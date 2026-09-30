@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
+import '../sync_journal.dart';
 import '../tables/custom_categories.dart';
 import '../tables/custom_courses.dart';
 
@@ -38,13 +39,15 @@ class CustomTaxonomyDao extends DatabaseAccessor<AppDatabase> with _$CustomTaxon
   }
 
   /// Update a custom course
-  Future<void> updateCustomCourse(String id, CustomCoursesCompanion data) {
-    return (update(customCourses)..where((t) => t.id.equals(id))).write(data);
+  Future<void> updateCustomCourse(String id, CustomCoursesCompanion data) async {
+    await (update(customCourses)..where((t) => t.id.equals(id))).write(data);
+    await SyncJournal.touch(attachedDatabase, SyncJournal.customCourses, id);
   }
 
   /// Delete a custom course
-  Future<void> deleteCustomCourse(String id) {
-    return (delete(customCourses)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteCustomCourse(String id) async {
+    await (delete(customCourses)..where((t) => t.id.equals(id))).go();
+    await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.customCourses, id);
   }
 
   /// Check if a custom course name already exists
@@ -85,13 +88,15 @@ class CustomTaxonomyDao extends DatabaseAccessor<AppDatabase> with _$CustomTaxon
   }
 
   /// Update a custom category
-  Future<void> updateCustomCategory(String id, CustomCategoriesCompanion data) {
-    return (update(customCategories)..where((t) => t.id.equals(id))).write(data);
+  Future<void> updateCustomCategory(String id, CustomCategoriesCompanion data) async {
+    await (update(customCategories)..where((t) => t.id.equals(id))).write(data);
+    await SyncJournal.touch(attachedDatabase, SyncJournal.customCategories, id);
   }
 
   /// Delete a custom category
-  Future<void> deleteCustomCategory(String id) {
-    return (delete(customCategories)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteCustomCategory(String id) async {
+    await (delete(customCategories)..where((t) => t.id.equals(id))).go();
+    await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.customCategories, id);
   }
 
   /// Check if a custom category name already exists

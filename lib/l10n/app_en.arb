@@ -87,6 +87,32 @@
   "cookbooksTitle": "Cookbooks",
   "cookbooksEmpty": "No cookbooks yet",
   "cookbookAdd": "New Cookbook",
+  "isbnScreenTitle": "Add a cookbook by barcode",
+  "isbnAddFromBarcode": "Scan a cookbook barcode",
+  "isbnAddFromBarcodeSubtitle": "Add a printed cookbook from its ISBN",
+  "isbnCreateBlank": "Create a new cookbook",
+  "isbnCreateBlankSubtitle": "Start an empty collection",
+  "isbnPointCamera": "Point your camera at the barcode on the back cover",
+  "isbnTypeLabel": "ISBN",
+  "isbnTypeHint": "978-0-00-000000-0",
+  "isbnTypeHelp": "Or type the ISBN printed above the barcode",
+  "isbnLookUp": "Look up",
+  "isbnInvalid": "That doesn't look like a valid ISBN. Check the 10 or 13 digits and try again.",
+  "isbnLookingUp": "Looking up the book…",
+  "isbnNotFound": "We couldn't find this book in the catalogues. Fill in the details and we'll add it anyway.",
+  "isbnTitleLabel": "Title",
+  "isbnAuthorLabel": "Author",
+  "isbnAddToLibrary": "Add to my cookbooks",
+  "isbnScanAnother": "Scan another book",
+  "isbnAlreadyAdded": "This book is already in your cookbooks.",
+  "isbnOpenCookbook": "Open cookbook",
+  "isbnAddedTitle": "Added to your cookbooks",
+  "isbnAddedBody": "Now add recipes from it — snap a photo of a page, or type one in.",
+  "isbnAddRecipes": "Add recipes from this book",
+  "isbnPages": "{count} pages",
+  "@isbnPages": {"placeholders": {"count": {"type": "int"}}},
+  "isbnScanBookDetected": "That's a book barcode — opening the cookbook scanner.",
+  "isbnCameraUnavailable": "Camera unavailable. You can still type the ISBN below.",
   "cookbookEdit": "Edit Cookbook",
   "cookbookDelete": "Delete Cookbook",
   "cookbookDeleteConfirm": "Delete this cookbook and all its recipes?",
@@ -139,6 +165,7 @@
       }
     }
   },
+  "shoppingSharedLabel": "Shared",
   "settingsTitle": "Settings",
   "settingsAppearance": "Appearance",
   "settingsTheme": "Theme",
@@ -1546,7 +1573,140 @@
   "helpContactUs": "Contact Us",
   "helpContactUsDesc": "Have questions or feedback? Email us at support@recipespellbook.com",
   "navCommunity": "Community",
+  "navMore": "More",
   "navComingSoon": "Coming soon",
+  "keyCtrl": "Ctrl",
+  "keyShift": "Shift",
+  "keyAlt": "Alt",
+  "keyEsc": "Esc",
+  "keyEnter": "Enter",
+  "keyDelete": "Del",
+  "keySpace": "Space",
+  "sidebarLibrary": "Library",
+  "sidebarPlan": "Plan",
+  "sidebarDiscover": "Discover",
+  "sidebarAllRecipes": "All recipes",
+  "sidebarCollapse": "Collapse sidebar",
+  "sidebarExpand": "Expand sidebar",
+  "sidebarSwitchCookbook": "Switch cookbook",
+  "sidebarManageCookbooks": "Manage cookbooks",
+  "sidebarSignInToSync": "Sign in to sync",
+  "syncStatusJustNow": "Synced just now",
+  "syncStatusMinutes": "Synced {minutes} min ago",
+  "@syncStatusMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStatusHours": "Synced {hours} h ago",
+  "@syncStatusHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStatusLocal": "Saved on this device",
+  "paletteHint": "Search recipes and commands…",
+  "paletteSectionRecent": "Recent",
+  "paletteSectionGoTo": "Go to",
+  "paletteSectionActions": "Actions",
+  "paletteSectionRecipes": "Recipes",
+  "paletteImportSubtitle": "From a link, photo, or file",
+  "paletteAdvancedSearch": "Search with filters",
+  "paletteToggleTheme": "Toggle light / dark",
+  "paletteAppearance": "Appearance",
+  "paletteSearchAll": "Search all recipes for “{query}”",
+  "@paletteSearchAll": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "paletteNoMatches": "No matches",
+  "paletteNavigateHint": "Navigate",
+  "paletteOpenHint": "Open",
+  "shortcutsTitle": "Keyboard shortcuts",
+  "shortcutsGeneral": "General",
+  "shortcutsNavigation": "Navigation",
+  "shortcutsRecipes": "Recipes",
+  "shortcutsShopping": "Shopping",
+  "shortcutsEditor": "Editor",
+  "shortcutCommandPalette": "Command palette",
+  "shortcutNewRecipe": "New recipe",
+  "shortcutToggleSidebar": "Toggle sidebar",
+  "shortcutGoBack": "Go back",
+  "shortcutDismiss": "Dismiss",
+  "shortcutMoveSelection": "Move selection",
+  "shortcutOpenRecipe": "Open recipe",
+  "shortcutAddToSelection": "Add to selection",
+  "shortcutRangeSelect": "Select a range",
+  "shortcutClick": "Click",
+  "shortcutTrash": "Move to trash",
+  "shortcutAddItem": "Add item",
+  "shortcutToggleItem": "Check off item",
+  "shortcutSaveRecipe": "Save recipe",
+  "windowMinimize": "Minimize",
+  "windowMaximize": "Maximize",
+  "windowRestore": "Restore",
+  "windowClose": "Close",
+  "selectionCount": "{count} selected",
+  "@selectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectionClear": "Clear selection",
+  "selectAction": "Select",
+  "homeGreetingMorning": "Good morning",
+  "homeGreetingAfternoon": "Good afternoon",
+  "homeGreetingEvening": "Good evening",
+  "homeNextSevenDays": "Next 7 days",
+  "homeOpenList": "Open list",
+  "homeAllCaughtUp": "All caught up",
+  "homeToBuy": "{count, plural, =1{1 item to buy} other{{count} items to buy}}",
+  "@homeToBuy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeAndMore": "+{count} more",
+  "@homeAndMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNothingPlanned": "Nothing planned",
+  "homePlanAMeal": "Plan a meal",
+  "homeJumpBackIn": "Jump back in",
+  "shoppingAddNamed": "Add “{name}”",
+  "@shoppingAddNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingUncheck": "Put back on the list",
+  "cookbooksCount": "{count, plural, =1{1 cookbook} other{{count} cookbooks}}",
+  "@cookbooksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "detailChooseRecipe": "Choose a recipe",
+  "detailChooseRecipeHint": "Pick one from the list to read it here.",
   "mealPlanButton": "Meal Plan",
   "groceriesButton": "Groceries",
   "shareButton": "Share",
@@ -4649,6 +4809,10 @@
   "menuDrawerTransferSubtitle": "Move recipes between devices",
   "menuDrawerApp": "App",
   "menuDrawerSettingsSubtitle": "Theme, language & preferences",
+  "moreAddRecipes": "Add recipes",
+  "moreSharing": "Sharing & family",
+  "moreScanProduct": "Scan a product barcode",
+  "moreScanProductSubtitle": "Look up a packaged product",
   "menuDrawerCouldNotOpenUrl": "Could not open {url}",
   "@menuDrawerCouldNotOpenUrl": {
     "placeholders": {
@@ -5288,5 +5452,146 @@
   "plannerPrevMonth": "Previous month",
   "plannerNextMonth": "Next month",
   "plannerPrevDay": "Previous day",
-  "plannerNextDay": "Next day"
+  "plannerNextDay": "Next day",
+  "joinLinkMenuLabel": "Join with invite link",
+  "joinLinkMenuSubtitle": "Shared list, cookbook or family",
+  "joinLinkTitle": "Join with an invite link",
+  "joinLinkTitleList": "Join a shared list",
+  "joinLinkTitleCookbook": "Join a shared cookbook",
+  "joinLinkTitleFamily": "Join a family",
+  "joinLinkListSubtitle": "Paste an invite link someone sent you",
+  "joinLinkBody": "Paste the invite link or code someone sent you. It works for shared shopping lists, cookbooks and family invites.",
+  "joinLinkHint": "Paste an invite link or code",
+  "joinLinkFromClipboard": "Filled in from your clipboard",
+  "joinLinkInvalid": "That doesn't look like an invite link or code",
+  "joinLinkOffline": "Couldn't check that code. Check your connection and try again.",
+  "inviteTryAnother": "Try another link",
+  "inviteErrorNetwork": "No connection. Check your internet and try again.",
+  "inviteErrorSessionExpired": "Your session has expired. Sign in again to continue.",
+  "shareViewerTitleList": "Shared shopping list",
+  "shareViewerTitleCookbook": "Shared cookbook",
+  "shareViewerTitleLink": "Shared link",
+  "shareViewerLoadFailed": "Couldn't load this link",
+  "shareViewerExpiredHint": "Ask the person who shared it for a new link, or paste another one.",
+  "shareViewerJoinList": "Join this list",
+  "shareViewerAddToLists": "Add to my lists",
+  "shareViewerJoinCookbook": "Join \"{name}\"",
+  "@shareViewerJoinCookbook": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareViewerSignInToJoinList": "Sign in to join this shopping list. You'll be added as soon as you're signed in.",
+  "shareViewerSignInToJoinCookbook": "Sign in to collaborate on this cookbook. You'll be added as soon as you're signed in.",
+  "shareViewerJoinedList": "Joined! It's in your Shopping tab.",
+  "shareViewerJoinedCookbook": "Joined! It's in your cookbooks.",
+  "shareViewerOwnItem": "This is yours — you already have it.",
+  "shareViewerJoinNeedsSubscription": "Collaborating on cookbooks needs a subscription.",
+  "shareViewerOwnerLapsed": "The owner's subscription is no longer active, so this cookbook can't be shared right now.",
+  "shareViewerNotCollab": "This link is a one-time copy, not a live invite.",
+  "shareViewerJoinFailed": "Couldn't join. Please try again.",
+  "familyJoinWithCodeOrLink": "Join with code or link",
+  "familySignInToUse": "Sign in to create or join a family.",
+  "familyInviteMember": "Invite family member",
+  "familyInviteSheetTitle": "Invite to {familyName}",
+  "@familyInviteSheetTitle": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      }
+    }
+  },
+  "familyInviteSheetBody": "Have them scan this code with their phone camera, or send them the link. They can also paste the link or code in Family → Join with code or link.",
+  "familyInviteCode": "Invite code",
+  "familyInviteLink": "Invite link",
+  "familySeatsLeft": "{count, plural, =1{1 spot left} other{{count} spots left}}",
+  "@familySeatsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "familyFullTitle": "Your family is full",
+  "familyFullOwnerBody": "All {max} spots are taken. Remove a member or upgrade your plan to invite someone new.",
+  "@familyFullOwnerBody": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "familyFullMemberBody": "All {max} spots are taken. Ask the family owner to make room.",
+  "@familyFullMemberBody": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "familyAloneHint": "No one else has joined yet. Invite someone to start sharing.",
+  "familyYou": "You",
+  "familyErrorSubscription": "A Premium plan is required to create a family.",
+  "familyErrorFull": "This family is full.",
+  "familyErrorAlreadyInFamily": "You're already in a family. Leave it first to join another.",
+  "familyErrorInvalidCode": "That invite code isn't valid. Check it or ask for a new link.",
+  "familyJoinScreenTitle": "Family invite",
+  "familyJoinPrompt": "Join {familyName}?",
+  "@familyJoinPrompt": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinInvitedBy": "{name} invited you to share cookbooks, shopping lists and meal plans.",
+  "@familyJoinInvitedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinGenericPrompt": "Join the family with invite code {code}?",
+  "@familyJoinGenericPrompt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinSignIn": "Sign in to join this family. You'll join as soon as you're signed in.",
+  "familyJoinConfirm": "Join family",
+  "familyJoinAlreadyMember": "You're already in {familyName}.",
+  "@familyJoinAlreadyMember": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinInOtherFamily": "You're already in {familyName}. Leave that family first to join this one.",
+  "@familyJoinInOtherFamily": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinFullBody": "{familyName} is full ({max} of {max} members). Ask the owner to remove someone or upgrade their plan.",
+  "@familyJoinFullBody": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "familyJoinOpenFamily": "Open family",
+  "familyJoinInvalid": "This family invite isn't valid anymore",
+  "familyJoinInvalidHint": "The invite code may have been changed. Ask for a new link, or paste another one."
 }

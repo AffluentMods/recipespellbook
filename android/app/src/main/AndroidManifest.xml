@@ -34,6 +34,14 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Links are handled ONLY by app_links (lib/main.dart). With
+                 Flutter's built-in deep linking on, go_router also received
+                 every link and routed it by path alone, so
+                 recipespellbook://s/CODE hit "Page Not Found" and cold-start
+                 links opened twice. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -77,18 +85,21 @@
                 <data android:scheme="recipespellbook" android:host="import"/>
                 <data android:scheme="recipespellbook" android:host="s"/>
                 <data android:scheme="recipespellbook" android:host="community"/>
+                <data android:scheme="recipespellbook" android:host="family"/>
             </intent-filter>
 
-            <!-- Universal (App) Links: https://recipespellbook.app/s/<code>
-                 opens directly in the app. autoVerify checks the domain's
-                 /.well-known/assetlinks.json against the app's signing cert. -->
+            <!-- Universal (App) Links open directly in the app:
+                   https://recipespellbook.app/s/<code>            (shares)
+                   https://recipespellbook.app/family/join/<code>  (family invites)
+                 autoVerify checks the domain's /.well-known/assetlinks.json
+                 against the app's signing cert (domain-wide, not per path). -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https"
-                    android:host="recipespellbook.app"
-                    android:pathPrefix="/s/"/>
+                <data android:scheme="https" android:host="recipespellbook.app"/>
+                <data android:pathPrefix="/s/"/>
+                <data android:pathPrefix="/family/join/"/>
             </intent-filter>
 
         </activity>

@@ -6,7 +6,11 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../theme/tokens.dart';
 import '../../../utils/recipe_title.dart';
+import '../../../utils/responsive_utils.dart';
+import '../../widgets/app_controls.dart';
+import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Screen showing all quick access recipes (meal plan + pinned + recent)
@@ -147,13 +151,21 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
       if (mounted) _loadItems();
     });
 
+    final touch = !Responsive.isDesktopLayout(context);
+    final c = context.appColors;
+    final quiet = touch ? c.textSecondary : null;
+
     return Scaffold(
+      backgroundColor: touch ? c.surface : null,
       appBar: AppBar(
-        title: Text(l10n.settingsQuickAccess),
+        backgroundColor: touch ? c.surface : null,
+        centerTitle: touch ? false : null,
+        titleSpacing: touch && Navigator.of(context).canPop() ? 0 : null,
+        title: touch ? TouchPageTitle(l10n.settingsQuickAccess) : Text(l10n.settingsQuickAccess),
         actions: [
           // View size
           PopupMenuButton<_ViewSize>(
-            icon: Icon(_viewSize.icon),
+            icon: Icon(_viewSize.icon, color: quiet),
             tooltip: l10n.tooltipViewSize,
             onSelected: (size) => setState(() => _viewSize = size),
             itemBuilder: (ctx) => _ViewSize.values.map((size) {
@@ -173,7 +185,7 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
           PopupMenuButton<_FilterMode>(
             icon: Icon(
               Icons.filter_list,
-              color: _filter != _FilterMode.all ? theme.colorScheme.primary : null,
+              color: _filter != _FilterMode.all ? (touch ? c.accent : theme.colorScheme.primary) : quiet,
             ),
             tooltip: l10n.searchFilters,
             onSelected: (filter) => setState(() => _filter = filter),
@@ -192,7 +204,7 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
           ),
           // Sort
           PopupMenuButton<_SortMode>(
-            icon: const Icon(Icons.sort),
+            icon: Icon(Icons.sort, color: quiet),
             tooltip: l10n.sortOrder,
             onSelected: (sort) => setState(() => _sort = sort),
             itemBuilder: (ctx) => _SortMode.values.map((sort) {
@@ -214,7 +226,57 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
           ? const Center(child: CircularProgressIndicator())
           : items.isEmpty
           ? _EmptyState(filter: _filter)
+          : touch
+          ? _buildTouchList(items)
           : _buildList(items),
+    );
+  }
+
+  /// Touch layouts use the shared recipe rows and cards; a small marker on
+  /// the photo says why a recipe is here (planned today / pinned).
+  Widget _buildTouchList(List<_QuickRecipeItem> items) {
+    final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final wide = Responsive.useNavRail(context);
+    final side = wide ? Space.xxl : Space.lg;
+    final sources = {for (final i in items) i.recipe.id: i.source};
+    final recipes = [for (final i in items) i.recipe];
+    void open(Recipe r) => context.push('/recipe/${r.id}');
+
+    Widget? badge(Recipe r) => switch (sources[r.id]) {
+          _Source.mealPlan => RecipeCardBadge(icon: Icons.calendar_today_rounded, color: c.accent, tooltip: l10n.navPlanner),
+          _Source.pinned => RecipeCardBadge(icon: Icons.push_pin_rounded, color: c.accent, tooltip: l10n.recipeListPinned),
+          _ => null,
+        };
+
+    if (_viewSize == _ViewSize.small) {
+      return ListView.builder(
+        key: const PageStorageKey('quick_access_rows'),
+        padding: EdgeInsets.fromLTRB(side - Space.sm, Space.xs, side - Space.sm, 104),
+        itemCount: recipes.length,
+        itemBuilder: (context, i) {
+          final b = badge(recipes[i]);
+          return RecipeListRow(
+            key: ValueKey(recipes[i].id),
+            recipe: recipes[i],
+            onTap: () => open(recipes[i]),
+            trailing: b == null ? null : Padding(padding: const EdgeInsets.only(left: Space.sm), child: b),
+          );
+        },
+      );
+    }
+    return RecipeCardGrid(
+      storageKey: _viewSize == _ViewSize.large ? 'quick_access_large' : 'quick_access_grid',
+      recipes: recipes,
+      maxTileWidth: _viewSize == _ViewSize.large ? 440 : (wide ? 230 : 250),
+      gap: wide ? Space.lg : Space.md,
+      padding: EdgeInsets.fromLTRB(side, Space.xs, side, 104),
+      onTap: open,
+      badgeBuilder: badge,
+      onToggleFavorite: (r) async {
+        await ref.read(recipeDaoProvider).toggleFavorite(r.id, !r.isFavorite);
+        if (mounted) _loadItems();
+      },
     );
   }
 
@@ -595,7 +657,7 @@ class _LargeCard extends StatelessWidget {
                             Icon(Icons.restaurant, size: 14, color: theme.colorScheme.outline),
                             const SizedBox(width: 4),
                             Text(
-                              '${item.recipe.servings} ${AppLocalizations.of(context)!.servingsUnit}',
+                              servingsLabel(AppLocalizations.of(context)!, item.recipe.servings) ?? '',
                               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                             ),
                           ],

@@ -348,7 +348,8 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
       backgroundColor: context.appColors.surface,
       // Voice control toggle floats above the bottom bar so the user
       // can find it without leaving the recipe view. Hidden on web.
-      floatingActionButton: kIsWeb ? null : FloatingActionButton(
+      // Desktop layouts: the voice toggle lives in the top bar instead.
+      floatingActionButton: (kIsWeb || Responsive.isDesktopLayout(context)) ? null : FloatingActionButton(
         backgroundColor: _voiceListening ? context.appColors.accent : context.appColors.surfaceHigh,
         foregroundColor: Colors.white,
         onPressed: _toggleVoice,
@@ -362,6 +363,8 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
             // Top bar
             _TopBar(
               recipeName: _recipe!.title,
+              voiceListening: _voiceListening,
+              onToggleVoice: (!kIsWeb && Responsive.isDesktopLayout(context)) ? _toggleVoice : null,
               showIngredients: _showIngredients,
               hasNutrition: _nutrition?.hasAnyData ?? false,
               showNutrition: _showNutrition,
@@ -471,8 +474,14 @@ class _TopBar extends StatelessWidget {
   final VoidCallback onFontSize;
   final VoidCallback onExit;
 
+  /// Voice control toggle in the bar (desktop); null hides it.
+  final VoidCallback? onToggleVoice;
+  final bool voiceListening;
+
   const _TopBar({
     required this.recipeName,
+    this.onToggleVoice,
+    this.voiceListening = false,
     required this.showIngredients,
     required this.hasNutrition,
     required this.showNutrition,
@@ -490,6 +499,7 @@ class _TopBar extends StatelessWidget {
         children: [
           IconButton(
             icon: Icon(Icons.close, color: context.appColors.textPrimary),
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
             onPressed: onExit,
           ),
           Expanded(
@@ -509,6 +519,15 @@ class _TopBar extends StatelessWidget {
                 color: showNutrition ? context.appColors.accent : context.appColors.textSecondary,
               ),
               onPressed: onToggleNutrition,
+            ),
+          if (onToggleVoice != null)
+            IconButton(
+              icon: Icon(
+                voiceListening ? Icons.mic : Icons.mic_none,
+                color: voiceListening ? context.appColors.accent : context.appColors.textSecondary,
+              ),
+              tooltip: AppLocalizations.of(context)!.cookModeVoiceTitle,
+              onPressed: onToggleVoice,
             ),
           // Font size
           IconButton(

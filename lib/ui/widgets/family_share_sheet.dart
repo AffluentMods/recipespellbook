@@ -12,6 +12,7 @@ import '../../services/revenuecat_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
+import 'sheet_chrome.dart';
 
 // ════════════════════════════════════════════
 //  Permission labels
@@ -133,10 +134,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
       children: [
         // ── Drag handle ──
         Center(
-          child: Container(
-            width: 40, height: 4, margin: const EdgeInsets.only(top: 12, bottom: 8),
-            decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
-          ),
+          child: const SheetHandle(top: 12, bottom: 8),
         ),
 
         // ── Header ──
@@ -324,7 +322,10 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
       return;
     }
     // Start syncing this list right away so the owner's edits propagate.
-    if (!_isCookbook) await CollabService.instance.markCollab(widget.resourceId, _collabPermission);
+    // The owner always has full rights — _collabPermission is what INVITEES
+    // get; using it here locked the owner out of their own list (e.g. a
+    // "check only" link made the owner check-only until the next pull).
+    if (!_isCookbook) await CollabService.instance.markCollab(widget.resourceId, 'full');
     if (!mounted) return;
     setState(() {
       _collabLink = link;
@@ -335,11 +336,6 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     Clipboard.setData(ClipboardData(text: link.url));
     AppSnackbar.success(context, 'Invite link copied — send it to anyone');
   }
-
-  // ────────────────────────────────────
-  //  Family member picker
-  // ────────────────────────────────────
-
 }
 
 // ════════════════════════════════════════════
@@ -560,7 +556,6 @@ class _PermissionDropdown extends StatelessWidget {
   }
 }
 
-/// Tile for a family member not yet shared with — tap to pick permission and share.
 /// Tile for an existing share — shows permission and allows edit/revoke.
 class _ExistingShareTile extends StatelessWidget {
   final FamilyShareInfo share;

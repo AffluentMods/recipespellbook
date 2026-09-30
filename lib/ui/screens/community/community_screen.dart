@@ -26,6 +26,9 @@ import '../../widgets/community/community_recipe_preview_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import 'community_publish_screen.dart';
+import '../../widgets/sheet_chrome.dart';
+import '../../widgets/app_controls.dart';
+import '../../../theme/tokens.dart';
 
 // ════════════════════════════════════════════
 //  COMMUNITY SCREEN — Browse & Search
@@ -220,19 +223,141 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     }
   }
 
+  /// Desktop header: the title (admin tap preserved) with the feed's actions
+  /// right-aligned — Publish is a button, not a floating action.
+  PreferredSizeWidget _desktopHeader(BuildContext context, ThemeData theme, AppLocalizations l10n) {
+    final c = context.appColors;
+    return PageHeader(
+      titleWidget: GestureDetector(
+        onTap: _handleAdminTap,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.navCommunity),
+            if (_pendingAdminCount > 0 && AdminService.instance.isAdmin) ...[
+              const SizedBox(width: Space.sm),
+              RowCount(_pendingAdminCount, emphasized: true),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        Badge(
+          isLabelVisible: _selectedTags.isNotEmpty || _filterHasImages,
+          label: Text('${_selectedTags.length + (_filterHasImages ? 1 : 0)}'),
+          offset: const Offset(-2, 2),
+          child: ToolbarIconButton(
+            icon: Icons.label_outline_rounded,
+            tooltip: l10n.communityPublishTags,
+            selected: _selectedTags.isNotEmpty || _filterHasImages,
+            onPressed: _showFilterSheet,
+          ),
+        ),
+        ToolbarIconButton(
+          icon: _viewMode == _ViewMode.grid ? Icons.view_list_rounded : Icons.grid_view_rounded,
+          tooltip: _viewMode == _ViewMode.grid ? l10n.communityListView : l10n.communityGridView,
+          onPressed: () {
+            final newMode = _viewMode == _ViewMode.grid ? _ViewMode.list : _ViewMode.grid;
+            setState(() => _viewMode = newMode);
+            _saveViewMode(newMode);
+          },
+        ),
+        ToolbarIconButton(
+          icon: Icons.inventory_2_outlined,
+          tooltip: l10n.communityMyPublications,
+          onPressed: () => context.push('/community/my-publications').then((_) { if (mounted) _load(); }),
+        ),
+        FilledButton.icon(
+          onPressed: () => _showPublishChooser(context),
+          icon: Icon(Icons.publish_rounded, size: 18, color: c.onAccent),
+          label: Text(l10n.communityPublish),
+        ),
+      ],
+    );
+  }
+
+  /// Desktop: search, Recipes/Cookbooks and sort on one toolbar row.
+  Widget _desktopFilterRow(BuildContext context, AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.xxxl - 4, 0, Space.xl, Space.xs),
+      child: Wrap(
+        spacing: Space.md,
+        runSpacing: Space.sm,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ToolbarSearchField(
+            controller: _searchController,
+            hintText: l10n.communitySearchHint,
+            width: 320,
+            onChanged: (v) {
+              if (v.isEmpty && _query.isNotEmpty) {
+                setState(() => _query = '');
+                _load();
+              }
+            },
+            onSubmitted: (v) {
+              setState(() => _query = v.trim());
+              _load();
+            },
+          ),
+          SegmentedButton<_BrowseMode>(
+            segments: [
+              ButtonSegment(value: _BrowseMode.recipes, label: Text(l10n.communityBrowseRecipes), icon: const Icon(Icons.restaurant_menu, size: 16)),
+              ButtonSegment(value: _BrowseMode.cookbooks, label: Text(l10n.communityBrowseCookbooks), icon: const Icon(Icons.book, size: 16)),
+            ],
+            selected: {_browseMode},
+            onSelectionChanged: (v) {
+              setState(() => _browseMode = v.first);
+              _load();
+            },
+            showSelectedIcon: false,
+            style: const ButtonStyle(
+              visualDensity: VisualDensity.compact,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SortChip(label: l10n.communitySortRecent, value: 'recent', selected: _sort, onSelected: _onSortChanged),
+              const SizedBox(width: Space.sm),
+              _SortChip(label: l10n.communitySortPopular, value: 'popular', selected: _sort, onSelected: _onSortChanged),
+              const SizedBox(width: Space.sm),
+              _SortChip(label: l10n.communitySortMostDownloaded, value: 'downloads', selected: _sort, onSelected: _onSortChanged),
+              const SizedBox(width: Space.sm),
+              _SortChip(label: l10n.communitySortTopRated, value: 'top_rated', selected: _sort, onSelected: _onSortChanged),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final desktop = Responsive.isDesktopLayout(context);
 
     return Scaffold(
-      appBar: AppBar(
+      backgroundColor: context.appColors.surface,
+      appBar: desktop ? _desktopHeader(context, theme, l10n) : AppBar(
+        backgroundColor: context.appColors.surface,
+        centerTitle: false,
         title: GestureDetector(
           onTap: _handleAdminTap,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(l10n.navCommunity),
+              Text(
+                l10n.navCommunity,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.3,
+                  color: context.appColors.textPrimary,
+                ),
+              ),
               if (_pendingAdminCount > 0 && AdminService.instance.isAdmin) ...[
                 const SizedBox(width: 8),
                 Container(
@@ -289,8 +414,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       ),
       body: Responsive.constrainWidth(context, maxWidth: 1800, child: Column(
         children: [
+          if (desktop) _desktopFilterRow(context, l10n),
           // ── Search bar ──
-          Padding(
+          if (!desktop) Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Align(
               alignment: Alignment.centerLeft,
@@ -298,26 +424,15 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 constraints: BoxConstraints(
                   maxWidth: Responsive.useNavRail(context) ? 480 : double.infinity,
                 ),
-                child: TextField(
+                child: TouchSearchField(
                   controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: l10n.communitySearchHint,
-                    prefixIcon: const Icon(Icons.search, size: 20),
-                    suffixIcon: _query.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _query = '');
-                              _load();
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
+                  hintText: l10n.communitySearchHint,
+                  onChanged: (v) {
+                    if (v.isEmpty && _query.isNotEmpty) {
+                      setState(() => _query = '');
+                      _load();
+                    }
+                  },
                   onSubmitted: (v) {
                     setState(() => _query = v.trim());
                     _load();
@@ -328,46 +443,27 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           ),
 
           // ── Browse mode toggle ──
-          Padding(
+          if (!desktop) Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
             child: Row(
               children: [
-                if (Responsive.useNavRail(context))
-                  SegmentedButton<_BrowseMode>(
-                    segments: [
-                      ButtonSegment(value: _BrowseMode.recipes, label: Text(l10n.communityBrowseRecipes), icon: const Icon(Icons.restaurant_menu, size: 16)),
-                      ButtonSegment(value: _BrowseMode.cookbooks, label: Text(l10n.communityBrowseCookbooks), icon: const Icon(Icons.book, size: 16)),
-                    ],
-                    selected: {_browseMode},
-                    onSelectionChanged: (v) {
-                      setState(() => _browseMode = v.first);
-                      _load();
-                    },
-                    showSelectedIcon: false,
-                    style: ButtonStyle(
-                      visualDensity: VisualDensity.compact,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: SegmentedButton<_BrowseMode>(
-                      segments: [
-                        ButtonSegment(value: _BrowseMode.recipes, label: Text(l10n.communityBrowseRecipes), icon: const Icon(Icons.restaurant_menu, size: 16)),
-                        ButtonSegment(value: _BrowseMode.cookbooks, label: Text(l10n.communityBrowseCookbooks), icon: const Icon(Icons.book, size: 16)),
-                      ],
-                      selected: {_browseMode},
-                      onSelectionChanged: (v) {
-                        setState(() => _browseMode = v.first);
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TouchSegmented<_BrowseMode>(
+                      expand: !Responsive.useNavRail(context),
+                      selected: _browseMode,
+                      onChanged: (v) {
+                        setState(() => _browseMode = v);
                         _load();
                       },
-                      showSelectedIcon: false,
-                      style: ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
+                      segments: [
+                        TouchSegment(value: _BrowseMode.recipes, label: l10n.communityBrowseRecipes, icon: Icons.restaurant_menu_rounded),
+                        TouchSegment(value: _BrowseMode.cookbooks, label: l10n.communityBrowseCookbooks, icon: Icons.menu_book_rounded),
+                      ],
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -376,10 +472,12 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           const _CreatorsYouFollowRail(),
 
           // ── Sort chips ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          if (!desktop) Container(
+            padding: const EdgeInsets.only(top: 8),
+            alignment: AlignmentDirectional.centerStart,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   _SortChip(label: l10n.communitySortRecent, value: 'recent', selected: _sort, onSelected: _onSortChanged),
@@ -423,7 +521,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           Expanded(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onHorizontalDragEnd: (details) {
+              // Touch swipe only: on desktop a mouse drag selects text.
+              onHorizontalDragEnd: desktop ? null : (details) {
                 final velocity = details.primaryVelocity ?? 0;
                 if (velocity.abs() < 300) return; // ignore weak swipes
                 setState(() {
@@ -486,10 +585,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 200),
                 opacity: _fabVisible ? 1.0 : 0.0,
-                child: FloatingActionButton.extended(
+                child: AccentFab(
+                  icon: Icons.publish_rounded,
+                  label: l10n.communityPublish,
                   onPressed: () => _showPublishChooser(context),
-                  icon: const Icon(Icons.publish),
-                  label: Text(l10n.communityPublish),
                 ),
               ),
             )
@@ -575,8 +674,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final all = await ref.read(recipeDaoProvider).watchAllRecipesGlobal().first;
     if (!context.mounted) return;
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -858,8 +957,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -869,10 +968,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(l10n.communitySaveRecipeTo(recipe.title), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -1005,8 +1101,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     bool countStarted = false;
     Timer? countTimer;
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
@@ -1087,14 +1183,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
           final tagsToShow = displayTags.isEmpty && !isSearching ? curatedFallback : displayTags;
 
-          return DraggableScrollableSheet(
+          return AdaptiveDraggableSheet(
             initialChildSize: 0.55,
             minChildSize: 0.35,
             maxChildSize: 0.85,
             builder: (_, scrollController) => Container(
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: SheetPresentation.surfaceRadius(ctx),
               ),
               child: Column(
                 children: [
@@ -1102,10 +1198,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 12, bottom: 8),
                     child: Center(
-                      child: Container(width: 40, height: 4, decoration: BoxDecoration(
-                        color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(2),
-                      )),
+                      child: const SheetHandle(top: 0),
                     ),
                   ),
 
@@ -1439,6 +1532,9 @@ class _SortChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isActive = value == selected;
     final theme = Theme.of(context);
+    if (!Responsive.isDesktopLayout(context)) {
+      return TouchChip(label: label, selected: isActive, onTap: () => onSelected(value));
+    }
 
     return GestureDetector(
       onTap: () => onSelected(value),

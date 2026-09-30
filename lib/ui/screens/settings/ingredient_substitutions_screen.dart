@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../data/ingredient_substitutions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/sheet_chrome.dart';
 
 /// Standalone ingredient substitutions screen
 /// Accessible from drawer menu and from long-pressing ingredients in recipes
@@ -350,20 +351,12 @@ void showIngredientSubsSheet(BuildContext context, String ingredientName) {
       builder: (_, controller) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: Column(
           children: [
             // Handle
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SheetHandle(top: 12),
             // Header
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),

@@ -37,8 +37,17 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/family_share_sheet.dart';
+import '../../widgets/join_with_link_dialog.dart';
+import '../../widgets/sheet_chrome.dart';
+import '../../widgets/app_context_menu.dart';
+import '../../widgets/app_controls.dart';
+import '../../widgets/keycap.dart';
+import '../../../theme/tokens.dart';
+import '../../../utils/recipe_title.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
+
+part 'shopping_desktop.dart';
 
 /// Provider to track shopping list item count (for nav badge)
 final shoppingItemCountProvider = StreamProvider<int>((ref) {
@@ -158,6 +167,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   static const _groupModeKey = 'shoppingGroupMode';
 
   Timer? _collabTimer;
+
+  /// Count the published selection bar was built with (republish on change).
+  int _publishedSelectionCount = 0;
 
   @override
   void initState() {
@@ -355,12 +367,47 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final hasBar = ref.read(selectionBarProvider) != null;
-      if (selecting && !hasBar) {
+      if (selecting && (!hasBar || _publishedSelectionCount != selectedIds.length)) {
+        _publishedSelectionCount = selectedIds.length;
         ref.read(selectionBarProvider.notifier).state = _buildSelectionBar();
       } else if (!selecting && hasBar) {
+        _publishedSelectionCount = 0;
         ref.read(selectionBarProvider.notifier).state = null;
       }
     });
+
+    // Desktop / pointer layout: lists pane + items pane.
+    if (Responsive.isDesktopLayout(context)) {
+      final perm = CollabService.instance.permissionFor(_currentListId);
+      return _DesktopShoppingView(
+        listId: _currentListId,
+        listName: _currentListName,
+        groupMode: _groupMode,
+        onGroupModeChanged: _setGroupMode,
+        userMappings: _userMappings,
+        recentlyCheckedIds: _recentlyCheckedIds,
+        sharedListCounts: _sharedListCounts,
+        members: _sharedListMembers[_currentListId] ?? const [],
+        onSelectList: _setCurrentList,
+        onNewList: () => _createNewList(context),
+        onRenameList: (list) => _renameList(context, list),
+        onDeleteList: (list) => _deleteList(context, list),
+        onShareList: (id, name) => _showShareSheet(context, listId: id, listName: name),
+        onSetDefaultList: _setDefaultList,
+        onMoreOptions: () => _showMoreOptions(context),
+        onItemChecked: _onItemChecked,
+        onItemUnchecked: _onItemUnchecked,
+        onCategoryChanged: _onItemCategoryChanged,
+        onMappingsChanged: _loadUserMappings,
+        banner: CollabService.instance.isCollab(_currentListId) &&
+                !CollabService.instance.canEdit(_currentListId)
+            ? Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: _collabBanner(theme, perm),
+              )
+            : null,
+      );
+    }
 
     return PopScope(
       // While selecting, a back press clears the selection instead of leaving.
@@ -437,9 +484,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           },
         )),
       ),
-      floatingActionButton: (Responsive.useNavRail(context) || selecting || !CollabService.instance.canEdit(_currentListId))
-          ? null
-          : _ModernFAB(onTap: () => _showAddItemSheet(context)),
+
       ),
     );
   }
@@ -522,6 +567,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         destructive: true,
         onTap: () => _bulkDelete(sel()),
       ),
+      count: ref.read(_shoppingSelectionProvider).length,
+      onClear: _clearSelection,
     );
   }
 
@@ -582,8 +629,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       AppSnackbar.info(context, l10n.shoppingNoOtherLists);
       return;
     }
-    final target = await showModalBottomSheet<ShoppingList>(
-      context: context,
+    final target = await Responsive.showAdaptiveSheet<ShoppingList>(
+      context,
+      isScrollControlled: false,
       builder: (pickCtx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -633,8 +681,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   Future<String?> _pickCategory(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
-    return showModalBottomSheet<String>(
-      context: context,
+    return Responsive.showAdaptiveSheet<String>(
+      context,
       isScrollControlled: true,
       builder: (ctx) => DraggableScrollableSheet(
         expand: false,
@@ -692,10 +740,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(l10n.shareNamedList(name),
@@ -766,7 +811,12 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     AppSnackbar.loading(context, AppLocalizations.of(context)!.generatingLink);
 
     try {
-      final link = await FamilyService.instance.createShareLink('shopping_list', listId);
+      // Ship a self-contained snapshot (like family_share_sheet.dart does).
+      // Without it the link serves the server's copy of the list, which is
+      // missing or stale/empty for lists that aren't cloud-synced, so the
+      // recipient got nothing (or the link couldn't be created).
+      final snapshot = await CollabService.instance.buildListSnapshot(listId);
+      final link = await FamilyService.instance.createShareLink('shopping_list', listId, snapshot: snapshot);
       if (!context.mounted) return;
       AppSnackbar.dismiss(context);
 
@@ -794,10 +844,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               const Icon(Icons.check_circle, size: 48, color: Colors.green),
               const SizedBox(height: 12),
@@ -859,288 +906,189 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
     Responsive.showAdaptiveSheet(
       context,
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(l10n.shoppingLists, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                  const Spacer(),
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      _createNewList(context);
-                    },
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.actionNew),
-                  ),
-                ],
-              ),
-            ),
-            StreamBuilder<List<ShoppingList>>(
-              stream: shoppingDao.watchAllLists(),
-              builder: (context, snapshot) {
-                final lists = snapshot.data ?? [];
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: lists.length,
-                  itemBuilder: (context, index) {
-                    final list = lists[index];
-                    final isSelected = list.id == _currentListId;
-                    final isShared = _sharedListCounts.containsKey(list.id);
-                    return Container(
-                      decoration: isShared ? BoxDecoration(
-                        border: Border(left: BorderSide(color: context.appColors.accent, width: 3)),
-                        color: context.appColors.accent.withValues(alpha: 0.05),
-                      ) : null,
-                      child: ListTile(
-                      leading: Icon(
-                        isSelected ? Icons.check_circle : Icons.circle_outlined,
-                        color: isSelected ? theme.colorScheme.primary : null,
-                      ),
-                      title: Row(
-                        children: [
-                          Flexible(child: Text(list.name)),
-                          // "Default" tag — this is the list new sessions and
-                          // the shopping-list generator target by default.
-                          if (list.isDefault) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(l10n.defaultLabel,
-                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: theme.colorScheme.primary)),
-                            ),
-                          ],
-                          // Per-list unchecked count.
-                          if ((listCounts[list.id] ?? 0) > 0) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.primary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '${listCounts[list.id]}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                          ],
-                          if (isShared) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: context.appColors.accent.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text('Shared', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: context.appColors.accent)),
-                            ),
-                          ],
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Star = set this list as the default (hidden once it
-                          // already is the default — the tag shows that).
-                          if (!list.isDefault)
-                            IconButton(
-                              icon: const Icon(Icons.star_outline, size: 20),
-                              tooltip: l10n.defaultLabel,
-                              onPressed: () => _setDefaultList(list),
-                            ),
-                          IconButton(
-                            icon: const Icon(Icons.share_outlined, size: 20),
-                            tooltip: l10n.actionShare,
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _showShareSheet(context, listId: list.id, listName: list.name);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, size: 20),
-                            tooltip: l10n.rename,
-                            onPressed: () => _renameList(context, list),
-                          ),
-                          if (!list.isDefault)
-                            IconButton(
-                              icon: const Icon(Icons.delete, size: 20),
-                              tooltip: l10n.actionDelete,
-                              onPressed: () => _deleteList(context, list),
-                            ),
-                        ],
-                      ),
-                      onTap: () {
-                        _setCurrentList(list.id, list.name);
-                        Navigator.pop(ctx);
-                      },
-                    ),
-                    );
-                  },
-                );
-              },
-            ),
-            const Divider(height: 1),
-            // Manual fallback for when an invite link doesn't open the app on
-            // its own (e.g. tapped in an app that strips the link, or on a
-            // device without the app-link verification). Paste the link/code
-            // and we route straight to the share viewer to join.
-            ListTile(
-              leading: const Icon(Icons.group_add_outlined),
-              title: const Text('Join a shared list'),
-              subtitle: const Text('Paste an invite link someone sent you'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _joinWithLink(context);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ────────────────────────────────────
-  //  JOIN A SHARED LIST (paste an invite link)
-  // ────────────────────────────────────
-
-  /// Prompt for an invite link (or code) and open the share viewer to join.
-  /// This is the reliable path when a deep link fails to launch the app.
-  Future<void> _joinWithLink(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-
-    // Pre-fill from the clipboard when it already holds an invite link/code, so
-    // most people can just tap Join.
-    try {
-      final clip = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
-      if (clip != null && _shareCodeFromText(clip) != null) {
-        controller.text = clip.trim();
-      }
-    } catch (_) {}
-    if (!context.mounted) return;
-
-    final code = await showDialog<String>(
-      context: context,
       builder: (ctx) {
-        String? error;
-        return StatefulBuilder(
-          builder: (ctx, setLocal) => AlertDialog(
-            title: const Text('Join a shared list'),
-            content: Column(
+        final c = ctx.appColors;
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.85),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Paste the invite link (or code) someone shared with you.',
-                  style: TextStyle(fontSize: 13),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: controller,
-                  autofocus: true,
-                  textInputAction: TextInputAction.go,
-                  decoration: InputDecoration(
-                    hintText: 'https://recipespellbook.app/s/…',
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.link),
-                    errorText: error,
+                const SheetHandle(top: Space.md),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Space.xl, Space.md, Space.md, Space.sm),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(l10n.shoppingLists,
+                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _createNewList(context);
+                        },
+                        icon: const Icon(Icons.add_rounded, size: 20),
+                        label: Text(l10n.actionNew),
+                      ),
+                    ],
                   ),
-                  onChanged: (_) {
-                    if (error != null) setLocal(() => error = null);
-                  },
-                  onSubmitted: (_) {
-                    final c = _shareCodeFromText(controller.text);
-                    if (c == null) {
-                      setLocal(() => error = "That doesn't look like a valid invite link");
-                    } else {
-                      Navigator.pop(ctx, c);
-                    }
-                  },
                 ),
+                Flexible(
+                  child: StreamBuilder<List<ShoppingList>>(
+                    stream: shoppingDao.watchAllLists(),
+                    builder: (context, snapshot) {
+                      final lists = snapshot.data ?? [];
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: lists.length,
+                        itemBuilder: (context, index) {
+                          final list = lists[index];
+                          final isSelected = list.id == _currentListId;
+                          final isShared = _sharedListCounts.containsKey(list.id);
+                          final count = listCounts[list.id] ?? 0;
+                          final meta = [
+                            l10n.shoppingItemCount(count),
+                            if (list.isDefault) l10n.defaultLabel,
+                            if (isShared) l10n.shoppingSharedLabel,
+                          ].join('  ·  ');
+                          return InkWell(
+                            onTap: () {
+                              _setCurrentList(list.id, list.name);
+                              Navigator.pop(ctx);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(Space.xl, Space.sm, Space.xs, Space.sm),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+                                    size: 22,
+                                    color: isSelected ? c.accent : c.textTertiary,
+                                  ),
+                                  const SizedBox(width: Space.lg),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          list.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                            color: c.textPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(meta, style: TextStyle(fontSize: 12.5, color: c.textTertiary)),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuButton<String>(
+                                    tooltip: l10n.moreLabel,
+                                    icon: Icon(Icons.more_horiz_rounded, color: c.textSecondary),
+                                    onSelected: (v) {
+                                      switch (v) {
+                                        case 'default':
+                                          _setDefaultList(list);
+                                        case 'share':
+                                          Navigator.pop(ctx);
+                                          _showShareSheet(context, listId: list.id, listName: list.name);
+                                        case 'rename':
+                                          _renameList(context, list);
+                                        case 'delete':
+                                          _deleteList(context, list);
+                                      }
+                                    },
+                                    itemBuilder: (_) => [
+                                      // Star = make this the list new items and the
+                                      // generator go to (hidden once it already is).
+                                      if (!list.isDefault)
+                                        PopupMenuItem(
+                                          value: 'default',
+                                          child: ListTile(
+                                            leading: const Icon(Icons.star_outline_rounded),
+                                            title: Text(l10n.defaultLabel),
+                                            contentPadding: EdgeInsets.zero,
+                                          ),
+                                        ),
+                                      PopupMenuItem(
+                                        value: 'share',
+                                        child: ListTile(
+                                          leading: const Icon(Icons.ios_share_rounded),
+                                          title: Text(l10n.actionShare),
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 'rename',
+                                        child: ListTile(
+                                          leading: const Icon(Icons.edit_outlined),
+                                          title: Text(l10n.rename),
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                      if (!list.isDefault)
+                                        PopupMenuItem(
+                                          value: 'delete',
+                                          child: ListTile(
+                                            leading: Icon(Icons.delete_outline_rounded, color: c.destructive),
+                                            title: Text(l10n.actionDelete, style: TextStyle(color: c.destructive)),
+                                            contentPadding: EdgeInsets.zero,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Divider(height: 1, thickness: 1, color: c.hairline),
+                // Manual fallback for when an invite link doesn't open the app
+                // on its own (tapped in an app that strips the link, or on a
+                // device without app-link verification). Paste the link / code
+                // and we route straight to the matching screen to join.
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    showJoinWithLinkDialog(context, purpose: JoinLinkPurpose.shoppingList);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(Space.xl, Space.md, Space.xl, Space.md),
+                    child: Row(
+                      children: [
+                        Icon(Icons.group_add_outlined, size: 22, color: c.accent),
+                        const SizedBox(width: Space.lg),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l10n.joinLinkTitleList,
+                                  style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600, color: c.accent)),
+                              Text(l10n.joinLinkListSubtitle,
+                                  style: TextStyle(fontSize: 12.5, color: c.textTertiary)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: Space.sm),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(l10n.actionCancel),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final c = _shareCodeFromText(controller.text);
-                  if (c == null) {
-                    setLocal(() => error = "That doesn't look like a valid invite link");
-                  } else {
-                    Navigator.pop(ctx, c);
-                  }
-                },
-                child: const Text('Join'),
-              ),
-            ],
           ),
         );
       },
     );
-
-    if (code != null && context.mounted) {
-      // The share viewer loads the invite and offers Join / Add to my lists for
-      // both live-collaboration and one-time-copy links.
-      context.push('/s/$code');
-    }
-  }
-
-  /// Pull a share code out of pasted text: a full `…/s/<code>` link, the
-  /// custom-scheme `recipespellbook://s/<code>`, a `?code=` query param, or the
-  /// bare code on its own. Returns null when nothing usable is found.
-  String? _shareCodeFromText(String raw) {
-    final text = raw.trim();
-    if (text.isEmpty) return null;
-
-    // Grab the first URL-looking token if the paste has surrounding words.
-    final urlMatch = RegExp(r'[a-zA-Z][a-zA-Z0-9+.\-]*://\S+').firstMatch(text);
-    if (urlMatch != null) {
-      final uri = Uri.tryParse(urlMatch.group(0)!);
-      if (uri == null) return null;
-      final q = uri.queryParameters['code'];
-      if (q != null && q.isNotEmpty) return q;
-      // Host counts as the first segment for custom-scheme links.
-      final segs = [uri.host, ...uri.pathSegments].where((s) => s.isNotEmpty).toList();
-      for (final key in const ['s', 'share', 'join']) {
-        final i = segs.indexOf(key);
-        if (i >= 0 && i + 1 < segs.length) return segs[i + 1];
-      }
-      return null;
-    }
-
-    // No scheme — maybe a bare "…/s/<code>" fragment or a raw code.
-    if (text.contains('/')) {
-      final parts = text.split('/').where((s) => s.isNotEmpty).toList();
-      final i = parts.indexOf('s');
-      if (i >= 0 && i + 1 < parts.length) return parts[i + 1];
-      return null;
-    }
-    return RegExp(r'^[A-Za-z0-9_\-]{3,64}$').hasMatch(text) ? text : null;
   }
 
   /// Mark a list as the default. The open switcher (a StreamBuilder on
@@ -1285,7 +1233,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -1293,7 +1241,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 8),
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+                const SheetHandle(top: 0),
                 const SizedBox(height: 16),
                 ListTile(
                   leading: const Icon(Icons.check_box),
@@ -1465,14 +1413,14 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1562,14 +1510,14 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1796,121 +1744,166 @@ class _ModernHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final wide = Responsive.useNavRail(context);
+    final c = context.appColors;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+      padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.sm, Space.sm),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              // Tappable list name with dropdown indicator
-              GestureDetector(
-                onTap: onListTap,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        listName,
-                        style: (wide ? theme.textTheme.headlineSmall : theme.textTheme.headlineMedium)
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              // The list switcher: the list's name, tap for every list.
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Material(
+                  color: Colors.transparent,
+                  borderRadius: Radii.mdAll,
+                  child: InkWell(
+                    onTap: onListTap,
+                    borderRadius: Radii.mdAll,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(Space.xs, Space.xs, Space.xs, Space.xs),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              listName,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontSize: 28,
+                                height: 1.15,
+                                letterSpacing: -0.4,
+                                fontWeight: FontWeight.w600,
+                                color: c.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: Space.xs),
+                          Icon(Icons.expand_more_rounded, color: c.accent),
+                          // Items waiting in OTHER lists — tap to switch.
+                          if (otherListsCount > 0) ...[
+                            const SizedBox(width: Space.xs),
+                            Tooltip(
+                              message: l10n.shoppingLists,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: c.selectedFill,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '+${otherListsCount > 99 ? '99+' : otherListsCount}',
+                                  style: TextStyle(color: c.accent, fontSize: 12, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.arrow_drop_down, color: theme.colorScheme.outline),
-                    // Count of items waiting in OTHER lists — tap to switch.
-                    if (otherListsCount > 0) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: context.appColors.accent,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          otherListsCount > 99 ? '99+' : '$otherListsCount',
-                          style: TextStyle(
-                            color: context.appColors.onAccent,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+                  ),
+                ),
                 ),
               ),
-              const Spacer(),
               // Family members this list is shared with.
               if (members.length > 1) ...[
                 _ShopAvatarStack(members: members),
-                const SizedBox(width: 4),
+                const SizedBox(width: Space.xs),
               ],
-              IconButton(icon: const Icon(Icons.share_outlined), tooltip: l10n.actionShare, onPressed: onShare),
-              IconButton(icon: const Icon(Icons.more_vert), tooltip: 'More options', onPressed: onMoreOptions),
-              if (wide && onAddItem != null) ...[
-                const SizedBox(width: 8),
-                FilledButton.icon(
-                  onPressed: onAddItem,
-                  icon: const Icon(Icons.add, size: 20),
-                  label: Text(l10n.shoppingAddItem),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.appColors.accent,
-                    foregroundColor: context.appColors.onAccent,
-                  ),
-                ),
-              ],
+              IconButton(icon: Icon(Icons.ios_share_rounded, color: c.textSecondary), tooltip: l10n.actionShare, onPressed: onShare),
+              IconButton(icon: Icon(Icons.more_horiz_rounded, color: c.textSecondary), tooltip: l10n.moreLabel, onPressed: onMoreOptions),
             ],
           ),
-          const SizedBox(height: 12),
-          // Grouping toggle on the LEFT (tap to flip By Aisle ⇄ By Recipe),
-          // item count on the RIGHT.
-          Row(
-            children: [
-              InkWell(
-                onTap: () => onGroupModeChanged(groupMode.toggled),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: context.appColors.surfaceRaised,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: context.appColors.outline.withValues(alpha: 0.5)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(groupMode.icon, size: 17, color: context.appColors.accent),
-                      const SizedBox(width: 7),
-                      Text(_getGroupModeLabel(groupMode, l10n),
-                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                      const SizedBox(width: 6),
-                      Icon(Icons.swap_horiz_rounded, size: 16, color: context.appColors.textTertiary),
-                    ],
-                  ),
+          const SizedBox(height: Space.sm),
+          Padding(
+            padding: const EdgeInsets.only(right: Space.sm),
+            child: Row(
+              children: [
+                _TouchGroupModeToggle(mode: groupMode, onChanged: onGroupModeChanged),
+                const Spacer(),
+                Text(
+                  l10n.shoppingItemCount(itemCount),
+                  style: TextStyle(fontSize: 13.5, color: c.textTertiary),
                 ),
-              ),
-              const Spacer(),
-              Text(
-                l10n.shoppingItemCount(itemCount),
-                style: theme.textTheme.bodyLarge?.copyWith(color: context.appColors.textSecondary),
-              ),
-            ],
+              ],
+            ),
           ),
+          if (onAddItem != null) ...[
+            const SizedBox(height: Space.md),
+            Padding(
+              padding: const EdgeInsets.only(right: Space.sm),
+              child: _AddItemField(onTap: onAddItem!),
+            ),
+          ],
         ],
       ),
     );
   }
+}
 
-  String _getGroupModeLabel(ShoppingGroupMode mode, AppLocalizations l10n) {
-    switch (mode) {
-      case ShoppingGroupMode.section: return l10n.shoppingBySection;
-      case ShoppingGroupMode.recipe: return l10n.shoppingByRecipe;
-    }
+/// By aisle ⇄ by recipe, as a two-segment control.
+class _TouchGroupModeToggle extends StatelessWidget {
+  final ShoppingGroupMode mode;
+  final ValueChanged<ShoppingGroupMode> onChanged;
+  const _TouchGroupModeToggle({required this.mode, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return TouchSegmented<ShoppingGroupMode>(
+      selected: mode,
+      onChanged: onChanged,
+      segments: [
+        TouchSegment(value: ShoppingGroupMode.section, label: l10n.shoppingBySection, icon: ShoppingGroupMode.section.icon),
+        TouchSegment(value: ShoppingGroupMode.recipe, label: l10n.shoppingByRecipe, icon: ShoppingGroupMode.recipe.icon),
+      ],
+    );
+  }
+}
+
+/// The always-visible way to add: looks like a field, opens the add page
+/// (with suggestions and recent items).
+class _AddItemField extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AddItemField({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      button: true,
+      label: l10n.shoppingAddItem,
+      excludeSemantics: true,
+      child: Material(
+        color: c.textPrimary.withValues(alpha: 0.045),
+        shape: RoundedRectangleBorder(borderRadius: Radii.lgAll, side: BorderSide(color: c.hairline)),
+        child: InkWell(
+          borderRadius: Radii.lgAll,
+          onTap: onTap,
+          child: SizedBox(
+            height: 46,
+            child: Row(
+              children: [
+                const SizedBox(width: Space.md),
+                Icon(Icons.add_rounded, size: 22, color: c.accent),
+                const SizedBox(width: Space.sm + 2),
+                Expanded(
+                  child: Text(
+                    l10n.shoppingAddItem,
+                    style: TextStyle(fontSize: 15, color: c.textTertiary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -2116,7 +2109,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: SafeArea(
         child: Padding(
@@ -2125,14 +2118,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Handle
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
 
               // Title
@@ -2652,35 +2638,6 @@ class _BulkItem {
   _BulkItem({required this.displayName, required this.count, required this.totalAmount, this.unit});
 }
 
-// ============ MODERN FAB ============
-
-class _ModernFAB extends StatelessWidget {
-  final VoidCallback onTap;
-  const _ModernFAB({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bg = theme.colorScheme.primary;
-    final fg = theme.colorScheme.onPrimary;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
-      ),
-      child: FloatingActionButton(
-        onPressed: onTap,
-        backgroundColor: bg,
-        foregroundColor: fg,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Icon(Icons.add, size: 26, color: fg),
-      ),
-    );
-  }
-}
-
 // ============ ADD ITEM – FULL SCREEN WITH AUTOCOMPLETE ============
 
 class _AddItemFullScreen extends ConsumerStatefulWidget {
@@ -3158,20 +3115,14 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -3292,20 +3243,14 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 16),
               if (supportsCamera)
                 ListTile(
@@ -3835,7 +3780,6 @@ class _SectionGroupedList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final shoppingDao = ref.watch(shoppingDaoProvider);
 
     // Load custom shopping category names to resolve IDs like SHOP_xxx
@@ -3877,30 +3821,22 @@ class _SectionGroupedList extends ConsumerWidget {
         final sectionWidgets = <Widget>[
           for (final category in sortedKeys)
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
-                  child: Text(
-                    resolveCategoryName(category).toUpperCase(),
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: context.appColors.textSecondary,
-                      letterSpacing: 0.5,
+                _ShopGroupLabel(resolveCategoryName(category), count: grouped[category]!.length),
+                _ItemGroup(children: [
+                  for (final item in grouped[category]!)
+                    _ShoppingItemTile(
+                      item: item,
+                      listId: listId,
+                      userMappings: userMappings,
+                      onCategoryChanged: onCategoryChanged,
+                      onItemChecked: onItemChecked,
+                      onItemUnchecked: onItemUnchecked,
+                      pendingCheck: recentlyCheckedIds.contains(item.id),
                     ),
-                  ),
-                ),
-                for (final item in grouped[category]!)
-                  _ShoppingItemTile(
-                    item: item,
-                    listId: listId,
-                    userMappings: userMappings,
-                    onCategoryChanged: onCategoryChanged,
-                    onItemChecked: onItemChecked,
-                    onItemUnchecked: onItemUnchecked,
-                    pendingCheck: recentlyCheckedIds.contains(item.id),
-                  ),
+                ]),
               ],
             ),
         ];
@@ -3912,7 +3848,8 @@ class _SectionGroupedList extends ConsumerWidget {
         // One clean single column at every width (the parent centres + caps it);
         // a masonry of half-empty columns read as "disorganised" on desktop.
         return ListView(
-          padding: const EdgeInsets.only(bottom: 100),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 32),
           children: [
             ...sectionWidgets,
             if (checkedSection != null) checkedSection,
@@ -3948,7 +3885,6 @@ class _RecipeGroupedList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final recipeDao = ref.watch(recipeDaoProvider);
 
     final grouped = <String?, List<ShoppingListItem>>{};
@@ -3964,7 +3900,8 @@ class _RecipeGroupedList extends ConsumerWidget {
     });
 
     return ListView(
-      padding: const EdgeInsets.only(bottom: 100),
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 32),
       children: [
         for (final recipeId in sortedKeys) ...[
           FutureBuilder<Recipe?>(
@@ -3972,42 +3909,33 @@ class _RecipeGroupedList extends ConsumerWidget {
             builder: (context, snapshot) {
               final recipe = snapshot.data;
               final title = recipe?.title ?? AppLocalizations.of(context)!.shoppingAddedManually;
-
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title.toUpperCase(),
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: context.appColors.textSecondary,
-                          letterSpacing: 0.5,
-                        ),
+              return _ShopGroupLabel(
+                title,
+                count: grouped[recipeId]!.length,
+                trailing: recipe == null
+                    ? null
+                    : IconButton(
+                        onPressed: () => context.push('/recipe/${recipe.id}'),
+                        icon: Icon(Icons.open_in_new_rounded, size: 17, color: context.appColors.accent),
+                        tooltip: AppLocalizations.of(context)!.actionView,
+                        visualDensity: VisualDensity.compact,
                       ),
-                    ),
-                    if (recipe != null)
-                      GestureDetector(
-                        onTap: () => context.push('/recipe/${recipe.id}'),
-                        child: Icon(Icons.open_in_new, size: 18, color: theme.colorScheme.primary),
-                      ),
-                  ],
-                ),
               );
             },
           ),
-          for (final item in grouped[recipeId]!)
-            _ShoppingItemTile(
-              item: item,
-              listId: listId,
-              userMappings: userMappings,
-              onCategoryChanged: onCategoryChanged,
-              onItemChecked: onItemChecked,
-              onItemUnchecked: onItemUnchecked,
-              showRecipeLink: false,
-              pendingCheck: recentlyCheckedIds.contains(item.id),
-            ),
+          _ItemGroup(children: [
+            for (final item in grouped[recipeId]!)
+              _ShoppingItemTile(
+                item: item,
+                listId: listId,
+                userMappings: userMappings,
+                onCategoryChanged: onCategoryChanged,
+                onItemChecked: onItemChecked,
+                onItemUnchecked: onItemUnchecked,
+                showRecipeLink: false,
+                pendingCheck: recentlyCheckedIds.contains(item.id),
+              ),
+          ]),
         ],
         if (checkedItems.isNotEmpty)
           _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
@@ -4045,7 +3973,6 @@ class _ShoppingItemTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final shoppingDao = ref.read(shoppingDaoProvider);
-    final isDark = theme.brightness == Brightness.dark;
     final recipeDao = ref.watch(recipeDaoProvider);
 
     final parsed = parseIngredient(item.name);
@@ -4065,9 +3992,18 @@ class _ShoppingItemTile extends ConsumerWidget {
     final canEdit = CollabService.instance.canEdit(listId);
     final canCheck = CollabService.instance.canCheck(listId);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      child: Dismissible(
+    final c = context.appColors;
+    final done = item.isChecked || pendingCheck;
+    void toggleCheck() {
+      HapticFeedback.lightImpact();
+      if (done) {
+        (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
+      } else {
+        (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
+      }
+    }
+
+    return Dismissible(
         key: Key(item.id),
         // Disable swipe-to-delete during selection, or when I can't edit this
         // shared list (view / check-only member).
@@ -4075,11 +4011,8 @@ class _ShoppingItemTile extends ConsumerWidget {
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.error,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(Icons.delete, color: theme.colorScheme.onError),
+          color: theme.colorScheme.error,
+          child: Icon(Icons.delete_outline_rounded, color: theme.colorScheme.onError),
         ),
         onDismissed: (_) {
           // Save item data for undo before deleting
@@ -4106,19 +4039,10 @@ class _ShoppingItemTile extends ConsumerWidget {
             duration: const Duration(seconds: 4),
           ));
         },
-        child: Container(
-          decoration: BoxDecoration(
-            // Selected rows get a subtle accent tint (not a heavy border) so a
-            // selected-but-unchecked item is distinguishable at a glance.
-            color: isSelected
-                ? theme.colorScheme.primary.withValues(alpha: 0.08)
-                : (isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface),
-            borderRadius: BorderRadius.circular(14),
-            border: isDark
-                ? null
-                : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.08)),
-          ),
-          clipBehavior: Clip.antiAlias,
+        child: Material(
+          // Selected rows get a soft accent tint so a selected-but-unchecked
+          // item is distinguishable from a checked one at a glance.
+          color: isSelected ? c.selectedFill : Colors.transparent,
           child: InkWell(
             onTap: () {
               if (selecting) {
@@ -4127,7 +4051,7 @@ class _ShoppingItemTile extends ConsumerWidget {
                 _showItemOptions(context, ref);
               } else if (canCheck) {
                 // Check-only member: tapping the row toggles the check.
-                (item.isChecked ? (onItemUnchecked ?? (id) => shoppingDao.toggleItemChecked(id, false)) : (onItemChecked ?? (id) => shoppingDao.toggleItemChecked(id, true)))(item.id);
+                toggleCheck();
               }
             },
             onLongPress: canEdit
@@ -4136,71 +4060,108 @@ class _ShoppingItemTile extends ConsumerWidget {
                     selection.add(item.id);
                   }
                 : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  // Leading SELECTION checkbox (multi-select only) — a square box
-                  // that is distinct from the trailing round check-off control,
-                  // so "selected" never looks like "checked off".
-                  if (selecting)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: Checkbox(
-                        value: isSelected,
-                        onChanged: (_) => selection.toggle(item.id),
-                        activeColor: theme.colorScheme.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 2),
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 54),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(Space.xs, Space.xs, Space.md, Space.xs),
+                child: Row(
+                  children: [
+                    // Leading SELECTION checkbox (multi-select only) — square,
+                    // distinct from the round check-off control.
+                    if (selecting)
+                      Padding(
+                        padding: const EdgeInsets.only(left: Space.xs),
+                        child: Checkbox(
+                          value: isSelected,
+                          onChanged: (_) => selection.toggle(item.id),
+                          activeColor: c.accent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                          side: BorderSide(color: c.textPrimary.withValues(alpha: 0.3), width: 1.5),
+                          visualDensity: VisualDensity.compact,
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                    // Round CHECK-OFF control — keeps its "bought" meaning even
+                    // during multi-select. View-only members can't use it.
+                    Semantics(
+                      checked: done,
+                      label: done ? AppLocalizations.of(context)!.shoppingUncheck : AppLocalizations.of(context)!.shoppingMarkBought,
+                      child: InkResponse(
+                        onTap: canCheck ? toggleCheck : null,
+                        radius: 22,
+                        child: SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Center(
+                            child: AnimatedContainer(
+                              duration: Motion.fast,
+                              width: 23,
+                              height: 23,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: done ? c.accent : Colors.transparent,
+                                border: Border.all(
+                                  color: done ? c.accent : c.textPrimary.withValues(alpha: canCheck ? 0.3 : 0.12),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: done ? Icon(Icons.check_rounded, size: 16, color: c.onAccent) : null,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  // Emoji circle
-                  Stack(
-                    children: [
-                      Container(
-                        width: 48, height: 48,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHigh,
-                          shape: BoxShape.circle,
-                        ),
+                    // Emoji, with a count when several recipes need it.
+                    SizedBox(
+                      width: 34,
+                      child: Stack(
+                        clipBehavior: Clip.none,
                         alignment: Alignment.center,
-                        child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                        children: [
+                          Opacity(
+                            opacity: done ? 0.45 : 1,
+                            child: Text(emoji, style: const TextStyle(fontSize: 21)),
+                          ),
+                          if (hasMultipleSources)
+                            Positioned(
+                              right: -2,
+                              top: -4,
+                              child: Container(
+                                constraints: const BoxConstraints(minWidth: 16),
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: c.accent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: c.surface, width: 1.5),
+                                ),
+                                child: Text(
+                                  '${sources.length}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: c.onAccent),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      if (hasMultipleSources)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            width: 20, height: 20,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.tertiary,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: theme.colorScheme.surface, width: 2),
+                    ),
+                    const SizedBox(width: Space.sm + 2),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: Space.sm),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              item.name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                height: 1.3,
+                                color: done ? c.textTertiary : c.textPrimary,
+                                decoration: done ? TextDecoration.lineThrough : null,
+                                decorationColor: c.textTertiary,
+                              ),
                             ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '${sources.length}',
-                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(width: 16),
-                  // Item info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            decoration: (item.isChecked || pendingCheck) ? TextDecoration.lineThrough : null,
-                            color: (item.isChecked || pendingCheck) ? theme.colorScheme.outline : null,
-                          ),
-                        ),
                         if (showRecipeLink && hasMultipleSources && !item.isChecked)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
@@ -4282,175 +4243,243 @@ class _ShoppingItemTile extends ConsumerWidget {
                               );
                             },
                           ),
-                      ],
-                    ),
-                  ),
-                  // Trailing CHECK-OFF control — keeps its "bought / done"
-                  // meaning even during multi-select (selection is the leading
-                  // square checkbox above).
-                  Transform.scale(
-                      scale: 1.2,
-                      child: Checkbox(
-                        value: item.isChecked || pendingCheck,
-                        // View-only members can't check items off.
-                        onChanged: canCheck
-                            ? (_) {
-                                if (item.isChecked || pendingCheck) {
-                                  (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
-                                } else {
-                                  (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
-                                }
-                              }
-                            : null,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 2),
+                          ],
+                        ),
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
+      );
+  }
+
+  void _showItemOptions(BuildContext context, WidgetRef ref) =>
+      _showShoppingItemEditor(context, ref,
+          item: item, userMappings: userMappings, onCategoryChanged: onCategoryChanged);
+}
+
+/// Edit sheet (phone) / dialog (desktop) for one shopping item: rename,
+/// change category, move to another list, delete with undo.
+void _showShoppingItemEditor(
+  BuildContext context,
+  WidgetRef ref, {
+  required ShoppingListItem item,
+  required Map<String, String> userMappings,
+  required Function(String, String, String) onCategoryChanged,
+}) {
+  final theme = Theme.of(context);
+  final l10n = AppLocalizations.of(context)!;
+  final shoppingDao = ref.read(shoppingDaoProvider);
+  final controller = TextEditingController(text: item.name);
+
+  Responsive.showAdaptiveSheet(
+    context,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(child: const SheetHandle(top: 0)),
+            const SizedBox(height: 20),
+            Text(l10n.shoppingEditItem, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: l10n.shoppingItemName,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            _CategoryDropdown(
+              currentCategoryId: item.shoppingCategoryId ?? getShoppingCategory(item.name, userMappings: userMappings),
+              onChanged: (newCategoryId) {
+                onCategoryChanged(item.id, item.name, newCategoryId);
+                Navigator.pop(ctx);
+              },
+            ),
+            const SizedBox(height: 8),
+
+            // Move to another shopping list
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.drive_file_move_outlined),
+              title: Text(l10n.shoppingMoveToList),
+              onTap: () async {
+                final lists = (await shoppingDao.getAllLists())
+                    .where((l) => l.id != item.listId)
+                    .toList();
+                if (!ctx.mounted) return;
+                if (lists.isEmpty) {
+                  AppSnackbar.info(ctx, l10n.shoppingNoOtherLists);
+                  return;
+                }
+                final target = await Responsive.showAdaptiveSheet<ShoppingList>(
+                  ctx,
+                  isScrollControlled: false,
+                  builder: (pickCtx) => SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(l10n.shoppingMoveToList,
+                              style: Theme.of(pickCtx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        ),
+                        ...lists.map((l) => ListTile(
+                              leading: const Icon(Icons.list_alt),
+                              title: Text(l.name),
+                              onTap: () => Navigator.pop(pickCtx, l),
+                            )),
+                      ],
+                    ),
+                  ),
+                );
+                if (target == null) return;
+                await shoppingDao.moveItemToList(item.id, target.id);
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) {
+                  AppSnackbar.success(context, l10n.shoppingMovedToList(target.name));
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      // Snapshot before delete so we can restore if
+                      // the user hits Undo. Editing-sheet delete used
+                      // to be silent — now matches the swipe-to-delete
+                      // behaviour with a 5s undo window.
+                      final snapshot = item;
+                      shoppingDao.deleteItem(item.id);
+                      Navigator.pop(ctx);
+                      AppSnackbar.successWithAction(
+                        context,
+                        l10n.shoppingItemRemoved,
+                        actionLabel: l10n.actionUndo,
+                        onAction: () {
+                          shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+                            id: snapshot.id,
+                            listId: snapshot.listId,
+                            name: snapshot.name,
+                            isChecked: drift.Value(snapshot.isChecked),
+                            sortOrder: drift.Value(snapshot.sortOrder),
+                            note: drift.Value(snapshot.note),
+                            shoppingCategoryId: drift.Value(snapshot.shoppingCategoryId),
+                            recipeId: drift.Value(snapshot.recipeId),
+                          ));
+                        },
+                      );
+                    },
+                    icon: Icon(Icons.delete, color: theme.colorScheme.error),
+                    label: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () {
+                      if (controller.text.trim().isNotEmpty) {
+                        shoppingDao.updateItem(item.id, name: controller.text.trim());
+                      }
+                      Navigator.pop(ctx);
+                    },
+                    child: Text(l10n.actionSave),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+// ============ GROUPS ============
+
+/// Heading above a group of items: the aisle / recipe name and a quiet count.
+class _ShopGroupLabel extends StatelessWidget {
+  final String text;
+  final int? count;
+  final Widget? trailing;
+  const _ShopGroupLabel(this.text, {this.count, this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(Space.xxl, Space.xl, trailing != null ? Space.sm : Space.xl, Space.sm),
+      child: SizedBox(
+        height: trailing != null ? 32 : null,
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      text.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0.7, color: c.textTertiary),
+                    ),
+                  ),
+                  if (count != null) ...[
+                    const SizedBox(width: Space.sm),
+                    RowCount(count!),
+                  ],
+                ],
+              ),
+            ),
+            ?trailing,
+          ],
+        ),
       ),
     );
   }
+}
 
-  void _showItemOptions(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    final controller = TextEditingController(text: item.name);
+/// A hairline-outlined card holding a run of item rows, separated by inset
+/// hairlines — one card per aisle / recipe.
+class _ItemGroup extends StatelessWidget {
+  final List<Widget> children;
+  const _ItemGroup({required this.children});
 
-    Responsive.showAdaptiveSheet(
-      context,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: const EdgeInsets.all(20),
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(borderRadius: Radii.lgAll, border: Border.all(color: c.hairline)),
+        child: ClipRRect(
+          borderRadius: Radii.lgAll,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
-              const SizedBox(height: 20),
-              Text(l10n.shoppingEditItem, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  labelText: l10n.shoppingItemName,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              _CategoryDropdown(
-                currentCategoryId: item.shoppingCategoryId ?? getShoppingCategory(item.name, userMappings: userMappings),
-                onChanged: (newCategoryId) {
-                  onCategoryChanged(item.id, item.name, newCategoryId);
-                  Navigator.pop(ctx);
-                },
-              ),
-              const SizedBox(height: 8),
-
-              // Move to another shopping list
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.drive_file_move_outlined),
-                title: Text(l10n.shoppingMoveToList),
-                onTap: () async {
-                  final lists = (await shoppingDao.getAllLists())
-                      .where((l) => l.id != item.listId)
-                      .toList();
-                  if (!ctx.mounted) return;
-                  if (lists.isEmpty) {
-                    AppSnackbar.info(ctx, l10n.shoppingNoOtherLists);
-                    return;
-                  }
-                  final target = await showModalBottomSheet<ShoppingList>(
-                    context: ctx,
-                    builder: (pickCtx) => SafeArea(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(l10n.shoppingMoveToList,
-                                style: Theme.of(pickCtx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                          ),
-                          ...lists.map((l) => ListTile(
-                                leading: const Icon(Icons.list_alt),
-                                title: Text(l.name),
-                                onTap: () => Navigator.pop(pickCtx, l),
-                              )),
-                        ],
-                      ),
-                    ),
-                  );
-                  if (target == null) return;
-                  await shoppingDao.moveItemToList(item.id, target.id);
-                  if (ctx.mounted) Navigator.pop(ctx);
-                  if (context.mounted) {
-                    AppSnackbar.success(context, l10n.shoppingMovedToList(target.name));
-                  }
-                },
-              ),
-              const SizedBox(height: 8),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Snapshot before delete so we can restore if
-                        // the user hits Undo. Editing-sheet delete used
-                        // to be silent — now matches the swipe-to-delete
-                        // behaviour with a 5s undo window.
-                        final snapshot = item;
-                        shoppingDao.deleteItem(item.id);
-                        Navigator.pop(ctx);
-                        AppSnackbar.successWithAction(
-                          context,
-                          l10n.shoppingItemRemoved,
-                          actionLabel: l10n.actionUndo,
-                          onAction: () {
-                            shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
-                              id: snapshot.id,
-                              listId: snapshot.listId,
-                              name: snapshot.name,
-                              isChecked: drift.Value(snapshot.isChecked),
-                              sortOrder: drift.Value(snapshot.sortOrder),
-                              note: drift.Value(snapshot.note),
-                              shoppingCategoryId: drift.Value(snapshot.shoppingCategoryId),
-                              recipeId: drift.Value(snapshot.recipeId),
-                            ));
-                          },
-                        );
-                      },
-                      icon: Icon(Icons.delete, color: theme.colorScheme.error),
-                      label: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        if (controller.text.trim().isNotEmpty) {
-                          shoppingDao.updateItem(item.id, name: controller.text.trim());
-                        }
-                        Navigator.pop(ctx);
-                      },
-                      child: Text(l10n.actionSave),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) Divider(height: 1, thickness: 1, indent: 82, color: c.hairline),
+                children[i],
+              ],
             ],
           ),
         ),
@@ -4601,33 +4630,28 @@ class _CheckedSection extends ConsumerWidget {
     final shoppingDao = ref.read(shoppingDaoProvider);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 8, 4),
-          child: Row(
-            children: [
-              Icon(Icons.check_circle, size: 20, color: theme.colorScheme.outline),
-              const SizedBox(width: 8),
-              Text(
-                l10n.shoppingCheckedItemsCount(items.length),
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.outline),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () {
-                  shoppingDao.deleteCheckedItems(listId);
-                  // TODO: Kitchen Buddy hidden for now
-                  // KitchenBuddyIntegration.updateShoppingCompleteCount(ref, 1);
-                },
-                child: Text(l10n.shoppingDeleteChecked),
-              ),
-            ],
+        _ShopGroupLabel(
+          l10n.shoppingCheckedItemsCount(items.length),
+          trailing: TextButton(
+            onPressed: () {
+              shoppingDao.deleteCheckedItems(listId);
+              // TODO: Kitchen Buddy hidden for now
+              // KitchenBuddyIntegration.updateShoppingCompleteCount(ref, 1);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
+              textStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+              visualDensity: VisualDensity.compact,
+            ),
+            child: Text(l10n.shoppingDeleteChecked),
           ),
         ),
-        for (final item in items)
-          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
+        _ItemGroup(children: [
+          for (final item in items)
+            _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
+        ]),
       ],
     );
   }

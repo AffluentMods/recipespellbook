@@ -1,162 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/settings_provider.dart';
-import '../../providers/subscription_provider.dart';
-import '../../router/router.dart';
-import '../../services/auth_service.dart';
-import '../../services/community_service.dart';
 import '../../services/feedback_service.dart';
-import '../../services/revenuecat_service.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/tokens.dart';
 import '../../ui/screens/import/faq_screen.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import '../../utils/responsive_utils.dart';
-import '../../utils/platform_utils.dart';
-import '../../providers/cookbook_provider.dart';
+import 'app_controls.dart';
 import 'app_snackbar.dart';
-import 'new_recipe_dialog.dart';
-
-// ═══════════════════════════════════════════════════════════════════
-// DRAWER
-// ═══════════════════════════════════════════════════════════════════
-
-class AppMenuDrawer extends ConsumerWidget {
-  const AppMenuDrawer({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final subStatus = ref.watch(subscriptionProvider);
-    final authState = ref.watch(authProvider);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Drawer(
-      backgroundColor: isDark
-          ? theme.colorScheme.surface
-          : theme.colorScheme.surfaceContainerLow,
-      child: Column(
-        children: [
-          // ═══ Profile header ═══
-          _ProfileHeader(authState: authState),
-
-          // ═══ Scrollable menu ═══
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
-              children: [
-                // ── Group 1: Your Stuff ──
-                const _DrawerGroupLabel(label: 'Your Stuff'),
-                const SizedBox(height: 8),
-                _DrawerGroup(children: [
-                  _DrawerItem(
-                    index: 0,
-                    icon: Icons.menu_book_rounded,
-                    iconColor: context.appColors.accent,
-                    label: l10n.navCookbooks,
-                    subtitle: 'Organize your recipe collections',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/cookbooks');
-                    },
-                  ),
-                  _DrawerItem(
-                    index: 1,
-                    icon: Icons.download_rounded,
-                    iconColor: context.appColors.accent,
-                    label: l10n.importGuides,
-                    subtitle: 'From any URL, photo or file',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ImportGuidesScreen()),
-                      );
-                    },
-                  ),
-                  _DrawerItem(
-                    index: 2,
-                    icon: Icons.swap_horiz_rounded,
-                    iconColor: context.appColors.accent,
-                    label: l10n.transferTitle,
-                    subtitle: 'Move recipes between devices',
-                    onTap: () {
-                      Navigator.pop(context);
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        rootNavigatorKey.currentContext?.push('/transfer');
-                      });
-                    },
-                  ),
-                  if (supportsBarcodeScanner)
-                    _DrawerItem(
-                      index: 3,
-                      icon: Icons.qr_code_scanner_rounded,
-                      iconColor: context.appColors.accent,
-                      label: 'Scan barcode',
-                      subtitle: 'Look up a packaged product',
-                      onTap: () {
-                        Navigator.pop(context);
-                        final cookbookId = ref.read(selectedCookbookProvider).valueOrNull?.id ?? 'starter';
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          final ctx = rootNavigatorKey.currentContext;
-                          if (ctx != null) showImportDialog(ctx, cookbookId, autoScanBarcode: true);
-                        });
-                      },
-                    ),
-                ]),
-
-                const SizedBox(height: 20),
-
-                // ── Group 2: App ──
-                const _DrawerGroupLabel(label: 'App'),
-                const SizedBox(height: 8),
-                _DrawerGroup(children: [
-                  _DrawerItem(
-                    index: 4,
-                    icon: Icons.settings_rounded,
-                    iconColor: context.appColors.accent,
-                    label: l10n.settingsTitle,
-                    subtitle: 'Theme, language & preferences',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/settings');
-                    },
-                  ),
-                  _DrawerItem(
-                    index: 5,
-                    icon: Icons.headset_mic_rounded,
-                    iconColor: context.appColors.accent,
-                    label: l10n.helpTitle,
-                    subtitle: 'FAQ, guides & contact us',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
-                      );
-                    },
-                  ),
-                ]),
-
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-
-          // ═══ Bottom: Upgrade + Version ═══
-          SafeArea(
-            top: false,
-            child: _BottomSection(subStatus: subStatus),
-          ),
-        ],
-      ),
-    );
-  }
-
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // URL LAUNCH HELPER — robust, no canLaunchUrl checks needed
@@ -210,17 +62,25 @@ class HelpSupportScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
+    // Desktop reaches Help from the sidebar: a page title, no back button,
+    // and a reading-width column.
+    final desktop = Responsive.isDesktopLayout(context);
+    if (!desktop) return _touch(context, l10n);
 
     return Scaffold(
       appBar: AppBar(
-        leading: _BackButtonCircle(),
+        automaticallyImplyLeading: false,
         title: Text(l10n.menuHelpSupport),
-        centerTitle: true,
+        centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      // The list stays full-width so the wheel scrolls anywhere in the pane;
+      // on desktop its content is a left-aligned column under the title.
+      body: LayoutBuilder(builder: (context, box) => ListView(
+        padding: desktop
+            ? EdgeInsets.fromLTRB(28, 8, (box.maxWidth - 28 - 720).clamp(28.0, double.infinity), 32)
+            : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         children: [
           // Hero
           Container(
@@ -309,6 +169,109 @@ class HelpSupportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 32),
         ],
+      )),
+    );
+  }
+
+  /// Phone & tablet: a short intro and the support routes as hairline groups,
+  /// feedback in its own group below.
+  Widget _touch(BuildContext context, AppLocalizations l10n) {
+    final c = context.appColors;
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: c.surface,
+      appBar: AppBar(
+        backgroundColor: c.surface,
+        centerTitle: false,
+        titleSpacing: Navigator.of(context).canPop() ? 0 : Space.xl,
+        title: TouchPageTitle(l10n.menuHelpSupport),
+      ),
+      body: Responsive.constrainScrollable(
+        maxWidth: Responsive.settingsListMaxWidth,
+        minHorizontal: 0,
+        builder: (context, padding) => ListView(
+          padding: padding.copyWith(bottom: Space.xxxl),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.xl, Space.sm, Space.xl, Space.xl),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(color: c.selectedFill, shape: BoxShape.circle),
+                    child: Icon(Icons.support_agent_rounded, color: c.accent, size: 26),
+                  ),
+                  const SizedBox(width: Space.lg),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.menuHowCanWeHelp,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: c.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(l10n.menuGetInTouch, style: TextStyle(fontSize: 13.5, color: c.textSecondary)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TouchGroup(children: [
+              TouchRow(
+                icon: Icons.forum_outlined,
+                title: l10n.joinDiscord,
+                subtitle: l10n.joinDiscordSubtitle,
+                onTap: () => _launchExternalUrl(context, _discordUrl),
+              ),
+              TouchRow(
+                icon: Icons.mail_outline_rounded,
+                title: l10n.helpContactUs,
+                subtitle: _supportEmail,
+                onTap: () => _launchEmail(context, _supportEmail, subject: 'Recipe Spellbook — Support Request'),
+              ),
+              TouchRow(
+                icon: Icons.menu_book_outlined,
+                title: l10n.importGuides,
+                subtitle: l10n.stepByStepGuides,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen())),
+              ),
+              TouchRow(
+                icon: Icons.help_outline_rounded,
+                title: l10n.faqTitle,
+                subtitle: l10n.faqHeroSubtitle,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FaqScreen())),
+              ),
+              TouchRow(
+                icon: Icons.language_rounded,
+                title: l10n.menuVisitWebsite,
+                subtitle: _websiteUrl,
+                onTap: () => _launchExternalUrl(context, _websiteUrl),
+              ),
+            ]),
+            TouchGroupLabel(l10n.settingsFeedback),
+            TouchGroup(children: [
+              TouchRow(
+                icon: Icons.lightbulb_outline_rounded,
+                title: l10n.sendSuggestion,
+                subtitle: l10n.sendSuggestionSubtitle,
+                onTap: () => _showSuggestionDialog(context),
+              ),
+              TouchRow(
+                icon: Icons.bug_report_outlined,
+                title: l10n.reportBug,
+                subtitle: l10n.reportBugSubtitle,
+                onTap: () => _showBugReportDialog(context),
+              ),
+            ]),
+          ],
+        ),
       ),
     );
   }
@@ -561,872 +524,6 @@ class _SupportCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// PROFILE HEADER — avatar + name + plan pill
-// ═══════════════════════════════════════════════════════════════════
-
-class _ProfileHeader extends ConsumerStatefulWidget {
-  final AuthState authState;
-  const _ProfileHeader({required this.authState});
-  @override
-  ConsumerState<_ProfileHeader> createState() => _ProfileHeaderState();
-}
-
-class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final isSignedIn = widget.authState.isSignedIn;
-    final isLoading = widget.authState.isLoading;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: isDark
-              ? [context.appColors.accent.withValues(alpha: 0.35), context.appColors.surface]
-              : [context.appColors.accent.withValues(alpha: 0.4), theme.colorScheme.surfaceContainerLow],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: isLoading
-              ? _buildLoading(theme)
-              : isSignedIn
-              ? _buildSignedIn(theme, widget.authState)
-              : _buildSignedOut(context, theme),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoading(ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        children: [
-          const SizedBox(height: 32),
-          SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary)),
-          const SizedBox(height: 8),
-          Text(l10n.menuSigningIn, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSignedIn(ThemeData theme, AuthState authState) {
-    final user = authState.user!;
-    final subStatus = ref.watch(subscriptionProvider);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Column(
-      children: [
-        // ── Plan pill (top left) ──
-        Align(
-          alignment: Alignment.centerLeft,
-          child: _PlanPill(subStatus: subStatus),
-        ),
-        const SizedBox(height: 10),
-
-        // ── Profile area (avatar + name + email) — all tappable → account ──
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            Navigator.pop(context);
-            context.push('/settings/account');
-          },
-          child: Column(
-            children: [
-              _UserAvatar(user: user, radius: 32),
-              const SizedBox(height: 8),
-              Text(
-                user.displayName,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : theme.colorScheme.onSurface,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                user.email,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? Colors.white.withValues(alpha: 0.6) : theme.colorScheme.outline,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // ── Community strip ──
-        _CommunityStrip(isDark: isDark),
-      ],
-    );
-  }
-
-  Widget _buildSignedOut(BuildContext context, ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
-    final authNotifier = ref.read(authProvider.notifier);
-    final isDark = theme.brightness == Brightness.dark;
-    final subStatus = ref.watch(subscriptionProvider);
-
-    return Column(
-      children: [
-        // Plan pill
-        Align(
-          alignment: Alignment.centerLeft,
-          child: _PlanPill(subStatus: subStatus),
-        ),
-        const SizedBox(height: 10),
-
-        // App icon as avatar
-        Container(
-          width: 64, height: 64,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: context.appColors.accent.withValues(alpha: 0.18),
-          ),
-          child: Center(
-            child: Text('?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: isDark ? Colors.white : context.appColors.accent)),
-          ),
-        ),
-        const SizedBox(height: 8),
-
-        Text('Guest', style: theme.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: isDark ? Colors.white : theme.colorScheme.onSurface,
-        )),
-        const SizedBox(height: 2),
-        Text(l10n.menuSignInSync, style: TextStyle(fontSize: 12, color: isDark ? Colors.white.withValues(alpha: 0.6) : theme.colorScheme.outline)),
-        const SizedBox(height: 16),
-
-        // Google sign-in
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () { Navigator.pop(context); authNotifier.signInWithGoogle(); },
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 11),
-              side: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.3) : theme.colorScheme.outlineVariant),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : theme.colorScheme.onSurface)),
-                const SizedBox(width: 10),
-                Text(l10n.continueWithGoogle,
-                    style: TextStyle(fontWeight: FontWeight.w500, color: isDark ? Colors.white : theme.colorScheme.onSurface, fontSize: 14)),
-              ],
-            ),
-          ),
-        ),
-
-        if (isAppleSignInAvailable) ...[
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () { Navigator.pop(context); authNotifier.signInWithApple(); },
-              style: FilledButton.styleFrom(
-                backgroundColor: isDark ? Colors.white : Colors.black,
-                foregroundColor: isDark ? Colors.black : Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 11),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.apple, size: 20, color: isDark ? Colors.black : Colors.white),
-                  const SizedBox(width: 10),
-                  Text(l10n.continueWithApple, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// COMMUNITY STRIP — stats or CTA inside the profile header
-// ═══════════════════════════════════════════════════════════════════
-
-class _CommunityStrip extends ConsumerWidget {
-  final bool isDark;
-  const _CommunityStrip({required this.isDark});
-
-  // Cache to prevent flash on drawer re-open
-  static _CommunityStats? _cachedStats;
-  static bool _fetchedOnce = false;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Use cached stats if available to avoid CTA flash
-    if (_cachedStats != null) {
-      // Refresh in background but show cached immediately
-      _fetchStats().then((stats) { _cachedStats = stats; });
-      return _buildStats(context, _cachedStats!);
-    }
-
-    return FutureBuilder<_CommunityStats?>(
-      future: _fetchOnce(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting && !_fetchedOnce) {
-          // Show nothing while loading first time (avoids CTA flash)
-          return const SizedBox.shrink();
-        }
-
-        final stats = snapshot.data ?? _cachedStats;
-        if (stats != null) {
-          return _buildStats(context, stats);
-        }
-        return _buildCTA(context);
-      },
-    );
-  }
-
-  Future<_CommunityStats?> _fetchOnce() async {
-    if (_fetchedOnce && _cachedStats == null) return null;
-    final stats = await _fetchStats();
-    _fetchedOnce = true;
-    _cachedStats = stats;
-    return stats;
-  }
-
-  Future<_CommunityStats?> _fetchStats() async {
-    try {
-      final userId = AuthService.instance.currentUser?.id;
-      if (userId == null) return null;
-
-      final service = CommunityService.instance;
-
-      // Fetch publications for download count
-      final pubs = await service.getMyPublications();
-
-      // Fetch creator profile for follower/following counts
-      final profile = await service.getCreatorProfile(userId);
-
-      if (pubs.isEmpty && (profile == null || profile.followerCount == 0)) return null;
-
-      int totalDownloads = 0;
-      for (final pub in pubs) {
-        totalDownloads += pub.downloadCount;
-      }
-
-      return _CommunityStats(
-        downloadCount: totalDownloads,
-        followerCount: profile?.followerCount ?? 0,
-        followingCount: profile?.followingCount ?? 0,
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Widget _buildCTA(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-        context.go('/community');
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text('COMMUNITY', style: TextStyle(
-                    fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.8,
-                    color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.4),
-                  )),
-                  const SizedBox(height: 3),
-                  Text(
-                    'Publish a cookbook to start building your stats here',
-                    style: TextStyle(fontSize: 11, color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.6)),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios, size: 14, color: context.appColors.accent),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStats(BuildContext context, _CommunityStats stats) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-        context.go('/community');
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('COMMUNITY', style: TextStyle(
-              fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.8,
-              color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.4),
-            )),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _StatColumn(value: '${stats.followerCount}', label: 'followers', isDark: isDark),
-                _StatColumn(value: '${stats.followingCount}', label: 'following', isDark: isDark),
-                _StatColumn(value: '${stats.downloadCount}', label: 'downloads', isDark: isDark),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CommunityStats {
-  final int downloadCount;
-  final int followerCount;
-  final int followingCount;
-  const _CommunityStats({required this.downloadCount, required this.followerCount, required this.followingCount});
-}
-
-class _StatColumn extends StatelessWidget {
-  final String value;
-  final String label;
-  final bool isDark;
-  const _StatColumn({required this.value, required this.label, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(value, style: TextStyle(
-          fontSize: 18, fontWeight: FontWeight.w700,
-          color: isDark ? Colors.white : Colors.black87,
-        )),
-        const SizedBox(height: 2),
-        Text(label, style: TextStyle(
-          fontSize: 10,
-          color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.5),
-        ), textAlign: TextAlign.center),
-      ],
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// BOTTOM SECTION
-// ═══════════════════════════════════════════════════════════════════
-
-class _BottomSection extends ConsumerWidget {
-  final SubscriptionStatus subStatus;
-  const _BottomSection({required this.subStatus});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final isPro = subStatus.isPro;
-    final version = ref.watch(appVersionProvider).valueOrNull ?? '...';
-
-    return Column(
-      children: [
-        // Invite Friends — full-width tappable row
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              Navigator.pop(context);
-              SharePlus.instance.share(ShareParams(text: l10n.menuShareMessage, subject: 'Recipe Spellbook'));
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  Icon(Icons.share_rounded, size: 18, color: theme.colorScheme.outline.withValues(alpha: 0.7)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(l10n.inviteFriends,
-                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface, fontSize: 13, fontWeight: FontWeight.w500)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Divider(height: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4), indent: 20, endIndent: 20),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-          child: isPro ? _buildProBadge(context, ref, theme) : _buildUpgradeButton(context, theme),
-        ),
-        // Version number — tiny muted, separate from button
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Text(l10n.menuAppVersion(version),
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.40), fontSize: 10)),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProBadge(BuildContext context, WidgetRef ref, ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: () {
-          final captured = subStatus;
-          Navigator.pop(context);
-          WidgetsBinding.instance.addPostFrameCallback((_) => _showSubscriptionSheet(ref, captured));
-        },
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          side: BorderSide(color: Colors.amber.withValues(alpha: 0.5)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.star_rounded, size: 18, color: Colors.amber),
-            const SizedBox(width: 6),
-            Text(l10n.drawerProTier(subStatus.tier.displayName),
-                style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w500, fontSize: 13)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUpgradeButton(BuildContext context, ThemeData theme) {
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: LinearGradient(colors: [Colors.amber.shade600, Colors.orange.shade500]),
-          boxShadow: [BoxShadow(color: Colors.amber.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2))],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () {
-              Navigator.pop(context);
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                rootNavigatorKey.currentContext?.push('/upgrade');
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 11),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.star_rounded, size: 18, color: Colors.white),
-                  const SizedBox(width: 6),
-                  const Text('\u2726 Unlock Premium \u2014 \$6.99', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showSubscriptionSheet(WidgetRef ref, SubscriptionStatus status) {
-    final ctx = rootNavigatorKey.currentContext;
-    if (ctx == null) return;
-    final theme = Theme.of(ctx);
-    final l10n = AppLocalizations.of(ctx)!;
-    final sub = ref.read(subscriptionProvider.notifier);
-    Responsive.showAdaptiveSheet(
-      ctx,
-      builder: (bCtx) => SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 40, height: 4,
-                decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [Colors.amber.shade700, Colors.orange.shade600]),
-                  shape: BoxShape.circle),
-              child: const Icon(Icons.star, size: 32, color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            Text(l10n.affluentLabsPro, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            Text(status.tier.displayName, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-            const SizedBox(height: 8),
-            if (status.isCancelled)
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(color: theme.colorScheme.errorContainer, borderRadius: BorderRadius.circular(8)),
-                child: Row(children: [
-                  Icon(Icons.info_outline, size: 16, color: theme.colorScheme.error),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(l10n.cancelledAccessUntil(_fmtDate(status.expirationDate)),
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error))),
-                ]),
-              ),
-            if (status.tier == SubscriptionTier.premium)
-              Text(l10n.lifetimeNeverExpires,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w500))
-            else if (status.expirationDate != null && !status.isCancelled)
-              Text(l10n.renewsDate(_fmtDate(status.expirationDate)),
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () { Navigator.pop(bCtx); sub.presentCustomerCenter(); },
-                icon: const Icon(Icons.credit_card),
-                label: Text(l10n.manageSubscription),
-                style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _fmtDate(DateTime? d) => d == null ? 'Unknown' : '${d.month}/${d.day}/${d.year}';
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// SHARED WIDGETS
-// ═══════════════════════════════════════════════════════════════════
-
-/// Plan pill shown in the profile header.
-/// Free users get a tappable amber pill that opens /upgrade.
-/// Pro users get a non-tappable pill showing their tier.
-class _PlanPill extends StatelessWidget {
-  final SubscriptionStatus subStatus;
-  const _PlanPill({required this.subStatus});
-
-  @override
-  Widget build(BuildContext context) {
-    final isPro = subStatus.isPro;
-    final label = isPro
-        ? '\u2726 ${subStatus.tier == SubscriptionTier.family ? 'Family' : 'Premium'}'
-        : '\u2726 Free Plan';
-
-    final pill = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isPro
-            ? Colors.amber.withValues(alpha: 0.20)
-            : Colors.amber.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.amber.withValues(alpha: isPro ? 0.5 : 0.4),
-          width: 0.5,
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Colors.amber.shade800,
-        ),
-      ),
-    );
-
-    if (isPro) return pill;
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          rootNavigatorKey.currentContext?.push('/upgrade');
-        });
-      },
-      child: pill,
-    );
-  }
-}
-
-/// Group label ("Your Stuff", "App") rendered above a _DrawerGroup.
-class _DrawerGroupLabel extends StatelessWidget {
-  final String label;
-  const _DrawerGroupLabel({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        label.toUpperCase(),
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.outline.withValues(alpha: 0.6),
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.8,
-          fontSize: 11,
-        ),
-      ),
-    );
-  }
-}
-
-/// Kitchen Stats Card — shows recipe count, cookbook count, last sync.
-
-class _DrawerGroup extends StatelessWidget {
-  final List<Widget> children;
-  const _DrawerGroup({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final filtered = children.whereType<_DrawerItem>().toList();
-    if (filtered.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? theme.colorScheme.surfaceContainerHigh
-            : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.2 : 0.3),
-          width: 0.5,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          for (int i = 0; i < filtered.length; i++) ...[
-            filtered[i],
-            if (i < filtered.length - 1)
-              Divider(
-                height: 0.5,
-                thickness: 0.5,
-                indent: 60,
-                color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.2 : 0.3),
-              ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _DrawerItem extends StatefulWidget {
-  final int index;
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final String subtitle;
-  final VoidCallback onTap;
-  const _DrawerItem({
-    required this.index,
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  State<_DrawerItem> createState() => _DrawerItemState();
-}
-
-class _DrawerItemState extends State<_DrawerItem> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = theme.colorScheme.onSurface;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 300 + 30 * widget.index),
-      curve: Curves.easeOut,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value.clamp(0.0, 1.0),
-          child: Transform.translate(
-            offset: Offset(20 * (1 - value), 0),
-            child: child,
-          ),
-        );
-      },
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _pressed = true),
-        onTapUp: (_) {
-          setState(() => _pressed = false);
-          widget.onTap();
-        },
-        onTapCancel: () => setState(() => _pressed = false),
-        child: AnimatedScale(
-          scale: _pressed ? 0.98 : 1.0,
-          duration: const Duration(milliseconds: 100),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: null, // handled by GestureDetector
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: widget.iconColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(widget.icon, size: 20, color: widget.iconColor),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.label,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: c,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            widget.subtitle,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 20,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-class _UserAvatar extends StatelessWidget {
-  final AuthUser user;
-  final double radius;
-  const _UserAvatar({required this.user, this.radius = 28});
-
-  String _resolveAvatarUrl(String avatarUrl) {
-    if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) return avatarUrl;
-    const apiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://api.recipespellbook.app');
-    return '$apiUrl/v1/web/avatar/$avatarUrl';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final initial = user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : '?';
-    final hasAvatar = user.avatarUrl != null && user.avatarUrl!.isNotEmpty;
-
-    if (hasAvatar) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: context.appColors.accent.withValues(alpha: 0.18),
-        backgroundImage: NetworkImage(_resolveAvatarUrl(user.avatarUrl!)),
-        onBackgroundImageError: (_, __) {},
-        child: null,
-      );
-    }
-
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: context.appColors.accent.withValues(alpha: 0.18),
-      child: Text(
-        initial,
-        style: TextStyle(
-          fontSize: radius * 0.65,
-          fontWeight: FontWeight.bold,
-          color: context.appColors.accent,
-        ),
-      ),
-    );
-  }
-}
-
-class _BackButtonCircle extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(left: 8),
-      child: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-        style: IconButton.styleFrom(
-            backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-            shape: const CircleBorder(), padding: const EdgeInsets.all(10)),
       ),
     );
   }

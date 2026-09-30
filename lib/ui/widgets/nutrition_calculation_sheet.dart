@@ -13,6 +13,7 @@ import '../../services/usda_service.dart';
 import 'app_snackbar.dart';
 import 'recipe_image.dart';
 import '../../utils/responsive_utils.dart';
+import 'sheet_chrome.dart';
 
 /// Shows the nutrition calculation process and results
 class NutritionCalculationSheet extends ConsumerStatefulWidget {
@@ -285,7 +286,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
       maxChildSize: 0.95,
@@ -294,15 +295,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         return Column(
           children: [
             // Handle
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SheetHandle(top: 12),
 
             // Header with tabs
             Padding(
@@ -1844,7 +1837,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
     final hasNutrition = scaledNutrition != null;
     final hasMultipleLinks = widget.allLinks.length > 1;
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: hasMultipleLinks ? 0.85 : 0.65,
       minChildSize: 0.4,
       maxChildSize: 0.95,
@@ -1853,14 +1846,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
         return Column(
           children: [
             // ── Handle ──
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40, height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SheetHandle(top: 12),
 
             // ── Header ──
             Padding(

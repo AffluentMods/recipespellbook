@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
+import '../sync_journal.dart';
 import '../tables/meal_plans.dart';
 import '../tables/recipes.dart';
 
@@ -52,14 +53,21 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
     return into(mealPlans).insert(mealPlan);
   }
 
-  Future<void> deleteMealPlan(String id) {
-    return (delete(mealPlans)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteMealPlan(String id) async {
+    await (delete(mealPlans)..where((t) => t.id.equals(id))).go();
+    await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.mealPlans, id);
   }
 
-  Future<void> deletePastMealPlans() {
+  Future<void> deletePastMealPlans() async {
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
-    return (delete(mealPlans)..where((t) => t.date.isSmallerThanValue(startOfDay))).go();
+    final ids = await (selectOnly(mealPlans)
+          ..addColumns([mealPlans.id])
+          ..where(mealPlans.date.isSmallerThanValue(startOfDay)))
+        .map((r) => r.read(mealPlans.id)!)
+        .get();
+    await (delete(mealPlans)..where((t) => t.date.isSmallerThanValue(startOfDay))).go();
+    await SyncJournal.recordDeletions(attachedDatabase, SyncJournal.mealPlans, ids);
   }
 
   Stream<List<MealPlan>> watchMealPlansForDate(String cookbookId, DateTime date) {
@@ -94,43 +102,43 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
 
   Future<void> updateMealPlanDate(String id, DateTime newDate) {
     return (update(mealPlans)..where((t) => t.id.equals(id)))
-        .write(MealPlansCompanion(date: Value(newDate)));
+        .write(MealPlansCompanion(date: Value(newDate), updatedAt: Value(DateTime.now())));
   }
 
   Future<void> updateMealPlanNotes(String id, String? notes) {
     return (update(mealPlans)..where((t) => t.id.equals(id)))
-        .write(MealPlansCompanion(notes: Value(notes)));
+        .write(MealPlansCompanion(notes: Value(notes), updatedAt: Value(DateTime.now())));
   }
 
   Future<void> updateMealPlanType(String id, String mealType) {
     return (update(mealPlans)..where((t) => t.id.equals(id)))
-        .write(MealPlansCompanion(mealType: Value(mealType)));
+        .write(MealPlansCompanion(mealType: Value(mealType), updatedAt: Value(DateTime.now())));
   }
 
   /// Update the explicit clock time (null clears it, falling back to the
   /// meal-type's default slot on the timeline).
   Future<void> updateMealPlanTime(String id, DateTime? time) {
     return (update(mealPlans)..where((t) => t.id.equals(id)))
-        .write(MealPlansCompanion(time: Value(time)));
+        .write(MealPlansCompanion(time: Value(time), updatedAt: Value(DateTime.now())));
   }
 
   /// Move a meal to a new day, carrying its clock time (hour/minute) over.
   Future<void> updateMealPlanSchedule(String id, DateTime date, DateTime? time) {
     return (update(mealPlans)..where((t) => t.id.equals(id)))
-        .write(MealPlansCompanion(date: Value(date), time: Value(time)));
+        .write(MealPlansCompanion(date: Value(date), time: Value(time), updatedAt: Value(DateTime.now())));
   }
 
   /// Swap the recipe a meal points at (used by "Replace meal").
   Future<void> updateMealPlanRecipe(String id, String recipeId) {
     return (update(mealPlans)..where((t) => t.id.equals(id)))
-        .write(MealPlansCompanion(recipeId: Value(recipeId)));
+        .write(MealPlansCompanion(recipeId: Value(recipeId), updatedAt: Value(DateTime.now())));
   }
 
   /// Set (or clear, with null) the per-meal card colour override. Stores a
   /// palette key — see [MealPlans.cardColor].
   Future<void> updateMealPlanCardColor(String id, String? cardColor) {
     return (update(mealPlans)..where((t) => t.id.equals(id)))
-        .write(MealPlansCompanion(cardColor: Value(cardColor)));
+        .write(MealPlansCompanion(cardColor: Value(cardColor), updatedAt: Value(DateTime.now())));
   }
 
   Stream<Map<DateTime, int>> watchMealCountsForDateRange(DateTime startDate, DateTime endDate) {

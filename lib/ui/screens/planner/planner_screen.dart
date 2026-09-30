@@ -14,10 +14,14 @@ import '../../../utils/recipe_title.dart';
 import '../../../services/shopping_list_generator.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
+import '../../../theme/tokens.dart';
+import '../../widgets/app_controls.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/color_picker_dialog.dart';
+import '../../widgets/recipe_cards.dart' show servingsLabel;
 import '../../widgets/recipe_image.dart';
 import '../../widgets/selection_action_bar.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ============ PROVIDERS ============
 
@@ -78,7 +82,7 @@ const _plannerMealTypes = <(String, String)>[
   ('Snack', '🍪'),
 ];
 
-String _mealTypeLabel(AppLocalizations l10n, String type) {
+String mealTypeLabel(AppLocalizations l10n, String type) {
   switch (type) {
     case 'Breakfast': return l10n.mealTypeBreakfast;
     case 'Lunch': return l10n.mealTypeLunch;
@@ -130,9 +134,11 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    _weekStart = _getWeekStart(now);
-    _monthAnchor = DateTime(now.year, now.month, 1);
+    // Open on the week / month of the selected day — Home can hand over a day
+    // later in the week (or next week).
+    final selected = ref.read(selectedPlannerDateProvider);
+    _weekStart = _getWeekStart(selected);
+    _monthAnchor = DateTime(selected.year, selected.month, 1);
     _restoreViewMode();
   }
 
@@ -318,7 +324,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 viewMode: mode,
                 showViewSwitcher: wide,
                 onViewModeChanged: _setViewMode,
-                showBack: Responsive.isCompact(context),
+                // The planner is a tab: only offer back when it was pushed
+                // (e.g. from a deep link) and there is somewhere to return.
+                showBack: Responsive.isCompact(context) && context.canPop(),
                 onBack: () {
                   // Pop if this planner was pushed (e.g. deep link); otherwise
                   // fall back to the home tab.
@@ -357,11 +365,12 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 ),
               ),
             ] else if (wide && mode == PlannerViewMode.day) ...[
-              // DAY: the hour timeline, full width (centred + capped).
+              // DAY: the hour timeline across the whole pane (no capped column
+              // with dead side margins — the wheel scrolls anywhere).
               Expanded(
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 900),
+                    constraints: const BoxConstraints(maxWidth: 1500),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
                       child: _PlannerCard(
@@ -419,6 +428,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                             data: (plans) => _DayTimeline(
                               plans: plans,
                               date: selectedDate,
+                              revealFirstMeal: true,
                               onAddAt: (t) => _showAddMealSheet(
                                   context, selectedDate,
                                   initialTime: t),
@@ -433,9 +443,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 ),
               ),
             ] else if (!isDesktop) ...[
-              // Week-at-a-glance strip in its own card (swipe to change weeks).
+              // Week-at-a-glance strip in a hairline card (swipe to change weeks).
               Responsive.constrainWidth(context, child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                padding: const EdgeInsets.fromLTRB(Space.lg, Space.xs, Space.lg, 0),
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onHorizontalDragEnd: (details) {
@@ -447,7 +457,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                     }
                   },
                   child: _PlannerCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding: const EdgeInsets.all(Space.xs),
                     child: _WeekStrip(
                       weekStart: _weekStart,
                       selectedDate: selectedDate,
@@ -464,19 +474,27 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 ),
               )),
 
-              // Hour-by-hour day timeline in its own card. Always shown so every
+              // The chosen day, spelled out, with its shopping shortcut.
+              Responsive.constrainWidth(context, child: _DayHeading(
+                date: selectedDate,
+                plans: mealPlansAsync.valueOrNull ?? const [],
+              )),
+
+              // Hour-by-hour day timeline on the page. Always shown so every
               // hour offers a "+" to add a meal at that slot, even on empty days.
               Expanded(
                 child: Responsive.constrainWidth(context, child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                  child: _PlannerCard(
-                    padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.fromLTRB(Space.sm, 0, Space.sm, 0),
+                  child: Material(
+                    type: MaterialType.transparency,
                     child: mealPlansAsync.when(
                       loading: () => const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
                       data: (plans) => _DayTimeline(
                         plans: plans,
                         date: selectedDate,
+                        showShoppingButton: false,
+                        revealFirstMeal: true,
                         onAddAt: (time) => _showAddMealSheet(context, selectedDate, initialTime: time),
                         onEditMeal: (plan) => _showEditMealSheet(context, plan, selectedDate),
                       ),
@@ -510,7 +528,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
       ),
       floatingActionButton: (isDesktop || isTablet || selecting)
           ? null
-          : _ModernFAB(
+          : AccentFab(
+              icon: Icons.add_rounded,
+              label: l10n.addMeal,
               onPressed: () => _showAddMealSheet(context, selectedDate),
             ),
       ),
@@ -622,8 +642,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
 
   Future<void> _bulkChangeMealType(Set<String> ids) async {
     final l10n = AppLocalizations.of(context)!;
-    final type = await showModalBottomSheet<String>(
-      context: context,
+    final type = await Responsive.showAdaptiveSheet<String>(
+      context,
+      isScrollControlled: false,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -639,7 +660,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             for (final (mt, emoji) in _plannerMealTypes)
               ListTile(
                 leading: Text(emoji, style: const TextStyle(fontSize: 22)),
-                title: Text(_mealTypeLabel(l10n, mt)),
+                title: Text(mealTypeLabel(l10n, mt)),
                 onTap: () => Navigator.pop(ctx, mt),
               ),
           ],
@@ -676,7 +697,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
           children: [
             if (!Responsive.isDesktopLayout(context)) ...[
               const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+              const SheetHandle(top: 0),
             ],
             Padding(
               padding: const EdgeInsets.all(16),
@@ -735,7 +756,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             children: [
               if (!Responsive.isDesktopLayout(context)) ...[
                 const SizedBox(height: 8),
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+                const SheetHandle(top: 0),
               ],
               const SizedBox(height: 16),
               // "Share meal plan" was a "coming soon" dead-end — hidden until
@@ -845,11 +866,10 @@ class _WeekGridView extends StatelessWidget {
     required this.onOpenDay,
   });
 
-  static const double _minColumnWidth = 150.0;
+  static const double _minColumnWidth = 120.0;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final today = DateTime.now();
     final todayNormalized = DateTime(today.year, today.month, today.day);
 
@@ -864,7 +884,7 @@ class _WeekGridView extends StatelessWidget {
             children: [
               for (int i = 0; i < weekDates.length; i++) ...[
                 if (i > 0)
-                  VerticalDivider(width: 1, thickness: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+                  VerticalDivider(width: 1, thickness: 1, color: context.appColors.hairline),
                 if (useFixedWidth)
                   SizedBox(
                     width: _minColumnWidth,
@@ -928,41 +948,9 @@ class _DayColumn extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
     final mealsAsync = ref.watch(mealPlansForDateProvider(date));
 
-    // Reused by both empty (centred inline) and non-empty (pinned below) columns
-    // so an empty day no longer strands the button at the bottom of a tall void.
-    final addButton = InkWell(
-      onTap: onAddMeal,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: context.appColors.accent.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: context.appColors.accent.withValues(alpha: 0.30),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add, size: 16, color: context.appColors.accent),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                l10n.plannerAddMeal,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: context.appColors.accent,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    // A quiet "+ Add meal" row that always sits directly under the day's
+    // meals, so every column reads the same whether it's empty or full.
+    final addButton = _AddMealRow(label: l10n.plannerAddMeal, onTap: onAddMeal);
 
     return Container(
       color: isToday
@@ -974,12 +962,11 @@ class _DayColumn extends ConsumerWidget {
           InkWell(
             onTap: onOpenDay,
             child: Container(
+            width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                ),
+                bottom: BorderSide(color: context.appColors.hairline),
               ),
               color: isToday
                   ? context.appColors.accent.withValues(alpha: 0.15)
@@ -1050,32 +1037,6 @@ class _DayColumn extends ConsumerWidget {
               ),
               error: (_, __) => const Center(child: Icon(Icons.error_outline, size: 18)),
               data: (plans) {
-                if (plans.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.restaurant_menu_rounded,
-                            size: 22,
-                            color: context.appColors.textTertiary
-                                .withValues(alpha: 0.7)),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.plannerNoMeals,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: context.appColors.textTertiary,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: addButton,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
                 // Group by meal type and sort
                 final grouped = <String, List<MealPlanWithRecipe>>{};
                 for (final plan in plans) {
@@ -1089,18 +1050,12 @@ class _DayColumn extends ConsumerWidget {
                     return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
                   });
 
-                return Column(
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
                   children: [
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                        children: [
-                          for (final mealType in sortedKeys)
-                            for (final plan in grouped[mealType]!)
-                              _CompactMealCard(plan: plan),
-                        ],
-                      ),
-                    ),
+                    for (final mealType in sortedKeys)
+                      for (final plan in grouped[mealType]!)
+                        _CompactMealCard(plan: plan),
                     addButton,
                   ],
                 );
@@ -1108,6 +1063,56 @@ class _DayColumn extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Ghost "+ Add meal" row for the week grid: muted until hovered.
+class _AddMealRow extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _AddMealRow({required this.label, required this.onTap});
+
+  @override
+  State<_AddMealRow> createState() => _AddMealRowState();
+}
+
+class _AddMealRowState extends State<_AddMealRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final fg = _hover ? c.accent : c.textTertiary;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(6),
+          hoverColor: c.accent.withValues(alpha: 0.08),
+          child: SizedBox(
+            height: 34,
+            child: Row(
+              children: [
+                const SizedBox(width: 8),
+                Icon(Icons.add_rounded, size: 16, color: fg),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: fg),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1310,49 +1315,60 @@ class _PlannerHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
         child: Row(
           children: [
-            Flexible(
-              child: InkWell(
-                onTap: onPickDate,
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+            // The month title keeps its natural width; the range label is
+            // dropped first when the pane gets narrow.
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final showSubtitle = subtitle.isNotEmpty && box.maxWidth >= 380;
+                  return Row(
                     children: [
                       Flexible(
-                        child: Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colors.textPrimary,
+                        child: InkWell(
+                          onTap: onPickDate,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.headlineSmall?.copyWith(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: -0.3,
+                                      color: colors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(Icons.keyboard_arrow_down_rounded,
+                                    size: 22, color: colors.textSecondary),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down_rounded,
-                          size: 24, color: colors.textSecondary),
+                      if (showSubtitle) ...[
+                        const SizedBox(width: 10),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ],
-                  ),
-                ),
+                  );
+                },
               ),
             ),
-            if (subtitle.isNotEmpty) ...[
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-            const Spacer(),
+            const SizedBox(width: 12),
             if (showViewSwitcher) ...[
               _PlannerViewSwitcher(mode: viewMode, onChanged: onViewModeChanged),
               const SizedBox(width: 8),
@@ -1381,45 +1397,77 @@ class _PlannerHeader extends StatelessWidget {
       );
     }
 
-    // Compact header (unchanged): back · selected-day month · more.
-    final compactLabel = '${DateFormat.MMMM(locale).format(date)} ${date.year}';
+    // Compact header: the month in Fraunces (tap for the calendar), week
+    // arrows, and Today when the week on screen isn't this one.
+    final compactLabel = DateFormat.MMMM(locale).format(date);
+    final now = DateTime.now();
+    final thisWeek = !DateTime(now.year, now.month, now.day).isBefore(weekStart) &&
+        DateTime(now.year, now.month, now.day).isBefore(weekStart.add(const Duration(days: 7)));
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+      padding: EdgeInsets.fromLTRB(showBack ? Space.xs : Space.md, Space.md, Space.xs, Space.sm),
       child: Row(
         children: [
           if (showBack)
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              icon: const Icon(Icons.arrow_back_rounded),
               onPressed: onBack,
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             ),
           Expanded(
-            child: InkWell(
-              onTap: onPickDate,
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      compactLabel,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: InkWell(
+                onTap: onPickDate,
+                borderRadius: Radii.mdAll,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Space.xs, vertical: Space.xs),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          compactLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontSize: 28,
+                            height: 1.15,
+                            letterSpacing: -0.4,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down_rounded,
-                        size: 22, color: theme.colorScheme.onSurfaceVariant),
-                  ],
+                      const SizedBox(width: Space.sm),
+                      Text(
+                        '${date.year}',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: colors.textTertiary),
+                      ),
+                      Icon(Icons.expand_more_rounded, size: 20, color: colors.accent),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
+          if (!thisWeek)
+            TextButton(onPressed: onToday, child: Text(l10n.today)),
           IconButton(
-            icon: const Icon(Icons.more_horiz_rounded),
+            icon: Icon(Icons.chevron_left_rounded, color: colors.textSecondary),
+            tooltip: prevTip,
+            onPressed: onPrev,
+          ),
+          IconButton(
+            icon: Icon(Icons.chevron_right_rounded, color: colors.textSecondary),
+            tooltip: nextTip,
+            onPressed: onNext,
+          ),
+          IconButton(
+            icon: Icon(Icons.more_horiz_rounded, color: colors.textSecondary),
             onPressed: onMoreOptions,
-            tooltip: AppLocalizations.of(context)!.plannerMoreOptions,
+            tooltip: l10n.plannerMoreOptions,
           ),
         ],
       ),
@@ -1444,37 +1492,27 @@ class _PlannerViewSwitcher extends StatelessWidget {
       (PlannerViewMode.week, l10n.plannerWeek),
       (PlannerViewMode.day, l10n.plannerDay),
     ];
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: c.surfaceHigh,
-        borderRadius: BorderRadius.circular(10),
+    // A real segmented control: keyboard-focusable, pointer cursor, hover.
+    return SegmentedButton<PlannerViewMode>(
+      showSelectedIcon: false,
+      style: ButtonStyle(
+        visualDensity: VisualDensity.compact,
+        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 14)),
+        minimumSize: const WidgetStatePropertyAll(Size(0, 32)),
+        shape: const WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8)))),
+        side: WidgetStatePropertyAll(BorderSide(color: c.textPrimary.withValues(alpha: 0.12))),
+        textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+        backgroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? c.accent.withValues(alpha: 0.14) : Colors.transparent),
+        foregroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? c.accent : c.textSecondary),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final (m, label) in items)
-            GestureDetector(
-              onTap: () => onChanged(m),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: m == mode ? c.accent : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: m == mode ? c.onAccent : c.textSecondary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
+      segments: [
+        for (final (m, label) in items) ButtonSegment(value: m, label: Text(label)),
+      ],
+      selected: {mode},
+      onSelectionChanged: (v) => onChanged(v.first),
     );
   }
 }
@@ -1768,97 +1806,147 @@ class _WeekStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final c = context.appColors;
     final today = DateTime.now();
     final todayNormalized = DateTime(today.year, today.month, today.day);
     final selectedNormalized = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-
-    // Compute the day-letter row once per build (not once per day cell).
     final locale = Localizations.localeOf(context).toString();
-    final dayNames = List.generate(7, (i) {
-      final d = weekStart.add(Duration(days: i));
-      return DateFormat.E(locale).format(d)[0].toUpperCase();
-    });
 
-    return Container(
-      height: 80,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: List.generate(7, (index) {
-          final date = weekStart.add(Duration(days: index));
-          final dateNormalized = DateTime(date.year, date.month, date.day);
+    return Row(
+      children: List.generate(7, (index) {
+        final date = weekStart.add(Duration(days: index));
+        final dateNormalized = DateTime(date.year, date.month, date.day);
+        final isSelected = dateNormalized == selectedNormalized;
+        final isToday = dateNormalized == todayNormalized;
+        final mealCount = mealCounts[dateNormalized] ?? 0;
+        final weekday = DateFormat.E(locale).format(date);
 
-          final isSelected = dateNormalized == selectedNormalized;
-          final isToday = dateNormalized == todayNormalized;
-          final mealCount = mealCounts[dateNormalized] ?? 0;
-
-          return Expanded(
+        return Expanded(
+          child: Semantics(
+            button: true,
+            selected: isSelected,
+            label: DateFormat.MMMMEEEEd(locale).format(date),
+            excludeSemantics: true,
             child: GestureDetector(
-              onTap: () => onDateSelected(date),
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onDateSelected(date);
+              },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+                duration: Motion.fast,
+                margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                padding: const EdgeInsets.symmetric(vertical: Space.sm),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? context.appColors.accent
-                      : isToday
-                      ? (isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerHighest)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
+                  color: isSelected ? c.selectedFill : Colors.transparent,
+                  borderRadius: Radii.mdAll,
                 ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      dayNames[index],
+                      weekday.length > 3 ? weekday.substring(0, 3) : weekday,
+                      maxLines: 1,
+                      overflow: TextOverflow.clip,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurfaceVariant,
+                        letterSpacing: 0.2,
+                        color: isSelected ? c.accent : c.textTertiary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       '${date.day}',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurface,
+                        fontFamily: 'Fraunces',
+                        fontSize: 20,
+                        height: 1.2,
+                        fontWeight: isToday || isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected ? c.accent : (isToday ? c.textPrimary : c.textSecondary),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    // Meal indicator dots
-                    if (mealCount > 0)
-                      Row(
+                    const SizedBox(height: 3),
+                    SizedBox(
+                      height: 5,
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          mealCount.clamp(0, 3),
-                              (i) => Container(
-                            width: 6,
-                            height: 6,
-                            margin: const EdgeInsets.symmetric(horizontal: 1),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white.withValues(alpha: 0.8)
-                                  : context.appColors.accent,
-                              shape: BoxShape.circle,
+                        children: [
+                          for (var i = 0; i < mealCount.clamp(0, 3); i++)
+                            Container(
+                              width: 5,
+                              height: 5,
+                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isSelected ? c.accent : c.textTertiary.withValues(alpha: 0.6),
+                              ),
                             ),
-                          ),
-                        ),
-                      )
-                    else
-                      const SizedBox(height: 6),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-          );
-        }),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+/// The selected day spelled out ("Wednesday, September 30") with the
+/// "add this day to the shopping list" shortcut when it has recipes.
+class _DayHeading extends ConsumerWidget {
+  final DateTime date;
+  final List<MealPlanWithRecipe> plans;
+  const _DayHeading({required this.date, required this.plans});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
+    final now = DateTime.now();
+    final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+    final recipeIds = plans.where((p) => p.recipe != null).map((p) => p.recipe!.id).toSet().toList();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.xl, Space.lg, Space.sm, Space.xs),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isToday)
+                  Text(
+                    l10n.today.toUpperCase(),
+                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.7, color: c.accent),
+                  ),
+                Text(
+                  DateFormat.MMMMEEEEd(locale).format(date),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w600,
+                        color: c.textPrimary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          if (recipeIds.isNotEmpty)
+            TextButton.icon(
+              onPressed: () => launchShoppingListGeneratorFromMealPlan(context, ref, recipeIds: recipeIds),
+              icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
+              label: Text(l10n.groceriesButton),
+              style: TextButton.styleFrom(
+                foregroundColor: c.accent,
+                textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1901,8 +1989,8 @@ class _WeekRail extends StatelessWidget {
         final isToday = dateNormalized == todayNormalized;
         final mealCount = mealCounts[dateNormalized] ?? 0;
 
-        final labelColor = isSelected ? colors.onAccent : colors.textSecondary;
-        final dayColor = isSelected ? colors.onAccent : colors.textPrimary;
+        final labelColor = isSelected ? colors.accent : colors.textTertiary;
+        final dayColor = isSelected ? colors.accent : colors.textPrimary;
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 3),
@@ -1916,12 +2004,9 @@ class _WeekRail extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? colors.accent
-                      : isToday
-                          ? colors.accent.withValues(alpha: 0.10)
-                          : Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
+                  color: isSelected ? colors.selectedFill : Colors.transparent,
+                  borderRadius: Radii.mdAll,
+                  border: isToday && !isSelected ? Border.all(color: colors.hairline) : null,
                 ),
                 child: Row(
                   children: [
@@ -1939,9 +2024,12 @@ class _WeekRail extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           '${date.day}',
-                          style: theme.textTheme.titleMedium?.copyWith(
+                          style: TextStyle(
+                            fontFamily: 'Fraunces',
+                            fontSize: 20,
+                            height: 1.2,
                             color: dayColor,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -1959,8 +2047,8 @@ class _WeekRail extends StatelessWidget {
                                 const EdgeInsets.symmetric(horizontal: 1),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? colors.onAccent.withValues(alpha: 0.85)
-                                  : colors.accent,
+                                  ? colors.accent
+                                  : colors.textTertiary.withValues(alpha: 0.6),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -1988,22 +2076,16 @@ class _PlannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    // A flat hairline-framed surface on the page at every size — the design
+    // language's panel, not a floating card.
+    final c = context.appColors;
     return Container(
       clipBehavior: Clip.antiAlias,
       padding: padding,
       decoration: BoxDecoration(
-        color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: c.surface,
+        borderRadius: Radii.lgAll,
+        border: Border.all(color: c.hairline),
       ),
       child: child,
     );
@@ -2022,11 +2104,22 @@ class _DayTimeline extends ConsumerWidget {
   final void Function(TimeOfDay time) onAddAt;
   final void Function(MealPlanWithRecipe plan) onEditMeal;
 
+  /// The "add day to shopping list" button at the top (phones show it in the
+  /// day heading instead).
+  final bool showShoppingButton;
+
+  /// Touch layouts open each day scrolled to its first meal (a dinner would
+  /// otherwise sit below the fold of a 6 AM start) and start every day from
+  /// its own scroll position.
+  final bool revealFirstMeal;
+
   const _DayTimeline({
     required this.plans,
     required this.date,
     required this.onAddAt,
     required this.onEditMeal,
+    this.showShoppingButton = true,
+    this.revealFirstMeal = false,
   });
 
   int _startMinutes(MealPlanWithRecipe p) {
@@ -2070,6 +2163,7 @@ class _DayTimeline extends ConsumerWidget {
     final maxMeal = hours.isEmpty ? 22 : hours.reduce((a, b) => a > b ? a : b);
     final startHour = minMeal < 6 ? minMeal : 6;
     final endHour = maxMeal > 22 ? maxMeal : 22;
+    final revealId = revealFirstMeal && byHour.isNotEmpty ? byHour[minMeal]!.first.mealPlan.id : null;
 
     final recipeIds = plans
         .where((p) => p.recipe != null)
@@ -2079,9 +2173,10 @@ class _DayTimeline extends ConsumerWidget {
     final base = DateTime(date.year, date.month, date.day);
 
     return ListView(
+      key: revealFirstMeal ? ValueKey(base) : null,
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 100),
       children: [
-        if (recipeIds.isNotEmpty)
+        if (recipeIds.isNotEmpty && showShoppingButton)
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             child: SizedBox(
@@ -2106,16 +2201,49 @@ class _DayTimeline extends ConsumerWidget {
             onAdd: () => onAddAt(TimeOfDay(hour: h, minute: 0)),
           ),
           for (final p in (byHour[h] ?? const <MealPlanWithRecipe>[]))
-            _MealBlock(
-              key: ValueKey(p.mealPlan.id),
-              plan: p,
-              date: date,
-              onEdit: () => onEditMeal(p),
-            ),
+            if (p.mealPlan.id == revealId)
+              _RevealOnce(
+                key: ValueKey('reveal-${p.mealPlan.id}'),
+                child: _MealBlock(
+                  key: ValueKey(p.mealPlan.id),
+                  plan: p,
+                  date: date,
+                  onEdit: () => onEditMeal(p),
+                ),
+              )
+            else
+              _MealBlock(
+                key: ValueKey(p.mealPlan.id),
+                plan: p,
+                date: date,
+                onEdit: () => onEditMeal(p),
+              ),
         ],
       ],
     );
   }
+}
+
+/// Scrolls its child into view once, after its first frame.
+class _RevealOnce extends StatefulWidget {
+  final Widget child;
+  const _RevealOnce({super.key, required this.child});
+
+  @override
+  State<_RevealOnce> createState() => _RevealOnceState();
+}
+
+class _RevealOnceState extends State<_RevealOnce> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Scrollable.ensureVisible(context, alignment: 0.25);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// A single hour marker: the clock label on the left, a hairline, and a "+" on
@@ -2128,6 +2256,37 @@ class _HourRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
+    if (Responsive.isDesktopLayout(context)) return _desktop(context);
+    return InkWell(
+      onTap: onAdd,
+      borderRadius: Radii.mdAll,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 72,
+              child: Text(
+                _clock(base, hour * 60),
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: c.textTertiary,
+                  fontWeight: FontWeight.w600,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+            Expanded(child: Divider(color: c.hairline, height: 34)),
+            const SizedBox(width: 6),
+            Icon(Icons.add_rounded, size: 18, color: c.textTertiary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _desktop(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
       onTap: onAdd,
@@ -2136,7 +2295,7 @@ class _HourRow extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              width: 62,
+              width: 72,
               child: Text(
                 _clock(base, hour * 60),
                 style: theme.textTheme.labelSmall?.copyWith(
@@ -2237,12 +2396,12 @@ class _MealBlock extends ConsumerWidget {
     final t = plan.mealPlan.time;
     final subtitle = <String>[
       if (t != null) _clock(base, t.hour * 60 + t.minute),
-      if (r?.servings != null && r!.servings!.isNotEmpty) '${r.servings} ${l10n.servingsUnit}',
+      ?servingsLabel(l10n, r?.servings),
     ].join('  ·  ');
 
     return Padding(
-      // Left inset aligns the card with the hour divider (8 ListView + 62 label).
-      padding: const EdgeInsets.fromLTRB(70, 3, 4, 3),
+      // Left inset aligns the card with the hour divider (8 ListView + 72 label).
+      padding: const EdgeInsets.fromLTRB(80, 3, 4, 3),
       child: Dismissible(
         key: Key('tl_${plan.mealPlan.id}'),
         direction: selecting ? DismissDirection.none : DismissDirection.endToStart,
@@ -2284,7 +2443,7 @@ class _MealBlock extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _mealTypeLabel(l10n, plan.mealPlan.mealType).toUpperCase(),
+                              mealTypeLabel(l10n, plan.mealPlan.mealType).toUpperCase(),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: onColor.withValues(alpha: 0.75),
                                 fontWeight: FontWeight.w700,
@@ -2490,16 +2649,15 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
     final dateLabel = isToday ? l10n.today : DateFormat.MMMd().format(base);
 
     final subtitle = <String>[
-      _mealTypeLabel(l10n, mp.mealType),
+      mealTypeLabel(l10n, mp.mealType),
       currentTod.format(context),
-      if (r?.servings != null && r!.servings!.isNotEmpty)
-        '${r.servings} ${l10n.servingsUnit}',
+      ?servingsLabel(l10n, r?.servings),
     ].join(' · ');
 
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: SafeArea(
         top: false,
@@ -2509,14 +2667,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
             children: [
               const SizedBox(height: 12),
               // Drag handle (sheet dismisses via scrim tap / swipe down).
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colors.outline,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 8),
 
               // ── Header: whole row opens the recipe ──
@@ -2645,7 +2796,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
                 colors,
                 icon: Icons.restaurant,
                 label: l10n.plannerChangeMealType,
-                trailing: _mealTypeLabel(l10n, mp.mealType),
+                trailing: mealTypeLabel(l10n, mp.mealType),
                 onTap: () async {
                   final type = await _pickMealTypeSheet(context);
                   if (type == null || !context.mounted) return;
@@ -2835,14 +2986,15 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
 /// Bottom-sheet meal-type chooser used by the edit sheet.
 Future<String?> _pickMealTypeSheet(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
-  return showModalBottomSheet<String>(
-    context: context,
+  return Responsive.showAdaptiveSheet<String>(
+    context,
+    isScrollControlled: false,
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 8),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(ctx).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(l10n.plannerChangeMealType, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -2850,7 +3002,7 @@ Future<String?> _pickMealTypeSheet(BuildContext context) {
           for (final (mt, emoji) in _plannerMealTypes)
             ListTile(
               leading: Text(emoji, style: const TextStyle(fontSize: 22)),
-              title: Text(_mealTypeLabel(l10n, mt)),
+              title: Text(mealTypeLabel(l10n, mt)),
               onTap: () => Navigator.pop(ctx, mt),
             ),
           const SizedBox(height: 8),
@@ -2862,8 +3014,8 @@ Future<String?> _pickMealTypeSheet(BuildContext context) {
 
 /// Bottom-sheet recipe picker used by "Replace meal"; returns the chosen id.
 Future<String?> _pickRecipeSheet(BuildContext context, WidgetRef ref) {
-  return showModalBottomSheet<String>(
-    context: context,
+  return Responsive.showAdaptiveSheet<String>(
+    context,
     isScrollControlled: true,
     builder: (ctx) => _RecipePickerSheet(ref: ref),
   );
@@ -2890,12 +3042,12 @@ class _RecipePickerSheetState extends State<_RecipePickerSheet> {
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: Column(
         children: [
           const SizedBox(height: 12),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: TextField(
@@ -3003,12 +3155,12 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: Column(
         children: [
           const SizedBox(height: 12),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
 
           // Header
           Padding(
@@ -3256,36 +3408,6 @@ class _RecipeSelectTile extends StatelessWidget {
       ),
       trailing: Icon(Icons.add_circle_outline, color: context.appColors.accent),
       onTap: onTap,
-    );
-  }
-}
-// ═══════════════════════════════════════════════════════════════════
-// MODERN FAB
-// ═══════════════════════════════════════════════════════════════════
-
-class _ModernFAB extends StatelessWidget {
-  final VoidCallback onPressed;
-  const _ModernFAB({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bg = theme.colorScheme.primary;
-    final fg = theme.colorScheme.onPrimary;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
-      ),
-      child: FloatingActionButton(
-        onPressed: onPressed,
-        backgroundColor: bg,
-        foregroundColor: fg,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, size: 26),
-      ),
     );
   }
 }

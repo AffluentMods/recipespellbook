@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'services/notification_stub.dart' if (dart.library.io) 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'utils/share_handler_stub.dart' if (dart.library.io) 'package:share_handler/share_handler.dart';
 import 'l10n/app_localizations.dart';
+import 'utils/invite_link_parser.dart';
 import 'utils/platform_utils.dart';
 import 'utils/pending_deep_link.dart';
 import 'providers/auth_provider.dart';
@@ -33,15 +35,18 @@ import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/widgets/app_shortcuts.dart';
 
-/// Custom scroll behavior that enables mouse drag scrolling for horizontal
-/// lists on desktop (trackpad, mouse, stylus all work like touch).
+/// Scroll behaviour: touch, stylus and trackpad drag-scroll everywhere. A
+/// MOUSE only drags on phones/tablets — on desktop and web a mouse drag must
+/// select text and drive swipe rows / drag handles instead; the wheel and
+/// trackpad do the scrolling there.
 class AppScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
     PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
     PointerDeviceKind.trackpad,
     PointerDeviceKind.stylus,
+    PointerDeviceKind.invertedStylus,
+    if (isMobile) PointerDeviceKind.mouse,
   };
 }
 
@@ -169,6 +174,19 @@ class RecipeSpellbookApp extends ConsumerWidget {
                   minVerticalPadding: 4,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                 ),
+                // Screens that still use an AppBar read like the desktop
+                // PageHeader: left-aligned editorial title, same inset/height.
+                appBarTheme: baseTheme.appBarTheme.copyWith(
+                  centerTitle: false,
+                  toolbarHeight: 64,
+                  titleSpacing: 28,
+                  titleTextStyle: baseTheme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.3,
+                    color: baseTheme.colorScheme.onSurface,
+                  ),
+                ),
               ),
               child: result,
             );
@@ -212,18 +230,20 @@ class RecipeSpellbookApp extends ConsumerWidget {
             );
           }
 
-          // Desktop: custom window chrome (title bar) + command palette +
-          // keyboard-shortcuts cheat sheet overlays.
+          // Desktop: custom window chrome (title bar). Desktop + web: the
+          // command palette and keyboard-shortcuts cheat sheet overlays (their
+          // ⌘/Ctrl+K and ⌘/Ctrl+/ bindings live in AppShortcuts).
           if (isDesktop) {
+            result = Column(
+              children: [
+                const DesktopTitleBar(),
+                Expanded(child: result),
+              ],
+            );
+          }
+          if (!isMobile) {
             result = ShortcutsCheatSheetHost(
-              child: CommandPaletteHost(
-                child: Column(
-                  children: [
-                    const DesktopTitleBar(),
-                    Expanded(child: result),
-                  ],
-                ),
-              ),
+              child: CommandPaletteHost(child: result),
             );
           }
 
@@ -255,6 +275,11 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   }
 
   Future<void> _initServices() async {
+    // 0. Start listening for deep links FIRST. A cold-start link is captured
+    //    while the splash still owns navigation and handed to it, instead of
+    //    waiting behind auth + RevenueCat init (which can outlast the splash).
+    _initDeepLinks();
+
     // 1. Wire services to database
     final db = ref.read(databaseProvider);
     SyncService.instance.setDatabase(db);
@@ -287,26 +312,30 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     // 7. Wire up share intent handling
     _initShareHandler();
-
-    // 8. Wire up deep links (recipe/cookbook/list share view links)
-    _initDeepLinks();
   }
 
-  // ── Deep-link handling (share view links) ──────────────────────────
-  //  Handles: recipespellbook://import?code=ABC  (web "Open in App")
-  //           recipespellbook://s/ABC
-  //           recipespellbook://community?id=PUB  (web "Open in App", cookbooks)
-  //           recipespellbook://community/PUB
-  //           https://recipespellbook.app/s/ABC  (universal link, if verified)
-  AppLinks? _deepLinks;
+  // ── Deep-link handling (share / invite links) ──────────────────────
+  //  app_links is the ONLY link handler: Flutter's built-in deep linking is
+  //  turned off (AndroidManifest.xml flutter_deeplinking_enabled, Info.plist
+  //  FlutterDeepLinkingEnabled). With both on, go_router also got every link,
+  //  matched only its path (recipespellbook://s/X → "/X" → Page Not Found)
+  //  and cold-start links opened twice.
+  //  Every link shape is parsed by InviteLinkParser (utils/invite_link_parser.dart):
+  //    /s/<code> share links, recipespellbook://import?code=, community links,
+  //    and /family/join/<code> family invites.
   StreamSubscription<Uri>? _deepLinkSub;
+  String? _lastDeepLink;
+  DateTime? _lastDeepLinkAt;
 
-  Future<void> _initDeepLinks() async {
+  void _initDeepLinks() {
+    // On web the browser URL already drives go_router; app_links would hand
+    // the same URL back and open the page a second time.
+    if (kIsWeb) return;
     try {
-      _deepLinks = AppLinks();
-      final initial = await _deepLinks!.getInitialAppLink();
-      if (initial != null) _handleDeepLink(initial);
-      _deepLinkSub = _deepLinks!.uriLinkStream.listen(
+      // app_links (≥6) replays the launch link on this stream when the first
+      // listener attaches, so there's no separate getInitialLink() call —
+      // that would handle a cold-start link twice.
+      _deepLinkSub = AppLinks().uriLinkStream.listen(
         _handleDeepLink,
         onError: (Object e) => debugPrint('[DeepLink] stream error: $e'),
       );
@@ -316,51 +345,48 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   }
 
   void _handleDeepLink(Uri uri) {
-    // Resolve the target route from the link.
-    String? target;
-    final pubId = _communityIdFromUri(uri);
-    if (pubId != null && pubId.isNotEmpty) {
-      target = '/community/$pubId'; // published cookbook detail
-    } else {
-      final code = _shareCodeFromUri(uri);
-      if (code != null && code.isNotEmpty) target = '/s/$code'; // public share viewer
+    // The same link can arrive twice in quick succession (e.g. iOS app +
+    // scene callbacks); only act on it once.
+    final now = DateTime.now();
+    final key = uri.toString();
+    if (key == _lastDeepLink &&
+        _lastDeepLinkAt != null &&
+        now.difference(_lastDeepLinkAt!) < const Duration(seconds: 3)) {
+      return;
     }
-    if (target == null) return;
+    _lastDeepLink = key;
+    _lastDeepLinkAt = now;
 
-    // On cold start the splash navigates to '/' when its intro finishes, which
+    final target = _routeForDeepLink(uri);
+    if (target == null) {
+      debugPrint('[DeepLink] ignored $uri');
+      return;
+    }
+    _navigateToLinkTarget(target);
+  }
+
+  /// In-app route for a link, or null when it isn't one of ours.
+  String? _routeForDeepLink(Uri uri) {
+    // Kroger OAuth redirect (grocery integration). Flutter's deep linking used
+    // to be the only thing that could route this (and it dropped the host).
+    if (uri.scheme == InviteLinkParser.customScheme && uri.host == 'kroger-callback') {
+      return Uri(
+        path: '/kroger-callback',
+        queryParameters: uri.queryParameters.isEmpty ? null : uri.queryParameters,
+      ).toString();
+    }
+    return InviteLinkParser.parseUri(uri)?.route;
+  }
+
+  void _navigateToLinkTarget(String target) {
+    // On cold start the splash navigates Home when its intro finishes, which
     // would clobber a push here. While the splash owns navigation, hand it the
-    // target; once warm, navigate directly.
+    // target (it opens it on top of Home); once warm, navigate directly.
     if (splashActive) {
       pendingDeepLink = target;
     } else {
       router.push(target);
     }
-  }
-
-  /// Pull a community publication id out of an "Open in App" community link.
-  ///   recipespellbook://community?id=PUB
-  ///   recipespellbook://community/PUB
-  String? _communityIdFromUri(Uri uri) {
-    // Host counts as the first segment for custom-scheme links.
-    final segs = [uri.host, ...uri.pathSegments].where((s) => s.isNotEmpty).toList();
-    if (!segs.contains('community')) return null;
-    final q = uri.queryParameters['id'];
-    if (q != null && q.isNotEmpty) return q;
-    final i = segs.indexOf('community');
-    if (i >= 0 && i + 1 < segs.length) return segs[i + 1];
-    return null;
-  }
-
-  /// Pull a share code out of the various link shapes we accept.
-  String? _shareCodeFromUri(Uri uri) {
-    final q = uri.queryParameters['code'];
-    if (q != null && q.isNotEmpty) return q;
-    // Look for a `/s/<code>` segment (host counts as the first segment for
-    // custom-scheme links like recipespellbook://s/<code>).
-    final segs = [uri.host, ...uri.pathSegments].where((s) => s.isNotEmpty).toList();
-    final i = segs.indexOf('s');
-    if (i >= 0 && i + 1 < segs.length) return segs[i + 1];
-    return null;
   }
 
   /// Initialize subscription + notifications in background (non-blocking).
@@ -413,6 +439,15 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     // 2. Check for shared text/URL
     final content = media.content?.trim();
     if (content != null && content.isNotEmpty) {
+      // Our own share / invite links (e.g. a list invite shared to the app
+      // from a chat) open the matching screen instead of being scraped as a
+      // recipe page. Bare codes (route == null) fall through to text import.
+      final inviteRoute = InviteLinkParser.parseText(content)?.route;
+      if (inviteRoute != null) {
+        _navigateToLinkTarget(inviteRoute);
+        return;
+      }
+
       final url = _extractUrl(content);
       if (url != null) {
         _importFromSharedUrl(url);
@@ -636,6 +671,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _deepLinkSub?.cancel();
     super.dispose();
   }
 

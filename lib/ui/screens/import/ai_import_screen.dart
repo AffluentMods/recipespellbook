@@ -11,6 +11,7 @@ import '../../../providers/database_provider.dart';
 import '../../../services/ai_import_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/sheet_chrome.dart';
 
 /// Screen for importing recipes from AI-generated JSON.
 ///
@@ -106,20 +107,13 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(20)),
+                SheetPresentation.surfaceRadius(ctx),
           ),
           child: Column(
             children: [
               // Handle
               const SizedBox(height: 8),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
 
               // Header
               Padding(

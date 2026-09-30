@@ -244,6 +244,83 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cookbookAdd => 'Nieuw kookboek';
 
   @override
+  String get isbnScreenTitle => 'Add a cookbook by barcode';
+
+  @override
+  String get isbnAddFromBarcode => 'Scan a cookbook barcode';
+
+  @override
+  String get isbnAddFromBarcodeSubtitle => 'Add a printed cookbook from its ISBN';
+
+  @override
+  String get isbnCreateBlank => 'Create a new cookbook';
+
+  @override
+  String get isbnCreateBlankSubtitle => 'Start an empty collection';
+
+  @override
+  String get isbnPointCamera => 'Point your camera at the barcode on the back cover';
+
+  @override
+  String get isbnTypeLabel => 'ISBN';
+
+  @override
+  String get isbnTypeHint => '978-0-00-000000-0';
+
+  @override
+  String get isbnTypeHelp => 'Or type the ISBN printed above the barcode';
+
+  @override
+  String get isbnLookUp => 'Look up';
+
+  @override
+  String get isbnInvalid => 'That doesn\'t look like a valid ISBN. Check the 10 or 13 digits and try again.';
+
+  @override
+  String get isbnLookingUp => 'Looking up the book…';
+
+  @override
+  String get isbnNotFound => 'We couldn\'t find this book in the catalogues. Fill in the details and we\'ll add it anyway.';
+
+  @override
+  String get isbnTitleLabel => 'Title';
+
+  @override
+  String get isbnAuthorLabel => 'Author';
+
+  @override
+  String get isbnAddToLibrary => 'Add to my cookbooks';
+
+  @override
+  String get isbnScanAnother => 'Scan another book';
+
+  @override
+  String get isbnAlreadyAdded => 'This book is already in your cookbooks.';
+
+  @override
+  String get isbnOpenCookbook => 'Open cookbook';
+
+  @override
+  String get isbnAddedTitle => 'Added to your cookbooks';
+
+  @override
+  String get isbnAddedBody => 'Now add recipes from it — snap a photo of a page, or type one in.';
+
+  @override
+  String get isbnAddRecipes => 'Add recipes from this book';
+
+  @override
+  String isbnPages(int count) {
+    return '$count pages';
+  }
+
+  @override
+  String get isbnScanBookDetected => 'That\'s a book barcode — opening the cookbook scanner.';
+
+  @override
+  String get isbnCameraUnavailable => 'Camera unavailable. You can still type the ISBN below.';
+
+  @override
   String get cookbookEdit => 'Kookboek bewerken';
 
   @override
@@ -374,6 +451,9 @@ class AppLocalizationsNl extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get shoppingSharedLabel => 'Shared';
 
   @override
   String get settingsTitle => 'Instellingen';
@@ -3348,7 +3428,266 @@ class AppLocalizationsNl extends AppLocalizations {
   String get navCommunity => 'Community';
 
   @override
+  String get navMore => 'More';
+
+  @override
   String get navComingSoon => 'Binnenkort';
+
+  @override
+  String get keyCtrl => 'Ctrl';
+
+  @override
+  String get keyShift => 'Shift';
+
+  @override
+  String get keyAlt => 'Alt';
+
+  @override
+  String get keyEsc => 'Esc';
+
+  @override
+  String get keyEnter => 'Enter';
+
+  @override
+  String get keyDelete => 'Del';
+
+  @override
+  String get keySpace => 'Space';
+
+  @override
+  String get sidebarLibrary => 'Library';
+
+  @override
+  String get sidebarPlan => 'Plan';
+
+  @override
+  String get sidebarDiscover => 'Discover';
+
+  @override
+  String get sidebarAllRecipes => 'All recipes';
+
+  @override
+  String get sidebarCollapse => 'Collapse sidebar';
+
+  @override
+  String get sidebarExpand => 'Expand sidebar';
+
+  @override
+  String get sidebarSwitchCookbook => 'Switch cookbook';
+
+  @override
+  String get sidebarManageCookbooks => 'Manage cookbooks';
+
+  @override
+  String get sidebarSignInToSync => 'Sign in to sync';
+
+  @override
+  String get syncStatusJustNow => 'Synced just now';
+
+  @override
+  String syncStatusMinutes(int minutes) {
+    return 'Synced $minutes min ago';
+  }
+
+  @override
+  String syncStatusHours(int hours) {
+    return 'Synced $hours h ago';
+  }
+
+  @override
+  String get syncStatusLocal => 'Saved on this device';
+
+  @override
+  String get paletteHint => 'Search recipes and commands…';
+
+  @override
+  String get paletteSectionRecent => 'Recent';
+
+  @override
+  String get paletteSectionGoTo => 'Go to';
+
+  @override
+  String get paletteSectionActions => 'Actions';
+
+  @override
+  String get paletteSectionRecipes => 'Recipes';
+
+  @override
+  String get paletteImportSubtitle => 'From a link, photo, or file';
+
+  @override
+  String get paletteAdvancedSearch => 'Search with filters';
+
+  @override
+  String get paletteToggleTheme => 'Toggle light / dark';
+
+  @override
+  String get paletteAppearance => 'Appearance';
+
+  @override
+  String paletteSearchAll(String query) {
+    return 'Search all recipes for “$query”';
+  }
+
+  @override
+  String get paletteNoMatches => 'No matches';
+
+  @override
+  String get paletteNavigateHint => 'Navigate';
+
+  @override
+  String get paletteOpenHint => 'Open';
+
+  @override
+  String get shortcutsTitle => 'Keyboard shortcuts';
+
+  @override
+  String get shortcutsGeneral => 'General';
+
+  @override
+  String get shortcutsNavigation => 'Navigation';
+
+  @override
+  String get shortcutsRecipes => 'Recipes';
+
+  @override
+  String get shortcutsShopping => 'Shopping';
+
+  @override
+  String get shortcutsEditor => 'Editor';
+
+  @override
+  String get shortcutCommandPalette => 'Command palette';
+
+  @override
+  String get shortcutNewRecipe => 'New recipe';
+
+  @override
+  String get shortcutToggleSidebar => 'Toggle sidebar';
+
+  @override
+  String get shortcutGoBack => 'Go back';
+
+  @override
+  String get shortcutDismiss => 'Dismiss';
+
+  @override
+  String get shortcutMoveSelection => 'Move selection';
+
+  @override
+  String get shortcutOpenRecipe => 'Open recipe';
+
+  @override
+  String get shortcutAddToSelection => 'Add to selection';
+
+  @override
+  String get shortcutRangeSelect => 'Select a range';
+
+  @override
+  String get shortcutClick => 'Click';
+
+  @override
+  String get shortcutTrash => 'Move to trash';
+
+  @override
+  String get shortcutAddItem => 'Add item';
+
+  @override
+  String get shortcutToggleItem => 'Check off item';
+
+  @override
+  String get shortcutSaveRecipe => 'Save recipe';
+
+  @override
+  String get windowMinimize => 'Minimize';
+
+  @override
+  String get windowMaximize => 'Maximize';
+
+  @override
+  String get windowRestore => 'Restore';
+
+  @override
+  String get windowClose => 'Close';
+
+  @override
+  String selectionCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get selectionClear => 'Clear selection';
+
+  @override
+  String get selectAction => 'Select';
+
+  @override
+  String get homeGreetingMorning => 'Good morning';
+
+  @override
+  String get homeGreetingAfternoon => 'Good afternoon';
+
+  @override
+  String get homeGreetingEvening => 'Good evening';
+
+  @override
+  String get homeNextSevenDays => 'Next 7 days';
+
+  @override
+  String get homeOpenList => 'Open list';
+
+  @override
+  String get homeAllCaughtUp => 'All caught up';
+
+  @override
+  String homeToBuy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items to buy',
+      one: '1 item to buy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeAndMore(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get homeNothingPlanned => 'Nothing planned';
+
+  @override
+  String get homePlanAMeal => 'Plan a meal';
+
+  @override
+  String get homeJumpBackIn => 'Jump back in';
+
+  @override
+  String shoppingAddNamed(String name) {
+    return 'Add “$name”';
+  }
+
+  @override
+  String get shoppingUncheck => 'Put back on the list';
+
+  @override
+  String cookbooksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cookbooks',
+      one: '1 cookbook',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get detailChooseRecipe => 'Choose a recipe';
+
+  @override
+  String get detailChooseRecipeHint => 'Pick one from the list to read it here.';
 
   @override
   String get mealPlanButton => 'Maaltijdplan';
@@ -8743,6 +9082,18 @@ class AppLocalizationsNl extends AppLocalizations {
   String get menuDrawerSettingsSubtitle => 'Thema, taal & voorkeuren';
 
   @override
+  String get moreAddRecipes => 'Add recipes';
+
+  @override
+  String get moreSharing => 'Sharing & family';
+
+  @override
+  String get moreScanProduct => 'Scan a product barcode';
+
+  @override
+  String get moreScanProductSubtitle => 'Look up a packaged product';
+
+  @override
   String menuDrawerCouldNotOpenUrl(String url) {
     return 'Kan $url niet openen';
   }
@@ -9861,4 +10212,215 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get plannerNextDay => 'Volgende dag';
+
+  @override
+  String get joinLinkMenuLabel => 'Join with invite link';
+
+  @override
+  String get joinLinkMenuSubtitle => 'Shared list, cookbook or family';
+
+  @override
+  String get joinLinkTitle => 'Join with an invite link';
+
+  @override
+  String get joinLinkTitleList => 'Join a shared list';
+
+  @override
+  String get joinLinkTitleCookbook => 'Join a shared cookbook';
+
+  @override
+  String get joinLinkTitleFamily => 'Join a family';
+
+  @override
+  String get joinLinkListSubtitle => 'Paste an invite link someone sent you';
+
+  @override
+  String get joinLinkBody => 'Paste the invite link or code someone sent you. It works for shared shopping lists, cookbooks and family invites.';
+
+  @override
+  String get joinLinkHint => 'Paste an invite link or code';
+
+  @override
+  String get joinLinkFromClipboard => 'Filled in from your clipboard';
+
+  @override
+  String get joinLinkInvalid => 'That doesn\'t look like an invite link or code';
+
+  @override
+  String get joinLinkOffline => 'Couldn\'t check that code. Check your connection and try again.';
+
+  @override
+  String get inviteTryAnother => 'Try another link';
+
+  @override
+  String get inviteErrorNetwork => 'No connection. Check your internet and try again.';
+
+  @override
+  String get inviteErrorSessionExpired => 'Your session has expired. Sign in again to continue.';
+
+  @override
+  String get shareViewerTitleList => 'Shared shopping list';
+
+  @override
+  String get shareViewerTitleCookbook => 'Shared cookbook';
+
+  @override
+  String get shareViewerTitleLink => 'Shared link';
+
+  @override
+  String get shareViewerLoadFailed => 'Couldn\'t load this link';
+
+  @override
+  String get shareViewerExpiredHint => 'Ask the person who shared it for a new link, or paste another one.';
+
+  @override
+  String get shareViewerJoinList => 'Join this list';
+
+  @override
+  String get shareViewerAddToLists => 'Add to my lists';
+
+  @override
+  String shareViewerJoinCookbook(String name) {
+    return 'Join \"$name\"';
+  }
+
+  @override
+  String get shareViewerSignInToJoinList => 'Sign in to join this shopping list. You\'ll be added as soon as you\'re signed in.';
+
+  @override
+  String get shareViewerSignInToJoinCookbook => 'Sign in to collaborate on this cookbook. You\'ll be added as soon as you\'re signed in.';
+
+  @override
+  String get shareViewerJoinedList => 'Joined! It\'s in your Shopping tab.';
+
+  @override
+  String get shareViewerJoinedCookbook => 'Joined! It\'s in your cookbooks.';
+
+  @override
+  String get shareViewerOwnItem => 'This is yours — you already have it.';
+
+  @override
+  String get shareViewerJoinNeedsSubscription => 'Collaborating on cookbooks needs a subscription.';
+
+  @override
+  String get shareViewerOwnerLapsed => 'The owner\'s subscription is no longer active, so this cookbook can\'t be shared right now.';
+
+  @override
+  String get shareViewerNotCollab => 'This link is a one-time copy, not a live invite.';
+
+  @override
+  String get shareViewerJoinFailed => 'Couldn\'t join. Please try again.';
+
+  @override
+  String get familyJoinWithCodeOrLink => 'Join with code or link';
+
+  @override
+  String get familySignInToUse => 'Sign in to create or join a family.';
+
+  @override
+  String get familyInviteMember => 'Invite family member';
+
+  @override
+  String familyInviteSheetTitle(String familyName) {
+    return 'Invite to $familyName';
+  }
+
+  @override
+  String get familyInviteSheetBody => 'Have them scan this code with their phone camera, or send them the link. They can also paste the link or code in Family → Join with code or link.';
+
+  @override
+  String get familyInviteCode => 'Invite code';
+
+  @override
+  String get familyInviteLink => 'Invite link';
+
+  @override
+  String familySeatsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count spots left',
+      one: '1 spot left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get familyFullTitle => 'Your family is full';
+
+  @override
+  String familyFullOwnerBody(int max) {
+    return 'All $max spots are taken. Remove a member or upgrade your plan to invite someone new.';
+  }
+
+  @override
+  String familyFullMemberBody(int max) {
+    return 'All $max spots are taken. Ask the family owner to make room.';
+  }
+
+  @override
+  String get familyAloneHint => 'No one else has joined yet. Invite someone to start sharing.';
+
+  @override
+  String get familyYou => 'You';
+
+  @override
+  String get familyErrorSubscription => 'A Premium plan is required to create a family.';
+
+  @override
+  String get familyErrorFull => 'This family is full.';
+
+  @override
+  String get familyErrorAlreadyInFamily => 'You\'re already in a family. Leave it first to join another.';
+
+  @override
+  String get familyErrorInvalidCode => 'That invite code isn\'t valid. Check it or ask for a new link.';
+
+  @override
+  String get familyJoinScreenTitle => 'Family invite';
+
+  @override
+  String familyJoinPrompt(String familyName) {
+    return 'Join $familyName?';
+  }
+
+  @override
+  String familyJoinInvitedBy(String name) {
+    return '$name invited you to share cookbooks, shopping lists and meal plans.';
+  }
+
+  @override
+  String familyJoinGenericPrompt(String code) {
+    return 'Join the family with invite code $code?';
+  }
+
+  @override
+  String get familyJoinSignIn => 'Sign in to join this family. You\'ll join as soon as you\'re signed in.';
+
+  @override
+  String get familyJoinConfirm => 'Join family';
+
+  @override
+  String familyJoinAlreadyMember(String familyName) {
+    return 'You\'re already in $familyName.';
+  }
+
+  @override
+  String familyJoinInOtherFamily(String familyName) {
+    return 'You\'re already in $familyName. Leave that family first to join this one.';
+  }
+
+  @override
+  String familyJoinFullBody(String familyName, int max) {
+    return '$familyName is full ($max of $max members). Ask the owner to remove someone or upgrade their plan.';
+  }
+
+  @override
+  String get familyJoinOpenFamily => 'Open family';
+
+  @override
+  String get familyJoinInvalid => 'This family invite isn\'t valid anymore';
+
+  @override
+  String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
 }

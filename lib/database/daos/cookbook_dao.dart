@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
+import '../sync_journal.dart';
 import '../tables/cookbooks.dart';
 import '../tables/recipes.dart';
 
@@ -35,7 +36,12 @@ class CookbookDao extends DatabaseAccessor<AppDatabase> with _$CookbookDaoMixin 
 
   /// Insert a cookbook
   Future<int> insertCookbook(CookbooksCompanion cookbook) {
-    return into(cookbooks).insert(cookbook);
+    // updatedAt drives the sync push; a null one meant new cookbooks never
+    // reached the server while their recipes did.
+    final stamped = cookbook.updatedAt.present && cookbook.updatedAt.value != null
+        ? cookbook
+        : cookbook.copyWith(updatedAt: Value(DateTime.now()));
+    return into(cookbooks).insert(stamped);
   }
 
   /// Update cookbook name only
@@ -68,6 +74,7 @@ class CookbookDao extends DatabaseAccessor<AppDatabase> with _$CookbookDaoMixin 
         updatedAt: Value(DateTime.now()),
       ));
       await (delete(cookbooks)..where((c) => c.id.equals(id))).go();
+      await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.cookbooks, id);
     });
   }
 

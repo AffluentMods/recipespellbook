@@ -553,6 +553,156 @@ abstract class AppLocalizations {
   /// **'New Cookbook'**
   String get cookbookAdd;
 
+  /// No description provided for @isbnScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a cookbook by barcode'**
+  String get isbnScreenTitle;
+
+  /// No description provided for @isbnAddFromBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a cookbook barcode'**
+  String get isbnAddFromBarcode;
+
+  /// No description provided for @isbnAddFromBarcodeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a printed cookbook from its ISBN'**
+  String get isbnAddFromBarcodeSubtitle;
+
+  /// No description provided for @isbnCreateBlank.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new cookbook'**
+  String get isbnCreateBlank;
+
+  /// No description provided for @isbnCreateBlankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start an empty collection'**
+  String get isbnCreateBlankSubtitle;
+
+  /// No description provided for @isbnPointCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Point your camera at the barcode on the back cover'**
+  String get isbnPointCamera;
+
+  /// No description provided for @isbnTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ISBN'**
+  String get isbnTypeLabel;
+
+  /// No description provided for @isbnTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'978-0-00-000000-0'**
+  String get isbnTypeHint;
+
+  /// No description provided for @isbnTypeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Or type the ISBN printed above the barcode'**
+  String get isbnTypeHelp;
+
+  /// No description provided for @isbnLookUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up'**
+  String get isbnLookUp;
+
+  /// No description provided for @isbnInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like a valid ISBN. Check the 10 or 13 digits and try again.'**
+  String get isbnInvalid;
+
+  /// No description provided for @isbnLookingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking up the book…'**
+  String get isbnLookingUp;
+
+  /// No description provided for @isbnNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find this book in the catalogues. Fill in the details and we\'ll add it anyway.'**
+  String get isbnNotFound;
+
+  /// No description provided for @isbnTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get isbnTitleLabel;
+
+  /// No description provided for @isbnAuthorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get isbnAuthorLabel;
+
+  /// No description provided for @isbnAddToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my cookbooks'**
+  String get isbnAddToLibrary;
+
+  /// No description provided for @isbnScanAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan another book'**
+  String get isbnScanAnother;
+
+  /// No description provided for @isbnAlreadyAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'This book is already in your cookbooks.'**
+  String get isbnAlreadyAdded;
+
+  /// No description provided for @isbnOpenCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Open cookbook'**
+  String get isbnOpenCookbook;
+
+  /// No description provided for @isbnAddedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your cookbooks'**
+  String get isbnAddedTitle;
+
+  /// No description provided for @isbnAddedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Now add recipes from it — snap a photo of a page, or type one in.'**
+  String get isbnAddedBody;
+
+  /// No description provided for @isbnAddRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recipes from this book'**
+  String get isbnAddRecipes;
+
+  /// No description provided for @isbnPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pages'**
+  String isbnPages(int count);
+
+  /// No description provided for @isbnScanBookDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s a book barcode — opening the cookbook scanner.'**
+  String get isbnScanBookDetected;
+
+  /// No description provided for @isbnCameraUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera unavailable. You can still type the ISBN below.'**
+  String get isbnCameraUnavailable;
+
   /// No description provided for @cookbookEdit.
   ///
   /// In en, this message translates to:
@@ -780,6 +930,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{No items} =1{1 item} other{{count} items}}'**
   String shoppingItemCount(int count);
+
+  /// No description provided for @shoppingSharedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get shoppingSharedLabel;
 
   /// No description provided for @settingsTitle.
   ///
@@ -6220,7 +6376,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpSyncingDesc.
   ///
   /// In en, this message translates to:
-  /// **'Cloud sync is coming soon! Your recipes will sync across all your devices.'**
+  /// **'With Premium, your recipes, cookbooks and photos sync automatically across all your devices.'**
   String get helpSyncingDesc;
 
   /// No description provided for @helpContactUs.
@@ -6241,11 +6397,473 @@ abstract class AppLocalizations {
   /// **'Community'**
   String get navCommunity;
 
+  /// No description provided for @navMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get navMore;
+
   /// No description provided for @navComingSoon.
   ///
   /// In en, this message translates to:
   /// **'Coming soon'**
   String get navComingSoon;
+
+  /// No description provided for @keyCtrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl'**
+  String get keyCtrl;
+
+  /// No description provided for @keyShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get keyShift;
+
+  /// No description provided for @keyAlt.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt'**
+  String get keyAlt;
+
+  /// No description provided for @keyEsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Esc'**
+  String get keyEsc;
+
+  /// No description provided for @keyEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get keyEnter;
+
+  /// No description provided for @keyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Del'**
+  String get keyDelete;
+
+  /// No description provided for @keySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Space'**
+  String get keySpace;
+
+  /// No description provided for @sidebarLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get sidebarLibrary;
+
+  /// No description provided for @sidebarPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get sidebarPlan;
+
+  /// No description provided for @sidebarDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get sidebarDiscover;
+
+  /// No description provided for @sidebarAllRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes'**
+  String get sidebarAllRecipes;
+
+  /// No description provided for @sidebarCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse sidebar'**
+  String get sidebarCollapse;
+
+  /// No description provided for @sidebarExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand sidebar'**
+  String get sidebarExpand;
+
+  /// No description provided for @sidebarSwitchCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch cookbook'**
+  String get sidebarSwitchCookbook;
+
+  /// No description provided for @sidebarManageCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage cookbooks'**
+  String get sidebarManageCookbooks;
+
+  /// No description provided for @sidebarSignInToSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to sync'**
+  String get sidebarSignInToSync;
+
+  /// No description provided for @syncStatusJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced just now'**
+  String get syncStatusJustNow;
+
+  /// No description provided for @syncStatusMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {minutes} min ago'**
+  String syncStatusMinutes(int minutes);
+
+  /// No description provided for @syncStatusHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {hours} h ago'**
+  String syncStatusHours(int hours);
+
+  /// No description provided for @syncStatusLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device'**
+  String get syncStatusLocal;
+
+  /// No description provided for @paletteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes and commands…'**
+  String get paletteHint;
+
+  /// No description provided for @paletteSectionRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get paletteSectionRecent;
+
+  /// No description provided for @paletteSectionGoTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to'**
+  String get paletteSectionGoTo;
+
+  /// No description provided for @paletteSectionActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get paletteSectionActions;
+
+  /// No description provided for @paletteSectionRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get paletteSectionRecipes;
+
+  /// No description provided for @paletteImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From a link, photo, or file'**
+  String get paletteImportSubtitle;
+
+  /// No description provided for @paletteAdvancedSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search with filters'**
+  String get paletteAdvancedSearch;
+
+  /// No description provided for @paletteToggleTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle light / dark'**
+  String get paletteToggleTheme;
+
+  /// No description provided for @paletteAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get paletteAppearance;
+
+  /// No description provided for @paletteSearchAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Search all recipes for “{query}”'**
+  String paletteSearchAll(String query);
+
+  /// No description provided for @paletteNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get paletteNoMatches;
+
+  /// No description provided for @paletteNavigateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate'**
+  String get paletteNavigateHint;
+
+  /// No description provided for @paletteOpenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get paletteOpenHint;
+
+  /// No description provided for @shortcutsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard shortcuts'**
+  String get shortcutsTitle;
+
+  /// No description provided for @shortcutsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get shortcutsGeneral;
+
+  /// No description provided for @shortcutsNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get shortcutsNavigation;
+
+  /// No description provided for @shortcutsRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get shortcutsRecipes;
+
+  /// No description provided for @shortcutsShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get shortcutsShopping;
+
+  /// No description provided for @shortcutsEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Editor'**
+  String get shortcutsEditor;
+
+  /// No description provided for @shortcutCommandPalette.
+  ///
+  /// In en, this message translates to:
+  /// **'Command palette'**
+  String get shortcutCommandPalette;
+
+  /// No description provided for @shortcutNewRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'New recipe'**
+  String get shortcutNewRecipe;
+
+  /// No description provided for @shortcutToggleSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle sidebar'**
+  String get shortcutToggleSidebar;
+
+  /// No description provided for @shortcutGoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get shortcutGoBack;
+
+  /// No description provided for @shortcutDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get shortcutDismiss;
+
+  /// No description provided for @shortcutMoveSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Move selection'**
+  String get shortcutMoveSelection;
+
+  /// No description provided for @shortcutOpenRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Open recipe'**
+  String get shortcutOpenRecipe;
+
+  /// No description provided for @shortcutAddToSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to selection'**
+  String get shortcutAddToSelection;
+
+  /// No description provided for @shortcutRangeSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a range'**
+  String get shortcutRangeSelect;
+
+  /// No description provided for @shortcutClick.
+  ///
+  /// In en, this message translates to:
+  /// **'Click'**
+  String get shortcutClick;
+
+  /// No description provided for @shortcutTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to trash'**
+  String get shortcutTrash;
+
+  /// No description provided for @shortcutAddItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get shortcutAddItem;
+
+  /// No description provided for @shortcutToggleItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Check off item'**
+  String get shortcutToggleItem;
+
+  /// No description provided for @shortcutSaveRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save recipe'**
+  String get shortcutSaveRecipe;
+
+  /// No description provided for @windowMinimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get windowMinimize;
+
+  /// No description provided for @windowMaximize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize'**
+  String get windowMaximize;
+
+  /// No description provided for @windowRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get windowRestore;
+
+  /// No description provided for @windowClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get windowClose;
+
+  /// No description provided for @selectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectionCount(int count);
+
+  /// No description provided for @selectionClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get selectionClear;
+
+  /// No description provided for @selectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectAction;
+
+  /// No description provided for @homeGreetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get homeGreetingMorning;
+
+  /// No description provided for @homeGreetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get homeGreetingAfternoon;
+
+  /// No description provided for @homeGreetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get homeGreetingEvening;
+
+  /// No description provided for @homeNextSevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 7 days'**
+  String get homeNextSevenDays;
+
+  /// No description provided for @homeOpenList.
+  ///
+  /// In en, this message translates to:
+  /// **'Open list'**
+  String get homeOpenList;
+
+  /// No description provided for @homeAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up'**
+  String get homeAllCaughtUp;
+
+  /// No description provided for @homeToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item to buy} other{{count} items to buy}}'**
+  String homeToBuy(int count);
+
+  /// No description provided for @homeAndMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String homeAndMore(int count);
+
+  /// No description provided for @homeNothingPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned'**
+  String get homeNothingPlanned;
+
+  /// No description provided for @homePlanAMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a meal'**
+  String get homePlanAMeal;
+
+  /// No description provided for @homeJumpBackIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump back in'**
+  String get homeJumpBackIn;
+
+  /// No description provided for @shoppingAddNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Add “{name}”'**
+  String shoppingAddNamed(String name);
+
+  /// No description provided for @shoppingUncheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Put back on the list'**
+  String get shoppingUncheck;
+
+  /// No description provided for @cookbooksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cookbook} other{{count} cookbooks}}'**
+  String cookbooksCount(int count);
+
+  /// No description provided for @detailChooseRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a recipe'**
+  String get detailChooseRecipe;
+
+  /// No description provided for @detailChooseRecipeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one from the list to read it here.'**
+  String get detailChooseRecipeHint;
 
   /// No description provided for @mealPlanButton.
   ///
@@ -16027,6 +16645,30 @@ abstract class AppLocalizations {
   /// **'Theme, language & preferences'**
   String get menuDrawerSettingsSubtitle;
 
+  /// No description provided for @moreAddRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recipes'**
+  String get moreAddRecipes;
+
+  /// No description provided for @moreSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing & family'**
+  String get moreSharing;
+
+  /// No description provided for @moreScanProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a product barcode'**
+  String get moreScanProduct;
+
+  /// No description provided for @moreScanProductSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up a packaged product'**
+  String get moreScanProductSubtitle;
+
   /// No description provided for @menuDrawerCouldNotOpenUrl.
   ///
   /// In en, this message translates to:
@@ -17946,6 +18588,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next day'**
   String get plannerNextDay;
+
+  /// No description provided for @joinLinkMenuLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with invite link'**
+  String get joinLinkMenuLabel;
+
+  /// No description provided for @joinLinkMenuSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared list, cookbook or family'**
+  String get joinLinkMenuSubtitle;
+
+  /// No description provided for @joinLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with an invite link'**
+  String get joinLinkTitle;
+
+  /// No description provided for @joinLinkTitleList.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a shared list'**
+  String get joinLinkTitleList;
+
+  /// No description provided for @joinLinkTitleCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a shared cookbook'**
+  String get joinLinkTitleCookbook;
+
+  /// No description provided for @joinLinkTitleFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a family'**
+  String get joinLinkTitleFamily;
+
+  /// No description provided for @joinLinkListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an invite link someone sent you'**
+  String get joinLinkListSubtitle;
+
+  /// No description provided for @joinLinkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the invite link or code someone sent you. It works for shared shopping lists, cookbooks and family invites.'**
+  String get joinLinkBody;
+
+  /// No description provided for @joinLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an invite link or code'**
+  String get joinLinkHint;
+
+  /// No description provided for @joinLinkFromClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled in from your clipboard'**
+  String get joinLinkFromClipboard;
+
+  /// No description provided for @joinLinkInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like an invite link or code'**
+  String get joinLinkInvalid;
+
+  /// No description provided for @joinLinkOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check that code. Check your connection and try again.'**
+  String get joinLinkOffline;
+
+  /// No description provided for @inviteTryAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another link'**
+  String get inviteTryAnother;
+
+  /// No description provided for @inviteErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Check your internet and try again.'**
+  String get inviteErrorNetwork;
+
+  /// No description provided for @inviteErrorSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to continue.'**
+  String get inviteErrorSessionExpired;
+
+  /// No description provided for @shareViewerTitleList.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared shopping list'**
+  String get shareViewerTitleList;
+
+  /// No description provided for @shareViewerTitleCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared cookbook'**
+  String get shareViewerTitleCookbook;
+
+  /// No description provided for @shareViewerTitleLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared link'**
+  String get shareViewerTitleLink;
+
+  /// No description provided for @shareViewerLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this link'**
+  String get shareViewerLoadFailed;
+
+  /// No description provided for @shareViewerExpiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the person who shared it for a new link, or paste another one.'**
+  String get shareViewerExpiredHint;
+
+  /// No description provided for @shareViewerJoinList.
+  ///
+  /// In en, this message translates to:
+  /// **'Join this list'**
+  String get shareViewerJoinList;
+
+  /// No description provided for @shareViewerAddToLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my lists'**
+  String get shareViewerAddToLists;
+
+  /// No description provided for @shareViewerJoinCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Join \"{name}\"'**
+  String shareViewerJoinCookbook(String name);
+
+  /// No description provided for @shareViewerSignInToJoinList.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to join this shopping list. You\'ll be added as soon as you\'re signed in.'**
+  String get shareViewerSignInToJoinList;
+
+  /// No description provided for @shareViewerSignInToJoinCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to collaborate on this cookbook. You\'ll be added as soon as you\'re signed in.'**
+  String get shareViewerSignInToJoinCookbook;
+
+  /// No description provided for @shareViewerJoinedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined! It\'s in your Shopping tab.'**
+  String get shareViewerJoinedList;
+
+  /// No description provided for @shareViewerJoinedCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined! It\'s in your cookbooks.'**
+  String get shareViewerJoinedCookbook;
+
+  /// No description provided for @shareViewerOwnItem.
+  ///
+  /// In en, this message translates to:
+  /// **'This is yours — you already have it.'**
+  String get shareViewerOwnItem;
+
+  /// No description provided for @shareViewerJoinNeedsSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborating on cookbooks needs a subscription.'**
+  String get shareViewerJoinNeedsSubscription;
+
+  /// No description provided for @shareViewerOwnerLapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner\'s subscription is no longer active, so this cookbook can\'t be shared right now.'**
+  String get shareViewerOwnerLapsed;
+
+  /// No description provided for @shareViewerNotCollab.
+  ///
+  /// In en, this message translates to:
+  /// **'This link is a one-time copy, not a live invite.'**
+  String get shareViewerNotCollab;
+
+  /// No description provided for @shareViewerJoinFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t join. Please try again.'**
+  String get shareViewerJoinFailed;
+
+  /// No description provided for @familyJoinWithCodeOrLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with code or link'**
+  String get familyJoinWithCodeOrLink;
+
+  /// No description provided for @familySignInToUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to create or join a family.'**
+  String get familySignInToUse;
+
+  /// No description provided for @familyInviteMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite family member'**
+  String get familyInviteMember;
+
+  /// No description provided for @familyInviteSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to {familyName}'**
+  String familyInviteSheetTitle(String familyName);
+
+  /// No description provided for @familyInviteSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Have them scan this code with their phone camera, or send them the link. They can also paste the link or code in Family → Join with code or link.'**
+  String get familyInviteSheetBody;
+
+  /// No description provided for @familyInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get familyInviteCode;
+
+  /// No description provided for @familyInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link'**
+  String get familyInviteLink;
+
+  /// No description provided for @familySeatsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 spot left} other{{count} spots left}}'**
+  String familySeatsLeft(int count);
+
+  /// No description provided for @familyFullTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family is full'**
+  String get familyFullTitle;
+
+  /// No description provided for @familyFullOwnerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All {max} spots are taken. Remove a member or upgrade your plan to invite someone new.'**
+  String familyFullOwnerBody(int max);
+
+  /// No description provided for @familyFullMemberBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All {max} spots are taken. Ask the family owner to make room.'**
+  String familyFullMemberBody(int max);
+
+  /// No description provided for @familyAloneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No one else has joined yet. Invite someone to start sharing.'**
+  String get familyAloneHint;
+
+  /// No description provided for @familyYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get familyYou;
+
+  /// No description provided for @familyErrorSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'A Premium plan is required to create a family.'**
+  String get familyErrorSubscription;
+
+  /// No description provided for @familyErrorFull.
+  ///
+  /// In en, this message translates to:
+  /// **'This family is full.'**
+  String get familyErrorFull;
+
+  /// No description provided for @familyErrorAlreadyInFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in a family. Leave it first to join another.'**
+  String get familyErrorAlreadyInFamily;
+
+  /// No description provided for @familyErrorInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That invite code isn\'t valid. Check it or ask for a new link.'**
+  String get familyErrorInvalidCode;
+
+  /// No description provided for @familyJoinScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family invite'**
+  String get familyJoinScreenTitle;
+
+  /// No description provided for @familyJoinPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Join {familyName}?'**
+  String familyJoinPrompt(String familyName);
+
+  /// No description provided for @familyJoinInvitedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} invited you to share cookbooks, shopping lists and meal plans.'**
+  String familyJoinInvitedBy(String name);
+
+  /// No description provided for @familyJoinGenericPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the family with invite code {code}?'**
+  String familyJoinGenericPrompt(String code);
+
+  /// No description provided for @familyJoinSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to join this family. You\'ll join as soon as you\'re signed in.'**
+  String get familyJoinSignIn;
+
+  /// No description provided for @familyJoinConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Join family'**
+  String get familyJoinConfirm;
+
+  /// No description provided for @familyJoinAlreadyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in {familyName}.'**
+  String familyJoinAlreadyMember(String familyName);
+
+  /// No description provided for @familyJoinInOtherFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in {familyName}. Leave that family first to join this one.'**
+  String familyJoinInOtherFamily(String familyName);
+
+  /// No description provided for @familyJoinFullBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{familyName} is full ({max} of {max} members). Ask the owner to remove someone or upgrade their plan.'**
+  String familyJoinFullBody(String familyName, int max);
+
+  /// No description provided for @familyJoinOpenFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Open family'**
+  String get familyJoinOpenFamily;
+
+  /// No description provided for @familyJoinInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This family invite isn\'t valid anymore'**
+  String get familyJoinInvalid;
+
+  /// No description provided for @familyJoinInvalidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The invite code may have been changed. Ask for a new link, or paste another one.'**
+  String get familyJoinInvalidHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

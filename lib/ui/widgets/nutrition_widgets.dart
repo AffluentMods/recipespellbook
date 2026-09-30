@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../data/nutrition_data.dart';
 import '../../utils/responsive_utils.dart';
+import 'sheet_chrome.dart';
 
 /// Displays nutrition information in a compact card format
 class NutritionCard extends StatelessWidget {
@@ -374,7 +375,7 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: 0.85,
       minChildSize: 0.5,
       maxChildSize: 0.95,
@@ -383,20 +384,12 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
         return Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: SheetPresentation.surfaceRadius(context),
           ),
           child: Column(
             children: [
               // Handle
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 12),
 
               // Header
               Padding(

@@ -259,9 +259,24 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
 
     final isUploading = progress != null && progress.status != 'done' && progress.status != 'error';
 
+    // Desktop: "Publish" is a header action, not a floating button.
+    final desktop = Responsive.isDesktopLayout(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.communityMyPublications)),
-      floatingActionButton: _fabVisible
+      appBar: AppBar(
+        title: Text(l10n.communityMyPublications),
+        actions: [
+          if (desktop)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: FilledButton.icon(
+                onPressed: isUploading ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
+                icon: Icon(isUploading ? Icons.hourglass_top : Icons.publish, size: 18),
+                label: Text(isUploading ? l10n.communityUploading : l10n.communityPublish),
+              ),
+            ),
+        ],
+      ),
+      floatingActionButton: _fabVisible && !desktop
           ? FloatingActionButton.extended(
               onPressed: isUploading ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
               icon: Icon(isUploading ? Icons.hourglass_top : Icons.publish),

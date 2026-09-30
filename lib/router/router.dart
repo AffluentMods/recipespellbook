@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../l10n/app_localizations.dart';
 import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
+import '../ui/screens/cookbooks/cookbook_isbn_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
+import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
+import '../ui/screens/more/more_screen.dart';
 import '../ui/screens/planner/planner_screen.dart';
+import '../ui/screens/premium/family_join_screen.dart';
 import '../ui/screens/premium/family_screen.dart';
 import '../ui/screens/premium/paywall_screen.dart';
 import '../ui/screens/recipe/categories_browse_screen.dart';
@@ -50,6 +54,7 @@ import '../ui/screens/shopping/shopping_screen.dart';
 import '../ui/screens/share/share_viewer_screen.dart';
 import '../ui/screens/splash/splash_screen.dart';
 import '../ui/shell/app_shell.dart';
+import '../ui/widgets/app_menu_drawer.dart' show HelpSupportScreen;
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -73,6 +78,14 @@ final router = GoRouter(
         final code = state.pathParameters['code']!;
         return ShareViewerScreen(code: code);
       },
+    ),
+
+    // Family invite (https://recipespellbook.app/family/join/<code>, or a code
+    // pasted into "Join with code or link"). Confirms, then joins.
+    GoRoute(
+      path: '/family/join/:code',
+      name: 'family-join',
+      builder: (context, state) => FamilyJoinScreen(code: state.pathParameters['code']!),
     ),
 
     // NOTE: recipe edit + new recipe live INSIDE the shell route (below) so the
@@ -175,6 +188,15 @@ final router = GoRouter(
             child: PlannerScreen(),
           ),
         ),
+        // Phone / tablet "More" tab (account, library, import, sharing,
+        // settings, help). Desktop reaches these from the sidebar.
+        GoRoute(
+          path: '/more',
+          name: 'more',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: MoreScreen(),
+          ),
+        ),
 
         // ── Recipe browse screens (sidebar visible) ──
         GoRoute(
@@ -183,10 +205,14 @@ final router = GoRouter(
           builder: (context, state) {
             final courseId = state.uri.queryParameters['course'];
             final categoryId = state.uri.queryParameters['category'];
-            final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
+            // No ?cookbook= → '' → RecipeListScreen follows the selected cookbook.
+            final cookbookId = state.uri.queryParameters['cookbook'] ?? '';
             final l10n = AppLocalizations.of(context)!;
             return RecipeListScreen(
-              title: l10n.recipesTitle,
+              title: state.uri.queryParameters['title'] ??
+                  (courseId == null && categoryId == null
+                      ? l10n.sidebarAllRecipes
+                      : l10n.recipesTitle),
               cookbookId: cookbookId,
               courseId: courseId,
               categoryId: categoryId,
@@ -265,7 +291,21 @@ final router = GoRouter(
         GoRoute(
           path: '/search',
           name: 'search',
-          builder: (context, state) => const SearchScreen(),
+          builder: (context, state) => SearchScreen(
+            initialQuery: state.uri.queryParameters['q'],
+          ),
+        ),
+
+        // ── Help & import guides (in-shell so the desktop sidebar stays) ──
+        GoRoute(
+          path: '/help',
+          name: 'help',
+          builder: (context, state) => const HelpSupportScreen(),
+        ),
+        GoRoute(
+          path: '/import-guides',
+          name: 'import-guides',
+          builder: (context, state) => const ImportGuidesScreen(),
         ),
 
         // ── Substitutions (sidebar visible) ──
@@ -274,6 +314,15 @@ final router = GoRouter(
           name: 'substitutions',
           builder: (context, state) => IngredientSubstitutionsScreen(
             initialSearch: state.uri.queryParameters['q'],
+          ),
+        ),
+
+        // ── Add a printed cookbook by ISBN barcode (sidebar visible) ──
+        GoRoute(
+          path: '/cookbooks/add-book',
+          name: 'cookbook-add-book',
+          builder: (context, state) => CookbookIsbnScreen(
+            initialIsbn: state.uri.queryParameters['isbn'],
           ),
         ),
 

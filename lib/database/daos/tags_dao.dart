@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
+import '../sync_journal.dart';
 import '../tables/recipe_tags.dart';
 
 part 'tags_dao.g.dart';
@@ -31,14 +32,17 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
   }
 
   /// Update a tag
-  Future<bool> updateTag(Tag tag) {
-    return update(tags).replace(tag);
+  Future<bool> updateTag(Tag tag) async {
+    final ok = await update(tags).replace(tag);
+    await SyncJournal.touch(attachedDatabase, SyncJournal.tags, tag.id);
+    return ok;
   }
 
   /// Delete a tag and its recipe associations
   Future<void> deleteTag(String tagId) async {
     await (delete(recipeTags)..where((rt) => rt.tagId.equals(tagId))).go();
     await (delete(tags)..where((t) => t.id.equals(tagId))).go();
+    await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.tags, tagId);
   }
 
   // ============ RECIPE-TAG ASSOCIATIONS ============
@@ -68,13 +72,20 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
       RecipeTagsCompanion.insert(recipeId: recipeId, tagId: tagId),
       mode: InsertMode.insertOrIgnore,
     );
+    await _touchRecipe(recipeId);
   }
+
+  /// Tags travel with their recipe in sync, so the recipe must look changed.
+  Future<void> _touchRecipe(String recipeId) =>
+      (attachedDatabase.update(attachedDatabase.recipes)..where((r) => r.id.equals(recipeId)))
+          .write(RecipesCompanion(updatedAt: Value(DateTime.now())));
 
   /// Remove a tag from a recipe
   Future<void> removeTagFromRecipe(String recipeId, String tagId) async {
     await (delete(recipeTags)
       ..where((rt) => rt.recipeId.equals(recipeId) & rt.tagId.equals(tagId)))
         .go();
+    await _touchRecipe(recipeId);
   }
 
   /// Set all tags for a recipe (replaces existing)
@@ -88,6 +99,7 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
         RecipeTagsCompanion.insert(recipeId: recipeId, tagId: tagId),
       );
     }
+    await _touchRecipe(recipeId);
   }
 
   /// Get recipe count for a tag

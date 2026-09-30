@@ -8,6 +8,7 @@ import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../theme/app_colors.dart';
 import 'app_snackbar.dart';
+import 'sheet_chrome.dart';
 
 /// Modern sheet for selecting which ingredients to add to shopping list
 /// Features:
@@ -213,7 +214,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -221,14 +222,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
           // Handle bar
           Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            child: const SheetHandle(top: 0),
           ),
 
           // Header

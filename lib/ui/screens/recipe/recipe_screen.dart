@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart' as drift;
 import '../../../utils/native_file_image.dart';
 import 'package:flutter/material.dart' hide Step;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -25,10 +26,12 @@ import '../../../services/collab_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../providers/collab_provider.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/tokens.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../utils/recipe_title.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
+import '../../widgets/app_controls.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/placeholder_image.dart';
@@ -42,6 +45,7 @@ import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsP
 import '../settings/nutrition_settings_screen.dart';
 import '../community/community_publish_screen.dart';
 import 'recipe_enhance_screen.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
@@ -366,7 +370,19 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       );
     }
 
+    // Phone / tablet: cooking and servings stay within thumb reach.
+    final touchBar = !Responsive.isDesktopLayout(context) && !widget.isDetailPane;
+
     return Scaffold(
+      bottomNavigationBar: touchBar
+          ? _CookBar(
+              servings: _recipe!.servings,
+              scale: _scaleFactor,
+              onScaleChanged: (s) => setState(() => _scaleFactor = s),
+              onOpenScaleSheet: _openScaleSheet,
+              onCook: () => launchCookingMode(context, widget.recipeId, scaleFactor: _scaleFactor),
+            )
+          : null,
       // Decide by the ACTUAL width this screen is given, not the whole window:
       // RecipeScreen also renders inside the master-detail right pane (much
       // narrower than the window), so gating on window width would cram two
@@ -374,7 +390,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       // columns only once there's genuinely room (>=1000). Below that (phone,
       // tablet, narrow detail pane) the tabs are used, unchanged.
       body: LayoutBuilder(
-        builder: (context, constraints) => constraints.maxWidth >= 1000
+        builder: (context, constraints) => constraints.maxWidth >=
+                (Responsive.isDesktopLayout(context) ? 640 : 1000)
             ? _buildTwoColumnLayout(theme, l10n)
             : _buildTabbedLayout(theme, l10n),
       ),
@@ -384,6 +401,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   /// Title + rating + tags + description + meta + actions + allergy — shared by
   /// the tabbed (mobile/medium) header and the expanded two-column header.
   Widget _recipeInfoBlock(ThemeData theme, AppLocalizations l10n) {
+    final desktop = Responsive.isDesktopLayout(context);
+    final c = context.appColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -395,10 +414,18 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 message: _recipe!.title,
                 child: Text(
                   normalizeTitle(_recipe!.title).title,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 3,
+                  style: desktop
+                      ? theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        )
+                      : theme.textTheme.headlineSmall?.copyWith(
+                          fontSize: 28,
+                          height: 1.15,
+                          letterSpacing: -0.4,
+                          fontWeight: FontWeight.w600,
+                          color: c.textPrimary,
+                        ),
+                  maxLines: desktop ? 3 : 4,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -420,12 +447,23 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
         RecipeTagsDisplay(recipeId: widget.recipeId),
         if (_recipe!.description != null && _recipe!.description!.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          Text(
+            _recipe!.description!,
+            style: desktop
+                ? theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)
+                : theme.textTheme.bodyLarge?.copyWith(fontSize: 15.5, height: 1.5, color: c.textSecondary),
+          ),
         ],
         const SizedBox(height: 16),
         if (_hasMetaInfo(_recipe!)) ...[
-          _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor, onOpenScaleSheet: _openScaleSheet),
-          const SizedBox(height: 16),
+          _RecipeMetaInfoCard(
+            recipe: _recipe!,
+            scaleFactor: _scaleFactor,
+            onOpenScaleSheet: _openScaleSheet,
+            compact: desktop,
+            touch: !desktop,
+          ),
+          const SizedBox(height: 12),
         ],
         _RecipeActionBar(
           currentScale: _scaleFactor,
@@ -435,6 +473,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onConversionChanged: (mode) => setState(() => _unitConversion = mode),
           onAddToMealPlan: _showAddToMealPlanSheet,
           onAddToShopping: _showAddToShoppingSheet,
+          compact: desktop,
+          touch: !desktop,
         ),
         const SizedBox(height: 16),
         _ImprovedAllergyWarning(
@@ -502,7 +542,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 38,
+                    flex: 40,
                     child: _IngredientsTab(
                       ingredients: _sortedIngredients,
                       recipeId: widget.recipeId,
@@ -517,7 +557,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   ),
                   const SizedBox(width: 24),
                   Expanded(
-                    flex: 62,
+                    flex: 60,
                     child: _InstructionsTab(
                       steps: _steps,
                       recipeId: widget.recipeId,
@@ -538,6 +578,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   }
 
   Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n) {
+    final desktop = Responsive.isDesktopLayout(context);
+    final c = context.appColors;
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         _RecipeAppBar(
@@ -568,15 +610,30 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             delegate: _SliverTabBarDelegate(
               TabBar(
                 controller: _tabController,
-                indicator: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(9),
-                ),
+                indicator: desktop
+                    ? BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(9),
+                      )
+                    : BoxDecoration(
+                        // A paper thumb on a quiet track; lifted a tone in dark
+                        // mode so it still reads as the raised segment.
+                        color: theme.brightness == Brightness.dark ? c.surfaceHigh : c.surface,
+                        borderRadius: BorderRadius.circular(9),
+                        border: Border.all(color: c.hairline),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.shadow.withValues(alpha: 0.08),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorPadding: const EdgeInsets.all(4),
                 dividerColor: Colors.transparent,
-                labelColor: theme.colorScheme.onPrimary,
-                unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                labelColor: desktop ? theme.colorScheme.onPrimary : c.textPrimary,
+                unselectedLabelColor: desktop ? theme.colorScheme.onSurfaceVariant : c.textSecondary,
                 labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                 unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 splashBorderRadius: BorderRadius.circular(9),
@@ -585,8 +642,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   Tab(text: l10n.instructionsTitle),
                 ],
               ),
-              theme.colorScheme.surface,
-              theme.colorScheme.surfaceContainerHighest,
+              desktop ? theme.colorScheme.surface : c.surface,
+              desktop ? theme.colorScheme.surfaceContainerHighest : c.textPrimary.withValues(alpha: 0.055),
             ),
           ),
         ),
@@ -644,6 +701,13 @@ class _RecipeActionBar extends StatelessWidget {
   final VoidCallback onAddToMealPlan;
   final VoidCallback onAddToShopping;
 
+  /// Pointer layout: a row of compact tonal buttons instead of big tiles.
+  final bool compact;
+
+  /// Phone / tablet: the same outlined buttons, sized for touch and sharing
+  /// the row equally.
+  final bool touch;
+
   const _RecipeActionBar({
     required this.currentScale,
     required this.servings,
@@ -652,11 +716,91 @@ class _RecipeActionBar extends StatelessWidget {
     required this.onConversionChanged,
     required this.onAddToMealPlan,
     required this.onAddToShopping,
+    this.compact = false,
+    this.touch = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (touch) {
+      final c = context.appColors;
+      final converting = unitConversion != _UnitConversion.none;
+      Widget button(IconData icon, String label, VoidCallback onTap, {bool active = false}) => Expanded(
+            child: OutlinedButton(
+              onPressed: onTap,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: active ? c.accent : c.textPrimary,
+                backgroundColor: active ? c.selectedFill : Colors.transparent,
+                side: BorderSide(color: active ? c.accent.withValues(alpha: 0.5) : c.textPrimary.withValues(alpha: 0.14)),
+                minimumSize: const Size(0, 46),
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                shape: const RoundedRectangleBorder(borderRadius: Radii.lgAll),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 18, color: c.accent),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+      return Row(
+        children: [
+          button(Icons.calendar_month_outlined, l10n.mealPlanButton, onAddToMealPlan),
+          const SizedBox(width: Space.sm),
+          button(Icons.add_shopping_cart_rounded, l10n.groceriesButton, onAddToShopping),
+          const SizedBox(width: Space.sm),
+          button(Icons.swap_horiz_rounded, l10n.convertUnitsButton, () => _showConvertDialog(context), active: converting),
+        ],
+      );
+    }
+    if (compact) {
+      final c = context.appColors;
+      final converting = unitConversion != _UnitConversion.none;
+      ButtonStyle style({bool active = false}) => OutlinedButton.styleFrom(
+            foregroundColor: active ? c.accent : c.textPrimary,
+            backgroundColor: active ? c.selectedFill : Colors.transparent,
+            side: BorderSide(color: active ? c.accent.withValues(alpha: 0.5) : c.textPrimary.withValues(alpha: 0.16)),
+            minimumSize: const Size(0, 34),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          );
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          OutlinedButton.icon(
+            onPressed: onAddToMealPlan,
+            style: style(),
+            icon: Icon(Icons.calendar_month_outlined, size: 17, color: c.accent),
+            label: Text(l10n.mealPlanButton),
+          ),
+          OutlinedButton.icon(
+            onPressed: onAddToShopping,
+            style: style(),
+            icon: Icon(Icons.add_shopping_cart_rounded, size: 17, color: c.accent),
+            label: Text(l10n.groceriesButton),
+          ),
+          OutlinedButton.icon(
+            onPressed: () => _showConvertDialog(context),
+            style: style(active: converting),
+            icon: Icon(Icons.swap_horiz_rounded, size: 17, color: c.accent),
+            label: Text(l10n.convertUnitsButton),
+          ),
+        ],
+      );
+    }
     // Share now lives as an icon next to Favorite in the title row; this bar is
     // just Meal plan / Groceries / Convert.
     return Column(
@@ -702,21 +846,14 @@ class _RecipeActionBar extends StatelessWidget {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              child: const SheetHandle(top: 0),
             ),
             const SizedBox(height: 20),
             Text(units.convertUnitsTitle, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
@@ -825,7 +962,13 @@ class _RecipeMetaInfoCard extends StatelessWidget {
   /// tap it to open the scale/multiplier sheet (there is no separate stepper).
   final VoidCallback? onOpenScaleSheet;
 
-  const _RecipeMetaInfoCard({required this.recipe, this.scaleFactor = 1.0, this.onOpenScaleSheet});
+  /// Pointer layout: an inline strip of facts instead of the big card.
+  final bool compact;
+
+  /// Phone / tablet: the fact strip spread across the full width.
+  final bool touch;
+
+  const _RecipeMetaInfoCard({required this.recipe, this.scaleFactor = 1.0, this.onOpenScaleSheet, this.compact = false, this.touch = false});
 
   String _formatMinutes(int? minutes) {
     if (minutes == null || minutes <= 0) return '';
@@ -843,6 +986,120 @@ class _RecipeMetaInfoCard extends StatelessWidget {
 
     final prepTimeStr = _formatMinutes(recipe.prepTimeMinutes);
     final cookTimeStr = _formatMinutes(recipe.cookTimeMinutes);
+
+    if (touch) {
+      final c = context.appColors;
+      Widget fact(String label, String value, {VoidCallback? onTap}) {
+        final child = Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.md - 2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(label.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 10.5, letterSpacing: 0.6, fontWeight: FontWeight.w700, color: c.textTertiary)),
+              const SizedBox(height: 3),
+              Row(children: [
+                Flexible(
+                  child: Text(value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w600,
+                        color: onTap != null && scaleFactor != 1.0 ? c.accent : c.textPrimary,
+                      )),
+                ),
+                if (onTap != null) ...[const SizedBox(width: 4), Icon(Icons.tune_rounded, size: 14, color: c.accent)],
+              ]),
+            ],
+          ),
+        );
+        return Expanded(
+          child: onTap == null
+              ? child
+              : InkWell(onTap: onTap, borderRadius: Radii.lgAll, child: child),
+        );
+      }
+      final facts = <Widget>[
+        if (prepTimeStr.isNotEmpty) fact(l10n.recipeFieldPrepTime, prepTimeStr),
+        if (cookTimeStr.isNotEmpty) fact(l10n.recipeFieldCookTime, cookTimeStr),
+        if (recipe.servings != null && recipe.servings!.isNotEmpty)
+          fact(l10n.recipeFieldServings, _scaleServings(recipe.servings!, scaleFactor), onTap: onOpenScaleSheet),
+      ];
+      return Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: Radii.lgAll, side: BorderSide(color: c.hairline)),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < facts.length; i++) ...[
+                if (i > 0) VerticalDivider(width: 1, thickness: 1, indent: 10, endIndent: 10, color: c.hairline),
+                facts[i],
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (compact) {
+      final c = context.appColors;
+      Widget fact(IconData icon, String label, String value, {VoidCallback? onTap}) {
+        final child = Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, size: 18, color: onTap != null ? c.accent : c.textTertiary),
+            const SizedBox(width: 8),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label.toUpperCase(),
+                    style: TextStyle(fontSize: 10, letterSpacing: 0.6, fontWeight: FontWeight.w700, color: c.textTertiary)),
+                const SizedBox(height: 1),
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary)),
+                  if (onTap != null) ...[const SizedBox(width: 4), Icon(Icons.tune_rounded, size: 13, color: c.accent)],
+                ]),
+              ],
+            ),
+          ]),
+        );
+        if (onTap == null) return child;
+        return Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(8), child: child),
+        );
+      }
+      final facts = <Widget>[
+        if (prepTimeStr.isNotEmpty) fact(Icons.timer_outlined, l10n.recipeFieldPrepTime, prepTimeStr),
+        if (cookTimeStr.isNotEmpty) fact(Icons.local_fire_department_outlined, l10n.recipeFieldCookTime, cookTimeStr),
+        if (recipe.servings != null && recipe.servings!.isNotEmpty)
+          fact(Icons.people_outline, l10n.recipeFieldServings, _scaleServings(recipe.servings!, scaleFactor), onTap: onOpenScaleSheet),
+      ];
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: c.hairline),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < facts.length; i++) ...[
+                if (i > 0) VerticalDivider(width: 1, thickness: 1, indent: 10, endIndent: 10, color: c.hairline),
+                facts[i],
+              ],
+            ],
+          ),
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -870,31 +1127,33 @@ class _RecipeMetaInfoCard extends StatelessWidget {
     );
   }
 
-  /// Scale servings string by the given factor
-  /// Handles formats like "4", "3-4", "6-8", "1 pizza", "~1 cup"
-  String _scaleServings(String servings, double scale) {
-    if (scale == 1.0) return servings;
+  String _scaleServings(String servings, double scale) => scaleServingsLabel(servings, scale);
+}
 
-    // Try to find and scale numbers in the servings string
-    final numberPattern = RegExp(r'(\d+\.?\d*)');
-    final matches = numberPattern.allMatches(servings);
+/// Scale a servings string by [scale].
+/// Handles formats like "4", "3-4", "6-8", "1 pizza", "~1 cup".
+String scaleServingsLabel(String servings, double scale) {
+  if (scale == 1.0) return servings;
 
-    if (matches.isEmpty) return servings;
+  // Try to find and scale numbers in the servings string
+  final numberPattern = RegExp(r'(\d+\.?\d*)');
+  final matches = numberPattern.allMatches(servings);
 
-    String result = servings;
-    // Process matches in reverse to preserve string indices
-    for (final match in matches.toList().reversed) {
-      final original = double.tryParse(match.group(0)!);
-      if (original != null) {
-        final scaled = original * scale;
-        final scaledStr = scaled == scaled.roundToDouble()
-            ? scaled.round().toString()
-            : scaled.toStringAsFixed(1);
-        result = result.replaceRange(match.start, match.end, scaledStr);
-      }
+  if (matches.isEmpty) return servings;
+
+  String result = servings;
+  // Process matches in reverse to preserve string indices
+  for (final match in matches.toList().reversed) {
+    final original = double.tryParse(match.group(0)!);
+    if (original != null) {
+      final scaled = original * scale;
+      final scaledStr = scaled == scaled.roundToDouble()
+          ? scaled.round().toString()
+          : scaled.toStringAsFixed(1);
+      result = result.replaceRange(match.start, match.end, scaledStr);
     }
-    return result;
   }
+  return result;
 }
 
 /// Bottom sheet for scaling a recipe. A slider on top gives fine control;
@@ -995,7 +1254,7 @@ class _ScaleSheetState extends State<_ScaleSheet> {
     final l10n = AppLocalizations.of(context)!;
     final base = _baseServings();
     final scaled = _scale != 1.0;
-    final accent = theme.colorScheme.tertiary;
+    final accent = context.appColors.accent;
 
     String readout;
     if (base != null) {
@@ -1011,7 +1270,7 @@ class _ScaleSheetState extends State<_ScaleSheet> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       child: Column(
@@ -1019,14 +1278,7 @@ class _ScaleSheetState extends State<_ScaleSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            child: const SheetHandle(top: 0),
           ),
           const SizedBox(height: 18),
           Row(
@@ -1121,14 +1373,14 @@ class _ScaleChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.tertiary : theme.colorScheme.surface,
+          color: isSelected ? context.appColors.accent : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: isSelected ? null : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? theme.colorScheme.onTertiary : theme.colorScheme.onSurface,
+            color: isSelected ? context.appColors.onAccent : theme.colorScheme.onSurface,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             fontSize: 14,
           ),
@@ -1150,6 +1402,25 @@ class _LargeAddToShoppingButton extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
+    if (!Responsive.isDesktopLayout(context)) {
+      final c = context.appColors;
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton.tonalIcon(
+          onPressed: onTap,
+          icon: const Icon(Icons.add_shopping_cart_rounded),
+          label: Text(l10n.recipeAddToShoppingList),
+          style: FilledButton.styleFrom(
+            backgroundColor: c.selectedFill,
+            foregroundColor: c.accent,
+            minimumSize: const Size(0, 48),
+            maximumSize: const Size(double.infinity, 48),
+            textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            shape: const RoundedRectangleBorder(borderRadius: Radii.lgAll),
+          ),
+        ),
+      );
+    }
     return SizedBox(
       width: double.infinity,
       child: FilledButton.icon(
@@ -1502,6 +1773,30 @@ class _IngredientSectionBox extends ConsumerWidget {
         header != null && itemIds.isNotEmpty && itemIds.every(checkedSet.contains);
     final accent = allChecked ? theme.colorScheme.outline : theme.colorScheme.outline;
 
+    if (!Responsive.isDesktopLayout(context)) {
+      return _TouchSection(
+        title: header?.name,
+        done: allChecked,
+        collapsed: collapsed,
+        count: items.length,
+        onToggle: header == null
+            ? null
+            : () => ref.read(_collapsedSectionsProvider.notifier).toggle(recipeId, header!.id),
+        children: [
+          for (final ing in items)
+            _CheckableIngredientRow(
+              ingredient: ing,
+              recipeId: recipeId,
+              scaleFactor: scaleFactor,
+              unitConversion: unitConversion,
+              sectionItemIds: itemIds,
+              headerId: header?.id,
+              linkedRecipes: (ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList(),
+            ),
+        ],
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -1807,6 +2102,26 @@ class _InstructionSectionBox extends ConsumerWidget {
         ref.watch(_collapsedSectionsProvider)[recipeId] ?? const <String>{};
     final collapsed = collapsedSet.contains(header.id);
 
+    if (!Responsive.isDesktopLayout(context)) {
+      return _TouchSection(
+        title: header.instruction,
+        collapsed: collapsed,
+        count: steps.length,
+        onToggle: () => ref.read(_collapsedSectionsProvider.notifier).toggle(recipeId, header.id),
+        dividers: false,
+        children: [
+          for (var i = 0; i < steps.length; i++)
+            _InstructionStep(
+              stepNumber: i + 1,
+              step: steps[i],
+              recipeId: recipeId,
+              scaleFactor: scaleFactor,
+              ingredientNames: ingredientNames,
+            ),
+        ],
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -1920,6 +2235,13 @@ class _RecipeAppBar extends StatelessWidget {
     final readOnlyShared = CollabService.instance.isCollabCookbook(recipe.cookbookId) &&
         !CollabService.instance.canEditCookbook(recipe.cookbookId);
 
+    // Phone / tablet: a photo that folds into a paper toolbar (see
+    // [_buildTouch]). The desktop reading view keeps its compact header.
+    if (!Responsive.isDesktopLayout(context) && !isDetailPane) {
+      return _buildTouch(context, l10n,
+          hasImage: hasImage, isServer: isServer, defaultAsset: defaultAsset, readOnlyShared: readOnlyShared);
+    }
+
     // Smaller hero image on desktop to avoid taking up half the screen
     final expandedHeight = Responsive.isDesktopLayout(context) ? 220.0 : 300.0;
 
@@ -1929,19 +2251,19 @@ class _RecipeAppBar extends StatelessWidget {
       leading: isDetailPane
           ? IconButton(
               icon: const Icon(Icons.close, color: Colors.white),
-              tooltip: 'Close',
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
               onPressed: onClose ?? () => Navigator.of(context).pop(),
             )
           : Responsive.isDesktopLayout(context)
               ? IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  tooltip: 'Back',
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                   onPressed: () => Navigator.of(context).pop(),
                 )
               : Container(
                   margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-                  child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: 'Back', onPressed: () => Navigator.of(context).pop()),
+                  child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: MaterialLocalizations.of(context).backButtonTooltip, onPressed: () => Navigator.of(context).pop()),
                 ),
       flexibleSpace: LayoutBuilder(builder: (context, constraints) {
         // Collapse progress: 0 = fully expanded, 1 = fully collapsed. Fade the
@@ -1969,7 +2291,33 @@ class _RecipeAppBar extends StatelessWidget {
                 fontWeight: FontWeight.w600),
           ),
         ),
-        background: Stack(
+        background: _heroBackground(context, hasImage: hasImage, isServer: isServer, defaultAsset: defaultAsset),
+        );
+      }),
+      actions: [
+        if (!readOnlyShared)
+          Container(
+            margin: const EdgeInsets.all(4),
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
+            child: IconButton(icon: const Icon(Icons.edit, color: Colors.white), onPressed: onEdit, tooltip: l10n.actionEdit),
+          ),
+        Container(
+          margin: const EdgeInsets.only(right: 8),
+          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
+          child: PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (value) => _handleMenuAction(context, value),
+            itemBuilder: (context) => _menuItems(context, l10n, readOnlyShared),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The hero photo (local file, cloud copy or bundled default) under a soft
+  /// scrim so the toolbar buttons stay legible on any photo.
+  Widget _heroBackground(BuildContext context, {required bool hasImage, required bool isServer, required String? defaultAsset}) {
+    return Stack(
           fit: StackFit.expand,
           children: [
             // Image with optional rarity glow border
@@ -2015,23 +2363,10 @@ class _RecipeAppBar extends StatelessWidget {
               ),
             ),
           ],
-        ),
         );
-      }),
-      actions: [
-        if (!readOnlyShared)
-          Container(
-            margin: const EdgeInsets.all(4),
-            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-            child: IconButton(icon: const Icon(Icons.edit, color: Colors.white), onPressed: onEdit, tooltip: l10n.actionEdit),
-          ),
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-          child: PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            onSelected: (value) => _handleMenuAction(context, value),
-            itemBuilder: (context) => [
+  }
+
+  List<PopupMenuEntry<String>> _menuItems(BuildContext context, AppLocalizations l10n, bool readOnlyShared) => [
               PopupMenuItem(value: 'cook', child: Row(children: [const Icon(Icons.local_fire_department_outlined), const SizedBox(width: 12), Text(l10n.cookingMode)])),
               if (!readOnlyShared)
                 PopupMenuItem(value: 'enhance', child: Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 12), const Text('Enhance with AI')])),
@@ -2048,10 +2383,99 @@ class _RecipeAppBar extends StatelessWidget {
               if (!readOnlyShared) const PopupMenuDivider(),
               if (!readOnlyShared)
                 PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, color: context.appColors.destructive), const SizedBox(width: 12), Text(l10n.actionDelete, style: TextStyle(color: context.appColors.destructive))])),
-            ],
-          ),
-        ),
-      ],
+      ];
+
+  /// Touch hero: the photo fills the top of the page with round, frosted
+  /// buttons; as it scrolls away it folds into a plain paper toolbar with the
+  /// recipe title, and the buttons settle onto the page tone.
+  Widget _buildTouch(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required bool hasImage,
+    required bool isServer,
+    required String? defaultAsset,
+    required bool readOnlyShared,
+  }) {
+    final c = context.appColors;
+    final width = MediaQuery.sizeOf(context).width;
+    final expandedHeight = (width * 0.8).clamp(240.0, 360.0);
+    final topPad = MediaQuery.paddingOf(context).top;
+    return SliverAppBar(
+      expandedHeight: expandedHeight,
+      pinned: true,
+      automaticallyImplyLeading: false,
+      backgroundColor: c.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      flexibleSpace: LayoutBuilder(builder: (context, constraints) {
+        final minH = kToolbarHeight + topPad;
+        final t = ((expandedHeight + topPad - constraints.maxHeight) / (expandedHeight + topPad - minH))
+            .clamp(0.0, 1.0);
+        // The paper overlay and title arrive over the last third of the fold.
+        final fold = ((t - 0.6) / 0.4).clamp(0.0, 1.0);
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            _heroBackground(context, hasImage: hasImage, isServer: isServer, defaultAsset: defaultAsset),
+            IgnorePointer(child: ColoredBox(color: c.surface.withValues(alpha: fold))),
+            if (fold > 0.98)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Divider(height: 1, thickness: 1, color: c.hairline),
+              ),
+            Positioned(
+              top: topPad,
+              left: Space.sm,
+              right: Space.sm,
+              height: kToolbarHeight,
+              child: Row(
+                children: [
+                  _HeroButton(
+                    icon: Icons.arrow_back_rounded,
+                    tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                    fold: fold,
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: Opacity(
+                      opacity: fold,
+                      child: Text(
+                        normalizeTitle(recipe.title).title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: c.textPrimary,
+                            ),
+                      ),
+                    ),
+                  ),
+                  if (!readOnlyShared) ...[
+                    _HeroButton(
+                      icon: Icons.edit_outlined,
+                      tooltip: l10n.actionEdit,
+                      fold: fold,
+                      onPressed: onEdit,
+                    ),
+                    const SizedBox(width: Space.sm),
+                  ],
+                  PopupMenuButton<String>(
+                    tooltip: l10n.moreLabel,
+                    onSelected: (value) => _handleMenuAction(context, value),
+                    itemBuilder: (context) => _menuItems(context, l10n, readOnlyShared),
+                    child: _HeroButton(icon: Icons.more_horiz_rounded, fold: fold),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -2143,10 +2567,7 @@ class _RecipeAppBar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 8),
-                    Container(width: 40, height: 4, decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    )),
+                    const SheetHandle(top: 0),
                     const SizedBox(height: 16),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -2378,6 +2799,263 @@ class _RecipeAppBar extends StatelessWidget {
 
 // ============ HELPER WIDGETS ============
 
+/// A titled, collapsible run of ingredients or steps on touch layouts: a
+/// quiet header with a hairline under it instead of a boxed card, so the
+/// recipe reads like a page. Untitled runs render just their rows.
+class _TouchSection extends StatelessWidget {
+  final String? title;
+  final bool done;
+  final bool collapsed;
+  final int count;
+  final VoidCallback? onToggle;
+  final bool dividers;
+  final List<Widget> children;
+
+  const _TouchSection({
+    required this.title,
+    required this.collapsed,
+    required this.count,
+    required this.onToggle,
+    required this.children,
+    this.done = false,
+    this.dividers = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final rows = <Widget>[
+      for (var i = 0; i < children.length; i++) ...[
+        if (i > 0 && dividers) Divider(height: 1, thickness: 1, indent: 32, color: c.hairline),
+        children[i],
+      ],
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Space.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title != null) ...[
+            InkWell(
+              onTap: onToggle,
+              borderRadius: Radii.mdAll,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: Space.sm + 2),
+                child: Row(
+                  children: [
+                    if (done) ...[
+                      Icon(Icons.check_circle_rounded, size: 18, color: c.accent),
+                      const SizedBox(width: Space.sm),
+                    ],
+                    Expanded(
+                      child: Text(
+                        title!,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: done ? c.textTertiary : c.textPrimary,
+                              decoration: done ? TextDecoration.lineThrough : null,
+                            ),
+                      ),
+                    ),
+                    if (collapsed)
+                      Padding(
+                        padding: const EdgeInsets.only(right: Space.xs),
+                        child: RowCount(count),
+                      ),
+                    AnimatedRotation(
+                      turns: collapsed ? -0.25 : 0,
+                      duration: Motion.fast,
+                      child: Icon(Icons.keyboard_arrow_down_rounded, color: c.textTertiary),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Divider(height: 1, thickness: 1, color: c.hairline),
+            if (!collapsed) const SizedBox(height: Space.xs),
+          ],
+          if (!collapsed) ...rows,
+        ],
+      ),
+    );
+  }
+}
+
+/// The sticky bar at the foot of a recipe on phones and tablets: a servings
+/// stepper (tap the value for the full scale sheet) and Start cooking.
+class _CookBar extends StatelessWidget {
+  final String? servings;
+  final double scale;
+  final ValueChanged<double> onScaleChanged;
+  final VoidCallback onOpenScaleSheet;
+  final VoidCallback onCook;
+
+  const _CookBar({
+    required this.servings,
+    required this.scale,
+    required this.onScaleChanged,
+    required this.onOpenScaleSheet,
+    required this.onCook,
+  });
+
+  double? get _base {
+    final m = RegExp(r'(\d+\.?\d*)').firstMatch(servings ?? '');
+    final v = m == null ? null : double.tryParse(m.group(1)!);
+    return (v != null && v > 0) ? v : null;
+  }
+
+  String _trim(double v) {
+    var s = v.toStringAsFixed(2);
+    if (s.contains('.')) s = s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    return s;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final base = _base;
+    final hasServings = servings != null && servings!.trim().isNotEmpty;
+    final label = hasServings ? scaleServingsLabel(servings!, scale) : '${_trim(scale)}×';
+    final scaled = (scale - 1.0).abs() > 0.001;
+
+    // One serving at a time when the recipe says how many it makes, half
+    // steps of the whole recipe otherwise.
+    void step(int dir) {
+      HapticFeedback.selectionClick();
+      if (base != null) {
+        final next = (base * scale + dir).clamp(1.0, 999.0);
+        onScaleChanged(double.parse((next / base).toStringAsFixed(4)));
+      } else {
+        onScaleChanged((scale + dir * 0.5).clamp(0.5, 8.0));
+      }
+    }
+
+    final canDecrease = base != null ? base * scale > 1.0001 : scale > 0.5001;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(top: BorderSide(color: c.hairline)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(Space.md, Space.sm + 2, Space.md, Space.sm + 2),
+          child: Row(
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: Radii.lgAll,
+                  border: Border.all(color: c.textPrimary.withValues(alpha: 0.14)),
+                ),
+                child: SizedBox(
+                  height: 48,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_rounded, size: 20),
+                        color: c.textSecondary,
+                        tooltip: l10n.scaleRecipe,
+                        onPressed: canDecrease ? () => step(-1) : null,
+                      ),
+                      InkWell(
+                        onTap: onOpenScaleSheet,
+                        borderRadius: Radii.mdAll,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 56, maxWidth: 120),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: Space.xs),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 14.5,
+                                    height: 1.1,
+                                    fontWeight: FontWeight.w700,
+                                    color: scaled ? c.accent : c.textPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  l10n.recipeFieldServings.toLowerCase(),
+                                  maxLines: 1,
+                                  style: TextStyle(fontSize: 10.5, height: 1.2, color: c.textTertiary),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_rounded, size: 20),
+                        color: c.textSecondary,
+                        tooltip: l10n.scaleRecipe,
+                        onPressed: () => step(1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: Space.md),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: onCook,
+                  icon: const Icon(Icons.local_fire_department_rounded, size: 20),
+                  label: Text(l10n.startCooking, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    shape: const RoundedRectangleBorder(borderRadius: Radii.lgAll),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Round toolbar button over the recipe photo: frosted dark over the image,
+/// melting into a plain page-tone icon button as the hero folds ([fold] 0→1).
+class _HeroButton extends StatelessWidget {
+  final IconData icon;
+  final String? tooltip;
+  final double fold;
+  final VoidCallback? onPressed;
+  const _HeroButton({required this.icon, required this.fold, this.tooltip, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    // Fixed black/white only while sitting on the photo (legible on any
+    // image); the folded state uses the palette.
+    final bg = Color.lerp(Colors.black.withValues(alpha: 0.32), c.surface.withValues(alpha: 0), fold)!;
+    final fg = Color.lerp(Colors.white, c.textPrimary, fold)!;
+    final button = Material(
+      color: bg,
+      shape: const CircleBorder(),
+      child: SizedBox(width: 40, height: 40, child: Icon(icon, size: 21, color: fg)),
+    );
+    if (onPressed == null) return button;
+    return Tooltip(
+      message: tooltip ?? '',
+      child: Material(
+        type: MaterialType.transparency,
+        shape: const CircleBorder(),
+        child: InkWell(customBorder: const CircleBorder(), onTap: onPressed, child: button),
+      ),
+    );
+  }
+}
+
 class _FavoriteButton extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback onToggle;
@@ -2501,13 +3179,17 @@ class _CheckableIngredientRow extends ConsumerWidget {
     final matchingAllergens =
         detectedAllergens.where((a) => userAllergyKeys.contains(a)).toList();
 
+    final touch = !Responsive.isDesktopLayout(context);
+    final c = context.appColors;
     final baseStyle = theme.textTheme.bodyLarge?.copyWith(
       decoration: isChecked ? TextDecoration.lineThrough : null,
-      color: isChecked ? theme.colorScheme.outline : null,
+      color: isChecked ? theme.colorScheme.outline : (touch ? c.textPrimary : null),
+      fontSize: touch ? 16.5 : null,
+      height: touch ? 1.35 : null,
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: touch ? 9 : 5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2530,8 +3212,8 @@ class _CheckableIngredientRow extends ConsumerWidget {
                     border: Border.all(
                       color: isChecked
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.outline,
-                      width: 2,
+                          : (touch ? c.textPrimary.withValues(alpha: 0.28) : theme.colorScheme.outline),
+                      width: touch ? 1.5 : 2,
                     ),
                   ),
                   child: isChecked
@@ -2675,12 +3357,60 @@ class _InstructionStep extends ConsumerWidget {
     final hasImage = step.imagePath != null &&
         step.imagePath!.isNotEmpty &&
         (stepImgIsServer || FileExistsCache.exists(step.imagePath!));
+    final touch = !Responsive.isDesktopLayout(context);
+    final c = context.appColors;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: touch ? 22 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (touch)
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // The step number doubles as the "done" toggle.
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => ref.read(_checkedItemsProvider.notifier).toggle(recipeId, step.id),
+                child: AnimatedContainer(
+                  duration: Motion.fast,
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isChecked ? c.accent : Colors.transparent,
+                    border: Border.all(color: isChecked ? c.accent : c.textPrimary.withValues(alpha: 0.2), width: 1.5),
+                  ),
+                  alignment: Alignment.center,
+                  child: isChecked
+                      ? Icon(Icons.check_rounded, size: 17, color: c.onAccent)
+                      : Text(
+                          '$stepNumber',
+                          style: TextStyle(
+                            fontFamily: 'Fraunces',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: c.textPrimary,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Text(
+                    instruction,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontSize: 16.5,
+                      height: 1.55,
+                      decoration: isChecked ? TextDecoration.lineThrough : null,
+                      color: isChecked ? c.textTertiary : c.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ])
+          else
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             // Number badge doubles as the "done" checkbox — tap to strike out.
             GestureDetector(

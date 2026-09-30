@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
+import '../sync_journal.dart';
 import '../tables/categories.dart';
 
 part 'category_dao.g.dart';
@@ -31,11 +32,13 @@ class CategoryDao extends DatabaseAccessor<AppDatabase> with _$CategoryDaoMixin 
     return into(categories).insert(category);
   }
 
-  Future<void> updateCategory(Category category) {
-    return update(categories).replace(category);
+  Future<void> updateCategory(Category category) async {
+    await update(categories).replace(category);
+    await SyncJournal.touch(attachedDatabase, SyncJournal.categories, category.id);
   }
 
-  Future<void> deleteCategory(String id) {
-    return (delete(categories)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteCategory(String id) async {
+    await (delete(categories)..where((t) => t.id.equals(id))).go();
+    await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.categories, id);
   }
 }

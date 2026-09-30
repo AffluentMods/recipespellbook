@@ -13,6 +13,10 @@ import '../../../providers/database_provider.dart';
 // import '../../../providers/kitchen_buddy_provider.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/tokens.dart';
+import '../../../utils/avatar_url.dart';
+import '../../widgets/app_controls.dart';
+import 'account_screen.dart';
 
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
@@ -36,6 +40,7 @@ import 'nutrition_settings_screen.dart';
 import 'quick_access_settings_screen.dart';
 import 'trash_screen.dart';
 import '../premium/family_screen.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════════════════════
 //  SETTINGS SCREEN
@@ -51,6 +56,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   String _query = '';
+
+  /// Desktop two-pane: the section shown on the right (by title), or
+  /// [_accountKey] for the account page. Null = first section.
+  String? _desktopSection;
+  static const _accountKey = '__account';
+
+  /// Desktop: sub-pages (allergies, tags, trash…) open inside the right pane.
+  final GlobalKey<NavigatorState> _paneNavKey = GlobalKey<NavigatorState>();
   @override
   void dispose() {
     _searchController.dispose();
@@ -65,6 +78,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _openSettingsPanel(Widget screen, {double maxWidth = 800, double maxHeight = 600}) {
+    // Desktop two-pane: open the sub-page inside the right pane (its own
+    // navigator, so its back button returns to the section).
+    final pane = _paneNavKey.currentState;
+    if (Responsive.isDesktopLayout(context) && pane != null) {
+      pane.push(MaterialPageRoute(builder: (_) => screen));
+      return;
+    }
     if (Responsive.isDesktopLayout(context)) {
       showDialog(
         context: context,
@@ -141,14 +161,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ) : null,
         _m(l10n.settingsSurpriseMe, 'surprise recipe suggestion') ? SwitchListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-          secondary: Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.auto_fix_high, size: 20, color: theme.colorScheme.primary),
-          ),
+          secondary: _SettingIcon(Icons.auto_fix_high, color: theme.colorScheme.primary),
           title: Text(l10n.settingsSurpriseMe, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
           subtitle: Text(l10n.settingsSurpriseMeSubtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
           value: s.showSurpriseMe,
@@ -334,20 +347,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ]),
     ].whereType<Widget>().toList();
 
+    if (Responsive.isDesktopLayout(context)) {
+      return _buildDesktop(context, sections, auth);
+    }
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             floating: true, snap: true,
             centerTitle: false,
-            title: Text(l10n.settingsTitle),
+            backgroundColor: context.appColors.surface,
+            title: Text(
+              l10n.settingsTitle,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.3,
+                color: context.appColors.textPrimary,
+              ),
+            ),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(56),
+              preferredSize: const Size.fromHeight(60),
               child: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                child: _SearchField(
+                padding: const EdgeInsets.fromLTRB(16, 2, 16, 12),
+                child: TouchSearchField(
                   controller: _searchController,
                   focusNode: _searchFocusNode,
+                  hintText: l10n.settingsSearchHint,
                   onChanged: (q) => setState(() => _query = q.trim()),
                 ),
               )),
@@ -374,6 +401,191 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Column(children: sections),
               )),
             ),
+        ],
+      ),
+    );
+  }
+
+  // ─── DESKTOP: section list + page (like System Settings) ───
+
+  void _selectDesktopSection(String key) {
+    _paneNavKey.currentState?.popUntil((r) => r.isFirst);
+    setState(() => _desktopSection = key);
+  }
+
+  Widget _buildDesktop(BuildContext context, List<Widget> sections, AuthState auth) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
+    final named = sections.whereType<_Section>().toList();
+    final selectedKey = _desktopSection ?? (named.isNotEmpty ? named.first.title : _accountKey);
+    final selected = named.where((s) => s.title == selectedKey).firstOrNull;
+
+    Widget page;
+    if (_query.isNotEmpty) {
+      page = named.isEmpty
+          ? Center(
+              child: Text(l10n.settingsNoMatchingSettings,
+                  style: TextStyle(color: c.textTertiary)),
+            )
+          : Responsive.constrainScrollable(
+              maxWidth: 720,
+              minHorizontal: Space.xxl,
+              bottom: Space.huge,
+              builder: (context, pad) => ListView(
+                padding: pad,
+                children: [for (final s in named) s],
+              ),
+            );
+    } else if (selectedKey == _accountKey || selected == null) {
+      page = const AccountScreen();
+    } else {
+      page = Responsive.constrainScrollable(
+        maxWidth: 720,
+        minHorizontal: Space.xxl,
+        top: Space.xl,
+        bottom: Space.huge,
+        builder: (context, pad) => ListView(
+          padding: pad,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.md, 0, Space.md, Space.sm),
+              child: Text(
+                selected.title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: c.textPrimary,
+                    ),
+              ),
+            ),
+            _Section(
+              title: selected.title,
+              icon: selected.icon,
+              showTitle: false,
+              children: selected.children,
+            ),
+          ],
+        ),
+      );
+    }
+
+    final user = auth.user;
+    final avatarUrl = user?.avatarUrl;
+    final hasAvatar = auth.isSignedIn && avatarUrl != null && avatarUrl.isNotEmpty;
+
+    return Scaffold(
+      backgroundColor: c.surface,
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 264,
+            child: ColoredBox(
+              color: c.textPrimary.withValues(alpha: 0.018),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(Space.md, Space.xl, Space.md, Space.xl),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(Space.sm, 0, Space.sm, Space.md),
+                    child: Text(
+                      l10n.settingsTitle,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            color: c.textPrimary,
+                          ),
+                    ),
+                  ),
+                  ToolbarSearchField(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    hintText: l10n.settingsSearchHint,
+                    width: double.infinity,
+                    onChanged: (q) => setState(() => _query = q.trim()),
+                  ),
+                  const SizedBox(height: Space.md),
+                  // Account
+                  Material(
+                    color: selectedKey == _accountKey && _query.isEmpty ? c.selectedFill : Colors.transparent,
+                    borderRadius: Radii.mdAll,
+                    child: InkWell(
+                      onTap: () => _selectDesktopSection(_accountKey),
+                      borderRadius: Radii.mdAll,
+                      hoverColor: c.hoverFill,
+                      splashFactory: NoSplash.splashFactory,
+                      child: Padding(
+                        padding: const EdgeInsets.all(Space.sm + 2),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor: c.accent.withValues(alpha: 0.16),
+                              backgroundImage: hasAvatar ? NetworkImage(resolveAvatarUrl(avatarUrl)) : null,
+                              onBackgroundImageError: hasAvatar ? (_, _) {} : null,
+                              child: hasAvatar
+                                  ? null
+                                  : Icon(Icons.person_outline_rounded, size: 18, color: c.accent),
+                            ),
+                            const SizedBox(width: Space.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    auth.isSignedIn ? (user?.displayName ?? l10n.accountTitle) : l10n.signIn,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary),
+                                  ),
+                                  Text(
+                                    auth.isSignedIn ? (user?.email ?? '') : l10n.sidebarSignInToSync,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 12, color: c.textTertiary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: Space.sm),
+                  for (final section in named)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 1),
+                      child: NavRow(
+                        icon: section.icon,
+                        label: section.title,
+                        selected: _query.isEmpty && section.title == selectedKey,
+                        onTap: () {
+                          if (_query.isNotEmpty) {
+                            _searchController.clear();
+                            _query = '';
+                          }
+                          _selectDesktopSection(section.title);
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          VerticalDivider(width: 1, thickness: 1, color: c.hairline),
+          Expanded(
+            child: _SettingsPaneContent(
+              page: page,
+              child: Navigator(
+                key: _paneNavKey,
+                onGenerateRoute: (_) => PageRouteBuilder(
+                  pageBuilder: (context, _, _) => const _SettingsPaneRoot(),
+                  transitionDuration: Duration.zero,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -455,7 +667,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final service = ExportImportService(db);
     Responsive.showAdaptiveSheet(context, builder: (sheetCtx) => Material(
       color: Theme.of(sheetCtx).colorScheme.surfaceContainerLow,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius: SheetPresentation.surfaceRadius(sheetCtx),
       child: SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsImport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
@@ -760,40 +972,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 }
 
 // ════════════════════════════════════════════
-//  SEARCH FIELD
-// ════════════════════════════════════════════
-
-class _SearchField extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  const _SearchField({required this.controller, required this.focusNode, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextField(
-      controller: controller, focusNode: focusNode, onChanged: onChanged,
-      style: theme.textTheme.bodyMedium,
-      decoration: InputDecoration(
-        hintText: AppLocalizations.of(context)!.settingsSearchHint,
-        hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-        prefixIcon: Icon(Icons.search, size: 20, color: theme.colorScheme.outline),
-        suffixIcon: controller.text.isNotEmpty
-            ? IconButton(icon: Icon(Icons.close, size: 18, color: theme.colorScheme.outline), onPressed: () { controller.clear(); onChanged(''); focusNode.unfocus(); })
-            : null,
-        filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest,
-        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5)),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════
 //  ACCOUNT CARD
 // ════════════════════════════════════════════
 
@@ -810,18 +988,18 @@ class _AccountCard extends ConsumerWidget {
     final user = authState.user;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: Material(
+        color: context.appColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: Radii.lgAll,
+          side: BorderSide(color: context.appColors.hairline),
         ),
         child: InkWell(
           onTap: () => context.push('/settings/account'),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: Radii.lgAll,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
             child: Row(children: [
               Container(
                 width: 48, height: 48,
@@ -879,19 +1057,50 @@ class _TierBadge extends ConsumerWidget {
 
 enum _ResetScope { local, all }
 
+/// Hands the desktop settings pane's current page to the pane navigator's
+/// root route (which is built once), so switching sections just rebuilds it.
+class _SettingsPaneContent extends InheritedWidget {
+  final Widget page;
+  const _SettingsPaneContent({required this.page, required super.child});
+
+  @override
+  bool updateShouldNotify(_SettingsPaneContent oldWidget) => oldWidget.page != page;
+}
+
+class _SettingsPaneRoot extends StatelessWidget {
+  const _SettingsPaneRoot();
+
+  @override
+  Widget build(BuildContext context) {
+    final page = context.dependOnInheritedWidgetOfExactType<_SettingsPaneContent>()?.page;
+    return Material(color: context.appColors.surface, child: page ?? const SizedBox.shrink());
+  }
+}
+
 class _Section extends StatelessWidget {
   final String title;
   final IconData icon;
   final List<Widget> children;
-  const _Section({required this.title, required this.icon, required this.children});
+
+  /// False when the page already titles the section (desktop pane).
+  final bool showTitle;
+  const _Section({required this.title, required this.icon, required this.children, this.showTitle = true});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (!Responsive.isDesktopLayout(context)) {
+      // Phone / tablet: the design language's grouped list — a quiet label
+      // and a hairline card with inset hairlines between rows.
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        if (showTitle) TouchGroupLabel(title),
+        TouchGroup(children: children),
+      ]);
+    }
     final isDark = theme.brightness == Brightness.dark;
     final bg = isDark ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surfaceContainerLowest;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Padding(
+      if (showTitle) Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
         child: Row(children: [
           Icon(icon, size: 14, color: theme.colorScheme.outline),
@@ -925,14 +1134,47 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (!Responsive.isDesktopLayout(context)) {
+      return TouchRow(
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        destructive: titleColor != null,
+        onTap: onTap,
+      );
+    }
     final c = titleColor ?? theme.colorScheme.primary;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: c.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: c)),
+      leading: _SettingIcon(icon, color: c),
       title: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: titleColor)),
       subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       onTap: onTap,
+    );
+  }
+}
+
+/// Leading icon of a settings row: a tinted square on desktop, the plain
+/// quiet icon of the touch list on phones and tablets.
+class _SettingIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  const _SettingIcon(this.icon, {required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Responsive.isDesktopLayout(context)) {
+      return SizedBox(
+        width: 24,
+        child: Icon(icon, size: 21, color: context.appColors.textSecondary),
+      );
+    }
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+      child: Icon(icon, size: 20, color: color),
     );
   }
 }
@@ -998,7 +1240,7 @@ class _TextScaleTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.text_fields_rounded, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.text_fields_rounded, color: theme.colorScheme.primary),
       title: Text(l10n.textSize, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(_label(l10n), style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1014,7 +1256,7 @@ class _TextScaleTile extends StatelessWidget {
       builder: (ctx, ss) => SafeArea(child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
           const SizedBox(height: 20),
           Text(l10n.textSize, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
@@ -1079,7 +1321,7 @@ class _ThemeSelectionTile extends ConsumerWidget {
     final theme = Theme.of(context);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.palette_outlined, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.palette_outlined, color: theme.colorScheme.primary),
       title: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text('${currentTheme.emoji} ${_name(context, currentTheme)}', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1095,7 +1337,7 @@ class _ThemeSelectionTile extends ConsumerWidget {
       expand: false, initialChildSize: 0.7, maxChildSize: 0.9, minChildSize: 0.4,
       builder: (context, sc) => SafeArea(child: Column(children: [
         const SizedBox(height: 8),
-        Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+        const SheetHandle(top: 0),
         Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
         Expanded(child: GridView.builder(
           controller: sc, padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1192,7 +1434,7 @@ class _ThemeModeTile extends StatelessWidget {
     };
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(icon, color: theme.colorScheme.primary),
       title: Text(l10n.settingsThemeMode, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1228,7 +1470,7 @@ class _MeasurementSystemTile extends StatelessWidget {
     final theme = Theme.of(context);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.straighten, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.straighten, color: theme.colorScheme.primary),
       title: Text(l10n.settingsMeasurements, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(currentSystem.displayName, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1264,7 +1506,7 @@ class _WeekStartDayTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.calendar_today, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.calendar_today, color: theme.colorScheme.primary),
       title: Text(l10n.settingsWeekStartDay, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(_name(context, currentDay), style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1302,7 +1544,7 @@ class _LanguageTile extends StatelessWidget {
     final theme = Theme.of(context);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.language, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.language, color: theme.colorScheme.primary),
       title: Text(l10n.settingsLanguage, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(_currentName ?? '\u{1F310} ${l10n.settingsSystemLanguage}', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1311,7 +1553,7 @@ class _LanguageTile extends StatelessWidget {
           expand: false, initialChildSize: 0.6, maxChildSize: 0.85, minChildSize: 0.3,
           builder: (context, sc) => SafeArea(child: Column(children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+            const SheetHandle(top: 0),
             Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsLanguage, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
             Expanded(child: ListView(controller: sc, children: [
               ...supportedLanguages.map((lang) => ListTile(
@@ -1440,7 +1682,7 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
     final buttonLabel = _allChecked ? l.exportFullBackup : _noneChecked ? l10n.settingsExportNone : l10n.settingsExportPartial;
     return Material(
       color: theme.colorScheme.surfaceContainerLow,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius: SheetPresentation.surfaceRadius(context),
       child: SafeArea(child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(mainAxisSize: MainAxisSize.min, children: [

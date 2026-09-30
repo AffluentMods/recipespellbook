@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/responsive_utils.dart';
-import '../../../utils/recipe_title.dart';
-import '../../widgets/recipe_image.dart';
+import '../../widgets/app_controls.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/recipe_cards.dart';
 
 /// Provider for recently viewed recipes (no limit)
 final allRecentRecipesProvider = StreamProvider<List<Recipe>>((ref) {
@@ -24,169 +25,81 @@ class RecentRecipesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final recipesAsync = ref.watch(allRecentRecipesProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(Icons.history, size: 24),
-            const SizedBox(width: 10),
-            Text(l10n.recentTitle),
-          ],
+    if (Responsive.isDesktopLayout(context)) {
+      final recipes = recipesAsync.valueOrNull ?? const <Recipe>[];
+      return Scaffold(
+        backgroundColor: context.appColors.surface,
+        appBar: PageHeader(
+          title: l10n.recentTitle,
+          leading: Navigator.of(context).canPop() ? const HeaderBackButton() : null,
         ),
+        body: recipesAsync.isLoading && !recipesAsync.hasValue
+            ? const Center(child: CircularProgressIndicator())
+            : recipes.isEmpty
+                ? EmptyState(
+                    icon: Icons.history,
+                    title: l10n.recentEmpty,
+                    message: l10n.recentEmptySubtitle,
+                  )
+                : RecipeCardGrid(
+                    storageKey: 'recent_grid',
+                    recipes: recipes,
+                    onTap: (r) => context.push('/recipe/${r.id}'),
+                    onToggleFavorite: (r) =>
+                        ref.read(recipeDaoProvider).toggleFavorite(r.id, !r.isFavorite),
+                  ),
+      );
+    }
+
+    final c = context.appColors;
+    final wide = Responsive.useNavRail(context);
+    final side = wide ? Space.xxl : Space.lg;
+    return Scaffold(
+      backgroundColor: c.surface,
+      appBar: AppBar(
+        backgroundColor: c.surface,
+        centerTitle: false,
+        titleSpacing: Navigator.of(context).canPop() ? 0 : Space.xl,
+        title: TouchPageTitle(l10n.recentTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(Icons.search_rounded, color: c.textSecondary),
+            tooltip: l10n.searchTitle,
             onPressed: () => context.push('/search'),
           ),
+          const SizedBox(width: Space.xs),
         ],
       ),
-      body: Responsive.constrainWidth(context, child: recipesAsync.when(
+      body: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (recipes) {
           if (recipes.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.history,
-                      size: 64,
-                      color: theme.colorScheme.outline,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.recentEmpty,
-                      style: theme.textTheme.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.recentEmptySubtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+            return EmptyState(
+              icon: Icons.history,
+              title: l10n.recentEmpty,
+              message: l10n.recentEmptySubtitle,
             );
           }
-
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-            itemCount: recipes.length,
-            itemBuilder: (context, index) {
-              return _RecipeItem(recipe: recipes[index]);
+          return RecipeCardGrid(
+            storageKey: 'recent_grid_touch',
+            recipes: recipes,
+            physics: const AlwaysScrollableScrollPhysics(),
+            maxTileWidth: wide ? 230 : 250,
+            gap: wide ? Space.lg : Space.md,
+            padding: EdgeInsets.fromLTRB(side, Space.xs, side, 104),
+            onTap: (r) {
+              ref.read(recipeDaoProvider).updateLastViewed(r.id);
+              context.pushNamed('recipe', pathParameters: {'id': r.id});
             },
+            onToggleFavorite: (r) =>
+                ref.read(recipeDaoProvider).toggleFavorite(r.id, !r.isFavorite),
           );
         },
-      )),
-    );
-  }
-}
-
-class _RecipeItem extends ConsumerWidget {
-  final Recipe recipe;
-
-  const _RecipeItem({required this.recipe});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final course = recipe.courseId != null ? CourseData.getById(recipe.courseId!) : null;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () {
-            ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
-            context.pushNamed('recipe', pathParameters: {'id': recipe.id});
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                // Thumbnail
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: course?.lightColor ?? theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: RecipeImage.thumbnail(
-                    imagePath: recipe.imagePath,
-                    recipeId: recipe.id,
-                    recipeName: recipe.title,
-                    course: recipe.courseId,
-                    category: recipe.categoryId,
-                    width: 64,
-                    height: 64,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                // Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Tooltip(
-                        message: recipe.title,
-                        child: Text(
-                          normalizeTitle(recipe.title).title,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (recipe.lastViewedAt != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatLastViewed(recipe.lastViewedAt!, l10n),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                // Favorite indicator
-                if (recipe.isFavorite)
-                  Icon(Icons.favorite, size: 20, color: context.appColors.favorite),
-              ],
-            ),
-          ),
-        ),
       ),
     );
-  }
-
-  String _formatLastViewed(DateTime date, AppLocalizations l10n) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-
-    if (diff.inMinutes < 1) return l10n.recentJustNow;
-    if (diff.inMinutes < 60) return l10n.recentMinutesAgo(diff.inMinutes);
-    if (diff.inHours < 24) return l10n.recentHoursAgo(diff.inHours);
-    if (diff.inDays == 1) return l10n.recentYesterday;
-    if (diff.inDays < 7) return l10n.recentDaysAgo(diff.inDays);
-    return '${date.month}/${date.day}/${date.year}';
   }
 }

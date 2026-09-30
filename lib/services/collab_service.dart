@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/database.dart';
+import '../database/sync_journal.dart';
 import 'auth_service.dart';
 import 'family_service.dart';
+import 'sync_service.dart';
 
 /// Live collaboration sync for shared shopping lists.
 ///
@@ -198,14 +200,28 @@ class CollabService {
 
   String _iso(DateTime d) => d.toUtc().toIso8601String();
 
+  /// Sync right after joining a list. The pull cursor only fetches rows changed
+  /// since our last pull, and a list we just joined may not have changed in a
+  /// while — so a normal cycle would never deliver it ("Joined!" but nothing
+  /// shows up). This waits for any in-flight cycle (it would advance the
+  /// cursor past us) and then pulls every collaborative list from scratch.
+  Future<void> syncAfterJoin() async {
+    for (var i = 0; _syncing && i < 50; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    await syncNow(fullPull: true);
+  }
+
   /// One push+pull cycle. Safe to call frequently (guarded + no-ops when idle).
-  Future<void> syncNow() async {
+  /// [fullPull] ignores the pull cursor and fetches everything.
+  Future<void> syncNow({bool fullPull = false}) async {
     final db = _db;
     if (_syncing || db == null || !AuthService.instance.isSignedIn) return;
     _syncing = true;
     try {
       final prefs = await SharedPreferences.getInstance();
-      final pullCursor = prefs.getString(_cursorKey); // server time → pull `since`
+      // server time → pull `since`
+      final pullCursor = fullPull ? null : prefs.getString(_cursorKey);
       final lastPushRaw = prefs.getString(_pushCursorKey);
       final lastPush = lastPushRaw != null ? DateTime.tryParse(lastPushRaw) : null;
       // Captured up-front (device time). Anything edited AFTER this is left for
@@ -219,6 +235,17 @@ class CollabService {
       final pushLists = <Map<String, dynamic>>[];
       final pushItems = <Map<String, dynamic>>[];
       bool changedLocally(DateTime updatedAt) => lastPush == null || updatedAt.isAfter(lastPush);
+      // Items deleted locally since the last push. Deleted rows are gone from
+      // the table, so they come from the sync journal (which remembers each
+      // item's list) and go out as soft-deletes.
+      for (final del in await SyncJournal.pendingDeletions(db)) {
+        if (del.entity != SyncJournal.shoppingListItems) continue;
+        final listId = del.parentId;
+        if (listId == null || !_collabListIds.contains(listId)) continue;
+        if (lastPush != null && !del.at.isAfter(lastPush)) continue;
+        pushItems.add({'id': del.id, 'listId': listId, 'updatedAt': _iso(del.at), 'deletedAt': _iso(del.at)});
+      }
+
       for (final listId in _collabListIds) {
         final list = await (db.select(db.shoppingLists)..where((t) => t.id.equals(listId))).getSingleOrNull();
         if (list != null && changedLocally(list.updatedAt)) {
@@ -230,7 +257,7 @@ class CollabService {
         }
         final items = await (db.select(db.shoppingListItems)..where((t) => t.listId.equals(listId))).get();
         for (final it in items) {
-          if (!changedLocally(it.updatedAt)) continue;
+          if (!changedLocally(it.updatedAt) || it.name.trim().isEmpty) continue;
           pushItems.add({
             'id': it.id, 'listId': it.listId, 'name': it.name,
             'quantity': it.quantity, 'unit': it.unit, 'isChecked': it.isChecked,
@@ -252,10 +279,17 @@ class CollabService {
       final serverTime = resp['serverTime'] as String?;
       if (serverTime != null) await prefs.setString(_cursorKey, serverTime);
       await prefs.setString(_pushCursorKey, _iso(pushStart));
-      final perms = (resp['permissions'] as Map?) ?? const {};
-      _permissions = perms.map((k, v) => MapEntry(k as String, v as String));
-      _collabListIds = _permissions.keys.toSet();
-      await _persistMembership(prefs);
+      // A response without permissions (older server / partial failure) must
+      // not wipe every membership.
+      final perms = resp['permissions'];
+      if (perms is Map) {
+        final next = perms.map((k, v) => MapEntry(k as String, v as String));
+        if (!mapEquals(next, _permissions)) {
+          _permissions = next;
+          _collabListIds = _permissions.keys.toSet();
+          await _persistMembership(prefs);
+        }
+      }
     } catch (e) {
       debugPrint('[Collab] syncNow: $e');
     } finally {
@@ -271,14 +305,17 @@ class CollabService {
     // Keep a local row if it was edited during/after this sync started (an
     // unpushed edit) — it'll be pushed next cycle and win there. Everything else
     // takes the server's copy. This uses only device time, never the server's.
-    await db.transaction(() async {
+    await SyncService.instance.runAsRemote(() => db.transaction(() async {
       for (final raw in lists) {
         final l = raw as Map;
         final id = l['id'] as String;
         final existing = await (db.select(db.shoppingLists)..where((t) => t.id.equals(id))).getSingleOrNull();
         if (existing != null && existing.updatedAt.isAfter(pushStart)) continue; // unpushed local edit
         if (l['deletedAt'] != null) {
-          if (existing != null) await (db.delete(db.shoppingLists)..where((t) => t.id.equals(id))).go();
+          if (existing != null) {
+            await (db.delete(db.shoppingListItems)..where((t) => t.listId.equals(id))).go();
+            await (db.delete(db.shoppingLists)..where((t) => t.id.equals(id))).go();
+          }
           continue;
         }
         await db.into(db.shoppingLists).insertOnConflictUpdate(ShoppingListsCompanion.insert(
@@ -298,10 +335,15 @@ class CollabService {
           if (existing != null) await (db.delete(db.shoppingListItems)..where((t) => t.id.equals(id))).go();
           continue;
         }
+        final name = ((it['name'] as String?) ?? '').trim();
+        final listId = it['listId'] as String?;
+        // An empty name violates the column constraint and would roll back
+        // (and wedge) every future pull.
+        if (name.isEmpty || listId == null) continue;
         await db.into(db.shoppingListItems).insertOnConflictUpdate(ShoppingListItemsCompanion.insert(
           id: id,
-          listId: it['listId'] as String,
-          name: (it['name'] as String?) ?? '',
+          listId: listId,
+          name: name.length > 200 ? name.substring(0, 200) : name,
           quantity: Value(it['quantity'] as String?),
           unit: Value(it['unit'] as String?),
           isChecked: Value(it['isChecked'] as bool? ?? false),
@@ -312,7 +354,7 @@ class CollabService {
           updatedAt: Value(pushStart),
         ));
       }
-    });
+    }));
   }
 
   /// Build the snapshot ({name, color, items:[...]}) used to publish a list to

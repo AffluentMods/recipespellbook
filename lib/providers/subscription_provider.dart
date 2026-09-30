@@ -93,6 +93,25 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
 
   void _onTierChanged(SubscriptionTier tier) {
     _syncState();
+    _verifyWithServer();
+  }
+
+  String? _verifiedFor;
+
+  /// The device sees a paid purchase the server may not know about yet
+  /// (App Store / Play purchases reach the server only this way or via the
+  /// RevenueCat webhook). Ask it to verify once per user+tier.
+  Future<void> _verifyWithServer() async {
+    final auth = AuthService.instance;
+    final user = auth.currentUser;
+    final rcTier = RevenueCatService.instance.currentTier;
+    if (user == null || rcTier == SubscriptionTier.free) return;
+    if (SubscriptionTier.fromBackendString(user.tier).index >= rcTier.index) return;
+    final key = '${user.id}:${rcTier.name}';
+    if (_verifiedFor == key) return;
+    _verifiedFor = key;
+    final serverTier = await auth.verifySubscription();
+    debugPrint('[Sub] Server verified purchase: $serverTier');
   }
 
   /// Sync full state from RevenueCatService.
@@ -130,6 +149,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
 
         // Backend tier as fallback (overrides RC if RC can't verify)
         RevenueCatService.instance.setTierFromBackend(user.tier);
+        await _verifyWithServer();
         debugPrint('[Sub] Backend tier=${user.tier}, final tier=${RevenueCatService.instance.currentTier}');
       }
 

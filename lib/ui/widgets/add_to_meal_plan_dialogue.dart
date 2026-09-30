@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
+import 'sheet_chrome.dart';
 // TODO: Kitchen Buddy hidden for now
 // import 'kitchen_buddy/kitchen_buddy_integration.dart';
 
@@ -155,7 +156,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
       child: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(context),
         ),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
@@ -163,14 +164,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              child: const SheetHandle(top: 0),
             ),
             const SizedBox(height: 14),
             // Header
