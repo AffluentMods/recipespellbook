@@ -428,6 +428,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                             data: (plans) => _DayTimeline(
                               plans: plans,
                               date: selectedDate,
+                              revealFirstMeal: true,
                               onAddAt: (t) => _showAddMealSheet(
                                   context, selectedDate,
                                   initialTime: t),
@@ -493,6 +494,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                         plans: plans,
                         date: selectedDate,
                         showShoppingButton: false,
+                        revealFirstMeal: true,
                         onAddAt: (time) => _showAddMealSheet(context, selectedDate, initialTime: time),
                         onEditMeal: (plan) => _showEditMealSheet(context, plan, selectedDate),
                       ),
@@ -2106,12 +2108,18 @@ class _DayTimeline extends ConsumerWidget {
   /// day heading instead).
   final bool showShoppingButton;
 
+  /// Touch layouts open each day scrolled to its first meal (a dinner would
+  /// otherwise sit below the fold of a 6 AM start) and start every day from
+  /// its own scroll position.
+  final bool revealFirstMeal;
+
   const _DayTimeline({
     required this.plans,
     required this.date,
     required this.onAddAt,
     required this.onEditMeal,
     this.showShoppingButton = true,
+    this.revealFirstMeal = false,
   });
 
   int _startMinutes(MealPlanWithRecipe p) {
@@ -2155,6 +2163,7 @@ class _DayTimeline extends ConsumerWidget {
     final maxMeal = hours.isEmpty ? 22 : hours.reduce((a, b) => a > b ? a : b);
     final startHour = minMeal < 6 ? minMeal : 6;
     final endHour = maxMeal > 22 ? maxMeal : 22;
+    final revealId = revealFirstMeal && byHour.isNotEmpty ? byHour[minMeal]!.first.mealPlan.id : null;
 
     final recipeIds = plans
         .where((p) => p.recipe != null)
@@ -2164,6 +2173,7 @@ class _DayTimeline extends ConsumerWidget {
     final base = DateTime(date.year, date.month, date.day);
 
     return ListView(
+      key: revealFirstMeal ? ValueKey(base) : null,
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 100),
       children: [
         if (recipeIds.isNotEmpty && showShoppingButton)
@@ -2191,16 +2201,49 @@ class _DayTimeline extends ConsumerWidget {
             onAdd: () => onAddAt(TimeOfDay(hour: h, minute: 0)),
           ),
           for (final p in (byHour[h] ?? const <MealPlanWithRecipe>[]))
-            _MealBlock(
-              key: ValueKey(p.mealPlan.id),
-              plan: p,
-              date: date,
-              onEdit: () => onEditMeal(p),
-            ),
+            if (p.mealPlan.id == revealId)
+              _RevealOnce(
+                key: ValueKey('reveal-${p.mealPlan.id}'),
+                child: _MealBlock(
+                  key: ValueKey(p.mealPlan.id),
+                  plan: p,
+                  date: date,
+                  onEdit: () => onEditMeal(p),
+                ),
+              )
+            else
+              _MealBlock(
+                key: ValueKey(p.mealPlan.id),
+                plan: p,
+                date: date,
+                onEdit: () => onEditMeal(p),
+              ),
         ],
       ],
     );
   }
+}
+
+/// Scrolls its child into view once, after its first frame.
+class _RevealOnce extends StatefulWidget {
+  final Widget child;
+  const _RevealOnce({super.key, required this.child});
+
+  @override
+  State<_RevealOnce> createState() => _RevealOnceState();
+}
+
+class _RevealOnceState extends State<_RevealOnce> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Scrollable.ensureVisible(context, alignment: 0.25);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// A single hour marker: the clock label on the left, a hairline, and a "+" on
