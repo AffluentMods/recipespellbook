@@ -1448,6 +1448,28 @@ class _CookbookDropdown extends ConsumerWidget {
                   context.push('/cookbook/new/edit');
                 },
               ),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: theme.colorScheme.primaryContainer,
+                  ),
+                  child: Icon(Icons.qr_code_scanner_rounded, color: theme.colorScheme.primary),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)!.isbnAddFromBarcode,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.push('/cookbooks/add-book');
+                },
+              ),
               const SizedBox(height: 16),
             ],
           ),

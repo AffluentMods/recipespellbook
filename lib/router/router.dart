@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../l10n/app_localizations.dart';
 import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
+import '../ui/screens/cookbooks/cookbook_isbn_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
@@ -274,6 +275,15 @@ final router = GoRouter(
           name: 'substitutions',
           builder: (context, state) => IngredientSubstitutionsScreen(
             initialSearch: state.uri.queryParameters['q'],
+          ),
+        ),
+
+        // ── Add a printed cookbook by ISBN barcode (sidebar visible) ──
+        GoRoute(
+          path: '/cookbooks/add-book',
+          name: 'cookbook-add-book',
+          builder: (context, state) => CookbookIsbnScreen(
+            initialIsbn: state.uri.queryParameters['isbn'],
           ),
         ),
 

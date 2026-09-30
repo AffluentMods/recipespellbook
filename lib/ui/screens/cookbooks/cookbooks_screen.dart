@@ -19,6 +19,7 @@ import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
+import '../../widgets/new_cookbook_chooser.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../../theme/app_colors.dart';
@@ -205,7 +206,7 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
   }
 
   void _showNewCookbookDialog(BuildContext context, WidgetRef ref) {
-    context.push('/cookbook/new/edit');
+    showNewCookbookChooser(context);
   }
 }
 

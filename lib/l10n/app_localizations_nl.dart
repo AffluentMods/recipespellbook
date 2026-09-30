@@ -244,6 +244,83 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cookbookAdd => 'Nieuw kookboek';
 
   @override
+  String get isbnScreenTitle => 'Add a cookbook by barcode';
+
+  @override
+  String get isbnAddFromBarcode => 'Scan a cookbook barcode';
+
+  @override
+  String get isbnAddFromBarcodeSubtitle => 'Add a printed cookbook from its ISBN';
+
+  @override
+  String get isbnCreateBlank => 'Create a new cookbook';
+
+  @override
+  String get isbnCreateBlankSubtitle => 'Start an empty collection';
+
+  @override
+  String get isbnPointCamera => 'Point your camera at the barcode on the back cover';
+
+  @override
+  String get isbnTypeLabel => 'ISBN';
+
+  @override
+  String get isbnTypeHint => '978-0-00-000000-0';
+
+  @override
+  String get isbnTypeHelp => 'Or type the ISBN printed above the barcode';
+
+  @override
+  String get isbnLookUp => 'Look up';
+
+  @override
+  String get isbnInvalid => 'That doesn\'t look like a valid ISBN. Check the 10 or 13 digits and try again.';
+
+  @override
+  String get isbnLookingUp => 'Looking up the book…';
+
+  @override
+  String get isbnNotFound => 'We couldn\'t find this book in the catalogues. Fill in the details and we\'ll add it anyway.';
+
+  @override
+  String get isbnTitleLabel => 'Title';
+
+  @override
+  String get isbnAuthorLabel => 'Author';
+
+  @override
+  String get isbnAddToLibrary => 'Add to my cookbooks';
+
+  @override
+  String get isbnScanAnother => 'Scan another book';
+
+  @override
+  String get isbnAlreadyAdded => 'This book is already in your cookbooks.';
+
+  @override
+  String get isbnOpenCookbook => 'Open cookbook';
+
+  @override
+  String get isbnAddedTitle => 'Added to your cookbooks';
+
+  @override
+  String get isbnAddedBody => 'Now add recipes from it — snap a photo of a page, or type one in.';
+
+  @override
+  String get isbnAddRecipes => 'Add recipes from this book';
+
+  @override
+  String isbnPages(int count) {
+    return '$count pages';
+  }
+
+  @override
+  String get isbnScanBookDetected => 'That\'s a book barcode — opening the cookbook scanner.';
+
+  @override
+  String get isbnCameraUnavailable => 'Camera unavailable. You can still type the ISBN below.';
+
+  @override
   String get cookbookEdit => 'Kookboek bewerken';
 
   @override

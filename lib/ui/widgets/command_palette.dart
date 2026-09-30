@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../router/router.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/settings_provider.dart';
@@ -165,6 +166,13 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
           _close();
           showImportDialog(_navContext, 'starter');
         },
+      ),
+      _PaletteItem(
+        icon: Icons.qr_code_scanner_rounded,
+        label: AppLocalizations.of(context)!.isbnAddFromBarcode,
+        subtitle: AppLocalizations.of(context)!.isbnAddFromBarcodeSubtitle,
+        section: 'Commands',
+        run: () => _push('/cookbooks/add-book'),
       ),
       _PaletteItem(
         icon: Icons.search,

@@ -107,6 +107,19 @@ class AppMenuDrawer extends ConsumerWidget {
                         });
                       },
                     ),
+                  _DrawerItem(
+                    index: 3,
+                    icon: Icons.menu_book_rounded,
+                    iconColor: context.appColors.accent,
+                    label: l10n.isbnAddFromBarcode,
+                    subtitle: l10n.isbnAddFromBarcodeSubtitle,
+                    onTap: () {
+                      Navigator.pop(context);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        rootNavigatorKey.currentContext?.push('/cookbooks/add-book');
+                      });
+                    },
+                  ),
                 ]),
 
                 const SizedBox(height: 20),

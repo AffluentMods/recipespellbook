@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/additive_data.dart';
+import '../ui/screens/cookbooks/cookbook_isbn_screen.dart';
+import '../ui/widgets/app_snackbar.dart';
+import 'isbn_lookup_service.dart';
 import '../utils/responsive_utils.dart';
 
 /// Service for scanning barcodes and looking up product information
@@ -261,6 +264,19 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       if (mounted) {
         setState(() => _isProcessing = false);
         Navigator.pop(context, {'action': 'importFromUrl', 'url': value});
+      }
+      return;
+    }
+
+    // A book's ISBN (Bookland 978/979) isn't a grocery — hand it to the
+    // cookbook scanner instead of reporting "product not found".
+    if (IsbnLookupService.looksLikeIsbn(value)) {
+      if (mounted) {
+        AppSnackbar.info(context, AppLocalizations.of(context)!.isbnScanBookDetected);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => CookbookIsbnScreen(initialIsbn: value)),
+        );
       }
       return;
     }

@@ -553,6 +553,156 @@ abstract class AppLocalizations {
   /// **'New Cookbook'**
   String get cookbookAdd;
 
+  /// No description provided for @isbnScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a cookbook by barcode'**
+  String get isbnScreenTitle;
+
+  /// No description provided for @isbnAddFromBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a cookbook barcode'**
+  String get isbnAddFromBarcode;
+
+  /// No description provided for @isbnAddFromBarcodeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a printed cookbook from its ISBN'**
+  String get isbnAddFromBarcodeSubtitle;
+
+  /// No description provided for @isbnCreateBlank.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new cookbook'**
+  String get isbnCreateBlank;
+
+  /// No description provided for @isbnCreateBlankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start an empty collection'**
+  String get isbnCreateBlankSubtitle;
+
+  /// No description provided for @isbnPointCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Point your camera at the barcode on the back cover'**
+  String get isbnPointCamera;
+
+  /// No description provided for @isbnTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ISBN'**
+  String get isbnTypeLabel;
+
+  /// No description provided for @isbnTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'978-0-00-000000-0'**
+  String get isbnTypeHint;
+
+  /// No description provided for @isbnTypeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Or type the ISBN printed above the barcode'**
+  String get isbnTypeHelp;
+
+  /// No description provided for @isbnLookUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up'**
+  String get isbnLookUp;
+
+  /// No description provided for @isbnInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like a valid ISBN. Check the 10 or 13 digits and try again.'**
+  String get isbnInvalid;
+
+  /// No description provided for @isbnLookingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking up the book…'**
+  String get isbnLookingUp;
+
+  /// No description provided for @isbnNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find this book in the catalogues. Fill in the details and we\'ll add it anyway.'**
+  String get isbnNotFound;
+
+  /// No description provided for @isbnTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get isbnTitleLabel;
+
+  /// No description provided for @isbnAuthorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get isbnAuthorLabel;
+
+  /// No description provided for @isbnAddToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my cookbooks'**
+  String get isbnAddToLibrary;
+
+  /// No description provided for @isbnScanAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan another book'**
+  String get isbnScanAnother;
+
+  /// No description provided for @isbnAlreadyAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'This book is already in your cookbooks.'**
+  String get isbnAlreadyAdded;
+
+  /// No description provided for @isbnOpenCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Open cookbook'**
+  String get isbnOpenCookbook;
+
+  /// No description provided for @isbnAddedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your cookbooks'**
+  String get isbnAddedTitle;
+
+  /// No description provided for @isbnAddedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Now add recipes from it — snap a photo of a page, or type one in.'**
+  String get isbnAddedBody;
+
+  /// No description provided for @isbnAddRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recipes from this book'**
+  String get isbnAddRecipes;
+
+  /// No description provided for @isbnPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pages'**
+  String isbnPages(int count);
+
+  /// No description provided for @isbnScanBookDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s a book barcode — opening the cookbook scanner.'**
+  String get isbnScanBookDetected;
+
+  /// No description provided for @isbnCameraUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera unavailable. You can still type the ISBN below.'**
+  String get isbnCameraUnavailable;
+
   /// No description provided for @cookbookEdit.
   ///
   /// In en, this message translates to:
