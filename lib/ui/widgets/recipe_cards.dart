@@ -9,17 +9,21 @@ import '../../utils/recipe_title.dart';
 import 'app_context_menu.dart';
 import 'recipe_image.dart';
 
+/// "4 servings" for a bare count or range; "8 slices" keeps its own unit.
+/// Null when the recipe doesn't say.
+String? servingsLabel(AppLocalizations l10n, String? servings) {
+  final v = servings?.trim() ?? '';
+  if (v.isEmpty) return null;
+  return RegExp(r'[^\d\s.,/~\-–]').hasMatch(v) ? v : '$v ${l10n.servingsUnit}';
+}
+
 /// "25 min · 4 servings" — the one-line recipe summary used on cards/rows.
 String recipeMetaLine(AppLocalizations l10n, Recipe recipe) {
   final parts = <String>[
     if (formatTotalDuration(l10n, recipe.prepTimeMinutes, recipe.cookTimeMinutes)
         case final t?)
       t,
-    if (recipe.servings != null && recipe.servings!.trim().isNotEmpty)
-      // "8 slices" already names its unit; bare "4" / "4-6" gets "servings".
-      RegExp(r'[^\d\s.,/~\-–]').hasMatch(recipe.servings!.trim())
-          ? recipe.servings!.trim()
-          : '${recipe.servings!.trim()} ${l10n.servingsUnit}',
+    ?servingsLabel(l10n, recipe.servings),
   ];
   return parts.join(' · ');
 }

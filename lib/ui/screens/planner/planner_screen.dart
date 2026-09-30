@@ -14,8 +14,10 @@ import '../../../utils/recipe_title.dart';
 import '../../../services/shopping_list_generator.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
+import '../../../theme/tokens.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/color_picker_dialog.dart';
+import '../../widgets/recipe_cards.dart' show servingsLabel;
 import '../../widgets/recipe_image.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/sheet_chrome.dart';
@@ -848,11 +850,10 @@ class _WeekGridView extends StatelessWidget {
     required this.onOpenDay,
   });
 
-  static const double _minColumnWidth = 150.0;
+  static const double _minColumnWidth = 120.0;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final today = DateTime.now();
     final todayNormalized = DateTime(today.year, today.month, today.day);
 
@@ -867,7 +868,7 @@ class _WeekGridView extends StatelessWidget {
             children: [
               for (int i = 0; i < weekDates.length; i++) ...[
                 if (i > 0)
-                  VerticalDivider(width: 1, thickness: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+                  VerticalDivider(width: 1, thickness: 1, color: context.appColors.hairline),
                 if (useFixedWidth)
                   SizedBox(
                     width: _minColumnWidth,
@@ -931,41 +932,9 @@ class _DayColumn extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
     final mealsAsync = ref.watch(mealPlansForDateProvider(date));
 
-    // Reused by both empty (centred inline) and non-empty (pinned below) columns
-    // so an empty day no longer strands the button at the bottom of a tall void.
-    final addButton = InkWell(
-      onTap: onAddMeal,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: context.appColors.accent.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: context.appColors.accent.withValues(alpha: 0.30),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add, size: 16, color: context.appColors.accent),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                l10n.plannerAddMeal,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: context.appColors.accent,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    // A quiet "+ Add meal" row that always sits directly under the day's
+    // meals, so every column reads the same whether it's empty or full.
+    final addButton = _AddMealRow(label: l10n.plannerAddMeal, onTap: onAddMeal);
 
     return Container(
       color: isToday
@@ -977,12 +946,11 @@ class _DayColumn extends ConsumerWidget {
           InkWell(
             onTap: onOpenDay,
             child: Container(
+            width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                ),
+                bottom: BorderSide(color: context.appColors.hairline),
               ),
               color: isToday
                   ? context.appColors.accent.withValues(alpha: 0.15)
@@ -1053,32 +1021,6 @@ class _DayColumn extends ConsumerWidget {
               ),
               error: (_, __) => const Center(child: Icon(Icons.error_outline, size: 18)),
               data: (plans) {
-                if (plans.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.restaurant_menu_rounded,
-                            size: 22,
-                            color: context.appColors.textTertiary
-                                .withValues(alpha: 0.7)),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.plannerNoMeals,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: context.appColors.textTertiary,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: addButton,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
                 // Group by meal type and sort
                 final grouped = <String, List<MealPlanWithRecipe>>{};
                 for (final plan in plans) {
@@ -1092,18 +1034,12 @@ class _DayColumn extends ConsumerWidget {
                     return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
                   });
 
-                return Column(
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
                   children: [
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                        children: [
-                          for (final mealType in sortedKeys)
-                            for (final plan in grouped[mealType]!)
-                              _CompactMealCard(plan: plan),
-                        ],
-                      ),
-                    ),
+                    for (final mealType in sortedKeys)
+                      for (final plan in grouped[mealType]!)
+                        _CompactMealCard(plan: plan),
                     addButton,
                   ],
                 );
@@ -1111,6 +1047,56 @@ class _DayColumn extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Ghost "+ Add meal" row for the week grid: muted until hovered.
+class _AddMealRow extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _AddMealRow({required this.label, required this.onTap});
+
+  @override
+  State<_AddMealRow> createState() => _AddMealRowState();
+}
+
+class _AddMealRowState extends State<_AddMealRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final fg = _hover ? c.accent : c.textTertiary;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(6),
+          hoverColor: c.accent.withValues(alpha: 0.08),
+          child: SizedBox(
+            height: 34,
+            child: Row(
+              children: [
+                const SizedBox(width: 8),
+                Icon(Icons.add_rounded, size: 16, color: fg),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: fg),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1313,49 +1299,60 @@ class _PlannerHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
         child: Row(
           children: [
-            Flexible(
-              child: InkWell(
-                onTap: onPickDate,
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+            // The month title keeps its natural width; the range label is
+            // dropped first when the pane gets narrow.
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final showSubtitle = subtitle.isNotEmpty && box.maxWidth >= 380;
+                  return Row(
                     children: [
                       Flexible(
-                        child: Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colors.textPrimary,
+                        child: InkWell(
+                          onTap: onPickDate,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.headlineSmall?.copyWith(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: -0.3,
+                                      color: colors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(Icons.keyboard_arrow_down_rounded,
+                                    size: 22, color: colors.textSecondary),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down_rounded,
-                          size: 24, color: colors.textSecondary),
+                      if (showSubtitle) ...[
+                        const SizedBox(width: 10),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ],
-                  ),
-                ),
+                  );
+                },
               ),
             ),
-            if (subtitle.isNotEmpty) ...[
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-            const Spacer(),
+            const SizedBox(width: 12),
             if (showViewSwitcher) ...[
               _PlannerViewSwitcher(mode: viewMode, onChanged: onViewModeChanged),
               const SizedBox(width: 8),
@@ -1983,6 +1980,21 @@ class _PlannerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    // Desktop: the shell's content panel already floats, so the calendar is a
+    // flat hairline-framed surface inside it.
+    if (Responsive.isDesktopLayout(context)) {
+      final c = context.appColors;
+      return Container(
+        clipBehavior: Clip.antiAlias,
+        padding: padding,
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: Radii.lgAll,
+          border: Border.all(color: c.hairline),
+        ),
+        child: child,
+      );
+    }
     return Container(
       clipBehavior: Clip.antiAlias,
       padding: padding,
@@ -2129,7 +2141,7 @@ class _HourRow extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              width: 62,
+              width: 72,
               child: Text(
                 _clock(base, hour * 60),
                 style: theme.textTheme.labelSmall?.copyWith(
@@ -2230,12 +2242,12 @@ class _MealBlock extends ConsumerWidget {
     final t = plan.mealPlan.time;
     final subtitle = <String>[
       if (t != null) _clock(base, t.hour * 60 + t.minute),
-      if (r?.servings != null && r!.servings!.isNotEmpty) '${r.servings} ${l10n.servingsUnit}',
+      ?servingsLabel(l10n, r?.servings),
     ].join('  ·  ');
 
     return Padding(
-      // Left inset aligns the card with the hour divider (8 ListView + 62 label).
-      padding: const EdgeInsets.fromLTRB(70, 3, 4, 3),
+      // Left inset aligns the card with the hour divider (8 ListView + 72 label).
+      padding: const EdgeInsets.fromLTRB(80, 3, 4, 3),
       child: Dismissible(
         key: Key('tl_${plan.mealPlan.id}'),
         direction: selecting ? DismissDirection.none : DismissDirection.endToStart,
@@ -2485,8 +2497,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
     final subtitle = <String>[
       _mealTypeLabel(l10n, mp.mealType),
       currentTod.format(context),
-      if (r?.servings != null && r!.servings!.isNotEmpty)
-        '${r.servings} ${l10n.servingsUnit}',
+      ?servingsLabel(l10n, r?.servings),
     ].join(' · ');
 
     return Container(
