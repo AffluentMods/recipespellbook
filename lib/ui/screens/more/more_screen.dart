@@ -640,6 +640,7 @@ void showSubscriptionSheet(
                   label: Text(l10n.manageSubscription),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
+                    maximumSize: const Size.fromHeight(48),
                   ),
                 ),
               ),
