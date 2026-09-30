@@ -140,6 +140,13 @@ class AuthService {
   String? get currentJwt => _currentJwt;
   bool get isSignedIn => _currentUser != null && _currentJwt != null;
 
+  /// Test hook: act as [user] with [jwt] without going through a provider.
+  @visibleForTesting
+  void debugSetSession(AuthUser? user, String? jwt) {
+    _currentUser = user;
+    _currentJwt = jwt;
+  }
+
   // ════════════════════════════════════════════
   //  INITIALIZATION
   // ════════════════════════════════════════════

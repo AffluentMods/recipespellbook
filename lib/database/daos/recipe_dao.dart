@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:drift/drift.dart';
 import '../database.dart';
+import '../sync_journal.dart';
 import '../tables/ingredients.dart';
 import '../tables/recipe_links.dart';
 import '../tables/recipe_tags.dart';
@@ -322,6 +323,7 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       await (delete(ingredients)..where((i) => i.recipeId.equals(recipeId))).go();
       await (delete(steps)..where((s) => s.recipeId.equals(recipeId))).go();
       await (delete(recipes)..where((r) => r.id.equals(recipeId))).go();
+      await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.recipes, recipeId);
     });
   }
 
@@ -572,7 +574,13 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       ..where((l) => l.ingredientId.equals(ingredientId))
       ..where((l) => l.linkedRecipeId.equals(linkedId)))
         .go();
+    await _touch(sourceId);
   }
+
+  /// Links travel with their source recipe in sync, so it must look changed.
+  Future<void> _touch(String recipeId) =>
+      (update(recipes)..where((r) => r.id.equals(recipeId)))
+          .write(RecipesCompanion(updatedAt: Value(DateTime.now())));
 
   /// Update the scale of an ingredient→recipe link
   Future<void> updateIngredientRecipeLinkScale(
@@ -586,6 +594,7 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       ..where((l) => l.ingredientId.equals(ingredientId))
       ..where((l) => l.linkedRecipeId.equals(linkedId)))
         .write(RecipeLinksCompanion(scale: drift.Value(newScale)));
+    await _touch(sourceId);
   }
 
   /// Get linked recipes for a specific ingredient (with scale info)

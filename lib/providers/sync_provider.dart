@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
+import '../providers/cookbook_provider.dart';
+import '../providers/settings_provider.dart';
 import '../providers/subscription_provider.dart';
+import '../services/collab_service.dart';
 import '../services/sync_service.dart';
 
 // ════════════════════════════════════════════
@@ -64,10 +70,103 @@ class SyncNotifier extends StateNotifier<SyncState> {
   final Ref _ref;
   final _service = SyncService.instance;
 
+  /// Push this long after the last local edit (edits usually come in bursts).
+  static const _editDebounce = Duration(seconds: 4);
+
+  /// Background refresh while the app is in the foreground.
+  static const _foregroundInterval = Duration(minutes: 3);
+
+  /// Shared shopping lists poll faster — people shop together in real time.
+  static const _collabInterval = Duration(seconds: 20);
+
+  Timer? _editTimer;
+  Timer? _periodic;
+  Timer? _collabTimer;
+  StreamSubscription<Set<String>>? _changesSub;
+  StreamSubscription<SyncRekey>? _rekeySub;
+  AppLifecycleListener? _lifecycle;
+  bool _foreground = true;
+
   Future<void> _init() async {
     final lastSync = await _service.getLastSyncAt();
-    if (lastSync != null) {
+    if (lastSync != null && mounted) {
       state = state.copyWith(lastSyncAt: lastSync);
+    }
+
+    // Sync as soon as someone signs in (or gains Cloud Sync) — not only on
+    // the next launch.
+    _ref.listen<bool>(authProvider.select((a) => a.isSignedIn), (prev, signedIn) {
+      if (signedIn && prev != true) {
+        // Rate-limited: at launch main.dart already kicked off a sync.
+        Future.delayed(const Duration(seconds: 1), () => autoSync());
+        _syncCollab();
+      }
+    });
+    _ref.listen<bool>(subscriptionProvider.select((s) => s.tier.hasCloudSync), (prev, has) {
+      if (has && prev == false) autoSync(force: true);
+    });
+
+    _changesSub = _service.localChanges.listen(_onLocalChange);
+    _rekeySub = _service.rekeys.listen(_onRekey);
+
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        _foreground = true;
+        _syncCollab();
+      },
+      onHide: () {
+        _foreground = false;
+        // Leaving the app: push pending edits now rather than in a few seconds.
+        if (_editTimer?.isActive ?? false) {
+          _editTimer!.cancel();
+          autoSync(force: true);
+        }
+      },
+    );
+
+    _periodic = Timer.periodic(_foregroundInterval, (_) {
+      if (_foreground) autoSync();
+    });
+    _collabTimer = Timer.periodic(_collabInterval, (_) {
+      if (_foreground) _syncCollab();
+    });
+  }
+
+  @override
+  void dispose() {
+    _editTimer?.cancel();
+    _periodic?.cancel();
+    _collabTimer?.cancel();
+    _changesSub?.cancel();
+    _rekeySub?.cancel();
+    _lifecycle?.dispose();
+    super.dispose();
+  }
+
+  void _onLocalChange(Set<String> tables) {
+    if (!_isSignedIn) return;
+    if (tables.any((t) => t == 'shopping_lists' || t == 'shopping_list_items') &&
+        CollabService.instance.collabListIds.isNotEmpty) {
+      _syncCollab();
+    }
+    if (!_hasCloudSync) return;
+    _editTimer?.cancel();
+    _editTimer = Timer(_editDebounce, () => autoSync(force: true));
+  }
+
+  void _syncCollab() {
+    if (!_isSignedIn || CollabService.instance.collabListIds.isEmpty) return;
+    CollabService.instance.syncNow();
+  }
+
+  /// Follow a cookbook that moved to a new id (see SyncService re-keying).
+  void _onRekey(SyncRekey r) {
+    if (r.entity != 'cookbooks') return;
+    if (_ref.read(selectedCookbookIdProvider) == r.from) {
+      _ref.read(selectedCookbookIdProvider.notifier).state = r.to;
+    }
+    if (_ref.read(settingsProvider).currentCookbookId == r.from) {
+      _ref.read(settingsProvider.notifier).setCurrentCookbook(r.to);
     }
   }
 
@@ -80,6 +179,23 @@ class SyncNotifier extends StateNotifier<SyncState> {
   /// Whether the user is signed in.
   bool get _isSignedIn {
     return _ref.read(authProvider).isSignedIn;
+  }
+
+  void _apply(SyncResult result, {bool quiet = false}) {
+    if (!mounted) return;
+    if (result.success) {
+      state = state.copyWith(
+        status: SyncStatus.success,
+        lastSyncAt: result.syncedAt ?? DateTime.now(),
+        pushedCount: result.pushedCount,
+        pulledCount: result.pulledCount,
+      );
+    } else if (quiet) {
+      // Background syncs don't nag about transient network trouble.
+      state = state.copyWith(status: SyncStatus.idle);
+    } else {
+      state = state.copyWith(status: SyncStatus.error, error: result.error);
+    }
   }
 
   /// Run a sync if the user is eligible (signed in + cloud sync tier).
@@ -102,122 +218,34 @@ class SyncNotifier extends StateNotifier<SyncState> {
     }
 
     state = state.copyWith(status: SyncStatus.syncing, error: null);
-
     final result = await _service.sync(fullSync: fullSync);
-
-    if (result.success) {
-      state = state.copyWith(
-        status: SyncStatus.success,
-        lastSyncAt: result.syncedAt,
-        pushedCount: result.pushedCount,
-        pulledCount: result.pulledCount,
-      );
-    } else {
-      state = state.copyWith(
-        status: SyncStatus.error,
-        error: result.error,
-      );
-    }
-
+    _apply(result);
+    _syncCollab();
     return result;
   }
 
-  /// Pull-only sync (for new device setup).
-  Future<SyncResult> pullOnly() async {
-    if (!_isSignedIn || !_hasCloudSync) {
-      return const SyncResult.failure('Not eligible for sync');
-    }
+  /// Kept for existing callers — same as [sync].
+  Future<SyncResult> pullOnly() => sync();
 
-    state = state.copyWith(status: SyncStatus.syncing, error: null);
-
-    final result = await _service.pullOnly();
-
-    if (result.success) {
-      state = state.copyWith(
-        status: SyncStatus.success,
-        lastSyncAt: result.syncedAt,
-        pulledCount: result.pulledCount,
-      );
-    } else {
-      state = state.copyWith(
-        status: SyncStatus.error,
-        error: result.error,
-      );
-    }
-
-    return result;
-  }
-
-  /// Minimum interval between auto-syncs to prevent rapid loops.
+  /// Minimum interval between timer/lifecycle-driven syncs.
   static const _minAutoSyncInterval = Duration(seconds: 30);
   DateTime? _lastAutoSync;
 
-  /// Whether we've already attempted a recovery full-sync this session.
-  bool _recoveryAttempted = false;
-
-  /// Auto-sync: silently attempt sync. Does not update error state
-  /// on failure (to avoid spamming the UI on transient network issues).
-  ///
-  /// Includes automatic recovery: if an incremental sync exchanges only
-  /// metadata (0 recipes/shopping items pushed or pulled) but the client
-  /// has real entities locally, one full sync is triggered to repair
-  /// poisoned timestamps. This only happens once per session.
-  Future<void> autoSync() async {
+  /// Background sync: silent on failure. [force] skips the rate limit (used
+  /// after an edit or sign-in, where the user expects it to go now).
+  Future<void> autoSync({bool force = false}) async {
     if (!_isSignedIn || !_hasCloudSync) return;
-    if (state.isSyncing) return;
-
-    // Debounce: prevent rapid successive auto-syncs
-    if (_lastAutoSync != null &&
+    if (!force &&
+        _lastAutoSync != null &&
         DateTime.now().difference(_lastAutoSync!) < _minAutoSyncInterval) {
-      debugPrint('[SyncProvider] Auto-sync skipped — too soon (${DateTime.now().difference(_lastAutoSync!).inSeconds}s)');
       return;
     }
     _lastAutoSync = DateTime.now();
 
-    debugPrint('[SyncProvider] Auto-sync starting...');
-
-    state = state.copyWith(status: SyncStatus.syncing);
+    if (mounted) state = state.copyWith(status: SyncStatus.syncing);
     final result = await _service.sync();
-
-    if (result.success) {
-      state = state.copyWith(
-        status: SyncStatus.success,
-        lastSyncAt: result.syncedAt,
-        pushedCount: result.pushedCount,
-        pulledCount: result.pulledCount,
-      );
-      debugPrint('[SyncProvider] Auto-sync complete: '
-          '+${result.pushedCount} pushed, +${result.pulledCount} pulled');
-
-      // Recovery detection: if incremental sync exchanged only small-table
-      // metadata but we have real content locally, timestamps are poisoned.
-      // Do ONE full sync to repair.
-      if (!_recoveryAttempted && result.pushedCount > 0) {
-        final needsRecovery = await _service.needsFullSyncRecovery();
-        if (needsRecovery) {
-          _recoveryAttempted = true;
-          debugPrint('[SyncProvider] Detected stale sync state — triggering recovery full sync');
-          state = state.copyWith(status: SyncStatus.syncing);
-          final recovery = await _service.sync(fullSync: true);
-          if (recovery.success) {
-            state = state.copyWith(
-              status: SyncStatus.success,
-              lastSyncAt: recovery.syncedAt,
-              pushedCount: recovery.pushedCount,
-              pulledCount: recovery.pulledCount,
-            );
-            debugPrint('[SyncProvider] Recovery sync complete: '
-                '+${recovery.pushedCount} pushed, +${recovery.pulledCount} pulled');
-          }
-        } else {
-          _recoveryAttempted = true; // No recovery needed, don't check again
-        }
-      }
-    } else {
-      // Silently revert to idle on failure — don't show errors for auto-sync
-      state = state.copyWith(status: SyncStatus.idle);
-      debugPrint('[SyncProvider] Auto-sync failed: ${result.error}');
-    }
+    _apply(result, quiet: true);
+    if (!result.success) debugPrint('[SyncProvider] Auto-sync failed: ${result.error}');
   }
 
   /// Reset sync UI state (e.g. on sign-out).

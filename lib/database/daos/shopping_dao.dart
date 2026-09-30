@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import '../../utils/ingredient_utils.dart';
 import '../database.dart';
+import '../sync_journal.dart';
 import '../tables/shopping_categories.dart';
 import '../tables/shopping_list_items.dart';
 import '../tables/shopping_lists.dart';
@@ -38,10 +39,11 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
   /// Mark [id] as the single default list, clearing the flag on every other.
   Future<void> setDefaultList(String id) async {
     await transaction(() async {
+      final now = DateTime.now();
       await (update(shoppingLists)..where((t) => t.isDefault.equals(true)))
-          .write(const ShoppingListsCompanion(isDefault: Value(false)));
+          .write(ShoppingListsCompanion(isDefault: const Value(false), updatedAt: Value(now)));
       await (update(shoppingLists)..where((t) => t.id.equals(id)))
-          .write(const ShoppingListsCompanion(isDefault: Value(true)));
+          .write(ShoppingListsCompanion(isDefault: const Value(true), updatedAt: Value(now)));
     });
   }
 
@@ -50,20 +52,33 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
   }
 
   Future<void> updateList(String id, ShoppingListsCompanion list) {
-    return (update(shoppingLists)..where((t) => t.id.equals(id))).write(list);
+    return (update(shoppingLists)..where((t) => t.id.equals(id)))
+        .write(list.copyWith(updatedAt: Value(DateTime.now())));
   }
 
   Future<void> updateListName(String id, String name) {
     return (update(shoppingLists)..where((t) => t.id.equals(id)))
-        .write(ShoppingListsCompanion(name: Value(name)));
+        .write(ShoppingListsCompanion(name: Value(name), updatedAt: Value(DateTime.now())));
   }
 
   /// Delete a shopping list and all its items.
   Future<void> deleteList(String id) async {
     await transaction(() async {
+      final itemIds = await _itemIds(shoppingListItems.listId.equals(id));
       await (delete(shoppingListItems)..where((t) => t.listId.equals(id))).go();
       await (delete(shoppingLists)..where((t) => t.id.equals(id))).go();
+      await SyncJournal.recordDeletions(attachedDatabase, SyncJournal.shoppingListItems, itemIds.keys,
+          parents: itemIds);
+      await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.shoppingLists, id);
     });
+  }
+
+  /// Item id → list id for the items matching [where].
+  Future<Map<String, String>> _itemIds(Expression<bool> where) async {
+    final q = selectOnly(shoppingListItems)
+      ..addColumns([shoppingListItems.id, shoppingListItems.listId])
+      ..where(where);
+    return {for (final r in await q.get()) r.read(shoppingListItems.id)!: r.read(shoppingListItems.listId)!};
   }
 
   // ============ SHOPPING LIST ITEMS ============
@@ -117,8 +132,10 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
     return (update(shoppingListItems)..where((t) => t.id.equals(id))).write(companion);
   }
 
-  Future<void> deleteItem(String id) {
-    return (delete(shoppingListItems)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteItem(String id) async {
+    final ids = await _itemIds(shoppingListItems.id.equals(id));
+    await (delete(shoppingListItems)..where((t) => t.id.equals(id))).go();
+    await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.shoppingListItems, id, parentId: ids[id]);
   }
 
   /// Move an item to a different shopping list.
@@ -132,27 +149,31 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
 
   Future<void> toggleItemChecked(String id, bool checked) {
     return (update(shoppingListItems)..where((t) => t.id.equals(id)))
-        .write(ShoppingListItemsCompanion(isChecked: Value(checked)));
+        .write(ShoppingListItemsCompanion(isChecked: Value(checked), updatedAt: Value(DateTime.now())));
   }
 
   Future<void> checkAllItems(String listId) {
     return (update(shoppingListItems)..where((t) => t.listId.equals(listId)))
-        .write(const ShoppingListItemsCompanion(isChecked: Value(true)));
+        .write(ShoppingListItemsCompanion(isChecked: const Value(true), updatedAt: Value(DateTime.now())));
   }
 
   Future<void> uncheckAllItems(String listId) {
     return (update(shoppingListItems)..where((t) => t.listId.equals(listId)))
-        .write(const ShoppingListItemsCompanion(isChecked: Value(false)));
+        .write(ShoppingListItemsCompanion(isChecked: const Value(false), updatedAt: Value(DateTime.now())));
   }
 
-  Future<void> deleteCheckedItems(String listId) {
-    return (delete(shoppingListItems)
+  Future<void> deleteCheckedItems(String listId) async {
+    final ids = await _itemIds(shoppingListItems.listId.equals(listId) & shoppingListItems.isChecked.equals(true));
+    await (delete(shoppingListItems)
       ..where((t) => t.listId.equals(listId) & t.isChecked.equals(true)))
         .go();
+    await SyncJournal.recordDeletions(attachedDatabase, SyncJournal.shoppingListItems, ids.keys, parents: ids);
   }
 
-  Future<void> deleteAllItemsInList(String listId) {
-    return (delete(shoppingListItems)..where((t) => t.listId.equals(listId))).go();
+  Future<void> deleteAllItemsInList(String listId) async {
+    final ids = await _itemIds(shoppingListItems.listId.equals(listId));
+    await (delete(shoppingListItems)..where((t) => t.listId.equals(listId))).go();
+    await SyncJournal.recordDeletions(attachedDatabase, SyncJournal.shoppingListItems, ids.keys, parents: ids);
   }
 
   // ============ SMART STACKING ============
@@ -470,18 +491,21 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
     return into(shoppingCategories).insert(category);
   }
 
-  Future<void> updateShoppingCategoryName(String id, String name) {
-    return (update(shoppingCategories)..where((t) => t.id.equals(id)))
+  Future<void> updateShoppingCategoryName(String id, String name) async {
+    await (update(shoppingCategories)..where((t) => t.id.equals(id)))
         .write(ShoppingCategoriesCompanion(name: Value(name)));
+    await SyncJournal.touch(attachedDatabase, SyncJournal.shoppingCategories, id);
   }
 
-  Future<void> updateShoppingCategorySortOrder(String id, int sortOrder) {
-    return (update(shoppingCategories)..where((t) => t.id.equals(id)))
+  Future<void> updateShoppingCategorySortOrder(String id, int sortOrder) async {
+    await (update(shoppingCategories)..where((t) => t.id.equals(id)))
         .write(ShoppingCategoriesCompanion(sortOrder: Value(sortOrder)));
+    await SyncJournal.touch(attachedDatabase, SyncJournal.shoppingCategories, id);
   }
 
-  Future<void> deleteShoppingCategory(String id) {
-    return (delete(shoppingCategories)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteShoppingCategory(String id) async {
+    await (delete(shoppingCategories)..where((t) => t.id.equals(id))).go();
+    await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.shoppingCategories, id);
   }
 
   // ============ USER INGREDIENT MAPPINGS ============

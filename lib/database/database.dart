@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'connection.dart';
+import 'sync_journal.dart';
 import 'daos/category_dao.dart';
 import 'daos/cookbook_dao.dart';
 import 'daos/custom_taxonomy_dao.dart';
@@ -70,6 +72,10 @@ part 'database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  /// For tests: run against any executor (e.g. an in-memory database).
+  @visibleForTesting
+  AppDatabase.forTesting(super.executor);
+
   @override
   int get schemaVersion => 10;
 
@@ -96,6 +102,9 @@ class AppDatabase extends _$AppDatabase {
       onCreate: (Migrator m) async {
         await m.createAll();
         await _seedDefaultData();
+      },
+      beforeOpen: (details) async {
+        await SyncJournal.ensureTables(this);
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 2) {
