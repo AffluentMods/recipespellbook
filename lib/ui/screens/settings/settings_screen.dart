@@ -13,6 +13,10 @@ import '../../../providers/database_provider.dart';
 // import '../../../providers/kitchen_buddy_provider.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/tokens.dart';
+import '../../../utils/avatar_url.dart';
+import '../../widgets/app_controls.dart';
+import 'account_screen.dart';
 
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
@@ -52,6 +56,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   String _query = '';
+
+  /// Desktop two-pane: the section shown on the right (by title), or
+  /// [_accountKey] for the account page. Null = first section.
+  String? _desktopSection;
+  static const _accountKey = '__account';
+
+  /// Desktop: sub-pages (allergies, tags, trash…) open inside the right pane.
+  final GlobalKey<NavigatorState> _paneNavKey = GlobalKey<NavigatorState>();
   @override
   void dispose() {
     _searchController.dispose();
@@ -66,6 +78,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _openSettingsPanel(Widget screen, {double maxWidth = 800, double maxHeight = 600}) {
+    // Desktop two-pane: open the sub-page inside the right pane (its own
+    // navigator, so its back button returns to the section).
+    final pane = _paneNavKey.currentState;
+    if (Responsive.isDesktopLayout(context) && pane != null) {
+      pane.push(MaterialPageRoute(builder: (_) => screen));
+      return;
+    }
     if (Responsive.isDesktopLayout(context)) {
       showDialog(
         context: context,
@@ -335,6 +354,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ]),
     ].whereType<Widget>().toList();
 
+    if (Responsive.isDesktopLayout(context)) {
+      return _buildDesktop(context, sections, auth);
+    }
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -375,6 +398,191 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Column(children: sections),
               )),
             ),
+        ],
+      ),
+    );
+  }
+
+  // ─── DESKTOP: section list + page (like System Settings) ───
+
+  void _selectDesktopSection(String key) {
+    _paneNavKey.currentState?.popUntil((r) => r.isFirst);
+    setState(() => _desktopSection = key);
+  }
+
+  Widget _buildDesktop(BuildContext context, List<Widget> sections, AuthState auth) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
+    final named = sections.whereType<_Section>().toList();
+    final selectedKey = _desktopSection ?? (named.isNotEmpty ? named.first.title : _accountKey);
+    final selected = named.where((s) => s.title == selectedKey).firstOrNull;
+
+    Widget page;
+    if (_query.isNotEmpty) {
+      page = named.isEmpty
+          ? Center(
+              child: Text(l10n.settingsNoMatchingSettings,
+                  style: TextStyle(color: c.textTertiary)),
+            )
+          : Responsive.constrainScrollable(
+              maxWidth: 720,
+              minHorizontal: Space.xxl,
+              bottom: Space.huge,
+              builder: (context, pad) => ListView(
+                padding: pad,
+                children: [for (final s in named) s],
+              ),
+            );
+    } else if (selectedKey == _accountKey || selected == null) {
+      page = const AccountScreen();
+    } else {
+      page = Responsive.constrainScrollable(
+        maxWidth: 720,
+        minHorizontal: Space.xxl,
+        top: Space.xl,
+        bottom: Space.huge,
+        builder: (context, pad) => ListView(
+          padding: pad,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.md, 0, Space.md, Space.sm),
+              child: Text(
+                selected.title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: c.textPrimary,
+                    ),
+              ),
+            ),
+            _Section(
+              title: selected.title,
+              icon: selected.icon,
+              showTitle: false,
+              children: selected.children,
+            ),
+          ],
+        ),
+      );
+    }
+
+    final user = auth.user;
+    final avatarUrl = user?.avatarUrl;
+    final hasAvatar = auth.isSignedIn && avatarUrl != null && avatarUrl.isNotEmpty;
+
+    return Scaffold(
+      backgroundColor: c.surface,
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 264,
+            child: ColoredBox(
+              color: c.textPrimary.withValues(alpha: 0.018),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(Space.md, Space.xl, Space.md, Space.xl),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(Space.sm, 0, Space.sm, Space.md),
+                    child: Text(
+                      l10n.settingsTitle,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            color: c.textPrimary,
+                          ),
+                    ),
+                  ),
+                  ToolbarSearchField(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    hintText: l10n.settingsSearchHint,
+                    width: double.infinity,
+                    onChanged: (q) => setState(() => _query = q.trim()),
+                  ),
+                  const SizedBox(height: Space.md),
+                  // Account
+                  Material(
+                    color: selectedKey == _accountKey && _query.isEmpty ? c.selectedFill : Colors.transparent,
+                    borderRadius: Radii.mdAll,
+                    child: InkWell(
+                      onTap: () => _selectDesktopSection(_accountKey),
+                      borderRadius: Radii.mdAll,
+                      hoverColor: c.hoverFill,
+                      splashFactory: NoSplash.splashFactory,
+                      child: Padding(
+                        padding: const EdgeInsets.all(Space.sm + 2),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor: c.accent.withValues(alpha: 0.16),
+                              backgroundImage: hasAvatar ? NetworkImage(resolveAvatarUrl(avatarUrl)) : null,
+                              onBackgroundImageError: hasAvatar ? (_, _) {} : null,
+                              child: hasAvatar
+                                  ? null
+                                  : Icon(Icons.person_outline_rounded, size: 18, color: c.accent),
+                            ),
+                            const SizedBox(width: Space.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    auth.isSignedIn ? (user?.displayName ?? l10n.accountTitle) : l10n.signIn,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary),
+                                  ),
+                                  Text(
+                                    auth.isSignedIn ? (user?.email ?? '') : l10n.sidebarSignInToSync,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 12, color: c.textTertiary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: Space.sm),
+                  for (final section in named)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 1),
+                      child: NavRow(
+                        icon: section.icon,
+                        label: section.title,
+                        selected: _query.isEmpty && section.title == selectedKey,
+                        onTap: () {
+                          if (_query.isNotEmpty) {
+                            _searchController.clear();
+                            _query = '';
+                          }
+                          _selectDesktopSection(section.title);
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          VerticalDivider(width: 1, thickness: 1, color: c.hairline),
+          Expanded(
+            child: _SettingsPaneContent(
+              page: page,
+              child: Navigator(
+                key: _paneNavKey,
+                onGenerateRoute: (_) => PageRouteBuilder(
+                  pageBuilder: (context, _, _) => const _SettingsPaneRoot(),
+                  transitionDuration: Duration.zero,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -880,11 +1088,34 @@ class _TierBadge extends ConsumerWidget {
 
 enum _ResetScope { local, all }
 
+/// Hands the desktop settings pane's current page to the pane navigator's
+/// root route (which is built once), so switching sections just rebuilds it.
+class _SettingsPaneContent extends InheritedWidget {
+  final Widget page;
+  const _SettingsPaneContent({required this.page, required super.child});
+
+  @override
+  bool updateShouldNotify(_SettingsPaneContent oldWidget) => oldWidget.page != page;
+}
+
+class _SettingsPaneRoot extends StatelessWidget {
+  const _SettingsPaneRoot();
+
+  @override
+  Widget build(BuildContext context) {
+    final page = context.dependOnInheritedWidgetOfExactType<_SettingsPaneContent>()?.page;
+    return Material(color: context.appColors.surface, child: page ?? const SizedBox.shrink());
+  }
+}
+
 class _Section extends StatelessWidget {
   final String title;
   final IconData icon;
   final List<Widget> children;
-  const _Section({required this.title, required this.icon, required this.children});
+
+  /// False when the page already titles the section (desktop pane).
+  final bool showTitle;
+  const _Section({required this.title, required this.icon, required this.children, this.showTitle = true});
 
   @override
   Widget build(BuildContext context) {
@@ -892,7 +1123,7 @@ class _Section extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final bg = isDark ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surfaceContainerLowest;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Padding(
+      if (showTitle) Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
         child: Row(children: [
           Icon(icon, size: 14, color: theme.colorScheme.outline),
