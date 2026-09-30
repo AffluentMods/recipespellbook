@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 import 'auth_service.dart';
+
+const _apiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://api.recipespellbook.app');
 
 // ════════════════════════════════════════════
 //  MODELS
@@ -111,6 +114,90 @@ class FamilyShareInfo {
   bool get isShoppingList => resourceType == 'shopping_list';
 }
 
+/// Why a family / invite request failed, so the UI can offer the right fix
+/// (sign in again, upgrade, try another code…) instead of a generic error.
+enum InviteErrorKind {
+  /// Not signed in on this device.
+  signedOut,
+
+  /// Signed in, but the server rejected the session (401) — sign in again.
+  sessionExpired,
+
+  /// The signed-in user's plan doesn't include this (403).
+  subscriptionRequired,
+
+  /// The owner's plan lapsed, so the shared item can't sync to members.
+  ownerSubscriptionRequired,
+
+  /// Unknown / expired code, or the shared item was deleted.
+  notFound,
+
+  /// A one-time copy link was used where a live invite was expected.
+  notCollab,
+
+  /// The family has no free seats.
+  familyFull,
+
+  /// Already in a different family (must leave it first).
+  alreadyInFamily,
+
+  /// No connection / server unreachable.
+  network,
+
+  /// Anything else — see the accompanying server message.
+  other,
+}
+
+/// Details of a family invite, shown before joining ("Join the Smiths?").
+class FamilyInvitePreview {
+  final String familyName;
+  final String? ownerName;
+  final String? ownerAvatarUrl;
+  final int memberCount;
+  final int maxMembers;
+  final bool isFull;
+  final bool alreadyMember;
+
+  /// Name of the family the user is already in, when it's a different one.
+  final String? currentFamilyName;
+
+  const FamilyInvitePreview({
+    required this.familyName, this.ownerName, this.ownerAvatarUrl,
+    required this.memberCount, required this.maxMembers, required this.isFull,
+    this.alreadyMember = false, this.currentFamilyName,
+  });
+
+  factory FamilyInvitePreview.fromJson(Map<String, dynamic> json) {
+    final count = (json['memberCount'] as num?)?.toInt() ?? 0;
+    final max = (json['maxMembers'] as num?)?.toInt() ?? 5;
+    return FamilyInvitePreview(
+      familyName: (json['familyName'] as String?) ?? '',
+      ownerName: json['ownerName'] as String?,
+      ownerAvatarUrl: json['ownerAvatarUrl'] as String?,
+      memberCount: count,
+      maxMembers: max,
+      isFull: (json['isFull'] as bool?) ?? count >= max,
+      alreadyMember: (json['alreadyMember'] as bool?) ?? false,
+      currentFamilyName: json['currentFamilyName'] as String?,
+    );
+  }
+}
+
+/// A successful collaboration join.
+class ShareJoinInfo {
+  final String resourceType;
+  final String resourceId;
+  final String permission;
+
+  /// The link is the current user's own — nothing was joined.
+  final bool isOwner;
+
+  const ShareJoinInfo({
+    required this.resourceType, required this.resourceId,
+    required this.permission, this.isOwner = false,
+  });
+}
+
 /// A temporary one-time share link.
 class ShareLinkInfo {
   final String code;
@@ -170,39 +257,90 @@ class FamilyService {
     return null;
   }
 
-  Future<({bool success, String? error, FamilyInfo? family})> createFamily(String name) async {
+  /// Create a family owned by the current user. On failure [error] says why;
+  /// [message] carries the server's wording for [InviteErrorKind.other].
+  Future<({bool success, InviteErrorKind? error, String? message, FamilyInfo? family})>
+      createFamily(String name) async {
     if (!_auth.isSignedIn) {
-      return (success: false, error: 'Sign in to create a family', family: null);
+      return (success: false, error: InviteErrorKind.signedOut, message: null, family: null);
     }
     try {
       final response = await _auth.post('/v1/family', {'name': name});
       if (response.statusCode == 201) {
         _cachedFamily = FamilyInfo.fromJson(jsonDecode(response.body)['family']);
-        return (success: true, error: null, family: _cachedFamily);
+        return (success: true, error: null, message: null, family: _cachedFamily);
       }
-      if (response.statusCode == 401 || response.statusCode == 403) {
-        return (success: false, error: 'Cloud Sync subscription required to create a family', family: null);
-      }
-      return (success: false, error: _parseError(response), family: null);
-    } catch (e) { return (success: false, error: 'Connection error', family: null); }
+      final (kind, message) = _classifyError(response, forbidden: InviteErrorKind.subscriptionRequired);
+      return (success: false, error: kind, message: message, family: null);
+    } catch (e) {
+      return (success: false, error: InviteErrorKind.network, message: null, family: null);
+    }
   }
 
-  Future<({bool success, String? error, String? familyName})> joinFamily(String inviteCode) async {
+  /// Join the family with [inviteCode]. Joining never needs a paid plan — the
+  /// owner's plan covers the family — so a 403 here is NOT "subscription
+  /// required" (it's e.g. a disabled account); 401 means the session expired.
+  Future<({bool success, InviteErrorKind? error, String? message, String? familyName})>
+      joinFamily(String inviteCode) async {
     if (!_auth.isSignedIn) {
-      return (success: false, error: 'Sign in to join a family', familyName: null);
+      return (success: false, error: InviteErrorKind.signedOut, message: null, familyName: null);
     }
     try {
-      final response = await _auth.post('/v1/family/join', {'inviteCode': inviteCode});
+      final response = await _auth.post('/v1/family/join', {'inviteCode': inviteCode.trim()});
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         await getFamily();
-        return (success: true, error: null, familyName: data['familyName'] as String?);
+        return (success: true, error: null, message: null, familyName: data['familyName'] as String?);
       }
-      if (response.statusCode == 401 || response.statusCode == 403) {
-        return (success: false, error: 'Cloud Sync subscription required to join a family', familyName: null);
+      final (kind, message) = _classifyError(response);
+      return (success: false, error: kind, message: message, familyName: null);
+    } catch (e) {
+      return (success: false, error: InviteErrorKind.network, message: null, familyName: null);
+    }
+  }
+
+  /// Look up a family invite before joining it. [unsupported] is true when the
+  /// server predates the preview endpoint — callers can still offer to join.
+  Future<({FamilyInvitePreview? preview, InviteErrorKind? error, bool unsupported})>
+      previewFamilyInvite(String inviteCode) async {
+    if (!_auth.isSignedIn) {
+      return (preview: null, error: InviteErrorKind.signedOut, unsupported: false);
+    }
+    try {
+      final r = await _auth.get('/v1/family/invite/${Uri.encodeComponent(inviteCode.trim())}');
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body) as Map<String, dynamic>;
+        return (
+          preview: FamilyInvitePreview.fromJson(data['invite'] as Map<String, dynamic>),
+          error: null,
+          unsupported: false,
+        );
       }
-      return (success: false, error: _parseError(response), familyName: null);
-    } catch (e) { return (success: false, error: 'Connection error', familyName: null); }
+      // Our 404 is JSON ({error, code}); Express's own "Cannot GET" 404 for an
+      // unknown route is HTML — that means an older server without previews.
+      if (r.statusCode == 404 && _errorBody(r) == null) {
+        return (preview: null, error: null, unsupported: true);
+      }
+      final (kind, _) = _classifyError(r);
+      return (preview: null, error: kind, unsupported: false);
+    } catch (e) {
+      debugPrint('[Family] previewInvite: $e');
+      return (preview: null, error: InviteErrorKind.network, unsupported: false);
+    }
+  }
+
+  /// Check whether [code] is a live share link (public, no auth). Returns the
+  /// HTTP status (200 found, 404 unknown, 410 expired) or null when offline.
+  Future<int?> probeShareCode(String code) async {
+    try {
+      final r = await http
+          .get(Uri.parse('$_apiUrl/v1/share/${Uri.encodeComponent(code)}'))
+          .timeout(const Duration(seconds: 10));
+      return r.statusCode;
+    } catch (e) {
+      debugPrint('[Share] probe: $e');
+      return null;
+    }
   }
 
   Future<bool> leaveFamily() async {
@@ -377,22 +515,38 @@ class FamilyService {
   }
 
   /// Join a collaboration invite by code. Returns the resource + granted
-  /// permission, or null on failure (e.g. paywalled cookbook, expired link).
-  Future<({String resourceType, String resourceId, String permission})?>
+  /// permission, or why it failed (expired link, paywalled cookbook, expired
+  /// session…) so the caller can offer the right next step.
+  Future<({ShareJoinInfo? joined, InviteErrorKind? error, String? message})>
       joinShareLink(String code) async {
+    if (!_auth.isSignedIn) {
+      return (joined: null, error: InviteErrorKind.signedOut, message: null);
+    }
     try {
-      final r = await _auth.post('/v1/share/$code/join', {});
+      final r = await _auth.post('/v1/share/${Uri.encodeComponent(code)}/join', {});
       if (r.statusCode == 200) {
         final d = jsonDecode(r.body) as Map<String, dynamic>;
         return (
-          resourceType: d['resourceType'] as String,
-          resourceId: d['resourceId'] as String,
-          permission: (d['permission'] as String?) ?? 'read',
+          joined: ShareJoinInfo(
+            resourceType: d['resourceType'] as String,
+            resourceId: d['resourceId'] as String,
+            permission: (d['permission'] as String?) ?? 'read',
+            isOwner: d['owner'] == true,
+          ),
+          error: null,
+          message: null,
         );
       }
-      debugPrint('[Share] join failed: ${_parseError(r)}');
-    } catch (e) { debugPrint('[Share] join: $e'); }
-    return null;
+      debugPrint('[Share] join failed (${r.statusCode}): ${_parseError(r)}');
+      if (r.statusCode == 400) {
+        return (joined: null, error: InviteErrorKind.notCollab, message: null);
+      }
+      final (kind, message) = _classifyError(r, forbidden: InviteErrorKind.subscriptionRequired);
+      return (joined: null, error: kind, message: message);
+    } catch (e) {
+      debugPrint('[Share] join: $e');
+      return (joined: null, error: InviteErrorKind.network, message: null);
+    }
   }
 
   /// Pull collaborative shopping lists shared with me (free channel). Returns
@@ -469,5 +623,52 @@ class FamilyService {
     try {
       return jsonDecode(response.body)['error'] ?? 'Unknown error';
     } catch (_) { return 'Request failed'; }
+  }
+
+  /// The decoded JSON error body, or null when the body isn't a JSON object.
+  Map<String, dynamic>? _errorBody(http.Response r) {
+    try {
+      final d = jsonDecode(r.body);
+      return d is Map<String, dynamic> ? d : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Map a failed family / share response to an [InviteErrorKind]. Prefers the
+  /// server's machine-readable `code`; falls back to the status for older
+  /// servers. [forbidden] is what a code-less 403 means for this endpoint.
+  (InviteErrorKind, String?) _classifyError(http.Response r,
+      {InviteErrorKind forbidden = InviteErrorKind.other}) {
+    final body = _errorBody(r);
+    final message = body?['error'] as String?;
+    switch (body?['code']) {
+      case 'invalid_code' || 'not_found' || 'resource_gone':
+        return (InviteErrorKind.notFound, message);
+      case 'family_full':
+        return (InviteErrorKind.familyFull, message);
+      case 'already_in_family':
+        return (InviteErrorKind.alreadyInFamily, message);
+      case 'subscription_required':
+        return (InviteErrorKind.subscriptionRequired, message);
+      case 'owner_subscription_required':
+        return (InviteErrorKind.ownerSubscriptionRequired, message);
+      case 'not_collab':
+        return (InviteErrorKind.notCollab, message);
+    }
+    switch (r.statusCode) {
+      case 401:
+        return (InviteErrorKind.sessionExpired, message);
+      case 403:
+        // requireAuth answers 403 for disabled accounts on every route.
+        return (message == 'Account disabled' ? InviteErrorKind.other : forbidden, message);
+      case 404 || 410:
+        return (InviteErrorKind.notFound, message);
+      case 409:
+        // Older servers send no code: "Family is full" vs "Already in a family".
+        final full = (message ?? '').toLowerCase().contains('full');
+        return (full ? InviteErrorKind.familyFull : InviteErrorKind.alreadyInFamily, message);
+    }
+    return (InviteErrorKind.other, message);
   }
 }

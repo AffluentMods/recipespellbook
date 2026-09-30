@@ -19,6 +19,7 @@ import '../../utils/responsive_utils.dart';
 import '../../utils/platform_utils.dart';
 import '../../providers/cookbook_provider.dart';
 import 'app_snackbar.dart';
+import 'join_with_link_dialog.dart';
 import 'new_recipe_dialog.dart';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -91,9 +92,24 @@ class AppMenuDrawer extends ConsumerWidget {
                       });
                     },
                   ),
+                  // Manual way in for invites whose link didn't open the app.
+                  _DrawerItem(
+                    index: 3,
+                    icon: Icons.group_add_rounded,
+                    iconColor: context.appColors.accent,
+                    label: l10n.joinLinkMenuLabel,
+                    subtitle: l10n.joinLinkMenuSubtitle,
+                    onTap: () {
+                      Navigator.pop(context);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        final ctx = rootNavigatorKey.currentContext;
+                        if (ctx != null) showJoinWithLinkDialog(ctx);
+                      });
+                    },
+                  ),
                   if (supportsBarcodeScanner)
                     _DrawerItem(
-                      index: 3,
+                      index: 4,
                       icon: Icons.qr_code_scanner_rounded,
                       iconColor: context.appColors.accent,
                       label: 'Scan barcode',
@@ -116,7 +132,7 @@ class AppMenuDrawer extends ConsumerWidget {
                 const SizedBox(height: 8),
                 _DrawerGroup(children: [
                   _DrawerItem(
-                    index: 4,
+                    index: 5,
                     icon: Icons.settings_rounded,
                     iconColor: context.appColors.accent,
                     label: l10n.settingsTitle,
@@ -127,7 +143,7 @@ class AppMenuDrawer extends ConsumerWidget {
                     },
                   ),
                   _DrawerItem(
-                    index: 5,
+                    index: 6,
                     icon: Icons.headset_mic_rounded,
                     iconColor: context.appColors.accent,
                     label: l10n.helpTitle,

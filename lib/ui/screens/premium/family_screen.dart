@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/family_invite_sheet.dart';
+import '../../widgets/join_with_link_dialog.dart';
+import '../../widgets/sign_in_prompt.dart';
 
 /// Full-screen family management page.
 /// Shows either "Create / Join" if not in a family, or family details + members.
-class FamilyScreen extends StatefulWidget {
+class FamilyScreen extends ConsumerStatefulWidget {
   const FamilyScreen({super.key});
 
   @override
-  State<FamilyScreen> createState() => _FamilyScreenState();
+  ConsumerState<FamilyScreen> createState() => _FamilyScreenState();
 }
 
-class _FamilyScreenState extends State<FamilyScreen> {
+class _FamilyScreenState extends ConsumerState<FamilyScreen> {
   final _family = FamilyService.instance;
   FamilyInfo? _info;
   bool _loading = true;
@@ -82,7 +88,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
               child: OutlinedButton.icon(
                 onPressed: () => _showJoinDialog(),
                 icon: const Icon(Icons.group_add),
-                label: Text(l10n.familyJoinWithCode),
+                label: Text(l10n.familyJoinWithCodeOrLink),
               ),
             ),
           ],
@@ -98,6 +104,9 @@ class _FamilyScreenState extends State<FamilyScreen> {
   Widget _buildFamilyView(ThemeData theme) {
     final l10n = AppLocalizations.of(context)!;
     final info = _info!;
+    final myUserId = AuthService.instance.currentUser?.id;
+    final others = myUserId == null ? info.members : info.otherMembers(myUserId);
+    final seatsLeft = info.maxMembers - info.members.length;
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
@@ -128,95 +137,156 @@ class _FamilyScreenState extends State<FamilyScreen> {
                       ),
                     ),
                   ]),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.familyMembersCount(info.members.length, info.maxMembers),
-                    style: TextStyle(color: theme.colorScheme.outline, fontSize: 14),
+                  const SizedBox(height: 12),
+                  // Capacity: "3 of 10 members" + how many spots are left.
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: info.maxMembers > 0 ? (info.members.length / info.maxMembers).clamp(0.0, 1.0) : 1,
+                      minHeight: 6,
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      color: info.isFull ? theme.colorScheme.error : theme.colorScheme.primary,
+                    ),
                   ),
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    Expanded(
+                      child: Text(
+                        l10n.familyMembersCount(info.members.length, info.maxMembers),
+                        style: TextStyle(color: theme.colorScheme.outline, fontSize: 14),
+                      ),
+                    ),
+                    if (!info.isFull)
+                      Text(
+                        l10n.familySeatsLeft(seatsLeft),
+                        style: TextStyle(color: theme.colorScheme.outline, fontSize: 13),
+                      ),
+                  ]),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
 
-          // ── Invite Section ──
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.familyInvite, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 12),
-                  // Code display
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          info.inviteCode,
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 4, fontFamily: 'monospace'),
-                        ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          icon: const Icon(Icons.copy, size: 20),
-                          onPressed: () {
-                            Clipboard.setData(ClipboardData(text: info.inviteCode));
-                            AppSnackbar.success(context, l10n.familyCodeCopied);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Share buttons
-                  Row(children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: info.shareLink));
-                          AppSnackbar.success(context, l10n.familyLinkCopied);
-                        },
-                        icon: const Icon(Icons.link, size: 18),
-                        label: Text(l10n.familyCopyLink),
+          // ── Invite Section ── (hidden when full: explain instead)
+          if (info.isFull)
+            Card(
+              color: theme.colorScheme.errorContainer.withValues(alpha: 0.35),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Icon(Icons.group_off_outlined, color: theme.colorScheme.error),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(l10n.familyFullTitle,
+                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          SharePlus.instance.share(ShareParams(
-                            text: l10n.familyShareMessage(info.inviteCode, info.shareLink),
-                            subject: l10n.familyShareSubject,
-                          ));
-                        },
-                        icon: const Icon(Icons.share, size: 18),
-                        label: Text(l10n.actionShare),
-                      ),
-                    ),
-                  ]),
-                  if (info.isOwner) ...[
+                    ]),
                     const SizedBox(height: 8),
-                    Center(
-                      child: TextButton(
-                        onPressed: () async {
-                          final code = await _family.regenerateInviteCode();
-                          if (code != null) { await _load(); if (mounted) AppSnackbar.success(context, l10n.familyNewCodeGenerated); }
-                        },
-                        child: Text(l10n.familyRegenerateCode, style: const TextStyle(fontSize: 12)),
+                    Text(
+                      info.isOwner
+                          ? l10n.familyFullOwnerBody(info.maxMembers)
+                          : l10n.familyFullMemberBody(info.maxMembers),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    ),
+                    if (info.isOwner) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => context.push('/upgrade'),
+                          icon: const Icon(Icons.star_outline, size: 18),
+                          label: Text(l10n.upgrade),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            )
+          else
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.familyInvite, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    if (others.isEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(l10n.familyAloneHint,
+                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    ],
+                    const SizedBox(height: 12),
+                    // The obvious way in: QR code, link, copy and share in one sheet.
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () => showFamilyInviteSheet(context, info),
+                        icon: const Icon(Icons.person_add_alt_1_rounded),
+                        label: Text(l10n.familyInviteMember),
+                        style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    // Code display
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(l10n.familyInviteCode,
+                              style: TextStyle(color: theme.colorScheme.outline, fontSize: 13)),
+                          const Spacer(),
+                          Text(
+                            info.inviteCode,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 3, fontFamily: 'monospace'),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.copy, size: 20),
+                            tooltip: MaterialLocalizations.of(context).copyButtonLabel,
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: info.inviteCode));
+                              AppSnackbar.success(context, l10n.familyCodeCopied);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(children: [
+                      Expanded(
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: info.shareLink));
+                            AppSnackbar.success(context, l10n.familyLinkCopied);
+                          },
+                          icon: const Icon(Icons.link, size: 18),
+                          label: Text(l10n.familyCopyLink),
+                        ),
+                      ),
+                      if (info.isOwner)
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () async {
+                              final code = await _family.regenerateInviteCode();
+                              if (code != null) { await _load(); if (mounted) AppSnackbar.success(context, l10n.familyNewCodeGenerated); }
+                            },
+                            child: Text(l10n.familyRegenerateCode),
+                          ),
+                        ),
+                    ]),
                   ],
-                ],
+                ),
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // ── Members List ──
@@ -239,6 +309,8 @@ class _FamilyScreenState extends State<FamilyScreen> {
                     ),
                     title: Row(children: [
                       Flexible(child: Text(member.displayName, overflow: TextOverflow.ellipsis)),
+                      if (member.userId == myUserId)
+                        Text(' (${l10n.familyYou})', style: TextStyle(color: theme.colorScheme.outline)),
                       if (member.isOwner) ...[
                         const SizedBox(width: 6),
                         Container(
@@ -252,7 +324,8 @@ class _FamilyScreenState extends State<FamilyScreen> {
                       ],
                     ]),
                     subtitle: Text(member.email ?? '', style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
-                    trailing: info.isAdmin && !member.isOwner && member.userId != _family.currentFamily?.ownerId
+                    trailing: info.isAdmin && !member.isOwner && member.userId != myUserId &&
+                            member.userId != _family.currentFamily?.ownerId
                         ? IconButton(
                       icon: Icon(Icons.remove_circle_outline, color: theme.colorScheme.error, size: 20),
                       onPressed: () => _confirmKick(member),
@@ -298,62 +371,81 @@ class _FamilyScreenState extends State<FamilyScreen> {
   //  DIALOGS
   // ════════════════════════════════════════════
 
-  void _showCreateDialog() {
+  /// Make sure there's a live session before creating / joining; signs the
+  /// user in (and carries on) when there isn't one.
+  Future<bool> _ensureSignedIn() async {
+    if (AuthService.instance.isSignedIn) return true;
+    final l10n = AppLocalizations.of(context)!;
+    return promptSignIn(context, ref, message: l10n.familySignInToUse, icon: Icons.family_restroom);
+  }
+
+  Future<void> _showCreateDialog() async {
+    if (!await _ensureSignedIn() || !mounted) return;
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
-    showDialog(context: context, builder: (ctx) => AlertDialog(
+    final name = await showDialog<String>(context: context, builder: (ctx) => AlertDialog(
       title: Text(l10n.familyCreateTitle),
       content: TextField(
         controller: controller,
         decoration: InputDecoration(hintText: l10n.familyNameHint, border: const OutlineInputBorder()),
         autofocus: true,
         textCapitalization: TextCapitalization.words,
+        onSubmitted: (v) { if (v.trim().isNotEmpty) Navigator.pop(ctx, v.trim()); },
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-        FilledButton(onPressed: () async {
+        FilledButton(onPressed: () {
           final name = controller.text.trim();
           if (name.isEmpty) return;
-          Navigator.pop(ctx);
-          final result = await _family.createFamily(name);
-          if (result.success) {
-            await _load();
-            if (mounted) AppSnackbar.success(context, l10n.familyCreated);
-          } else {
-            if (mounted) AppSnackbar.error(context, result.error ?? l10n.familyCreateFailed);
-          }
+          Navigator.pop(ctx, name);
         }, child: Text(l10n.actionCreate)),
       ],
     ));
+    if (name == null || !mounted) return;
+    await _createFamily(name);
   }
 
-  void _showJoinDialog() {
+  Future<void> _createFamily(String name, {bool retried = false}) async {
     final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: Text(l10n.familyJoinTitle),
-      content: TextField(
-        controller: controller,
-        decoration: InputDecoration(hintText: l10n.familyEnterInviteCode, border: const OutlineInputBorder()),
-        autofocus: true,
-        textCapitalization: TextCapitalization.characters,
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-        FilledButton(onPressed: () async {
-          final code = controller.text.trim();
-          if (code.isEmpty) return;
-          Navigator.pop(ctx);
-          final result = await _family.joinFamily(code);
-          if (result.success) {
-            await _load();
-            if (mounted) AppSnackbar.success(context, l10n.familyJoined(result.familyName ?? ''));
-          } else {
-            if (mounted) AppSnackbar.error(context, result.error ?? l10n.familyJoinFailed);
-          }
-        }, child: Text(l10n.familyJoinAction)),
-      ],
-    ));
+    final result = await _family.createFamily(name);
+    if (!mounted) return;
+    if (result.success) {
+      await _load();
+      if (mounted) AppSnackbar.success(context, l10n.familyCreated);
+      return;
+    }
+    switch (result.error) {
+      case InviteErrorKind.signedOut || InviteErrorKind.sessionExpired when !retried:
+        // Dead session: sign in again, then finish creating.
+        if (result.error == InviteErrorKind.sessionExpired) {
+          await ref.read(authProvider.notifier).signOut();
+          if (!mounted) return;
+          AppSnackbar.info(context, l10n.inviteErrorSessionExpired);
+        }
+        if (await _ensureSignedIn() && mounted) await _createFamily(name, retried: true);
+      case InviteErrorKind.subscriptionRequired:
+        AppSnackbar.errorWithAction(
+          context,
+          l10n.familyErrorSubscription,
+          actionLabel: l10n.upgrade,
+          onAction: () => context.push('/upgrade'),
+        );
+      case InviteErrorKind.alreadyInFamily:
+        AppSnackbar.error(context, l10n.familyErrorAlreadyInFamily);
+        await _load();
+      case InviteErrorKind.network:
+        AppSnackbar.error(context, l10n.inviteErrorNetwork);
+      default:
+        AppSnackbar.error(context, result.message ?? l10n.familyCreateFailed);
+    }
+  }
+
+  /// Join with a pasted invite link or a typed code. Opens the family-invite
+  /// screen, which confirms and joins (and explains full / invalid invites).
+  Future<void> _showJoinDialog() async {
+    if (!await _ensureSignedIn() || !mounted) return;
+    await showJoinWithLinkDialog(context, purpose: JoinLinkPurpose.family);
+    if (mounted) await _load();
   }
 
   void _showRenameDialog() {

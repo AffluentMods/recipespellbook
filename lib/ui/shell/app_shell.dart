@@ -12,6 +12,7 @@ import '../../utils/responsive_utils.dart';
 import '../screens/import/import_guides_screen.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/app_snackbar.dart';
+import '../widgets/join_with_link_dialog.dart';
 import '../widgets/selection_action_bar.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../widgets/kitchen_buddy/coin_toast_overlay.dart';
@@ -693,6 +694,16 @@ class _AppSidebar extends ConsumerWidget {
                     label: l10n.transferTitle,
                     iconColor: const Color(0xFF0EA5E9),
                     onTap: () => context.push('/transfer'),
+                    theme: theme,
+                  ),
+                  // Same as the phone drawer: paste an invite link or code
+                  // (links can't open the desktop app on their own).
+                  _SidebarNavItem(
+                    icon: Icons.group_add_outlined,
+                    selectedIcon: Icons.group_add_rounded,
+                    label: l10n.joinLinkMenuLabel,
+                    iconColor: const Color(0xFFF59E0B),
+                    onTap: () => showJoinWithLinkDialog(context),
                     theme: theme,
                   ),
                 ],

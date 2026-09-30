@@ -9873,4 +9873,215 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get plannerNextDay => 'Día siguiente';
+
+  @override
+  String get joinLinkMenuLabel => 'Join with invite link';
+
+  @override
+  String get joinLinkMenuSubtitle => 'Shared list, cookbook or family';
+
+  @override
+  String get joinLinkTitle => 'Join with an invite link';
+
+  @override
+  String get joinLinkTitleList => 'Join a shared list';
+
+  @override
+  String get joinLinkTitleCookbook => 'Join a shared cookbook';
+
+  @override
+  String get joinLinkTitleFamily => 'Join a family';
+
+  @override
+  String get joinLinkListSubtitle => 'Paste an invite link someone sent you';
+
+  @override
+  String get joinLinkBody => 'Paste the invite link or code someone sent you. It works for shared shopping lists, cookbooks and family invites.';
+
+  @override
+  String get joinLinkHint => 'Paste an invite link or code';
+
+  @override
+  String get joinLinkFromClipboard => 'Filled in from your clipboard';
+
+  @override
+  String get joinLinkInvalid => 'That doesn\'t look like an invite link or code';
+
+  @override
+  String get joinLinkOffline => 'Couldn\'t check that code. Check your connection and try again.';
+
+  @override
+  String get inviteTryAnother => 'Try another link';
+
+  @override
+  String get inviteErrorNetwork => 'No connection. Check your internet and try again.';
+
+  @override
+  String get inviteErrorSessionExpired => 'Your session has expired. Sign in again to continue.';
+
+  @override
+  String get shareViewerTitleList => 'Shared shopping list';
+
+  @override
+  String get shareViewerTitleCookbook => 'Shared cookbook';
+
+  @override
+  String get shareViewerTitleLink => 'Shared link';
+
+  @override
+  String get shareViewerLoadFailed => 'Couldn\'t load this link';
+
+  @override
+  String get shareViewerExpiredHint => 'Ask the person who shared it for a new link, or paste another one.';
+
+  @override
+  String get shareViewerJoinList => 'Join this list';
+
+  @override
+  String get shareViewerAddToLists => 'Add to my lists';
+
+  @override
+  String shareViewerJoinCookbook(String name) {
+    return 'Join \"$name\"';
+  }
+
+  @override
+  String get shareViewerSignInToJoinList => 'Sign in to join this shopping list. You\'ll be added as soon as you\'re signed in.';
+
+  @override
+  String get shareViewerSignInToJoinCookbook => 'Sign in to collaborate on this cookbook. You\'ll be added as soon as you\'re signed in.';
+
+  @override
+  String get shareViewerJoinedList => 'Joined! It\'s in your Shopping tab.';
+
+  @override
+  String get shareViewerJoinedCookbook => 'Joined! It\'s in your cookbooks.';
+
+  @override
+  String get shareViewerOwnItem => 'This is yours — you already have it.';
+
+  @override
+  String get shareViewerJoinNeedsSubscription => 'Collaborating on cookbooks needs a subscription.';
+
+  @override
+  String get shareViewerOwnerLapsed => 'The owner\'s subscription is no longer active, so this cookbook can\'t be shared right now.';
+
+  @override
+  String get shareViewerNotCollab => 'This link is a one-time copy, not a live invite.';
+
+  @override
+  String get shareViewerJoinFailed => 'Couldn\'t join. Please try again.';
+
+  @override
+  String get familyJoinWithCodeOrLink => 'Join with code or link';
+
+  @override
+  String get familySignInToUse => 'Sign in to create or join a family.';
+
+  @override
+  String get familyInviteMember => 'Invite family member';
+
+  @override
+  String familyInviteSheetTitle(String familyName) {
+    return 'Invite to $familyName';
+  }
+
+  @override
+  String get familyInviteSheetBody => 'Have them scan this code with their phone camera, or send them the link. They can also paste the link or code in Family → Join with code or link.';
+
+  @override
+  String get familyInviteCode => 'Invite code';
+
+  @override
+  String get familyInviteLink => 'Invite link';
+
+  @override
+  String familySeatsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count spots left',
+      one: '1 spot left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get familyFullTitle => 'Your family is full';
+
+  @override
+  String familyFullOwnerBody(int max) {
+    return 'All $max spots are taken. Remove a member or upgrade your plan to invite someone new.';
+  }
+
+  @override
+  String familyFullMemberBody(int max) {
+    return 'All $max spots are taken. Ask the family owner to make room.';
+  }
+
+  @override
+  String get familyAloneHint => 'No one else has joined yet. Invite someone to start sharing.';
+
+  @override
+  String get familyYou => 'You';
+
+  @override
+  String get familyErrorSubscription => 'A Premium plan is required to create a family.';
+
+  @override
+  String get familyErrorFull => 'This family is full.';
+
+  @override
+  String get familyErrorAlreadyInFamily => 'You\'re already in a family. Leave it first to join another.';
+
+  @override
+  String get familyErrorInvalidCode => 'That invite code isn\'t valid. Check it or ask for a new link.';
+
+  @override
+  String get familyJoinScreenTitle => 'Family invite';
+
+  @override
+  String familyJoinPrompt(String familyName) {
+    return 'Join $familyName?';
+  }
+
+  @override
+  String familyJoinInvitedBy(String name) {
+    return '$name invited you to share cookbooks, shopping lists and meal plans.';
+  }
+
+  @override
+  String familyJoinGenericPrompt(String code) {
+    return 'Join the family with invite code $code?';
+  }
+
+  @override
+  String get familyJoinSignIn => 'Sign in to join this family. You\'ll join as soon as you\'re signed in.';
+
+  @override
+  String get familyJoinConfirm => 'Join family';
+
+  @override
+  String familyJoinAlreadyMember(String familyName) {
+    return 'You\'re already in $familyName.';
+  }
+
+  @override
+  String familyJoinInOtherFamily(String familyName) {
+    return 'You\'re already in $familyName. Leave that family first to join this one.';
+  }
+
+  @override
+  String familyJoinFullBody(String familyName, int max) {
+    return '$familyName is full ($max of $max members). Ask the owner to remove someone or upgrade their plan.';
+  }
+
+  @override
+  String get familyJoinOpenFamily => 'Open family';
+
+  @override
+  String get familyJoinInvalid => 'This family invite isn\'t valid anymore';
+
+  @override
+  String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
 }

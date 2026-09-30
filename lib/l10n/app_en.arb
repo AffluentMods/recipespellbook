@@ -5288,5 +5288,146 @@
   "plannerPrevMonth": "Previous month",
   "plannerNextMonth": "Next month",
   "plannerPrevDay": "Previous day",
-  "plannerNextDay": "Next day"
+  "plannerNextDay": "Next day",
+  "joinLinkMenuLabel": "Join with invite link",
+  "joinLinkMenuSubtitle": "Shared list, cookbook or family",
+  "joinLinkTitle": "Join with an invite link",
+  "joinLinkTitleList": "Join a shared list",
+  "joinLinkTitleCookbook": "Join a shared cookbook",
+  "joinLinkTitleFamily": "Join a family",
+  "joinLinkListSubtitle": "Paste an invite link someone sent you",
+  "joinLinkBody": "Paste the invite link or code someone sent you. It works for shared shopping lists, cookbooks and family invites.",
+  "joinLinkHint": "Paste an invite link or code",
+  "joinLinkFromClipboard": "Filled in from your clipboard",
+  "joinLinkInvalid": "That doesn't look like an invite link or code",
+  "joinLinkOffline": "Couldn't check that code. Check your connection and try again.",
+  "inviteTryAnother": "Try another link",
+  "inviteErrorNetwork": "No connection. Check your internet and try again.",
+  "inviteErrorSessionExpired": "Your session has expired. Sign in again to continue.",
+  "shareViewerTitleList": "Shared shopping list",
+  "shareViewerTitleCookbook": "Shared cookbook",
+  "shareViewerTitleLink": "Shared link",
+  "shareViewerLoadFailed": "Couldn't load this link",
+  "shareViewerExpiredHint": "Ask the person who shared it for a new link, or paste another one.",
+  "shareViewerJoinList": "Join this list",
+  "shareViewerAddToLists": "Add to my lists",
+  "shareViewerJoinCookbook": "Join \"{name}\"",
+  "@shareViewerJoinCookbook": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareViewerSignInToJoinList": "Sign in to join this shopping list. You'll be added as soon as you're signed in.",
+  "shareViewerSignInToJoinCookbook": "Sign in to collaborate on this cookbook. You'll be added as soon as you're signed in.",
+  "shareViewerJoinedList": "Joined! It's in your Shopping tab.",
+  "shareViewerJoinedCookbook": "Joined! It's in your cookbooks.",
+  "shareViewerOwnItem": "This is yours — you already have it.",
+  "shareViewerJoinNeedsSubscription": "Collaborating on cookbooks needs a subscription.",
+  "shareViewerOwnerLapsed": "The owner's subscription is no longer active, so this cookbook can't be shared right now.",
+  "shareViewerNotCollab": "This link is a one-time copy, not a live invite.",
+  "shareViewerJoinFailed": "Couldn't join. Please try again.",
+  "familyJoinWithCodeOrLink": "Join with code or link",
+  "familySignInToUse": "Sign in to create or join a family.",
+  "familyInviteMember": "Invite family member",
+  "familyInviteSheetTitle": "Invite to {familyName}",
+  "@familyInviteSheetTitle": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      }
+    }
+  },
+  "familyInviteSheetBody": "Have them scan this code with their phone camera, or send them the link. They can also paste the link or code in Family → Join with code or link.",
+  "familyInviteCode": "Invite code",
+  "familyInviteLink": "Invite link",
+  "familySeatsLeft": "{count, plural, =1{1 spot left} other{{count} spots left}}",
+  "@familySeatsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "familyFullTitle": "Your family is full",
+  "familyFullOwnerBody": "All {max} spots are taken. Remove a member or upgrade your plan to invite someone new.",
+  "@familyFullOwnerBody": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "familyFullMemberBody": "All {max} spots are taken. Ask the family owner to make room.",
+  "@familyFullMemberBody": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "familyAloneHint": "No one else has joined yet. Invite someone to start sharing.",
+  "familyYou": "You",
+  "familyErrorSubscription": "A Premium plan is required to create a family.",
+  "familyErrorFull": "This family is full.",
+  "familyErrorAlreadyInFamily": "You're already in a family. Leave it first to join another.",
+  "familyErrorInvalidCode": "That invite code isn't valid. Check it or ask for a new link.",
+  "familyJoinScreenTitle": "Family invite",
+  "familyJoinPrompt": "Join {familyName}?",
+  "@familyJoinPrompt": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinInvitedBy": "{name} invited you to share cookbooks, shopping lists and meal plans.",
+  "@familyJoinInvitedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinGenericPrompt": "Join the family with invite code {code}?",
+  "@familyJoinGenericPrompt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinSignIn": "Sign in to join this family. You'll join as soon as you're signed in.",
+  "familyJoinConfirm": "Join family",
+  "familyJoinAlreadyMember": "You're already in {familyName}.",
+  "@familyJoinAlreadyMember": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinInOtherFamily": "You're already in {familyName}. Leave that family first to join this one.",
+  "@familyJoinInOtherFamily": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      }
+    }
+  },
+  "familyJoinFullBody": "{familyName} is full ({max} of {max} members). Ask the owner to remove someone or upgrade their plan.",
+  "@familyJoinFullBody": {
+    "placeholders": {
+      "familyName": {
+        "type": "String"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "familyJoinOpenFamily": "Open family",
+  "familyJoinInvalid": "This family invite isn't valid anymore",
+  "familyJoinInvalidHint": "The invite code may have been changed. Ask for a new link, or paste another one."
 }
