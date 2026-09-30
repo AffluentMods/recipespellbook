@@ -767,7 +767,12 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     AppSnackbar.loading(context, AppLocalizations.of(context)!.generatingLink);
 
     try {
-      final link = await FamilyService.instance.createShareLink('shopping_list', listId);
+      // Ship a self-contained snapshot (like family_share_sheet.dart does).
+      // Without it the link serves the server's copy of the list, which is
+      // missing or stale/empty for lists that aren't cloud-synced, so the
+      // recipient got nothing (or the link couldn't be created).
+      final snapshot = await CollabService.instance.buildListSnapshot(listId);
+      final link = await FamilyService.instance.createShareLink('shopping_list', listId, snapshot: snapshot);
       if (!context.mounted) return;
       AppSnackbar.dismiss(context);
 
