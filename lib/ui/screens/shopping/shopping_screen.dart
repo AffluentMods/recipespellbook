@@ -1853,63 +1853,14 @@ class _TouchGroupModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.appColors;
     final l10n = AppLocalizations.of(context)!;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    Widget segment(ShoppingGroupMode m, String label) {
-      final on = m == mode;
-      return Semantics(
-        selected: on,
-        button: true,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            if (!on) {
-              HapticFeedback.selectionClick();
-              onChanged(m);
-            }
-          },
-          child: AnimatedContainer(
-            duration: Motion.fast,
-            padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: 7),
-            decoration: BoxDecoration(
-              color: on ? (dark ? c.surfaceHigh : c.surface) : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-              border: on ? Border.all(color: c.hairline) : null,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(m.icon, size: 16, color: on ? c.accent : c.textTertiary),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: on ? FontWeight.w600 : FontWeight.w500,
-                    color: on ? c.textPrimary : c.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: c.textPrimary.withValues(alpha: 0.055),
-        borderRadius: BorderRadius.circular(11),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          segment(ShoppingGroupMode.section, l10n.shoppingBySection),
-          segment(ShoppingGroupMode.recipe, l10n.shoppingByRecipe),
-        ],
-      ),
+    return TouchSegmented<ShoppingGroupMode>(
+      selected: mode,
+      onChanged: onChanged,
+      segments: [
+        TouchSegment(value: ShoppingGroupMode.section, label: l10n.shoppingBySection, icon: ShoppingGroupMode.section.icon),
+        TouchSegment(value: ShoppingGroupMode.recipe, label: l10n.shoppingByRecipe, icon: ShoppingGroupMode.recipe.icon),
+      ],
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/tokens.dart';
@@ -839,6 +840,136 @@ class _TouchSearchFieldState extends State<TouchSearchField> {
           focusedBorder: OutlineInputBorder(
             borderRadius: Radii.lgAll,
             borderSide: BorderSide(color: c.accent, width: 1.5),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One option of a [TouchSegmented] control.
+class TouchSegment<T> {
+  final T value;
+  final String label;
+  final IconData? icon;
+  const TouchSegment({required this.value, required this.label, this.icon});
+}
+
+/// Two-to-four-way switch for touch layouts: a quiet track with a paper
+/// thumb under the chosen option (lifted a tone in dark mode). [expand]
+/// shares the full width equally.
+class TouchSegmented<T> extends StatelessWidget {
+  final List<TouchSegment<T>> segments;
+  final T selected;
+  final ValueChanged<T> onChanged;
+  final bool expand;
+
+  const TouchSegmented({
+    super.key,
+    required this.segments,
+    required this.selected,
+    required this.onChanged,
+    this.expand = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    Widget segment(TouchSegment<T> s) {
+      final on = s.value == selected;
+      final child = Semantics(
+        selected: on,
+        button: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (!on) {
+              HapticFeedback.selectionClick();
+              onChanged(s.value);
+            }
+          },
+          child: AnimatedContainer(
+            duration: Motion.fast,
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: Space.md),
+            decoration: BoxDecoration(
+              color: on ? (dark ? c.surfaceHigh : c.surface) : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+              border: on ? Border.all(color: c.hairline) : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (s.icon != null) ...[
+                  Icon(s.icon, size: 16, color: on ? c.accent : c.textTertiary),
+                  const SizedBox(width: 6),
+                ],
+                Flexible(
+                  child: Text(
+                    s.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: on ? FontWeight.w600 : FontWeight.w500,
+                      color: on ? c.textPrimary : c.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return expand ? Expanded(child: child) : child;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: c.textPrimary.withValues(alpha: 0.055),
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: Row(
+        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+        children: [for (final s in segments) segment(s)],
+      ),
+    );
+  }
+}
+
+/// Selectable pill for touch filter rows (sort orders, quick filters): a
+/// hairline pill that fills with the soft accent when chosen.
+class TouchChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const TouchChip({super.key, required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: Material(
+        color: selected ? c.selectedFill : Colors.transparent,
+        shape: StadiumBorder(side: BorderSide(color: selected ? c.accent.withValues(alpha: 0.4) : c.hairline)),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                color: selected ? c.accent : c.textSecondary,
+              ),
+            ),
           ),
         ),
       ),
