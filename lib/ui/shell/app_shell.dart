@@ -99,6 +99,10 @@ class _AppShellState extends ConsumerState<AppShell> {
   bool _isImmersiveRoute(String location) =>
       location.endsWith('/edit') || location.contains('/new-recipe');
 
+  /// Reading a recipe on a phone: its own cook bar takes the tab bar's place
+  /// (back returns to the tab it was opened from).
+  static final _recipeReading = RegExp(r'^/recipe/[^/]+$');
+
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(currentNavIndexProvider);
@@ -183,32 +187,37 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
 
     // Phone: the tab bar (swapped for the selection bar while multi-selecting).
+    // Reading a recipe hides it; the recipe's cook bar sits at the foot
+    // instead, and gets the system inset since there is no bar below it.
+    final reading = selectionBar == null && _recipeReading.hasMatch(location);
     return Scaffold(
       key: _scaffoldKey,
       body: widget.child,
-      bottomNavigationBar: AnimatedSwitcher(
-        duration: Motion.base,
-        switchInCurve: Motion.emphasized,
-        switchOutCurve: Motion.standard,
-        transitionBuilder: (child, animation) => SlideTransition(
-          position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
-              .animate(animation),
-          child: child,
-        ),
-        child: selectionBar != null
-            ? KeyedSubtree(
-                key: const ValueKey('selection-bar'),
-                child: selectionBar,
-              )
-            : KeyedSubtree(
-                key: const ValueKey('nav-bar'),
-                child: _TabBar(
-                  currentIndex: effectiveIndex,
-                  shoppingCount: shoppingCount,
-                  onSelect: _navigateTo,
-                ),
+      bottomNavigationBar: reading
+          ? null
+          : AnimatedSwitcher(
+              duration: Motion.base,
+              switchInCurve: Motion.emphasized,
+              switchOutCurve: Motion.standard,
+              transitionBuilder: (child, animation) => SlideTransition(
+                position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                    .animate(animation),
+                child: child,
               ),
-      ),
+              child: selectionBar != null
+                  ? KeyedSubtree(
+                      key: const ValueKey('selection-bar'),
+                      child: selectionBar,
+                    )
+                  : KeyedSubtree(
+                      key: const ValueKey('nav-bar'),
+                      child: _TabBar(
+                        currentIndex: effectiveIndex,
+                        shoppingCount: shoppingCount,
+                        onSelect: _navigateTo,
+                      ),
+                    ),
+            ),
     );
   }
 }
