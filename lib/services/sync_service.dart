@@ -95,6 +95,7 @@ class SyncService {
   static const _familyCursorPrefix = 'sync_family_cursor';
   static const _protocolPrefix = 'sync_protocol_v2';
   static const _foreignPrefix = 'sync_foreign_ids';
+  static const _collabMarkPrefix = 'sync_collab_cookbook_mark';
 
   /// Legacy key (pre-per-account). Used for migration.
   static const _legacyLastSyncKey = 'sync_last_sync_at';
@@ -202,7 +203,7 @@ class SyncService {
   /// The next sync pushes everything local and pulls everything remote.
   Future<void> clearLastSyncAt() async {
     final prefs = await SharedPreferences.getInstance();
-    for (final prefix in [_lastSyncKeyPrefix, _pushMarkPrefix, _familyCursorPrefix, _protocolPrefix]) {
+    for (final prefix in [_lastSyncKeyPrefix, _pushMarkPrefix, _familyCursorPrefix, _protocolPrefix, _collabMarkPrefix]) {
       await prefs.remove(_key(prefix));
     }
     await prefs.remove(_legacyLastSyncKey);
@@ -291,13 +292,14 @@ class SyncService {
     // premium push succeeding.
     var sharedPulled = 0;
     if (_auth.currentUser?.id == userId) {
+      final collabStart = DateTime.now();
       try {
-        await _pushDirtyCookbookRecipes();
+        await _pushDirtyCookbookRecipes(userId, collabStart);
       } catch (e) {
         debugPrint('[Sync] Cookbook collab push failed (non-fatal): $e');
       }
       try {
-        sharedPulled = await _pullFamilyShared(userId);
+        sharedPulled = await _pullFamilyShared(userId, inflightAfter: collabStart);
       } catch (e) {
         debugPrint('[Sync] Family pull failed (non-fatal): $e');
       }
@@ -481,7 +483,7 @@ class SyncService {
 
   /// Cursor for the family (shared-with-me) pull, kept separately so a failed
   /// pull is retried from the same point instead of silently skipped.
-  Future<int> _pullFamilyShared(String userId) async {
+  Future<int> _pullFamilyShared(String userId, {DateTime? inflightAfter}) async {
     final since = await _readDate(_familyCursorPrefix, userId);
     final requestedAt = DateTime.now().toUtc();
     final familyData = await FamilyService.instance.getSharedContent(
@@ -494,6 +496,7 @@ class SyncService {
       familyData,
       sharedOwners: _extractSharedCookbookOwners(familyData),
       skipRecipeIds: CollabService.instance.dirtyCookbookRecipeIds,
+      inflightAfter: inflightAfter,
     );
     CollabService.instance.setCookbookAccess(_extractCookbookShares(familyData));
     // Lists shared with me belong to their owner: never push them via /sync.
@@ -1041,14 +1044,19 @@ class SyncService {
   Future<void> pullSharedNow() async {
     if (_db == null || !_auth.isSignedIn) return;
     try {
+      final userId = _auth.currentUser!.id;
+      final startedAt = DateTime.now();
       final familyData = await FamilyService.instance.getSharedContent();
       if (familyData == null) return;
       await _applyServerData(
         familyData,
         sharedOwners: _extractSharedCookbookOwners(familyData),
         skipRecipeIds: CollabService.instance.dirtyCookbookRecipeIds,
+        inflightAfter: startedAt,
       );
       CollabService.instance.setCookbookAccess(_extractCookbookShares(familyData));
+      // What we just pulled is the server's copy, not a member edit to push.
+      await _saveDate(_collabMarkPrefix, userId, startedAt);
     } catch (e) {
       debugPrint('[Sync] pullSharedNow failed: $e');
     }
@@ -1057,12 +1065,33 @@ class SyncService {
   /// Push local edits to recipes in shared cookbooks I can edit through the
   /// free /collab cookbook channel (server preserves the owner's userId).
   /// Recipes are marked dirty by the editor; each is cleared once pushed.
-  Future<void> _pushDirtyCookbookRecipes() async {
+  ///
+  /// Besides the explicit dirty set (the editor), anything in an editable
+  /// shared cookbook changed since the last collab push goes too — favourites,
+  /// moves, trash, course/category changes made from lists never marked
+  /// themselves dirty and were silently lost. Pulled shared recipes are stored
+  /// with timestamps below this mark, so they aren't mistaken for edits.
+  Future<void> _pushDirtyCookbookRecipes(String userId, DateTime startedAt) async {
     final db = _db;
     if (db == null || !_auth.isSignedIn) return;
     final collab = CollabService.instance;
-    final dirty = collab.dirtyCookbookRecipeIds;
-    if (dirty.isEmpty) return;
+    final editable = [for (final id in collab.collabCookbookIds) if (collab.canEditCookbook(id)) id];
+    final mark = await _readDate(_collabMarkPrefix, userId);
+    final changed = editable.isEmpty
+        ? const <String>[]
+        : await (db.selectOnly(db.recipes)
+              ..addColumns([db.recipes.id])
+              ..where(db.recipes.cookbookId.isIn(editable) &
+                  (mark == null
+                      ? const Constant(false)
+                      : db.recipes.updatedAt.isBiggerThanValue(mark.subtract(_pushOverlap)))))
+            .map((r) => r.read(db.recipes.id)!)
+            .get();
+    final dirty = {...collab.dirtyCookbookRecipeIds, ...changed};
+    if (dirty.isEmpty) {
+      await _saveDate(_collabMarkPrefix, userId, startedAt);
+      return;
+    }
 
     final payloads = <Map<String, dynamic>>[];
     final pushIds = <String>[];   // cleared only on a successful push
@@ -1116,6 +1145,7 @@ class SyncService {
         if (current == null || current.updatedAt == pushedStamp[id]) clear.add(id);
       }
       if (clear.isNotEmpty) await collab.unmarkRecipesDirty(clear);
+      await _saveDate(_collabMarkPrefix, userId, startedAt);
       debugPrint('[Sync] Pushed ${payloads.length} shared-cookbook recipe edit(s), cleared ${clear.length}');
     }
   }
