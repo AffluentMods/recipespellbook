@@ -180,7 +180,8 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
       body: body,
       floatingActionButton: recipes.isEmpty
           ? null
-          : _AddRecipeFab(
+          : AccentFab(
+              icon: Icons.add_rounded,
               extended: _fabExtended,
               label: l10n.recipeAdd,
               onPressed: () => showNewRecipeDialog(context, cookbookId),
@@ -1528,68 +1529,6 @@ class _CookbookShelf extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// ── Add recipe ──
-
-class _AddRecipeFab extends StatelessWidget {
-  final bool extended;
-  final String label;
-  final VoidCallback onPressed;
-  const _AddRecipeFab({
-    required this.extended,
-    required this.label,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.appColors;
-    return Tooltip(
-      message: label,
-      child: Material(
-        color: c.accent,
-        elevation: 3,
-        shadowColor: Theme.of(
-          context,
-        ).colorScheme.shadow.withValues(alpha: 0.4),
-        borderRadius: Radii.xlAll,
-        child: InkWell(
-          borderRadius: Radii.xlAll,
-          onTap: onPressed,
-          child: AnimatedSize(
-            duration: Motion.slow,
-            curve: Motion.standard,
-            child: SizedBox(
-              height: 56,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: extended ? Space.xl : Space.lg,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.add_rounded, size: 24, color: c.onAccent),
-                    if (extended) ...[
-                      const SizedBox(width: Space.sm),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: c.onAccent,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

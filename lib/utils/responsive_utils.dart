@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/tokens.dart';
 import '../ui/widgets/sheet_chrome.dart';
 
 /// Published by the app shell around the routed page: the real width of the
@@ -302,12 +303,11 @@ class Responsive {
       useRootNavigator: useRootNavigator,
       constraints: constraints,
       showDragHandle: showDragHandle,
-      backgroundColor:
-          backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow,
+      // One sheet chrome everywhere: the page tone (content that paints its
+      // own surface blends in) and the design system's sheet corners.
+      backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.surface,
       shape: shape ??
-          const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
+          const RoundedRectangleBorder(borderRadius: Radii.sheetTop),
       builder: (ctx) => SheetPresentation(
         isBottomSheet: true,
         child: Builder(builder: builder),

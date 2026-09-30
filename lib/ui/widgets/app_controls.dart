@@ -694,6 +694,206 @@ class TouchGroupLabel extends StatelessWidget {
   );
 }
 
+/// The primary floating action on touch layouts: an accent pill with an icon
+/// and label that folds to the icon alone ([extended] false) — pages fold it
+/// while the user scrolls into content.
+class AccentFab extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool extended;
+  final VoidCallback? onPressed;
+
+  const AccentFab({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    this.extended = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Tooltip(
+      message: label,
+      child: Material(
+        color: c.accent,
+        elevation: 3,
+        shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.4),
+        borderRadius: Radii.xlAll,
+        child: InkWell(
+          borderRadius: Radii.xlAll,
+          onTap: onPressed,
+          child: AnimatedSize(
+            duration: Motion.slow,
+            curve: Motion.standard,
+            child: SizedBox(
+              height: 56,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: extended ? Space.xl : Space.lg),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 24, color: c.onAccent),
+                    if (extended) ...[
+                      const SizedBox(width: Space.sm),
+                      Text(
+                        label,
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: c.onAccent),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Search field for touch layouts (46 px): the same quiet fill and hairline
+/// as [ToolbarSearchField], with a clear button once there is text.
+class TouchSearchField extends StatefulWidget {
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final String hintText;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final bool autofocus;
+  final TextInputAction? textInputAction;
+
+  const TouchSearchField({
+    super.key,
+    this.controller,
+    this.focusNode,
+    required this.hintText,
+    this.onChanged,
+    this.onSubmitted,
+    this.autofocus = false,
+    this.textInputAction,
+  });
+
+  @override
+  State<TouchSearchField> createState() => _TouchSearchFieldState();
+}
+
+class _TouchSearchFieldState extends State<TouchSearchField> {
+  late final TextEditingController _controller = widget.controller ?? TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onText);
+  }
+
+  void _onText() => setState(() {});
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onText);
+    if (widget.controller == null) _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final border = OutlineInputBorder(
+      borderRadius: Radii.lgAll,
+      borderSide: BorderSide(color: c.hairline),
+    );
+    return SizedBox(
+      height: 46,
+      child: TextField(
+        controller: _controller,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
+        textInputAction: widget.textInputAction ?? TextInputAction.search,
+        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+        style: TextStyle(fontSize: 15, color: c.textPrimary),
+        textAlignVertical: TextAlignVertical.center,
+        decoration: InputDecoration(
+          isDense: true,
+          filled: true,
+          fillColor: c.textPrimary.withValues(alpha: 0.045),
+          hintText: widget.hintText,
+          hintStyle: TextStyle(fontSize: 15, color: c.textTertiary),
+          contentPadding: const EdgeInsets.symmetric(horizontal: Space.md),
+          prefixIcon: Icon(Icons.search_rounded, size: 21, color: c.textTertiary),
+          suffixIcon: _controller.text.isEmpty
+              ? null
+              : IconButton(
+                  icon: Icon(Icons.close_rounded, size: 19, color: c.textTertiary),
+                  tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+                  onPressed: () {
+                    _controller.clear();
+                    widget.onChanged?.call('');
+                  },
+                ),
+          border: border,
+          enabledBorder: border,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: Radii.lgAll,
+            borderSide: BorderSide(color: c.accent, width: 1.5),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Square outlined icon button that sits beside a [TouchSearchField] (tags,
+/// sort, filters): 46 px, hairline, accent when [active].
+class TouchFieldButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+  final bool active;
+  final int badge;
+
+  const TouchFieldButton({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    this.onPressed,
+    this.active = false,
+    this.badge = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    Widget iconWidget = Icon(icon, size: 21, color: active ? c.accent : c.textSecondary);
+    if (badge > 0) {
+      iconWidget = Badge(
+        label: Text('$badge'),
+        backgroundColor: c.accent,
+        textColor: c.onAccent,
+        child: iconWidget,
+      );
+    }
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: active ? c.selectedFill : Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: Radii.lgAll,
+          side: BorderSide(color: active ? c.accent.withValues(alpha: 0.4) : c.hairline),
+        ),
+        child: InkWell(
+          borderRadius: Radii.lgAll,
+          onTap: onPressed,
+          child: SizedBox(width: 46, height: 46, child: Center(child: iconWidget)),
+        ),
+      ),
+    );
+  }
+}
+
 /// Wraps a clickable surface that isn't an InkWell (bare GestureDetector,
 /// custom painter…) with the pointer cursor, a hover flag and keyboard focus +
 /// activation, so every clickable thing behaves like a control.

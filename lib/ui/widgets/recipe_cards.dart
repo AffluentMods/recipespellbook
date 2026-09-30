@@ -250,6 +250,9 @@ class RecipeCardGrid extends StatelessWidget {
   final double maxTileWidth;
   final EdgeInsets padding;
   final String? storageKey;
+  final void Function(Recipe recipe)? onLongPress;
+  final double gap;
+  final ScrollPhysics? physics;
 
   const RecipeCardGrid({
     super.key,
@@ -262,19 +265,23 @@ class RecipeCardGrid extends StatelessWidget {
     this.maxTileWidth = 250,
     this.padding = const EdgeInsets.fromLTRB(Space.xxxl - 4, Space.xs, Space.xxxl - 4, 96),
     this.storageKey,
+    this.onLongPress,
+    this.gap = Space.lg,
+    this.physics,
   });
-
-  static const double gap = Space.lg;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       final avail = constraints.maxWidth - padding.horizontal;
-      final columns = ((avail + gap) / (maxTileWidth + gap)).ceil().clamp(2, 12);
+      final columns = maxTileWidth >= avail
+          ? 1
+          : ((avail + gap) / (maxTileWidth + gap)).ceil().clamp(2, 12);
       final tileWidth = (avail - gap * (columns - 1)) / columns;
       final tileHeight = tileWidth * 3 / 4 + RecipeGridCard.textBlockHeight + 2;
       return GridView.builder(
         key: storageKey == null ? null : PageStorageKey(storageKey),
+        physics: physics,
         padding: padding,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columns,
@@ -292,6 +299,7 @@ class RecipeCardGrid extends StatelessWidget {
             selected: selectedIds.contains(r.id),
             contextItems: contextItemsBuilder?.call(context, r) ?? const [],
             onTap: () => onTap(r),
+            onLongPress: onLongPress == null ? null : () => onLongPress!(r),
             onToggleFavorite: onToggleFavorite == null ? null : () => onToggleFavorite!(r),
           );
         },
