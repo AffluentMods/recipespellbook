@@ -8,7 +8,9 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/app_controls.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Provider for favorite recipes
@@ -24,6 +26,35 @@ class FavoriteRecipesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recipesAsync = ref.watch(favoriteRecipesProvider);
     final l10n = AppLocalizations.of(context)!;
+
+    if (Responsive.isDesktopLayout(context)) {
+      final recipes = recipesAsync.valueOrNull ?? const <Recipe>[];
+      return Scaffold(
+        backgroundColor: context.appColors.surface,
+        appBar: PageHeader(
+          title: l10n.favoritesTitle,
+          subtitle: recipesAsync.hasValue ? l10n.countRecipes(recipes.length) : null,
+        ),
+        body: recipesAsync.isLoading && !recipesAsync.hasValue
+            ? const Center(child: CircularProgressIndicator())
+            : recipes.isEmpty
+                ? EmptyState(
+                    icon: Icons.favorite_border,
+                    title: l10n.favoritesEmpty,
+                    message: l10n.favoritesEmptySubtitle,
+                  )
+                : RecipeCardGrid(
+                    storageKey: 'favorites_grid',
+                    recipes: recipes,
+                    onTap: (r) {
+                      ref.read(recipeDaoProvider).updateLastViewed(r.id);
+                      context.pushNamed('recipe', pathParameters: {'id': r.id});
+                    },
+                    onToggleFavorite: (r) =>
+                        ref.read(recipeDaoProvider).toggleFavorite(r.id, !r.isFavorite),
+                  ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

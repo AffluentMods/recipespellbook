@@ -27,6 +27,11 @@ import '../../../theme/app_colors.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../layouts/master_detail_layout.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../theme/tokens.dart';
+import '../../widgets/app_controls.dart';
+import '../../widgets/keycap.dart';
+import '../../widgets/recipe_cards.dart';
+import '../../widgets/sheet_chrome.dart';
 
 /// Generic recipe list screen with filtering by course/category/tags
 /// Supports view size, sorting, search, and tag filtering
@@ -68,6 +73,13 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   final Set<String> _selectedIds = {};
   List<Recipe> _currentVisibleRecipes = [];
 
+  /// Last plainly-clicked / toggled recipe — the anchor for Shift-click ranges.
+  String? _anchorId;
+
+  /// Count the published selection toolbar was built with (republish on change
+  /// so the desktop toolbar's "N selected" stays live).
+  int _publishedSelectionCount = 0;
+
   void _toggleSelection(String id) {
     setState(() {
       if (_selectedIds.contains(id)) {
@@ -91,8 +103,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final tagsDao = ref.read(tagsDaoProvider);
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       isScrollControlled: true,
       backgroundColor: theme.colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -106,10 +118,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             builder: (ctx, setSheetState) => Column(
               children: [
                 const SizedBox(height: 8),
-                Container(width: 40, height: 4, decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                )),
+                const SheetHandle(top: 0),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
@@ -238,6 +247,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         destructive: true,
         onTap: () => _bulkDelete(context),
       ),
+      count: _selectedIds.length,
+      onClear: _exitSelection,
     );
   }
 
@@ -299,12 +310,26 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final hasBar = ref.read(selectionBarProvider) != null;
-      if (selecting && !hasBar) {
+      if (selecting &&
+          (!hasBar || _publishedSelectionCount != _selectedIds.length)) {
+        _publishedSelectionCount = _selectedIds.length;
         ref.read(selectionBarProvider.notifier).state = _buildSelectionBar();
       } else if (!selecting && hasBar) {
+        _publishedSelectionCount = 0;
         ref.read(selectionBarProvider.notifier).state = null;
       }
     });
+
+    // Desktop / pointer layout: a browsable grid, which becomes a compact list
+    // beside the recipe once one is opened (resizable master/detail).
+    if (Responsive.isDesktopLayout(context)) {
+      return _buildDesktop(
+        recipeStream: recipeStream,
+        tagsDao: tagsDao,
+        cookbookId: effectiveCookbookId,
+        canEditHere: canEditHere,
+      );
+    }
 
     final masterScaffold = Scaffold(
       appBar: _isSelecting
@@ -502,22 +527,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       ),
     );
 
-    // Desktop master-detail layout (only when the content pane is wide enough)
-    if (Responsive.useTwoPane(context)) {
-      return MasterDetailLayout(
-        masterWidth: 420,
-        master: masterScaffold,
-        detail: _selectedRecipeId != null
-            ? RecipeScreen(
-                key: ValueKey(_selectedRecipeId),
-                recipeId: _selectedRecipeId!,
-                isDetailPane: true,
-                onClose: () => setState(() => _selectedRecipeId = null),
-              )
-            : null,
-      );
-    }
-
     return masterScaffold;
   }
 
@@ -585,12 +594,355 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         onTap: () => dao.duplicateRecipe(recipe.id),
       ),
       ContextMenuItem(
+        icon: Icons.check_circle_outline,
+        label: _selectedIds.contains(recipe.id) ? l10n.selectionClear : l10n.selectAction,
+        onTap: () {
+          if (_selectedIds.contains(recipe.id)) {
+            _toggleSelection(recipe.id);
+          } else {
+            _enterSelection(recipe.id);
+            _anchorId = recipe.id;
+          }
+        },
+      ),
+      ContextMenuItem(
         icon: Icons.delete_outline,
         label: l10n.actionDelete,
         isDestructive: true,
         onTap: () => dao.moveToTrash(recipe.id),
       ),
     ];
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  //  DESKTOP (pointer) LAYOUT
+  // ════════════════════════════════════════════════════════════════
+
+  /// Pointer click semantics for a recipe card/row:
+  ///  * ⌘/Ctrl-click toggles it in the multi-selection,
+  ///  * Shift-click selects the range from the anchor,
+  ///  * a plain click toggles while selecting, otherwise opens the recipe.
+  void _onDesktopTap(String id) {
+    // Keep keyboard control (arrows, Enter, Esc, Del, ⌘A) on the list.
+    _listFocusNode.requestFocus();
+    final kb = HardwareKeyboard.instance;
+    final additive = usesCommandKey ? kb.isMetaPressed : kb.isControlPressed;
+    if (kb.isShiftPressed && _anchorId != null) {
+      final ids = _currentVisibleRecipes.map((r) => r.id).toList();
+      final a = ids.indexOf(_anchorId!);
+      final b = ids.indexOf(id);
+      if (a >= 0 && b >= 0) {
+        final lo = a < b ? a : b;
+        final hi = a < b ? b : a;
+        setState(() {
+          _isSelecting = true;
+          _selectedIds.addAll(ids.sublist(lo, hi + 1));
+        });
+        return;
+      }
+    }
+    if (additive) {
+      _anchorId = id;
+      if (_isSelecting) {
+        _toggleSelection(id);
+      } else {
+        _enterSelection(id);
+      }
+      return;
+    }
+    if (_isSelecting) {
+      _anchorId = id;
+      _toggleSelection(id);
+      return;
+    }
+    _anchorId = id;
+    _openRecipe(context, id);
+  }
+
+  /// Streams → tag filter → sort, then [builder] with the visible recipes.
+  Widget _recipesBody(
+    Stream<List<Recipe>> recipeStream,
+    TagsDao tagsDao,
+    String cookbookId,
+    Widget Function(List<Recipe> recipes) builder,
+  ) {
+    return StreamBuilder<List<Recipe>>(
+      stream: recipeStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        var recipes = snapshot.data ?? [];
+        if (_searchQuery.isNotEmpty) {
+          recipes = recipes.where((r) =>
+              r.title.toLowerCase().contains(_searchQuery) ||
+              (r.description?.toLowerCase().contains(_searchQuery) ?? false)).toList();
+        }
+        Widget finish(List<Recipe> list) {
+          final sorted = _sortRecipes(list);
+          _currentVisibleRecipes = sorted;
+          if (sorted.isEmpty) {
+            return _EmptyState(
+              title: widget.title,
+              isSearching: _searchQuery.isNotEmpty || _selectedTagIds.isNotEmpty,
+              cookbookId: cookbookId,
+              courseId: widget.courseId,
+              categoryId: widget.categoryId,
+            );
+          }
+          return builder(sorted);
+        }
+        if (_selectedTagIds.isNotEmpty) {
+          return FutureBuilder<List<Recipe>>(
+            future: _filterByTags(recipes, tagsDao),
+            builder: (context, tagSnapshot) {
+              if (!tagSnapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return finish(tagSnapshot.data!);
+            },
+          );
+        }
+        return finish(recipes);
+      },
+    );
+  }
+
+  Widget _desktopToolbar({required bool compact, required bool canEditHere}) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final c = context.appColors;
+    // Narrow content (small window / expanded sidebar): a slimmer field so the
+    // page title keeps its room.
+    final narrow = Responsive.contentWidth(context) < 900;
+    final search = ToolbarSearchField(
+      controller: _searchController,
+      hintText: l10n.searchHint,
+      width: compact ? double.infinity : (narrow ? 170 : 220),
+      onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+    );
+    final tags = Badge(
+      isLabelVisible: _selectedTagIds.isNotEmpty,
+      label: Text('${_selectedTagIds.length}'),
+      offset: const Offset(-2, 2),
+      child: ToolbarIconButton(
+        icon: Icons.label_outline_rounded,
+        tooltip: l10n.recipeFieldTags,
+        selected: _selectedTagIds.isNotEmpty,
+        onPressed: () => _showTagSheet(context),
+      ),
+    );
+    final sort = PopupMenuButton<_SortMode>(
+      tooltip: l10n.sortOrder,
+      onSelected: (sort) => setState(() => _sort = sort),
+      position: PopupMenuPosition.under,
+      itemBuilder: (ctx) => _SortMode.values.map((sort) {
+        return PopupMenuItem(
+          value: sort,
+          height: 36,
+          child: Row(children: [
+            Icon(sort.icon, size: 18, color: _sort == sort ? c.accent : c.textTertiary),
+            const SizedBox(width: Space.md),
+            Text(sort.label(l10n), style: theme.textTheme.bodyMedium),
+          ]),
+        );
+      }).toList(),
+      child: IgnorePointer(
+        child: ToolbarIconButton(icon: Icons.sort_rounded, tooltip: l10n.sortOrder, onPressed: () {}),
+      ),
+    );
+    if (compact) {
+      return Row(children: [
+        Expanded(child: search),
+        const SizedBox(width: Space.xs),
+        tags,
+        sort,
+      ]);
+    }
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      search,
+      const SizedBox(width: Space.sm),
+      tags,
+      sort,
+      const SizedBox(width: Space.xs),
+      SegmentedButton<bool>(
+        showSelectedIcon: false,
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: Space.sm)),
+          minimumSize: const WidgetStatePropertyAll(Size(36, 32)),
+          shape: const WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: Radii.mdAll)),
+          side: WidgetStatePropertyAll(BorderSide(color: c.hairline)),
+          backgroundColor: WidgetStateProperty.resolveWith(
+              (s) => s.contains(WidgetState.selected) ? c.selectedFill : Colors.transparent),
+          foregroundColor: WidgetStateProperty.resolveWith(
+              (s) => s.contains(WidgetState.selected) ? c.accent : c.textTertiary),
+        ),
+        segments: [
+          ButtonSegment(value: false, icon: const Icon(Icons.grid_view_rounded, size: 17), tooltip: l10n.viewSizeMedium),
+          ButtonSegment(value: true, icon: const Icon(Icons.view_list_rounded, size: 18), tooltip: l10n.viewSizeSmall),
+        ],
+        selected: {_viewSize == _ViewSize.small},
+        onSelectionChanged: (v) =>
+            setState(() => _viewSize = v.first ? _ViewSize.small : _ViewSize.medium),
+      ),
+    ]);
+  }
+
+  Widget _buildDesktop({
+    required Stream<List<Recipe>> recipeStream,
+    required TagsDao tagsDao,
+    required String cookbookId,
+    required bool canEditHere,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
+    final twoPane = Responsive.useTwoPane(context) && _selectedRecipeId != null;
+    final cookbookName = ref.watch(selectedCookbookProvider).valueOrNull?.name;
+
+    Widget keys(Widget child) => Focus(
+          focusNode: _listFocusNode,
+          autofocus: true,
+          onKeyEvent: _handleListKey,
+          child: child,
+        );
+
+    final newButton = !canEditHere
+        ? null
+        : Responsive.contentWidth(context) < 900
+            ? Tooltip(
+                message: withShortcut(l10n.shortcutNewRecipe, shortcutLabel(context, 'N')),
+                child: IconButton.filled(
+                  onPressed: () => _showAddRecipeDialog(context),
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                ),
+              )
+            : FilledButton.icon(
+                onPressed: () => _showAddRecipeDialog(context),
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: Text(l10n.shortcutNewRecipe),
+              );
+
+    if (!twoPane) {
+      // ── Browse: full-width grid (or list) under a page header ──
+      return Scaffold(
+        backgroundColor: c.surface,
+        appBar: PageHeader(
+          title: widget.title,
+          subtitle: cookbookName,
+          actions: [
+            _desktopToolbar(compact: false, canEditHere: canEditHere),
+            ?newButton,
+          ],
+        ),
+        body: keys(_recipesBody(recipeStream, tagsDao, cookbookId, (recipes) {
+          if (_viewSize == _ViewSize.small) {
+            return Responsive.constrainScrollable(
+              maxWidth: 880,
+              minHorizontal: Space.xl,
+              bottom: 96,
+              builder: (context, pad) => ListView.builder(
+                padding: pad,
+                itemCount: recipes.length,
+                itemBuilder: (context, i) => RecipeListRow(
+                  key: ValueKey(recipes[i].id),
+                  recipe: recipes[i],
+                  selecting: _isSelecting,
+                  selected: _selectedIds.contains(recipes[i].id),
+                  contextItems: _recipeContextItems(context, recipes[i]),
+                  onTap: () => _onDesktopTap(recipes[i].id),
+                ),
+              ),
+            );
+          }
+          return RecipeCardGrid(
+            storageKey: 'recipe_grid_desktop',
+            recipes: recipes,
+            selecting: _isSelecting,
+            selectedIds: _selectedIds,
+            contextItemsBuilder: _recipeContextItems,
+            onTap: (r) => _onDesktopTap(r.id),
+            onToggleFavorite: (r) =>
+                ref.read(recipeDaoProvider).toggleFavorite(r.id, !r.isFavorite),
+          );
+        })),
+      );
+    }
+
+    // ── Reading: compact list beside the open recipe ──
+    final master = Material(
+      color: c.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.xl, Space.lg, Space.md, Space.sm),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w600,
+                          color: c.textPrimary,
+                        ),
+                  ),
+                ),
+                ToolbarIconButton(
+                  icon: Icons.grid_view_rounded,
+                  tooltip: l10n.viewSizeMedium,
+                  shortcut: l10n.keyEsc,
+                  onPressed: () => setState(() => _selectedRecipeId = null),
+                ),
+                if (canEditHere)
+                  ToolbarIconButton(
+                    icon: Icons.add_rounded,
+                    tooltip: l10n.shortcutNewRecipe,
+                    shortcut: shortcutLabel(context, 'N'),
+                    onPressed: () => _showAddRecipeDialog(context),
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.md, Space.sm),
+            child: _desktopToolbar(compact: true, canEditHere: canEditHere),
+          ),
+          Expanded(
+            child: keys(_recipesBody(recipeStream, tagsDao, cookbookId, (recipes) {
+              return ListView.builder(
+                padding: const EdgeInsets.only(bottom: 96),
+                itemCount: recipes.length,
+                itemBuilder: (context, i) => RecipeListRow(
+                  key: ValueKey(recipes[i].id),
+                  recipe: recipes[i],
+                  active: recipes[i].id == _selectedRecipeId && !_isSelecting,
+                  selecting: _isSelecting,
+                  selected: _selectedIds.contains(recipes[i].id),
+                  contextItems: _recipeContextItems(context, recipes[i]),
+                  onTap: () => _onDesktopTap(recipes[i].id),
+                ),
+              );
+            })),
+          ),
+        ],
+      ),
+    );
+
+    return MasterDetailLayout(
+      persistKey: 'recipes',
+      masterWidth: 340,
+      master: master,
+      detail: RecipeScreen(
+        key: ValueKey(_selectedRecipeId),
+        recipeId: _selectedRecipeId!,
+        isDetailPane: true,
+        onClose: () => setState(() => _selectedRecipeId = null),
+      ),
+    );
   }
 
   /// Move the desktop master-detail selection through the ordered visible list.
@@ -627,6 +979,25 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       _trashSelected();
       return KeyEventResult.handled;
     }
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      if (_isSelecting) {
+        _exitSelection();
+        return KeyEventResult.handled;
+      }
+      if (_selectedRecipeId != null) {
+        setState(() => _selectedRecipeId = null);
+        return KeyEventResult.handled;
+      }
+    }
+    final kb = HardwareKeyboard.instance;
+    if (event.logicalKey == LogicalKeyboardKey.keyA &&
+        (usesCommandKey ? kb.isMetaPressed : kb.isControlPressed)) {
+      setState(() {
+        _isSelecting = true;
+        _selectAll(_currentVisibleRecipes);
+      });
+      return KeyEventResult.handled;
+    }
     return KeyEventResult.ignored;
   }
 
@@ -647,8 +1018,13 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     });
   }
 
+  /// The cookbook this list shows: the explicit one, else the selected one.
+  String get _effectiveCookbookId => widget.cookbookId.isNotEmpty
+      ? widget.cookbookId
+      : (ref.read(selectedCookbookIdProvider) ?? 'starter');
+
   void _showAddRecipeDialog(BuildContext context) {
-    showNewRecipeDialog(context, widget.cookbookId);
+    showNewRecipeDialog(context, _effectiveCookbookId);
   }
 
   List<Recipe> _sortRecipes(List<Recipe> recipes) {
@@ -772,8 +1148,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final courses = taxonomy.CourseData.courses;
-    final selected = await showModalBottomSheet<String>(
-      context: context,
+    final selected = await Responsive.showAdaptiveSheet<String>(
+      context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -787,7 +1163,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           builder: (_, scrollController) => SafeArea(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SheetHandle(top: 0),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(l10n.setCourse, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -831,8 +1207,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final categories = taxonomy.CategoryData.categories;
-    final selected = await showModalBottomSheet<String>(
-      context: context,
+    final selected = await Responsive.showAdaptiveSheet<String>(
+      context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -846,7 +1222,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           builder: (_, scrollController) => SafeArea(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SheetHandle(top: 0),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(l10n.setCategory, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -910,8 +1286,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       return;
     }
 
-    final targetId = await showModalBottomSheet<String>(
-      context: context,
+    final targetId = await Responsive.showAdaptiveSheet<String>(
+      context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -920,7 +1296,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         final theme = Theme.of(ctx);
         return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
           const SizedBox(height: 8),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(l10n.recipeListCopyToCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -978,8 +1354,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       return;
     }
 
-    final targetId = await showModalBottomSheet<String>(
-      context: context,
+    final targetId = await Responsive.showAdaptiveSheet<String>(
+      context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -988,7 +1364,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         final theme = Theme.of(ctx);
         return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
           const SizedBox(height: 8),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(l10n.recipeListMoveToCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),

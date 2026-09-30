@@ -1573,6 +1573,128 @@
   "helpContactUsDesc": "Have questions or feedback? Email us at support@recipespellbook.com",
   "navCommunity": "Community",
   "navComingSoon": "Coming soon",
+  "keyCtrl": "Ctrl",
+  "keyShift": "Shift",
+  "keyAlt": "Alt",
+  "keyEsc": "Esc",
+  "keyEnter": "Enter",
+  "keyDelete": "Del",
+  "keySpace": "Space",
+  "sidebarLibrary": "Library",
+  "sidebarPlan": "Plan",
+  "sidebarDiscover": "Discover",
+  "sidebarAllRecipes": "All recipes",
+  "sidebarCollapse": "Collapse sidebar",
+  "sidebarExpand": "Expand sidebar",
+  "sidebarSwitchCookbook": "Switch cookbook",
+  "sidebarManageCookbooks": "Manage cookbooks",
+  "sidebarSignInToSync": "Sign in to sync",
+  "syncStatusJustNow": "Synced just now",
+  "syncStatusMinutes": "Synced {minutes} min ago",
+  "@syncStatusMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStatusHours": "Synced {hours} h ago",
+  "@syncStatusHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStatusLocal": "Saved on this device",
+  "paletteHint": "Search recipes and commands…",
+  "paletteSectionRecent": "Recent",
+  "paletteSectionGoTo": "Go to",
+  "paletteSectionActions": "Actions",
+  "paletteSectionRecipes": "Recipes",
+  "paletteImportSubtitle": "From a link, photo, or file",
+  "paletteAdvancedSearch": "Search with filters",
+  "paletteToggleTheme": "Toggle light / dark",
+  "paletteAppearance": "Appearance",
+  "paletteSearchAll": "Search all recipes for “{query}”",
+  "@paletteSearchAll": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "paletteNoMatches": "No matches",
+  "paletteNavigateHint": "Navigate",
+  "paletteOpenHint": "Open",
+  "shortcutsTitle": "Keyboard shortcuts",
+  "shortcutsGeneral": "General",
+  "shortcutsNavigation": "Navigation",
+  "shortcutsRecipes": "Recipes",
+  "shortcutsShopping": "Shopping",
+  "shortcutsEditor": "Editor",
+  "shortcutCommandPalette": "Command palette",
+  "shortcutNewRecipe": "New recipe",
+  "shortcutToggleSidebar": "Toggle sidebar",
+  "shortcutGoBack": "Go back",
+  "shortcutDismiss": "Dismiss",
+  "shortcutMoveSelection": "Move selection",
+  "shortcutOpenRecipe": "Open recipe",
+  "shortcutAddToSelection": "Add to selection",
+  "shortcutRangeSelect": "Select a range",
+  "shortcutClick": "Click",
+  "shortcutTrash": "Move to trash",
+  "shortcutAddItem": "Add item",
+  "shortcutToggleItem": "Check off item",
+  "shortcutSaveRecipe": "Save recipe",
+  "windowMinimize": "Minimize",
+  "windowMaximize": "Maximize",
+  "windowRestore": "Restore",
+  "windowClose": "Close",
+  "selectionCount": "{count} selected",
+  "@selectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectionClear": "Clear selection",
+  "selectAction": "Select",
+  "homeGreetingMorning": "Good morning",
+  "homeGreetingAfternoon": "Good afternoon",
+  "homeGreetingEvening": "Good evening",
+  "homeNextSevenDays": "Next 7 days",
+  "homeOpenList": "Open list",
+  "homeAllCaughtUp": "All caught up",
+  "homeToBuy": "{count, plural, =1{1 item to buy} other{{count} items to buy}}",
+  "@homeToBuy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeJumpBackIn": "Jump back in",
+  "shoppingAddNamed": "Add “{name}”",
+  "@shoppingAddNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingUncheck": "Put back on the list",
+  "cookbooksCount": "{count, plural, =1{1 cookbook} other{{count} cookbooks}}",
+  "@cookbooksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "detailChooseRecipe": "Choose a recipe",
+  "detailChooseRecipeHint": "Pick one from the list to read it here.",
   "mealPlanButton": "Meal Plan",
   "groceriesButton": "Groceries",
   "shareButton": "Share",

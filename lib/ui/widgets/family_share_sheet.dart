@@ -12,6 +12,7 @@ import '../../services/revenuecat_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
+import 'sheet_chrome.dart';
 
 // ════════════════════════════════════════════
 //  Permission labels
@@ -133,10 +134,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
       children: [
         // ── Drag handle ──
         Center(
-          child: Container(
-            width: 40, height: 4, margin: const EdgeInsets.only(top: 12, bottom: 8),
-            decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
-          ),
+          child: const SheetHandle(top: 12, bottom: 8),
         ),
 
         // ── Header ──

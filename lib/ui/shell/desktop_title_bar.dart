@@ -2,16 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
-import '../widgets/command_palette.dart';
+import '../../theme/tokens.dart';
+import '../../utils/platform_utils.dart';
 
 /// Height of the custom desktop title bar.
-const double kDesktopTitleBarHeight = 44;
+const double kDesktopTitleBarHeight = 38;
 
-/// A custom, themed window title bar drawn in place of the native one
-/// (the native bar is hidden via [DesktopWindowService]). Gives the desktop
-/// app real window chrome: draggable region, app mark, a Ctrl+K search pill,
-/// and themed minimize / maximize / close controls.
+/// Width kept clear on macOS for the native traffic-light buttons.
+const double _kMacTrafficLightInset = 76;
+
+/// The window's title bar, drawn in the chrome tone so it reads as one surface
+/// with the sidebar (the page content sits below it as an inset panel).
+///
+///  * macOS keeps the native traffic lights (window_manager's hidden title bar
+///    style leaves them in place) — we only reserve room for them.
+///  * Windows / Linux get themed minimise / maximise / close controls.
+///  * Everything else is a drag region; double-click toggles maximise.
 class DesktopTitleBar extends ConsumerStatefulWidget {
   const DesktopTitleBar({super.key});
 
@@ -58,125 +66,59 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
   @override
   Widget build(BuildContext context) {
     final c = context.appColors;
-    // The title bar is mounted in MaterialApp.builder, ABOVE any Scaffold/
-    // Material — so its Text widgets would otherwise inherit Flutter's fallback
-    // text style (the yellow double-underline). Wrapping in a Material supplies
-    // a proper DefaultTextStyle so all title-bar text renders cleanly.
+    final l10n = AppLocalizations.of(context);
+    // Mounted in MaterialApp.builder, above any Scaffold — the Material gives
+    // the text a proper DefaultTextStyle (no fallback yellow underline).
     return Material(
-      type: MaterialType.transparency,
-      child: Container(
-      height: kDesktopTitleBarHeight,
-      decoration: BoxDecoration(
-        color: c.surface,
-        border: Border(
-          bottom: BorderSide(color: c.outline.withValues(alpha: 0.35), width: 1),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Draggable region: app mark + name.
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onDoubleTap: _toggleMaximize,
-              onPanStart: (_) => windowManager.startDragging(),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 14),
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_stories_outlined, size: 18, color: c.accent),
-                    const SizedBox(width: 9),
-                    Text(
-                      'Recipe Spellbook',
-                      style: TextStyle(
-                        color: c.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                        decoration: TextDecoration.none,
-                      ),
+      color: context.chromeColor,
+      child: SizedBox(
+        height: kDesktopTitleBarHeight,
+        child: Row(
+          children: [
+            if (isMacOS) const SizedBox(width: _kMacTrafficLightInset),
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onDoubleTap: _toggleMaximize,
+                onPanStart: (_) => windowManager.startDragging(),
+                child: Center(
+                  child: Text(
+                    l10n?.appTitle ?? '',
+                    style: TextStyle(
+                      color: c.textTertiary,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.2,
+                      decoration: TextDecoration.none,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-          // Command palette pill.
-          _SearchPill(colors: c, onTap: () => openCommandPalette(ref)),
-          const SizedBox(width: 8),
-          // Window controls.
-          _WindowButton(
-            icon: Icons.remove,
-            colors: c,
-            onTap: () => windowManager.minimize(),
-          ),
-          _WindowButton(
-            icon: _maximized ? Icons.filter_none : Icons.crop_square,
-            colors: c,
-            iconSize: _maximized ? 13 : 15,
-            onTap: _toggleMaximize,
-          ),
-          _WindowButton(
-            icon: Icons.close,
-            colors: c,
-            isClose: true,
-            onTap: () => windowManager.close(),
-          ),
-        ],
-      ),
-    ),
-    );
-  }
-}
-
-class _SearchPill extends StatefulWidget {
-  final AppColors colors;
-  final VoidCallback onTap;
-  const _SearchPill({required this.colors, required this.onTap});
-
-  @override
-  State<_SearchPill> createState() => _SearchPillState();
-}
-
-class _SearchPillState extends State<_SearchPill> {
-  bool _hover = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = widget.colors;
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          height: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: _hover ? c.surfaceHigh : c.surfaceRaised,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: c.outline.withValues(alpha: 0.5)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search, size: 15, color: c.textTertiary),
-              const SizedBox(width: 8),
-              Text('Search',
-                  style: TextStyle(color: c.textTertiary, fontSize: 12.5)),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: c.surface.withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: c.outline.withValues(alpha: 0.5)),
-                ),
-                child: Text('Ctrl K',
-                    style: TextStyle(color: c.textTertiary, fontSize: 10.5)),
+            if (!isMacOS) ...[
+              _WindowButton(
+                icon: Icons.remove_rounded,
+                tooltip: l10n?.windowMinimize ?? '',
+                onTap: () => windowManager.minimize(),
+              ),
+              _WindowButton(
+                icon: _maximized
+                    ? Icons.filter_none_rounded
+                    : Icons.crop_square_rounded,
+                iconSize: _maximized ? 13 : 15,
+                tooltip:
+                    (_maximized ? l10n?.windowRestore : l10n?.windowMaximize) ??
+                    '',
+                onTap: _toggleMaximize,
+              ),
+              _WindowButton(
+                icon: Icons.close_rounded,
+                tooltip: l10n?.windowClose ?? '',
+                isClose: true,
+                onTap: () => windowManager.close(),
               ),
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -185,13 +127,13 @@ class _SearchPillState extends State<_SearchPill> {
 
 class _WindowButton extends StatefulWidget {
   final IconData icon;
-  final AppColors colors;
+  final String tooltip;
   final VoidCallback onTap;
   final bool isClose;
   final double iconSize;
   const _WindowButton({
     required this.icon,
-    required this.colors,
+    required this.tooltip,
     required this.onTap,
     this.isClose = false,
     this.iconSize = 16,
@@ -206,22 +148,30 @@ class _WindowButtonState extends State<_WindowButton> {
 
   @override
   Widget build(BuildContext context) {
-    final c = widget.colors;
+    final c = context.appColors;
+    final scheme = Theme.of(context).colorScheme;
     final Color bg = _hover
-        ? (widget.isClose ? const Color(0xFFE81123) : c.surfaceHigh)
+        ? (widget.isClose ? scheme.error : c.hoverFill)
         : Colors.transparent;
-    final Color fg = _hover && widget.isClose ? Colors.white : c.textSecondary;
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          width: 46,
-          height: kDesktopTitleBarHeight,
-          color: bg,
-          alignment: Alignment.center,
-          child: Icon(widget.icon, size: widget.iconSize, color: fg),
+    final Color fg = _hover && widget.isClose
+        ? scheme.onError
+        : c.textSecondary;
+    return Tooltip(
+      message: widget.tooltip,
+      waitDuration: const Duration(milliseconds: 700),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: Motion.fast,
+            width: 46,
+            height: kDesktopTitleBarHeight,
+            color: bg,
+            alignment: Alignment.center,
+            child: Icon(widget.icon, size: widget.iconSize, color: fg),
+          ),
         ),
       ),
     );

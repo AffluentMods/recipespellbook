@@ -6,6 +6,7 @@ import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import '../../utils/responsive_utils.dart';
+import 'sheet_chrome.dart';
 
 /// A widget that displays selected tags and allows adding/removing tags
 class TagPicker extends ConsumerStatefulWidget {
@@ -251,7 +252,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
     final l10n = AppLocalizations.of(context)!;
     final tagsDao = ref.watch(tagsDaoProvider);
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: 0.7,
       minChildSize: 0.4,
       maxChildSize: 0.9,
@@ -260,15 +261,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
         return Column(
           children: [
             // Handle
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SheetHandle(top: 12),
 
             // Header
             Padding(

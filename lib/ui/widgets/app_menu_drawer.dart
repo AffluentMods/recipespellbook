@@ -239,17 +239,25 @@ class HelpSupportScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
+    // Desktop reaches Help from the sidebar: a page title, no back button,
+    // and a reading-width column.
+    final desktop = Responsive.isDesktopLayout(context);
 
     return Scaffold(
       appBar: AppBar(
-        leading: _BackButtonCircle(),
+        leading: desktop ? null : _BackButtonCircle(),
+        automaticallyImplyLeading: !desktop,
         title: Text(l10n.menuHelpSupport),
-        centerTitle: true,
+        centerTitle: !desktop,
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      // The list stays full-width so the wheel scrolls anywhere in the pane;
+      // on desktop its content is a left-aligned column under the title.
+      body: LayoutBuilder(builder: (context, box) => ListView(
+        padding: desktop
+            ? EdgeInsets.fromLTRB(28, 8, (box.maxWidth - 28 - 720).clamp(28.0, double.infinity), 32)
+            : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         children: [
           // Hero
           Container(
@@ -338,7 +346,7 @@ class HelpSupportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 32),
         ],
-      ),
+      )),
     );
   }
 

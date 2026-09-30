@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import '../../utils/responsive_utils.dart';
 import 'recipe_image.dart';
+import 'sheet_chrome.dart';
 
 /// Action being performed on the recipe + sub-recipes.
 enum SubRecipeAction { copy, move, delete, publish, download }
@@ -193,10 +194,7 @@ class _SubRecipeSelectionContentState extends State<_SubRecipeSelectionContent> 
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
               child: Text(

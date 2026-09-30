@@ -1978,8 +1978,9 @@ class _MealPlanToggleCard extends StatelessWidget {
       ('Dinner', l10n.mealTypeDinner),
       ('Snack', l10n.mealTypeSnack),
     ];
-    final picked = await showModalBottomSheet<String>(
-      context: context,
+    final picked = await Responsive.showAdaptiveSheet<String>(
+      context,
+      isScrollControlled: false,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,

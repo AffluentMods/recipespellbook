@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/recipe_title.dart';
+import '../../widgets/recipe_cards.dart' show servingsLabel;
 import '../../widgets/recipe_image.dart';
 
 /// Screen showing all quick access recipes (meal plan + pinned + recent)
@@ -595,7 +596,7 @@ class _LargeCard extends StatelessWidget {
                             Icon(Icons.restaurant, size: 14, color: theme.colorScheme.outline),
                             const SizedBox(width: 4),
                             Text(
-                              '${item.recipe.servings} ${AppLocalizations.of(context)!.servingsUnit}',
+                              servingsLabel(AppLocalizations.of(context)!, item.recipe.servings) ?? '',
                               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                             ),
                           ],

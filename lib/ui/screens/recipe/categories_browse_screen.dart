@@ -220,12 +220,21 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: Responsive.browseGridColumns(context),
-        childAspectRatio: Responsive.isDesktopLayout(context) ? 1.8 : 1.5,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
+      // Desktop caps the TILE size (more columns on wide windows), not the
+      // column count — tiles never balloon on ultrawide monitors.
+      gridDelegate: Responsive.isDesktopLayout(context)
+          ? const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 240,
+              childAspectRatio: 1.8,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            )
+          : SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: Responsive.browseGridColumns(context),
+              childAspectRatio: 1.5,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];

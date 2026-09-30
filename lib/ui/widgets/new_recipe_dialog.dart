@@ -23,6 +23,7 @@ import 'app_snackbar.dart';
 import 'platform_brand.dart';
 import '../../services/barcode_scanner_service.dart';
 import '../../utils/responsive_utils.dart';
+import 'sheet_chrome.dart';
 
 /// Shows the MODERN add recipe dialog with 2 options
 Future<void> showNewRecipeDialog(BuildContext context, String cookbookId) {
@@ -56,7 +57,7 @@ class _AddRecipeChooser extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: SafeArea(
         child: Padding(
@@ -64,13 +65,7 @@ class _AddRecipeChooser extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 24),
               Text(l10n.recipeAdd, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
@@ -815,7 +810,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       margin: EdgeInsets.only(bottom: bottomPadding),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: Stack(
         children: [
@@ -825,7 +820,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+                  const SheetHandle(top: 0),
                   const SizedBox(height: 22),
 
                   // ── Header ──
@@ -980,8 +975,15 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                           icon: Icons.help_outline_rounded,
                           label: 'How to import',
                           onTap: () {
+                            // Desktop: open the guides in-shell (sidebar stays).
+                            final desktop = Responsive.isDesktopLayout(context);
+                            final router = GoRouter.of(context);
                             Navigator.pop(context);
-                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen()));
+                            if (desktop) {
+                              router.push('/import-guides');
+                            } else {
+                              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen()));
+                            }
                           },
                         ),
                       ),
@@ -1006,7 +1008,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
               child: Container(
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface.withValues(alpha: 0.96),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                  borderRadius: SheetPresentation.surfaceRadius(context),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1160,14 +1162,14 @@ class _TextInputSheetState extends State<_TextInputSheet> {
     return Container(
       margin: EdgeInsets.only(bottom: bottom),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
-      decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),
+      decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: SheetPresentation.surfaceRadius(context)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
+            Center(child: const SheetHandle(top: 0)),
             const SizedBox(height: 20),
             Row(children: [
               Expanded(child: Text(l10n.pasteRecipeTitle, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))),

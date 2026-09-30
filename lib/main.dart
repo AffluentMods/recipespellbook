@@ -35,15 +35,18 @@ import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/widgets/app_shortcuts.dart';
 
-/// Custom scroll behavior that enables mouse drag scrolling for horizontal
-/// lists on desktop (trackpad, mouse, stylus all work like touch).
+/// Scroll behaviour: touch, stylus and trackpad drag-scroll everywhere. A
+/// MOUSE only drags on phones/tablets — on desktop and web a mouse drag must
+/// select text and drive swipe rows / drag handles instead; the wheel and
+/// trackpad do the scrolling there.
 class AppScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
     PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
     PointerDeviceKind.trackpad,
     PointerDeviceKind.stylus,
+    PointerDeviceKind.invertedStylus,
+    if (isMobile) PointerDeviceKind.mouse,
   };
 }
 
@@ -171,6 +174,19 @@ class RecipeSpellbookApp extends ConsumerWidget {
                   minVerticalPadding: 4,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                 ),
+                // Screens that still use an AppBar read like the desktop
+                // PageHeader: left-aligned editorial title, same inset/height.
+                appBarTheme: baseTheme.appBarTheme.copyWith(
+                  centerTitle: false,
+                  toolbarHeight: 64,
+                  titleSpacing: 28,
+                  titleTextStyle: baseTheme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.3,
+                    color: baseTheme.colorScheme.onSurface,
+                  ),
+                ),
               ),
               child: result,
             );
@@ -214,18 +230,20 @@ class RecipeSpellbookApp extends ConsumerWidget {
             );
           }
 
-          // Desktop: custom window chrome (title bar) + command palette +
-          // keyboard-shortcuts cheat sheet overlays.
+          // Desktop: custom window chrome (title bar). Desktop + web: the
+          // command palette and keyboard-shortcuts cheat sheet overlays (their
+          // ⌘/Ctrl+K and ⌘/Ctrl+/ bindings live in AppShortcuts).
           if (isDesktop) {
+            result = Column(
+              children: [
+                const DesktopTitleBar(),
+                Expanded(child: result),
+              ],
+            );
+          }
+          if (!isMobile) {
             result = ShortcutsCheatSheetHost(
-              child: CommandPaletteHost(
-                child: Column(
-                  children: [
-                    const DesktopTitleBar(),
-                    Expanded(child: result),
-                  ],
-                ),
-              ),
+              child: CommandPaletteHost(child: result),
             );
           }
 

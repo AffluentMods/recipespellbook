@@ -7,6 +7,7 @@ import '../../providers/database_provider.dart';
 import '../../theme/app_colors.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
+import 'sheet_chrome.dart';
 
 /// Model for recipe tags/collections
 class RecipeTag {
@@ -120,15 +121,7 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
     return Column(
       children: [
         // Handle
-        Container(
-          margin: const EdgeInsets.only(top: 12),
-          width: 40,
-          height: 4,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.outline.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
+        const SheetHandle(top: 12),
         // Header
         Padding(
           padding: const EdgeInsets.all(16),

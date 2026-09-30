@@ -6397,6 +6397,444 @@ abstract class AppLocalizations {
   /// **'Coming soon'**
   String get navComingSoon;
 
+  /// No description provided for @keyCtrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl'**
+  String get keyCtrl;
+
+  /// No description provided for @keyShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get keyShift;
+
+  /// No description provided for @keyAlt.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt'**
+  String get keyAlt;
+
+  /// No description provided for @keyEsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Esc'**
+  String get keyEsc;
+
+  /// No description provided for @keyEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get keyEnter;
+
+  /// No description provided for @keyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Del'**
+  String get keyDelete;
+
+  /// No description provided for @keySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Space'**
+  String get keySpace;
+
+  /// No description provided for @sidebarLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get sidebarLibrary;
+
+  /// No description provided for @sidebarPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get sidebarPlan;
+
+  /// No description provided for @sidebarDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get sidebarDiscover;
+
+  /// No description provided for @sidebarAllRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes'**
+  String get sidebarAllRecipes;
+
+  /// No description provided for @sidebarCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse sidebar'**
+  String get sidebarCollapse;
+
+  /// No description provided for @sidebarExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand sidebar'**
+  String get sidebarExpand;
+
+  /// No description provided for @sidebarSwitchCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch cookbook'**
+  String get sidebarSwitchCookbook;
+
+  /// No description provided for @sidebarManageCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage cookbooks'**
+  String get sidebarManageCookbooks;
+
+  /// No description provided for @sidebarSignInToSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to sync'**
+  String get sidebarSignInToSync;
+
+  /// No description provided for @syncStatusJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced just now'**
+  String get syncStatusJustNow;
+
+  /// No description provided for @syncStatusMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {minutes} min ago'**
+  String syncStatusMinutes(int minutes);
+
+  /// No description provided for @syncStatusHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {hours} h ago'**
+  String syncStatusHours(int hours);
+
+  /// No description provided for @syncStatusLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device'**
+  String get syncStatusLocal;
+
+  /// No description provided for @paletteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes and commands…'**
+  String get paletteHint;
+
+  /// No description provided for @paletteSectionRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get paletteSectionRecent;
+
+  /// No description provided for @paletteSectionGoTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to'**
+  String get paletteSectionGoTo;
+
+  /// No description provided for @paletteSectionActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get paletteSectionActions;
+
+  /// No description provided for @paletteSectionRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get paletteSectionRecipes;
+
+  /// No description provided for @paletteImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From a link, photo, or file'**
+  String get paletteImportSubtitle;
+
+  /// No description provided for @paletteAdvancedSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search with filters'**
+  String get paletteAdvancedSearch;
+
+  /// No description provided for @paletteToggleTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle light / dark'**
+  String get paletteToggleTheme;
+
+  /// No description provided for @paletteAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get paletteAppearance;
+
+  /// No description provided for @paletteSearchAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Search all recipes for “{query}”'**
+  String paletteSearchAll(String query);
+
+  /// No description provided for @paletteNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get paletteNoMatches;
+
+  /// No description provided for @paletteNavigateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate'**
+  String get paletteNavigateHint;
+
+  /// No description provided for @paletteOpenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get paletteOpenHint;
+
+  /// No description provided for @shortcutsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard shortcuts'**
+  String get shortcutsTitle;
+
+  /// No description provided for @shortcutsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get shortcutsGeneral;
+
+  /// No description provided for @shortcutsNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get shortcutsNavigation;
+
+  /// No description provided for @shortcutsRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get shortcutsRecipes;
+
+  /// No description provided for @shortcutsShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get shortcutsShopping;
+
+  /// No description provided for @shortcutsEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Editor'**
+  String get shortcutsEditor;
+
+  /// No description provided for @shortcutCommandPalette.
+  ///
+  /// In en, this message translates to:
+  /// **'Command palette'**
+  String get shortcutCommandPalette;
+
+  /// No description provided for @shortcutNewRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'New recipe'**
+  String get shortcutNewRecipe;
+
+  /// No description provided for @shortcutToggleSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle sidebar'**
+  String get shortcutToggleSidebar;
+
+  /// No description provided for @shortcutGoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get shortcutGoBack;
+
+  /// No description provided for @shortcutDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get shortcutDismiss;
+
+  /// No description provided for @shortcutMoveSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Move selection'**
+  String get shortcutMoveSelection;
+
+  /// No description provided for @shortcutOpenRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Open recipe'**
+  String get shortcutOpenRecipe;
+
+  /// No description provided for @shortcutAddToSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to selection'**
+  String get shortcutAddToSelection;
+
+  /// No description provided for @shortcutRangeSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a range'**
+  String get shortcutRangeSelect;
+
+  /// No description provided for @shortcutClick.
+  ///
+  /// In en, this message translates to:
+  /// **'Click'**
+  String get shortcutClick;
+
+  /// No description provided for @shortcutTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to trash'**
+  String get shortcutTrash;
+
+  /// No description provided for @shortcutAddItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get shortcutAddItem;
+
+  /// No description provided for @shortcutToggleItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Check off item'**
+  String get shortcutToggleItem;
+
+  /// No description provided for @shortcutSaveRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save recipe'**
+  String get shortcutSaveRecipe;
+
+  /// No description provided for @windowMinimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get windowMinimize;
+
+  /// No description provided for @windowMaximize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize'**
+  String get windowMaximize;
+
+  /// No description provided for @windowRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get windowRestore;
+
+  /// No description provided for @windowClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get windowClose;
+
+  /// No description provided for @selectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectionCount(int count);
+
+  /// No description provided for @selectionClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get selectionClear;
+
+  /// No description provided for @selectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectAction;
+
+  /// No description provided for @homeGreetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get homeGreetingMorning;
+
+  /// No description provided for @homeGreetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get homeGreetingAfternoon;
+
+  /// No description provided for @homeGreetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get homeGreetingEvening;
+
+  /// No description provided for @homeNextSevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 7 days'**
+  String get homeNextSevenDays;
+
+  /// No description provided for @homeOpenList.
+  ///
+  /// In en, this message translates to:
+  /// **'Open list'**
+  String get homeOpenList;
+
+  /// No description provided for @homeAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up'**
+  String get homeAllCaughtUp;
+
+  /// No description provided for @homeToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item to buy} other{{count} items to buy}}'**
+  String homeToBuy(int count);
+
+  /// No description provided for @homeJumpBackIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump back in'**
+  String get homeJumpBackIn;
+
+  /// No description provided for @shoppingAddNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Add “{name}”'**
+  String shoppingAddNamed(String name);
+
+  /// No description provided for @shoppingUncheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Put back on the list'**
+  String get shoppingUncheck;
+
+  /// No description provided for @cookbooksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cookbook} other{{count} cookbooks}}'**
+  String cookbooksCount(int count);
+
+  /// No description provided for @detailChooseRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a recipe'**
+  String get detailChooseRecipe;
+
+  /// No description provided for @detailChooseRecipeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one from the list to read it here.'**
+  String get detailChooseRecipeHint;
+
   /// No description provided for @mealPlanButton.
   ///
   /// In en, this message translates to:

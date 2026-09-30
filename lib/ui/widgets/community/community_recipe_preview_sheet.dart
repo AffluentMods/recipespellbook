@@ -7,6 +7,8 @@ import '../../../utils/duration_format.dart';
 import '../../../utils/recipe_title.dart';
 import 'community_media.dart';
 import 'meta_line.dart';
+import '../sheet_chrome.dart';
+import '../../../utils/responsive_utils.dart';
 
 /// The Community recipe preview: a bottom sheet at 70% height, draggable to
 /// full (community handoff, preview sheet). This is the conversion point of
@@ -20,8 +22,8 @@ Future<void> showCommunityRecipePreview(
   VoidCallback? onExpandRecipe,
   bool alreadySaved = false,
 }) {
-  return showModalBottomSheet(
-    context: context,
+  return Responsive.showAdaptiveSheet(
+    context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (ctx) => _PreviewSheet(
@@ -79,7 +81,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
     final cook = formatDurationMinutes(l10n, recipe.cookTimeMinutes);
     final servingsInt = int.tryParse(recipe.servings ?? '');
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: 0.7,
       minChildSize: 0.45,
       maxChildSize: 0.95,
@@ -87,7 +89,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
       builder: (ctx, scrollController) => Container(
         decoration: BoxDecoration(
           color: colors.surfaceRaised,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
           border: Border(
             top: BorderSide(color: colors.outline.withValues(alpha: 0.35)),
           ),
@@ -96,14 +98,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 14),
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colors.outline.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              child: const SheetHandle(top: 0),
             ),
             Expanded(
               child: ListView(

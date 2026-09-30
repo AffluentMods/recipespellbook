@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../providers/navigation_guard_provider.dart';
-import '../../services/auth_service.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/tokens.dart';
+import '../../utils/platform_utils.dart';
 import '../../utils/responsive_utils.dart';
-import '../screens/import/import_guides_screen.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/app_snackbar.dart';
-import '../widgets/join_with_link_dialog.dart';
 import '../widgets/selection_action_bar.dart';
+import 'desktop_sidebar.dart';
+import 'shell_navigation.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../widgets/kitchen_buddy/coin_toast_overlay.dart';
 
@@ -136,67 +137,30 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
     _lastLocation = location;
 
-    // Immersive routes (recipe editor / new recipe): a full editing surface.
-    // Desktop keeps the sidebar so editing stays in-shell; compact goes
-    // full-screen (the mobile behaviour, unchanged).
-    if (_isImmersiveRoute(location)) {
-      if (Responsive.useExpandedSidebar(context)) {
-        return Row(
-          children: [
-            _AppSidebar(
-              currentIndex: effectiveIndex,
-              currentPath: location,
-              shoppingBadge: shoppingBadge,
-              onDestinationSelected: (index) {
-                switch (index) {
-                  case 0: _navigateTo('/', 0);
-                  case 1: _navigateTo('/community', 1);
-                  case 2: _navigateTo('/planner', 2);
-                  case 3: _navigateTo('/shopping', 3);
-                }
-              },
-            ),
-            VerticalDivider(
-              width: 1, thickness: 1,
-              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-            ),
-            Expanded(child: widget.child),
-          ],
-        );
+    // Desktop (≥900dp): sidebar + inset content panel. Immersive routes
+    // (recipe editor / new recipe) keep the sidebar so editing stays in-shell.
+    if (Responsive.useExpandedSidebar(context)) {
+      final routeDestination = destinationForLocation(location);
+      final lastDestination = ref.watch(lastShellDestinationProvider);
+      if (routeDestination != null && routeDestination != lastDestination) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref.read(lastShellDestinationProvider.notifier).state = routeDestination;
+          }
+        });
       }
-      return widget.child;
+      return _DesktopShellLayout(
+        scaffoldKey: _scaffoldKey,
+        selected: routeDestination ?? lastDestination,
+        shoppingCount: shoppingCount,
+        selectionBar: _isImmersiveRoute(location) ? null : selectionBar,
+        child: widget.child,
+      );
     }
 
-    // Desktop: Expanded sidebar (≥900dp)
-    if (Responsive.useExpandedSidebar(context)) {
-      return Row(
-        children: [
-          _AppSidebar(
-            currentIndex: effectiveIndex,
-            currentPath: location,
-            shoppingBadge: shoppingBadge,
-            onDestinationSelected: (index) {
-              switch (index) {
-                case 0: _navigateTo('/', 0);
-                case 1: _navigateTo('/community', 1);
-                case 2: _navigateTo('/planner', 2);
-                case 3: _navigateTo('/shopping', 3);
-              }
-            },
-          ),
-          VerticalDivider(
-            width: 1, thickness: 1,
-            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-          ),
-          Expanded(
-            child: Scaffold(
-              key: _scaffoldKey,
-              body: widget.child,
-              bottomNavigationBar: selectionBar,
-            ),
-          ),
-        ],
-      );
+    // Compact immersive routes go full-screen (the mobile behaviour, unchanged).
+    if (_isImmersiveRoute(location)) {
+      return widget.child;
     }
 
     // Tablet: Compact NavigationRail (600–899dp)
@@ -565,499 +529,107 @@ class _NavDef {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// EXPANDED SIDEBAR — desktop (≥900dp)
-// Replaces both NavigationRail and Drawer on wide screens.
+// DESKTOP SHELL — sidebar + inset content panel (≥900dp)
 // ═══════════════════════════════════════════════════════════════════
 
-class _AppSidebar extends ConsumerWidget {
-  final int currentIndex;
-  final String currentPath;
-  final int? shoppingBadge;
-  final ValueChanged<int> onDestinationSelected;
+/// The desktop frame: the sidebar sits on the window chrome tone and the page
+/// renders inside a rounded, hairline-outlined panel inset from the window
+/// edge — paper on a desk. Publishes the real content width ([ShellMetrics])
+/// so pages lay out against the panel, not the window, and floats the
+/// multi-select toolbar over the bottom of the panel.
+class _DesktopShellLayout extends StatelessWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  final ShellDestination? selected;
+  final int shoppingCount;
+  final Widget? selectionBar;
+  final Widget child;
 
-  const _AppSidebar({
-    required this.currentIndex,
-    required this.currentPath,
-    this.shoppingBadge,
-    required this.onDestinationSelected,
+  const _DesktopShellLayout({
+    required this.scaffoldKey,
+    required this.selected,
+    required this.shoppingCount,
+    required this.selectionBar,
+    required this.child,
   });
-
-  static const _sidebarWidth = 240.0;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = theme.brightness == Brightness.dark;
-    final authState = ref.watch(authProvider);
-    final subStatus = ref.watch(subscriptionProvider);
-
-    final bgColor = isDark
-        ? Color.lerp(theme.colorScheme.surface, Colors.black, 0.3)!
-        : theme.colorScheme.surfaceContainerLow;
-
-    // Route-based highlighting for secondary items
-    final isCommunity = currentPath.startsWith('/community');
-    final isSettings = currentPath.startsWith('/settings') || currentPath == '/about';
-    final isAccount = currentPath == '/settings/account';
-    final isRecipes = currentPath.startsWith('/recipe') || currentPath.startsWith('/search');
-
-    // Secondary `.go` destinations replace an in-shell editor without firing its
-    // PopScope, so route them through the unsaved-changes guard too.
-    Future<void> guardedGo(String path) async {
-      if (!await confirmDiscardBeforeLeaving(ref)) return;
-      if (context.mounted) context.go(path);
-    }
-
-    return Material(
-      color: bgColor,
-      child: SizedBox(
-        width: _sidebarWidth,
-        child: Column(
-          children: [
-            // ── App title row ──
-            _SidebarHeader(theme: theme, isDark: isDark),
-
-            // ── Scrollable content ──
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                children: [
-                  // ── Main nav ──
-                  _SidebarNavItem(
-                    icon: Icons.home_outlined,
-                    selectedIcon: Icons.home_rounded,
-                    label: l10n.navHome,
-                    isSelected: currentIndex == 0 && !isCommunity && !isSettings && !isRecipes,
-                    onTap: () => onDestinationSelected(0),
-                    theme: theme,
-                  ),
-                  _SidebarNavItem(
-                    icon: Icons.people_outlined,
-                    selectedIcon: Icons.people_rounded,
-                    label: l10n.navCommunity,
-                    isSelected: currentIndex == 1 && !isSettings,
-                    onTap: () => onDestinationSelected(1),
-                    theme: theme,
-                  ),
-                  _SidebarNavItem(
-                    icon: Icons.calendar_today_outlined,
-                    selectedIcon: Icons.calendar_today_rounded,
-                    label: l10n.navPlanner,
-                    isSelected: currentIndex == 2 && !isCommunity && !isSettings,
-                    onTap: () => onDestinationSelected(2),
-                    theme: theme,
-                  ),
-                  _SidebarNavItem(
-                    icon: Icons.shopping_cart_outlined,
-                    selectedIcon: Icons.shopping_cart_rounded,
-                    label: l10n.navShopping,
-                    isSelected: currentIndex == 3 && !isCommunity && !isSettings,
-                    badge: shoppingBadge,
-                    onTap: () => onDestinationSelected(3),
-                    theme: theme,
-                  ),
-
-                  // ── Divider ──
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                    child: Divider(
-                      height: 1,
-                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-                    ),
-                  ),
-
-                  // ── Secondary nav ──
-                  _SidebarNavItem(
-                    icon: Icons.menu_book_outlined,
-                    selectedIcon: Icons.menu_book_rounded,
-                    label: l10n.navCookbooks,
-                    iconColor: const Color(0xFF6366F1),
-                    onTap: () => guardedGo('/cookbooks'),
-                    theme: theme,
-                  ),
-                  _SidebarNavItem(
-                    icon: Icons.download_outlined,
-                    selectedIcon: Icons.download_rounded,
-                    label: l10n.importGuides,
-                    iconColor: Colors.teal,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ImportGuidesScreen()),
-                      );
-                    },
-                    theme: theme,
-                  ),
-                  _SidebarNavItem(
-                    icon: Icons.swap_horiz_outlined,
-                    selectedIcon: Icons.swap_horiz_rounded,
-                    label: l10n.transferTitle,
-                    iconColor: const Color(0xFF0EA5E9),
-                    onTap: () => context.push('/transfer'),
-                    theme: theme,
-                  ),
-                  // Same as the phone drawer: paste an invite link or code
-                  // (links can't open the desktop app on their own).
-                  _SidebarNavItem(
-                    icon: Icons.group_add_outlined,
-                    selectedIcon: Icons.group_add_rounded,
-                    label: l10n.joinLinkMenuLabel,
-                    iconColor: const Color(0xFFF59E0B),
-                    onTap: () => showJoinWithLinkDialog(context),
-                    theme: theme,
-                  ),
-                ],
-              ),
-            ),
-
-            // ── Bottom section: Help, Settings, Account ──
-            _SidebarBottom(
-              theme: theme,
-              l10n: l10n,
-              isDark: isDark,
-              authState: authState,
-              subStatus: subStatus,
-              isSettingsActive: isSettings && !isAccount,
-              isAccountActive: isAccount,
-              onGuardedGo: guardedGo,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Sidebar header with logo ──
-
-class _SidebarHeader extends StatelessWidget {
-  final ThemeData theme;
-  final bool isDark;
-  const _SidebarHeader({required this.theme, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
-    return Padding(
-      padding: EdgeInsets.only(top: topPadding + 12, left: 16, right: 12, bottom: 8),
+    final c = context.appColors;
+    const inset = DesktopMetrics.contentInset;
+    return ColoredBox(
+      color: context.chromeColor,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: const DecorationImage(
-                image: AssetImage('assets/images/icon.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
+          DesktopSidebar(selected: selected, shoppingCount: shoppingCount),
           Expanded(
-            child: Text(
-              'Recipe Spellbook',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
+            child: Padding(
+              // Native desktop has the title bar above, so the panel starts flush
+              // under it; on web the panel is inset on every side.
+              padding: EdgeInsets.fromLTRB(0, isDesktop ? 0 : inset, inset, inset),
+              child: DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: BoxDecoration(
+                  borderRadius: Radii.lgAll,
+                  border: Border.all(color: c.hairline),
+                ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: c.surface,
+                    borderRadius: Radii.lgAll,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.06),
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: Radii.lgAll,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => ShellMetrics(
+                        contentWidth: constraints.maxWidth,
+                        child: Scaffold(
+                          key: scaffoldKey,
+                          backgroundColor: c.surface,
+                          body: Stack(
+                            children: [
+                              Positioned.fill(child: child),
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: Space.lg,
+                                child: Center(
+                                  child: AnimatedSwitcher(
+                                    duration: Motion.base,
+                                    switchInCurve: Motion.emphasized,
+                                    switchOutCurve: Motion.standard,
+                                    transitionBuilder: (child, animation) => FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0, 0.4),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      ),
+                                    ),
+                                    child: selectionBar ?? const SizedBox.shrink(),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ── Sidebar nav item ──
-
-class _SidebarNavItem extends StatelessWidget {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-  final bool isSelected;
-  final Color? iconColor;
-  final int? badge;
-  final VoidCallback onTap;
-  final ThemeData theme;
-
-  const _SidebarNavItem({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-    this.isSelected = false,
-    this.iconColor,
-    this.badge,
-    required this.onTap,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = theme.brightness == Brightness.dark;
-    final selectedBg = theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.10);
-    final activeColor = iconColor ?? theme.colorScheme.primary;
-    final inactiveColor = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-    final effectiveColor = isSelected ? activeColor : (iconColor ?? inactiveColor);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Material(
-        color: isSelected ? selectedBg : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            child: Row(
-              children: [
-                Icon(
-                  isSelected ? selectedIcon : icon,
-                  size: 20,
-                  color: effectiveColor,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (badge != null && badge! > 0) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.error,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      badge! > 99 ? '99+' : badge.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Sidebar bottom: Help, Settings, Account ──
-
-class _SidebarBottom extends StatelessWidget {
-  final ThemeData theme;
-  final AppLocalizations l10n;
-  final bool isDark;
-  final AuthState authState;
-  final SubscriptionStatus subStatus;
-  final bool isSettingsActive;
-  final bool isAccountActive;
-
-  /// Guarded `context.go` from the parent sidebar (prompts before discarding an
-  /// in-shell editor's unsaved changes).
-  final Future<void> Function(String path) onGuardedGo;
-
-  const _SidebarBottom({
-    required this.theme,
-    required this.l10n,
-    required this.isDark,
-    required this.authState,
-    required this.subStatus,
-    required this.onGuardedGo,
-    this.isSettingsActive = false,
-    this.isAccountActive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Divider(
-          height: 1,
-          indent: 18,
-          endIndent: 18,
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-        ),
-
-        // Help & Settings
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          child: Column(
-            children: [
-              _SidebarNavItem(
-                icon: Icons.headset_mic_outlined,
-                selectedIcon: Icons.headset_mic_rounded,
-                label: l10n.helpTitle,
-                iconColor: const Color(0xFFEC4899),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
-                  );
-                },
-                theme: theme,
-              ),
-              _SidebarNavItem(
-                icon: Icons.settings_outlined,
-                selectedIcon: Icons.settings_rounded,
-                label: l10n.settingsTitle,
-                isSelected: isSettingsActive,
-                iconColor: const Color(0xFF6B7280),
-                onTap: () => onGuardedGo('/settings'),
-                theme: theme,
-              ),
-            ],
-          ),
-        ),
-
-        // Invite friends
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: GestureDetector(
-            onTap: () {
-              SharePlus.instance.share(
-                ShareParams(text: l10n.menuShareMessage, subject: 'Recipe Spellbook'),
-              );
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.favorite_rounded, size: 13, color: Color(0xFFE53935)),
-                const SizedBox(width: 5),
-                Text(
-                  l10n.inviteFriends,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.6),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // Account row
-        _SidebarAccountRow(
-          theme: theme,
-          authState: authState,
-          subStatus: subStatus,
-          l10n: l10n,
-          isDark: isDark,
-        ),
-
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-}
-
-// ── Account row at bottom of sidebar ──
-
-class _SidebarAccountRow extends StatelessWidget {
-  final ThemeData theme;
-  final AuthState authState;
-  final SubscriptionStatus subStatus;
-  final AppLocalizations l10n;
-  final bool isDark;
-
-  const _SidebarAccountRow({
-    required this.theme,
-    required this.authState,
-    required this.subStatus,
-    required this.l10n,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => context.push('/settings/account'),
-          hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Row(
-              children: [
-                // Avatar
-                CircleAvatar(
-                  radius: 15,
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  backgroundImage: authState.isSignedIn && authState.user?.avatarUrl != null
-                      ? NetworkImage(authState.user!.avatarUrl!)
-                      : null,
-                  child: authState.isSignedIn && authState.user?.avatarUrl != null
-                      ? null
-                      : Icon(
-                          authState.isSignedIn ? Icons.person_rounded : Icons.person_outline_rounded,
-                          size: 16,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        authState.isSignedIn
-                            ? (authState.user?.displayName ?? l10n.accountTitle)
-                            : l10n.signIn,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (subStatus.isPro) ...[
-                        const SizedBox(height: 1),
-                        Text(
-                          subStatus.tier.displayName,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.amber.shade600,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 16,
-                  color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

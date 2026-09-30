@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/tokens.dart';
 import '../../utils/platform_utils.dart';
 
 /// Data class for a context menu item.
@@ -48,40 +50,59 @@ class ContextMenuRegion extends StatelessWidget {
 
     return GestureDetector(
       onSecondaryTapDown: (details) {
-        _showContextMenu(context, details.globalPosition);
+        showAppContextMenu(context, details.globalPosition, items);
       },
       child: child,
     );
   }
+}
 
-  void _showContextMenu(BuildContext context, Offset position) {
+/// Shows the app's context menu with [items] at the global pointer [position]
+/// (for widgets that detect the secondary click themselves).
+void showAppContextMenu(BuildContext context, Offset position, List<ContextMenuItem> items) {
+  _AppContextMenu(items).show(context, position);
+}
+
+class _AppContextMenu {
+  final List<ContextMenuItem> items;
+  const _AppContextMenu(this.items);
+
+  void show(BuildContext context, Offset position) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final c = context.appColors;
     final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    // The overlay may be a nested navigator's (e.g. inside the desktop shell's
+    // content panel), so convert the global pointer position into its space.
+    final local = overlay.globalToLocal(position);
 
     showMenu<void>(
       context: context,
       position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        overlay.size.width - position.dx,
-        overlay.size.height - position.dy,
+        local.dx,
+        local.dy,
+        overlay.size.width - local.dx,
+        overlay.size.height - local.dy,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      color: isDark
-          ? theme.colorScheme.surfaceContainerHigh
-          : theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.lgAll,
+        side: BorderSide(color: c.hairline),
+      ),
+      color: c.surface,
       elevation: 8,
+      menuPadding: const EdgeInsets.all(Space.xs),
+      constraints: const BoxConstraints(minWidth: 200),
       items: items.map((item) {
         final color = item.isDestructive
             ? theme.colorScheme.error
-            : theme.colorScheme.onSurface;
+            : c.textPrimary;
         return PopupMenuItem<void>(
           onTap: item.onTap,
+          height: 34,
+          padding: const EdgeInsets.symmetric(horizontal: Space.md),
           child: Row(
             children: [
-              Icon(item.icon, size: 18, color: color),
-              const SizedBox(width: 10),
+              Icon(item.icon, size: 17, color: item.isDestructive ? color : c.textTertiary),
+              const SizedBox(width: Space.md),
               Text(
                 item.label,
                 style: TextStyle(color: color, fontSize: 13.5),

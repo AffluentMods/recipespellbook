@@ -3416,6 +3416,251 @@ class AppLocalizationsIt extends AppLocalizations {
   String get navComingSoon => 'Prossimamente';
 
   @override
+  String get keyCtrl => 'Ctrl';
+
+  @override
+  String get keyShift => 'Shift';
+
+  @override
+  String get keyAlt => 'Alt';
+
+  @override
+  String get keyEsc => 'Esc';
+
+  @override
+  String get keyEnter => 'Enter';
+
+  @override
+  String get keyDelete => 'Del';
+
+  @override
+  String get keySpace => 'Space';
+
+  @override
+  String get sidebarLibrary => 'Library';
+
+  @override
+  String get sidebarPlan => 'Plan';
+
+  @override
+  String get sidebarDiscover => 'Discover';
+
+  @override
+  String get sidebarAllRecipes => 'All recipes';
+
+  @override
+  String get sidebarCollapse => 'Collapse sidebar';
+
+  @override
+  String get sidebarExpand => 'Expand sidebar';
+
+  @override
+  String get sidebarSwitchCookbook => 'Switch cookbook';
+
+  @override
+  String get sidebarManageCookbooks => 'Manage cookbooks';
+
+  @override
+  String get sidebarSignInToSync => 'Sign in to sync';
+
+  @override
+  String get syncStatusJustNow => 'Synced just now';
+
+  @override
+  String syncStatusMinutes(int minutes) {
+    return 'Synced $minutes min ago';
+  }
+
+  @override
+  String syncStatusHours(int hours) {
+    return 'Synced $hours h ago';
+  }
+
+  @override
+  String get syncStatusLocal => 'Saved on this device';
+
+  @override
+  String get paletteHint => 'Search recipes and commands…';
+
+  @override
+  String get paletteSectionRecent => 'Recent';
+
+  @override
+  String get paletteSectionGoTo => 'Go to';
+
+  @override
+  String get paletteSectionActions => 'Actions';
+
+  @override
+  String get paletteSectionRecipes => 'Recipes';
+
+  @override
+  String get paletteImportSubtitle => 'From a link, photo, or file';
+
+  @override
+  String get paletteAdvancedSearch => 'Search with filters';
+
+  @override
+  String get paletteToggleTheme => 'Toggle light / dark';
+
+  @override
+  String get paletteAppearance => 'Appearance';
+
+  @override
+  String paletteSearchAll(String query) {
+    return 'Search all recipes for “$query”';
+  }
+
+  @override
+  String get paletteNoMatches => 'No matches';
+
+  @override
+  String get paletteNavigateHint => 'Navigate';
+
+  @override
+  String get paletteOpenHint => 'Open';
+
+  @override
+  String get shortcutsTitle => 'Keyboard shortcuts';
+
+  @override
+  String get shortcutsGeneral => 'General';
+
+  @override
+  String get shortcutsNavigation => 'Navigation';
+
+  @override
+  String get shortcutsRecipes => 'Recipes';
+
+  @override
+  String get shortcutsShopping => 'Shopping';
+
+  @override
+  String get shortcutsEditor => 'Editor';
+
+  @override
+  String get shortcutCommandPalette => 'Command palette';
+
+  @override
+  String get shortcutNewRecipe => 'New recipe';
+
+  @override
+  String get shortcutToggleSidebar => 'Toggle sidebar';
+
+  @override
+  String get shortcutGoBack => 'Go back';
+
+  @override
+  String get shortcutDismiss => 'Dismiss';
+
+  @override
+  String get shortcutMoveSelection => 'Move selection';
+
+  @override
+  String get shortcutOpenRecipe => 'Open recipe';
+
+  @override
+  String get shortcutAddToSelection => 'Add to selection';
+
+  @override
+  String get shortcutRangeSelect => 'Select a range';
+
+  @override
+  String get shortcutClick => 'Click';
+
+  @override
+  String get shortcutTrash => 'Move to trash';
+
+  @override
+  String get shortcutAddItem => 'Add item';
+
+  @override
+  String get shortcutToggleItem => 'Check off item';
+
+  @override
+  String get shortcutSaveRecipe => 'Save recipe';
+
+  @override
+  String get windowMinimize => 'Minimize';
+
+  @override
+  String get windowMaximize => 'Maximize';
+
+  @override
+  String get windowRestore => 'Restore';
+
+  @override
+  String get windowClose => 'Close';
+
+  @override
+  String selectionCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get selectionClear => 'Clear selection';
+
+  @override
+  String get selectAction => 'Select';
+
+  @override
+  String get homeGreetingMorning => 'Good morning';
+
+  @override
+  String get homeGreetingAfternoon => 'Good afternoon';
+
+  @override
+  String get homeGreetingEvening => 'Good evening';
+
+  @override
+  String get homeNextSevenDays => 'Next 7 days';
+
+  @override
+  String get homeOpenList => 'Open list';
+
+  @override
+  String get homeAllCaughtUp => 'All caught up';
+
+  @override
+  String homeToBuy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items to buy',
+      one: '1 item to buy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeJumpBackIn => 'Jump back in';
+
+  @override
+  String shoppingAddNamed(String name) {
+    return 'Add “$name”';
+  }
+
+  @override
+  String get shoppingUncheck => 'Put back on the list';
+
+  @override
+  String cookbooksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cookbooks',
+      one: '1 cookbook',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get detailChooseRecipe => 'Choose a recipe';
+
+  @override
+  String get detailChooseRecipeHint => 'Pick one from the list to read it here.';
+
+  @override
   String get mealPlanButton => 'Piano pasti';
 
   @override
