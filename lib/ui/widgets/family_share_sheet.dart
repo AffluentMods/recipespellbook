@@ -324,7 +324,10 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
       return;
     }
     // Start syncing this list right away so the owner's edits propagate.
-    if (!_isCookbook) await CollabService.instance.markCollab(widget.resourceId, _collabPermission);
+    // The owner always has full rights — _collabPermission is what INVITEES
+    // get; using it here locked the owner out of their own list (e.g. a
+    // "check only" link made the owner check-only until the next pull).
+    if (!_isCookbook) await CollabService.instance.markCollab(widget.resourceId, 'full');
     if (!mounted) return;
     setState(() {
       _collabLink = link;
