@@ -15,6 +15,7 @@ import '../../../services/shopping_list_generator.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
 import '../../../theme/tokens.dart';
+import '../../widgets/app_controls.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/color_picker_dialog.dart';
 import '../../widgets/recipe_cards.dart' show servingsLabel;
@@ -133,9 +134,11 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    _weekStart = _getWeekStart(now);
-    _monthAnchor = DateTime(now.year, now.month, 1);
+    // Open on the week / month of the selected day — Home can hand over a day
+    // later in the week (or next week).
+    final selected = ref.read(selectedPlannerDateProvider);
+    _weekStart = _getWeekStart(selected);
+    _monthAnchor = DateTime(selected.year, selected.month, 1);
     _restoreViewMode();
   }
 
@@ -439,9 +442,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 ),
               ),
             ] else if (!isDesktop) ...[
-              // Week-at-a-glance strip in its own card (swipe to change weeks).
+              // Week-at-a-glance strip in a hairline card (swipe to change weeks).
               Responsive.constrainWidth(context, child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                padding: const EdgeInsets.fromLTRB(Space.lg, Space.xs, Space.lg, 0),
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onHorizontalDragEnd: (details) {
@@ -453,7 +456,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                     }
                   },
                   child: _PlannerCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding: const EdgeInsets.all(Space.xs),
                     child: _WeekStrip(
                       weekStart: _weekStart,
                       selectedDate: selectedDate,
@@ -470,19 +473,26 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 ),
               )),
 
-              // Hour-by-hour day timeline in its own card. Always shown so every
+              // The chosen day, spelled out, with its shopping shortcut.
+              Responsive.constrainWidth(context, child: _DayHeading(
+                date: selectedDate,
+                plans: mealPlansAsync.valueOrNull ?? const [],
+              )),
+
+              // Hour-by-hour day timeline on the page. Always shown so every
               // hour offers a "+" to add a meal at that slot, even on empty days.
               Expanded(
                 child: Responsive.constrainWidth(context, child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                  child: _PlannerCard(
-                    padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.fromLTRB(Space.sm, 0, Space.sm, 0),
+                  child: Material(
+                    type: MaterialType.transparency,
                     child: mealPlansAsync.when(
                       loading: () => const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
                       data: (plans) => _DayTimeline(
                         plans: plans,
                         date: selectedDate,
+                        showShoppingButton: false,
                         onAddAt: (time) => _showAddMealSheet(context, selectedDate, initialTime: time),
                         onEditMeal: (plan) => _showEditMealSheet(context, plan, selectedDate),
                       ),
@@ -516,7 +526,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
       ),
       floatingActionButton: (isDesktop || isTablet || selecting)
           ? null
-          : _ModernFAB(
+          : AccentFab(
+              icon: Icons.add_rounded,
+              label: l10n.addMeal,
               onPressed: () => _showAddMealSheet(context, selectedDate),
             ),
       ),
@@ -1383,45 +1395,77 @@ class _PlannerHeader extends StatelessWidget {
       );
     }
 
-    // Compact header (unchanged): back · selected-day month · more.
-    final compactLabel = '${DateFormat.MMMM(locale).format(date)} ${date.year}';
+    // Compact header: the month in Fraunces (tap for the calendar), week
+    // arrows, and Today when the week on screen isn't this one.
+    final compactLabel = DateFormat.MMMM(locale).format(date);
+    final now = DateTime.now();
+    final thisWeek = !DateTime(now.year, now.month, now.day).isBefore(weekStart) &&
+        DateTime(now.year, now.month, now.day).isBefore(weekStart.add(const Duration(days: 7)));
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+      padding: EdgeInsets.fromLTRB(showBack ? Space.xs : Space.md, Space.md, Space.xs, Space.sm),
       child: Row(
         children: [
           if (showBack)
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              icon: const Icon(Icons.arrow_back_rounded),
               onPressed: onBack,
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             ),
           Expanded(
-            child: InkWell(
-              onTap: onPickDate,
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      compactLabel,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: InkWell(
+                onTap: onPickDate,
+                borderRadius: Radii.mdAll,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Space.xs, vertical: Space.xs),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          compactLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontSize: 28,
+                            height: 1.15,
+                            letterSpacing: -0.4,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down_rounded,
-                        size: 22, color: theme.colorScheme.onSurfaceVariant),
-                  ],
+                      const SizedBox(width: Space.sm),
+                      Text(
+                        '${date.year}',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: colors.textTertiary),
+                      ),
+                      Icon(Icons.expand_more_rounded, size: 20, color: colors.accent),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
+          if (!thisWeek)
+            TextButton(onPressed: onToday, child: Text(l10n.today)),
           IconButton(
-            icon: const Icon(Icons.more_horiz_rounded),
+            icon: Icon(Icons.chevron_left_rounded, color: colors.textSecondary),
+            tooltip: prevTip,
+            onPressed: onPrev,
+          ),
+          IconButton(
+            icon: Icon(Icons.chevron_right_rounded, color: colors.textSecondary),
+            tooltip: nextTip,
+            onPressed: onNext,
+          ),
+          IconButton(
+            icon: Icon(Icons.more_horiz_rounded, color: colors.textSecondary),
             onPressed: onMoreOptions,
-            tooltip: AppLocalizations.of(context)!.plannerMoreOptions,
+            tooltip: l10n.plannerMoreOptions,
           ),
         ],
       ),
@@ -1760,97 +1804,147 @@ class _WeekStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final c = context.appColors;
     final today = DateTime.now();
     final todayNormalized = DateTime(today.year, today.month, today.day);
     final selectedNormalized = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-
-    // Compute the day-letter row once per build (not once per day cell).
     final locale = Localizations.localeOf(context).toString();
-    final dayNames = List.generate(7, (i) {
-      final d = weekStart.add(Duration(days: i));
-      return DateFormat.E(locale).format(d)[0].toUpperCase();
-    });
 
-    return Container(
-      height: 80,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: List.generate(7, (index) {
-          final date = weekStart.add(Duration(days: index));
-          final dateNormalized = DateTime(date.year, date.month, date.day);
+    return Row(
+      children: List.generate(7, (index) {
+        final date = weekStart.add(Duration(days: index));
+        final dateNormalized = DateTime(date.year, date.month, date.day);
+        final isSelected = dateNormalized == selectedNormalized;
+        final isToday = dateNormalized == todayNormalized;
+        final mealCount = mealCounts[dateNormalized] ?? 0;
+        final weekday = DateFormat.E(locale).format(date);
 
-          final isSelected = dateNormalized == selectedNormalized;
-          final isToday = dateNormalized == todayNormalized;
-          final mealCount = mealCounts[dateNormalized] ?? 0;
-
-          return Expanded(
+        return Expanded(
+          child: Semantics(
+            button: true,
+            selected: isSelected,
+            label: DateFormat.MMMMEEEEd(locale).format(date),
+            excludeSemantics: true,
             child: GestureDetector(
-              onTap: () => onDateSelected(date),
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onDateSelected(date);
+              },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+                duration: Motion.fast,
+                margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                padding: const EdgeInsets.symmetric(vertical: Space.sm),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? context.appColors.accent
-                      : isToday
-                      ? (isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerHighest)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
+                  color: isSelected ? c.selectedFill : Colors.transparent,
+                  borderRadius: Radii.mdAll,
                 ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      dayNames[index],
+                      weekday.length > 3 ? weekday.substring(0, 3) : weekday,
+                      maxLines: 1,
+                      overflow: TextOverflow.clip,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurfaceVariant,
+                        letterSpacing: 0.2,
+                        color: isSelected ? c.accent : c.textTertiary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       '${date.day}',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurface,
+                        fontFamily: 'Fraunces',
+                        fontSize: 20,
+                        height: 1.2,
+                        fontWeight: isToday || isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected ? c.accent : (isToday ? c.textPrimary : c.textSecondary),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    // Meal indicator dots
-                    if (mealCount > 0)
-                      Row(
+                    const SizedBox(height: 3),
+                    SizedBox(
+                      height: 5,
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          mealCount.clamp(0, 3),
-                              (i) => Container(
-                            width: 6,
-                            height: 6,
-                            margin: const EdgeInsets.symmetric(horizontal: 1),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white.withValues(alpha: 0.8)
-                                  : context.appColors.accent,
-                              shape: BoxShape.circle,
+                        children: [
+                          for (var i = 0; i < mealCount.clamp(0, 3); i++)
+                            Container(
+                              width: 5,
+                              height: 5,
+                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isSelected ? c.accent : c.textTertiary.withValues(alpha: 0.6),
+                              ),
                             ),
-                          ),
-                        ),
-                      )
-                    else
-                      const SizedBox(height: 6),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-          );
-        }),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+/// The selected day spelled out ("Wednesday, September 30") with the
+/// "add this day to the shopping list" shortcut when it has recipes.
+class _DayHeading extends ConsumerWidget {
+  final DateTime date;
+  final List<MealPlanWithRecipe> plans;
+  const _DayHeading({required this.date, required this.plans});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
+    final now = DateTime.now();
+    final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+    final recipeIds = plans.where((p) => p.recipe != null).map((p) => p.recipe!.id).toSet().toList();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.xl, Space.lg, Space.sm, Space.xs),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isToday)
+                  Text(
+                    l10n.today.toUpperCase(),
+                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.7, color: c.accent),
+                  ),
+                Text(
+                  DateFormat.MMMMEEEEd(locale).format(date),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w600,
+                        color: c.textPrimary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          if (recipeIds.isNotEmpty)
+            TextButton.icon(
+              onPressed: () => launchShoppingListGeneratorFromMealPlan(context, ref, recipeIds: recipeIds),
+              icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
+              label: Text(l10n.groceriesButton),
+              style: TextButton.styleFrom(
+                foregroundColor: c.accent,
+                textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1893,8 +1987,8 @@ class _WeekRail extends StatelessWidget {
         final isToday = dateNormalized == todayNormalized;
         final mealCount = mealCounts[dateNormalized] ?? 0;
 
-        final labelColor = isSelected ? colors.onAccent : colors.textSecondary;
-        final dayColor = isSelected ? colors.onAccent : colors.textPrimary;
+        final labelColor = isSelected ? colors.accent : colors.textTertiary;
+        final dayColor = isSelected ? colors.accent : colors.textPrimary;
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 3),
@@ -1908,12 +2002,9 @@ class _WeekRail extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? colors.accent
-                      : isToday
-                          ? colors.accent.withValues(alpha: 0.10)
-                          : Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
+                  color: isSelected ? colors.selectedFill : Colors.transparent,
+                  borderRadius: Radii.mdAll,
+                  border: isToday && !isSelected ? Border.all(color: colors.hairline) : null,
                 ),
                 child: Row(
                   children: [
@@ -1931,9 +2022,12 @@ class _WeekRail extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           '${date.day}',
-                          style: theme.textTheme.titleMedium?.copyWith(
+                          style: TextStyle(
+                            fontFamily: 'Fraunces',
+                            fontSize: 20,
+                            height: 1.2,
                             color: dayColor,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -1951,8 +2045,8 @@ class _WeekRail extends StatelessWidget {
                                 const EdgeInsets.symmetric(horizontal: 1),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? colors.onAccent.withValues(alpha: 0.85)
-                                  : colors.accent,
+                                  ? colors.accent
+                                  : colors.textTertiary.withValues(alpha: 0.6),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -1980,37 +2074,16 @@ class _PlannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    // Desktop: the shell's content panel already floats, so the calendar is a
-    // flat hairline-framed surface inside it.
-    if (Responsive.isDesktopLayout(context)) {
-      final c = context.appColors;
-      return Container(
-        clipBehavior: Clip.antiAlias,
-        padding: padding,
-        decoration: BoxDecoration(
-          color: c.surface,
-          borderRadius: Radii.lgAll,
-          border: Border.all(color: c.hairline),
-        ),
-        child: child,
-      );
-    }
+    // A flat hairline-framed surface on the page at every size — the design
+    // language's panel, not a floating card.
+    final c = context.appColors;
     return Container(
       clipBehavior: Clip.antiAlias,
       padding: padding,
       decoration: BoxDecoration(
-        color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: c.surface,
+        borderRadius: Radii.lgAll,
+        border: Border.all(color: c.hairline),
       ),
       child: child,
     );
@@ -2029,11 +2102,16 @@ class _DayTimeline extends ConsumerWidget {
   final void Function(TimeOfDay time) onAddAt;
   final void Function(MealPlanWithRecipe plan) onEditMeal;
 
+  /// The "add day to shopping list" button at the top (phones show it in the
+  /// day heading instead).
+  final bool showShoppingButton;
+
   const _DayTimeline({
     required this.plans,
     required this.date,
     required this.onAddAt,
     required this.onEditMeal,
+    this.showShoppingButton = true,
   });
 
   int _startMinutes(MealPlanWithRecipe p) {
@@ -2088,7 +2166,7 @@ class _DayTimeline extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 100),
       children: [
-        if (recipeIds.isNotEmpty)
+        if (recipeIds.isNotEmpty && showShoppingButton)
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             child: SizedBox(
@@ -2135,6 +2213,37 @@ class _HourRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
+    if (Responsive.isDesktopLayout(context)) return _desktop(context);
+    return InkWell(
+      onTap: onAdd,
+      borderRadius: Radii.mdAll,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 72,
+              child: Text(
+                _clock(base, hour * 60),
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: c.textTertiary,
+                  fontWeight: FontWeight.w600,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+            Expanded(child: Divider(color: c.hairline, height: 34)),
+            const SizedBox(width: 6),
+            Icon(Icons.add_rounded, size: 18, color: c.textTertiary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _desktop(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
       onTap: onAdd,
@@ -3256,36 +3365,6 @@ class _RecipeSelectTile extends StatelessWidget {
       ),
       trailing: Icon(Icons.add_circle_outline, color: context.appColors.accent),
       onTap: onTap,
-    );
-  }
-}
-// ═══════════════════════════════════════════════════════════════════
-// MODERN FAB
-// ═══════════════════════════════════════════════════════════════════
-
-class _ModernFAB extends StatelessWidget {
-  final VoidCallback onPressed;
-  const _ModernFAB({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bg = theme.colorScheme.primary;
-    final fg = theme.colorScheme.onPrimary;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
-      ),
-      child: FloatingActionButton(
-        onPressed: onPressed,
-        backgroundColor: bg,
-        foregroundColor: fg,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, size: 26),
-      ),
     );
   }
 }
