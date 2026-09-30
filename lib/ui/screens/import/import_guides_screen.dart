@@ -87,6 +87,7 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.search, size: 22),
+                  tooltip: MaterialLocalizations.of(context).searchFieldLabel,
                   onPressed: () => setState(() => _searching = true),
                 ),
                 IconButton(
@@ -98,7 +99,10 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
             ),
       body: Responsive.constrainWidth(context, child: q.isEmpty
           ? ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              // Desktop: content lines up with the page title.
+              padding: Responsive.isDesktopLayout(context)
+                  ? const EdgeInsets.fromLTRB(28, 8, 28, 32)
+                  : const EdgeInsets.fromLTRB(16, 8, 16, 32),
               children: [
                 // ── Hero ──
                 _HeroBanner(theme: theme),
@@ -1536,7 +1540,8 @@ class _GuideGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final cols = constraints.maxWidth >= 800 ? 3 : 2;
+      // Three columns only once each card can hold its title, badge and time.
+      final cols = constraints.maxWidth >= 1040 ? 3 : 2;
       final spacing = 10.0;
       final cardWidth = (constraints.maxWidth - spacing * (cols - 1)) / cols;
       return Wrap(

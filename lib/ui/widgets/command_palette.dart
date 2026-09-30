@@ -88,10 +88,21 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
   void initState() {
     super.initState();
     _previousFocus = FocusManager.instance.primaryFocus;
+    // Track the field through its controller: some platform text-input paths
+    // (IME commits on Linux) update the value without an onChanged callback.
+    _controller.addListener(_onQueryChanged);
     // The palette lives above the Navigator, so `autofocus` alone won't steal
     // focus from the page's scope — request it explicitly.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _focus.requestFocus();
+    });
+  }
+
+  void _onQueryChanged() {
+    if (_controller.text == _query) return;
+    setState(() {
+      _query = _controller.text;
+      _selected = 0;
     });
   }
 
@@ -488,10 +499,6 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
                                           fontSize: 16.5,
                                         ),
                                       ),
-                                      onChanged: (v) => setState(() {
-                                        _query = v;
-                                        _selected = 0;
-                                      }),
                                     ),
                                   ),
                                   Keycap(l10n.keyEsc),

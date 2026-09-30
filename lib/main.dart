@@ -172,6 +172,19 @@ class RecipeSpellbookApp extends ConsumerWidget {
                   minVerticalPadding: 4,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                 ),
+                // Screens that still use an AppBar read like the desktop
+                // PageHeader: left-aligned editorial title, same inset/height.
+                appBarTheme: baseTheme.appBarTheme.copyWith(
+                  centerTitle: false,
+                  toolbarHeight: 64,
+                  titleSpacing: 28,
+                  titleTextStyle: baseTheme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.3,
+                    color: baseTheme.colorScheme.onSurface,
+                  ),
+                ),
               ),
               child: result,
             );
