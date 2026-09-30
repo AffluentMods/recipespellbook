@@ -4,6 +4,9 @@ part of 'shopping_screen.dart';
 // DESKTOP SHOPPING — lists pane + items pane
 // ═══════════════════════════════════════════════════════════════════
 
+/// Width cap for the add field and item rows (left-aligned with the title).
+const double _itemsColumnWidth = 760;
+
 /// Pointer layout for the shopping list: all lists on the left (with their
 /// unchecked counts), the current list on the right with an always-ready
 /// add field at the top, compact rows, hover actions, right-click menus and
@@ -244,10 +247,16 @@ class _DesktopShoppingViewState extends ConsumerState<_DesktopShoppingView> {
                     if (_canEdit)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(Space.xxxl - 4, 0, Space.xl, Space.sm),
-                        child: _DesktopQuickAdd(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: _itemsColumnWidth),
+                            child: _DesktopQuickAdd(
                           listId: widget.listId,
                           userMappings: widget.userMappings,
                           onMappingsChanged: widget.onMappingsChanged,
+                            ),
+                          ),
                         ),
                       ),
                     Expanded(
@@ -730,12 +739,17 @@ class _DesktopItemsList extends ConsumerWidget {
           menu: menuFor(item),
         );
 
-    return Responsive.constrainScrollable(
-      maxWidth: 860,
-      minHorizontal: Space.xl,
-      bottom: 96,
-      builder: (context, pad) => ListView(
-        padding: pad,
+    // One left edge for title, add field and rows; the list stays a
+    // full-width scrollable (no wheel dead zone) with the rows capped.
+    return LayoutBuilder(
+      builder: (context, constraints) => ListView(
+        padding: EdgeInsets.fromLTRB(
+          Space.xxxl - 4 - Space.sm,
+          0,
+          (constraints.maxWidth - _itemsColumnWidth - (Space.xxxl - 4 - Space.sm))
+              .clamp(Space.xl, double.infinity),
+          96,
+        ),
         children: [
           for (final key in keys) ...[
             _GroupHeader(

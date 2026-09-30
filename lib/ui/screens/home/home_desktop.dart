@@ -102,9 +102,9 @@ class DesktopHome extends ConsumerWidget {
                     children: [
                       const BackupReminderBanner(),
                       if (stackGlance) ...[
-                        _WeekGlanceCard(),
+                        SizedBox(height: 232, child: _WeekGlanceCard()),
                         const SizedBox(height: Space.lg),
-                        const _ShoppingGlanceCard(),
+                        const SizedBox(height: 232, child: _ShoppingGlanceCard()),
                       ] else
                         SizedBox(
                           height: 244,
@@ -335,9 +335,10 @@ class _WeekGlanceCard extends ConsumerWidget {
             final idx = DateTime(d.year, d.month, d.day).difference(today).inDays;
             if (idx >= 0 && idx < 7) byDay.putIfAbsent(idx, () => []).add(p);
           }
-          // As many days as fit legibly (≥ ~96 px each), up to a week.
+          // As many days as fit legibly (≥ ~104 px each, so a meal title's
+          // longest word fits a chip line), up to a week.
           return LayoutBuilder(builder: (context, constraints) {
-            final days = (constraints.maxWidth / 96).floor().clamp(3, 7);
+            final days = (constraints.maxWidth / 104).floor().clamp(3, 7);
             return Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

@@ -975,8 +975,15 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                           icon: Icons.help_outline_rounded,
                           label: 'How to import',
                           onTap: () {
+                            // Desktop: open the guides in-shell (sidebar stays).
+                            final desktop = Responsive.isDesktopLayout(context);
+                            final router = GoRouter.of(context);
                             Navigator.pop(context);
-                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen()));
+                            if (desktop) {
+                              router.push('/import-guides');
+                            } else {
+                              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen()));
+                            }
                           },
                         ),
                       ),

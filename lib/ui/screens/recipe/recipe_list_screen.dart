@@ -623,6 +623,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   ///  * Shift-click selects the range from the anchor,
   ///  * a plain click toggles while selecting, otherwise opens the recipe.
   void _onDesktopTap(String id) {
+    // Keep keyboard control (arrows, Enter, Esc, Del, ⌘A) on the list.
+    _listFocusNode.requestFocus();
     final kb = HardwareKeyboard.instance;
     final additive = usesCommandKey ? kb.isMetaPressed : kb.isControlPressed;
     if (kb.isShiftPressed && _anchorId != null) {
@@ -710,10 +712,13 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final c = context.appColors;
+    // Narrow content (small window / expanded sidebar): a slimmer field so the
+    // page title keeps its room.
+    final narrow = Responsive.contentWidth(context) < 900;
     final search = ToolbarSearchField(
       controller: _searchController,
       hintText: l10n.searchHint,
-      width: compact ? double.infinity : 220,
+      width: compact ? double.infinity : (narrow ? 170 : 220),
       onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
     );
     final tags = Badge(
@@ -802,13 +807,21 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           child: child,
         );
 
-    final newButton = canEditHere
-        ? FilledButton.icon(
-            onPressed: () => _showAddRecipeDialog(context),
-            icon: const Icon(Icons.add_rounded, size: 18),
-            label: Text(l10n.shortcutNewRecipe),
-          )
-        : null;
+    final newButton = !canEditHere
+        ? null
+        : Responsive.contentWidth(context) < 900
+            ? Tooltip(
+                message: withShortcut(l10n.shortcutNewRecipe, shortcutLabel(context, 'N')),
+                child: IconButton.filled(
+                  onPressed: () => _showAddRecipeDialog(context),
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                ),
+              )
+            : FilledButton.icon(
+                onPressed: () => _showAddRecipeDialog(context),
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: Text(l10n.shortcutNewRecipe),
+              );
 
     if (!twoPane) {
       // ── Browse: full-width grid (or list) under a page header ──
