@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
+import 'sheet_chrome.dart';
 
 /// Shows the Google / Apple sign-in sheet with [message] explaining why, runs
 /// the chosen sign-in, and resolves to whether the user is signed in
@@ -29,9 +30,7 @@ Future<bool> promptSignIn(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             const SizedBox(height: 24),
             Icon(icon, size: 48, color: theme.colorScheme.primary),
             const SizedBox(height: 16),

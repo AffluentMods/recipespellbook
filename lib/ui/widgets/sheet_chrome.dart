@@ -14,11 +14,20 @@ import '../../theme/tokens.dart';
 class SheetPresentation extends InheritedWidget {
   final bool isBottomSheet;
 
+  /// The sheet frame already paints the grab handle (every bottom sheet opened
+  /// through `Responsive.showAdaptiveSheet` does), so [SheetHandle] inside the
+  /// content only keeps its spacing.
+  final bool drawsHandle;
+
   const SheetPresentation({
     super.key,
     required this.isBottomSheet,
+    this.drawsHandle = false,
     required super.child,
   });
+
+  static bool _framePaintsHandle(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SheetPresentation>()?.drawsHandle ?? false;
 
   /// Whether the content at [context] is presented as a bottom sheet.
   static bool isBottomSheetOf(BuildContext context) {
@@ -35,7 +44,55 @@ class SheetPresentation extends InheritedWidget {
 
   @override
   bool updateShouldNotify(SheetPresentation oldWidget) =>
-      oldWidget.isBottomSheet != isBottomSheet;
+      oldWidget.isBottomSheet != isBottomSheet || oldWidget.drawsHandle != drawsHandle;
+}
+
+/// The frame of a bottom sheet opened through `Responsive.showAdaptiveSheet`:
+/// the content plus one grab handle floating at the top, so every sheet in the
+/// app gets the same handle whether or not its content draws one.
+class SheetFrame extends StatelessWidget {
+  final Widget child;
+  const SheetFrame({super.key, required this.child});
+
+  /// Distance from the sheet's top edge to the handle.
+  static const double handleTop = 8;
+
+  @override
+  Widget build(BuildContext context) {
+    return SheetPresentation(
+      isBottomSheet: true,
+      drawsHandle: true,
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
+          child,
+          const Positioned(
+            top: handleTop,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(child: Center(child: _GrabHandle())),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GrabHandle extends StatelessWidget {
+  const _GrabHandle();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Container(
+      width: 36,
+      height: 4,
+      decoration: BoxDecoration(
+        color: c.textPrimary.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
 }
 
 /// The grab handle at the top of a bottom sheet. Renders the handle only when
@@ -66,19 +123,13 @@ class SheetHandle extends StatelessWidget {
           ? const SizedBox.shrink()
           : SizedBox(height: total);
     }
-    final c = context.appColors;
+    // The sheet frame paints the handle; keep the rhythm the content expects.
+    if (SheetPresentation._framePaintsHandle(context)) {
+      return SizedBox(height: total);
+    }
     return Padding(
       padding: EdgeInsets.only(top: top, bottom: bottom),
-      child: Center(
-        child: Container(
-          width: 36,
-          height: 4,
-          decoration: BoxDecoration(
-            color: c.textPrimary.withValues(alpha: 0.18),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      ),
+      child: const Center(child: _GrabHandle()),
     );
   }
 }

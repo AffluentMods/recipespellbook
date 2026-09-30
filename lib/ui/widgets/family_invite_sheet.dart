@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/family_service.dart';
 import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
+import 'sheet_chrome.dart';
 
 /// Everything needed to bring someone into the family in one place: a QR code
 /// they can scan with their phone camera, the invite link and code (each with
@@ -36,9 +37,7 @@ class _FamilyInviteSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             const SizedBox(height: 16),
             Text(l10n.familyInviteSheetTitle(info.name),
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),

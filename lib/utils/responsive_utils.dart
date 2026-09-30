@@ -252,11 +252,11 @@ class Responsive {
     bool isScrollControlled = true,
     double desktopMaxWidth = 480,
     double desktopMaxHeight = 600,
-    // When true the sheet is presented on the ROOT navigator, so it sits above
-    // the bottom nav and can't be left hanging in a background tab when the user
-    // switches tabs (they must dismiss it first). Use for app-level modals like
-    // the share sheet.
-    bool useRootNavigator = false,
+    // Which navigator presents it. Bottom sheets default to the ROOT navigator:
+    // they cover the tab bar under the scrim (as sheets do on iOS / Android)
+    // and can't be left hanging in a background tab. The desktop dialog
+    // defaults to the shell navigator. Pass a value to force either.
+    bool? useRootNavigator,
     // Bottom-sheet-only presentation overrides (phones/tablets). The desktop
     // dialog ignores them: it sizes with [desktopMaxWidth]/[desktopMaxHeight]
     // and always uses the dialog theme's surface and corners.
@@ -269,7 +269,7 @@ class Responsive {
       final screenHeight = MediaQuery.sizeOf(context).height;
       return showDialog<T>(
         context: context,
-        useRootNavigator: useRootNavigator,
+        useRootNavigator: useRootNavigator ?? false,
         builder: (ctx) => Dialog(
           insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -300,7 +300,7 @@ class Responsive {
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: isScrollControlled,
-      useRootNavigator: useRootNavigator,
+      useRootNavigator: useRootNavigator ?? true,
       constraints: constraints,
       showDragHandle: showDragHandle,
       // One sheet chrome everywhere: the page tone (content that paints its
@@ -308,10 +308,11 @@ class Responsive {
       backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.surface,
       shape: shape ??
           const RoundedRectangleBorder(borderRadius: Radii.sheetTop),
-      builder: (ctx) => SheetPresentation(
-        isBottomSheet: true,
-        child: Builder(builder: builder),
-      ),
+      // Every bottom sheet gets the same grab handle from its frame (unless the
+      // caller asked for Material's own).
+      builder: (ctx) => showDragHandle == true
+          ? SheetPresentation(isBottomSheet: true, child: Builder(builder: builder))
+          : SheetFrame(child: Builder(builder: builder)),
     );
   }
 }
