@@ -196,7 +196,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final resultsAsync = ref.watch(searchResultsProvider);
     final query = ref.watch(searchQueryProvider);
 
@@ -205,33 +204,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
 
     return Scaffold(
+      backgroundColor: context.appColors.surface,
       appBar: AppBar(
-        title: TextField(
+        backgroundColor: context.appColors.surface,
+        titleSpacing: Navigator.of(context).canPop() ? 0 : Space.lg,
+        toolbarHeight: 64,
+        title: TouchSearchField(
           controller: _controller,
           focusNode: _focusNode,
-          decoration: InputDecoration(
-            hintText: l10n.searchHint,
-            border: InputBorder.none,
-            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-          ),
-          style: theme.textTheme.titleMedium,
+          hintText: l10n.searchHint,
           onChanged: (value) {
             ref.read(searchQueryProvider.notifier).state = value;
           },
         ),
-        actions: [
-          if (query.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                _controller.clear();
-                ref.read(searchQueryProvider.notifier).state = '';
-              },
-            ),
-        ],
+        actions: const [SizedBox(width: Space.lg)],
       ),
       body: query.isEmpty
-          ? _EmptySearchState()
+          ? const _RecentlyViewed()
           : resultsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('${l10n.errorGeneric}: $e')),
@@ -354,6 +343,42 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               minHorizontal: 0,
               builder: (context, pad) => Padding(padding: pad, child: master),
             ),
+    );
+  }
+}
+
+/// Before typing (phones / tablets): the recipes you looked at last, one tap
+/// away — search is usually "that thing I had open yesterday".
+class _RecentlyViewed extends ConsumerWidget {
+  const _RecentlyViewed();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final recent = ref.watch(recentRecipesProvider).valueOrNull ?? const <Recipe>[];
+    if (recent.isEmpty) return _EmptySearchState();
+    return Responsive.constrainScrollable(
+      maxWidth: 720,
+      minHorizontal: Space.sm,
+      builder: (context, pad) => ListView(
+        padding: pad.copyWith(bottom: Space.xxxl),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        children: [
+          GroupLabel(
+            l10n.homeRecentRecipes,
+            padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.sm, Space.xs + 2),
+          ),
+          for (final r in recent)
+            RecipeListRow(
+              key: ValueKey(r.id),
+              recipe: r,
+              onTap: () {
+                ref.read(recipeDaoProvider).updateLastViewed(r.id);
+                context.pushNamed('recipe', pathParameters: {'id': r.id});
+              },
+            ),
+        ],
+      ),
     );
   }
 }
@@ -742,83 +767,69 @@ class _SearchResultCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final hasTime = recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null;
-    final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      color: isSelected
-          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
-          : null,
-      child: InkWell(
-        onTap: onTap ?? () {
-          ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
-          context.pushNamed('recipe', pathParameters: {'id': recipe.id});
-        },
-        onLongPress: onLongPress ?? () => _showRecipeActions(context, ref, recipe),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              if (isSelecting) ...[
-                Icon(
-                  isSelected ? Icons.check_circle : Icons.circle_outlined,
-                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-              ],
-              _SearchResultImage(recipe: recipe, size: 64),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Tooltip(
-                      message: recipe.title,
-                      child: Text(
+    final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final meta = recipeMetaLine(l10n, recipe);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: 1),
+      child: Material(
+        color: isSelected ? c.selectedFill : Colors.transparent,
+        borderRadius: Radii.lgAll,
+        child: InkWell(
+          onTap: onTap ?? () {
+            ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
+            context.pushNamed('recipe', pathParameters: {'id': recipe.id});
+          },
+          onLongPress: onLongPress ?? () => _showRecipeActions(context, ref, recipe),
+          borderRadius: Radii.lgAll,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: Space.sm),
+            child: Row(
+              children: [
+                if (isSelecting) ...[
+                  Icon(
+                    isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                    color: isSelected ? c.accent : c.textTertiary,
+                    size: 22,
+                  ),
+                  const SizedBox(width: Space.md),
+                ],
+                _SearchResultImage(recipe: recipe, size: 60),
+                const SizedBox(width: Space.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         normalizeTitle(recipe.title).title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(fontSize: 15.5, height: 1.3, fontWeight: FontWeight.w600, color: c.textPrimary),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    if (recipe.description != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        recipe.description!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.outline,
+                      if (recipe.description != null && recipe.description!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          recipe.description!,
+                          style: TextStyle(fontSize: 13, color: c.textSecondary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      ],
+                      if (meta.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(meta, style: TextStyle(fontSize: 12.5, color: c.textTertiary)),
+                      ],
                     ],
-                    if (hasTime) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.schedule, size: 14, color: theme.colorScheme.outline),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatTime(totalTime),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
-              ),
-              if (recipe.isFavorite)
-                Icon(Icons.favorite, color: context.appColors.favorite, size: 20),
-            ],
+                if (recipe.isFavorite)
+                  Padding(
+                    padding: const EdgeInsets.only(left: Space.sm),
+                    child: Icon(Icons.favorite_rounded, color: c.favorite, size: 18),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -998,14 +1009,6 @@ class _SearchResultCard extends ConsumerWidget {
       if (context.mounted) AppSnackbar.error(context, '${l10n.errorGeneric}: $e');
     }
   }
-
-  String _formatTime(int minutes) {
-    if (minutes < 60) return '$minutes min';
-    final hours = minutes ~/ 60;
-    final mins = minutes % 60;
-    if (mins == 0) return '$hours hr';
-    return '$hours hr $mins min';
-  }
 }
 
 class _SearchResultImage extends StatelessWidget {
@@ -1016,14 +1019,12 @@ class _SearchResultImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
+        color: context.appColors.surfaceHigh,
+        borderRadius: Radii.mdAll,
       ),
       clipBehavior: Clip.antiAlias,
       child: RecipeImage.thumbnail(

@@ -161,14 +161,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ) : null,
         _m(l10n.settingsSurpriseMe, 'surprise recipe suggestion') ? SwitchListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-          secondary: Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.auto_fix_high, size: 20, color: theme.colorScheme.primary),
-          ),
+          secondary: _SettingIcon(Icons.auto_fix_high, color: theme.colorScheme.primary),
           title: Text(l10n.settingsSurpriseMe, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
           subtitle: Text(l10n.settingsSurpriseMeSubtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
           value: s.showSurpriseMe,
@@ -364,14 +357,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           SliverAppBar(
             floating: true, snap: true,
             centerTitle: false,
-            title: Text(l10n.settingsTitle),
+            backgroundColor: context.appColors.surface,
+            title: Text(
+              l10n.settingsTitle,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.3,
+                color: context.appColors.textPrimary,
+              ),
+            ),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(56),
+              preferredSize: const Size.fromHeight(60),
               child: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                child: _SearchField(
+                padding: const EdgeInsets.fromLTRB(16, 2, 16, 12),
+                child: TouchSearchField(
                   controller: _searchController,
                   focusNode: _searchFocusNode,
+                  hintText: l10n.settingsSearchHint,
                   onChanged: (q) => setState(() => _query = q.trim()),
                 ),
               )),
@@ -969,40 +972,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 }
 
 // ════════════════════════════════════════════
-//  SEARCH FIELD
-// ════════════════════════════════════════════
-
-class _SearchField extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  const _SearchField({required this.controller, required this.focusNode, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextField(
-      controller: controller, focusNode: focusNode, onChanged: onChanged,
-      style: theme.textTheme.bodyMedium,
-      decoration: InputDecoration(
-        hintText: AppLocalizations.of(context)!.settingsSearchHint,
-        hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-        prefixIcon: Icon(Icons.search, size: 20, color: theme.colorScheme.outline),
-        suffixIcon: controller.text.isNotEmpty
-            ? IconButton(icon: Icon(Icons.close, size: 18, color: theme.colorScheme.outline), onPressed: () { controller.clear(); onChanged(''); focusNode.unfocus(); })
-            : null,
-        filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest,
-        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5)),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════
 //  ACCOUNT CARD
 // ════════════════════════════════════════════
 
@@ -1019,18 +988,18 @@ class _AccountCard extends ConsumerWidget {
     final user = authState.user;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: Material(
+        color: context.appColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: Radii.lgAll,
+          side: BorderSide(color: context.appColors.hairline),
         ),
         child: InkWell(
           onTap: () => context.push('/settings/account'),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: Radii.lgAll,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
             child: Row(children: [
               Container(
                 width: 48, height: 48,
@@ -1120,6 +1089,14 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (!Responsive.isDesktopLayout(context)) {
+      // Phone / tablet: the design language's grouped list — a quiet label
+      // and a hairline card with inset hairlines between rows.
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        if (showTitle) TouchGroupLabel(title),
+        TouchGroup(children: children),
+      ]);
+    }
     final isDark = theme.brightness == Brightness.dark;
     final bg = isDark ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surfaceContainerLowest;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1157,14 +1134,47 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (!Responsive.isDesktopLayout(context)) {
+      return TouchRow(
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        destructive: titleColor != null,
+        onTap: onTap,
+      );
+    }
     final c = titleColor ?? theme.colorScheme.primary;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: c.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: c)),
+      leading: _SettingIcon(icon, color: c),
       title: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: titleColor)),
       subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       onTap: onTap,
+    );
+  }
+}
+
+/// Leading icon of a settings row: a tinted square on desktop, the plain
+/// quiet icon of the touch list on phones and tablets.
+class _SettingIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  const _SettingIcon(this.icon, {required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Responsive.isDesktopLayout(context)) {
+      return SizedBox(
+        width: 24,
+        child: Icon(icon, size: 21, color: context.appColors.textSecondary),
+      );
+    }
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+      child: Icon(icon, size: 20, color: color),
     );
   }
 }
@@ -1230,7 +1240,7 @@ class _TextScaleTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.text_fields_rounded, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.text_fields_rounded, color: theme.colorScheme.primary),
       title: Text(l10n.textSize, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(_label(l10n), style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1311,7 +1321,7 @@ class _ThemeSelectionTile extends ConsumerWidget {
     final theme = Theme.of(context);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.palette_outlined, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.palette_outlined, color: theme.colorScheme.primary),
       title: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text('${currentTheme.emoji} ${_name(context, currentTheme)}', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1424,7 +1434,7 @@ class _ThemeModeTile extends StatelessWidget {
     };
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(icon, color: theme.colorScheme.primary),
       title: Text(l10n.settingsThemeMode, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1460,7 +1470,7 @@ class _MeasurementSystemTile extends StatelessWidget {
     final theme = Theme.of(context);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.straighten, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.straighten, color: theme.colorScheme.primary),
       title: Text(l10n.settingsMeasurements, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(currentSystem.displayName, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1496,7 +1506,7 @@ class _WeekStartDayTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.calendar_today, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.calendar_today, color: theme.colorScheme.primary),
       title: Text(l10n.settingsWeekStartDay, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(_name(context, currentDay), style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
@@ -1534,7 +1544,7 @@ class _LanguageTile extends StatelessWidget {
     final theme = Theme.of(context);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.language, size: 20, color: theme.colorScheme.primary)),
+      leading: _SettingIcon(Icons.language, color: theme.colorScheme.primary),
       title: Text(l10n.settingsLanguage, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text(_currentName ?? '\u{1F310} ${l10n.settingsSystemLanguage}', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),

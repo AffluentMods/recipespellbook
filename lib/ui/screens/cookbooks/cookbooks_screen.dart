@@ -25,7 +25,6 @@ import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
-import '../../../utils/platform_utils.dart';
 import '../../widgets/sheet_chrome.dart';
 import '../../widgets/app_controls.dart';
 import '../../../theme/tokens.dart';
@@ -106,7 +105,17 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
               actions: _desktopActions(context),
             )
           : AppBar(
-        title: Text(l10n.cookbooksTitle),
+        backgroundColor: context.appColors.surface,
+        centerTitle: false,
+        title: Text(
+          l10n.cookbooksTitle,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+            color: context.appColors.textPrimary,
+          ),
+        ),
         actions: wide
             ? [
                 Center(
@@ -192,28 +201,11 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
             children: [
               if (_showSearch && Responsive.isCompact(context))
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: TextField(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                  child: TouchSearchField(
                     controller: _searchController,
                     focusNode: _searchFocus,
-                    decoration: InputDecoration(
-                      hintText: l10n.searchCookbooks,
-                      prefixIcon: const Icon(Icons.search, size: 20),
-                      suffixIcon: _query.isNotEmpty
-                          ? IconButton(
-                        icon: const Icon(Icons.clear, size: 18),
-                        tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
-                        onPressed: () => setState(() {
-                          _searchController.clear();
-                          _query = '';
-                        }),
-                      )
-                          : null,
-                      filled: true,
-                      fillColor: theme.colorScheme.surfaceContainerHighest,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
+                    hintText: l10n.searchCookbooks,
                     onChanged: (v) => setState(() => _query = v),
                   ),
                 ),
@@ -239,9 +231,10 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
       ),
       floatingActionButton: wide
           ? null
-          : _ModernFAB(
-              onPressed: () => _showNewCookbookDialog(context, ref),
+          : AccentFab(
+              icon: Icons.add_rounded,
               label: l10n.cookbookAdd,
+              onPressed: () => _showNewCookbookDialog(context, ref),
             ),
     );
   }
@@ -332,33 +325,6 @@ class _CookbookGrid extends ConsumerWidget {
 
     return Column(
       children: [
-        // Touch guidance — mobile/tablet only. Desktop users click / right-click.
-        if (!Responsive.isDesktopLayout(context)) Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.touch_app, size: 16, color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.cookbookHint,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-              ),
-            ],
-          ),
-        ),
-
         // Grid
         Expanded(
           child: AppRefreshIndicator(
@@ -366,8 +332,9 @@ class _CookbookGrid extends ConsumerWidget {
             padding: Responsive.isDesktopLayout(context)
                 ? const EdgeInsets.fromLTRB(Space.xxxl - 4, Space.xs, Space.xxxl - 4, Space.huge)
                 : wide
-                ? const EdgeInsets.fromLTRB(24, 8, 24, 32)
-                : const EdgeInsets.fromLTRB(6, 4, 6, 80),
+                ? const EdgeInsets.fromLTRB(Space.xxl, Space.sm, Space.xxl, Space.xxxl)
+                : const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 104),
+            // 3:4 covers with a two-line caption, on every size.
             gridDelegate: Responsive.isDesktopLayout(context)
                 ? const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 220,
@@ -376,18 +343,11 @@ class _CookbookGrid extends ConsumerWidget {
                     // 3:4 cover + two caption lines.
                     childAspectRatio: 0.62,
                   )
-                : wide
-                ? const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 260,
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20,
-                    childAspectRatio: 0.78,
-                  )
-                : SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: Responsive.cookbookColumns(context),
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 4,
-                    childAspectRatio: 1.0,
+                : const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 200,
+                    mainAxisSpacing: Space.xl,
+                    crossAxisSpacing: Space.lg,
+                    childAspectRatio: 0.6,
                   ),
             itemCount: cookbooks.length,
             itemBuilder: (context, index) {
@@ -438,14 +398,17 @@ class _CookbookGrid extends ConsumerWidget {
                   ),
                 );
               }
-              return ContextMenuRegion(
-                items: menuItems,
-                child: _CookbookCard(
+              // Touch: the same cover tile, with its menu button always shown
+              // and long-press for the full menu.
+              return GestureDetector(
+                onLongPressStart: (d) => _showContextMenu(context, ref, cookbook, d.globalPosition),
+                child: _DesktopCookbookTile(
                   cookbook: cookbook,
                   isSelected: isSelected,
                   members: members,
+                  menuItems: menuItems,
+                  touch: true,
                   onTap: () => onCookbookSelected(cookbook.id),
-                  onLongPress: (position) => _showContextMenu(context, ref, cookbook, position),
                 ),
               );
             },
@@ -930,163 +893,39 @@ class _CookbookGrid extends ConsumerWidget {
   }
 }
 
-class _CookbookCard extends StatelessWidget {
-  final Cookbook cookbook;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final ValueChanged<Offset> onLongPress;
-  final List<_CookbookMember> members;
-
-  const _CookbookCard({
-    required this.cookbook,
-    required this.isSelected,
-    required this.onTap,
-    required this.onLongPress,
-    this.members = const [],
-  });
-
-  void _showMembers(BuildContext context) {
-    Responsive.showAdaptiveSheet(
-      context,
-      isScrollControlled: false,
-      showDragHandle: true,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-              child: Text(cookbook.name,
-                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+/// Who a shared cookbook is shared with (tap the avatar stack on a cover).
+void _showCookbookMembers(BuildContext context, Cookbook cookbook, List<_CookbookMember> members) {
+  Responsive.showAdaptiveSheet(
+    context,
+    isScrollControlled: false,
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SheetHandle(top: Space.md),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+            child: Text(cookbook.name,
+                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Text('People in this cookbook',
+                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: ctx.appColors.textTertiary)),
+          ),
+          for (final m in members)
+            ListTile(
+              leading: _Avatar(member: m, size: 40),
+              title: Text(m.name ?? 'Member'),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Text('People in this cookbook',
-                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: Theme.of(ctx).colorScheme.outline)),
-            ),
-            for (final m in members)
-              ListTile(
-                leading: _Avatar(member: m, size: 40),
-                title: Text(m.name ?? 'Member'),
-              ),
-            const SizedBox(height: 8),
-          ],
-        ),
+          const SizedBox(height: 8),
+        ],
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return GestureDetector(
-      onTap: onTap,
-      onLongPressStart: (details) => onLongPress(details.globalPosition),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: isSelected
-              ? BorderSide(color: theme.colorScheme.primary, width: 3)
-              : BorderSide.none,
-        ),
-        child: Stack(
-          children: [
-            // Cover image or placeholder
-            Positioned.fill(
-              child: cookbook.imagePath != null &&
-                  cookbook.imagePath!.isNotEmpty &&
-                  FileExistsCache.exists(cookbook.imagePath!)
-                  ? buildFileImage(cookbook.imagePath!, fit: BoxFit.cover,
-                      cacheHeight: 400)
-                  : const CookbookPlaceholderImage(height: double.infinity),
-            ),
-            // Gradient overlay
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // Member avatars — only when the cookbook is shared with others.
-            if (members.length > 1)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: GestureDetector(
-                  onTap: () => _showMembers(context),
-                  child: _AvatarStack(members: members),
-                ),
-              ),
-
-            // Name and count
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    cookbook.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            // Selected indicator (bottom-right, clear of the avatar stack & pencil)
-            if (isSelected)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 16),
-                ),
-              ),
-            // Edit pencil (top-left, original position) — touch platforms only;
-            // desktop uses the right-click context menu instead.
-            if (!isDesktop)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: GestureDetector(
-                  onTap: () => context.push('/cookbook/${cookbook.id}/edit'),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.edit, color: Colors.white, size: 14),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+    ),
+  );
 }
+
 /// Desktop cookbook tile: the cover as an object (3:4, rounded, hairline),
 /// name and recipe count underneath. Hover lifts it, shows the pointer and
 /// reveals a "⋯" menu button with the same actions as right-click.
@@ -1097,12 +936,16 @@ class _DesktopCookbookTile extends ConsumerStatefulWidget {
   final List<ContextMenuItem> menuItems;
   final VoidCallback onTap;
 
+  /// Phones / tablets: no hover, so the menu button stays visible.
+  final bool touch;
+
   const _DesktopCookbookTile({
     required this.cookbook,
     required this.isSelected,
     required this.members,
     required this.menuItems,
     required this.onTap,
+    this.touch = false,
   });
 
   @override
@@ -1172,7 +1015,10 @@ class _DesktopCookbookTileState extends ConsumerState<_DesktopCookbookTile> {
                         Positioned(
                           left: Space.sm,
                           bottom: Space.sm,
-                          child: _AvatarStack(members: widget.members),
+                          child: GestureDetector(
+                            onTap: () => _showCookbookMembers(context, cookbook, widget.members),
+                            child: _AvatarStack(members: widget.members),
+                          ),
                         ),
                       if (widget.isSelected)
                         Positioned(
@@ -1189,7 +1035,7 @@ class _DesktopCookbookTileState extends ConsumerState<_DesktopCookbookTile> {
                         right: Space.sm,
                         child: AnimatedOpacity(
                           duration: Motion.fast,
-                          opacity: _hovered ? 1 : 0,
+                          opacity: _hovered || widget.touch ? 1 : 0,
                           child: Material(
                             key: _menuKey,
                             color: c.surface.withValues(alpha: 0.9),
@@ -1197,7 +1043,10 @@ class _DesktopCookbookTileState extends ConsumerState<_DesktopCookbookTile> {
                             child: IconButton(
                               icon: Icon(Icons.more_horiz_rounded, size: 18, color: c.textPrimary),
                               tooltip: l10n.moreLabel,
-                              constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+                              constraints: BoxConstraints.tightFor(
+                                width: widget.touch ? 36 : 30,
+                                height: widget.touch ? 36 : 30,
+                              ),
                               padding: EdgeInsets.zero,
                               onPressed: _openMenu,
                             ),
@@ -1223,56 +1072,6 @@ class _DesktopCookbookTileState extends ConsumerState<_DesktopCookbookTile> {
               ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// MODERN FAB
-// ═══════════════════════════════════════════════════════════════════
-
-class _ModernFAB extends StatelessWidget {
-  final VoidCallback onPressed;
-  final String? label;
-  const _ModernFAB({required this.onPressed, this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bg = theme.colorScheme.primary;
-    final fg = theme.colorScheme.onPrimary;
-
-    if (label != null) {
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
-        ),
-        child: FloatingActionButton.extended(
-          onPressed: onPressed,
-          backgroundColor: bg,
-          foregroundColor: fg,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          icon: const Icon(Icons.add, size: 22),
-          label: Text(label!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-        ),
-      );
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
-      ),
-      child: FloatingActionButton(
-        onPressed: onPressed,
-        backgroundColor: bg,
-        foregroundColor: fg,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, size: 26),
       ),
     );
   }
