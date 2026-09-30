@@ -6,8 +6,11 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/tokens.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/app_controls.dart';
 
 enum BrowseMode { courses, categories }
 
@@ -64,10 +67,21 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
     final primaryLabel = isCourses ? l10n.coursesTitle : l10n.categoriesTitle;
     final secondaryLabel = isCourses ? l10n.categoriesTitle : l10n.coursesTitle;
 
+    final touch = !Responsive.isDesktopLayout(context);
+    final side = Responsive.useNavRail(context) ? Space.xxl : Space.lg;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(primaryLabel),
-      ),
+      backgroundColor: touch ? context.appColors.surface : null,
+      appBar: touch
+          ? AppBar(
+              backgroundColor: context.appColors.surface,
+              centerTitle: false,
+              titleSpacing: Navigator.of(context).canPop() ? 0 : Space.xl,
+              title: TouchPageTitle(primaryLabel),
+            )
+          : AppBar(
+              title: Text(primaryLabel),
+            ),
       body: StreamBuilder<List<Recipe>>(
         stream: recipeDao.watchRecipesForCookbook(cookbookId),
         builder: (context, snapshot) {
@@ -125,11 +139,24 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
           final secondaryCounts = isCourses ? categoryCounts : courseCounts;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: touch ? EdgeInsets.fromLTRB(side, Space.xs, side, Space.xxxl) : const EdgeInsets.all(16),
             child: Responsive.constrainWidth(context, child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // View All Recipes button
+                if (touch)
+                  TouchGroup(
+                    margin: EdgeInsets.zero,
+                    children: [
+                      TouchRow(
+                        icon: Icons.menu_book_outlined,
+                        title: l10n.viewAllRecipes,
+                        subtitle: l10n.recipesTotal(recipes.length),
+                        onTap: () => context.push('/recipes/all?cookbook=$cookbookId'),
+                      ),
+                    ],
+                  )
+                else
                 Card(
                   color: theme.colorScheme.primaryContainer,
                   child: InkWell(
@@ -165,11 +192,11 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                SizedBox(height: touch ? 0 : 24),
 
                 // PRIMARY SECTION
                 _SectionHeader(title: primaryLabel, icon: isCourses ? Icons.restaurant_menu : Icons.category),
-                const SizedBox(height: 12),
+                SizedBox(height: touch ? 0 : 12),
 
                 _buildGrid(context, primaryEntries, primaryCounts, cookbookId, isCourse: isCourses),
 
@@ -179,11 +206,11 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
                   label: isCourses ? l10n.browseNoCourse : l10n.browseUncategorized,
                 ),
 
-                const SizedBox(height: 32),
+                SizedBox(height: touch ? Space.sm : 32),
 
                 // SECONDARY SECTION
                 _SectionHeader(title: secondaryLabel, icon: isCourses ? Icons.category : Icons.restaurant_menu),
-                const SizedBox(height: 12),
+                SizedBox(height: touch ? 0 : 12),
 
                 _buildGrid(context, secondaryEntries, secondaryCounts, cookbookId, isCourse: !isCourses),
 
@@ -229,11 +256,11 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             )
-          : SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: Responsive.browseGridColumns(context),
-              childAspectRatio: 1.5,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+          : const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 250,
+              mainAxisExtent: 60,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
             ),
       itemCount: entries.length,
       itemBuilder: (context, index) {
@@ -260,6 +287,9 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (!Responsive.isDesktopLayout(context)) {
+      return GroupLabel(title, padding: const EdgeInsets.fromLTRB(Space.xs, Space.xxl, 0, Space.sm));
+    }
     return Row(
       children: [
         Icon(icon, size: 20, color: theme.colorScheme.primary),
@@ -286,6 +316,7 @@ class _BrowseCardStatic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (!Responsive.isDesktopLayout(context)) return _touch(context);
 
     return Card(
       child: InkWell(
@@ -309,6 +340,58 @@ class _BrowseCardStatic extends StatelessWidget {
                 ),
               ),
               Text('$count', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Touch: a hairline tile with the emoji beside the name and count; empty
+  /// ones recede.
+  Widget _touch(BuildContext context) {
+    final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final empty = count == 0;
+    return Material(
+      color: c.surface,
+      shape: RoundedRectangleBorder(borderRadius: Radii.lgAll, side: BorderSide(color: c.hairline)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Space.md),
+          child: Row(
+            children: [
+              Opacity(
+                opacity: empty ? 0.55 : 1,
+                child: Text(emoji, style: const TextStyle(fontSize: 24)),
+              ),
+              const SizedBox(width: Space.md - 2),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                        color: empty ? c.textSecondary : c.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      l10n.countRecipes(count),
+                      maxLines: 1,
+                      style: TextStyle(fontSize: 12, color: c.textTertiary),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -343,6 +426,26 @@ class _UncategorizedTile extends ConsumerWidget {
         }).toList();
 
         if (uncategorized.isEmpty) return const SizedBox.shrink();
+
+        if (!Responsive.isDesktopLayout(context)) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: TouchGroup(
+              margin: EdgeInsets.zero,
+              children: [
+                TouchRow(
+                  icon: Icons.help_outline_rounded,
+                  title: label,
+                  subtitle: l10n.countRecipes(uncategorized.length),
+                  onTap: () {
+                    final type = isCourse ? 'course' : 'category';
+                    context.push('/recipes/uncategorized?cookbook=$cookbookId&type=$type');
+                  },
+                ),
+              ],
+            ),
+          );
+        }
 
         return Padding(
           padding: const EdgeInsets.only(top: 12),

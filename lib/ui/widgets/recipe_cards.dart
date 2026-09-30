@@ -254,6 +254,9 @@ class RecipeCardGrid extends StatelessWidget {
   final double gap;
   final ScrollPhysics? physics;
 
+  /// Optional marker over each card's photo (why it is in this list).
+  final Widget? Function(Recipe recipe)? badgeBuilder;
+
   const RecipeCardGrid({
     super.key,
     required this.recipes,
@@ -268,6 +271,7 @@ class RecipeCardGrid extends StatelessWidget {
     this.onLongPress,
     this.gap = Space.lg,
     this.physics,
+    this.badgeBuilder,
   });
 
   @override
@@ -301,6 +305,7 @@ class RecipeCardGrid extends StatelessWidget {
             onTap: () => onTap(r),
             onLongPress: onLongPress == null ? null : () => onLongPress!(r),
             onToggleFavorite: onToggleFavorite == null ? null : () => onToggleFavorite!(r),
+            badge: badgeBuilder?.call(r),
           );
         },
       );

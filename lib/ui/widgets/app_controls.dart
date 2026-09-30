@@ -673,6 +673,28 @@ class TouchRow extends StatelessWidget {
   }
 }
 
+/// Title for touch app bars: the Fraunces page title at 24 px, one line.
+/// Pair with `centerTitle: false` and the page tone as the bar colour.
+class TouchPageTitle extends StatelessWidget {
+  final String text;
+  const TouchPageTitle(this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+            color: context.appColors.textPrimary,
+          ),
+    );
+  }
+}
+
 /// Section heading for touch layouts: the [GroupLabel] style with page
 /// gutters, sitting above a [TouchGroup].
 class TouchGroupLabel extends StatelessWidget {

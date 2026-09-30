@@ -3,9 +3,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/feedback_service.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/tokens.dart';
 import '../../ui/screens/import/faq_screen.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import '../../utils/responsive_utils.dart';
+import 'app_controls.dart';
 import 'app_snackbar.dart';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -63,13 +65,13 @@ class HelpSupportScreen extends StatelessWidget {
     // Desktop reaches Help from the sidebar: a page title, no back button,
     // and a reading-width column.
     final desktop = Responsive.isDesktopLayout(context);
+    if (!desktop) return _touch(context, l10n);
 
     return Scaffold(
       appBar: AppBar(
-        leading: desktop ? null : _BackButtonCircle(),
-        automaticallyImplyLeading: !desktop,
+        automaticallyImplyLeading: false,
         title: Text(l10n.menuHelpSupport),
-        centerTitle: !desktop,
+        centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
@@ -168,6 +170,109 @@ class HelpSupportScreen extends StatelessWidget {
           const SizedBox(height: 32),
         ],
       )),
+    );
+  }
+
+  /// Phone & tablet: a short intro and the support routes as hairline groups,
+  /// feedback in its own group below.
+  Widget _touch(BuildContext context, AppLocalizations l10n) {
+    final c = context.appColors;
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: c.surface,
+      appBar: AppBar(
+        backgroundColor: c.surface,
+        centerTitle: false,
+        titleSpacing: Navigator.of(context).canPop() ? 0 : Space.xl,
+        title: TouchPageTitle(l10n.menuHelpSupport),
+      ),
+      body: Responsive.constrainScrollable(
+        maxWidth: Responsive.settingsListMaxWidth,
+        minHorizontal: 0,
+        builder: (context, padding) => ListView(
+          padding: padding.copyWith(bottom: Space.xxxl),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.xl, Space.sm, Space.xl, Space.xl),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(color: c.selectedFill, shape: BoxShape.circle),
+                    child: Icon(Icons.support_agent_rounded, color: c.accent, size: 26),
+                  ),
+                  const SizedBox(width: Space.lg),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.menuHowCanWeHelp,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: c.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(l10n.menuGetInTouch, style: TextStyle(fontSize: 13.5, color: c.textSecondary)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TouchGroup(children: [
+              TouchRow(
+                icon: Icons.forum_outlined,
+                title: l10n.joinDiscord,
+                subtitle: l10n.joinDiscordSubtitle,
+                onTap: () => _launchExternalUrl(context, _discordUrl),
+              ),
+              TouchRow(
+                icon: Icons.mail_outline_rounded,
+                title: l10n.helpContactUs,
+                subtitle: _supportEmail,
+                onTap: () => _launchEmail(context, _supportEmail, subject: 'Recipe Spellbook — Support Request'),
+              ),
+              TouchRow(
+                icon: Icons.menu_book_outlined,
+                title: l10n.importGuides,
+                subtitle: l10n.stepByStepGuides,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen())),
+              ),
+              TouchRow(
+                icon: Icons.help_outline_rounded,
+                title: l10n.faqTitle,
+                subtitle: l10n.faqHeroSubtitle,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FaqScreen())),
+              ),
+              TouchRow(
+                icon: Icons.language_rounded,
+                title: l10n.menuVisitWebsite,
+                subtitle: _websiteUrl,
+                onTap: () => _launchExternalUrl(context, _websiteUrl),
+              ),
+            ]),
+            TouchGroupLabel(l10n.settingsFeedback),
+            TouchGroup(children: [
+              TouchRow(
+                icon: Icons.lightbulb_outline_rounded,
+                title: l10n.sendSuggestion,
+                subtitle: l10n.sendSuggestionSubtitle,
+                onTap: () => _showSuggestionDialog(context),
+              ),
+              TouchRow(
+                icon: Icons.bug_report_outlined,
+                title: l10n.reportBug,
+                subtitle: l10n.reportBugSubtitle,
+                onTap: () => _showBugReportDialog(context),
+              ),
+            ]),
+          ],
+        ),
+      ),
     );
   }
 
@@ -419,23 +524,6 @@ class _SupportCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BackButtonCircle extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(left: 8),
-      child: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-        style: IconButton.styleFrom(
-            backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-            shape: const CircleBorder(), padding: const EdgeInsets.all(10)),
       ),
     );
   }
