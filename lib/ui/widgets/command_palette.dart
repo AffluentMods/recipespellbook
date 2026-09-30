@@ -11,6 +11,7 @@ import '../../providers/settings_provider.dart';
 import '../../providers/navigation_guard_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/recipe_title.dart';
+import 'join_with_link_dialog.dart';
 import 'new_recipe_dialog.dart';
 
 /// Whether the Ctrl/Cmd+K command palette is showing.
@@ -105,6 +106,7 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
   }
 
   List<_PaletteItem> _commands() {
+    final l10n = AppLocalizations.of(context)!;
     return [
       _PaletteItem(
         icon: Icons.home_outlined,
@@ -203,6 +205,16 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
         subtitle: 'Theme & colors',
         section: 'Commands',
         run: () => _push('/settings/appearance'),
+      ),
+      _PaletteItem(
+        icon: Icons.group_add_outlined,
+        label: l10n.joinLinkMenuLabel,
+        subtitle: l10n.joinLinkMenuSubtitle,
+        section: 'Commands',
+        run: () {
+          _close();
+          showJoinWithLinkDialog(_navContext);
+        },
       ),
       _PaletteItem(
         icon: Icons.swap_horiz,

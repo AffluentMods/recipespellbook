@@ -19,6 +19,7 @@ import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
+import '../../widgets/join_with_link_dialog.dart';
 import '../../widgets/new_cookbook_chooser.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
@@ -117,6 +118,22 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
+                // Manual way to join a cookbook someone shared (paste the
+                // invite link) — links don't always open the app by themselves.
+                // Labelled when there's room, icon-only on narrower windows.
+                if (Responsive.width(context) >= 1200)
+                  TextButton.icon(
+                    onPressed: () => showJoinWithLinkDialog(context, purpose: JoinLinkPurpose.cookbook),
+                    icon: const Icon(Icons.group_add_outlined),
+                    label: Text(l10n.joinLinkTitleCookbook),
+                  )
+                else
+                  IconButton(
+                    icon: const Icon(Icons.group_add_outlined),
+                    tooltip: l10n.joinLinkTitleCookbook,
+                    onPressed: () => showJoinWithLinkDialog(context, purpose: JoinLinkPurpose.cookbook),
+                  ),
+                const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(right: 16),
                   child: FilledButton.icon(
@@ -127,6 +144,11 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
                 ),
               ]
             : [
+                IconButton(
+                  icon: const Icon(Icons.group_add_outlined),
+                  tooltip: l10n.joinLinkTitleCookbook,
+                  onPressed: () => showJoinWithLinkDialog(context, purpose: JoinLinkPurpose.cookbook),
+                ),
                 IconButton(
                   icon: const Icon(Icons.search),
                   tooltip: l10n.searchCookbooks,

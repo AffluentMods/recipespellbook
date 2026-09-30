@@ -18096,6 +18096,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next day'**
   String get plannerNextDay;
+
+  /// No description provided for @joinLinkMenuLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with invite link'**
+  String get joinLinkMenuLabel;
+
+  /// No description provided for @joinLinkMenuSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared list, cookbook or family'**
+  String get joinLinkMenuSubtitle;
+
+  /// No description provided for @joinLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with an invite link'**
+  String get joinLinkTitle;
+
+  /// No description provided for @joinLinkTitleList.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a shared list'**
+  String get joinLinkTitleList;
+
+  /// No description provided for @joinLinkTitleCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a shared cookbook'**
+  String get joinLinkTitleCookbook;
+
+  /// No description provided for @joinLinkTitleFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a family'**
+  String get joinLinkTitleFamily;
+
+  /// No description provided for @joinLinkListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an invite link someone sent you'**
+  String get joinLinkListSubtitle;
+
+  /// No description provided for @joinLinkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the invite link or code someone sent you. It works for shared shopping lists, cookbooks and family invites.'**
+  String get joinLinkBody;
+
+  /// No description provided for @joinLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an invite link or code'**
+  String get joinLinkHint;
+
+  /// No description provided for @joinLinkFromClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled in from your clipboard'**
+  String get joinLinkFromClipboard;
+
+  /// No description provided for @joinLinkInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like an invite link or code'**
+  String get joinLinkInvalid;
+
+  /// No description provided for @joinLinkOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check that code. Check your connection and try again.'**
+  String get joinLinkOffline;
+
+  /// No description provided for @inviteTryAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another link'**
+  String get inviteTryAnother;
+
+  /// No description provided for @inviteErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Check your internet and try again.'**
+  String get inviteErrorNetwork;
+
+  /// No description provided for @inviteErrorSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to continue.'**
+  String get inviteErrorSessionExpired;
+
+  /// No description provided for @shareViewerTitleList.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared shopping list'**
+  String get shareViewerTitleList;
+
+  /// No description provided for @shareViewerTitleCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared cookbook'**
+  String get shareViewerTitleCookbook;
+
+  /// No description provided for @shareViewerTitleLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared link'**
+  String get shareViewerTitleLink;
+
+  /// No description provided for @shareViewerLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this link'**
+  String get shareViewerLoadFailed;
+
+  /// No description provided for @shareViewerExpiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the person who shared it for a new link, or paste another one.'**
+  String get shareViewerExpiredHint;
+
+  /// No description provided for @shareViewerJoinList.
+  ///
+  /// In en, this message translates to:
+  /// **'Join this list'**
+  String get shareViewerJoinList;
+
+  /// No description provided for @shareViewerAddToLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my lists'**
+  String get shareViewerAddToLists;
+
+  /// No description provided for @shareViewerJoinCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Join \"{name}\"'**
+  String shareViewerJoinCookbook(String name);
+
+  /// No description provided for @shareViewerSignInToJoinList.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to join this shopping list. You\'ll be added as soon as you\'re signed in.'**
+  String get shareViewerSignInToJoinList;
+
+  /// No description provided for @shareViewerSignInToJoinCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to collaborate on this cookbook. You\'ll be added as soon as you\'re signed in.'**
+  String get shareViewerSignInToJoinCookbook;
+
+  /// No description provided for @shareViewerJoinedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined! It\'s in your Shopping tab.'**
+  String get shareViewerJoinedList;
+
+  /// No description provided for @shareViewerJoinedCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined! It\'s in your cookbooks.'**
+  String get shareViewerJoinedCookbook;
+
+  /// No description provided for @shareViewerOwnItem.
+  ///
+  /// In en, this message translates to:
+  /// **'This is yours — you already have it.'**
+  String get shareViewerOwnItem;
+
+  /// No description provided for @shareViewerJoinNeedsSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborating on cookbooks needs a subscription.'**
+  String get shareViewerJoinNeedsSubscription;
+
+  /// No description provided for @shareViewerOwnerLapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner\'s subscription is no longer active, so this cookbook can\'t be shared right now.'**
+  String get shareViewerOwnerLapsed;
+
+  /// No description provided for @shareViewerNotCollab.
+  ///
+  /// In en, this message translates to:
+  /// **'This link is a one-time copy, not a live invite.'**
+  String get shareViewerNotCollab;
+
+  /// No description provided for @shareViewerJoinFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t join. Please try again.'**
+  String get shareViewerJoinFailed;
+
+  /// No description provided for @familyJoinWithCodeOrLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with code or link'**
+  String get familyJoinWithCodeOrLink;
+
+  /// No description provided for @familySignInToUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to create or join a family.'**
+  String get familySignInToUse;
+
+  /// No description provided for @familyInviteMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite family member'**
+  String get familyInviteMember;
+
+  /// No description provided for @familyInviteSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to {familyName}'**
+  String familyInviteSheetTitle(String familyName);
+
+  /// No description provided for @familyInviteSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Have them scan this code with their phone camera, or send them the link. They can also paste the link or code in Family → Join with code or link.'**
+  String get familyInviteSheetBody;
+
+  /// No description provided for @familyInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get familyInviteCode;
+
+  /// No description provided for @familyInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link'**
+  String get familyInviteLink;
+
+  /// No description provided for @familySeatsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 spot left} other{{count} spots left}}'**
+  String familySeatsLeft(int count);
+
+  /// No description provided for @familyFullTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family is full'**
+  String get familyFullTitle;
+
+  /// No description provided for @familyFullOwnerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All {max} spots are taken. Remove a member or upgrade your plan to invite someone new.'**
+  String familyFullOwnerBody(int max);
+
+  /// No description provided for @familyFullMemberBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All {max} spots are taken. Ask the family owner to make room.'**
+  String familyFullMemberBody(int max);
+
+  /// No description provided for @familyAloneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No one else has joined yet. Invite someone to start sharing.'**
+  String get familyAloneHint;
+
+  /// No description provided for @familyYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get familyYou;
+
+  /// No description provided for @familyErrorSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'A Premium plan is required to create a family.'**
+  String get familyErrorSubscription;
+
+  /// No description provided for @familyErrorFull.
+  ///
+  /// In en, this message translates to:
+  /// **'This family is full.'**
+  String get familyErrorFull;
+
+  /// No description provided for @familyErrorAlreadyInFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in a family. Leave it first to join another.'**
+  String get familyErrorAlreadyInFamily;
+
+  /// No description provided for @familyErrorInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That invite code isn\'t valid. Check it or ask for a new link.'**
+  String get familyErrorInvalidCode;
+
+  /// No description provided for @familyJoinScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family invite'**
+  String get familyJoinScreenTitle;
+
+  /// No description provided for @familyJoinPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Join {familyName}?'**
+  String familyJoinPrompt(String familyName);
+
+  /// No description provided for @familyJoinInvitedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} invited you to share cookbooks, shopping lists and meal plans.'**
+  String familyJoinInvitedBy(String name);
+
+  /// No description provided for @familyJoinGenericPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the family with invite code {code}?'**
+  String familyJoinGenericPrompt(String code);
+
+  /// No description provided for @familyJoinSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to join this family. You\'ll join as soon as you\'re signed in.'**
+  String get familyJoinSignIn;
+
+  /// No description provided for @familyJoinConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Join family'**
+  String get familyJoinConfirm;
+
+  /// No description provided for @familyJoinAlreadyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in {familyName}.'**
+  String familyJoinAlreadyMember(String familyName);
+
+  /// No description provided for @familyJoinInOtherFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in {familyName}. Leave that family first to join this one.'**
+  String familyJoinInOtherFamily(String familyName);
+
+  /// No description provided for @familyJoinFullBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{familyName} is full ({max} of {max} members). Ask the owner to remove someone or upgrade their plan.'**
+  String familyJoinFullBody(String familyName, int max);
+
+  /// No description provided for @familyJoinOpenFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Open family'**
+  String get familyJoinOpenFamily;
+
+  /// No description provided for @familyJoinInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This family invite isn\'t valid anymore'**
+  String get familyJoinInvalid;
+
+  /// No description provided for @familyJoinInvalidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The invite code may have been changed. Ask for a new link, or paste another one.'**
+  String get familyJoinInvalidHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

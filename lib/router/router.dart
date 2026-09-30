@@ -7,6 +7,7 @@ import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
 import '../ui/screens/planner/planner_screen.dart';
+import '../ui/screens/premium/family_join_screen.dart';
 import '../ui/screens/premium/family_screen.dart';
 import '../ui/screens/premium/paywall_screen.dart';
 import '../ui/screens/recipe/categories_browse_screen.dart';
@@ -74,6 +75,14 @@ final router = GoRouter(
         final code = state.pathParameters['code']!;
         return ShareViewerScreen(code: code);
       },
+    ),
+
+    // Family invite (https://recipespellbook.app/family/join/<code>, or a code
+    // pasted into "Join with code or link"). Confirms, then joins.
+    GoRoute(
+      path: '/family/join/:code',
+      name: 'family-join',
+      builder: (context, state) => FamilyJoinScreen(code: state.pathParameters['code']!),
     ),
 
     // NOTE: recipe edit + new recipe live INSIDE the shell route (below) so the

@@ -125,14 +125,19 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
     _shimmerController.forward();
 
-    // Navigate when done — honor a deep link captured during cold start,
-    // otherwise go Home.
+    // Navigate when done: Home, plus any deep link captured during cold start
+    // opened on top of it (so Back returns Home instead of leaving the app).
     _fadeController.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
         final target = pendingDeepLink;
         pendingDeepLink = null;
         splashActive = false;
-        context.go(target ?? '/');
+        final router = GoRouter.of(context);
+        router.go('/');
+        if (target != null) {
+          // Push once the Home route has been applied, so it lands above it.
+          WidgetsBinding.instance.addPostFrameCallback((_) => router.push(target));
+        }
       }
     });
   }

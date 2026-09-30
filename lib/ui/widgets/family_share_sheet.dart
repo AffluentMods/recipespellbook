@@ -335,11 +335,6 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     Clipboard.setData(ClipboardData(text: link.url));
     AppSnackbar.success(context, 'Invite link copied — send it to anyone');
   }
-
-  // ────────────────────────────────────
-  //  Family member picker
-  // ────────────────────────────────────
-
 }
 
 // ════════════════════════════════════════════
@@ -560,7 +555,6 @@ class _PermissionDropdown extends StatelessWidget {
   }
 }
 
-/// Tile for a family member not yet shared with — tap to pick permission and share.
 /// Tile for an existing share — shows permission and allows edit/revoke.
 class _ExistingShareTile extends StatelessWidget {
   final FamilyShareInfo share;

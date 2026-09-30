@@ -8,6 +8,7 @@ import '../../../data/course_category_data.dart';
 import '../../../data/nutrition_data.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../services/auth_service.dart';
@@ -17,7 +18,9 @@ import '../../../services/image_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/join_with_link_dialog.dart';
 import '../../widgets/macro_ring.dart';
+import '../../widgets/sign_in_prompt.dart';
 
 const _shareApiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://api.recipespellbook.app');
 
@@ -98,7 +101,7 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.shareViewerSharedRecipe),
+        title: Text(_title(l10n)),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.go('/'),
@@ -111,9 +114,21 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
     );
   }
 
+  /// App bar title for what the link actually points at (it used to say
+  /// "Shared Recipe" for lists and cookbooks too).
+  String _title(AppLocalizations l10n) {
+    if (_loading || _error != null) return l10n.shareViewerTitleLink;
+    return switch (_data?['type']) {
+      'shopping_list' => l10n.shareViewerTitleList,
+      'cookbook' => l10n.shareViewerTitleCookbook,
+      _ => _recipes.length > 1 ? l10n.shareViewerTitleCookbook : l10n.shareViewerSharedRecipe,
+    };
+  }
+
   Widget _joinCookbookBar() {
+    final l10n = AppLocalizations.of(context)!;
     final cb = (_data?['cookbook'] as Map?) ?? const {};
-    final name = (cb['name'] as String?) ?? 'this cookbook';
+    final name = (cb['name'] as String?) ?? l10n.shareViewerTitleCookbook;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -125,24 +140,79 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
             icon: _saving
                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.group_add_rounded),
-            label: Text('Join "$name"'),
+            label: Text(l10n.shareViewerJoinCookbook(name)),
           ),
         ),
       ),
     );
   }
 
-  Future<void> _joinCollabCookbook() async {
+  /// Join this collaboration invite, signing in first when needed and then
+  /// carrying on (instead of just telling a signed-out user to sign in).
+  /// Returns the join result, or null when it didn't happen (the reason has
+  /// already been shown).
+  Future<ShareJoinInfo?> _joinInvite({required String signInMessage}) async {
+    final l10n = AppLocalizations.of(context)!;
+    // A cold-start link can reach this screen before the saved session loads.
+    await waitForAuthReady(ref);
+    if (!mounted) return null;
     if (!AuthService.instance.isSignedIn) {
-      AppSnackbar.info(context, 'Sign in to collaborate on this cookbook');
-      return;
+      final ok = await promptSignIn(context, ref, message: signInMessage, icon: Icons.group_add_rounded);
+      if (!ok || !mounted) return null;
     }
+
     setState(() => _saving = true);
-    final res = await FamilyService.instance.joinShareLink(widget.code);
-    if (!mounted) return;
-    if (res == null) {
+    var res = await FamilyService.instance.joinShareLink(widget.code);
+    if (!mounted) return null;
+    if (res.error == InviteErrorKind.sessionExpired) {
+      // The saved session is dead server-side: sign in again, then retry once.
+      await ref.read(authProvider.notifier).signOut();
+      if (!mounted) return null;
+      AppSnackbar.info(context, l10n.inviteErrorSessionExpired);
+      final ok = await promptSignIn(context, ref, message: signInMessage, icon: Icons.group_add_rounded);
+      if (!mounted) return null;
+      if (!ok) {
+        setState(() => _saving = false);
+        return null;
+      }
+      res = await FamilyService.instance.joinShareLink(widget.code);
+      if (!mounted) return null;
+    }
+    if (res.joined != null) return res.joined;
+
+    setState(() => _saving = false);
+    switch (res.error) {
+      case InviteErrorKind.notFound:
+        // Expired / revoked / deleted since the page loaded.
+        setState(() => _error = 'expired');
+      case InviteErrorKind.subscriptionRequired:
+        AppSnackbar.errorWithAction(
+          context,
+          l10n.shareViewerJoinNeedsSubscription,
+          actionLabel: l10n.upgrade,
+          onAction: () => context.push('/upgrade'),
+        );
+      case InviteErrorKind.ownerSubscriptionRequired:
+        AppSnackbar.error(context, l10n.shareViewerOwnerLapsed);
+      case InviteErrorKind.notCollab:
+        AppSnackbar.error(context, l10n.shareViewerNotCollab);
+      case InviteErrorKind.network:
+        AppSnackbar.error(context, l10n.inviteErrorNetwork);
+      default:
+        AppSnackbar.error(context, res.message ?? l10n.shareViewerJoinFailed);
+    }
+    return null;
+  }
+
+  Future<void> _joinCollabCookbook() async {
+    final l10n = AppLocalizations.of(context)!;
+    final res = await _joinInvite(signInMessage: l10n.shareViewerSignInToJoinCookbook);
+    if (res == null || !mounted) return;
+    if (res.isOwner) {
       setState(() => _saving = false);
-      AppSnackbar.error(context, "Couldn't join — the invite may be invalid, expired, or need a subscription.");
+      AppSnackbar.info(context, l10n.shareViewerOwnItem);
+      ref.read(selectedCookbookIdProvider.notifier).state = res.resourceId;
+      context.go('/');
       return;
     }
     final owner = _data?['sharedBy'] as Map?;
@@ -158,7 +228,7 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
     if (!mounted) return;
     setState(() => _saving = false);
     ref.read(selectedCookbookIdProvider.notifier).state = res.resourceId;
-    AppSnackbar.success(context, "Joined! It's in your cookbooks.");
+    AppSnackbar.success(context, l10n.shareViewerJoinedCookbook);
     context.go('/');
   }
 
@@ -190,27 +260,63 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
     }
 
     if (_error != null) {
-      String errorText;
-      switch (_error) {
-        case 'expired': errorText = l10n.shareViewerExpired; break;
-        case 'no_connection': errorText = l10n.shareViewerNoConnection; break;
-        default: errorText = l10n.shareViewerFailed;
-      }
+      final expired = _error == 'expired';
+      final offline = _error == 'no_connection';
+      final errorText = expired
+          ? l10n.shareViewerExpired
+          : offline ? l10n.shareViewerNoConnection : l10n.shareViewerLoadFailed;
       return Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.link_off, size: 64, color: theme.colorScheme.outline),
-              const SizedBox(height: 16),
-              Text(errorText, style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () => context.go('/'),
-                child: Text(l10n.shareViewerGoHome),
-              ),
-            ],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(offline ? Icons.wifi_off_rounded : Icons.link_off,
+                    size: 64, color: theme.colorScheme.outline),
+                const SizedBox(height: 16),
+                Text(errorText,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center),
+                if (expired) ...[
+                  const SizedBox(height: 8),
+                  Text(l10n.shareViewerExpiredHint,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center),
+                ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: offline
+                      ? FilledButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _error = null;
+                              _loading = true;
+                            });
+                            _fetchShareData();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: Text(l10n.actionRetry),
+                        )
+                      : FilledButton.icon(
+                          // Paste a different invite; it replaces this page.
+                          onPressed: () => showJoinWithLinkDialog(context, replace: true),
+                          icon: const Icon(Icons.link),
+                          label: Text(l10n.inviteTryAnother),
+                        ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => context.go('/'),
+                    child: Text(l10n.shareViewerGoHome),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -252,6 +358,7 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
   }
 
   Widget _buildShoppingList(ThemeData theme, String sharedBy, String? avatarUrl) {
+    final l10n = AppLocalizations.of(context)!;
     final sl = (_data?['shoppingList'] as Map?) ?? const {};
     final items = (_data?['items'] as List?) ?? const [];
     final isCollab = _data?['kind'] == 'collab';
@@ -309,7 +416,7 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
                 icon: _saving
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                     : Icon(isCollab ? Icons.group_add_rounded : Icons.playlist_add_rounded),
-                label: Text(isCollab ? 'Join this list' : 'Add to my lists'),
+                label: Text(isCollab ? l10n.shareViewerJoinList : l10n.shareViewerAddToLists),
               ),
             ),
           ),
@@ -319,22 +426,22 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
   }
 
   Future<void> _joinCollabList() async {
-    if (!AuthService.instance.isSignedIn) {
-      AppSnackbar.info(context, 'Sign in to join this list');
-      return;
-    }
-    setState(() => _saving = true);
-    final res = await FamilyService.instance.joinShareLink(widget.code);
-    if (!mounted) return;
-    setState(() => _saving = false);
-    if (res == null) {
-      AppSnackbar.error(context, "Couldn't join — the invite may be invalid, expired, or need a subscription.");
+    final l10n = AppLocalizations.of(context)!;
+    final res = await _joinInvite(signInMessage: l10n.shareViewerSignInToJoinList);
+    if (res == null || !mounted) return;
+    if (res.isOwner) {
+      setState(() => _saving = false);
+      AppSnackbar.info(context, l10n.shareViewerOwnItem);
+      context.go('/shopping');
       return;
     }
     await CollabService.instance.markCollab(res.resourceId, res.permission);
-    await CollabService.instance.syncNow();
+    // Full pull: the joined list may be older than our collab pull cursor, and
+    // a normal cycle would then never deliver it ("Joined!" but no list).
+    await CollabService.instance.syncAfterJoin();
     if (!mounted) return;
-    AppSnackbar.success(context, "Joined! It's in your Shopping tab.");
+    setState(() => _saving = false);
+    AppSnackbar.success(context, l10n.shareViewerJoinedList);
     context.go('/shopping');
   }
 
