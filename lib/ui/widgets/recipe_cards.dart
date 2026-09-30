@@ -152,10 +152,8 @@ class _RecipeGridCardState extends State<RecipeGridCard> {
                   children: [
                     SizedBox(
                       height: 36,
-                      child: Text(
+                      child: _ClampedTitle(
                         normalizeTitle(recipe.title).title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 14,
                           height: 1.28,
@@ -184,21 +182,46 @@ class _RecipeGridCardState extends State<RecipeGridCard> {
 
     return ContextMenuRegion(
       items: widget.contextItems,
-      child: Tooltip(
-        message: recipe.title,
-        waitDuration: const Duration(milliseconds: 900),
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          onEnter: (_) => setState(() => _hovered = true),
-          onExit: (_) => setState(() => _hovered = false),
-          child: GestureDetector(
-            onTap: widget.onTap,
-            behavior: HitTestBehavior.opaque,
-            child: Semantics(button: true, selected: widget.selected, child: card),
-          ),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Semantics(button: true, selected: widget.selected, child: card),
         ),
       ),
     );
+  }
+}
+
+/// A two-line title that offers the full text as a tooltip only when it is
+/// actually cut off (as Finder does), instead of repeating visible text.
+class _ClampedTitle extends StatelessWidget {
+  final String text;
+  final TextStyle style;
+  const _ClampedTitle(this.text, {required this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final label = Text(text, maxLines: 2, overflow: TextOverflow.ellipsis, style: style);
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        maxLines: 2,
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout(maxWidth: constraints.maxWidth);
+      final clipped = painter.didExceedMaxLines;
+      painter.dispose();
+      if (!clipped) return label;
+      return Tooltip(
+        message: text,
+        waitDuration: const Duration(milliseconds: 700),
+        child: label,
+      );
+    });
   }
 }
 
