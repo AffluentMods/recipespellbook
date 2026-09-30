@@ -163,6 +163,9 @@ class SyncService {
 
   bool get isSyncing => _active != null;
 
+  /// Whether this session already asked the server to verify purchases.
+  bool _purchaseVerified = false;
+
   /// Kept for existing callers; the journal now tracks pending changes.
   void markPendingChanges() {}
 
@@ -357,13 +360,21 @@ class SyncService {
 
     for (var i = 0; i < requests.length; i++) {
       final last = i == requests.length - 1;
-      final response = await _auth.post('/v1/sync/push', {
-        'lastSyncAt': pullCursor?.toUtc().toIso8601String(),
-        'clientTime': DateTime.now().toUtc().toIso8601String(),
-        'pull': last,
-        ...requests[i],
-      }, timeout: _requestTimeout);
+      Future<dynamic> send() => _auth.post('/v1/sync/push', {
+            'lastSyncAt': pullCursor?.toUtc().toIso8601String(),
+            'clientTime': DateTime.now().toUtc().toIso8601String(),
+            'pull': last,
+            ...requests[i],
+          }, timeout: _requestTimeout);
+      var response = await send();
 
+      if (response.statusCode == 403 && !_purchaseVerified) {
+        // Bought in the App Store / Play but the server hasn't heard yet:
+        // have it check with RevenueCat, then try once more.
+        _purchaseVerified = true;
+        final tier = await _auth.verifySubscription();
+        if (tier != null && tier != 'free') response = await send();
+      }
       if (response.statusCode == 403) {
         return SyncResult.failure('Cloud Sync is not included in your plan', notEntitled: true);
       }

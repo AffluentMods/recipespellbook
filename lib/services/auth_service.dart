@@ -140,6 +140,37 @@ class AuthService {
   String? get currentJwt => _currentJwt;
   bool get isSignedIn => _currentUser != null && _currentJwt != null;
 
+  /// Ask the server to check this account's in-app purchases (RevenueCat) and
+  /// update its tier. App Store / Play purchases are otherwise unknown to the
+  /// server, which then refuses Cloud Sync, family and shared cookbooks.
+  /// Returns the server's tier, or null when it couldn't be checked.
+  Future<String?> verifySubscription() async {
+    if (!isSignedIn) return null;
+    try {
+      final r = await post('/v1/subscription/verify', const {});
+      if (r.statusCode != 200) return null;
+      final tier = (jsonDecode(r.body) as Map<String, dynamic>)['tier'] as String?;
+      final u = _currentUser;
+      if (tier != null && u != null && tier != u.tier) {
+        _currentUser = AuthUser(
+          id: u.id, email: u.email, name: u.name, avatarUrl: u.avatarUrl,
+          tier: tier, role: u.role, discordId: u.discordId, createdAt: u.createdAt,
+        );
+        // Persisting is best-effort (the keychain can be locked in the
+        // background); the server already has the new tier either way.
+        try {
+          await _saveUser(_currentUser!);
+        } catch (e) {
+          debugPrint('[Auth] verifySubscription: could not persist user: $e');
+        }
+      }
+      return tier;
+    } catch (e) {
+      debugPrint('[Auth] verifySubscription: $e');
+      return null;
+    }
+  }
+
   /// Test hook: act as [user] with [jwt] without going through a provider.
   @visibleForTesting
   void debugSetSession(AuthUser? user, String? jwt) {

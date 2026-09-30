@@ -193,4 +193,18 @@ void main() {
       expect(await (a2.db.select(a2.db.recipes)..where((r) => r.id.equals(id('r_pancakes')))).get(), isEmpty);
     });
   }, skip: users.length < 2 ? 'Set SYNC_E2E_USERS to run against a live API' : false);
+
+  // A user who bought in the App Store / Play: RevenueCat knows, the server
+  // (tier "free") doesn't yet. The first sync must heal that on its own.
+  final buyerRaw = Platform.environment['SYNC_E2E_APPSTORE_BUYER'];
+  test('an App Store buyer the server thinks is free still syncs', () async {
+    final b = (jsonDecode(buyerRaw!) as List).cast<Map<String, dynamic>>().first;
+    final d = Device('buyer-phone', AuthUser(id: b['id'] as String, email: b['email'] as String, tier: 'free'),
+        b['token'] as String);
+    await d.db.select(d.db.cookbooks).get();
+    final r = await syncOn(d);
+    expect(r.notEntitled, isFalse);
+    expect(AuthService.instance.currentUser?.tier, 'premium');
+    await d.db.close();
+  }, skip: buyerRaw == null ? 'Set SYNC_E2E_APPSTORE_BUYER (needs a mock or real RevenueCat)' : false);
 }
