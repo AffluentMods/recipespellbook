@@ -37,6 +37,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/family_share_sheet.dart';
+import '../../widgets/sheet_chrome.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 
@@ -582,8 +583,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       AppSnackbar.info(context, l10n.shoppingNoOtherLists);
       return;
     }
-    final target = await showModalBottomSheet<ShoppingList>(
-      context: context,
+    final target = await Responsive.showAdaptiveSheet<ShoppingList>(
+      context,
+      isScrollControlled: false,
       builder: (pickCtx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -633,8 +635,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   Future<String?> _pickCategory(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
-    return showModalBottomSheet<String>(
-      context: context,
+    return Responsive.showAdaptiveSheet<String>(
+      context,
       isScrollControlled: true,
       builder: (ctx) => DraggableScrollableSheet(
         expand: false,
@@ -692,10 +694,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(l10n.shareNamedList(name),
@@ -794,10 +793,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               const Icon(Icons.check_circle, size: 48, color: Colors.green),
               const SizedBox(height: 12),
@@ -862,13 +858,13 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+            const SheetHandle(top: 0),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -1285,7 +1281,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -1293,7 +1289,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 8),
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+                const SheetHandle(top: 0),
                 const SizedBox(height: 16),
                 ListTile(
                   leading: const Icon(Icons.check_box),
@@ -1465,14 +1461,14 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1562,14 +1558,14 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -2116,7 +2112,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: SafeArea(
         child: Padding(
@@ -2125,14 +2121,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Handle
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
 
               // Title
@@ -3158,20 +3147,14 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -3292,20 +3275,14 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 16),
               if (supportsCamera)
                 ListTile(
@@ -4328,14 +4305,14 @@ class _ShoppingItemTile extends ConsumerWidget {
         child: Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: SheetPresentation.surfaceRadius(ctx),
           ),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
+              Center(child: const SheetHandle(top: 0)),
               const SizedBox(height: 20),
               Text(l10n.shoppingEditItem, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
@@ -4372,8 +4349,9 @@ class _ShoppingItemTile extends ConsumerWidget {
                     AppSnackbar.info(ctx, l10n.shoppingNoOtherLists);
                     return;
                   }
-                  final target = await showModalBottomSheet<ShoppingList>(
-                    context: ctx,
+                  final target = await Responsive.showAdaptiveSheet<ShoppingList>(
+                    ctx,
+                    isScrollControlled: false,
                     builder: (pickCtx) => SafeArea(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,

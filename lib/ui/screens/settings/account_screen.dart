@@ -14,6 +14,7 @@ import '../../../services/sync_service.dart';
 import '../../../utils/platform_utils.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════════════════════
 //  ACCOUNT SCREEN — Dedicated full-screen account management
@@ -322,13 +323,7 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(
-              width: 36, height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SheetHandle(top: 0),
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
@@ -388,13 +383,7 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
                   children: [
                     // Drag handle
                     Center(
-                      child: Container(
-                        width: 36, height: 4,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.outlineVariant,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
+                      child: const SheetHandle(top: 0),
                     ),
                     const SizedBox(height: 20),
                     Text(l10n.editDisplayName, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),

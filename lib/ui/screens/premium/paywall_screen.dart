@@ -10,6 +10,7 @@ import '../../../services/auth_service.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../../utils/platform_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/sheet_chrome.dart';
 
 /// Paywall — one focused, warm plan: a single lifetime unlock that turns on
 /// cloud sync + family sharing of recipes & cookbooks. Price is shown live from
@@ -467,9 +468,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             const SizedBox(height: 24),
             Icon(Icons.account_circle, size: 48, color: theme.colorScheme.primary),
             const SizedBox(height: 16),

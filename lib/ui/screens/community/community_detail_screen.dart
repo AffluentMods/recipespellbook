@@ -21,6 +21,7 @@ import '../../widgets/community/community_media.dart';
 import '../../widgets/community/meta_line.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/community_tag_picker.dart';
+import '../../widgets/sheet_chrome.dart';
 import 'community_recipe_preview_dialog.dart';
 import 'community_screen.dart'; // StarRating
 
@@ -368,10 +369,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
+              const SheetHandle(top: 0),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
@@ -423,10 +421,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
+              const SheetHandle(top: 0),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(l10n.communityDownloadOptions, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -466,10 +461,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 12),
-                Container(width: 40, height: 4, decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                )),
+                const SheetHandle(top: 0),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(l10n.communityChooseCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -520,10 +512,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
+              const SheetHandle(top: 0),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(sl10n.communityReportTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -584,9 +573,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     controller: scrollController,
                     children: [
                       Center(
-                        child: Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
-                        ),
+                        child: const SheetHandle(top: 0, bottom: 16),
                       ),
                       Text(l10n.communityEditCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 16),

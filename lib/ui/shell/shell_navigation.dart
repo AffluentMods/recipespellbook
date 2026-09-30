@@ -148,8 +148,9 @@ ShellDestination? destinationForLocation(String location) {
   if (path.startsWith('/shopping')) return ShellDestination.shopping;
   if (path.startsWith('/community')) return ShellDestination.community;
   if (path == '/settings/account') return ShellDestination.account;
-  if (path.startsWith('/settings') || path == '/about')
+  if (path.startsWith('/settings') || path == '/about') {
     return ShellDestination.settings;
+  }
   if (path == '/help' || path == '/import-guides') return ShellDestination.help;
   return null;
 }

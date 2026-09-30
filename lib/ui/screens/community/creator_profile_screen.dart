@@ -8,6 +8,7 @@ import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
+import '../../widgets/sheet_chrome.dart';
 
 class CreatorProfileScreen extends StatefulWidget {
   final String userId;
@@ -101,13 +102,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(
-              width: 36, height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SheetHandle(top: 0),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),

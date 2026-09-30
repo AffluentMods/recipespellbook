@@ -26,6 +26,7 @@ import '../../widgets/community/community_recipe_preview_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import 'community_publish_screen.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════
 //  COMMUNITY SCREEN — Browse & Search
@@ -575,8 +576,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final all = await ref.read(recipeDaoProvider).watchAllRecipesGlobal().first;
     if (!context.mounted) return;
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -858,8 +859,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -869,10 +870,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(l10n.communitySaveRecipeTo(recipe.title), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -1005,8 +1003,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     bool countStarted = false;
     Timer? countTimer;
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
@@ -1094,7 +1092,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             builder: (_, scrollController) => Container(
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: SheetPresentation.surfaceRadius(ctx),
               ),
               child: Column(
                 children: [
@@ -1102,10 +1100,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 12, bottom: 8),
                     child: Center(
-                      child: Container(width: 40, height: 4, decoration: BoxDecoration(
-                        color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(2),
-                      )),
+                      child: const SheetHandle(top: 0),
                     ),
                   ),
 

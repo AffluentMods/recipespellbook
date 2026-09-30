@@ -36,6 +36,7 @@ import 'nutrition_settings_screen.dart';
 import 'quick_access_settings_screen.dart';
 import 'trash_screen.dart';
 import '../premium/family_screen.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════════════════════
 //  SETTINGS SCREEN
@@ -455,7 +456,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final service = ExportImportService(db);
     Responsive.showAdaptiveSheet(context, builder: (sheetCtx) => Material(
       color: Theme.of(sheetCtx).colorScheme.surfaceContainerLow,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius: SheetPresentation.surfaceRadius(sheetCtx),
       child: SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsImport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
@@ -1014,7 +1015,7 @@ class _TextScaleTile extends StatelessWidget {
       builder: (ctx, ss) => SafeArea(child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
           const SizedBox(height: 20),
           Text(l10n.textSize, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
@@ -1095,7 +1096,7 @@ class _ThemeSelectionTile extends ConsumerWidget {
       expand: false, initialChildSize: 0.7, maxChildSize: 0.9, minChildSize: 0.4,
       builder: (context, sc) => SafeArea(child: Column(children: [
         const SizedBox(height: 8),
-        Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+        const SheetHandle(top: 0),
         Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
         Expanded(child: GridView.builder(
           controller: sc, padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1311,7 +1312,7 @@ class _LanguageTile extends StatelessWidget {
           expand: false, initialChildSize: 0.6, maxChildSize: 0.85, minChildSize: 0.3,
           builder: (context, sc) => SafeArea(child: Column(children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+            const SheetHandle(top: 0),
             Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsLanguage, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
             Expanded(child: ListView(controller: sc, children: [
               ...supportedLanguages.map((lang) => ListTile(
@@ -1440,7 +1441,7 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
     final buttonLabel = _allChecked ? l.exportFullBackup : _noneChecked ? l10n.settingsExportNone : l10n.settingsExportPartial;
     return Material(
       color: theme.colorScheme.surfaceContainerLow,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius: SheetPresentation.surfaceRadius(context),
       child: SafeArea(child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(mainAxisSize: MainAxisSize.min, children: [

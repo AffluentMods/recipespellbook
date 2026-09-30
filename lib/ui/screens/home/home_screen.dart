@@ -23,6 +23,7 @@ import '../craving/craving_screen.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/recipe_title.dart';
 import '../../../theme/app_colors.dart';
+import '../../widgets/sheet_chrome.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -1339,7 +1340,7 @@ class _CookbookDropdown extends ConsumerWidget {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         child: SafeArea(
           child: Column(
@@ -1347,14 +1348,7 @@ class _CookbookDropdown extends ConsumerWidget {
             children: [
               // Handle
               const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

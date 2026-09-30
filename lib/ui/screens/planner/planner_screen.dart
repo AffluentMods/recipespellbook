@@ -18,6 +18,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/color_picker_dialog.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/selection_action_bar.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ============ PROVIDERS ============
 
@@ -622,8 +623,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
 
   Future<void> _bulkChangeMealType(Set<String> ids) async {
     final l10n = AppLocalizations.of(context)!;
-    final type = await showModalBottomSheet<String>(
-      context: context,
+    final type = await Responsive.showAdaptiveSheet<String>(
+      context,
+      isScrollControlled: false,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -676,7 +678,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
           children: [
             if (!Responsive.isDesktopLayout(context)) ...[
               const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+              const SheetHandle(top: 0),
             ],
             Padding(
               padding: const EdgeInsets.all(16),
@@ -735,7 +737,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             children: [
               if (!Responsive.isDesktopLayout(context)) ...[
                 const SizedBox(height: 8),
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+                const SheetHandle(top: 0),
               ],
               const SizedBox(height: 16),
               // "Share meal plan" was a "coming soon" dead-end — hidden until
@@ -2499,7 +2501,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: SafeArea(
         top: false,
@@ -2509,14 +2511,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
             children: [
               const SizedBox(height: 12),
               // Drag handle (sheet dismisses via scrim tap / swipe down).
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colors.outline,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              const SheetHandle(top: 0),
               const SizedBox(height: 8),
 
               // ── Header: whole row opens the recipe ──
@@ -2835,14 +2830,15 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
 /// Bottom-sheet meal-type chooser used by the edit sheet.
 Future<String?> _pickMealTypeSheet(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
-  return showModalBottomSheet<String>(
-    context: context,
+  return Responsive.showAdaptiveSheet<String>(
+    context,
+    isScrollControlled: false,
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 8),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(ctx).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(l10n.plannerChangeMealType, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -2862,8 +2858,8 @@ Future<String?> _pickMealTypeSheet(BuildContext context) {
 
 /// Bottom-sheet recipe picker used by "Replace meal"; returns the chosen id.
 Future<String?> _pickRecipeSheet(BuildContext context, WidgetRef ref) {
-  return showModalBottomSheet<String>(
-    context: context,
+  return Responsive.showAdaptiveSheet<String>(
+    context,
     isScrollControlled: true,
     builder: (ctx) => _RecipePickerSheet(ref: ref),
   );
@@ -2890,12 +2886,12 @@ class _RecipePickerSheetState extends State<_RecipePickerSheet> {
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: Column(
         children: [
           const SizedBox(height: 12),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: TextField(
@@ -3003,12 +2999,12 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       child: Column(
         children: [
           const SizedBox(height: 12),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          const SheetHandle(top: 0),
 
           // Header
           Padding(

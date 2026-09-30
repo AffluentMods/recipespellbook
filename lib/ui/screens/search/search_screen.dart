@@ -14,6 +14,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sub_recipe_selection_sheet.dart';
+import '../../widgets/sheet_chrome.dart';
 
 /// Search query provider
 final searchQueryProvider = StateProvider<String>((ref) => '');
@@ -338,8 +339,8 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
     }
 
     // Pick target cookbook
-    final targetId = await showModalBottomSheet<String>(
-      context: context,
+    final targetId = await Responsive.showAdaptiveSheet<String>(
+      context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -351,10 +352,7 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
+              const SheetHandle(top: 0),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
@@ -710,10 +708,7 @@ class _SearchResultCard extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -805,10 +800,7 @@ class _SearchResultCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 8),
-                  Container(width: 40, height: 4, decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  )),
+                  const SheetHandle(top: 0),
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),

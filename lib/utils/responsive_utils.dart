@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../ui/widgets/sheet_chrome.dart';
@@ -156,10 +158,14 @@ class Responsive {
       {required Widget child, double? maxWidth}) {
     final max = maxWidth ?? maxContentWidth(context);
     if (max == null) return child;
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: max),
-        child: child,
+    // WheelForwarder: when [child] is (or contains) a scrollable, a mouse
+    // wheel over the empty side margins still scrolls it — no dead zones.
+    return WheelForwarder(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: max),
+          child: _WheelTarget(child: child),
+        ),
       ),
     );
   }
@@ -250,6 +256,13 @@ class Responsive {
     // switches tabs (they must dismiss it first). Use for app-level modals like
     // the share sheet.
     bool useRootNavigator = false,
+    // Bottom-sheet-only presentation overrides (phones/tablets). The desktop
+    // dialog ignores them: it sizes with [desktopMaxWidth]/[desktopMaxHeight]
+    // and always uses the dialog theme's surface and corners.
+    BoxConstraints? constraints,
+    Color? backgroundColor,
+    ShapeBorder? shape,
+    bool? showDragHandle,
   }) {
     if (isDesktopLayout(context)) {
       final screenHeight = MediaQuery.sizeOf(context).height;
@@ -278,14 +291,84 @@ class Responsive {
       context: context,
       isScrollControlled: isScrollControlled,
       useRootNavigator: useRootNavigator,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      constraints: constraints,
+      showDragHandle: showDragHandle,
+      backgroundColor:
+          backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: shape ??
+          const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
       builder: (ctx) => SheetPresentation(
         isBottomSheet: true,
         child: Builder(builder: builder),
       ),
     );
   }
+}
+
+
+/// Makes the side margins around a width-capped column "wheel-transparent":
+/// a mouse-wheel event over the empty margin is re-dispatched at the nearest
+/// point inside the column, so a capped scrollable scrolls no matter where the
+/// pointer is. Used by [Responsive.constrainWidth]; prefer
+/// [Responsive.constrainScrollable] for new code (it keeps the scrollable
+/// itself full-width, so its scrollbar sits at the pane edge too).
+class WheelForwarder extends StatelessWidget {
+  final Widget child;
+  const WheelForwarder({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerSignal: (event) {
+        if (event is! PointerScrollEvent) return;
+        final target = _WheelTarget.find(context);
+        final box = target?.context.findRenderObject();
+        if (box is! RenderBox || !box.hasSize || !box.attached) return;
+        final rect = box.localToGlobal(Offset.zero) & box.size;
+        if (rect.contains(event.position) || rect.width < 4 || rect.height < 4) return;
+        final inside = Offset(
+          event.position.dx.clamp(rect.left + 2, rect.right - 2),
+          event.position.dy.clamp(rect.top + 2, rect.bottom - 2),
+        );
+        // Re-dispatch after the current event finishes routing.
+        scheduleMicrotask(() {
+          GestureBinding.instance.handlePointerEvent(
+            (event.original ?? event).copyWith(position: inside),
+          );
+        });
+      },
+      child: child,
+    );
+  }
+}
+
+/// Marks the capped column a [WheelForwarder] forwards into.
+class _WheelTarget extends StatefulWidget {
+  final Widget child;
+  const _WheelTarget({required this.child});
+
+  static _WheelTargetState? find(BuildContext forwarderContext) {
+    _WheelTargetState? found;
+    void visit(Element e) {
+      if (found != null) return;
+      if (e is StatefulElement && e.state is _WheelTargetState) {
+        found = e.state as _WheelTargetState;
+        return;
+      }
+      e.visitChildElements(visit);
+    }
+    (forwarderContext as Element).visitChildElements(visit);
+    return found;
+  }
+
+  @override
+  State<_WheelTarget> createState() => _WheelTargetState();
+}
+
+class _WheelTargetState extends State<_WheelTarget> {
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

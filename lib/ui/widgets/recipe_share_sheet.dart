@@ -17,6 +17,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme/app_colors.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
+import 'sheet_chrome.dart';
 
 /// Strip emoji characters that even Unicode fonts struggle with in PDFs.
 String _stripEmojiForPdf(String text) {
@@ -217,9 +218,7 @@ class _RecipeShareSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             const SizedBox(height: 24),
             Icon(Icons.ios_share, size: 48, color: theme.colorScheme.primary),
             const SizedBox(height: 16),

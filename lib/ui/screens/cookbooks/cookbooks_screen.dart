@@ -24,6 +24,7 @@ import '../../widgets/recipe_image.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/platform_utils.dart';
+import '../../widgets/sheet_chrome.dart';
 
 /// One person with access to a shared cookbook (owner or shared-with member).
 class _CookbookMember {
@@ -445,10 +446,7 @@ class _CookbookGrid extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(l10n.shareNamedCookbook(cookbook.name),
@@ -549,10 +547,7 @@ class _CookbookGrid extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
+              const SheetHandle(top: 0),
               const SizedBox(height: 20),
               const Icon(Icons.check_circle, size: 48, color: Colors.green),
               const SizedBox(height: 12),
@@ -618,10 +613,7 @@ class _CookbookGrid extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
+              const SheetHandle(top: 0),
               const SizedBox(height: 24),
               const Icon(Icons.star, size: 48, color: Colors.amber),
               const SizedBox(height: 16),
@@ -872,8 +864,9 @@ class _CookbookCard extends StatelessWidget {
   });
 
   void _showMembers(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
+      isScrollControlled: false,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
         child: Column(
@@ -1115,13 +1108,7 @@ class _MergeCookbooksSheetState extends State<_MergeCookbooksSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 8),
-          Container(
-            width: 40, height: 4,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
+          const SheetHandle(top: 0),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: Row(

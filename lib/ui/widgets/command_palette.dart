@@ -363,8 +363,9 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
       recentRecipesProvider,
     ); // repaint when Recent loads on empty query
     final results = _results(l10n);
-    if (_selected >= results.length)
+    if (_selected >= results.length) {
       _selected = results.isEmpty ? 0 : results.length - 1;
+    }
     final curved = CurvedAnimation(parent: _anim, curve: Motion.emphasized);
 
     return Positioned.fill(
@@ -503,8 +504,9 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
                                           item: item,
                                           selected: i == _selected,
                                           onHover: () {
-                                            if (_selected != i)
+                                            if (_selected != i) {
                                               setState(() => _selected = i);
+                                            }
                                           },
                                           onTap: item.run,
                                         );

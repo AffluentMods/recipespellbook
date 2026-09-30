@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../providers/subscription_provider.dart';
 import '../services/revenuecat_service.dart';
 import '../utils/responsive_utils.dart';
+import '../ui/widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════════════════════════
 //  FEATURE DEFINITIONS
@@ -222,14 +223,7 @@ bool checkFeatureAccess(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SheetHandle(top: 0),
             const SizedBox(height: 24),
             Icon(feature.icon, size: 48, color: Colors.amber),
             const SizedBox(height: 16),
@@ -306,14 +300,7 @@ bool checkStorageLimit(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SheetHandle(top: 0),
             const SizedBox(height: 24),
             Icon(Icons.sd_storage, size: 48, color: theme.colorScheme.error),
             const SizedBox(height: 16),

@@ -392,8 +392,9 @@ ButtonStyle _menuItemStyle(AppColors c) => ButtonStyle(
   foregroundColor: WidgetStatePropertyAll(c.textPrimary),
   overlayColor: WidgetStateProperty.resolveWith((s) {
     if (s.contains(WidgetState.pressed)) return c.pressedFill;
-    if (s.contains(WidgetState.hovered) || s.contains(WidgetState.focused))
+    if (s.contains(WidgetState.hovered) || s.contains(WidgetState.focused)) {
       return c.hoverFill;
+    }
     return null;
   }),
 );

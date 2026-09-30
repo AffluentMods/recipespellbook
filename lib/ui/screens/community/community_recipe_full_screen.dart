@@ -15,6 +15,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════
 //  FULL READ-ONLY RECIPE PREVIEW
@@ -325,8 +326,9 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
+      isScrollControlled: false,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) {
@@ -335,10 +337,7 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
+            const SheetHandle(top: 0),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(l10n.communitySaveRecipeTo(recipe.title), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),

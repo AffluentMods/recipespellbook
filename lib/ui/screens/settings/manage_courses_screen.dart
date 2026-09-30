@@ -69,8 +69,8 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 80),
+          : Responsive.constrainScrollable(maxWidth: Responsive.settingsListMaxWidth, minHorizontal: 0, builder: (context, pad) => ListView.builder(
+        padding: pad + const EdgeInsets.only(bottom: 80),
         itemCount: _courses.length,
         itemBuilder: (_, i) {
           final c = _courses[i];

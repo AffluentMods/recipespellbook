@@ -66,8 +66,8 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 80),
+          : Responsive.constrainScrollable(maxWidth: Responsive.settingsListMaxWidth, minHorizontal: 0, builder: (context, pad) => ListView.builder(
+        padding: pad + const EdgeInsets.only(bottom: 80),
         itemCount: _categories.length,
         itemBuilder: (_, i) {
           final c = _categories[i];

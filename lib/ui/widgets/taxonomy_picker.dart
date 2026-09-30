@@ -8,6 +8,7 @@ import '../../providers/cookbook_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
+import 'sheet_chrome.dart';
 
 /// A unified item that can be either a built-in or custom course/category
 class TaxonomyItem {
@@ -395,8 +396,7 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(margin: const EdgeInsets.only(top: 12), width: 40, height: 4,
-                decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+            const SheetHandle(top: 12),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(children: [
@@ -588,8 +588,7 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(margin: const EdgeInsets.only(top: 12), width: 40, height: 4,
-                decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+            const SheetHandle(top: 12),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(children: [

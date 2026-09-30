@@ -71,8 +71,9 @@ class _CheatSheetOverlayState extends ConsumerState<_CheatSheetOverlay>
   }
 
   void _close() {
-    if (mounted)
+    if (mounted) {
       ref.read(shortcutsCheatSheetOpenProvider.notifier).state = false;
+    }
   }
 
   KeyEventResult _onKey(FocusNode node, KeyEvent e) {
