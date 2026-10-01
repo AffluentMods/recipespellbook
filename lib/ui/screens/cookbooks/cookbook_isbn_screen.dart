@@ -15,6 +15,7 @@ import '../../../utils/platform_utils.dart';
 import '../../shell/app_shell.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/new_recipe_dialog.dart';
+import '../book_scan/book_scan_entry.dart';
 
 enum _Stage { entry, lookingUp, details, added }
 
@@ -418,12 +419,19 @@ class _CookbookIsbnScreenState extends ConsumerState<CookbookIsbnScreen> {
         ),
         const SizedBox(height: 28),
         FilledButton.icon(
-          onPressed: () {
+          onPressed: () async {
             ref.read(selectedCookbookIdProvider.notifier).state = id;
-            showImportDialog(context, id);
+            // Phones scan the book's pages; elsewhere fall back to the
+            // general import sheet (link, text, file).
+            if (!supportsBookScan) {
+              showImportDialog(context, id);
+              return;
+            }
+            final added = await startBookScan(context, cookbookId: id);
+            if (added > 0 && mounted) _openCookbook(id);
           },
-          icon: const Icon(Icons.add_a_photo_outlined),
-          label: Text(l10n.isbnAddRecipes),
+          icon: Icon(supportsBookScan ? Icons.document_scanner_outlined : Icons.add_rounded),
+          label: Text(supportsBookScan ? l10n.bookScanFromBook : l10n.isbnAddRecipes),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(

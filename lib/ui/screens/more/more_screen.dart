@@ -22,6 +22,7 @@ import '../../widgets/app_controls.dart';
 import '../../widgets/join_with_link_dialog.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/sheet_chrome.dart';
+import '../book_scan/book_scan_entry.dart';
 import '../import/import_guides_screen.dart';
 
 /// The phone / tablet "More" tab: who you are (account, plan, community
@@ -98,6 +99,13 @@ class MoreScreen extends ConsumerWidget {
                   chevron: false,
                   onTap: () => showImportDialog(context, _cookbookId(ref)),
                 ),
+                if (supportsBookScan)
+                  TouchRow(
+                    icon: Icons.document_scanner_outlined,
+                    title: l10n.bookScanAction,
+                    subtitle: l10n.bookScanMoreSubtitle,
+                    onTap: () => startBookScan(context, cookbookId: _cookbookId(ref)),
+                  ),
                 TouchRow(
                   icon: Icons.qr_code_scanner_rounded,
                   title: l10n.isbnAddFromBarcode,

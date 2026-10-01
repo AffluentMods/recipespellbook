@@ -5,6 +5,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../services/onboarding_service.dart';
 import '../../widgets/new_recipe_dialog.dart';
+import '../book_scan/book_scan_entry.dart';
 import '../onboarding/book_intro_screen.dart';
 import 'home_desktop.dart';
 import 'home_mobile.dart';
@@ -146,6 +147,17 @@ class _EmptyCookbookState extends StatelessWidget {
                 label: Text(l10n.importRecipe),
                 style: OutlinedButton.styleFrom(minimumSize: const Size(220, 48)),
               ),
+              // A printed cookbook added by its barcode starts out empty:
+              // offer to photograph its pages straight away.
+              if (supportsBookScan && canAddRecipesTo(cookbookId)) ...[
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () => startBookScan(context, cookbookId: cookbookId),
+                  icon: const Icon(Icons.document_scanner_outlined),
+                  label: Text(l10n.bookScanFromBook),
+                  style: OutlinedButton.styleFrom(minimumSize: const Size(220, 48)),
+                ),
+              ],
             ],
           ),
         ),
