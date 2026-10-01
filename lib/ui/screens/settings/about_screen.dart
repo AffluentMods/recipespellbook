@@ -188,7 +188,7 @@ class AboutScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '© ${DateTime.now().year} Affluent Labs',
+              '© ${DateTime.now().year} Affluent Labs LLC. All rights reserved.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.outline.withValues(alpha: 0.6),
                 fontSize: 11,
