@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
+import 'web_page_decoder.dart';
 import '../models/imported_recipe.dart';
 
 /// Consolidated recipe import engine.
@@ -40,14 +41,29 @@ class RecipeImportEngine {
   // ========== PLATFORM DETECTION ==========
 
   static _Platform _detectPlatform(String url) {
-    final lower = url.toLowerCase();
-    if (lower.contains('instagram.com') || lower.contains('instagr.am')) return _Platform.instagram;
-    if (lower.contains('tiktok.com') || lower.contains('vm.tiktok.com')) return _Platform.tiktok;
-    if (lower.contains('pinterest.com') || lower.contains('pin.it')) return _Platform.pinterest;
-    if (lower.contains('youtube.com') || lower.contains('youtu.be')) return _Platform.youtube;
-    if (lower.contains('squarespace.com') || lower.contains('.squarespace.')) return _Platform.squarespace;
+    final host = _hostOf(url);
+    if (_isOnSite(host, 'instagram.com') || _isOnSite(host, 'instagr.am')) return _Platform.instagram;
+    if (_isOnSite(host, 'tiktok.com')) return _Platform.tiktok;
+    if (_isPinterestHost(host)) return _Platform.pinterest;
+    if (_isOnSite(host, 'youtube.com') || _isOnSite(host, 'youtu.be')) return _Platform.youtube;
+    if (_isOnSite(host, 'squarespace.com') || host.contains('.squarespace.')) return _Platform.squarespace;
     return _Platform.generic;
   }
+
+  /// The host of [url] in lower case, or '' when it has none. Platforms are
+  /// told apart by host, so a blog whose address merely mentions Instagram or
+  /// ends in "pin.it" is not mistaken for one.
+  static String _hostOf(String url) =>
+      Uri.tryParse(url.trim())?.host.toLowerCase() ?? '';
+
+  static bool _isOnSite(String host, String site) =>
+      host == site || host.endsWith('.$site');
+
+  /// Pinterest runs one site per country (pinterest.co.uk, pinterest.de,
+  /// br.pinterest.com) next to pinterest.com and its pin.it short links.
+  static bool _isPinterestHost(String host) =>
+      host == 'pin.it' ||
+      RegExp(r'(?:^|\.)pinterest\.[a-z]{2,3}(?:\.[a-z]{2})?$').hasMatch(host);
 
   /// Normalize URL for better scraping (strip tracking, fix mobile URLs, etc.)
   static String _normalizeUrl(String url) {
@@ -59,7 +75,7 @@ class RecipeImportEngine {
     }
 
     // Instagram: convert /reel/ and /p/ share URLs to clean form
-    if (normalized.contains('instagram.com')) {
+    if (_isOnSite(_hostOf(normalized), 'instagram.com')) {
       // Remove query params (tracking) but keep the path
       final uri = Uri.tryParse(normalized);
       if (uri != null) {
@@ -90,41 +106,22 @@ class RecipeImportEngine {
     return normalized;
   }
 
-  /// Fetch a URL with browser-like headers. If the response is rejected
-  /// (4xx/5xx — often WAF bot detection like 403, 451, 455, 503), retry once
-  /// with the mobile UA which more sites accept by default.
-  /// Decode an HTTP body as text, defaulting to UTF-8.
+  /// Decode an HTTP body as text.
   ///
   /// `http`'s `response.body` getter decodes the bytes as Latin-1 (ISO-8859-1)
-  /// whenever the server omits `charset` from `Content-Type` — which most
-  /// recipe sites do — turning UTF-8 punctuation/accents into mojibake
-  /// (e.g. an em dash or "é" turning into "Ã©"). We decode as UTF-8 instead, and only fall
-  /// back to Latin-1 when the server explicitly declared a different charset or
-  /// the bytes aren't valid UTF-8.
-  static String _decodeBody(http.Response resp) {
-    final bytes = resp.bodyBytes;
-    final ct = (resp.headers['content-type'] ?? '').toLowerCase();
-    final charset = RegExp(r'charset=([^\s;]+)').firstMatch(ct)?.group(1);
-    // Server declared a specific non-UTF-8 charset — honor http's decoding, but
-    // never let it throw on a malformed/compressed body.
-    if (charset != null && charset != 'utf-8' && charset != 'utf8') {
-      try {
-        return resp.body;
-      } catch (_) {
-        return latin1.decode(bytes, allowInvalid: true);
-      }
-    }
-    try {
-      return utf8.decode(bytes);
-    } catch (_) {
-      // Not clean UTF-8 (latin1 page, or a body we couldn't decompress). Latin-1
-      // maps every byte and never throws — matches the old default and keeps a
-      // bad body from crashing the whole import. `resp.body` is NOT safe here:
-      // with charset=utf-8 it would re-run utf8.decode and throw again.
-      return latin1.decode(bytes, allowInvalid: true);
-    }
-  }
+  /// whenever the server omits `charset` from `Content-Type`, which most
+  /// recipe sites do, turning UTF-8 accents into mojibake ("é" into "Ã©").
+  /// [WebPageDecoder] reads UTF-8 first and then the charset the page
+  /// declares, and never throws on a malformed or compressed body.
+  static String _decodeBody(http.Response resp) => _decodePage(resp).text;
 
+  static DecodedPage _decodePage(http.Response resp) => WebPageDecoder.decode(
+      resp.bodyBytes,
+      contentType: resp.headers['content-type']);
+
+  /// Fetch a URL with browser-like headers. If the response is rejected
+  /// (4xx/5xx, often WAF bot detection like 403, 451, 455, 503), retry once
+  /// with the mobile UA which more sites accept by default.
   static Future<http.Response> _fetchWithFallback(String url, _Platform platform) async {
     final primaryHeaders = _headersForPlatform(platform);
     var resp = await http
@@ -287,12 +284,9 @@ class RecipeImportEngine {
 
   /// Whether a URL is a known short-link that needs redirect resolution.
   static bool _isShortUrl(String url) {
-    final lower = url.toLowerCase();
-    return lower.contains('vm.tiktok.com') ||
-        lower.contains('vt.tiktok.com') ||
-        lower.contains('pin.it') ||
-        lower.contains('bit.ly') ||
-        lower.contains('tinyurl.com');
+    final host = _hostOf(url);
+    return const ['vm.tiktok.com', 'vt.tiktok.com', 'pin.it', 'bit.ly', 'tinyurl.com']
+        .any((site) => _isOnSite(host, site));
   }
 
   /// Resolve a short URL to its final destination by following redirects.
@@ -374,16 +368,20 @@ class RecipeImportEngine {
   /// The `title` field contains the full video caption (which has the recipe).
   static ImportedRecipe? _parseTiktokOEmbed(
       Map<String, dynamic> json, String url, String? thumbnail) {
-    final caption = json['title']?.toString();
-    if (caption == null || caption.length < 30) return null;
+    final rawCaption = json['title']?.toString();
+    if (rawCaption == null || rawCaption.length < 30) return null;
+    // Hashtags and "follow for more" lines would otherwise end up as steps.
+    final caption = _withoutCaptionNoise(rawCaption);
+    if (caption.length < 30) return null;
 
     final authorName = json['author_name']?.toString() ?? '';
 
     // Try structured text parsing on the caption
-    final parsed = _parseStructuredText(caption);
+    final parsed = _parseStructuredText(_withMethodHeading(caption));
     if (parsed.ingredients.isNotEmpty || parsed.instructions.isNotEmpty) {
       // Clean up the title (caption's first line or author-based)
-      final cleanTitle = _extractSocialTitle(caption)
+      final cleanTitle = _captionTitle(caption)
+          ?? _extractSocialTitle(caption)
           ?? _cleanSocialTitle(parsed.title.isNotEmpty ? parsed.title : 'TikTok Recipe');
       parsed.title = cleanTitle;
       parsed.imageUrl = thumbnail;
@@ -416,8 +414,8 @@ class RecipeImportEngine {
   /// May contain a description with recipe text, plus a link to the original source.
   static ImportedRecipe? _parsePinterestOEmbed(
       Map<String, dynamic> json, String url, String? thumbnail) {
-    final title = json['title']?.toString() ?? 'Pinterest Recipe';
-    final description = json['description']?.toString();
+    final title = _pinTitle(json['title']?.toString() ?? 'Pinterest Recipe');
+    final description = _pinDescription(json['description']?.toString());
 
     // Pinterest oEmbed sometimes includes the original source URL in the description
     // or we can try to extract it from the pin page later
@@ -426,26 +424,35 @@ class RecipeImportEngine {
       final urlMatch = RegExp(r'https?://[^\s<>"{}|\\^`\[\]]+', caseSensitive: false)
           .firstMatch(description);
       if (urlMatch != null) {
-        final found = urlMatch.group(0)!;
+        // A link at the end of a sentence drags its full stop along.
+        final link = urlMatch.group(0)!;
+        var end = link.length;
+        while (end > 0 && '.,;:!?)'.contains(link[end - 1])) {
+          end--;
+        }
+        final found = link.substring(0, end);
         // Only follow if it's not a Pinterest URL (avoid loops)
-        if (!found.contains('pinterest.com') && !found.contains('pin.it')) {
+        if (!_isPinterestHost(_hostOf(found))) {
           originalSourceUrl = found;
         }
       }
     }
 
+    // Whatever the description holds, the link to the original recipe goes
+    // back with it: the caller tries that page first, and it is the better
+    // source whenever it can be read.
     if (description != null && description.length > 50) {
       final parsed = _parseStructuredText(description);
       if (parsed.ingredients.isNotEmpty || parsed.instructions.isNotEmpty) {
         parsed.title = _cleanSocialTitle(title);
         parsed.imageUrl = thumbnail;
-        parsed.sourceUrl = url;
+        parsed.sourceUrl = originalSourceUrl ?? url;
         return parsed;
       }
 
       final result = _parseSocialCaption(description, title, thumbnail);
       if (result != null) {
-        result.sourceUrl = url;
+        result.sourceUrl = originalSourceUrl ?? url;
         return result;
       }
     }
@@ -465,6 +472,13 @@ class RecipeImportEngine {
   /// Try to extract the original recipe source URL from a Pinterest pin page.
   /// Pinterest pins often link to the original recipe blog/website.
   static String? _extractPinterestSourceUrl(Document document) {
+    // The pin page names the site it was saved from in its meta tags. Those
+    // are there even when the page body is only a script.
+    for (final key in ['og:see_also', 'pinterestapp:source']) {
+      final source = _getMetaContent(document, key);
+      if (source != null && _isFollowableSource(source)) return source;
+    }
+
     // Look for the "Visit" or source link
     for (final selector in [
       'a[data-test-id="pin-action-link"]',
@@ -473,17 +487,33 @@ class RecipeImportEngine {
     ]) {
       final el = document.querySelector(selector);
       final href = el?.attributes['href'];
-      if (href != null && !href.contains('pinterest.com')) {
-        // Pinterest often wraps URLs in a redirect: /redirect/?url=...
-        if (href.contains('/redirect/') && href.contains('url=')) {
-          final uri = Uri.tryParse(href);
-          final redirectUrl = uri?.queryParameters['url'];
-          if (redirectUrl != null) return Uri.decodeComponent(redirectUrl);
-        }
-        return href;
+      if (href == null) continue;
+      // Pinterest often wraps URLs in a redirect: /redirect/?url=...
+      if (href.contains('/redirect/') && href.contains('url=')) {
+        final redirectUrl = Uri.tryParse(href)?.queryParameters['url'];
+        if (redirectUrl != null && _isFollowableSource(redirectUrl)) return redirectUrl;
       }
+      if (_isFollowableSource(href)) return href;
     }
     return null;
+  }
+
+  /// A public web address outside Pinterest. A link back into Pinterest
+  /// would only loop, and a pin must not be able to send the app to the
+  /// device's own network: bare names, IP addresses and local names are not
+  /// followed.
+  static bool _isFollowableSource(String url) {
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null) return false;
+    if (uri.scheme != 'http' && uri.scheme != 'https') return false;
+    final host = uri.host.toLowerCase();
+    // A public name ends in a top-level domain, and those start with a
+    // letter. An IP address does not, however it is written.
+    if (!RegExp(r'\.[a-z][a-z0-9-]*$').hasMatch(host)) return false;
+    if (host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.localhost')) {
+      return false;
+    }
+    return !_isPinterestHost(host);
   }
 
   // ========== PUBLIC API ==========
@@ -499,116 +529,280 @@ class RecipeImportEngine {
   }
 
   static Future<ImportedRecipe> _parseFromUrlInternal(String url, {bool isRecursiveCall = false}) async {
+    final (ImportedRecipe?, String?) result;
     try {
-      var normalized = _normalizeUrl(url);
-      var platform = _detectPlatform(normalized);
-
-      // 1. Resolve short URLs to their final destination
-      if (_isShortUrl(normalized)) {
-        final resolved = await _resolveShortUrl(normalized);
-        if (resolved != null && resolved != normalized) {
-          normalized = _normalizeUrl(resolved);
-          platform = _detectPlatform(normalized);
-        }
-      }
-
-      // 2. Try oEmbed for social platforms (works even when HTML scraping fails)
-      if (platform == _Platform.tiktok || platform == _Platform.pinterest) {
-        final oembedRecipe = await _tryOEmbed(normalized, platform);
-        if (oembedRecipe != null) {
-          // Pinterest: if we found an original source URL, try scraping that for a real recipe
-          if (platform == _Platform.pinterest && !isRecursiveCall) {
-            final sourceUrl = oembedRecipe.sourceUrl;
-            if (sourceUrl != null &&
-                !sourceUrl.contains('pinterest.com') &&
-                !sourceUrl.contains('pin.it')) {
-              try {
-                final sourceRecipe = await parseFromUrl(sourceUrl, isRecursiveCall: true);
-                if (sourceRecipe.ingredients.isNotEmpty) {
-                  // Use the full recipe from the source, but keep Pinterest image as fallback
-                  sourceRecipe.imageUrl ??= oembedRecipe.imageUrl;
-                  sourceRecipe.sourceUrl = normalized; // Keep Pinterest as the share source
-                  _detectCourseAndCategory(sourceRecipe);
-                  return sourceRecipe;
-                }
-              } catch (_) {
-                // Source scrape failed — use oEmbed data
-              }
-            }
-          }
-
-          // For TikTok or Pinterest without a followable source: use oEmbed data directly
-          if (oembedRecipe.ingredients.isNotEmpty || oembedRecipe.instructions.isNotEmpty) {
-            oembedRecipe.sourceUrl = normalized;
-            _detectCourseAndCategory(oembedRecipe);
-            return oembedRecipe;
-          }
-          // oEmbed returned a shell (title + image only) — fall through to try HTML scraping,
-          // but remember the image/title for later
-        }
-      }
-
-      // 3. Standard HTML scraping pipeline.
-      // Try the platform's preferred headers first; if the upstream rejects us
-      // (often a WAF returning 4xx/5xx), retry with mobile UA before giving up.
-      final response = await _fetchWithFallback(normalized, platform);
-
-      if (response.statusCode != 200) {
-        // Give the user a clue what went wrong rather than a raw status code
-        final code = response.statusCode;
-        if (code == 403 || code == 401 || code == 451 || code == 455) {
-          throw Exception('The site blocked our request. Try copying the recipe text and using "Paste" instead.');
-        } else if (code == 404 || code == 410) {
-          throw Exception('Page not found — check the URL.');
-        } else if (code == 429) {
-          throw Exception('The site is rate-limiting us. Try again in a minute.');
-        } else if (code >= 500 && code < 600) {
-          throw Exception('The site is having issues right now (HTTP $code). Try again later.');
-        }
-        throw Exception('Failed to fetch URL (HTTP $code)');
-      }
-
-      final document = html_parser.parse(_decodeBody(response));
-
-      // Standard extraction pipeline
-      var recipe = _tryJsonLd(document);
-      recipe ??= _tryMicrodata(document);
-      recipe ??= _tryCommonSelectors(document);
-
-      // Platform-specific fallbacks (social media extracts from meta tags)
-      if (recipe == null || (recipe.ingredients.isEmpty && recipe.instructions.isEmpty)) {
-        recipe = _tryPlatformSpecific(document, platform) ?? recipe;
-      }
-
-      // Pinterest HTML fallback: try to find and follow the original recipe URL
-      if (platform == _Platform.pinterest && !isRecursiveCall &&
-          (recipe == null || recipe.ingredients.isEmpty)) {
-        final sourceUrl = _extractPinterestSourceUrl(document);
-        if (sourceUrl != null) {
-          try {
-            final sourceRecipe = await parseFromUrl(sourceUrl, isRecursiveCall: true);
-            if (sourceRecipe.ingredients.isNotEmpty) {
-              sourceRecipe.imageUrl ??= _findBestImage(document);
-              sourceRecipe.sourceUrl = normalized;
-              _detectCourseAndCategory(sourceRecipe);
-              return sourceRecipe;
-            }
-          } catch (_) {}
-        }
-      }
-
-      recipe ??= _tryGenericHtml(document);
-      recipe ??= ImportedRecipe(
-          title: 'Imported Recipe', ingredients: [], instructions: []);
-
-      recipe.sourceUrl = normalized;
-      recipe.imageUrl ??= _findBestImage(document);
-      _detectCourseAndCategory(recipe);
-
-      return recipe;
+      result = await _importFromUrl(url, isRecursiveCall);
     } catch (e) {
       throw Exception('Failed to parse recipe: $e');
     }
+    // The engine's own failures are already one sentence for the person
+    // importing, so they go out as they are instead of being wrapped like
+    // the unexpected errors above.
+    final (recipe, failure) = result;
+    if (recipe == null) throw Exception(failure ?? _noRecipeFound);
+    return recipe;
+  }
+
+  static const _noRecipeFound = 'No recipe found on that page.';
+
+  /// Does the import. Returns the recipe, or the sentence that tells the
+  /// person why there is none.
+  static Future<(ImportedRecipe?, String?)> _importFromUrl(String url, bool isRecursiveCall) async {
+    var normalized = _normalizeUrl(url);
+    var platform = _detectPlatform(normalized);
+
+    // 1. Resolve short URLs to their final destination
+    if (_isShortUrl(normalized)) {
+      final resolved = await _resolveShortUrl(normalized);
+      if (resolved != null && resolved != normalized) {
+        normalized = _normalizeUrl(resolved);
+        platform = _detectPlatform(normalized);
+      }
+    }
+
+    // 2. Try oEmbed for social platforms (works even when HTML scraping fails)
+    if (platform == _Platform.tiktok || platform == _Platform.pinterest) {
+      final oembedRecipe = await _tryOEmbed(normalized, platform);
+      if (oembedRecipe != null) {
+        // Pinterest: if we found an original source URL, try scraping that for a real recipe
+        if (platform == _Platform.pinterest && !isRecursiveCall) {
+          final sourceUrl = oembedRecipe.sourceUrl;
+          if (sourceUrl != null && _isFollowableSource(sourceUrl)) {
+            try {
+              final sourceRecipe = await parseFromUrl(sourceUrl, isRecursiveCall: true);
+              if (sourceRecipe.ingredients.isNotEmpty) {
+                // Use the full recipe from the source, but keep Pinterest image as fallback
+                sourceRecipe.imageUrl ??= oembedRecipe.imageUrl;
+                sourceRecipe.sourceUrl = normalized; // Keep Pinterest as the share source
+                return (sourceRecipe, null);
+              }
+            } catch (_) {
+              // The source could not be read. Use the oEmbed data.
+            }
+          }
+        }
+
+        // For TikTok or Pinterest without a followable source: use oEmbed data directly
+        if (oembedRecipe.ingredients.isNotEmpty || oembedRecipe.instructions.isNotEmpty) {
+          oembedRecipe.sourceUrl = normalized;
+          _detectCourseAndCategory(oembedRecipe);
+          return (oembedRecipe, null);
+        }
+        // oEmbed returned a shell (title + image only). Fall through to HTML scraping.
+      }
+    }
+
+    // 3. Standard HTML scraping pipeline.
+    // Try the platform's preferred headers first; if the upstream rejects us
+    // (often a WAF returning 4xx/5xx), retry with mobile UA before giving up.
+    final response = await _fetchWithFallback(normalized, platform);
+    if (response.statusCode != 200) return (null, _statusFailure(response.statusCode));
+
+    final notAPage = _notAWebPage(response);
+    if (notAPage != null) return (null, notAPage);
+
+    final page = _decodePage(response);
+    // Set for a page in a charset the app has no table for. Its ASCII can
+    // still be read, and recipe data is often nothing else (other letters
+    // written as \u escapes), so such a page is only given up on when the
+    // recipe it yields holds text that could not be read, or it yields none.
+    final unreadable = page.unreadableCharset == null
+        ? null
+        : 'That page uses a text encoding (${page.unreadableCharset}) this app cannot read.';
+
+    if (_isPlainText(response, page.text)) {
+      final recipe = _recipeFromPlainText(page.text);
+      if (recipe == null) return (null, unreadable ?? _noRecipeFound);
+      if (unreadable != null && _hasUnreadableText(recipe)) return (null, unreadable);
+      recipe.sourceUrl = normalized;
+      recipe.imageUrl = _absoluteUrl(recipe.imageUrl, normalized);
+      // A course the data names stands. The guess only fills in for none.
+      final ownCourse = recipe.suggestedCourse;
+      _detectCourseAndCategory(recipe);
+      recipe.suggestedCourse = ownCourse ?? recipe.suggestedCourse;
+      return (recipe, null);
+    }
+
+    final document = html_parser.parse(page.text);
+
+    // Standard extraction pipeline
+    final marked = _tryPageMarkup(document);
+    // The course the site itself files the recipe under, when it says.
+    final siteCourse = marked?.suggestedCourse;
+    var recipe = marked;
+
+    // Platform-specific fallbacks (social media extracts from meta tags)
+    if (!_hasContent(recipe)) {
+      recipe = _tryPlatformSpecific(document, platform) ?? recipe;
+    }
+
+    // Pinterest HTML fallback: try to find and follow the original recipe URL
+    if (platform == _Platform.pinterest && !isRecursiveCall &&
+        (recipe == null || recipe.ingredients.isEmpty)) {
+      final sourceUrl = _extractPinterestSourceUrl(document);
+      if (sourceUrl != null) {
+        try {
+          final sourceRecipe = await parseFromUrl(sourceUrl, isRecursiveCall: true);
+          if (sourceRecipe.ingredients.isNotEmpty) {
+            sourceRecipe.imageUrl ??= _absoluteUrl(_findBestImage(document), normalized);
+            sourceRecipe.sourceUrl = normalized;
+            return (sourceRecipe, null);
+          }
+        } catch (_) {}
+      }
+    }
+
+    // An ordinary site with no recipe markup, or with only half of it: read
+    // the post itself. Not for the social platforms, whose page body is
+    // nothing but scripts.
+    final ordinarySite = platform == _Platform.generic || platform == _Platform.squarespace;
+    if (ordinarySite && !_isComplete(recipe)) {
+      recipe = _fillMissing(recipe, _tryGenericHtml(document));
+    }
+
+    if (recipe == null || !_hasContent(recipe)) {
+      return (null, unreadable ?? _noRecipeFailure(document, platform));
+    }
+    if (unreadable != null && _hasUnreadableText(recipe)) return (null, unreadable);
+
+    recipe.sourceUrl = normalized;
+    recipe.imageUrl = _absoluteUrl(recipe.imageUrl, normalized) ??
+        _absoluteUrl(_findBestImage(document), normalized);
+    _detectCourseAndCategory(recipe);
+    if (siteCourse != null && identical(recipe, marked)) recipe.suggestedCourse = siteCourse;
+
+    return (recipe, null);
+  }
+
+  /// Give the user a clue what went wrong rather than a raw status code.
+  static String _statusFailure(int code) {
+    if (code == 403 || code == 401 || code == 451 || code == 455) {
+      return 'The site blocked our request. Try copying the recipe text and using "Paste" instead.';
+    } else if (code == 404 || code == 410) {
+      return 'Page not found. Check the URL.';
+    } else if (code == 429) {
+      return 'The site is rate-limiting us. Try again in a minute.';
+    } else if (code >= 500 && code < 600) {
+      return 'The site is having issues right now (HTTP $code). Try again later.';
+    }
+    return 'Failed to fetch URL (HTTP $code)';
+  }
+
+  /// Why a response cannot be a recipe page (it is a PDF, a photo, an
+  /// archive, or far too large), or null when it is worth reading.
+  ///
+  /// Decided by what the bytes are, not by a list of allowed content types:
+  /// plenty of recipe pages are served with a wrong one.
+  static String? _notAWebPage(http.Response response) {
+    final bytes = response.bodyBytes;
+    final type = (response.headers['content-type'] ?? '').toLowerCase();
+    bool startsWith(List<int> magic) {
+      if (bytes.length < magic.length) return false;
+      for (var i = 0; i < magic.length; i++) {
+        if (bytes[i] != magic[i]) return false;
+      }
+      return true;
+    }
+
+    String? kind;
+    if (type.startsWith('application/pdf') || startsWith(const [0x25, 0x50, 0x44, 0x46, 0x2D])) {
+      kind = 'a PDF';
+    } else if (type.startsWith('image/')) {
+      kind = 'an image';
+    } else if (type.startsWith('video/')) {
+      kind = 'a video';
+    } else if (type.startsWith('audio/')) {
+      kind = 'an audio file';
+    } else if (type.startsWith('application/zip') || startsWith(const [0x50, 0x4B, 0x03, 0x04])) {
+      kind = 'a ZIP file';
+    } else if (bytes.take(1024).contains(0)) {
+      // Text never holds a zero byte. Photos, videos and documents do.
+      kind = 'a file';
+    }
+    if (kind != null) return 'No recipe found because that link is $kind, not a web page.';
+
+    if (bytes.length > 8 * 1024 * 1024) {
+      return 'No recipe found because that page is too large to read.';
+    }
+    return null;
+  }
+
+  /// What the decoder leaves where a character was in a charset it has no
+  /// table for.
+  static const _unreadableMark = '\uFFFD';
+
+  /// Whether [recipe] holds text the decoder could not read.
+  static bool _hasUnreadableText(ImportedRecipe recipe) => [
+        recipe.title,
+        recipe.description,
+        recipe.notes,
+        recipe.servings,
+        recipe.cuisine,
+        ...recipe.ingredients,
+        ...recipe.instructions,
+        ...?recipe.tags,
+      ].any((text) => text != null && text.contains(_unreadableMark));
+
+  /// What to tell the person when a page was read and held no recipe.
+  static String _noRecipeFailure(Document document, _Platform platform) {
+    if (_isLoginWall(document)) {
+      return 'That page needs a login, so we could not read the recipe.';
+    }
+    if (platform == _Platform.youtube) {
+      return "No recipe found in that video's description.";
+    }
+    return _noRecipeFound;
+  }
+
+  /// A login or sign-up form standing where the content should be. Instagram
+  /// and Facebook answer visitors without a session this way.
+  static bool _isLoginWall(Document document) {
+    final title = (document.querySelector('title')?.text ?? '').trim().toLowerCase();
+    final ogTitle = (_getMetaContent(document, 'og:title') ?? title).trim().toLowerCase();
+    if (title == 'instagram' && ogTitle == 'instagram') return true;
+    final description = _getMetaContent(document, 'og:description') ??
+        _getMetaContent(document, 'description') ??
+        '';
+    if (description.toLowerCase().startsWith('create an account or log in')) return true;
+    return RegExp(r'^(?:log ?in(?:to)?|sign ?in|sign ?up)\b').hasMatch(title);
+  }
+
+  /// A recipe kept as a text or Markdown file (a raw file on GitHub, a .txt
+  /// on someone's site) has no tags to read. Its lines are the recipe. The
+  /// same goes for a recipe an address answers as JSON.
+  static bool _isPlainText(http.Response response, String body) {
+    if (_looksLikeJson(body)) return true;
+    if (!RegExp(r'<[a-zA-Z!/?]').hasMatch(body)) return true;
+    final type = (response.headers['content-type'] ?? '').toLowerCase();
+    if (!type.startsWith('text/plain') && !type.contains('markdown')) return false;
+    // Some servers send real pages as text/plain. Those are still pages.
+    final head = body.length > 2000 ? body.substring(0, 2000) : body;
+    return !RegExp(r'<(?:!doctype\s+html|html|head|body)\b', caseSensitive: false).hasMatch(head);
+  }
+
+  static ImportedRecipe? _recipeFromPlainText(String text) {
+    if (_looksLikeJson(text)) {
+      // A recipe in JSON that names its ingredients or steps needs no
+      // further proof.
+      final json = _decodeJson(text);
+      final fromJson = _jsonRecipes(json).firstOrNull;
+      // JSON is read as JSON or not at all: as lines of text it would only
+      // give a recipe made of brackets and quotes. Text that merely opens
+      // and closes with a bracket, as Markdown full of links can, is no JSON
+      // and is read as the text it is.
+      if (fromJson != null || json != null) return fromJson;
+    }
+
+    // A text file has no menus or comments around its recipe, so what reads
+    // as its ingredients needs no heading to be believed.
+    final recipe = parseFromText(text);
+    final lines = text.split('\n').map((line) => line.trim());
+    final believable = _readsLikeRecipe(
+      recipe,
+      ingredientsHeading: true,
+      methodHeading: lines.any(_isMethodHeading),
+    );
+    return believable ? recipe : null;
   }
 
   /// Parse recipe from plain text, markdown, or JSON string.
@@ -691,7 +885,7 @@ class RecipeImportEngine {
         final appRecipes = _tryAppJsonBulk(content);
         if (appRecipes.isNotEmpty) return appRecipes;
         final single = _tryParseJson(content);
-        return single != null ? [single] : [];
+        return single != null && (single.ingredients.isNotEmpty || single.instructions.isNotEmpty) ? [single] : [];
       case 'html':
       case 'htm':
         return parseFromHtml(content);
@@ -1271,81 +1465,218 @@ class RecipeImportEngine {
   }
 
   /// Parse HTML content and return ALL recipes found (for bulk import).
-  /// Tries app-specific formats → JSON-LD → microdata → CSS selectors.
+  /// Tries app-specific formats → JSON-LD → microdata → CSS selectors → the
+  /// text of the page itself.
   static List<ImportedRecipe> parseFromHtml(String html) {
     final document = html_parser.parse(html);
-    final recipes = <ImportedRecipe>[];
 
     // 0. Try app-specific HTML formats (RecipeKeeper, CopyMeThat, etc.)
     final appRecipes = _tryAppSpecificHtml(document, html);
     if (appRecipes.isNotEmpty) return appRecipes;
 
     // 1. Try JSON-LD (can contain multiple recipes)
-    final scripts =
-    document.querySelectorAll('script[type="application/ld+json"]');
-    for (final script in scripts) {
-      try {
-        dynamic json = jsonDecode(script.text.trim());
+    var recipes = _jsonLdRecipes(document).where(_hasContent).toList();
 
-        List<dynamic> items;
-        if (json is List) {
-          items = json;
-        } else if (json is Map && json['@graph'] is List) {
-          items = json['@graph'] as List;
-        } else {
-          items = [json];
-        }
-
-        for (final item in items) {
-          if (item is Map && _isRecipeType(item['@type'])) {
-            recipes.add(_recipeFromJsonLd(Map<String, dynamic>.from(item)));
-          }
-        }
-      } catch (_) {}
+    // 2. Try single extraction (microdata, selectors, then the post itself)
+    if (recipes.isEmpty) {
+      var single = _tryPageMarkup(document);
+      if (!_isComplete(single)) {
+        single = _fillMissing(single, _tryGenericHtml(document));
+      }
+      if (single != null && _hasContent(single)) recipes = [single];
     }
 
-    if (recipes.isNotEmpty) return recipes;
-
-    // 2. Try single extraction (microdata, selectors)
-    final single = _tryMicrodata(document) ?? _tryCommonSelectors(document);
-    if (single != null) return [single];
-
+    // A file has no address to resolve a relative image against, and an
+    // image that cannot be downloaded only shows up as a failed download.
+    for (final recipe in recipes) {
+      recipe.imageUrl = _absoluteUrl(recipe.imageUrl);
+    }
     return recipes;
   }
 
   // ========== WEB SCRAPING ==========
 
+  static bool _hasContent(ImportedRecipe? recipe) =>
+      recipe != null &&
+      (recipe.ingredients.isNotEmpty || recipe.instructions.isNotEmpty);
+
+  static bool _isComplete(ImportedRecipe? recipe) =>
+      recipe != null &&
+      recipe.ingredients.isNotEmpty &&
+      recipe.instructions.isNotEmpty;
+
+  /// What the page's own markup says about its recipe: JSON-LD, then
+  /// microdata, then the classes recipe plugins use. A later source only
+  /// supplies what the earlier ones lack, so a page that marks up its
+  /// ingredients one way and its steps another still gives a whole recipe.
+  static ImportedRecipe? _tryPageMarkup(Document document) {
+    var recipe = _tryJsonLd(document);
+    if (!_isComplete(recipe)) {
+      recipe = _fillMissing(recipe, _tryMicrodata(document));
+    }
+    if (!_isComplete(recipe)) {
+      // Half a recipe is only completed from markup that is surely about it.
+      // Any other list on the page may belong to something else.
+      recipe = _fillMissing(recipe,
+          _tryCommonSelectors(document, pluginsOnly: _hasContent(recipe)));
+    }
+    return recipe;
+  }
+
+  /// Completes [recipe] from [other], a second reading of the same page: the
+  /// ingredients or steps it lacks, and the details it did not find.
+  static ImportedRecipe? _fillMissing(ImportedRecipe? recipe, ImportedRecipe? other) {
+    if (recipe == null) return other;
+    if (other == null) return recipe;
+    if (recipe.ingredients.isEmpty) recipe.ingredients = other.ingredients;
+    if (recipe.instructions.isEmpty) recipe.instructions = other.instructions;
+    if (recipe.title == 'Imported Recipe') recipe.title = other.title;
+    recipe.description ??= other.description;
+    recipe.imageUrl ??= other.imageUrl;
+    recipe.servings ??= other.servings;
+    recipe.prepTimeMinutes ??= other.prepTimeMinutes;
+    recipe.cookTimeMinutes ??= other.cookTimeMinutes;
+    return recipe;
+  }
+
   static ImportedRecipe? _tryJsonLd(Document document) {
+    final recipes = _jsonLdRecipes(document);
+    if (recipes.isEmpty) return null;
+    // A page can carry a bare Recipe entry (a teaser, a related post) next to
+    // the full one, so prefer the first that has something to cook.
+    return recipes.firstWhere(_hasContent, orElse: () => recipes.first);
+  }
+
+  /// Every Recipe entry in the page's JSON-LD blocks, in page order.
+  static List<ImportedRecipe> _jsonLdRecipes(Document document) {
+    final recipes = <ImportedRecipe>[];
     final scripts =
-    document.querySelectorAll('script[type="application/ld+json"]');
+        document.querySelectorAll('script[type="application/ld+json"]');
 
     for (final script in scripts) {
-      try {
-        final content = script.text.trim();
-        if (content.isEmpty) continue;
-
-        dynamic json = jsonDecode(content);
-
-        if (json is Map && json.containsKey('@graph')) {
-          json = (json['@graph'] as List).firstWhere(
-                (item) => _isRecipeType(item['@type']),
-            orElse: () => null,
-          );
-        } else if (json is List) {
-          json = json.firstWhere(
-                (item) => _isRecipeType(item['@type']),
-            orElse: () => null,
-          );
+      final entries = <Map<String, dynamic>>[];
+      _collectJsonLdRecipes(_decodeJsonLd(script.text), entries, 0);
+      for (final entry in entries) {
+        try {
+          recipes.add(_recipeFromJsonLd(entry));
+        } catch (_) {
+          // One malformed entry must not cost the page its other recipes.
         }
-
-        if (json == null || !_isRecipeType(json['@type'])) continue;
-
-        return _recipeFromJsonLd(json as Map<String, dynamic>);
-      } catch (e) {
-        continue;
       }
     }
-    return null;
+    return recipes;
+  }
+
+  /// Decodes one JSON-LD block, or returns null when it cannot be read.
+  ///
+  /// Blocks built by hand or by a shop template are often not quite JSON: a
+  /// raw line break or tab inside a string, a backslash before an apostrophe,
+  /// a comma before a closing bracket, an HTML comment around the data. Those
+  /// are repaired rather than letting the whole recipe go missing without a
+  /// word.
+  static dynamic _decodeJsonLd(String source) {
+    final text = source.trim();
+    if (text.isEmpty) return null;
+    try {
+      return jsonDecode(text);
+    } on FormatException {
+      try {
+        return jsonDecode(_repairJson(text));
+      } on FormatException {
+        return null;
+      }
+    }
+  }
+
+  static String _repairJson(String block) {
+    // Only what lies between the first opening and the last closing bracket
+    // is data, which drops a wrapper such as <!-- -->. CDATA markers have
+    // brackets of their own, so they are taken out first.
+    final source = block.replaceAll(RegExp(r'<!\[CDATA\[|\]\]>'), '');
+    final start = source.indexOf(RegExp(r'[{\[]'));
+    final end = source.lastIndexOf(RegExp(r'[}\]]'));
+    if (start < 0 || end <= start) return source;
+
+    const quote = 0x22, backslash = 0x5C, comma = 0x2C, slash = 0x2F, star = 0x2A;
+    final repaired = StringBuffer();
+    var inString = false;
+    var escaped = false;
+    // A comma is only written once it is known what follows it: before a
+    // closing bracket it is one too many.
+    var commaPending = false;
+    for (var i = start; i <= end; i++) {
+      final c = source.codeUnitAt(i);
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (c == backslash) {
+          // JSON escapes only a handful of characters. A backslash before any
+          // other ("Mom\'s", from a template that escapes apostrophes) is one
+          // too many and is dropped.
+          final next = i < end ? source[i + 1] : '';
+          if (next.isEmpty || !r'"\/bfnrtu'.contains(next)) continue;
+          escaped = true;
+        } else if (c == quote) {
+          inString = false;
+        } else if (c < 0x20) {
+          // JSON allows no raw control character inside a string. A line
+          // break and a tab stay what they are; a carriage return is the
+          // other half of a line break and is dropped.
+          if (c == 0x09) {
+            repaired.write(r'\t');
+          } else if (c != 0x0D) {
+            repaired.write(c == 0x0A ? r'\n' : ' ');
+          }
+          continue;
+        }
+      } else if (c == comma) {
+        commaPending = true;
+        continue;
+      } else if (c == slash && i < end && source.codeUnitAt(i + 1) == slash) {
+        // A comment, which JSON does not have and files edited by hand do.
+        // It runs to the end of its line.
+        final lineEnd = source.indexOf('\n', i);
+        i = lineEnd < 0 || lineEnd > end ? end : lineEnd - 1;
+        continue;
+      } else if (c == slash && i < end && source.codeUnitAt(i + 1) == star) {
+        final close = source.indexOf('*/', i + 2);
+        i = close < 0 || close > end ? end : close + 1;
+        continue;
+      } else if (c > 0x20) {
+        if (commaPending && c != 0x7D && c != 0x5D) repaired.writeCharCode(comma);
+        commaPending = false;
+        inString = c == quote;
+      }
+      repaired.writeCharCode(c);
+    }
+    return repaired.toString();
+  }
+
+  /// Finds Recipe entries wherever a site nests them: at the top, in a list,
+  /// under "@graph", as the "mainEntity" of the page, or as the items of an
+  /// ItemList when one page holds several recipes.
+  static void _collectJsonLdRecipes(
+      dynamic node, List<Map<String, dynamic>> found, int depth,
+      {bool inItemList = false}) {
+    if (depth > 6) return;
+    if (node is List) {
+      for (final item in node) {
+        _collectJsonLdRecipes(item, found, depth + 1, inItemList: inItemList);
+      }
+    } else if (node is Map<String, dynamic>) {
+      if (_isRecipeType(node['@type'])) {
+        // An ItemList mostly points at recipes on other pages, by name and
+        // link. Only an entry that carries its recipe belongs to this page.
+        final carriesRecipe =
+            node['recipeIngredient'] != null || node['recipeInstructions'] != null;
+        if (!inItemList || carriesRecipe) found.add(node);
+      } else {
+        for (final key in const ['@graph', 'mainEntity', 'item']) {
+          _collectJsonLdRecipes(node[key], found, depth + 1, inItemList: inItemList);
+        }
+        _collectJsonLdRecipes(node['itemListElement'], found, depth + 1, inItemList: true);
+      }
+    }
   }
 
   static ImportedRecipe _recipeFromJsonLd(Map<String, dynamic> json) {
@@ -1360,54 +1691,149 @@ class RecipeImportEngine {
       final first = authorData.first;
       author = first is Map ? first['name']?.toString() : first?.toString();
     }
-
-    // Extract nutrition notes
-    String? nutritionNotes;
-    final nutrition = json['nutrition'];
-    if (nutrition is Map) {
-      final parts = <String>[];
-      if (nutrition['calories'] != null) parts.add('Calories: ${nutrition['calories']}');
-      if (nutrition['proteinContent'] != null) parts.add('Protein: ${nutrition['proteinContent']}');
-      if (nutrition['carbohydrateContent'] != null) parts.add('Carbs: ${nutrition['carbohydrateContent']}');
-      if (nutrition['fatContent'] != null) parts.add('Fat: ${nutrition['fatContent']}');
-      if (nutrition['fiberContent'] != null) parts.add('Fiber: ${nutrition['fiberContent']}');
-      if (parts.isNotEmpty) nutritionNotes = parts.join(' | ');
-    }
+    author = _jsonLdText(author);
 
     // Build notes from author + nutrition
+    final nutritionNotes = _nutritionLine(json['nutrition']);
     final notesParts = <String>[];
     if (author != null && author.isNotEmpty) notesParts.add('By $author');
-    if (nutritionNotes != null) notesParts.add('Nutrition: $nutritionNotes');
+    if (nutritionNotes != null) notesParts.add(nutritionNotes);
 
     // Extract tags from keywords + recipeCategory
-    final tags = <String>[];
-    if (json['recipeCategory'] is List) {
-      tags.addAll(List<String>.from(json['recipeCategory']));
-    } else if (json['recipeCategory'] != null) {
-      tags.add(json['recipeCategory'].toString());
-    }
-    if (json['keywords'] is String) {
-      tags.addAll((json['keywords'] as String)
-          .split(',')
-          .map((k) => k.trim())
-          .where((k) => k.isNotEmpty && k.length < 40));
-    } else if (json['keywords'] is List) {
-      tags.addAll(List<String>.from(json['keywords']));
+    final categories = _jsonLdNames(json['recipeCategory']);
+    final tags = <String>[
+      ...categories,
+      ..._jsonLdNames(json['keywords']).where((k) => k.length < 40),
+    ];
+
+    // The site's own category says which course this is ("Main Course",
+    // "Dessert") more reliably than a guess from the title.
+    String? siteCourse;
+    for (final category in categories) {
+      siteCourse ??= mapToCourseId(category);
     }
 
+    final (prepTime, cookTime) = _splitTotalTime(
+      _parseTimeValue(json['prepTime']),
+      _parseTimeValue(json['cookTime']) ?? _parseTimeValue(json['performTime']),
+      _parseTimeValue(json['totalTime']),
+    );
+    final cuisine = _jsonLdNames(json['recipeCuisine']).join(', ');
+
     return ImportedRecipe(
-      title: _cleanHtmlText(json['name']?.toString()) ?? 'Imported Recipe',
-      description: _cleanHtmlText(json['description']?.toString()),
+      title: _jsonLdText(json['name']) ?? 'Imported Recipe',
+      description: _jsonLdText(json['description']),
       imageUrl: _extractImage(json['image']),
-      ingredients: _filterIngredientProse(_toStringList(json['recipeIngredient'])),
+      ingredients: _filterIngredientProse(
+          _jsonLdLines(json['recipeIngredient'] ?? json['ingredients'])),
       instructions: _extractJsonInstructions(json['recipeInstructions']),
-      prepTimeMinutes: _parseTimeValue(json['prepTime']),
-      cookTimeMinutes: _parseTimeValue(json['cookTime']),
-      servings: _extractServings(json['recipeYield']),
-      cuisine: json['recipeCuisine']?.toString(),
+      prepTimeMinutes: prepTime,
+      cookTimeMinutes: cookTime,
+      servings: _jsonLdText(_extractServings(json['recipeYield'])),
+      cuisine: cuisine.isNotEmpty ? cuisine : null,
       tags: tags.isNotEmpty ? tags.toSet().toList() : null,
+      suggestedCourse: siteCourse,
       notes: notesParts.isNotEmpty ? notesParts.join('\n') : null,
     );
+  }
+
+  /// The nutrition facts of schema.org data as one line for the notes.
+  static String? _nutritionLine(dynamic nutrition) {
+    if (nutrition is! Map) return null;
+    const labels = {
+      'calories': 'Calories',
+      'proteinContent': 'Protein',
+      'carbohydrateContent': 'Carbs',
+      'fatContent': 'Fat',
+      'fiberContent': 'Fiber',
+    };
+    final parts = <String>[];
+    labels.forEach((key, label) {
+      final amount = _jsonLdText(nutrition[key]);
+      if (amount != null) parts.add('$label: $amount');
+    });
+    return parts.isEmpty ? null : 'Nutrition: ${parts.join(' | ')}';
+  }
+
+  /// A JSON-LD value as clean text: entities decoded, tags removed, runs of
+  /// whitespace collapsed. Null when nothing is left.
+  static String? _jsonLdText(dynamic value) {
+    if (value is List && value.isNotEmpty) value = value.first;
+    if (value is! String && value is! num) return null;
+    final text = _cleanHtmlText(_htmlToText(value.toString())) ?? '';
+    return text.isEmpty ? null : text;
+  }
+
+  /// The names in a field that sites write either as a list or as one comma
+  /// separated string (categories, keywords, cuisines).
+  static List<String> _jsonLdNames(dynamic value) {
+    final names = <String>[];
+    for (final item in value is List ? value : [value]) {
+      if (item is! String) continue;
+      for (final name in (_jsonLdText(item) ?? '').split(',')) {
+        if (name.trim().isNotEmpty) names.add(name.trim());
+      }
+    }
+    return names;
+  }
+
+  /// The lines of a list field. An entry may itself be HTML holding several.
+  static List<String> _jsonLdLines(dynamic data) {
+    final lines = <String>[];
+    for (final item in _toStringList(data)) {
+      for (final line in _htmlToText(item).split('\n')) {
+        final clean = _cleanHtmlText(line) ?? '';
+        if (clean.isNotEmpty) lines.add(clean);
+      }
+    }
+    return lines;
+  }
+
+  static final _markup = RegExp(r'&[#\w]+;|</?[a-zA-Z][^<>]*>');
+  static final _anyTag = RegExp(r'</?[a-zA-Z][^<>]*>');
+  static final _blockMarkup =
+      RegExp(r'<\s*(?:p|br|li|div|tr|h[1-6])\b', caseSensitive: false);
+
+  /// The plain text of a string that may carry HTML, as JSON-LD written by
+  /// recipe plugins often does: entities ("&amp;", "&frac12;") are decoded
+  /// and tags removed, with a line break wherever a paragraph, a list item
+  /// or a <br> ended.
+  static String _htmlToText(String value) {
+    var text = value;
+    // Twice, because some sites escape their HTML a second time ("&amp;amp;",
+    // "&lt;p&gt;").
+    for (var pass = 0; pass < 2 && _markup.hasMatch(text); pass++) {
+      // The HTML parser takes minutes over tens of thousands of tags. No
+      // recipe text has that many, so one that does has its tags cut without
+      // a tree being built, a line break in place of each that starts a line.
+      // Only its entities are then left for the parser.
+      if ('<'.allMatches(text).take(2001).length > 2000) {
+        text = text
+            .replaceAllMapped(
+                _anyTag, (tag) => _blockMarkup.matchAsPrefix(tag[0]!) == null ? '' : '\n')
+            .replaceAll('<', '&lt;');
+      }
+      // Without block tags the string's own line breaks are the only ones.
+      final keepLines = !_blockMarkup.hasMatch(text);
+      text = _blockLines(html_parser.parseFragment(text), keepLines: keepLines)
+          .join('\n');
+    }
+    // "1&frasl;2" decodes to a fraction slash no ingredient parser expects.
+    return text.replaceAll('\u00A0', ' ').replaceAll('\u2044', '/');
+  }
+
+  /// A site that publishes only a total time, or a total and one of its
+  /// parts, still means a recipe that takes that long. The app keeps two
+  /// parts, so the missing one is what is left of the total.
+  static (int?, int?) _splitTotalTime(int? prep, int? cook, int? total) {
+    if (total == null) return (prep, cook);
+    if (cook == null) {
+      if (prep == null) return (null, total);
+      if (total > prep) return (prep, total - prep);
+    } else if (prep == null && total > cook) {
+      return (total - cook, cook);
+    }
+    return (prep, cook);
   }
 
   static bool _isRecipeType(dynamic type) {
@@ -1443,42 +1869,150 @@ class RecipeImportEngine {
   }
 
   static ImportedRecipe? _tryMicrodata(Document document) {
-    final root = document.querySelector('[itemtype*="schema.org/Recipe"]');
-    if (root == null) return null;
+    // A page can mark up related recipes too. The one being imported is the
+    // first that lists ingredients or steps.
+    final items = document.querySelectorAll('[itemtype*="schema.org/Recipe"]');
+    for (final item in items.take(8)) {
+      final recipe = _recipeFromMicrodata(item, document);
+      if (recipe != null) return recipe;
+    }
+    return null;
+  }
 
-    final ingredients = root
-        .querySelectorAll('[itemprop="recipeIngredient"]')
-        .map((e) => _cleanHtmlText(e.text) ?? '')
-        .where((s) => s.isNotEmpty)
-        .toList();
+  static ImportedRecipe? _recipeFromMicrodata(Element item, Document document) {
+    // "ingredients" is the name the property had before schema.org renamed
+    // it. Older recipe plugins still write it.
+    final ingredients = <String>[];
+    for (final element in _microdataProps(
+        item, '[itemprop~="recipeIngredient"], [itemprop~="ingredients"]')) {
+      ingredients.addAll(_microdataLines(element));
+    }
 
-    List<String> instructions = [];
-    final instructionNodes =
-    root.querySelectorAll('[itemprop="recipeInstructions"]');
-    for (var node in instructionNodes) {
-      final steps = node.querySelectorAll('[itemprop="text"]');
-      if (steps.isNotEmpty) {
-        instructions.addAll(
-            steps.map((e) => _cleanHtmlText(e.text) ?? '').where((s) => s.isNotEmpty));
-      } else {
-        final text = _cleanHtmlText(node.text);
-        if (text != null && text.isNotEmpty) instructions.add(text);
+    final instructions = <String>[];
+    final methods = _microdataProps(item, '[itemprop~="recipeInstructions"]');
+    for (final element in methods) {
+      // Steps marked up one by one each carry their own text.
+      final texts = element.querySelectorAll('[itemprop~="text"]');
+      if (texts.isNotEmpty) {
+        instructions.addAll(texts
+            .map((e) => _stepText(_blockLines(e).join(' ')))
+            .where((step) => step.isNotEmpty));
+        continue;
+      }
+      // Otherwise a property on its own wraps the whole method, and each of
+      // its lines is a step. One of several is one step, unless it holds a
+      // list or paragraphs of its own (a section of the method). A line that
+      // only numbers the step is left out.
+      final lines = _microdataLines(element, everyLine: true)
+          .map(_stepText)
+          .where((line) => line.isNotEmpty)
+          .toList();
+      final holdsList =
+          methods.length == 1 || element.querySelector('li, p, tr, br') != null;
+      if (holdsList) {
+        instructions.addAll(lines);
+      } else if (lines.isNotEmpty) {
+        instructions.add(lines.join(' '));
       }
     }
 
     if (ingredients.isEmpty && instructions.isEmpty) return null;
 
+    String? first(String name, {bool isTime = false}) {
+      for (final element in _microdataProps(item, '[itemprop~="$name"]')) {
+        // Times are written for machines in an attribute ("PT15M") and for
+        // people in the text ("15 mins"). The attribute is the exact one.
+        final exact = isTime
+            ? _cleanHtmlText(element.attributes['datetime'] ?? element.attributes['content'])
+            : null;
+        final value = (exact != null && exact.isNotEmpty) ? exact : _microdataText(element);
+        if (value != null) return value;
+      }
+      return null;
+    }
+
+    String? image;
+    for (final element in _microdataProps(item, '[itemprop~="image"]')) {
+      image = _imageAddress(element) ??
+          _imageAddress(element.querySelector('img, [itemprop~="url"], [itemprop~="contentUrl"]'));
+      if (image != null) break;
+    }
+
+    final (prepTime, cookTime) = _splitTotalTime(
+      _parseTimeValue(first('prepTime', isTime: true)),
+      _parseTimeValue(first('cookTime', isTime: true)),
+      _parseTimeValue(first('totalTime', isTime: true)),
+    );
+
     return ImportedRecipe(
-      title: root.querySelector('[itemprop="name"]')?.text.trim() ??
-          document.querySelector('title')?.text.trim() ??
-          'Imported Recipe',
+      title: _extractBestTitle(document, recipeItem: item),
+      description: first('description'),
+      imageUrl: image,
       ingredients: _filterIngredientProse(ingredients),
       instructions: instructions,
+      prepTimeMinutes: prepTime,
+      cookTimeMinutes: cookTime,
+      servings: first('recipeYield') ?? first('yield'),
     );
   }
 
-  static ImportedRecipe? _tryCommonSelectors(Document document) {
-    final selectors = [
+  /// The elements matching [selector] that describe [item] itself, not an
+  /// item nested inside it (its author, a rating, the nutrition block).
+  /// When a list and its entries both carry the property, only the list is
+  /// returned, so nothing is read twice.
+  static List<Element> _microdataProps(Element item, String selector) {
+    final found = item.querySelectorAll(selector).toSet();
+    bool belongs(Element element) {
+      for (var parent = element.parent;
+          parent != null && parent != item;
+          parent = parent.parent) {
+        if (parent.attributes.containsKey('itemscope')) return false;
+        if (found.contains(parent)) return false;
+      }
+      return true;
+    }
+
+    return found.where(belongs).toList();
+  }
+
+  /// What a microdata property says: its text, or its content attribute when
+  /// it is a <meta> with no text.
+  static String? _microdataText(Element element) {
+    final text = _blockLines(element).join(' ');
+    if (text.isNotEmpty) return text;
+    final content = _cleanHtmlText(element.attributes['content']) ?? '';
+    return content.isEmpty ? null : content;
+  }
+
+  /// The lines an ingredient or instruction property holds. Usually one, but
+  /// some pages put the property on the whole list.
+  ///
+  /// An ingredient laid out in blocks of its own (amount, then name) is still
+  /// one line, so only list markup splits it. With [everyLine] any block
+  /// does.
+  static List<String> _microdataLines(Element element, {bool everyLine = false}) {
+    final lines = _blockLines(element);
+    if (lines.isEmpty) {
+      final content = _microdataText(element);
+      return content == null ? [] : [content];
+    }
+    final holdsList = lines.length > 1 &&
+        (everyLine || element.querySelector('li, p, tr, br') != null);
+    return holdsList ? lines : [lines.join(' ')];
+  }
+
+  static String? _microdataName(Element item) {
+    for (final element in _microdataProps(item, '[itemprop~="name"]')) {
+      final name = _microdataText(element);
+      if (name != null) return name;
+    }
+    return null;
+  }
+
+  static ImportedRecipe? _tryCommonSelectors(Document document, {bool pluginsOnly = false}) {
+    // Recipe plugins. Their class names mean nothing else, so one list on
+    // its own is still part of a recipe.
+    const pluginSelectors = [
       // ── WordPress Recipe Plugins ──
       // WP Recipe Maker (most popular)
       ('.wprm-recipe-ingredients li', '.wprm-recipe-instructions li'),
@@ -1504,7 +2038,11 @@ class RecipeImportEngine {
       ('.jetpack-recipe-ingredients li', '.jetpack-recipe-directions li'),
       // Chicory
       ('.chicory-ingredients li', '.chicory-instructions li'),
+    ];
 
+    // Class names themes and hand-built pages use. These are looser, so a
+    // match has to look like a recipe before it is taken for one.
+    const themeSelectors = [
       // ── Squarespace ──
       // Squarespace recipe blogs often use these patterns
       ('.recipe-ingredients li', '.recipe-instructions li'),
@@ -1522,18 +2060,18 @@ class RecipeImportEngine {
       ('[data-ingredient]', '[data-instruction], [data-direction]'),
     ];
 
-    for (final (ingSelector, instSelector) in selectors) {
-      final ings = document
-          .querySelectorAll(ingSelector)
-          .map((e) => _cleanHtmlText(e.text) ?? '')
-          .where((s) => s.isNotEmpty && s.length > 2)
+    List<String> texts(String selector, int minLength, {bool skipLinks = false}) {
+      return document
+          .querySelectorAll(selector)
+          .where((e) => !skipLinks || !_isLinkOnly(e))
+          .map((e) => _blockLines(e).join(' '))
+          .where((s) => s.length > minLength)
           .toList();
+    }
 
-      final insts = document
-          .querySelectorAll(instSelector)
-          .map((e) => _cleanHtmlText(e.text) ?? '')
-          .where((s) => s.isNotEmpty && s.length > 5)
-          .toList();
+    for (final (ingSelector, instSelector) in pluginSelectors) {
+      final ings = texts(ingSelector, 2);
+      final insts = texts(instSelector, 5);
 
       if (ings.isNotEmpty || insts.isNotEmpty) {
         // Try to get a better title than just h1
@@ -1545,11 +2083,41 @@ class RecipeImportEngine {
         );
       }
     }
+    if (pluginsOnly) return null;
+
+    for (final (ingSelector, instSelector) in themeSelectors) {
+      // "ul li" and "ol li" match every list in a post: related links, a
+      // table of contents, a top ten. Lists of links are left out.
+      final anyList = ingSelector.endsWith(' ul li');
+      final ings = texts(ingSelector, 2, skipLinks: anyList);
+      final insts = texts(instSelector, 5, skipLinks: anyList);
+
+      // Steps alone prove nothing here, and ingredients alone only when they
+      // are written with amounts. Any-list matches need both.
+      if (ings.isEmpty) continue;
+      final amounts = ings.where(_amountLed.hasMatch).length >= 2;
+      if (anyList ? (insts.isEmpty || !amounts) : (insts.isEmpty && !amounts)) {
+        continue;
+      }
+
+      return ImportedRecipe(
+        title: _extractBestTitle(document),
+        ingredients: ings,
+        instructions: insts,
+      );
+    }
     return null;
   }
 
+  /// A list item that is nothing but a link, as in a list of related posts.
+  static bool _isLinkOnly(Element item) {
+    final links = item.querySelectorAll('a');
+    return links.length == 1 &&
+        _cleanHtmlText(links.first.text) == _cleanHtmlText(item.text);
+  }
+
   /// Extract the best recipe title from a document
-  static String _extractBestTitle(Document document) {
+  static String _extractBestTitle(Document document, {Element? recipeItem}) {
     // WPRM title
     final wprm = document.querySelector('.wprm-recipe-name');
     if (wprm != null && wprm.text.trim().isNotEmpty) return wprm.text.trim();
@@ -1562,16 +2130,21 @@ class RecipeImportEngine {
     final mv = document.querySelector('.mv-create-title');
     if (mv != null && mv.text.trim().isNotEmpty) return mv.text.trim();
 
-    // Recipe schema name
-    final schema = document.querySelector('[itemprop="name"]');
-    if (schema != null && schema.text.trim().isNotEmpty) return schema.text.trim();
+    // Recipe schema name. Only the recipe's own: themes mark every menu entry
+    // and the author with itemprop="name" as well.
+    final item = recipeItem ??
+        document.querySelector('[itemtype*="schema.org/Recipe"]');
+    final schema = item == null ? null : _microdataName(item);
+    if (schema != null) return schema;
 
     // og:title (usually cleaner than page <title>)
     final ogTitle = document.querySelector('meta[property="og:title"]')?.attributes['content'];
     if (ogTitle != null && ogTitle.isNotEmpty) return ogTitle;
 
-    // Standard heading
-    final h1 = document.querySelector('h1');
+    // Standard heading. Blog platforms give the post's own title a class, and
+    // on older themes the h1 is the name of the site.
+    final h1 = document.querySelector('.entry-title, .post-title') ??
+        document.querySelector('h1');
     if (h1 != null && h1.text.trim().isNotEmpty) return h1.text.trim();
 
     // Fallback to <title>
@@ -1579,9 +2152,316 @@ class RecipeImportEngine {
   }
 
   static ImportedRecipe? _tryGenericHtml(Document document) {
-    final bodyText = document.body?.text ?? '';
-    if (bodyText.length < 100) return null;
-    return _parseStructuredText(bodyText);
+    // The post itself where the theme marks it, the whole page last. A page
+    // can open with teasers that are articles too, so each is tried in turn.
+    final roots = <Node>[
+      ...document
+          .querySelectorAll(
+              'article, main, [role="main"], .entry-content, .post-content, .post-body')
+          .take(6),
+      if (document.body != null) document.body!,
+    ];
+
+    ImportedRecipe? recipe;
+    for (final root in roots) {
+      final candidate = _recipeFromLines(_blockLines(root));
+      if (candidate == null) continue;
+      if (_isComplete(candidate)) {
+        recipe = candidate;
+        break;
+      }
+      recipe ??= candidate;
+    }
+    if (recipe == null) return null;
+
+    recipe.title = _extractBestTitle(document);
+    recipe.description ??= _getMetaContent(document, 'og:description') ??
+        _getMetaContent(document, 'description');
+    return recipe;
+  }
+
+  /// Reads a recipe out of the visible lines of a page that has no recipe
+  /// markup. Returns null when the lines do not read like a recipe.
+  static ImportedRecipe? _recipeFromLines(List<String> lines) {
+    // The recipe starts at its ingredients heading. A table of contents has
+    // that heading too, followed by the next heading rather than ingredients.
+    var start = -1;
+    for (var i = 0; i + 1 < lines.length; i++) {
+      if (_isIngredientsHeading(lines[i]) && !_isRecipeHeading(lines[i + 1])) {
+        start = i;
+        break;
+      }
+    }
+    // With no heading, at the first line written like an ingredient.
+    if (start < 0) start = lines.indexWhere(_measuredLine.hasMatch);
+    if (start < 0) return null;
+
+    // It ends where the page turns to other things.
+    var end = lines.indexWhere(
+        (line) => line.length < 80 && _afterRecipeHeading.hasMatch(line), start);
+    if (end < 0) end = lines.length;
+    // The text parser knows fewer headings than are recognised here ("How to
+    // make banana bread", "Zutaten"), so each goes in under the plain name it
+    // does know. A nutrition box is left out, up to the next of them.
+    final body = <String>[];
+    var inNutritionBox = false;
+    for (final line in lines.sublist(start, end)) {
+      final heading = _isIngredientsHeading(line)
+          ? 'Ingredients'
+          : (_isMethodHeading(line) ? 'Instructions' : (_isNotesHeading(line) ? 'Notes' : null));
+      if (heading != null) {
+        body.add(heading);
+        inNutritionBox = false;
+      } else if (line.length < 80 && _nutritionHeading.hasMatch(line)) {
+        inNutritionBox = true;
+      } else if (!inNutritionBox && !(line.length < 200 && _siteFurniture.hasMatch(line))) {
+        body.add(line);
+      }
+    }
+    final ingredientsHeading = body.contains('Ingredients');
+    final methodHeading = body.contains('Instructions');
+
+    final method = _unheadedMethodStart(body);
+    if (method > 0) body.insert(method, 'Instructions');
+
+    // The text parser takes the first line it is given for the title, which
+    // would cost the recipe its first ingredient. It gets a stand-in, and the
+    // caller sets the real title.
+    final recipe = _parseStructuredText(['Recipe', ...body].join('\n'));
+    final believable = _readsLikeRecipe(recipe,
+        ingredientsHeading: ingredientsHeading, methodHeading: methodHeading);
+    if (!believable) return null;
+    // Guessed from the stand-in title, so not worth keeping.
+    recipe.suggestedCourse = null;
+    recipe.suggestedCategory = null;
+
+    // Right above the recipe stand its yield and times, and further up the
+    // paragraph that introduces it. The rest up there is the site's own
+    // furniture.
+    final intro = lines.sublist(0, start);
+    final details = _parseStructuredText([
+      'Recipe',
+      ...intro.skip(intro.length > 12 ? intro.length - 12 : 0).where((line) => line.length < 80),
+    ].join('\n'));
+    recipe.servings ??= details.servings;
+    recipe.prepTimeMinutes ??= details.prepTimeMinutes;
+    recipe.cookTimeMinutes ??= details.cookTimeMinutes;
+    final opening = intro.where((line) => line.length >= 60 && line.length < 500);
+    if (opening.isNotEmpty) recipe.description = opening.first;
+    return recipe;
+  }
+
+  /// Whether [recipe], read from the plain lines of a page or a text file, is
+  /// believable: at least two ingredients written with an amount and a unit,
+  /// or, under an ingredients heading of the text's own, a method under its
+  /// own heading too or at least two ingredients that open with an amount.
+  /// Anything less is a login page, an article or a list of links, and
+  /// importing it would hand the person garbage to clean up.
+  static bool _readsLikeRecipe(
+    ImportedRecipe recipe, {
+    required bool ingredientsHeading,
+    required bool methodHeading,
+  }) {
+    if (recipe.ingredients.where(_measuredLine.hasMatch).length >= 2) return true;
+    if (!ingredientsHeading) return false;
+    if (methodHeading && _isComplete(recipe)) return true;
+    return recipe.ingredients.where(_amountLed.hasMatch).length >= 2;
+  }
+
+  /// Where the method starts in a recipe that heads its ingredients but not
+  /// its method, or -1. That is the first numbered step, or the first line
+  /// that reads like a sentence: ingredient lines are short and do not end in
+  /// a full stop.
+  static int _unheadedMethodStart(List<String> lines) {
+    final heading = lines.indexWhere(_isIngredientsHeading);
+    if (heading < 0 || lines.any(_isMethodHeading)) return -1;
+    // Numbers right under the heading number the ingredients themselves.
+    final first = lines.indexWhere((line) => line.isNotEmpty, heading + 1);
+    final numberedIngredients = first >= 0 && _listNumber.hasMatch(lines[first]);
+    final method = lines.indexWhere(
+        (line) =>
+            (!numberedIngredients && _numberedStep.hasMatch(line)) ||
+            (line.length > 50 && _sentenceEnd.hasMatch(line)),
+        heading + 2);
+    // Sentences under a notes heading are the notes.
+    final notes = lines.indexWhere(_isNotesHeading, heading + 1);
+    return (notes >= 0 && notes < method) ? -1 : method;
+  }
+
+  static final _listNumber = RegExp(r'^\d{1,3}[.)]\s');
+  static final _numberedStep = RegExp(
+      r'^(?:\d{1,3}[.)]|step \d{1,3}[.:)]?)\s{1,3}\p{L}',
+      caseSensitive: false,
+      unicode: true);
+
+  // The digits and spaces in the two patterns below are counted, not open
+  // ended: they are tried on every line of a page, and a line of a hundred
+  // thousand digits must cost no more than a short one.
+
+  /// An ingredient line as recipes write them: an amount and a unit ("2 cups
+  /// flour", "250 g butter"), or a fraction ("1/2 onion", "½ lemon").
+  static final _measuredLine = RegExp(
+      r'^\s{0,8}(?:\d{1,4}\s{0,3}/\s{0,3}\d{1,4}|[½¼¾⅓⅔⅛⅜⅝⅞]|'
+      r'\d{1,5}(?:[.,]\d{1,3})?\s{0,3}(?:\d{1,3}/\d{1,3}|[½¼¾⅓⅔⅛⅜⅝⅞])?\s{0,3}(?:-\s{0,3}\d{1,5}\s{0,3})?'
+      r'(?:cups?|tbsps?|tbs|tsps?|tablespoons?|teaspoons?|oz|ounces?|lbs?|pounds?|'
+      r'g|grams?|kg|ml|l|lit(?:er|re)s?|dl|cloves?|pinch|cans?|sticks?|slices?)\b)',
+      caseSensitive: false);
+
+  /// A line that opens with an amount, with or without a unit ("3 eggs").
+  /// Proof of an ingredient only where the page says these are ingredients.
+  static final _amountLed = RegExp(r'^\s{0,8}[\d½¼¾⅓⅔⅛⅜⅝⅞]');
+
+  // The headings are known in the languages the app itself speaks, as far as
+  // those are written in Latin letters.
+  static final _ingredientsHeading = RegExp(
+      r"^(?:ingredients?|what you(?:['’]?ll)? need|you['’]?ll need|shopping list|"
+      r'zutaten|ingredientes|ingrédients|ingredienti|ingrediënten|benodigdheden|składniki)'
+      r'(?![\p{L}\p{N}])[^.!?]*$',
+      caseSensitive: false,
+      unicode: true);
+  static final _methodHeading = RegExp(
+      r'^(?:instructions?|directions?|method|steps?|preparation|procedure|'
+      r'zubereitung|anleitung|preparación|elaboración|instrucciones|pasos|préparation|étapes|'
+      r'preparazione|procedimento|istruzioni|bereiding|bereidingswijze|werkwijze|instructies|'
+      r'przygotowanie|sposób przygotowania|wykonanie|modo de preparo|modo de preparação|'
+      r'preparo|preparação|instruções|how to make(?![\p{L}\p{N}])[^.!?]*)$',
+      caseSensitive: false,
+      unicode: true);
+  static final _notesHeading = RegExp(
+      r"^(?:(?:recipe |chef['’]?s |cook['’]?s )?(?:notes?|tips?|variations?)|"
+      r'tipps?|hinweise?|notas|consejos|astuces|conseils|consigli|opmerkingen|uwagi|wskazówki|dicas)$',
+      caseSensitive: false,
+      unicode: true);
+  static final _nutritionHeading = RegExp(r'^nutrition\b', caseSensitive: false);
+
+  /// Headings and lines under which a page has left the recipe behind. The
+  /// last two are only that when they stand alone, as blogs print them over
+  /// their like button and their list of related posts.
+  static final _afterRecipeHeading = RegExp(
+      r'^(?:(?:you (?:might|may) also (?:like|enjoy|love)|related (?:recipes|posts|articles)|'
+      r'more recipes|leave a (?:comment|reply)|comments|\d{1,6} (?:comments?|responses|replies|thoughts)|'
+      r'share this|about the author|reader interactions|did you make this|'
+      r'posted (?:in|by|on|at|under)|filed under|tagged)\b|(?:tags|categories|labels):|'
+      r'(?:like this|related):?$)',
+      caseSensitive: false);
+
+  /// Lines a site prints under its content whatever the page is about: a
+  /// copyright notice, a bar of links ("Home | About | Contact").
+  static final _siteFurniture = RegExp(
+      r'^(?:©|copyright\b|all rights reserved\b)|^[^|\d]{1,40}(?:\s\|\s[^|\d]{1,40})+$',
+      caseSensitive: false);
+
+  static final _headingDecoration = RegExp(r'^[#*_\s]+|[*_:\s]+$');
+  static final _sentenceEnd = RegExp(r'[.!?]$');
+
+  /// A heading line without its decoration: Markdown marks, a closing colon.
+  static String _headingText(String line) =>
+      line.replaceAll(_headingDecoration, '');
+
+  static bool _isIngredientsHeading(String line) =>
+      line.length < 60 && _ingredientsHeading.hasMatch(_headingText(line));
+
+  static bool _isMethodHeading(String line) =>
+      line.length < 60 && _methodHeading.hasMatch(_headingText(line));
+
+  static bool _isNotesHeading(String line) =>
+      line.length < 60 && _notesHeading.hasMatch(_headingText(line));
+
+  static bool _isRecipeHeading(String line) =>
+      _isIngredientsHeading(line) || _isMethodHeading(line) || _isNotesHeading(line);
+
+  // Elements whose text is never part of a recipe: code, the furniture
+  // around a page, form controls.
+  static const _skippedElements = {
+    'script', 'style', 'noscript', 'template', 'svg', 'head', 'nav',
+    'header', 'footer', 'aside', 'iframe', 'button', 'select', 'textarea',
+  };
+
+  // Ids and classes of the usual blocks beside a post that are not the post.
+  static const _skippedBlocks = {
+    'comments', 'comment-list', 'commentlist', 'comments-area',
+    'comment-respond', 'respond', 'sidebar', 'widget-area', 'footer',
+    'site-footer',
+  };
+
+  static const _blockElements = {
+    'p', 'div', 'li', 'ul', 'ol', 'br', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5',
+    'h6', 'tr', 'table', 'section', 'article', 'blockquote', 'dl', 'dd', 'dt',
+    'pre', 'form', 'main', 'body', 'figure', 'figcaption',
+  };
+
+  static final _whitespace = RegExp(r'\s+');
+  static final _preformatted = RegExp(r'white-space\s*:\s*pre');
+
+  /// The text under [root], one entry per line as a reader sees them.
+  ///
+  /// `Element.text` glues "Ingredients" to the first ingredient when a page
+  /// has no whitespace between its tags, and includes scripts, menus and
+  /// footers. This walk breaks the line wherever a block element starts or
+  /// ends and leaves out what is not content. With [keepLines], line breaks
+  /// inside the text itself count too.
+  static List<String> _blockLines(Node root, {bool keepLines = false}) {
+    final text = StringBuffer();
+    _writeBlockText(root, text, keepLines, 0);
+    return text
+        .toString()
+        .split('\n')
+        // A fraction slash (U+2044) is written as the plain one amounts use.
+        .map((line) => line.replaceAll(_whitespace, ' ').replaceAll('\u2044', '/').trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+  }
+
+  static void _writeBlockText(Node node, StringBuffer text, bool keepLines, int depth) {
+    if (node is Text) {
+      text.write(keepLines ? node.data : node.data.replaceAll(_whitespace, ' '));
+      return;
+    }
+    // Deeper than any real page nests. Stops a hostile one from overflowing
+    // the stack.
+    if (depth > 400) return;
+
+    var keep = keepLines;
+    var block = false;
+    var cell = false;
+    if (node is Element) {
+      // The node the caller asked for is read whatever it is.
+      if (depth > 0 && _isPageFurniture(node)) return;
+      final tag = node.localName;
+      block = _blockElements.contains(tag);
+      cell = tag == 'td' || tag == 'th';
+      // <pre> and pre-wrap styling show their line breaks as written.
+      keep = keep ||
+          tag == 'pre' ||
+          _preformatted.hasMatch(node.attributes['style'] ?? '');
+    }
+
+    if (block) text.write('\n');
+    Node? previous;
+    for (final child in node.nodes) {
+      // "1<sup>1</sup>/<sub>2</sub> cups" is one and a half cups. Run
+      // together it would read as eleven halves.
+      final isFractionAfterWhole = child is Element &&
+          child.localName == 'sup' &&
+          previous is Text &&
+          _endsInDigit.hasMatch(previous.data) &&
+          _digitsOnly.hasMatch(child.text);
+      if (isFractionAfterWhole) text.write(' ');
+      _writeBlockText(child, text, keep, depth + 1);
+      previous = child;
+    }
+    if (block) text.write('\n');
+    if (cell) text.write(' ');
+  }
+
+  static final _endsInDigit = RegExp(r'\d$');
+  static final _digitsOnly = RegExp(r'^\d{1,3}$');
+
+  static bool _isPageFurniture(Element element) {
+    if (_skippedElements.contains(element.localName)) return true;
+    if (element.attributes.containsKey('hidden')) return true;
+    return _skippedBlocks.contains(element.id) ||
+        element.classes.any(_skippedBlocks.contains);
   }
 
   // ========== PLATFORM-SPECIFIC EXTRACTORS ==========
@@ -1608,24 +2488,40 @@ class RecipeImportEngine {
 
   /// Instagram: Extract from meta description/title (caption usually has the recipe)
   static ImportedRecipe? _tryInstagram(Document document) {
-    // Instagram puts the caption in og:description
-    final caption = _getMetaContent(document, 'og:description')
+    // Without a session Instagram often answers with its login page, whose
+    // description is an advert for Instagram and not a caption.
+    if (_isLoginWall(document)) return null;
+
+    final description = _getMetaContent(document, 'og:description')
         ?? _getMetaContent(document, 'description');
     final rawTitle = _getMetaContent(document, 'og:title') ?? 'Instagram Recipe';
     final image = _getMetaContent(document, 'og:image');
 
-    if (caption == null || caption.length < 50) return null;
+    // Both tags wrap the caption: og:title in the account's name,
+    // og:description in the likes, the account and the date. Either can be
+    // cut short, so the longer caption is the one to read.
+    final fromTitle = _instagramCaption(rawTitle);
+    var caption = description == null
+        ? fromTitle
+        : _instagramCaption(description) ?? description;
+    if (fromTitle != null && (caption == null || fromTitle.length > caption.length)) {
+      caption = fromTitle;
+    }
+    if (caption == null) return null;
+    caption = _withoutCaptionNoise(caption);
+    if (caption.length < 30) return null;
 
-    // og:title is typically: "Username on Instagram: "actual recipe name here 🔁 Save this..."
-    // _extractSocialTitle handles the quoted-title pattern; fall back to caption, then _cleanSocialTitle
-    final cleanTitle = _extractSocialTitle(rawTitle)
+    // The caption opens with the name of the dish. The account's name in
+    // og:title is not it.
+    final cleanTitle = _captionTitle(caption)
+        ?? _extractSocialTitle(rawTitle)
         ?? _extractSocialTitle(caption)
         ?? _cleanSocialTitle(rawTitle);
 
     // Try to parse the caption as a recipe
-    final parsed = _parseStructuredText(caption);
+    final parsed = _parseStructuredText(_withMethodHeading(caption));
     if (parsed.ingredients.isEmpty && parsed.instructions.isEmpty) {
-      // Caption wasn't structured — try splitting on common patterns
+      // The caption has no structure. Try splitting on common patterns.
       final result = _parseSocialCaption(caption, rawTitle, image);
       result?.title = cleanTitle; // override _cleanSocialTitle(title) done internally
       return result;
@@ -1660,9 +2556,10 @@ class RecipeImportEngine {
       }
     }
 
-    final parsed = _parseStructuredText(caption);
+    final cleanCaption = _withoutCaptionNoise(caption);
+    final parsed = _parseStructuredText(_withMethodHeading(cleanCaption));
     if (parsed.ingredients.isEmpty && parsed.instructions.isEmpty) {
-      return _parseSocialCaption(caption, title, image);
+      return _parseSocialCaption(cleanCaption, title, image);
     }
     parsed.title = _cleanSocialTitle(title);
     parsed.imageUrl = image;
@@ -1677,9 +2574,9 @@ class RecipeImportEngine {
 
     // If Pinterest has recipe schema, it's already handled by JSON-LD/microdata
     // This fallback extracts from pin description
-    final description = _getMetaContent(document, 'og:description')
-        ?? _getMetaContent(document, 'description');
-    final title = _getMetaContent(document, 'og:title') ?? 'Pinterest Recipe';
+    final description = _pinDescription(_getMetaContent(document, 'og:description')
+        ?? _getMetaContent(document, 'description'));
+    final title = _pinTitle(_getMetaContent(document, 'og:title') ?? 'Pinterest Recipe');
     final image = _getMetaContent(document, 'og:image');
 
     if (description == null || description.length < 50) return null;
@@ -1694,43 +2591,102 @@ class RecipeImportEngine {
     return _parseSocialCaption(description, title, image);
   }
 
+  static final _pinDate = RegExp(r'^[A-Z][a-z]{2,8}\.? \d{1,2}, \d{4} - ');
+  static final _pinPlaceholder = RegExp(
+      r'This Pin was (?:discovered|created) by .{0,120}?your own Pins on Pinterest\.?',
+      caseSensitive: false);
+
+  /// A pin's description without what Pinterest adds to it: the date in
+  /// front, and the sentence that stands in when the pin has no description
+  /// ("This Pin was discovered by ... Discover (and save!) your own Pins on
+  /// Pinterest."). Null when nothing of the pin's own is left.
+  static String? _pinDescription(String? description) {
+    if (description == null) return null;
+    final text = description
+        .replaceFirst(_pinDate, '')
+        .replaceFirst(_pinPlaceholder, '')
+        .trim();
+    return text.isEmpty ? null : text;
+  }
+
+  /// A pin's title without the keywords Pinterest lists behind it ("Lemon
+  /// Bars | Recipe | Lemon bars, Desserts").
+  static String _pinTitle(String title) {
+    final keywords = title.indexOf(' | ');
+    return keywords > 3 ? title.substring(0, keywords) : title;
+  }
+
   /// YouTube: Recipe is often in the video description
   static ImportedRecipe? _tryYoutube(Document document) {
     final title = _getMetaContent(document, 'og:title') ?? 'YouTube Recipe';
     final image = _getMetaContent(document, 'og:image');
 
-    // YouTube puts video description in various places
-    final description = _getMetaContent(document, 'og:description')
+    // The meta tags only hold the first line or two of the description. The
+    // whole of it is in the player data the page carries in a script.
+    final description = _youtubeDescription(document)
+        ?? _getMetaContent(document, 'og:description')
         ?? _getMetaContent(document, 'description');
+    if (description == null || description.length < 50) return null;
 
-    // Also try to find description in page content
-    final descEl = document.querySelector('#description-text, .ytd-text-inline-expander, [itemprop="description"]');
-    final descText = descEl?.text ?? description;
+    // Descriptions are full of links to gear and other channels, and of
+    // chapter marks ("1:23 Mixing"). None of those lines is the recipe.
+    final lines = _withoutCaptionNoise(description)
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) =>
+            line.isNotEmpty &&
+            !line.contains('://') &&
+            !_chapterMark.hasMatch(line))
+        .toList();
 
-    if (descText == null || descText.length < 50) return null;
-
-    final parsed = _parseStructuredText(descText);
-    if (parsed.ingredients.isEmpty && parsed.instructions.isEmpty) {
-      return _parseSocialCaption(descText, title, image);
-    }
+    // Most videos are not recipes, so the description has to read like one.
+    final parsed = _recipeFromLines(lines);
+    if (parsed == null) return null;
     parsed.title = _cleanSocialTitle(title);
     parsed.imageUrl = image;
     return parsed;
+  }
+
+  static final _chapterMark = RegExp(r'^\d{1,2}:\d{2}');
+  static final _youtubeDescriptionKey = RegExp(r'"shortDescription"\s*:\s*"');
+
+  /// The full video description, from the player data in the page's scripts.
+  static String? _youtubeDescription(Document document) {
+    for (final script in document.querySelectorAll('script')) {
+      final source = script.text;
+      final key = _youtubeDescriptionKey.firstMatch(source);
+      if (key == null) continue;
+      // The value is a JSON string. It ends at the first quote that is not
+      // escaped.
+      var end = key.end;
+      while (end < source.length && source.codeUnitAt(end) != 0x22) {
+        end += source.codeUnitAt(end) == 0x5C ? 2 : 1;
+      }
+      if (end >= source.length) return null;
+      try {
+        return jsonDecode(source.substring(key.end - 1, end + 1)) as String;
+      } on FormatException {
+        return null;
+      }
+    }
+    return null;
   }
 
   /// Squarespace: Try specific Squarespace blog patterns when JSON-LD and standard selectors miss
   static ImportedRecipe? _trySquarespace(Document document) {
     // Squarespace recipe blogs often use plain content blocks
     // Look for content with recipe-like structure in .sqs-block-content
-    final blocks = document.querySelectorAll('.sqs-block-content, .sqs-layout');
+    // Only the blocks themselves. The layout around them holds the same text
+    // again, and reading both doubles every line.
+    final blocks = document.querySelectorAll('.sqs-block-content');
     if (blocks.isEmpty) return null;
 
-    // Combine all block text and try structured parsing
-    final allText = blocks.map((b) => b.text).join('\n');
-    if (allText.length < 100) return null;
-
-    final parsed = _parseStructuredText(allText);
-    if (parsed.ingredients.isEmpty && parsed.instructions.isEmpty) return null;
+    // Read the blocks line by line and try structured parsing. Their plain
+    // text would run every paragraph into the next.
+    final parsed = _recipeFromLines([
+      for (final block in blocks) ..._blockLines(block),
+    ]);
+    if (parsed == null) return null;
 
     parsed.title = _extractBestTitle(document);
     parsed.imageUrl ??= _findBestImage(document);
@@ -1808,7 +2764,10 @@ class RecipeImportEngine {
 
   /// Clean a social media title (remove "on Instagram", "| TikTok", etc.)
   static String _cleanSocialTitle(String title) {
-    return title
+    // A title is short. What comes after is not read, which also keeps the
+    // patterns below quick on a line that never ends.
+    final start = title.length > 300 ? title.substring(0, 300) : title;
+    return start
         .replaceAll(RegExp(r'\s*[|–—]\s*(Instagram|TikTok|Pinterest|YouTube).*$', caseSensitive: false), '')
         .replaceAll(RegExp(r'\s*on\s+(Instagram|TikTok|Pinterest).*$', caseSensitive: false), '')
         .replaceAll(RegExp(r'^(Instagram|TikTok|Pinterest)\s*[|–—:]\s*', caseSensitive: false), '')
@@ -1822,8 +2781,10 @@ class RecipeImportEngine {
   /// Returns null if the text doesn't look like a social media caption.
   static String? _extractSocialTitle(String text) {
     // Pattern: "Username on Instagram: "recipe title here..."
+    // The lengths are capped: an account name is short, and a pattern that
+    // may start anywhere and run to the end takes very long on a long line.
     final instagramQuoteMatch = RegExp(
-      r'(?:^|\b)\w[\w.]*\s+on\s+Instagram:\s*["""\u201C]([^"""\u201D]+)["""\u201D]',
+      r'(?:^|\b)\w[\w.]{0,60}\s{1,10}on\s{1,10}Instagram:\s{0,10}["""\u201C]([^"""\u201D]{1,5000})["""\u201D]',
       caseSensitive: false,
     ).firstMatch(text);
     if (instagramQuoteMatch != null) {
@@ -1879,6 +2840,157 @@ class RecipeImportEngine {
     return null;
   }
 
+  static final _instagramWrapper = RegExp(
+      r'^.{0,200}?(?:\bon Instagram|\b\d{4}):\s{0,5}["“]',
+      caseSensitive: false);
+
+  /// The caption inside one of Instagram's meta tags, or null when [text] is
+  /// not in either wrapped form:
+  ///   og:title        Name on Instagram: "caption"
+  ///   og:description  12K likes, 340 comments - name on February 3, 2025: "caption".
+  static String? _instagramCaption(String text) {
+    final opening = _instagramWrapper.firstMatch(text);
+    if (opening == null) return null;
+    // Without the closing quote and the full stop og:description puts after
+    // it. A caption that was cut short has neither and is left as it is.
+    final caption = text.substring(opening.end).trimRight();
+    final body = caption.endsWith('.')
+        ? caption.substring(0, caption.length - 1).trimRight()
+        : caption;
+    final isClosed = body.endsWith('"') || body.endsWith('”');
+    return isClosed ? body.substring(0, body.length - 1) : caption;
+  }
+
+  static final _emoji = RegExp(
+      r'[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]',
+      unicode: true);
+  static final _hashtagsOnly = RegExp(
+      r'^(?:[#@][\p{L}\p{N}_]+(?:\.[\p{L}\p{N}_]+)*[\s,.]*)+$',
+      unicode: true);
+  static final _bareLink = RegExp(r'^(?:https?://|www\.)\S+$', caseSensitive: false);
+
+  static final _captionLineOpening = RegExp(r'^[^\p{L}\p{N}#@]+', unicode: true);
+
+  // Only what a line opens with counts. "Follow" and "comment" in the middle
+  // of a sentence are ordinary words in a step ("follow the package
+  // directions"), and so is "save" before anything but the post itself
+  // ("save the pasta water").
+  static final _callToAction = RegExp(
+      r"^(?:(?:don['’]?t forget|remember|make sure|be sure) to |please )?(?:"
+      r'save (?:this (?:recipe|post|reel|video|one)|(?:this|it) for (?:later|next time)|for later)\b|'
+      r'follow (?:me|us|along|for more|@)|'
+      r'comment\b.{0,60}\b(?:recipe|below|link)\b|'
+      r'tag (?:a|someone|your)\b|'
+      r'share this (?:recipe|post|reel|video|with)\b|'
+      r'subscribe\b|'
+      r'(?:full )?recipe (?:is )?(?:linked )?in (?:my |the )?bio\b|'
+      r'link in (?:my |the )?bio\b|'
+      r'dm me\b|'
+      r'like this (?:recipe|post|reel|video)\b|'
+      r'(?:like|share)(?:,| and| &| \+) ?(?:like|share|subscribe|follow|save|comment)\b|'
+      // How a video description signs off.
+      r'thanks? (?:you )?(?:so much )?for watching\b|'
+      r'music(?: by\b|:)|'
+      r'(?:filmed|shot|edited) (?:on|with|by)\b|'
+      r'business (?:inquiries|enquiries)\b)',
+      caseSensitive: false);
+
+  /// A caption line that is about the account and not the dish: hashtags, a
+  /// bare link, or a call to follow, save or comment.
+  static bool _isCaptionNoise(String line) {
+    // Past the emoji or bullet the line opens with.
+    final text = line.replaceFirst(_captionLineOpening, '');
+    return text.isEmpty ||
+        _hashtagsOnly.hasMatch(text) ||
+        _bareLink.hasMatch(text) ||
+        _callToAction.hasMatch(text);
+  }
+
+  /// [caption] without its noise lines and without the hashtags that trail
+  /// the other lines.
+  static String _withoutCaptionNoise(String caption) {
+    final kept = <String>[];
+    for (final raw in caption.split('\n')) {
+      final line = _withoutTrailingHashtags(raw).trim();
+      if (line.isEmpty) {
+        kept.add('');
+      } else if (!_isCaptionNoise(line)) {
+        kept.add(line);
+      }
+    }
+    return kept.join('\n').trim();
+  }
+
+  /// [line] without the hashtags it ends in ("so good #pasta #dinner").
+  ///
+  /// Read from the end, a tag at a time. A pattern for "a run of tags at the
+  /// end" has to try that from every space in the line, which takes minutes
+  /// on a line that is long enough.
+  static String _withoutTrailingHashtags(String line) {
+    bool isSpace(int index) {
+      final unit = line.codeUnitAt(index);
+      return unit <= 0x20 || unit == 0xA0 || unit == 0x3000;
+    }
+
+    var end = line.length;
+    while (true) {
+      var tagEnd = end;
+      while (tagEnd > 0 && isSpace(tagEnd - 1)) {
+        tagEnd--;
+      }
+      var tagStart = tagEnd;
+      while (tagStart > 0 && !isSpace(tagStart - 1) && line.codeUnitAt(tagStart - 1) != 0x23) {
+        tagStart--;
+      }
+      // A tag is a word with a "#" in front and a space before that.
+      final isTag = tagStart < tagEnd &&
+          tagStart >= 2 &&
+          line.codeUnitAt(tagStart - 1) == 0x23 &&
+          isSpace(tagStart - 2);
+      if (!isTag) return line.substring(0, end);
+      end = tagStart - 2;
+    }
+  }
+
+  /// [caption] with its method under a heading of its own. Captions often
+  /// head the ingredients and then just carry on with the steps, which would
+  /// all be read as more ingredients.
+  static String _withMethodHeading(String caption) {
+    final lines = caption.split('\n');
+    final method = _unheadedMethodStart(lines);
+    if (method < 0) return caption;
+    lines.insert(method, 'Instructions:');
+    return lines.join('\n');
+  }
+
+  /// The name of the dish from the first line of a caption: up to the first
+  /// emoji or the end of the first sentence, without hashtags and mentions.
+  static String? _captionTitle(String caption) {
+    var title = caption
+        .split('\n')
+        .map((line) => line.trim())
+        .firstWhere((line) => line.isNotEmpty, orElse: () => '');
+    // The name of a dish is short. What comes after is not read.
+    if (title.length > 300) title = title.substring(0, 300);
+    title = title.replaceFirst(RegExp(r'^[^\p{L}\p{N}]+', unicode: true), '');
+
+    final emoji = _emoji.firstMatch(title);
+    if (emoji != null && emoji.start > 3) title = title.substring(0, emoji.start);
+    title = title
+        .replaceAll(_emoji, ' ')
+        .replaceAll(RegExp(r'[#@][\p{L}\p{N}_.]+', unicode: true), ' ');
+
+    final sentenceEnd = RegExp(r'[.!?](?:\s|$)').firstMatch(title);
+    if (sentenceEnd != null && sentenceEnd.start > 3) {
+      title = title.substring(0, sentenceEnd.start);
+    }
+    title = title
+        .replaceAll(RegExp(r'''^["'“”\s]+|["'“”\s:,;|\-#@]+$'''), '')
+        .replaceAll(_whitespace, ' ')
+        .trim();
+    return (title.length > 3 && title.length < 150) ? title : null;
+  }
+
   /// Get meta tag content by property or name
   static String? _getMetaContent(Document document, String key) {
     final byProperty = document.querySelector('meta[property="$key"]')?.attributes['content'];
@@ -1907,11 +3019,8 @@ class RecipeImportEngine {
       '.recipe-image img',
       '[itemprop="image"]',
     ]) {
-      final el = document.querySelector(selector);
-      if (el != null) {
-        final src = el.attributes['src'] ?? el.attributes['data-src'] ?? el.attributes['data-lazy-src'];
-        if (src != null && src.isNotEmpty) return src;
-      }
+      final src = _imageAddress(document.querySelector(selector));
+      if (src != null) return src;
     }
 
     // 4. Largest image by dimensions or class hints
@@ -1927,6 +3036,8 @@ class RecipeImportEngine {
       // Skip tiny images, icons, avatars
       if (width > 0 && width < 100) continue;
       if (src.contains('avatar') || src.contains('icon') || src.contains('logo')) continue;
+      // An inline placeholder with no real address behind it.
+      if (dataSrc == null && src.startsWith('data:')) continue;
 
       if (area > bestArea) {
         bestArea = area;
@@ -1939,6 +3050,40 @@ class RecipeImportEngine {
     return bestSrc;
   }
 
+  /// The address an image element points at, whichever attribute holds it.
+  /// Lazy-loading themes keep the real one in data-src and put an inline
+  /// placeholder in src; microdata uses content or href.
+  static String? _imageAddress(Element? element) {
+    if (element == null) return null;
+    for (final name in const ['data-src', 'data-lazy-src', 'src', 'content', 'href']) {
+      final value = element.attributes[name]?.trim() ?? '';
+      if (value.isNotEmpty && !value.startsWith('data:')) return value;
+    }
+    return null;
+  }
+
+  /// [value] as an address the app can download an image from: absolute,
+  /// http or https. A relative one is resolved against [pageUrl] when the
+  /// page has an address. Anything else gives null, since a recipe without a
+  /// photo is better than one whose photo fails to download.
+  static String? _absoluteUrl(String? value, [String? pageUrl]) {
+    var address = value?.trim().replaceAll('&amp;', '&') ?? '';
+    if (address.isEmpty || address.contains(_unreadableMark)) return null;
+    // "//cdn.example/photo.jpg" leaves the scheme to the page it is on.
+    if (address.startsWith('//') && pageUrl == null) address = 'https:$address';
+    try {
+      var uri = Uri.parse(address);
+      if (!uri.hasScheme && pageUrl != null) {
+        uri = Uri.parse(pageUrl).resolveUri(uri);
+        address = uri.toString();
+      }
+      final isWeb = uri.scheme == 'http' || uri.scheme == 'https';
+      return isWeb && uri.host.isNotEmpty ? address : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   // ========== APP-SPECIFIC HTML PARSERS ==========
 
   /// Detect and parse app-specific HTML export formats
@@ -1947,22 +3092,38 @@ class RecipeImportEngine {
     if (document.querySelector('.recipe-details') != null ||
         rawHtml.contains('RecipeKeeper') ||
         document.querySelectorAll('[class*="recipe-details"]').length > 1) {
-      return _parseRecipeKeeperHtml(document);
+      final recipes = _parseRecipeKeeperHtml(document);
+      if (recipes.isNotEmpty) return recipes;
     }
 
-    // CopyMeThat: HTML export with <div class="recipe"> blocks
-    if (rawHtml.contains('CopyMeThat') ||
+    // CopyMeThat: HTML export with <div class="recipe"> blocks. The file only
+    // names the app in a lower-case meta tag, so it is also known by its
+    // structure: a name and the two lists, each under its own id.
+    final hasCopyMeThatIds = rawHtml.contains('copymethat_class_id_version') ||
+        (document.querySelector('div.recipe #name') != null &&
+            document.querySelector('div.recipe #recipeIngredients, div.recipe #recipeInstructions') != null);
+    final namesCopyMeThat = rawHtml.contains('CopyMeThat') ||
         rawHtml.contains('copymeThat') ||
-        document.querySelector('.recipeGroup') != null) {
-      return _parseCopyMeThatHtml(document);
+        document.querySelector('.recipeGroup') != null;
+    if (hasCopyMeThatIds || namesCopyMeThat) {
+      final recipes = _parseCopyMeThatHtml(document);
+      if (recipes.isNotEmpty) return recipes;
+      // A file that names the app but has none of the ids is read by its
+      // headings and lists. A page that only happens to share the ids is
+      // left to the other parsers.
+      if (namesCopyMeThat) return _parseCopyMeThatByLists(document);
     }
 
     return [];
   }
 
+  static final _zeroWidth = RegExp(r'[\u200B-\u200D\uFEFF]');
+
   /// Parse RecipeKeeper's monolithic HTML export.
   /// RecipeKeeper exports ALL recipes into a single (often 600KB+) HTML file.
-  /// Structure: multiple <div class="recipe-details"> each containing the recipe.
+  /// Structure: multiple <div class="recipe-details"> each containing the recipe,
+  /// its fields marked with itemprop attributes (recipeIngredients,
+  /// recipeDirections, recipeYield and so on).
   static List<ImportedRecipe> _parseRecipeKeeperHtml(Document document) {
     final recipes = <ImportedRecipe>[];
 
@@ -1976,77 +3137,94 @@ class RecipeImportEngine {
 
     for (final block in recipeBlocks) {
       try {
-        // Title
-        final titleEl = block.querySelector('.recipe-title, h2, h1, .title');
-        final title = titleEl?.text.trim() ?? 'Imported Recipe';
+        // A field is found by its itemprop. The class names are what files
+        // without the itemprop attributes still have.
+        Element? field(String property, String classes) =>
+            block.querySelector('[itemprop="$property"]') ??
+            block.querySelector(classes);
 
-        // Ingredients
-        final ingSection = block.querySelector('.recipe-ingredients, [class*="ingredient"]');
-        final ingredients = <String>[];
-        if (ingSection != null) {
-          // RecipeKeeper uses <li> or <p> or plain text with line breaks
-          final listItems = ingSection.querySelectorAll('li');
-          if (listItems.isNotEmpty) {
-            ingredients.addAll(listItems
-                .map((e) => _cleanHtmlText(e.text) ?? '')
-                .where((s) => s.isNotEmpty && s.length > 2));
-          } else {
-            // Plain text separated by <br> or newlines
-            ingredients.addAll(ingSection.innerHtml
-                .replaceAll(RegExp(r'<br\s*/?>'), '\n')
-                .replaceAll(RegExp(r'<[^>]+>'), '')
-                .split('\n')
-                .map((l) => l.trim())
-                .where((l) => l.isNotEmpty && l.length > 2));
-          }
+        // A value is the content of a <meta>, or the text of anything else.
+        String? valueOf(Element? element) {
+          if (element == null) return null;
+          final value = element.localName == 'meta'
+              ? _cleanHtmlText(element.attributes['content']) ?? ''
+              : _blockLines(element).join(' ');
+          return value.isEmpty ? null : value;
         }
 
-        // Instructions
-        final instSection = block.querySelector('.recipe-directions, .recipe-instructions, [class*="direction"], [class*="instruction"]');
+        List<String> valuesOf(String selector) {
+          final values = <String>[];
+          for (final element in block.querySelectorAll(selector)) {
+            for (final value in (valueOf(element) ?? '').split(',')) {
+              if (value.trim().isNotEmpty) values.add(value.trim());
+            }
+          }
+          return values;
+        }
+
+        // Ingredients, directions and notes hold one <p> or <li> per line,
+        // or plain text with <br> or bare line breaks between the lines.
+        List<String> linesOf(Element? box) => box == null
+            ? []
+            : _blockLines(box, keepLines: box.querySelector('p, li, br') == null);
+
+        // Title. The export writes zero-width spaces in front of some.
+        final title = (valueOf(field('name', '.recipe-title, h2, h1, .title')) ?? '')
+            .replaceAll(_zeroWidth, '')
+            .trim();
+
+        final ingredients = linesOf(field('recipeIngredients', '.recipe-ingredients, [class*="ingredient"]'));
+
         final instructions = <String>[];
-        if (instSection != null) {
-          final listItems = instSection.querySelectorAll('li');
-          if (listItems.isNotEmpty) {
-            instructions.addAll(listItems
-                .map((e) => _cleanHtmlText(e.text) ?? '')
-                .where((s) => s.isNotEmpty && s.length > 5));
-          } else {
-            instructions.addAll(instSection.innerHtml
-                .replaceAll(RegExp(r'<br\s*/?>'), '\n')
-                .replaceAll(RegExp(r'<[^>]+>'), '')
-                .split('\n')
-                .map((l) => l.trim())
-                .where((l) => l.isNotEmpty && l.length > 5));
-          }
+        for (final line in linesOf(field('recipeDirections',
+            '.recipe-directions, .recipe-instructions, [class*="direction"], [class*="instruction"]'))) {
+          final step = _stepText(line);
+          if (step.isNotEmpty) instructions.add(step);
         }
 
-        // Notes
-        final notesEl = block.querySelector('.recipe-notes, [class*="note"]');
-        final notes = notesEl != null ? _cleanHtmlText(notesEl.text) : null;
+        final notes = linesOf(field('recipeNotes', '.recipe-notes, [class*="note"]')).join('\n');
 
-        // Metadata
-        final servingsEl = block.querySelector('[class*="serving"], [class*="yield"]');
-        final prepEl = block.querySelector('[class*="prep"]');
-        final cookEl = block.querySelector('[class*="cook"]');
-        final categoryEl = block.querySelector('[class*="category"], [class*="course"]');
-        final imageEl = block.querySelector('img');
+        // Source: the link when there is one, otherwise what was typed
+        // ("Grandma's notebook").
+        final sourceEl = field('recipeSource', '[class*="source"], [class*="url"]');
+        final sourceLink = sourceEl?.localName == 'a' ? sourceEl : sourceEl?.querySelector('a[href]');
+        final source = sourceLink?.attributes['href']?.trim() ?? valueOf(sourceEl) ?? '';
 
-        // Source URL
-        final sourceEl = block.querySelector('[class*="source"] a, [class*="url"] a');
+        // The course becomes one of the app's own courses when it matches
+        // one. Categories, collections and a course the app does not have
+        // are kept as tags.
+        final courses = valuesOf('[itemprop="recipeCourse"]');
+        String? courseId;
+        for (final course in courses) {
+          courseId ??= mapToCourseId(course);
+        }
+        final tags = <String>{
+          ...valuesOf('[itemprop="recipeCategory"], [itemprop="recipeCollection"]'),
+          if (courseId == null) ...courses,
+        };
+        if (tags.isEmpty) tags.addAll(valuesOf('[class*="category"], [class*="course"]'));
+
+        final rating = int.tryParse(valueOf(block.querySelector('[itemprop="recipeRating"]')) ?? '');
+
+        // The photos are files beside the export, which an HTML file picked
+        // on its own cannot reach. Only a real web address is kept.
+        final imageEl = block.querySelector('img.recipe-photo') ?? block.querySelector('img');
 
         if (ingredients.isNotEmpty || instructions.isNotEmpty) {
           recipes.add(ImportedRecipe(
-            title: title,
+            title: title.isEmpty ? 'Imported Recipe' : title,
             ingredients: ingredients,
             instructions: instructions,
-            notes: notes,
-            servings: servingsEl != null ? _cleanHtmlText(servingsEl.text) : null,
-            prepTimeMinutes: prepEl != null ? _parseTimeString(_cleanHtmlText(prepEl.text) ?? '') : null,
-            cookTimeMinutes: cookEl != null ? _parseTimeString(_cleanHtmlText(cookEl.text) ?? '') : null,
-            imageUrl: imageEl?.attributes['src'],
-            sourceUrl: sourceEl?.attributes['href'],
+            notes: notes.isEmpty ? null : notes,
+            servings: valueOf(field('recipeYield', '[class*="serving"], [class*="yield"]')),
+            prepTimeMinutes: _parseTimeValue(valueOf(field('prepTime', '[class*="prep"]'))),
+            cookTimeMinutes: _parseTimeValue(valueOf(field('cookTime', '[class*="cook"]'))),
+            imageUrl: _absoluteUrl(imageEl?.attributes['src']),
+            sourceUrl: source.isEmpty ? null : source,
+            suggestedCourse: courseId,
+            rating: (rating != null && rating >= 1 && rating <= 5) ? rating : null,
             sourceApp: 'recipekeeper',
-            tags: categoryEl != null ? [_cleanHtmlText(categoryEl.text) ?? ''] : null,
+            tags: tags.isEmpty ? null : tags.toList(),
           ));
         }
       } catch (_) {
@@ -2058,8 +3236,23 @@ class RecipeImportEngine {
   }
 
   /// Parse CopyMeThat HTML export.
-  /// Structure: recipe blocks in <div class="recipe"> or similar groupings.
+  /// Structure: one <div class="recipe"> per recipe. Its fields are told
+  /// apart by id (#name, #recipeIngredients, #recipeInstructions and so on),
+  /// and the same ids repeat in every recipe, so each is looked up inside its
+  /// own block.
   static List<ImportedRecipe> _parseCopyMeThatHtml(Document document) {
+    final recipes = <ImportedRecipe>[];
+
+    for (final block in document.querySelectorAll('div.recipe')) {
+      final recipe = _copyMeThatRecipe(block);
+      if (recipe != null) recipes.add(recipe);
+    }
+    return recipes;
+  }
+
+  /// CopyMeThat files without the ids: recipe blocks with a heading for the
+  /// title, a <ul> of ingredients and an <ol> of directions.
+  static List<ImportedRecipe> _parseCopyMeThatByLists(Document document) {
     final recipes = <ImportedRecipe>[];
 
     var blocks = document.querySelectorAll('.recipe, .recipeGroup > div');
@@ -2108,7 +3301,7 @@ class RecipeImportEngine {
             ingredients: ingredients,
             instructions: instructions,
             notes: notesEl != null ? _cleanHtmlText(notesEl.text) : null,
-            imageUrl: imageEl?.attributes['src'],
+            imageUrl: _absoluteUrl(imageEl?.attributes['src']),
             sourceUrl: sourceEl?.attributes['href'],
             sourceApp: 'copymeThat',
           ));
@@ -2119,324 +3312,615 @@ class RecipeImportEngine {
     return recipes;
   }
 
-  // ========== APP-SPECIFIC JSON PARSERS ==========
+  /// One recipe of a CopyMeThat export, or null when [block] is not one.
+  static ImportedRecipe? _copyMeThatRecipe(Element block) {
+    String? text(String selector) {
+      final element = block.querySelector(selector);
+      final value = element == null ? '' : _blockLines(element).join(' ');
+      return value.isEmpty ? null : value;
+    }
 
-  /// Try to detect and parse app-specific JSON formats (single recipe)
-  static ImportedRecipe? _tryAppJson(String content) {
-    try {
-      final json = jsonDecode(content);
-      if (json is Map<String, dynamic>) {
-        // Crouton format
-        if (json.containsKey('ingredientSections') || json.containsKey('stepSections')) {
-          return _parseCroutonRecipe(json);
-        }
-        // Tandoor format
-        if (json.containsKey('steps') && json['steps'] is List && json.containsKey('working_time')) {
-          return _parseTandoorRecipe(json);
-        }
-        // Mealie format
-        if (json.containsKey('recipe_ingredient') || json.containsKey('recipe_instructions')) {
-          return _parseMealieRecipe(json);
-        }
-        // Samsung Food / Whisk format
-        if (json.containsKey('whpiRecipeId') || json.containsKey('recipeItems')) {
-          return _parseSamsungFoodRecipe(json);
-        }
+    // One <li> per line. Empty spacer items separate groups and are skipped;
+    // a sub-header naming a group ("Filling") is written "Filling:", the
+    // form the app turns into a heading.
+    List<String> lines(String selector) {
+      final found = <String>[];
+      for (final item in block.querySelectorAll(selector)) {
+        final line = _blockLines(item).join(' ');
+        if (line.isEmpty) continue;
+        final isHeader = item.className.contains('subheader');
+        found.add(isHeader && !line.endsWith(':') ? '$line:' : line);
       }
-    } catch (_) {}
-    return null;
-  }
-
-  /// Try to detect and parse app-specific JSON formats (multiple recipes)
-  static List<ImportedRecipe> _tryAppJsonBulk(String content) {
-    try {
-      final json = jsonDecode(content);
-
-      // Array of recipes
-      if (json is List) {
-        final recipes = <ImportedRecipe>[];
-        for (final item in json) {
-          if (item is Map<String, dynamic>) {
-            final recipe = _tryAppJsonSingle(item);
-            if (recipe != null) recipes.add(recipe);
-          }
-        }
-        if (recipes.isNotEmpty) return recipes;
-      }
-
-      // Wrapper object with recipes array
-      if (json is Map<String, dynamic>) {
-        // Tandoor export: {"recipes": [...]}
-        final recipesArray = json['recipes'] ?? json['items'] ?? json['data'];
-        if (recipesArray is List) {
-          final recipes = <ImportedRecipe>[];
-          for (final item in recipesArray) {
-            if (item is Map<String, dynamic>) {
-              final recipe = _tryAppJsonSingle(item);
-              if (recipe != null) recipes.add(recipe);
-            }
-          }
-          if (recipes.isNotEmpty) return recipes;
-        }
-
-        // Mealie export: {"groups": [{"recipes": [...]}]}
-        final groups = json['groups'];
-        if (groups is List) {
-          final recipes = <ImportedRecipe>[];
-          for (final group in groups) {
-            if (group is Map && group['recipes'] is List) {
-              for (final item in group['recipes']) {
-                if (item is Map<String, dynamic>) {
-                  final recipe = _parseMealieRecipe(item);
-                  recipes.add(recipe);
-                }
-              }
-            }
-          }
-          if (recipes.isNotEmpty) return recipes;
-        }
-
-        // Single recipe
-        final single = _tryAppJsonSingle(json);
-        if (single != null) return [single];
-      }
-    } catch (_) {}
-    return [];
-  }
-
-  /// Try a single JSON object against all known app formats
-  static ImportedRecipe? _tryAppJsonSingle(Map<String, dynamic> json) {
-    // Crouton
-    if (json.containsKey('ingredientSections') || json.containsKey('stepSections')) {
-      return _parseCroutonRecipe(json);
-    }
-    // Tandoor
-    if (json.containsKey('steps') && json['steps'] is List && json.containsKey('working_time')) {
-      return _parseTandoorRecipe(json);
-    }
-    // Mealie
-    if (json.containsKey('recipe_ingredient') || json.containsKey('recipe_instructions')) {
-      return _parseMealieRecipe(json);
-    }
-    // Samsung Food / Whisk
-    if (json.containsKey('whpiRecipeId') || json.containsKey('recipeItems')) {
-      return _parseSamsungFoodRecipe(json);
-    }
-    // Mela format
-    if (json.containsKey('text') && (json.containsKey('title') || json.containsKey('name'))) {
-      final text = json['text']?.toString() ?? '';
-      if (text.contains('---') || json.containsKey('images') || json.containsKey('categories')) {
-        return parseMelaRecipe(json);
-      }
-    }
-    // Generic recipe JSON detection — catches exports from lesser-known apps
-    final hasTitle = json.containsKey('title') || json.containsKey('name');
-    final hasIngredients = json.containsKey('ingredients') || json.containsKey('recipeIngredient');
-    final hasInstructions = json.containsKey('instructions') || json.containsKey('directions') ||
-        json.containsKey('steps') || json.containsKey('recipeInstructions');
-    if (hasTitle && hasIngredients && hasInstructions) {
-      return _buildRecipeFromJsonMap(json);
-    }
-    return null;
-  }
-
-  /// Parse Crouton app JSON format.
-  /// Structure: { name, ingredientSections: [{ingredients: [{quantity, unit, name}]}], stepSections: [{steps: [{text}]}] }
-  static ImportedRecipe _parseCroutonRecipe(Map<String, dynamic> json) {
-    final ingredients = <String>[];
-    final instructions = <String>[];
-
-    // Ingredients: nested in sections
-    final ingSections = json['ingredientSections'] ?? json['ingredients'];
-    if (ingSections is List) {
-      for (final section in ingSections) {
-        if (section is Map) {
-          final sectionName = section['name']?.toString();
-          if (sectionName != null && sectionName.isNotEmpty) {
-            ingredients.add('— $sectionName —');
-          }
-          final items = section['ingredients'] ?? section['items'];
-          if (items is List) {
-            for (final ing in items) {
-              if (ing is Map) {
-                final qty = ing['quantity']?.toString() ?? '';
-                final unit = ing['unit']?.toString() ?? '';
-                final name = ing['name']?.toString() ?? ing['ingredient']?.toString() ?? '';
-                final parts = [qty, unit, name].where((s) => s.isNotEmpty).join(' ');
-                if (parts.isNotEmpty) ingredients.add(parts);
-              } else if (ing is String) {
-                ingredients.add(ing);
-              }
-            }
-          }
-        } else if (section is String) {
-          ingredients.add(section);
-        }
-      }
+      return found;
     }
 
-    // Steps: nested in sections
-    final stepSections = json['stepSections'] ?? json['steps'];
-    if (stepSections is List) {
-      for (final section in stepSections) {
-        if (section is Map) {
-          final steps = section['steps'] ?? section['items'];
-          if (steps is List) {
-            for (final step in steps) {
-              final text = step is Map ? (step['text'] ?? step['instruction'])?.toString() : step?.toString();
-              if (text != null && text.isNotEmpty) instructions.add(text);
-            }
-          }
-          // Single text field
-          final text = section['text']?.toString();
-          if (text != null && text.isNotEmpty) instructions.add(text);
-        } else if (section is String) {
-          instructions.add(section);
-        }
-      }
-    }
+    final ingredients = lines('#recipeIngredients li');
+    final instructions = lines('#recipeInstructions li');
+    if (ingredients.isEmpty && instructions.isEmpty) return null;
+
+    final notes = lines('#recipeNotes li, li.recipeNote').join('\n');
+    final tags = lines('span.recipeCategory');
+    final rating = int.tryParse(text('#ratingValue') ?? '');
+    final source = block.querySelector('#original_link');
+    final sourceUrl = source?.attributes['href']?.trim() ?? '';
 
     return ImportedRecipe(
-      title: json['name']?.toString() ?? json['title']?.toString() ?? 'Crouton Recipe',
-      description: json['description']?.toString(),
+      title: text('#name') ?? text('h1, h2, .title') ?? 'Imported Recipe',
+      description: text('#description'),
       ingredients: ingredients,
       instructions: instructions,
-      servings: json['servings']?.toString() ?? json['yield']?.toString(),
-      prepTimeMinutes: _parseTimeValue(json['prepTime'] ?? json['prep_time']),
-      cookTimeMinutes: _parseTimeValue(json['cookTime'] ?? json['cook_time']),
-      imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString(),
-      sourceUrl: json['url']?.toString() ?? json['sourceUrl']?.toString(),
+      notes: notes.isEmpty ? null : notes,
+      servings: text('#recipeYield'),
+      prepTimeMinutes: _parseTimeValue(text('[meta="prepTime"]')),
+      cookTimeMinutes: _parseTimeValue(text('[meta="cookTime"]')),
+      rating: (rating != null && rating >= 1 && rating <= 5) ? rating : null,
+      tags: tags.isEmpty ? null : tags,
+      sourceUrl: sourceUrl.isNotEmpty ? sourceUrl : text('#original_link'),
+      // The photos are files beside the export. Only a real web address is
+      // kept, a relative path would just fail to download.
+      imageUrl: _absoluteUrl(block.querySelector('img.recipeImage')?.attributes['src']),
+      sourceApp: 'copymeThat',
+    );
+  }
+
+  // ========== APP-SPECIFIC JSON PARSERS ==========
+
+  /// The first recipe in a JSON text, in whichever of the formats below it
+  /// is written.
+  static ImportedRecipe? _tryAppJson(String content) =>
+      _tryAppJsonBulk(content).firstOrNull;
+
+  /// Every recipe in a JSON text: one recipe, a list of them, or an export
+  /// that wraps its recipes in an object.
+  static List<ImportedRecipe> _tryAppJsonBulk(String content) {
+    final recipes = _jsonRecipes(_decodeJson(content));
+    // A file has no address to resolve a relative image against, and an
+    // image that cannot be downloaded only shows up as a failed download.
+    for (final recipe in recipes) {
+      recipe.imageUrl = _absoluteUrl(recipe.imageUrl);
+    }
+    return recipes;
+  }
+
+  /// The recipes in decoded JSON. Only an entry that lists ingredients or
+  /// steps is one, so the settings file of an export, or any other JSON that
+  /// is no recipe, gives nothing.
+  static List<ImportedRecipe> _jsonRecipes(dynamic json) {
+    final recipes = <ImportedRecipe>[];
+    void addEach(dynamic entries, {bool fromMealie = false}) {
+      if (entries is! List) return;
+      for (final entry in entries) {
+        if (entry is! Map<String, dynamic>) continue;
+        try {
+          final recipe = fromMealie ? _parseMealieRecipe(entry) : _tryAppJsonSingle(entry);
+          if (_hasContent(recipe)) recipes.add(recipe!);
+        } catch (_) {
+          // One malformed entry must not cost the file its other recipes.
+        }
+      }
+    }
+
+    if (json is List) {
+      addEach(json);
+    } else if (json is Map<String, dynamic>) {
+      if (_isMealieBackup(json)) {
+        // Its rows are Mealie recipes, whatever other keys they carry.
+        addEach(_mealieBackupRecipes(json), fromMealie: true);
+        return recipes;
+      }
+      // An export that wraps its recipes: {"recipes": [...]}
+      addEach(json['recipes'] ?? json['items'] ?? json['data']);
+      // Mealie export: {"groups": [{"recipes": [...]}]}
+      final groups = json['groups'];
+      if (recipes.isEmpty && groups is List) {
+        for (final group in groups) {
+          if (group is Map) addEach(group['recipes']);
+        }
+      }
+      // Single recipe, bare or wrapped: {"recipe": {...}}
+      if (recipes.isEmpty) addEach([json]);
+      if (recipes.isEmpty) addEach([json['recipe']]);
+    }
+    return recipes;
+  }
+
+  /// One JSON object read as a recipe: in the format of the app that wrote
+  /// it when its keys give that away, otherwise by the names recipe data
+  /// commonly uses. Null when it lists neither ingredients nor steps.
+  static ImportedRecipe? _tryAppJsonSingle(Map<String, dynamic> json) {
+    final readers = <ImportedRecipe Function(Map<String, dynamic>)>[
+      if (_isCroutonRecipe(json)) _parseCroutonRecipe,
+      if (json['steps'] is List && json.containsKey('working_time')) _parseTandoorRecipe,
+      if (_isMealieRecipe(json)) _parseMealieRecipe,
+      if (json.containsKey('whpiRecipeId') || json.containsKey('recipeItems')) _parseSamsungFoodRecipe,
+      if (_isMelaRecipe(json)) parseMelaRecipe,
+      _buildRecipeFromJsonMap,
+    ];
+    // Keys that look like an app's can turn up in other data. What one
+    // reader does not find is left to the next, and in the end to the common
+    // names.
+    ImportedRecipe? recipe;
+    for (final read in readers) {
+      final found = read(json);
+      if (recipe == null || !_hasContent(recipe)) {
+        recipe = found;
+      } else {
+        if (recipe.ingredients.isEmpty) recipe.ingredients = found.ingredients;
+        if (recipe.instructions.isEmpty) recipe.instructions = found.instructions;
+      }
+      if (_isComplete(recipe)) break;
+    }
+    return _hasContent(recipe) ? recipe : null;
+  }
+
+  /// [rows] sorted by the number each carries under [key], which is the
+  /// order the app that wrote them shows them in. Rows without one follow
+  /// in file order.
+  static List<dynamic> _rowsInOrder(dynamic rows, String key) {
+    if (rows is! List) return const [];
+    final byOrder = [
+      for (var i = 0; i < rows.length; i++)
+        (rows[i] is Map && rows[i][key] is num ? rows[i][key] as num : null, i),
+    ];
+    byOrder.sort((a, b) {
+      final (orderA, indexA) = a;
+      final (orderB, indexB) = b;
+      if (orderA == null || orderB == null) {
+        if (orderA != null) return -1;
+        if (orderB != null) return 1;
+      } else if (orderA != orderB) {
+        return orderA.compareTo(orderB);
+      }
+      return indexA.compareTo(indexB);
+    });
+    return [for (final (_, index) in byOrder) rows[index]];
+  }
+
+  static final _notLetters = RegExp(r'[^a-z0-9]+');
+
+  /// Where a recipe is from: its link when the export has one, otherwise the
+  /// name it gives (a site, a book, "Grandma"). With both, the name comes
+  /// back as a line for the notes, unless the link already says it the way
+  /// "seriouseats.com" says "Serious Eats".
+  static (String?, String?) _sourceAndNote(String? link, String? name) {
+    if (link == null || name == null) return (link ?? name, null);
+    String letters(String text) => text.toLowerCase().replaceAll(_notLetters, '');
+    final inLink = letters(name).isNotEmpty && letters(link).contains(letters(name));
+    return (link, inLink ? null : 'Source: $name');
+  }
+
+  /// A detail the app has no field for, as a paragraph for the notes.
+  static String? _labelledNote(String label, String? text) {
+    if (text == null) return null;
+    return text.contains('\n') ? '$label:\n$text' : '$label: $text';
+  }
+
+  /// [parts] as notes, a blank line between them. Null when there are none.
+  static String? _joinNotes(List<String?> parts) {
+    final notes = parts.nonNulls.join('\n\n');
+    return notes.isEmpty ? null : notes;
+  }
+
+  /// The first of [names] (categories, tags) that names one of the app's
+  /// courses.
+  static String? _courseAmong(Iterable<String?> names) {
+    for (final name in names.nonNulls) {
+      final course = mapToCourseId(name);
+      if (course != null) return course;
+    }
+    return null;
+  }
+
+  /// The first picture in a list that holds data: base64 text, or an object
+  /// that carries it under "data". The text is megabytes long, so it is
+  /// handed on as it is.
+  static String? _firstImageData(dynamic images) {
+    if (images is! List) return null;
+    for (final image in images) {
+      final data = image is Map ? image['data'] : image;
+      if (data is String && data.trim().isNotEmpty) return data;
+    }
+    return null;
+  }
+
+  /// What a Crouton recipe is known by: an ingredient list in its shape, the
+  /// amount and the food each in an object of their own, or steps in its
+  /// shape next to a key only Crouton writes.
+  static bool _isCroutonRecipe(Map<String, dynamic> json) {
+    if (json.containsKey('ingredientSections') || json.containsKey('stepSections')) return true;
+    final ingredients = json['ingredients'];
+    if (ingredients is List && ingredients.any((row) => row is Map && row['ingredient'] is Map)) {
+      return true;
+    }
+    final steps = json['steps'];
+    return (json.containsKey('cookingDuration') || json.containsKey('folderIDs')) &&
+        steps is List &&
+        steps.any((row) => row is Map && row['step'] is String);
+  }
+
+  /// The units a .crumb file names, as a cook writes them. Any other
+  /// ("PINCH", "CAN") reads well enough in lower case.
+  static const _croutonUnits = {
+    'ITEM': '',
+    'CUP': 'cup',
+    'TABLESPOON': 'tbsp',
+    'TEASPOON': 'tsp',
+    'GRAMS': 'g',
+    'KGS': 'kg',
+    'MILLS': 'ml',
+    'LITRES': 'l',
+    'DECILITER': 'dl',
+    'OUNCE': 'oz',
+    'POUND': 'lb',
+  };
+
+  /// Parse Crouton app JSON format (.crumb).
+  /// Structure: { name, serves, duration and cookingDuration (minutes),
+  /// webLink, sourceName, notes, images (base64), ingredients: [{order,
+  /// quantity: {amount, quantityType}, ingredient: {name}}], steps: [{order,
+  /// step, isSection}] }. A quantityType of SECTION makes the row the title
+  /// of a group. The layout with ingredientSections and stepSections, each
+  /// section holding its rows, is read as well.
+  static ImportedRecipe _parseCroutonRecipe(Map<String, dynamic> json) {
+    final ingredients = <String>[];
+    void addIngredient(dynamic row, int depth) {
+      if (row is String) {
+        if (row.trim().isNotEmpty) ingredients.add(row.trim());
+        return;
+      }
+      if (row is! Map || depth > 2) return;
+      final group = row['ingredients'] ?? row['items'];
+      if (group is List) {
+        final title = _jsonString(row['name']);
+        if (title != null) ingredients.add(_groupTitle(title));
+        for (final item in _rowsInOrder(group, 'order')) {
+          addIngredient(item, depth + 1);
+        }
+        return;
+      }
+      final quantity = row['quantity'];
+      final type = quantity is Map ? _jsonString(quantity['quantityType'])?.toUpperCase() : null;
+      final name = _jsonName(row['ingredient']) ?? _jsonString(row['name']);
+      if (type == 'SECTION') {
+        if (name != null) ingredients.add(_groupTitle(name));
+        return;
+      }
+      final line = [
+        _jsonAmount(quantity is Map ? quantity['amount'] : quantity),
+        type == null
+            ? _jsonString(row['unit'])
+            : _croutonUnits[type] ?? type.toLowerCase().replaceAll('_', ' '),
+        name,
+      ].nonNulls.where((part) => part.isNotEmpty).join(' ');
+      if (line.isNotEmpty) ingredients.add(line);
+    }
+
+    for (final row in _rowsInOrder(json['ingredientSections'] ?? json['ingredients'], 'order')) {
+      addIngredient(row, 0);
+    }
+
+    final steps = <(String, bool)>[];
+    void addStep(dynamic row, int depth) {
+      if (row is String) {
+        steps.add((row, false));
+        return;
+      }
+      if (row is! Map || depth > 2) return;
+      final group = row['steps'] ?? row['items'];
+      if (group is List) {
+        for (final item in _rowsInOrder(group, 'order')) {
+          addStep(item, depth + 1);
+        }
+      }
+      final text = _jsonString(row['step']) ??
+          _jsonString(row['text']) ??
+          _jsonString(row['instruction']);
+      if (text != null) steps.add((text, row['isSection'] == true));
+    }
+
+    for (final row in _rowsInOrder(json['stepSections'] ?? json['steps'], 'order')) {
+      addStep(row, 0);
+    }
+
+    final (sourceUrl, sourceNote) = _sourceAndNote(
+      _jsonString(json['webLink']) ?? _jsonString(json['url']) ?? _jsonString(json['sourceUrl']),
+      _jsonString(json['sourceName']),
+    );
+    final tags = _jsonNames(json['tags']);
+
+    return ImportedRecipe(
+      title: _jsonString(json['name']) ?? _jsonString(json['title']) ?? 'Crouton Recipe',
+      description: _jsonString(json['description']),
+      ingredients: ingredients,
+      instructions: _stepsWithTitles(steps),
+      servings: _jsonServings(json['serves'] ?? json['servings'] ?? json['yield']),
+      prepTimeMinutes: _jsonTime(json, const ['duration', 'prepTime', 'prep_time']),
+      cookTimeMinutes: _jsonTime(json, const ['cookingDuration', 'cookTime', 'cook_time']),
+      imageUrl: _extractImage(json['image'] ?? json['imageUrl']),
+      imageData: _firstImageData(json['images']),
+      sourceUrl: sourceUrl,
+      notes: _joinNotes([
+        _jsonString(json['notes']),
+        sourceNote,
+        // The key is spelled the way Crouton spells it.
+        _labelledNote('Nutrition', _jsonString(json['neutritionalInfo'])),
+      ]),
+      tags: tags.isEmpty ? null : tags,
+      suggestedCourse: _courseAmong(tags),
       sourceApp: 'crouton',
     );
   }
 
   /// Parse Tandoor recipe manager JSON format.
-  /// Structure: { name, steps: [{ingredients: [{food: {name}, unit: {name}, amount}], instruction}], working_time, waiting_time }
+  /// Structure: { name, steps: [{name, instruction, ingredients: [{food:
+  /// {name}, unit: {name}, amount, note, no_amount, is_header}]}],
+  /// working_time and waiting_time (minutes), servings, servings_text,
+  /// keywords: [{name}], source_url }
   static ImportedRecipe _parseTandoorRecipe(Map<String, dynamic> json) {
     final ingredients = <String>[];
-    final instructions = <String>[];
+    final steps = <(String, bool)>[];
 
-    final steps = json['steps'];
-    if (steps is List) {
-      for (final step in steps) {
-        if (step is! Map) continue;
+    final rows = json['steps'];
+    for (final step in rows is List ? rows : const []) {
+      if (step is! Map) continue;
 
-        // Ingredients within each step
-        final stepIngs = step['ingredients'];
-        if (stepIngs is List) {
-          for (final ing in stepIngs) {
-            if (ing is! Map) continue;
-            final amount = ing['amount']?.toString() ?? '';
-            final unit = (ing['unit'] is Map) ? ing['unit']['name']?.toString() ?? '' : '';
-            final food = (ing['food'] is Map) ? ing['food']['name']?.toString() ?? '' : ing['food']?.toString() ?? '';
-            final note = ing['note']?.toString() ?? '';
-            final parts = [amount, unit, food, if (note.isNotEmpty) '($note)']
-                .where((s) => s.isNotEmpty && s != '0')
-                .join(' ');
-            if (parts.isNotEmpty) ingredients.add(parts);
-          }
+      // Ingredients within each step
+      final stepIngredients = step['ingredients'];
+      for (final ingredient in stepIngredients is List ? stepIngredients : const []) {
+        if (ingredient is! Map) continue;
+        final note = _jsonString(ingredient['note']);
+        // A header row is the title of a group, and keeps it in its note.
+        if (ingredient['is_header'] == true) {
+          if (note != null) ingredients.add(_groupTitle(note));
+          continue;
         }
-
-        // Instruction text
-        final instruction = step['instruction']?.toString();
-        if (instruction != null && instruction.isNotEmpty) instructions.add(instruction);
+        final food = _jsonName(ingredient['food']);
+        // "No amount" hides the unit along with the amount. An amount of
+        // zero is none either.
+        final shown = ingredient['no_amount'] != true;
+        final line = [
+          if (shown) _jsonAmount(ingredient['amount']),
+          if (shown) _jsonName(ingredient['unit']),
+          food,
+          if (note != null) food == null ? note : '($note)',
+        ].nonNulls.join(' ');
+        if (line.isNotEmpty) ingredients.add(line);
       }
+
+      // A step may carry a name, which Tandoor shows as a heading over it
+      // unless that is switched off.
+      final name = _jsonString(step['name']);
+      if (name != null && step['show_as_header'] != false) steps.add((name, true));
+      final instruction = _jsonString(step['instruction']);
+      if (instruction != null) steps.add((instruction, false));
     }
 
-    // Tandoor uses seconds for time
-    int? workingTime = json['working_time'] is int ? json['working_time'] as int : null;
-    int? waitingTime = json['waiting_time'] is int ? json['waiting_time'] as int : null;
-    if (workingTime != null) workingTime = (workingTime / 60).round();
-    if (waitingTime != null) waitingTime = (waitingTime / 60).round();
-
-    // Tags/keywords
-    final keywords = json['keywords'];
-    List<String>? tags;
-    if (keywords is List) {
-      tags = keywords.map((k) => k is Map ? k['name']?.toString() ?? '' : k.toString()).where((s) => s.isNotEmpty).toList();
-    }
+    final servings = _jsonAmount(json['servings']);
+    final servingsText = _jsonString(json['servings_text']);
+    final tags = _jsonNames(json['keywords']);
 
     return ImportedRecipe(
-      title: json['name']?.toString() ?? 'Tandoor Recipe',
-      description: json['description']?.toString(),
+      title: _jsonString(json['name']) ?? 'Tandoor Recipe',
+      description: _jsonString(json['description']),
       ingredients: ingredients,
-      instructions: instructions,
-      servings: json['servings']?.toString(),
-      prepTimeMinutes: workingTime,
-      cookTimeMinutes: waitingTime,
-      imageUrl: json['image']?.toString(),
-      sourceUrl: json['source_url']?.toString(),
-      tags: tags,
+      instructions: _stepsWithTitles(steps),
+      servings: servings != null && servingsText != null
+          ? '$servings $servingsText'
+          : servings ?? servingsText,
+      // Tandoor keeps both times in minutes.
+      prepTimeMinutes: _jsonTime(json, const ['working_time']),
+      cookTimeMinutes: _jsonTime(json, const ['waiting_time']),
+      imageUrl: _extractImage(json['image']),
+      sourceUrl: _jsonString(json['source_url']),
+      tags: tags.isEmpty ? null : tags,
+      suggestedCourse: _courseAmong(tags),
       sourceApp: 'tandoor',
     );
   }
 
+  /// What a Mealie recipe is known by. Its ZIP export writes every key in
+  /// snake_case. The JSON download of one recipe writes them in camelCase,
+  /// which makes its ingredients look like schema.org data, so that one is
+  /// told by the keys only Mealie has.
+  static bool _isMealieRecipe(Map<String, dynamic> json) {
+    if (json['recipe_ingredient'] is List || json['recipe_instructions'] is List) return true;
+    final ingredients = json['recipeIngredient'];
+    if (ingredients is! List) return false;
+    return json.containsKey('orgURL') ||
+        ingredients.any((row) =>
+            row is Map &&
+            (row.containsKey('display') ||
+                row.containsKey('disableAmount') ||
+                row.containsKey('referenceId')));
+  }
+
   /// Parse Mealie recipe JSON format.
-  /// Structure: { name, recipe_ingredient: [{note, quantity, unit: {name}, food: {name}}], recipe_instructions: [{text}] }
+  /// Structure: { name, recipe_ingredient: [{title, quantity, unit: {name},
+  /// food: {name}, note, display}], recipe_instructions: [{title, text}],
+  /// notes: [{title, text}], tags and recipe_category: [{name}], org_url,
+  /// recipe_yield, prep_time, perform_time and total_time ("15 minutes") },
+  /// with every key in camelCase instead when the recipe was downloaded on
+  /// its own (recipeIngredient, orgURL).
   static ImportedRecipe _parseMealieRecipe(Map<String, dynamic> json) {
+    // The same field under either spelling.
+    dynamic field(String snake, String camel) => json[snake] ?? json[camel];
+
+    // A title on an ingredient or a step opens a group with that name.
     final ingredients = <String>[];
-    final instructions = <String>[];
-
-    // Ingredients
-    final recipeIngs = json['recipe_ingredient'] ?? json['recipeIngredient'];
-    if (recipeIngs is List) {
-      for (final ing in recipeIngs) {
-        if (ing is Map) {
-          final qty = ing['quantity']?.toString() ?? '';
-          final unit = (ing['unit'] is Map) ? ing['unit']['name']?.toString() ?? '' : ing['unit']?.toString() ?? '';
-          final food = (ing['food'] is Map) ? ing['food']['name']?.toString() ?? '' : ing['food']?.toString() ?? '';
-          final note = ing['note']?.toString() ?? '';
-          final display = ing['display']?.toString(); // Mealie pre-formats this
-          if (display != null && display.isNotEmpty) {
-            ingredients.add(display);
-          } else {
-            final parts = [qty, unit, food, if (note.isNotEmpty) '($note)']
-                .where((s) => s.isNotEmpty && s != '0')
-                .join(' ');
-            if (parts.isNotEmpty) ingredients.add(parts);
-          }
-        } else if (ing is String) {
-          ingredients.add(ing);
-        }
+    final ingredientRows = field('recipe_ingredient', 'recipeIngredient');
+    for (final row in ingredientRows is List ? ingredientRows : const []) {
+      if (row is Map) {
+        final title = _jsonString(row['title']);
+        if (title != null) ingredients.add(_groupTitle(title));
+        final line = _mealieIngredient(row);
+        if (line.isNotEmpty) ingredients.add(line);
+      } else if (row is String && row.trim().isNotEmpty) {
+        ingredients.add(row.trim());
       }
     }
 
-    // Instructions
-    final recipeInsts = json['recipe_instructions'] ?? json['recipeInstructions'];
-    if (recipeInsts is List) {
-      for (final inst in recipeInsts) {
-        if (inst is Map) {
-          final text = inst['text']?.toString();
-          if (text != null && text.isNotEmpty) instructions.add(text);
-        } else if (inst is String) {
-          instructions.add(inst);
-        }
+    final steps = <(String, bool)>[];
+    final stepRows = field('recipe_instructions', 'recipeInstructions');
+    for (final row in stepRows is List ? stepRows : const []) {
+      if (row is Map) {
+        final title = _jsonString(row['title']);
+        if (title != null) steps.add((title, true));
+        final text = _jsonString(row['text']);
+        if (text != null) steps.add((text, false));
+      } else if (row is String) {
+        steps.add((row, false));
       }
     }
 
-    // Tags
-    final rawTags = json['tags'] ?? json['recipe_category'];
-    List<String>? tags;
-    if (rawTags is List) {
-      tags = rawTags.map((t) => t is Map ? t['name']?.toString() ?? '' : t.toString()).where((s) => s.isNotEmpty).toList();
-    }
+    final categories = _jsonNames(field('recipe_category', 'recipeCategory'));
+    final tags = <String>{..._jsonNames(json['tags']), ...categories};
+
+    // Newer versions count the servings. Older ones only have the yield as
+    // it was typed ("6 servings", "1 loaf").
+    final yieldText = _jsonString(field('recipe_yield', 'recipeYield'));
+    final yieldAmount = _jsonAmount(field('recipe_yield_quantity', 'recipeYieldQuantity'));
+    final servings = _jsonAmount(field('recipe_servings', 'recipeServings')) ??
+        (yieldAmount != null && yieldText != null
+            ? '$yieldAmount $yieldText'
+            : yieldText ?? yieldAmount);
+
+    final (prepTime, cookTime) = _splitTotalTime(
+      _jsonTime(json, const ['prep_time', 'prepTime']),
+      _jsonTime(json, const ['perform_time', 'performTime', 'cook_time', 'cookTime']),
+      _jsonTime(json, const ['total_time', 'totalTime']),
+    );
 
     return ImportedRecipe(
-      title: json['name']?.toString() ?? 'Mealie Recipe',
-      description: json['description']?.toString(),
+      title: _jsonString(json['name']) ?? 'Mealie Recipe',
+      description: _jsonString(json['description']),
       ingredients: ingredients,
-      instructions: instructions,
-      servings: json['recipe_yield']?.toString() ?? json['recipeYield']?.toString(),
-      prepTimeMinutes: _parseTimeValue(json['prep_time'] ?? json['prepTime']),
-      cookTimeMinutes: _parseTimeValue(json['perform_time'] ?? json['cookTime'] ?? json['total_time']),
-      imageUrl: json['image']?.toString(),
-      sourceUrl: json['org_url']?.toString() ?? json['url']?.toString(),
-      notes: json['notes'] is List
-          ? (json['notes'] as List).map((n) => n is Map ? n['text']?.toString() ?? '' : n.toString()).where((s) => s.isNotEmpty).join('\n')
-          : json['notes']?.toString(),
-      tags: tags,
+      instructions: _stepsWithTitles(steps),
+      servings: servings,
+      prepTimeMinutes: prepTime,
+      cookTimeMinutes: cookTime,
+      // Mealie's "image" is a key into its own store, not an address. Only
+      // an address is worth passing on.
+      imageUrl: _absoluteUrl(_jsonString(json['image'])),
+      sourceUrl: _jsonString(field('org_url', 'orgURL')) ?? _jsonString(json['url']),
+      notes: _joinNotes([_jsonNotes(json['notes']), _nutritionLine(json['nutrition'])]),
+      tags: tags.isEmpty ? null : tags.toList(),
+      suggestedCourse: _courseAmong([...categories, ...tags]),
+      rating: _jsonRating(json['rating']),
       sourceApp: 'mealie',
     );
+  }
+
+  /// One Mealie ingredient as a line. Mealie writes the line itself under
+  /// "display". Older exports do not, and they keep an ingredient nobody
+  /// split into amount, unit and food whole in its note, next to an amount
+  /// of 1 that means nothing.
+  static String _mealieIngredient(Map row) {
+    final display = _jsonString(row['display']);
+    if (display != null) return _plainFractions(display);
+
+    final amount = _jsonAmount(row['quantity']);
+    final unit = _jsonName(row['unit']);
+    final food = _jsonName(row['food']);
+    final note = _jsonString(row['note']);
+    final isSplit = (unit != null || food != null) &&
+        (row['disable_amount'] ?? row['disableAmount']) != true;
+    if (isSplit) {
+      return [amount, unit, food, if (note != null) '($note)'].nonNulls.join(' ');
+    }
+    final line = note ?? _jsonString(row['original_text'] ?? row['originalText']) ?? food ?? '';
+    return amount == null || amount == '1' || line.isEmpty ? line : '$amount $line';
+  }
+
+  static const _raisedDigits = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  static const _loweredDigits = '₀₁₂₃₄₅₆₇₈₉';
+  static final _raisedFraction =
+      RegExp('([$_raisedDigits]{1,4})/([$_loweredDigits]{1,4})');
+
+  /// A fraction printed with raised and lowered digits, the way Mealie
+  /// prints one ("¹/₂ cup"), in the plain digits that read as an amount.
+  static String _plainFractions(String line) =>
+      line.replaceAllMapped(_raisedFraction, (fraction) {
+        final over = fraction[1]!.split('').map(_raisedDigits.indexOf).join();
+        final under = fraction[2]!.split('').map(_loweredDigits.indexOf).join();
+        return '$over/$under';
+      });
+
+  /// A Mealie backup (database.json) holds no recipes as such but the tables
+  /// of its database: one list of rows per table, the ingredients and the
+  /// steps of all recipes each in a list of their own.
+  static bool _isMealieBackup(Map<String, dynamic> json) =>
+      json['recipes'] is List &&
+      (json['recipes_ingredients'] is List || json['recipe_instructions'] is List);
+
+  /// The recipes of a Mealie backup, each put back together from the rows
+  /// that carry its id, in the shape Mealie exports a single recipe in.
+  static List<Map<String, dynamic>> _mealieBackupRecipes(Map<String, dynamic> json) {
+    // An id as the key rows are looked up by. Ids are text or numbers.
+    String? keyOf(dynamic id) => id is String || id is num ? '$id' : null;
+
+    // The rows of a table by the recipe they belong to, in Mealie's order.
+    Map<String, List<Map>> byRecipe(dynamic table) {
+      final rows = <String, List<Map>>{};
+      for (final row in _rowsInOrder(table, 'position')) {
+        final recipe = row is Map ? keyOf(row['recipe_id']) : null;
+        if (recipe != null) (rows[recipe] ??= []).add(row);
+      }
+      return rows;
+    }
+
+    // The names in a table of units, foods, tags or categories, by row id.
+    Map<String, String> names(dynamic table) {
+      final found = <String, String>{};
+      for (final row in table is List ? table : const []) {
+        final id = row is Map ? keyOf(row['id']) : null;
+        final name = id == null ? null : _jsonString(row['name']);
+        if (name != null) found[id!] = name;
+      }
+      return found;
+    }
+
+    // What a table that links recipes to tags gives each recipe, by name.
+    Map<String, List<String>> linked(dynamic links, String key, Map<String, String> byId) {
+      final found = <String, List<String>>{};
+      for (final link in links is List ? links : const []) {
+        final recipe = link is Map ? keyOf(link['recipe_id']) : null;
+        final name = recipe == null ? null : byId[keyOf(link[key])];
+        if (name != null) (found[recipe!] ??= []).add(name);
+      }
+      return found;
+    }
+
+    final units = names(json['ingredient_units']);
+    final foods = names(json['ingredient_foods']);
+    final ingredients = byRecipe(json['recipes_ingredients']);
+    final steps = byRecipe(json['recipe_instructions']);
+    final notes = byRecipe(json['notes']);
+    final tags = linked(json['recipes_to_tags'], 'tag_id', names(json['tags']));
+    final categories =
+        linked(json['recipes_to_categories'], 'category_id', names(json['categories']));
+
+    final recipes = <Map<String, dynamic>>[];
+    final rows = json['recipes'];
+    for (final row in rows is List ? rows : const []) {
+      final id = row is Map<String, dynamic> ? keyOf(row['id']) : null;
+      if (id == null) continue;
+      recipes.add({
+        ...row,
+        'recipe_ingredient': [
+          for (final ingredient in ingredients[id] ?? const <Map>[])
+            {
+              ...ingredient,
+              'unit': units[keyOf(ingredient['unit_id'])],
+              'food': foods[keyOf(ingredient['food_id'])],
+            },
+        ],
+        'recipe_instructions': steps[id],
+        'notes': notes[id],
+        'tags': tags[id],
+        'recipe_category': categories[id],
+      });
+    }
+    return recipes;
   }
 
   /// Parse Samsung Food (formerly Whisk) JSON format.
@@ -2484,133 +3968,143 @@ class RecipeImportEngine {
   }
 
   /// Parse Paprika recipe JSON format.
-  /// Each Paprika recipe JSON has: name, ingredients (newline-separated),
-  /// directions (newline-separated), photo_data (base64), prep_time, cook_time,
-  /// source, categories (newline-separated), notes, rating (0-5).
+  /// Each Paprika recipe JSON has: name, ingredients and directions (one per
+  /// line), description, notes, servings, prep_time, cook_time and
+  /// total_time (as typed, "1 hr 20 min"), source (the name of the site or
+  /// book) and source_url (its link), categories (a list of names), rating
+  /// (0-5, 0 for unrated), difficulty, nutritional_info, image_url and
+  /// photo_data (base64).
   static ImportedRecipe parsePaprikaRecipe(Map<String, dynamic> json) {
-    final ingredientsRaw = json['ingredients']?.toString() ?? '';
-    final directionsRaw = json['directions']?.toString() ?? '';
-
-    final ingredients = ingredientsRaw
-        .split('\n')
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty)
-        .toList();
-
-    final instructions = directionsRaw
-        .split('\n')
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty)
-        .toList();
-
-    // Parse time strings like "30 min", "1 hr 15 min", "45 minutes"
-    int? parseTimeString(String? time) {
-      if (time == null || time.trim().isEmpty) return null;
-      final t = time.trim().toLowerCase();
-      int minutes = 0;
-      final hrMatch = RegExp(r'(\d+)\s*(?:hr|hour)s?').firstMatch(t);
-      if (hrMatch != null) minutes += (int.tryParse(hrMatch.group(1)!) ?? 0) * 60;
-      final minMatch = RegExp(r'(\d+)\s*(?:min|minute)s?').firstMatch(t);
-      if (minMatch != null) minutes += int.tryParse(minMatch.group(1)!) ?? 0;
-      // If just a number, assume minutes
-      if (minutes == 0) {
-        final plain = int.tryParse(t);
-        if (plain != null) minutes = plain;
-      }
-      return minutes > 0 ? minutes : null;
-    }
-
-    // Parse categories (newline-separated in Paprika)
-    final categoriesRaw = json['categories']?.toString() ?? '';
-    final tags = categoriesRaw
-        .split('\n')
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty)
-        .toList();
-
-    // Rating: Paprika uses 0-5, we store 0-5
-    final rating = json['rating'] is int ? json['rating'] as int :
-        (json['rating'] is double ? (json['rating'] as double).round() : null);
+    final tags = _jsonNames(json['categories']);
+    final (prepTime, cookTime) = _splitTotalTime(
+      _jsonTime(json, const ['prep_time']),
+      _jsonTime(json, const ['cook_time']),
+      _jsonTime(json, const ['total_time']),
+    );
+    final (sourceUrl, sourceNote) =
+        _sourceAndNote(_jsonString(json['source_url']), _jsonString(json['source']));
 
     return ImportedRecipe(
-      title: json['name']?.toString() ?? json['title']?.toString() ?? 'Paprika Recipe',
-      description: json['description']?.toString(),
-      ingredients: ingredients,
-      instructions: instructions,
-      prepTimeMinutes: parseTimeString(json['prep_time']?.toString()),
-      cookTimeMinutes: parseTimeString(json['cook_time']?.toString()),
-      servings: json['servings']?.toString(),
-      sourceUrl: json['source']?.toString() ?? json['source_url']?.toString(),
-      notes: json['notes']?.toString(),
-      imageUrl: json['image_url']?.toString(),
-      imageData: json['photo_data']?.toString(), // Base64 photo
-      tags: tags.isNotEmpty ? tags : null,
-      rating: rating,
+      title: _jsonString(json['name']) ?? _jsonString(json['title']) ?? 'Paprika Recipe',
+      description: _jsonString(json['description']),
+      ingredients: _jsonLines(json['ingredients']),
+      instructions: _withoutStepNumbers(_jsonLines(json['directions'])),
+      prepTimeMinutes: prepTime,
+      cookTimeMinutes: cookTime,
+      servings: _jsonServings(json['servings']),
+      sourceUrl: sourceUrl,
+      notes: _joinNotes([
+        _jsonString(json['notes']),
+        sourceNote,
+        _labelledNote('Difficulty', _jsonString(json['difficulty'])),
+        _labelledNote('Nutrition', _jsonString(json['nutritional_info'])),
+      ]),
+      imageUrl: _absoluteUrl(_jsonString(json['image_url'])),
+      // The main photo is in photo_data. Any others are in photos.
+      imageData: _firstImageData([json['photo_data']]) ?? _firstImageData(json['photos']),
+      tags: tags.isEmpty ? null : tags,
+      suggestedCourse: _courseAmong(tags),
+      rating: _jsonRating(json['rating']),
       sourceApp: 'paprika',
     );
   }
 
+  /// What a Mela recipe is known by: a title and a short text next to the
+  /// pictures or categories Mela keeps in the same file. Its ingredients and
+  /// instructions are one text each, never a list.
+  static bool _isMelaRecipe(Map<String, dynamic> json) {
+    if (!json.containsKey('text')) return false;
+    if (!json.containsKey('title') && !json.containsKey('name')) return false;
+    if (json['ingredients'] is List || json['instructions'] is List) return false;
+    final text = json['text'];
+    return json.containsKey('images') ||
+        json.containsKey('categories') ||
+        (text is String && text.contains('---'));
+  }
+
+  static final _markdownHeading = RegExp(r'^#+[ \t]*', multiLine: true);
+  static final _markdownLink = RegExp(r'\[([^\[\]\n]{1,300})\]\([^()\s]{0,2000}\)');
+  static final _markdownEmphasis =
+      RegExp(r'\*\*([^*\n]{1,300})\*\*|\*([^*\s][^*\n]{0,300})\*');
+
+  /// Mela text without the little Markdown Mela allows in it: a link is the
+  /// words it shows, bold and italics are plain, and a heading loses its
+  /// "#". Null when nothing is left.
+  static String? _melaText(dynamic value) {
+    final text = _jsonString(value)
+        ?.replaceAll(_markdownHeading, '')
+        .replaceAllMapped(_markdownLink, (link) => link.group(1)!)
+        .replaceAllMapped(_markdownEmphasis, (marked) => marked.group(1) ?? marked.group(2)!)
+        .trim();
+    return text == null || text.isEmpty ? null : text;
+  }
+
+  /// The lines of a Mela ingredient or instruction text. A line that starts
+  /// with "#" is the title of a group.
+  static List<String> _melaLines(dynamic value) {
+    final lines = <String>[];
+    for (final raw in _jsonLines(value)) {
+      final line = _melaText(raw);
+      if (line != null) lines.add(raw.startsWith('#') ? _groupTitle(line) : line);
+    }
+    return lines;
+  }
+
   /// Parse Mela recipe JSON format.
-  /// Mela uses: title, text (markdown with --- separator), images (base64 array), link, categories.
+  /// Mela writes: title, text (a short description), ingredients and
+  /// instructions (one per line), yield, prepTime, cookTime, totalTime,
+  /// notes, nutrition, link, images (base64 array) and categories.
   static ImportedRecipe parseMelaRecipe(Map<String, dynamic> json) {
-    final title = json['title']?.toString() ?? 'Mela Recipe';
-    final text = json['text']?.toString() ?? '';
-    final link = json['link']?.toString();
+    var description = _melaText(json['text']);
+    var ingredients = _melaLines(json['ingredients']);
+    var instructions = _withoutStepNumbers(_melaLines(json['instructions']));
 
-    // Parse text: ingredients and instructions separated by ---
-    List<String> ingredients = [];
-    List<String> instructions = [];
-
-    if (text.contains('---')) {
-      final parts = text.split('---');
-      if (parts.length >= 2) {
-        ingredients = parts[0]
-            .split('\n')
-            .map((l) => l.trim())
-            .where((l) => l.isNotEmpty && l != '-')
-            .map((l) => l.startsWith('- ') ? l.substring(2) : l)
+    // Mela always writes the two fields, empty or not. A file without them
+    // comes from a converter that keeps the whole recipe in "text", the
+    // ingredients above a line of dashes and the steps below it.
+    final text = _jsonString(json['text']);
+    if (text != null && !json.containsKey('ingredients') && !json.containsKey('instructions')) {
+      if (text.contains('---')) {
+        final parts = text.split('---');
+        ingredients = _jsonLines(parts.first)
+            .where((line) => line != '-')
+            .map((line) => line.startsWith('- ') ? line.substring(2) : line)
             .toList();
-        instructions = parts.sublist(1).join('\n')
-            .split('\n')
-            .map((l) => l.trim())
-            .where((l) => l.isNotEmpty)
-            .map((l) {
-              // Remove markdown numbering
-              final numMatch = RegExp(r'^\d+\.\s*').firstMatch(l);
-              return numMatch != null ? l.substring(numMatch.end) : l;
-            })
-            .toList();
+        instructions = _withoutStepNumbers(_jsonLines(parts.sublist(1).join('\n')));
+      } else {
+        // No separator. The text is parsed as a recipe when it reads like
+        // one, and is left to be the description when it does not.
+        final parsed = _recipeFromLines(_jsonLines(text));
+        ingredients = parsed?.ingredients ?? ingredients;
+        instructions = parsed?.instructions ?? instructions;
       }
-    } else {
-      // No separator — try structured text parsing
-      final parsed = _parseStructuredText(text);
-      ingredients = parsed.ingredients;
-      instructions = parsed.instructions;
+      // Text that was read as the recipe is not its description as well.
+      if (ingredients.isNotEmpty || instructions.isNotEmpty) description = null;
     }
 
-    // Images: take the first one as base64 image data
-    String? imageData;
-    if (json['images'] is List && (json['images'] as List).isNotEmpty) {
-      imageData = (json['images'] as List).first?.toString();
-    }
-
-    // Categories as tags
-    List<String>? tags;
-    if (json['categories'] is List) {
-      tags = (json['categories'] as List)
-          .map((c) => c.toString().trim())
-          .where((c) => c.isNotEmpty)
-          .toList();
-      if (tags.isEmpty) tags = null;
-    }
+    final tags = _jsonNames(json['categories']);
+    final (prepTime, cookTime) = _splitTotalTime(
+      _jsonTime(json, const ['prepTime']),
+      _jsonTime(json, const ['cookTime']),
+      _jsonTime(json, const ['totalTime']),
+    );
 
     return ImportedRecipe(
-      title: title,
+      title: _jsonString(json['title']) ?? _jsonString(json['name']) ?? 'Mela Recipe',
+      description: description,
       ingredients: ingredients,
       instructions: instructions,
-      imageData: imageData,
-      sourceUrl: link,
-      tags: tags,
+      servings: _jsonServings(json['yield']),
+      prepTimeMinutes: prepTime,
+      cookTimeMinutes: cookTime,
+      notes: _joinNotes([
+        _melaText(json['notes']),
+        _labelledNote('Nutrition', _melaText(json['nutrition'])),
+      ]),
+      imageData: _firstImageData(json['images']),
+      sourceUrl: _jsonString(json['link']),
+      tags: tags.isEmpty ? null : tags,
+      suggestedCourse: _courseAmong(tags),
       sourceApp: 'mela',
     );
   }
@@ -3599,128 +5093,288 @@ class RecipeImportEngine {
         (trimmed.startsWith('[') && trimmed.endsWith(']'));
   }
 
+  /// The recipe in a JSON text, the first when it holds several. Null when
+  /// the text is not JSON.
+  ///
+  /// JSON that holds no recipe gives one without ingredients or steps rather
+  /// than null: JSON is read as JSON or not at all, since as lines of text
+  /// it would only make a recipe of brackets and quotes.
   static ImportedRecipe? _tryParseJson(String text) {
+    final json = _decodeJson(text);
+    if (json == null) return null;
+    final recipe = _jsonRecipes(json).firstOrNull ??
+        _buildRecipeFromJsonMap(json is Map ? json : const {});
+    recipe.imageUrl = _absoluteUrl(recipe.imageUrl);
+    return recipe;
+  }
+
+  /// The data in a JSON text, or null when it is not JSON. Files written or
+  /// edited by hand are often not quite JSON, so a text that strict JSON
+  /// refuses is repaired and tried once more.
+  static dynamic _decodeJson(String text) {
     try {
-      final json = jsonDecode(text);
-      if (json is Map) {
-        return _buildRecipeFromJsonMap(json);
-      }
-    } catch (e) {
-      // Try cleaning common JSON artifacts and retry
+      return jsonDecode(text);
+    } on FormatException {
       try {
-        final cleaned = _cleanJsonText(text);
-        if (cleaned != text) {
-          final json = jsonDecode(cleaned);
-          if (json is Map) {
-            return _buildRecipeFromJsonMap(json);
-          }
-        }
-      } catch (_) {}
+        return jsonDecode(_cleanJsonText(text));
+      } on FormatException {
+        return null;
+      }
+    }
+  }
+
+  /// Text that is nearly JSON, repaired: a comma before a closing bracket,
+  /// a comment, a code fence or words around the data, a raw line break
+  /// inside a string.
+  static String _cleanJsonText(String text) {
+    // Python and JavaScript write strings in single quotes. That is only
+    // assumed of a text without one double quote, since in real JSON an
+    // apostrophe has to stay what it is.
+    final quoted = !text.contains('"') && text.contains("'")
+        ? text.replaceAll("'", '"')
+        : text;
+    return _repairJson(quoted);
+  }
+
+  /// A recipe from JSON that follows no app's format, read by the names
+  /// recipe data commonly uses, the schema.org ones among them.
+  static ImportedRecipe _buildRecipeFromJsonMap(Map json) {
+    // A recipe this app exported itself carries its extras under "_spellbook"
+    // and uses two schema.org fields its own way: the category is the app's
+    // category id, and the cuisine is the name of the cookbook.
+    final ownExport = json['_spellbook'] is Map;
+
+    final categories = [
+      if (!ownExport) ..._jsonLdNames(json['recipeCategory']),
+      ..._jsonNames(json['categories']),
+    ];
+    final rawTags = json['tags'] ?? json['keywords'];
+    final tags = <String>{
+      // One text holds several tags between commas. A list is already split.
+      ...(rawTags is String ? _jsonLdNames(rawTags) : _jsonNames(rawTags)),
+      ...categories,
+    };
+
+    final (prepTime, cookTime) = _splitTotalTime(
+      _jsonTime(json, const ['prepTime', 'prep_time', 'prepTimeMinutes', 'prep_time_minutes']),
+      _jsonTime(json, const ['cookTime', 'cook_time', 'cookTimeMinutes', 'cook_time_minutes', 'performTime']),
+      _jsonTime(json, const ['totalTime', 'total_time', 'totalTimeMinutes', 'total_time_minutes']),
+    );
+
+    final cuisine =
+        _jsonLdNames(json['cuisine'] ?? (ownExport ? null : json['recipeCuisine'])).join(', ');
+    final (sourceUrl, sourceNote) = _sourceAndNote(
+      _jsonString(json['url']) ??
+          _jsonString(json['sourceUrl']) ??
+          _jsonString(json['source_url']) ??
+          _jsonString(json['isBasedOn']),
+      _jsonString(json['source']) ?? _jsonString(json['creditText']),
+    );
+    // An export may carry its picture inside the file, as a data: address.
+    final image = _extractImage(json['image'] ?? json['imageUrl'] ?? json['photo']);
+    final embedded = image == null ? null : _dataImage.matchAsPrefix(image);
+
+    return ImportedRecipe(
+      title: _jsonLdText(json['title']) ?? _jsonLdText(json['name']) ?? 'Imported Recipe',
+      description: _jsonLdText(json['description']) ?? _jsonLdText(json['summary']),
+      ingredients: [
+        for (final line in _jsonLdLines(_jsonContent(json, const ['ingredients', 'recipeIngredient'])))
+          // RecipeSage writes the title of a group as a line in square
+          // brackets.
+          _bracketed.hasMatch(line) ? _groupTitle(line.substring(1, line.length - 1)) : line,
+      ],
+      instructions: _extractJsonInstructions(
+          _jsonContent(json, const ['instructions', 'recipeInstructions', 'directions', 'steps']),
+          fromFile: true),
+      servings: _jsonServings(
+          json['servings'] ?? json['yield'] ?? json['serves'] ?? json['recipeYield']),
+      prepTimeMinutes: prepTime,
+      cookTimeMinutes: cookTime,
+      imageUrl: embedded == null ? image : null,
+      imageData: embedded == null ? null : image?.substring(embedded.end),
+      sourceUrl: sourceUrl,
+      suggestedCourse: _courseAmong(
+          [_jsonString(json['course']), _jsonString(json['type']), ...categories]),
+      suggestedCategory: ownExport
+          ? _jsonString(json['recipeCategory'])
+          : _jsonString(json['category'])?.toLowerCase(),
+      cuisine: cuisine.isEmpty ? null : cuisine,
+      tags: tags.isEmpty ? null : tags.toList(),
+      notes: _joinNotes([
+        _jsonNotes(json['notes'] ?? json['note'] ?? json['tips']),
+        _ownComment(json['comment']),
+        sourceNote,
+        _nutritionLine(json['nutrition']) ??
+            _labelledNote('Nutrition', _jsonString(json['nutrition'])),
+      ]),
+      rating: _jsonRating(json['rating']) ?? _ownRating(json['aggregateRating']),
+    );
+  }
+
+  static final _dataImage = RegExp(r'data:image/[a-z0-9.+-]{1,20};base64,', caseSensitive: false);
+  static final _bracketed = RegExp(r'^\[[^\[\]]+\]$');
+
+  /// The first of [keys] under which [json] lists something: a list or an
+  /// object with entries, or text that is not blank. An empty field under
+  /// one name does not hide a filled one under another.
+  static dynamic _jsonContent(Map json, List<String> keys) {
+    for (final key in keys) {
+      final value = json[key];
+      final holdsSomething = value is String
+          ? value.trim().isNotEmpty
+          : (value is List && value.isNotEmpty) || (value is Map && value.isNotEmpty);
+      if (holdsSomething) return value;
     }
     return null;
   }
 
-  /// Clean common JSON artifacts (trailing commas, comments, etc.)
-  static String _cleanJsonText(String text) {
-    var s = text.trim();
-
-    // Strip markdown code fences
-    if (s.startsWith('```')) {
-      final firstNewline = s.indexOf('\n');
-      if (firstNewline != -1) s = s.substring(firstNewline + 1);
-      if (s.endsWith('```')) s = s.substring(0, s.length - 3);
-      s = s.trim();
-    }
-
-    // Strip single-line comments (// ...)
-    s = s.replaceAll(RegExp(r'//[^\n]*'), '');
-
-    // Strip block comments (/* ... */)
-    s = s.replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '');
-
-    // Remove trailing commas before } or ]
-    s = s.replaceAll(RegExp(r',\s*([}\]])'), r'$1');
-
-    // Extract JSON if there's text before/after
-    final firstBrace = s.indexOf('{');
-    final firstBracket = s.indexOf('[');
-    if (firstBrace > 0 || firstBracket > 0) {
-      final start = (firstBrace >= 0 && firstBracket >= 0)
-          ? (firstBrace < firstBracket ? firstBrace : firstBracket)
-          : (firstBrace >= 0 ? firstBrace : firstBracket);
-      if (start > 0) {
-        s = s.substring(start);
-        // Find matching end
-        final isArray = s.startsWith('[');
-        final endChar = isArray ? ']' : '}';
-        final lastEnd = s.lastIndexOf(endChar);
-        if (lastEnd > 0) s = s.substring(0, lastEnd + 1);
-      }
-    }
-
-    // Try replacing single quotes with double quotes as last resort
-    // Only if no double quotes exist (to avoid breaking valid JSON)
-    if (!s.contains('"') && s.contains("'")) {
-      s = s.replaceAll("'", '"');
-    }
-
-    return s;
+  /// The cook's own note among the comments of schema.org data. An export
+  /// writes it as one text, or as a comment named "Author Notes" the way
+  /// RecipeSage does. The comments a recipe site lists are what its readers
+  /// wrote, which is no note.
+  static String? _ownComment(dynamic comment) {
+    if (comment is String) return _jsonString(comment);
+    return _joinNotes([
+      for (final entry in comment is List ? comment : [comment])
+        if (entry is Map && entry['name'] == 'Author Notes') _jsonString(entry['text']),
+    ]);
   }
 
-  static ImportedRecipe _buildRecipeFromJsonMap(Map json) {
-    // Extract course/category and map to known IDs
-    final rawCourse = json['course']?.toString() ?? json['type']?.toString();
-    final rawCategory = json['category']?.toString();
-    final rawCuisine = json['cuisine']?.toString();
+  /// The cook's own rating in schema.org data, which only has a place for a
+  /// score and the number of votes behind it. An export writes the cook's
+  /// stars there with one vote or none. A score with more votes, or one that
+  /// is no whole number, is the average of a site's readers.
+  static int? _ownRating(dynamic aggregate) {
+    if (aggregate is! Map) return null;
+    final votes = aggregate['ratingCount'] ?? aggregate['reviewCount'];
+    final count = votes is String ? num.tryParse(votes.trim()) : votes;
+    if (count is num && count > 1) return null;
+    final value = aggregate['ratingValue'];
+    final stars = value is String ? num.tryParse(value.trim()) : value;
+    return stars is num && stars == stars.roundToDouble() ? _jsonRating(stars) : null;
+  }
 
-    // Extract tags from various formats
-    List<String>? tags;
-    final rawTags = json['tags'] ?? json['keywords'];
-    if (rawTags is List) {
-      tags = rawTags.map((t) => t.toString().trim()).where((t) => t.isNotEmpty).toList();
-    } else if (rawTags is String && rawTags.isNotEmpty) {
-      tags = rawTags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
+  /// [value] when it is text with something in it, trimmed. Exports write an
+  /// empty string where a field was left blank.
+  static String? _jsonString(dynamic value) {
+    if (value is! String) return null;
+    final text = value.replaceAll('\r\n', '\n').trim();
+    return text.isEmpty ? null : text;
+  }
+
+  /// The lines of a field that holds one entry per line, blank lines left
+  /// out. A list is read as the lines of its texts.
+  static List<String> _jsonLines(dynamic value) {
+    final lines = <String>[];
+    for (final text in value is List ? value : [value]) {
+      if (text is! String) continue;
+      for (final line in const LineSplitter().convert(text)) {
+        if (line.trim().isNotEmpty) lines.add(line.trim());
+      }
     }
+    return lines;
+  }
 
-    // Extract notes
-    final notes = json['notes']?.toString() ?? json['note']?.toString() ?? json['tips']?.toString();
+  /// The names in a list of categories, tags or keywords, each entry a name
+  /// or an object that carries one. A field that is one text instead holds a
+  /// name per line.
+  static List<String> _jsonNames(dynamic value) {
+    final names = <String>{};
+    for (final entry in value is List ? value : _jsonLines(value)) {
+      final name = _jsonString(entry is Map ? entry['name'] : entry);
+      if (name != null) names.add(name);
+    }
+    return names.toList();
+  }
 
-    return ImportedRecipe(
-      title: json['title']?.toString() ??
-          json['name']?.toString() ??
-          'Imported Recipe',
-      description: json['description']?.toString() ?? json['summary']?.toString(),
-      ingredients: _toStringList(
-          json['ingredients'] ?? json['recipeIngredient'] ?? []),
-      instructions: _toStringList(json['instructions'] ??
-          json['recipeInstructions'] ??
-          json['directions'] ??
-          json['steps'] ??
-          []),
-      servings:
-      json['servings']?.toString() ?? json['yield']?.toString() ?? json['serves']?.toString(),
-      prepTimeMinutes:
-      _parseTimeValue(json['prepTime'] ?? json['prep_time'] ?? json['prep_time_minutes']),
-      cookTimeMinutes:
-      _parseTimeValue(json['cookTime'] ?? json['cook_time'] ?? json['cook_time_minutes']),
-      imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString() ?? json['photo']?.toString(),
-      sourceUrl: json['url']?.toString() ?? json['sourceUrl']?.toString() ?? json['source']?.toString(),
-      suggestedCourse: rawCourse != null ? mapToCourseId(rawCourse) : null,
-      suggestedCategory: rawCategory?.toLowerCase(),
-      cuisine: rawCuisine,
-      tags: tags,
-      notes: notes,
-    );
+  /// The name of a unit or a food, which is either text or an object with a
+  /// name.
+  static String? _jsonName(dynamic value) =>
+      _jsonString(value is Map ? value['name'] : value);
+
+  static final _trailingZeros = RegExp(r'\.?0+$');
+
+  /// A number as a cook writes it: "2" for 2.0, "0.5", and no more than
+  /// three decimals.
+  static String _plainNumber(num value) {
+    if (value == value.roundToDouble()) return value.round().toString();
+    final rounded = value.toStringAsFixed(3).replaceFirst(_trailingZeros, '');
+    return rounded == '0' || rounded == '-0' ? value.toString() : rounded;
+  }
+
+  /// An amount as a cook writes it, or null for none. Apps store "no amount"
+  /// as zero.
+  static String? _jsonAmount(dynamic value) {
+    final text = _jsonString(value);
+    final number = value is num ? value : (text == null ? null : num.tryParse(text));
+    if (number == null) return text;
+    return number.isFinite && number > 0 ? _plainNumber(number) : null;
+  }
+
+  /// How many the recipe serves, as the file says it: a number is written
+  /// plainly ("4"), words are kept ("4 servings", "1 loaf").
+  static String? _jsonServings(dynamic value) {
+    if (value is num) return _jsonAmount(value);
+    return _jsonLdText(_extractServings(value));
+  }
+
+  /// A rating from one to five stars, or null. Apps store "not rated" as
+  /// zero.
+  static int? _jsonRating(dynamic value) {
+    final rating = value is String ? num.tryParse(value.trim()) : value;
+    if (rating is! num || !rating.isFinite) return null;
+    final stars = rating.round();
+    return stars >= 1 && stars <= 5 ? stars : null;
+  }
+
+  /// Notes as text: one text, or a list of notes that may each carry a
+  /// title.
+  static String? _jsonNotes(dynamic value) {
+    if (value is! List) return _jsonString(value);
+    final notes = <String>[];
+    for (final note in value) {
+      final text = note is Map
+          ? [_jsonString(note['title']), _jsonString(note['text'])].nonNulls.join(': ')
+          : _jsonString(note) ?? '';
+      if (text.isNotEmpty) notes.add(text);
+    }
+    return notes.isEmpty ? null : notes.join('\n');
+  }
+
+  /// The first of [keys] under which [json] holds a time that can be read:
+  /// a number of minutes, or a time as it was typed or exported.
+  static int? _jsonTime(Map json, List<String> keys) {
+    for (final key in keys) {
+      final value = json[key];
+      final minutes = value is String ? _parseTimeString(value) : _parseTimeValue(value);
+      if (minutes != null) return minutes;
+    }
+    return null;
   }
 
   static List<String> _toStringList(dynamic data) {
     if (data == null) return [];
     if (data is List) {
-      return data.map((e) {
+      String text(dynamic e) {
         if (e is String) return e.trim();
-        if (e is Map) return _flattenMapToString(e);
-        return e.toString().trim();
-      }).where((s) => s.isNotEmpty).toList();
+        if (e is Map) return _jsonIngredient(e);
+        return e is num ? e.toString() : '';
+      }
+
+      final lines = <String>[];
+      for (final e in data) {
+        // A group of lines nested one level down is read as its lines, under
+        // its name when it has one.
+        final group = e is Map ? e['ingredients'] ?? e['items'] : e;
+        if (group is List) {
+          final title = e is Map ? _jsonString(e['name'] ?? e['title']) : null;
+          if (title != null) lines.add(_groupTitle(title));
+          lines.addAll(group.map(text));
+        } else {
+          lines.add(text(e));
+        }
+      }
+      return lines.where((s) => s.isNotEmpty).toList();
     }
     if (data is String) {
       return data
@@ -3732,118 +5386,339 @@ class RecipeImportEngine {
     return [];
   }
 
-  /// Flattens a JSON map (ingredient/instruction object) into a readable string.
-  /// Handles common AI-generated formats:
-  ///   {"amount": "1 cup", "name": "flour"} → "1 cup flour"
-  ///   {"quantity": "2", "unit": "tbsp", "ingredient": "oil"} → "2 tbsp oil"
-  ///   {"text": "Mix well"} → "Mix well"
-  ///   {"step": 1, "instruction": "Preheat oven"} → "Preheat oven"
-  static String _flattenMapToString(Map e) {
-    // Direct text/content field
-    final text = e['text'] ?? e['content'] ?? e['instruction'] ?? e['direction'] ?? e['step_text'];
-    if (text is String && text.trim().isNotEmpty) return text.trim();
-
-    // Ingredient object: combine amount/quantity + unit + name/ingredient
-    final amount = e['amount']?.toString() ?? e['quantity']?.toString() ?? '';
-    final unit = e['unit']?.toString() ?? e['measure']?.toString() ?? '';
-    final name = e['name']?.toString() ?? e['ingredient']?.toString() ?? e['item']?.toString() ?? '';
-    final note = e['note']?.toString() ?? e['preparation']?.toString() ?? e['prep']?.toString() ?? '';
-
-    if (name.isNotEmpty) {
-      final parts = <String>[];
-      if (amount.isNotEmpty) parts.add(amount);
-      if (unit.isNotEmpty) parts.add(unit);
-      parts.add(name);
-      if (note.isNotEmpty) parts.add('($note)');
-      return parts.join(' ').trim();
+  /// One ingredient that JSON gives as an object, as the line a cook would
+  /// write:
+  ///   {"amount": "1 cup", "name": "flour"} is "1 cup flour"
+  ///   {"quantity": 2, "unit": "tbsp", "ingredient": "oil"} is "2 tbsp oil"
+  ///   {"text": "2 eggs, beaten"} is "2 eggs, beaten"
+  static String _jsonIngredient(Map e) {
+    // The whole line, when the object carries it.
+    for (final key in const ['text', 'display', 'original', 'content']) {
+      final line = _jsonString(e[key]);
+      if (line != null) return _plainFractions(line);
     }
 
-    // Last resort: join all string values
-    final values = e.values
-        .where((v) => v is String && v.isNotEmpty)
-        .map((v) => v.toString().trim())
-        .toList();
-    if (values.isNotEmpty) return values.join(' ');
-
-    return e.toString();
+    final name = _jsonName(e['name'] ?? e['ingredient'] ?? e['item'] ?? e['food']);
+    if (name == null) return _jsonWords(e);
+    final note = _jsonString(e['note'] ?? e['preparation'] ?? e['prep']);
+    return [
+      _jsonAmount(e['amount'] ?? e['quantity'] ?? e['qty']),
+      _jsonName(e['unit'] ?? e['measure']),
+      name,
+      if (note != null) '($note)',
+    ].nonNulls.join(' ');
   }
 
-  static List<String> _extractJsonInstructions(dynamic data) {
-    if (data == null) return [];
-    List<String> results = [];
+  static final _idLike = RegExp(
+      r'^(?:https?://|[0-9a-f]{8}-[0-9a-f]{4}-|[0-9a-f]{24,}$)',
+      caseSensitive: false);
 
-    void recurse(dynamic item) {
+  /// What an object in a shape this reader does not know says in words: its
+  /// texts, without the ids, links and type names stored beside them.
+  static String _jsonWords(Map object) {
+    final words = <String>[];
+    object.forEach((key, value) {
+      final name = '$key';
+      final isId = name == 'id' ||
+          name == 'uuid' ||
+          name.startsWith('@') ||
+          name.endsWith('Id') ||
+          name.endsWith('ID') ||
+          name.endsWith('_id');
+      final text = isId ? null : _jsonString(value);
+      if (text != null && !_idLike.hasMatch(text)) words.add(text);
+    });
+    return words.join(' ');
+  }
+
+  /// The steps in a recipe's instructions, whatever shape they are in: one
+  /// text, a list of texts, step objects, or groups of steps under a name.
+  ///
+  /// Recipe JSON that stands on its own, as a file does ([fromFile]), is
+  /// read more fully than the data inside a web page. The name of a group is
+  /// kept as a line of its own ("For the frosting:"), the form the app turns
+  /// into a heading, and a step object in a shape not known here gives the
+  /// words it holds.
+  static List<String> _extractJsonInstructions(dynamic data, {bool fromFile = false}) {
+    // Each step's text, and true where the text is the title of a group.
+    final steps = <(String, bool)>[];
+
+    void collect(dynamic item, int depth) {
+      if (depth > 8) return;
       if (item is String) {
-        final cleaned = _cleanHtmlText(item);
-        if (cleaned != null && cleaned.isNotEmpty) results.add(cleaned);
-      } else if (item is Map) {
-        if (item['text'] != null) {
-          final text = _cleanHtmlText(item['text'].toString());
-          if (text != null && text.isNotEmpty) results.add(text);
-        } else if (item['itemListElement'] != null) {
-          recurse(item['itemListElement']);
+        // A text on its own holds a step per line.
+        for (final line in _htmlToText(item).split('\n')) {
+          if (line.trim().isNotEmpty) steps.add((line, false));
         }
       } else if (item is List) {
-        for (var i in item) {
-          recurse(i);
+        for (final entry in item) {
+          collect(entry, depth + 1);
+        }
+      } else if (item is Map) {
+        final text = _stepObjectText(item);
+        final group = item['itemListElement'] ?? item['steps'];
+        // A group holds its steps, or stands in front of them as a marker of
+        // its own (a HowToSection with nothing but a name).
+        final type = item['@type'];
+        final isGroup = group != null || (type is String && type.endsWith('Section'));
+        if (text != null) {
+          steps.add((_htmlToText(text), false));
+        } else if (isGroup) {
+          // Its name is a label, not a step.
+          final title = fromFile ? _jsonLdText(item['name'] ?? item['title']) : null;
+          if (title != null) steps.add((title, true));
+          collect(group, depth + 1);
+        } else {
+          final label = _jsonString(item['description']) ??
+              _jsonString(item['name']) ??
+              (fromFile ? _jsonWords(item) : '');
+          if (label.isNotEmpty) steps.add((_htmlToText(label), false));
         }
       }
     }
 
-    recurse(data);
-    return results;
+    collect(data, 0);
+    // One group is no grouping, so its name ("Instructions") is not kept.
+    if (steps.where((step) => step.$2).length == 1 && steps.first.$2) {
+      steps.removeAt(0);
+    }
+    return _stepsWithTitles(steps);
   }
 
-  static int? _parseTimeValue(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    if (value is String) {
-      final isoMatch =
-      RegExp(r'P(?:T)?(?:(\d+)H)?(?:(\d+)M)?').firstMatch(value);
-      if (isoMatch != null) {
-        final h = int.tryParse(isoMatch.group(1) ?? '0') ?? 0;
-        final m = int.tryParse(isoMatch.group(2) ?? '0') ?? 0;
-        if (h > 0 || m > 0) return h * 60 + m;
-      }
-      return int.tryParse(value);
+  /// The text of a step that JSON gives as an object, under the names its
+  /// text commonly goes by. Null for an object that holds none of them,
+  /// such as a group of steps.
+  static String? _stepObjectText(Map step) {
+    for (final key in const ['text', 'instruction', 'direction', 'content', 'step_text', 'step']) {
+      final text = _jsonString(step[key]);
+      // "step" is as often the number of the step as its text.
+      if (text != null && num.tryParse(text) == null) return text;
     }
     return null;
   }
 
-  static int? _parseTimeString(String time) {
-    int totalMinutes = 0;
-    final hourMatch = RegExp(r'(\d+)\s*(?:hours?|hr|h)\b', caseSensitive: false)
-        .firstMatch(time);
-    if (hourMatch != null) {
-      totalMinutes += (int.tryParse(hourMatch.group(1)!) ?? 0) * 60;
+  /// Steps as the lines the app keeps. [steps] holds each step's text, with
+  /// true where the text is the title of a group instead, which becomes the
+  /// line the app turns into a heading. A recipe whose one step holds the
+  /// whole method is read as the lines of that step.
+  static List<String> _stepsWithTitles(List<(String, bool)> steps) {
+    final single = steps.where((step) => !step.$2).length == 1;
+    final lines = <String>[];
+    for (final (text, isTitle) in steps) {
+      final parts = isTitle
+          ? [_groupTitle(text)]
+          : (single ? text.split('\n') : [text]).map(_stepText);
+      lines.addAll(parts.where((line) => line.isNotEmpty));
     }
-    final minMatch = RegExp(r'(\d+)\s*(?:minutes?|mins?|m)\b',
-        caseSensitive: false)
-        .firstMatch(time);
-    if (minMatch != null) {
-      totalMinutes += int.tryParse(minMatch.group(1)!) ?? 0;
-    }
-    if (totalMinutes == 0) {
-      final numMatch = RegExp(r'(\d+)').firstMatch(time);
-      if (numMatch != null) {
-        totalMinutes = int.tryParse(numMatch.group(1)!) ?? 0;
-      }
-    }
-    return totalMinutes > 0 ? totalMinutes : null;
+    return lines;
   }
 
-  static String? _extractImage(dynamic image) {
-    if (image is String) return image;
-    if (image is List && image.isNotEmpty) return _extractImage(image.first);
-    if (image is Map) return image['url']?.toString();
+  /// The title of a group of ingredients or steps ("For the sauce") as the
+  /// line the app turns into a heading: with one colon at its end.
+  static String _groupTitle(String name) {
+    var end = name.length;
+    while (end > 0 && ': \t'.contains(name[end - 1])) {
+      end--;
+    }
+    return '${name.substring(0, end)}:';
+  }
+
+  /// Lines of instructions as steps: without the numbers typed in front of
+  /// them, since the app numbers its steps itself.
+  static List<String> _withoutStepNumbers(Iterable<String> lines) =>
+      lines.map(_stepText).where((step) => step.isNotEmpty).toList();
+
+  static final _stepLabel = RegExp(r'^(?:step\s?)?\d+[.):]?$', caseSensitive: false);
+  static final _stepNumber = RegExp(
+      r'^(?:step\s+\d+\s*[.):\-]?\s+|\d+[.):]\s+|\d+[.)](?=[A-Za-z])|[\-*•]\s+)',
+      caseSensitive: false);
+
+  /// One instruction step as clean text, without the "1." or "Step 2:" some
+  /// sites write in front. The app numbers the steps itself. "2.5 cm of oil"
+  /// keeps its number, and a line that is nothing but the number of a step
+  /// ("Step 2", over the step itself) is no step at all.
+  static String _stepText(String text) {
+    final step = (_cleanHtmlText(text) ?? '').replaceFirst(_stepNumber, '');
+    return _stepLabel.hasMatch(step) ? '' : step;
+  }
+
+  static int? _parseTimeValue(dynamic value) {
+    num? minutes;
+    if (value is num) {
+      minutes = value;
+    } else if (value is String) {
+      // A number on its own is a number of minutes. A number among words
+      // that name no unit of time ("serves 4") is not a time at all.
+      final text = value.trim();
+      minutes = _isoDurationMinutes(text) ?? num.tryParse(text) ?? _minutesInWords(text);
+    }
+    if (minutes == null || !minutes.isFinite) return null;
+    // No time and zero minutes are the same thing to a cook, and nothing
+    // takes longer than a year.
+    final rounded = minutes.round();
+    return (rounded > 0 && rounded <= _longestMinutes) ? rounded : null;
+  }
+
+  static const _longestMinutes = 366 * 24 * 60;
+
+  static final _durationPart = RegExp(r'(\d+(?:[.,]\d+)?)([YMWDHS])');
+
+  /// The minutes in an ISO 8601 duration ("PT1H30M", "P0DT0H20M", "PT1800S"),
+  /// or null when [text] is not one. Sites get the format wrong in a few
+  /// common ways that are read too: lower case, and a missing "T" ("P15M"
+  /// meant as fifteen minutes).
+  static int? _isoDurationMinutes(String text) {
+    final duration = text.toUpperCase();
+    if (!duration.startsWith('P')) return null;
+    // "M" is months before the "T" and minutes after it. Without a "T" there
+    // is no date part, so it can only be minutes.
+    var inTime = !duration.contains('T');
+    var minutes = 0.0;
+    var parts = 0;
+    var position = 1;
+    while (position < duration.length) {
+      if (duration[position] == 'T') {
+        inTime = true;
+        position++;
+        continue;
+      }
+      final part = _durationPart.matchAsPrefix(duration, position);
+      // Anything after a readable start is ignored ("PT20M-PT30M").
+      if (part == null) break;
+      final amount = double.parse(part.group(1)!.replaceFirst(',', '.'));
+      switch (part.group(2)) {
+        case 'W':
+          minutes += amount * 7 * 24 * 60;
+        case 'D':
+          minutes += amount * 24 * 60;
+        case 'H':
+          minutes += amount * 60;
+        case 'M':
+          if (inTime) minutes += amount;
+        case 'S':
+          minutes += amount / 60;
+      }
+      parts++;
+      position = part.end;
+    }
+    if (parts == 0) return null;
+    // A run of digits long enough to overflow is not a time.
+    return minutes <= _longestMinutes ? minutes.round() : 0;
+  }
+
+  /// A time a person typed into a field for one ("1 hr 30 min", "1.5 hours",
+  /// "1:30", "90", "about 20") or that data writes ("PT1H30M"), in minutes.
+  /// Null for anything that does not read as a time, rather than a guess.
+  ///
+  /// This reads more freely than [_parseTimeValue] reads the durations of a
+  /// web page, where a clock time or a number among other characters is
+  /// more likely to be something else.
+  static int? _parseTimeString(String time) {
+    final text = time.trim();
+    return _parseTimeValue(_clockMinutes(text) ?? _roughMinutes(text) ?? text);
+  }
+
+  static final _clock = RegExp(r'^(\d{1,3}):([0-5]\d)(?::[0-5]\d)?$');
+
+  /// The minutes in a time written like a clock: "1:30" is an hour and a
+  /// half.
+  static int? _clockMinutes(String text) {
+    final clock = _clock.firstMatch(text);
+    if (clock == null) return null;
+    return int.parse(clock.group(1)!) * 60 + int.parse(clock.group(2)!);
+  }
+
+  static final _roughTime = RegExp(
+      r'^(?:(?:~|≈|ca\.?|circa|about|approx(?:\.|imately)?|around|roughly)\s{0,3})?'
+      r'(\d{1,6}(?:\.\d{1,3})?)(?:\s{0,3}(?:[-\u2013]|to)\s{0,3}\d{1,6})?\s{0,3}\+?$',
+      caseSensitive: false);
+
+  /// The minutes in a number typed without a unit, and not always on its
+  /// own ("about 20", "20-25", "20 to 25", "30+"). A range is read as its
+  /// first number.
+  static num? _roughMinutes(String text) =>
+      num.tryParse(_roughTime.firstMatch(text)?.group(1) ?? '');
+
+  static final _timeInWords = RegExp(
+      // An amount: 2, 1.5, 1 1/2, 1½, 1/2 or ½, and not the tail of a longer
+      // number.
+      r'(?<![\d.,/])(?:(\d{1,4}(?:[.,]\d{1,2})?)(?:\s{0,2}(\d)/([1-9]\d?)|\s{0,2}([½¼¾]))?|'
+      r'(\d)/([1-9]\d?)|([½¼¾]))\s{0,3}'
+      // Its unit, in full or cut short. A letter after it makes it the start
+      // of some other word ("2 medium", "3 hot").
+      r'(?:(days?|d)|(hours?|hrs?|hr|h|stunden?|std|heures?|horas?|uur|uren)|'
+      r'(minutes?|mins?|min|m|minuten?|minutos?|minuti)|(seconds?|secs?|sec|s))(?![a-z])\.?'
+      // "1h30": the minutes after an hour, with their unit left out.
+      r'(?:\s{0,2}(\d{1,2})(?![\d.,:/]|\s{0,3}[a-z½¼¾]))?',
+      caseSensitive: false);
+
+  static const _fractionValues = {'½': 0.5, '¼': 0.25, '¾': 0.75};
+
+  /// The minutes in a time written out ("1 hour 15 minutes", "1 1/2 hrs",
+  /// "45 min", "1h30"), or null when [text] names no unit of time.
+  static int? _minutesInWords(String text) {
+    // A time is a few words at most. Anything longer is some other text that
+    // happens to mention one.
+    if (text.length > 120) return null;
+    var minutes = 0.0;
+    var found = false;
+    for (final part in _timeInWords.allMatches(text)) {
+      var amount = double.parse((part.group(1) ?? '0').replaceFirst(',', '.'));
+      final over = part.group(2) ?? part.group(5);
+      final under = part.group(3) ?? part.group(6);
+      if (over != null && under != null) amount += int.parse(over) / int.parse(under);
+      amount += _fractionValues[part.group(4) ?? part.group(7)] ?? 0;
+
+      if (part.group(8) != null) {
+        minutes += amount * 24 * 60;
+      } else if (part.group(9) != null) {
+        minutes += amount * 60 + int.parse(part.group(12) ?? '0');
+      } else if (part.group(10) != null) {
+        minutes += amount;
+      } else {
+        minutes += amount / 60;
+      }
+      found = true;
+    }
+    return found ? minutes.round() : null;
+  }
+
+  static String? _extractImage(dynamic image, [int depth = 0]) {
+    if (image is String) return image.trim().isEmpty ? null : image.trim();
+    // Nothing real nests its picture this deep.
+    if (depth > 4) return null;
+    if (image is List) {
+      // The first entry that holds an address. Sites list several sizes.
+      for (final item in image) {
+        final found = _extractImage(item, depth + 1);
+        if (found != null) return found;
+      }
+    }
+    if (image is Map) return _extractImage(image['url'] ?? image['contentUrl'], depth + 1);
     return null;
   }
 
   static String? _extractServings(dynamic data) {
     if (data == null) return null;
     if (data is int) return '$data servings';
+    if (data is double && data.isFinite) {
+      return data == data.roundToDouble() ? '${data.round()} servings' : '$data servings';
+    }
     if (data is String) return data;
-    if (data is List && data.isNotEmpty) return data.first.toString();
+    if (data is List) {
+      // The first entry that says something. Sites list "4" next to
+      // "4 servings".
+      for (final entry in data) {
+        final servings =
+            entry is num ? '$entry' : (entry is List ? null : _extractServings(entry));
+        if (servings != null && servings.trim().isNotEmpty) return servings;
+      }
+      return null;
+    }
+    // QuantitativeValue: {"value": 4, "unitText": "servings"}
+    if (data is Map && (data['value'] is num || data['value'] is String)) {
+      return '${data['value']} ${data['unitText'] ?? 'servings'}';
+    }
     return null;
   }
 }
