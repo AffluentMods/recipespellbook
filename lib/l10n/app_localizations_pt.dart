@@ -4173,6 +4173,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get manualEntryHint => 'Você pode inserir manualmente o nome do produto.';
 
   @override
+  String get productLookupFailed => 'Could Not Look Up Product';
+
+  @override
+  String get productLookupFailedHint => 'The product database did not answer. Check your connection and try again, or enter the product name yourself.';
+
+  @override
   String get scanAgain => 'Escanear novamente';
 
   @override
@@ -5982,7 +5988,54 @@ class AppLocalizationsPt extends AppLocalizations {
   String get transferCodeExpires => 'Este código expira em 15 minutos';
 
   @override
+  String transferCodeExpiresAt(String time) {
+    return 'This code expires at $time';
+  }
+
+  @override
+  String transferPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos did not fit into the transfer and stay on this device.',
+      one: '1 photo did not fit into the transfer and stays on this device.',
+    );
+    return '$_temp0 To move everything with every photo, do not use this code. Use Export Data in Settings on this device and Import Data on the other instead.';
+  }
+
+  @override
+  String get transferPhotosLeftOutTitle => 'Not every photo fits';
+
+  @override
+  String transferPhotosLeftOutAsk(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos do not fit into a transfer and would stay on this device.',
+      one: '1 photo does not fit into a transfer and would stay on this device.',
+    );
+    return '$_temp0 A backup file carries every photo: cancel, then use Export Data in Settings on this device and Import Data on the other. Use one or the other. A backup imported after a transfer adds every recipe a second time.';
+  }
+
+  @override
+  String get transferSendWithoutPhotos => 'Send without them';
+
+  @override
+  String get transferSignInToSend => 'Sign in to send your recipes to another device. The device that receives them does not need an account.';
+
+  @override
   String get transferComplete => 'Transferência concluída!';
+
+  @override
+  String transferAlreadyHere(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes were already on this device and were left as they are.',
+      one: '1 recipe was already on this device and was left as it is.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get transferAccountSynced => 'Sessão iniciada pelo remetente';
@@ -6001,6 +6054,33 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get transferMergeNote => 'Os dados existentes neste dispositivo serão mesclados. Duplicatas são ignoradas.';
+
+  @override
+  String get transferErrorTooLarge => 'Your library is too large to send in one transfer. Use Export Data in Settings to make a backup file, and Import Data on the other device.';
+
+  @override
+  String get transferErrorOffline => 'Could not reach the server. Check your connection and try again.';
+
+  @override
+  String get transferErrorServer => 'The server could not complete the transfer. Try again in a moment.';
+
+  @override
+  String get transferErrorCodeNotFound => 'Transfer code not found. Check the code and try again.';
+
+  @override
+  String get transferErrorCodeExpired => 'This transfer code has expired. Create a new one on the sending device.';
+
+  @override
+  String get transferErrorCodeUsed => 'This transfer code has already been used. If the transfer did not finish, create a new code on the sending device. Nothing will be imported twice.';
+
+  @override
+  String get transferErrorSyncRunning => 'A sync is in progress. Try again in a moment.';
+
+  @override
+  String get transferErrorUnreadable => 'This transfer could not be read. Create a new code on the sending device.';
+
+  @override
+  String get transferErrorNotSaved => 'The transfer arrived but could not be saved. Nothing on this device was changed. Try again with the same code.';
 
   @override
   String get transferPointCamera => 'Aponte para o código QR do dispositivo emissor';
@@ -10245,6 +10325,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get importFromFileSubtitle => 'Admite archivos .json y .zip de respaldo';
+
+  @override
+  String get importErrorNoPicker => 'The file picker could not be opened. Try again.';
+
+  @override
+  String get importErrorUnreadable => 'This backup file could not be read. It may be damaged or incomplete.';
+
+  @override
+  String get importErrorNotABackup => 'This file is not a Recipe Spellbook backup.';
+
+  @override
+  String get importErrorMissingData => 'This zip file is not a Recipe Spellbook backup. It has no data.json in it.';
+
+  @override
+  String get importErrorRestoreFailed => 'This backup could not be restored. Nothing was imported.';
 
   @override
   String get exportAdvanced => 'Opciones avanzadas';

@@ -10,6 +10,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/transfer_service.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/sign_in_prompt.dart';
 
 /// One-time device transfer screen for free users.
 ///
@@ -43,6 +44,8 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   String? _sendError;
   int _recipesCount = 0;
   int _cookbooksCount = 0;
+  int _photosLeftOut = 0;
+  DateTime? _expiresAt;
 
   // RECEIVE state
   final _codeController = TextEditingController();
@@ -50,6 +53,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   String? _receiveError;
   bool _receiveSuccess = false;
   int _importedCount = 0;
+  int _alreadyHere = 0;
   bool _didRestoreAuth = false;
 
   @override
@@ -99,8 +103,22 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   // ════════════════════════════════════════════════════════════════
 
   Widget _buildModePicker(ThemeData theme, AppLocalizations l10n) {
-    return Padding(
+    // Scrolls when the screen is too short for it: on a phone held sideways
+    // the second card was below the edge and could not be reached. With
+    // room to spare the column still fills the height, banner at the bottom.
+    return LayoutBuilder(
       key: const ValueKey('picker'),
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: IntrinsicHeight(child: _buildModeCards(theme, l10n)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeCards(ThemeData theme, AppLocalizations l10n) {
+    return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
@@ -125,10 +143,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
             subtitle: l10n.transferSendSubtitle(_targetDevice(l10n)),
             color: theme.colorScheme.primary,
             theme: theme,
-            onTap: () {
-              setState(() => _step = 1);
-              _prepareSend();
-            },
+            onTap: _startSend,
           ),
           const SizedBox(height: 16),
           _ModeCard(
@@ -170,28 +185,109 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   //  SEND MODE
   // ════════════════════════════════════════════════════════════════
 
+  /// Sending needs an account, the server takes a transfer from nobody
+  /// else. Asking for it here beats collecting the whole library first and
+  /// showing the server's refusal afterwards. [expired] is for a sign-in
+  /// the server has just turned down.
+  Future<void> _startSend({bool expired = false}) async {
+    final l10n = AppLocalizations.of(context)!;
+    final signedIn = await promptSignIn(
+      context,
+      ref,
+      message: expired ? l10n.inviteErrorSessionExpired : l10n.transferSignInToSend,
+    );
+    if (!signedIn || !mounted) return;
+    setState(() => _step = 1);
+    _prepareSend();
+  }
+
   Future<void> _prepareSend() async {
     setState(() { _isSending = true; _sendError = null; });
     try {
-      final result = await TransferService.instance.createTransfer();
-      if (mounted) {
-        setState(() {
-          _transferCode = result.code;
-          _isSending = false;
-          _sendReady = true;
-          _recipesCount = result.recipesCount;
-          _cookbooksCount = result.cookbooksCount;
-        });
+      final result = await TransferService.instance.createTransfer(leaveOutPhotos: _askAboutPhotos);
+      if (!mounted) return;
+      if (result == null) {
+        // Not sent: the user would rather move everything with a backup.
+        setState(() { _isSending = false; _step = 0; });
+        return;
       }
+      setState(() {
+        _transferCode = result.code;
+        _isSending = false;
+        _sendReady = true;
+        _recipesCount = result.recipesCount;
+        _cookbooksCount = result.cookbooksCount;
+        _photosLeftOut = result.photosLeftOut;
+        _expiresAt = result.expiresAt;
+      });
     } catch (e) {
       debugPrint('[Transfer] Send failed: $e');
+      if (e is TransferException && e.failure == TransferFailure.signInExpired && await _clearSignIn()) {
+        if (!mounted) return;
+        setState(() { _isSending = false; _step = 0; });
+        await _startSend(expired: true);
+        return;
+      }
       if (mounted) {
         setState(() {
           _isSending = false;
-          _sendError = e.toString().replaceFirst('Exception: ', '');
+          _sendError = _failureText(e);
         });
       }
     }
+  }
+
+  /// Clears a sign-in the server has turned down, and says whether this
+  /// device is signed out now. Sending again with a dead sign-in can only
+  /// fail again, so the user is asked to sign in afresh instead of being
+  /// offered "Try Again".
+  Future<bool> _clearSignIn() async {
+    try {
+      await ref.read(authProvider.notifier).signOut();
+    } catch (e) {
+      debugPrint('[Transfer] Could not clear the sign-in: $e');
+    }
+    return !AuthService.instance.isSignedIn;
+  }
+
+  /// Asked before anything is sent, when not every photo fits. Afterwards
+  /// is too late: the advice to move the photos with a backup then doubles
+  /// the library, because a backup restored after a transfer adds every
+  /// recipe again.
+  Future<bool> _askAboutPhotos(int photos) async {
+    if (!mounted) return false;
+    final l10n = AppLocalizations.of(context)!;
+    final send = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.transferPhotosLeftOutTitle),
+        content: SingleChildScrollView(child: Text(l10n.transferPhotosLeftOutAsk(photos))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.transferSendWithoutPhotos)),
+        ],
+      ),
+    );
+    return send == true;
+  }
+
+  /// What went wrong, as a sentence for the user.
+  String _failureText(Object error) {
+    final l10n = AppLocalizations.of(context)!;
+    if (error is! TransferException) return l10n.errorGenericMessage;
+    return switch (error.failure) {
+      TransferFailure.signInNeeded => l10n.transferSignInToSend,
+      TransferFailure.signInExpired => l10n.inviteErrorSessionExpired,
+      TransferFailure.tooLarge => l10n.transferErrorTooLarge,
+      TransferFailure.offline => l10n.transferErrorOffline,
+      TransferFailure.server => l10n.transferErrorServer,
+      TransferFailure.codeNotFound => l10n.transferErrorCodeNotFound,
+      TransferFailure.codeExpired => l10n.transferErrorCodeExpired,
+      TransferFailure.codeUsed => l10n.transferErrorCodeUsed,
+      TransferFailure.syncRunning => l10n.transferErrorSyncRunning,
+      TransferFailure.unreadable => l10n.transferErrorUnreadable,
+      TransferFailure.notSaved => l10n.transferErrorNotSaved,
+    };
   }
 
   Widget _buildSendMode(ThemeData theme, AppLocalizations l10n) {
@@ -245,8 +341,15 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(_transferCode ?? '',
-                      style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 6, fontFamily: 'monospace')),
+                  // Shrinks to fit: on a narrow screen or with large text
+                  // the code and the copy button ran past the edge.
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(_transferCode ?? '',
+                          style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 6, fontFamily: 'monospace')),
+                    ),
+                  ),
                   const SizedBox(width: 12),
                   IconButton(
                     onPressed: () {
@@ -281,16 +384,46 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.schedule, size: 16, color: theme.colorScheme.outline),
-                const SizedBox(width: 6),
-                Text(l10n.transferCodeExpires,
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-              ],
-            ),
+            // Photos that stayed behind are said out loud. A recipe arriving
+            // without its picture and no word about it would be a loss
+            // nobody notices until the old phone is gone.
+            if (_photosLeftOut > 0) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 18, color: theme.colorScheme.error),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(l10n.transferPhotosLeftOut(_photosLeftOut),
+                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            // The server decides how long a code lives and says so with
+            // the code. The screen used to promise an hour for 15 minutes.
+            if (_expiresAt != null) ...[
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.schedule, size: 16, color: theme.colorScheme.outline),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                        l10n.transferCodeExpiresAt(TimeOfDay.fromDateTime(_expiresAt!.toLocal()).format(context)),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                  ),
+                ],
+              ),
+            ],
           ],
         ],
       ),
@@ -333,6 +466,12 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               const SizedBox(height: 8),
               Text(l10n.transferImportedSuccess(_importedCount),
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              if (_alreadyHere > 0) ...[
+                const SizedBox(height: 4),
+                Text(l10n.transferAlreadyHere(_alreadyHere),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    textAlign: TextAlign.center),
+              ],
               if (_didRestoreAuth) ...[
                 const SizedBox(height: 8),
                 Row(
@@ -359,8 +498,10 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
       child: Column(
         children: [
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity, height: 160,
+          // At least this tall. With large text the two lines need more, and
+          // a fixed height pushed them out of the box.
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: double.infinity, minHeight: 160),
             child: Material(
               color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(16),
@@ -370,12 +511,17 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(height: 12),
                     Icon(Icons.qr_code_scanner, size: 56, color: theme.colorScheme.primary),
                     const SizedBox(height: 12),
-                    Text(l10n.transferScanQr, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(l10n.transferScanQr,
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center),
                     const SizedBox(height: 4),
                     Text(l10n.transferScanQrDesc,
-                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
@@ -406,6 +552,9 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               errorText: _receiveError,
+              // Room for all of it, however narrow the screen and however
+              // large the text. The last sentence says what to do next.
+              errorMaxLines: 20,
             ),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp('[A-Za-z0-9]')),
@@ -441,8 +590,6 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 _transferItem(Icons.menu_book, l10n.transferItemCookbooks, theme),
                 _transferItem(Icons.calendar_month, l10n.transferItemMealPlans, theme),
                 _transferItem(Icons.shopping_cart, l10n.transferItemShoppingLists, theme),
-                _transferItem(Icons.settings, l10n.transferItemSettings, theme),
-                _transferItem(Icons.account_circle, l10n.transferItemAccount, theme),
               ],
             ),
           ),
@@ -477,7 +624,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
         children: [
           Icon(icon, size: 16, color: theme.colorScheme.primary),
           const SizedBox(width: 10),
-          Text(label, style: theme.textTheme.bodySmall),
+          Expanded(child: Text(label, style: theme.textTheme.bodySmall)),
         ],
       ),
     );
@@ -538,6 +685,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           _isReceiving = false;
           _receiveSuccess = true;
           _importedCount = result.importedCount;
+          _alreadyHere = result.recipesAlreadyHere;
           _didRestoreAuth = didAuth;
         });
       }
@@ -546,7 +694,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
       if (mounted) {
         setState(() {
           _isReceiving = false;
-          _receiveError = e.toString().replaceFirst('Exception: ', '');
+          _receiveError = _failureText(e);
         });
       }
     }
