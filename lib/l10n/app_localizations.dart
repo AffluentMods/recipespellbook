@@ -8785,6 +8785,18 @@ abstract class AppLocalizations {
   /// **'Recipe imported successfully!'**
   String get aiImportSuccess;
 
+  /// Shown in place of the usual success message when the cookbook that was asked for no longer exists and another one was used.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Recipe imported into {cookbook}.} other{{count} recipes imported into {cookbook}.}}'**
+  String aiImportedInto(int count, String cookbook);
+
+  /// No description provided for @aiNoCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no cookbook to import into. Add a cookbook first.'**
+  String get aiNoCookbook;
+
   /// No description provided for @aiPreviewImport.
   ///
   /// In en, this message translates to:

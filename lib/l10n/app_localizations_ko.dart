@@ -4803,6 +4803,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get aiImportSuccess => '레시피를 성공적으로 가져왔습니다!';
 
   @override
+  String aiImportedInto(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes imported into $cookbook.',
+      one: 'Recipe imported into $cookbook.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get aiNoCookbook => 'There is no cookbook to import into. Add a cookbook first.';
+
+  @override
   String get aiPreviewImport => '미리보기 및 가져오기';
 
   @override
