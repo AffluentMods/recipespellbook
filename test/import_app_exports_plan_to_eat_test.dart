@@ -157,8 +157,8 @@ void main() {
         'Snacks': 'snack',
         'Breakfast': 'breakfast',
         'Breads': 'snack',
-        'Lunch': null,
-        'Dinner': null,
+        'Lunch': 'main',
+        'Dinner': 'main',
       };
       const keptAsTag = {'Soups', 'Salads', 'Breads', 'Lunch', 'Dinner'};
       courses.forEach((course, id) {

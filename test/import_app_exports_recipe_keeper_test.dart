@@ -525,9 +525,9 @@ void main() {
     });
 
     test('a course the app has no match for is kept as a tag', () {
-      final lunch = keeperRecipe(block(course: 'Lunch'));
+      final lunch = keeperRecipe(block(course: 'Canning'));
       expect(lunch.suggestedCourse, isNull);
-      expect(lunch.tags, ['Lunch']);
+      expect(lunch.tags, ['Canning']);
     });
 
     test('a course that says more than its match stays a tag as well', () {

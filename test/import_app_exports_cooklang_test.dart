@@ -307,9 +307,9 @@ Brown the @minced beef{500%g}.
       expect(recipe.imageUrl, 'https://example.com/lasagne.jpg');
       expect(recipe.sourceUrl, 'https://example.com/lasagne');
       expect(recipe.notes, 'Source: Nonna');
-      // The app has no dinner course, so the word is kept as a tag.
+      // Dinner is filed under main dishes, and the word is kept as a tag.
       expect(recipe.tags, ['pasta', 'comfort food', 'dinner']);
-      expect(recipe.suggestedCourse, isNull);
+      expect(recipe.suggestedCourse, 'main');
       expect(recipe.instructions, ['Brown the minced beef.']);
     });
 
@@ -376,7 +376,7 @@ Brown the @minced beef{500%g}.
       expect(soup.tags, ['winter', 'Soups']);
 
       final dinner = cookWith('course: dinner');
-      expect(dinner.suggestedCourse, isNull);
+      expect(dinner.suggestedCourse, 'main');
       expect(dinner.tags, ['dinner']);
       expect(dinner.suggestedCategory, isNull);
     });

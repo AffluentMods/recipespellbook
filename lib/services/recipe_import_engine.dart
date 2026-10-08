@@ -2420,7 +2420,7 @@ class RecipeImportEngine {
     final method = lines.indexWhere(
         (line) =>
             (!numberedIngredients && _numberedStep.hasMatch(line)) ||
-            (line.length > 50 && _sentenceEnd.hasMatch(line)),
+            (line.length > 50 && _sentenceStop.hasMatch(line)),
         heading + 2);
     // Sentences under a notes heading are the notes.
     final notes = lines.indexWhere(_isNotesHeading, heading + 1);
@@ -2491,7 +2491,7 @@ class RecipeImportEngine {
       caseSensitive: false);
 
   static final _headingDecoration = RegExp(r'^[#*_\s]+|[*_:\s]+$');
-  static final _sentenceEnd = RegExp(r'[.!?]$');
+  static final _sentenceStop = RegExp(r'[.!?]$');
 
   /// A heading line without its decoration: Markdown marks, a closing colon.
   static String _headingText(String line) =>
@@ -2565,7 +2565,7 @@ class RecipeImportEngine {
     var cell = false;
     if (node is Element) {
       // The node the caller asked for is read whatever it is.
-      if (depth > 0 && _isPageFurniture(node)) return;
+      if (depth > 0 && _isFurnitureElement(node)) return;
       final tag = node.localName;
       block = _blockElements.contains(tag);
       cell = tag == 'td' || tag == 'th';
@@ -2596,7 +2596,7 @@ class RecipeImportEngine {
   static final _endsInDigit = RegExp(r'\d$');
   static final _digitsOnly = RegExp(r'^\d{1,3}$');
 
-  static bool _isPageFurniture(Element element) {
+  static bool _isFurnitureElement(Element element) {
     if (_skippedElements.contains(element.localName)) return true;
     if (element.attributes.containsKey('hidden')) return true;
     return _skippedBlocks.contains(element.id) ||
@@ -3615,7 +3615,7 @@ class RecipeImportEngine {
     return [for (final (_, index) in byOrder) rows[index]];
   }
 
-  static final _notLetters = RegExp(r'[^a-z0-9]+');
+  static final _notAsciiLettersOrDigits = RegExp(r'[^a-z0-9]+');
 
   /// Where a recipe is from: its link when the export has one, otherwise the
   /// name it gives (a site, a book, "Grandma"). With both, the name comes
@@ -3623,7 +3623,7 @@ class RecipeImportEngine {
   /// "seriouseats.com" says "Serious Eats".
   static (String?, String?) _sourceAndNote(String? link, String? name) {
     if (link == null || name == null) return (link ?? name, null);
-    String letters(String text) => text.toLowerCase().replaceAll(_notLetters, '');
+    String letters(String text) => text.toLowerCase().replaceAll(_notAsciiLettersOrDigits, '');
     final inLink = letters(name).isNotEmpty && letters(link).contains(letters(name));
     return (link, inLink ? null : 'Source: $name');
   }
@@ -7495,7 +7495,7 @@ class RecipeImportEngine {
   static List<String> _withoutStepNumbers(Iterable<String> lines) =>
       lines.map(_stepText).where((step) => step.isNotEmpty).toList();
 
-  static final _stepLabel = RegExp(r'^(?:step\s?)?\d+[.):]?$', caseSensitive: false);
+  static final _bareStepLabel = RegExp(r'^(?:step\s?)?\d+[.):]?$', caseSensitive: false);
   static final _stepNumber = RegExp(
       r'^(?:step\s+\d+\s*[.):\-]?\s+|\d+[.):]\s+|\d+[.)](?=[A-Za-z])|[\-*•]\s+)',
       caseSensitive: false);
@@ -7506,7 +7506,7 @@ class RecipeImportEngine {
   /// ("Step 2", over the step itself) is no step at all.
   static String _stepText(String text) {
     final step = (_cleanHtmlText(text) ?? '').replaceFirst(_stepNumber, '');
-    return _stepLabel.hasMatch(step) ? '' : step;
+    return _bareStepLabel.hasMatch(step) ? '' : step;
   }
 
   static int? _parseTimeValue(dynamic value) {
@@ -7528,7 +7528,7 @@ class RecipeImportEngine {
 
   static const _longestMinutes = 366 * 24 * 60;
 
-  static final _durationPart = RegExp(r'(\d+(?:[.,]\d+)?)([YMWDHS])');
+  static final _isoDurationPart = RegExp(r'(\d+(?:[.,]\d+)?)([YMWDHS])');
 
   /// The minutes in an ISO 8601 duration ("PT1H30M", "P0DT0H20M", "PT1800S"),
   /// or null when [text] is not one. Sites get the format wrong in a few
@@ -7549,7 +7549,7 @@ class RecipeImportEngine {
         position++;
         continue;
       }
-      final part = _durationPart.matchAsPrefix(duration, position);
+      final part = _isoDurationPart.matchAsPrefix(duration, position);
       // Anything after a readable start is ignored ("PT20M-PT30M").
       if (part == null) break;
       final amount = double.parse(part.group(1)!.replaceFirst(',', '.'));
@@ -7618,8 +7618,6 @@ class RecipeImportEngine {
       // "1h30": the minutes after an hour, with their unit left out.
       r'(?:\s{0,2}(\d{1,2})(?![\d.,:/]|\s{0,3}[a-z½¼¾]))?',
       caseSensitive: false);
-
-  static const _fractionValues = {'½': 0.5, '¼': 0.25, '¾': 0.75};
 
   /// The minutes in a time written out ("1 hour 15 minutes", "1 1/2 hrs",
   /// "45 min", "1h30"), or null when [text] names no unit of time.

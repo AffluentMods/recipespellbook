@@ -517,7 +517,7 @@ void main() {
           'Food/Beverage/Alcoholic/TIKI/Mai Tai.md': text(note('Mai Tai')),
           'Food/Appetizer/Cheese Straws.md': text(note('Cheese Straws')),
           'Desserts/Shortbread.txt': text(note('Shortbread')),
-          'Food/Dinner/Chili.cook': text(chiliCook),
+          'Food/Weeknight/Chili.cook': text(chiliCook),
           'Food/Desserts/sheet.csv': utf8.encode(recipeSheet),
         }),
       );

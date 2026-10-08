@@ -764,8 +764,8 @@ void main() {
 
     test('a label with no course to match is a tag', () {
       final tags = <String>['weeknight'];
-      expect(course(['Lunch', ' Dinner ', '', 'lunch'], tags), isNull);
-      expect(tags, ['weeknight', 'Lunch', 'Dinner']);
+      expect(course(['Canning', ' Holiday ', '', 'canning'], tags), isNull);
+      expect(tags, ['weeknight', 'Canning', 'Holiday']);
     });
 
     test('of several labels the one that names a course wins, and the others are tags', () {

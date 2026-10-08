@@ -330,7 +330,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   Future<void> _importPastedText(String text) async {
     _showLoading(AppLocalizations.of(context)!.parsingRecipe);
     try {
-      final recipes = RecipeImportEngine.parseOcrTextMulti(text);
+      final recipes = RecipeImportEngine.parseTextMulti(text);
       final empty = recipes.isEmpty ||
           (recipes.length == 1 &&
               recipes.first.ingredients.isEmpty &&
@@ -626,7 +626,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     _showLoading(l10n.parsingRecipe);
     try {
       // Try multi-recipe parser — pasted text might be a whole cookbook section
-      final recipes = RecipeImportEngine.parseOcrTextMulti(text);
+      final recipes = RecipeImportEngine.parseTextMulti(text);
       _hideLoading();
       _showImportPreview(recipes, sourceText: text);
     } catch (e) {
@@ -969,7 +969,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                       _ImportOptionTile(icon: Icons.auto_awesome_rounded, label: 'AI', color: theme.colorScheme.tertiary, onTap: () {
                         HapticFeedback.selectionClick();
                         Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AiImportScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => AiImportScreen(cookbookId: widget.cookbookId)));
                       }),
                       if (supportsBarcodeScanner)
                         _ImportOptionTile(icon: Icons.qr_code_scanner_rounded, label: 'Scan', color: theme.colorScheme.primary, onTap: _importFromBarcode),
