@@ -119,11 +119,19 @@ class _UnitConverter {
     final rule = rules[unitLower];
     if (rule == null) return (amount: amount, unit: unit);
 
-    final numVal = double.tryParse(amount.replaceAll(RegExp(r'[^\d.]'), ''));
-    if (numVal == null) return (amount: amount, unit: unit);
+    // Converting is scaling by the rule's factor, so the amount is read by the
+    // same reader scaling uses. It knows fractions, mixed numbers and ranges
+    // ("½", "1 1/2", "1-2"). It only asks for a number to be written when it
+    // could read one, so an amount like "a few" keeps its own unit.
+    var understood = false;
+    final (converted, _) = scaleQuantityString(amount, unit, rule.factor,
+        format: (value) {
+      understood = true;
+      return _formatConverted(value);
+    });
+    if (!understood) return (amount: amount, unit: unit);
 
-    final converted = numVal * rule.factor;
-    return (amount: _formatConverted(converted), unit: rule.targetUnit);
+    return (amount: converted, unit: rule.targetUnit);
   }
 
   /// Format a converted amount with precision that scales to its size, so a
