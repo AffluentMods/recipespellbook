@@ -177,53 +177,65 @@ class RecipeImportEngine {
 
   // ========== SECTION HEADER PATTERNS ==========
 
-  // Note: \S{0,3} allows optional emoji characters between ## and the keyword
-  static final _ingredientHeaderPatterns = [
-    RegExp(r'^#{1,6}\s*\S{0,3}\s*ingredients?\s*:?\s*$',
-        caseSensitive: false, multiLine: true),
-    RegExp(r'^\*{0,2}ingredients?\*{0,2}\s*:?\s*$',
-        caseSensitive: false, multiLine: true),
-    RegExp(r'^ingredients?\s*:?\s*$',
-        caseSensitive: false, multiLine: true),
-    // Header with a trailing group name, e.g. "Ingredients for the cookie
-    // dough:" / "Ingredients (filling):". Short, no sentence punctuation, so a
-    // prose sentence starting with "Ingredients ... ." won't match.
-    RegExp(r"^ingredients?\b[\w\s,'&()/-]{0,40}:?\s*$",
-        caseSensitive: false, multiLine: true),
-    RegExp("^what\\s+you'?ll?\\s+need\\s*:?\\s*\$",
-        caseSensitive: false, multiLine: true),
-    RegExp("^you'?ll?\\s+need\\s*:?\\s*\$",
-        caseSensitive: false, multiLine: true),
-    RegExp(r'^shopping\s+list\s*:?\s*$',
-        caseSensitive: false, multiLine: true),
-    // "For the dough:", "For the cookie dough:" — allow multi-word group names.
-    RegExp(r"^for\s+the\s+[\w\s,'&()/-]{1,40}?:?\s*$",
-        caseSensitive: false, multiLine: true),
-  ];
+  // A header is told by its words alone. Heading marks, emphasis, an emoji in
+  // front and the colon at the end are taken off first, see [_undressed],
+  // so "## Ingredients", "**Ingredients:**" and "🛒 INGREDIENTS" all arrive
+  // here as "ingredients". The words are known in the languages the app is
+  // translated into: a recipe is pasted or photographed in whatever language
+  // its cook reads.
 
-  static final _instructionHeaderPatterns = [
-    RegExp(
-        r'^#{1,6}\s*\S{0,3}\s*(instructions?|directions?|method|steps?|preparation|how\s+to\s+make|procedure)\s*:?\s*$',
-        caseSensitive: false,
-        multiLine: true),
-    RegExp(
-        r'^\*{0,2}(instructions?|directions?|method|steps?)\*{0,2}\s*:?\s*$',
-        caseSensitive: false,
-        multiLine: true),
-    RegExp(
-        r'^(instructions?|directions?|method|steps?|preparation|how\s+to\s+make|to\s+make|procedure)\s*:?\s*$',
-        caseSensitive: false,
-        multiLine: true),
-  ];
+  // What may follow the word for "ingredients": a bracket ("(serves 4)",
+  // "（2人分）"), whom or what the list is for ("for the filling", "für 4
+  // Personen") or a name after a dash.
+  static const _headerTail = r'(?:\s*[(（](?<bracket>[^()（）]{0,40})[)）]'
+      r'|\s+(?<whom>for|für|fuer|pour|para|per|voor|dla|на)\s+(?<what>[^.!?。]{1,40})'
+      r'|\s*[-–\u2014/]\s*(?<name>[^.!?。]{1,30}))?';
 
-  static final _notesHeaderPatterns = [
-    RegExp(
-        "^#{1,6}\\s*\\S{0,3}\\s*(notes?|tips?|variations?|chef'?s?\\s+notes?|cook'?s?\\s+notes?)\\s*:?\\s*\$",
-        caseSensitive: false,
-        multiLine: true),
-    RegExp(r'^(notes?|tips?|variations?)\s*:?\s*$',
-        caseSensitive: false, multiLine: true),
-  ];
+  static final _ingredientHeader = RegExp(
+      r'^(?:(?:the\s+)?ingredients?(?:\s+(?:list|needed))?'
+      r'|zutaten(?:liste)?|ingredientes|ingr[ée]dients|ingredienti|ingredi[ëe]nten|sk[łl]adniki'
+      r'|ингредиенты|材料|食材|用料|原料|配料|재료)'
+      '$_headerTail'
+      r'$'
+      r"|^(?:(?:what|things)\s+)?you(?:['’]?ll|\s+will)?\s+need$"
+      r'|^shopping\s+list$',
+      caseSensitive: false);
+
+  static final _methodHeader = RegExp(
+      r'^(?:(?:(?:cooking|baking|preparation|recipe|step[-\s]by[-\s]step)\s+)?(?:instructions?|directions?|method|steps?|procedure)'
+      r'|preparation(?:\s+(?:method|steps?))?|method\s+of\s+preparation|step[-\s]by[-\s]step'
+      r'|how\s+to\s+(?:make|prepare|cook)(?:\s+(?:it|this))?|to\s+make|to\s+prepare|what\s+to\s+do'
+      // German, Spanish, French, Italian, Portuguese, Dutch and Polish.
+      r"|zubereitung|anleitung|zubereitungsschritte|so\s+geht['’]?s|so\s+wird['’]?s\s+gemacht"
+      r'|preparaci[óo]n|elaboraci[óo]n|instrucciones|pasos|procedimiento|modo\s+de\s+preparaci[óo]n|m[ée]todo'
+      r'|pr[ée]paration|[ée]tapes|m[ée]thode|r[ée]alisation'
+      r'|preparazione|procedimento|istruzioni|metodo'
+      r'|modo\s+de\s+prepar(?:o|ar)|modo\s+de\s+fazer|preparo|prepara[çc][ãa]o|instru[çc][õo]es'
+      r'|bereiding(?:swijze)?|instructies|werkwijze|methode'
+      r'|przygotowanie|spos[óo]b\s+przygotowania|wykonanie'
+      // Russian, Japanese, Chinese and Korean.
+      r'|приготовление|способ\s+приготовления|как\s+готовить'
+      r'|作り方|作りかた|手順|調理方法|做法|步骤|步驟|制作方法|製作方法|만드는\s*(?:법|방법)|조리법|조리\s*방법)$',
+      caseSensitive: false);
+
+  static final _notesHeader = RegExp(
+      r"^(?:(?:(?:recipe|kitchen|chef['’]?s?|cook['’]?s?|baker['’]?s?)\s+)?(?:notes?|tips?|hints?|variations?)"
+      r'(?:\s*(?:and|&)\s*(?:notes?|tips?|variations?))?'
+      // What a recipe card prints after the method, or before the
+      // ingredients, is neither a step nor an ingredient: "Nutrition",
+      // "Nutrition Facts (per serving)", "Equipment".
+      r'|nutrition(?:al)?(?:\s+(?:facts|info(?:rmation)?|values?))?(?:\s*\([^)]{0,30}\))?|equipment(?:\s+needed)?'
+      r'|macros?\s+per\s+serving'
+      r'|storage|storing|to\s+store|to\s+freeze|make[-\s]ahead|substitutions?|serving\s+suggestions?'
+      r'|notizen|hinweise?|tipps?|anmerkung(?:en)?|notas?|consejos|remarques?|astuces?|conseils?|consigli'
+      r'|dicas?|observa[çc][õo]es|notities|opmerkingen|uwagi|wskaz[óo]wki'
+      r'|примечани[ея]|советы?|заметки|メモ|コツ|ポイント|备注|備註|小贴士|小貼士|提示|메모|팁)$',
+      caseSensitive: false);
+
+  // Heading marks and whatever else dresses a header: rules, brackets, a
+  // bullet. Not a digit, so "1. Ingredients" stays a list item.
+  static final _headerDress = RegExp(r'^[\s#=~\-–\u2014_|\[\]<>*•·]+|[\s=~\-–\u2014_|\[\]<>*•·]+$');
+  static final _colonAtEnd = RegExp(r'\s*[:：]+$');
 
   // ========== MEASUREMENT UNITS ==========
 
@@ -826,6 +838,42 @@ class RecipeImportEngine {
     return _parseStructuredText(text);
   }
 
+  /// Parse text a person typed or pasted, which may hold several recipes.
+  ///
+  /// The lines are read as written. None of the clean-up [parseOcrTextMulti]
+  /// does for a photo is applied: nothing is trimmed from a line and short
+  /// lines, numbers and capitals are kept. Only whole lines of web page
+  /// furniture are left out (menus, share buttons, cookie banners), because
+  /// recipes are often pasted straight from a page. JSON and front matter are
+  /// read as [parseFromText] reads them.
+  static List<ImportedRecipe> parseTextMulti(String text) {
+    text = _withoutCodeFence(text
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .replaceAll('\t', ' '));
+
+    if (_looksLikeJson(text)) {
+      final fromJson = parseFromFileBulk(text, 'pasted.json');
+      if (fromJson.isNotEmpty) return fromJson;
+    }
+
+    if (_splitFrontMatter(text) != null) {
+      return [_parseObsidianMarkdown(text)];
+    }
+
+    final written = _linesOf(text).where((l) => !_isPageFurniture(l.trim())).join('\n');
+    return _parseMulti(written, scanned: false);
+  }
+
+  /// Text pasted out of a chat often arrives inside a code fence. Take the
+  /// fence off so its first line is not read as the title.
+  static String _withoutCodeFence(String text) {
+    final trimmed = text.trim();
+    final firstBreak = trimmed.indexOf('\n');
+    if (!trimmed.startsWith('```') || !trimmed.endsWith('```') || firstBreak == -1) return text;
+    return trimmed.substring(firstBreak + 1, trimmed.length - 3).trimRight();
+  }
+
   /// Parse from a file's content, using filename extension for format hints.
   static ImportedRecipe parseFromFile(String content, String filename) {
     final ext = filename.toLowerCase().split('.').last;
@@ -839,11 +887,17 @@ class RecipeImportEngine {
             ?? ImportedRecipe(title: 'Imported Recipe', ingredients: [], instructions: []);
       case 'md':
       case 'markdown':
+        final text = content
+            .replaceAll('\r\n', '\n')
+            .replaceAll('\r', '\n')
+            .replaceAll('\t', ' ');
+        // A note is named after its file unless it says otherwise.
+        final fileTitle = _fileTitle(filename);
         // Use Obsidian parser when YAML frontmatter is present
-        if (content.trimLeft().startsWith('---')) {
-          return _parseObsidianMarkdown(content);
+        if (_splitFrontMatter(text) != null) {
+          return _parseObsidianMarkdown(text, fileTitle: fileTitle);
         }
-        return _parseMarkdown(content);
+        return _parseMarkdown(text, fileTitle: fileTitle);
       case 'mmf':
       case 'mk':
       // MealMaster format — return first recipe found
@@ -869,7 +923,7 @@ class RecipeImportEngine {
           final recipes = _parseMasterCookMxp(content);
           if (recipes.isNotEmpty) return recipes.first;
         }
-        return parseFromText(content);
+        return _namedByFile(parseFromText(content), filename);
     }
   }
 
@@ -895,9 +949,17 @@ class RecipeImportEngine {
       case 'mxp':
         return _parseMasterCookMxp(content);
       case 'txt':
-        if (_looksLikeMealMaster(content)) return _parseMealMaster(content);
-        if (_looksLikeMasterCook(content)) return _parseMasterCookMxp(content);
-        final recipe = parseFromText(content);
+        // A file that only resembles one of these formats yields nothing
+        // there and is read as plain text.
+        if (_looksLikeMealMaster(content)) {
+          final recipes = _parseMealMaster(content);
+          if (recipes.isNotEmpty) return recipes;
+        }
+        if (_looksLikeMasterCook(content)) {
+          final recipes = _parseMasterCookMxp(content);
+          if (recipes.isNotEmpty) return recipes;
+        }
+        final recipe = _namedByFile(parseFromText(content), filename);
         return (recipe.ingredients.isNotEmpty || recipe.instructions.isNotEmpty) ? [recipe] : [];
       default:
         final recipe = parseFromFile(content, filename);
@@ -905,11 +967,17 @@ class RecipeImportEngine {
     }
   }
 
-  /// Check if text looks like MasterCook format.
+  // The banner MasterCook writes over each recipe it exports, and the
+  // heading of its ingredient table.
+  static final _masterCookBanner = RegExp(r'\*\s*Exported\s+from\s+MasterCook', caseSensitive: false);
+  static final _masterCookTable =
+      RegExp(r'^[ \t]*Amount\s+Measure\s+Ingredient\s+--\s+Preparation Method', multiLine: true, caseSensitive: false);
+
+  /// Check if text looks like MasterCook format. Only what MasterCook itself
+  /// writes counts: "Serving Size: 8" stands in many a plain recipe and on
+  /// every nutrition label.
   static bool _looksLikeMasterCook(String content) {
-    return content.contains('EXPORTED FROM  MASTERCOOK') ||
-        content.contains('EXPORTED FROM MASTERCOOK') ||
-        RegExp(r'Serving Size\s*:\s*\d', caseSensitive: false).hasMatch(content);
+    return _masterCookBanner.hasMatch(content) || _masterCookTable.hasMatch(content);
   }
 
   /// Parse MasterCook .mxp format text.
@@ -1004,13 +1072,11 @@ class RecipeImportEngine {
 
   /// Parse OCR text from a multi-recipe document (e.g. cookbook PDF).
   ///
-  /// Detects recipe boundaries using multiple signal types:
-  ///   - Nutrition/macros lines ("Macros per serving X cal Yg protein...")
-  ///   - Section headers ("Ingredients (...)", "How to make", "Method:", "Directions:")
-  ///   - Servings/yield lines ("Serves 4", "Yield: 12 cookies", "Makes 6")
-  ///   - Time lines ("Prep time:", "Cook time:", "Total time:")
-  ///   - Title-like lines (short, no trailing punctuation, followed by recipe content)
-  ///   - Page breaks (form feed \f or repeated blank lines)
+  /// The text is split where a new recipe shows itself after the method of
+  /// the one before: by the header of its ingredient list, by a line that
+  /// numbers it ("Recipe 12") or by its nutrition line ("Macros per serving
+  /// X cal Yg protein..."). The printed lines of a wrapped step or
+  /// ingredient are put back together.
   ///
   /// Optional [pageImagePaths] and [pageStartLines] map each recipe to a
   /// cover image extracted from the PDF page where the recipe starts.
@@ -1018,143 +1084,172 @@ class RecipeImportEngine {
   /// photo when a recipe spans multiple pages. Pages with `null` paths had
   /// no extractable photo — we look at the next 1-2 pages in that case.
   ///
-  /// Each candidate is scored; nearby candidates within 8 lines are clustered
-  /// into a single boundary. If only one recipe is detected, returns a single-
-  /// element list.
+  /// If only one recipe is detected, returns a single-element list.
   static List<ImportedRecipe> parseOcrTextMulti(
     String text, {
     List<String?>? pageImagePaths,
     List<int>? pageStartLines,
     List<double>? pageImageScores,
   }) {
-    final cleaned = _cleanOcrText(text);
-    final lines = cleaned.split('\n');
+    return _parseMulti(
+      text,
+      scanned: true,
+      pageImagePaths: pageImagePaths,
+      pageStartLines: pageStartLines,
+      pageImageScores: pageImageScores,
+    );
+  }
 
-    // ── Phase 1: find all candidate boundary lines with confidence scores ──
-    final candidates = <_BoundaryCandidate>[];
+  /// Splits [text] where one recipe ends and the next begins, and parses each
+  /// part. [scanned] text is cleaned of screen clutter first and gets a
+  /// quality score. Typed text is read as written.
+  ///
+  /// A recipe shows itself by the header of its ingredient list, by a line
+  /// that numbers it ("Recipe 12") or by its nutrition line. A new recipe
+  /// begins at the first of these that comes after a method, and takes the
+  /// title and the facts printed above it along.
+  static List<ImportedRecipe> _parseMulti(
+    String text, {
+    required bool scanned,
+    List<String?>? pageImagePaths,
+    List<int>? pageStartLines,
+    List<double>? pageImageScores,
+  }) {
+    // The whole text as one recipe, when there is no reason to split it.
+    ImportedRecipe whole() => scanned ? parseOcrText(text) : parseFromText(text);
 
+    // Every line, the blank ones too: each recipe is cut out with its
+    // paragraphs intact.
+    final allLines = scanned ? _cleanOcrText(text).split('\n') : _linesOf(text);
+    // Where each line with something on it stands in the text.
+    final at = [
+      for (var i = 0; i < allLines.length; i++)
+        if (allLines[i].trim().isNotEmpty) i,
+    ];
+    final lines = [for (final i in at) allLines[i].trim()];
+    // Typed lines still carry their Markdown and list markers, which would
+    // hide "**Recipe 2**" and "- Serves 4" from the patterns below.
+    final plain = scanned ? lines : lines.map(_withoutMarkup).toList();
+    final sections = [for (final line in lines) _detectSectionHeader(line)];
+
+    // ── Phase 1: the lines a recipe shows itself by ──
+    bool isMacros(int i) => _macrosLine.hasMatch(plain[i]);
+    bool isNumber(int i) => _recipeNumberLine.hasMatch(plain[i]);
+    // The header of the whole list. "Ingredients for the filling:" heads one
+    // group of a list and opens no recipe.
+    bool isListHeader(int i) => sections[i] == _Section.ingredients && _groupInHeader(lines[i]) == null;
+    // For each line, the header of a method nearest above it, or -1.
+    final methodAbove = List<int>.filled(lines.length + 1, -1);
     for (var i = 0; i < lines.length; i++) {
-      final line = lines[i].trim();
-      if (line.isEmpty) continue;
+      methodAbove[i + 1] = sections[i] == _Section.instructions ? i : methodAbove[i];
+    }
+    bool methodBetween(int from, int to) => methodAbove[to] > from;
 
-      // 1. Macros line — highest confidence (always recipe-specific)
-      if (RegExp(r'^macros?\s+per\s+serving', caseSensitive: false).hasMatch(line) ||
-          RegExp(r'^nutrition\s*(facts|info|per)', caseSensitive: false).hasMatch(line) ||
-          RegExp(r'^\d+\s*(cal|kcal)(ories)?\b', caseSensitive: false).hasMatch(line)) {
-        candidates.add(_BoundaryCandidate(line: i, score: 10, kind: 'macros'));
-        continue;
+    final named = [
+      for (var i = 0; i < lines.length; i++)
+        if (isNumber(i) || isListHeader(i)) i,
+    ];
+    // A nutrition line counts where it stands right over the list of its
+    // recipe, with nothing but facts between. Under a method it closes the
+    // recipe above, and the title of the next one comes after it. Where no
+    // list has a header the nutrition lines are all there is to go by.
+    bool factsBetween(int from, int to) {
+      if (to - from > 6) return false;
+      for (var i = from + 1; i < to; i++) {
+        if (!isMacros(i) && _extractMetadata(lines[i]) == null) return false;
       }
+      return true;
+    }
 
-      // 2. Ingredients heading with serving info — very strong
-      if (RegExp(r'^ingredients?\s*[\(:](?:.*serving|.*portion|.*\d|.*for)', caseSensitive: false).hasMatch(line) ||
-          RegExp(r'^ingredients?\s*\(', caseSensitive: false).hasMatch(line)) {
-        candidates.add(_BoundaryCandidate(line: i, score: 8, kind: 'ingredients_header'));
-        continue;
-      }
-
-      // 3. Yields / Servings / Makes — strong recipe-start signal
-      if (RegExp(r'^(serves?|yield[s]?|makes|servings?)\s*[:\s]\s*\d', caseSensitive: false).hasMatch(line) ||
-          RegExp(r'^(serves?|yield[s]?|makes)\s+\d', caseSensitive: false).hasMatch(line)) {
-        candidates.add(_BoundaryCandidate(line: i, score: 7, kind: 'yield'));
-        continue;
-      }
-
-      // 4. Prep/cook/total time near the start of a block — moderate signal
-      if (RegExp(r'^(prep|cook|total|active|cooking)\s+time\s*:', caseSensitive: false).hasMatch(line)) {
-        candidates.add(_BoundaryCandidate(line: i, score: 5, kind: 'time'));
-        continue;
-      }
-
-      // 5. "How to make" / "Instructions" / "Method" / "Directions" / "Steps"
-      // Useful but appears AFTER the title, so we'll use it as a back-reference.
-      if (RegExp(r'^\s*(how\s+to\s+make|instructions?|method|directions?|steps?|preparation)\s*[:\s]*$', caseSensitive: false).hasMatch(line)) {
-        candidates.add(_BoundaryCandidate(line: i, score: 6, kind: 'instructions_header'));
-        continue;
-      }
-
-      // 6. Form feed / page break — natural separator (often start of next recipe)
-      if (line == '\f' || lines[i].contains('\f')) {
-        candidates.add(_BoundaryCandidate(line: i, score: 4, kind: 'pagebreak'));
-        continue;
-      }
-
-      // 7. Recipe number patterns: "Recipe 12.", "12. Title", "Chapter 3"
-      if (RegExp(r'^recipe\s+\d+', caseSensitive: false).hasMatch(line)) {
-        candidates.add(_BoundaryCandidate(line: i, score: 9, kind: 'recipe_number'));
-        continue;
+    final marks = <int>[];
+    var namedBelow = named.length;
+    for (var i = 0; i < lines.length; i++) {
+      if (namedBelow > 0 && named[named.length - namedBelow] == i) {
+        namedBelow--;
+        marks.add(i);
+      } else if (isMacros(i)) {
+        final next = namedBelow > 0 ? named[named.length - namedBelow] : -1;
+        if (named.length < 2 || (next >= 0 && factsBetween(i, next))) marks.add(i);
       }
     }
 
-    // If we have very few candidates, this is likely a single recipe
-    if (candidates.length < 6) {
-      return [parseOcrText(text)];
-    }
-
-    // ── Phase 2: cluster nearby candidates into single boundaries ──
+    // ── Phase 2: one recipe may show itself several times over ──
     //
-    // Within one recipe, the markers (Macros, Ingredients, How to make) can
-    // span ~40-80 lines. Use STRONG anchors only — Macros, Ingredients(...),
-    // Recipe# — to define a boundary. Weaker anchors (instructions header,
-    // time, yield) just contribute confidence to the nearest strong anchor.
-    candidates.sort((a, b) => a.line.compareTo(b.line));
-    const strongKinds = {'macros', 'ingredients_header', 'recipe_number'};
+    // "Recipe 3", a nutrition line and "Ingredients" follow one another at
+    // the top of one recipe. The next recipe begins at the first mark that
+    // has a method between itself and the mark before it.
+    final heads = <int>[];
+    var lastMark = -1;
+    for (final mark in marks) {
+      if (heads.isEmpty || methodBetween(lastMark, mark)) heads.add(mark);
+      lastMark = mark;
+    }
+    // A mark with no method under it opens no recipe of its own.
+    if (heads.isNotEmpty && methodAbove[lines.length] < heads.last) heads.removeLast();
+    if (heads.length < 2) {
+      return [whole()];
+    }
 
-    final strongAnchors = candidates.where((c) => strongKinds.contains(c.kind)).toList();
-    if (strongAnchors.length < 2) {
-      return [parseOcrText(text)];
+    // ── Phase 3: move each boundary up to where its recipe begins ──
+    //
+    // Above the list stand the facts ("Serves 4", "Prep time: 10 min") and
+    // above those the title, perhaps with a line or two of introduction
+    // under it. The steps of the recipe before are where the search stops.
+    int topOf(int mark, int floor) {
+      var top = mark;
+      while (top > floor && (isMacros(top - 1) || _extractMetadata(lines[top - 1]) != null)) {
+        top--;
+      }
+      var best = -1;
+      var bestScore = -1;
+      for (var i = top - 1; i >= floor && i >= top - 8; i--) {
+        if (sections[i] != _Section.unknown || _isNumbered(lines[i]) || _readsAsStep(plain[i])) break;
+        if (!_titleShaped(plain[i])) continue;
+        // A title stands apart, is set in capitals and is short. Of two
+        // lines as good as each other the upper one is the title.
+        final apart = i == 0 || at[i] - at[i - 1] > 1;
+        final score =
+            (apart ? 2 : 0) + (_titleCased(plain[i]) ? 2 : 0) + (plain[i].split(_spaces).length <= 6 ? 1 : 0);
+        if (score >= bestScore) {
+          best = i;
+          bestScore = score;
+        }
+      }
+      return best >= 0 ? best : top;
     }
 
     final boundaries = <int>[];
-    for (var i = 0; i < strongAnchors.length; i++) {
-      final anchor = strongAnchors[i];
-
-      // Skip an anchor if a stronger anchor is within 15 lines (same recipe block).
-      // E.g. an "Ingredients (" right after "Macros per serving" — same recipe.
-      if (boundaries.isNotEmpty && anchor.line - boundaries.last < 15) continue;
-
-      // Verify this anchor leads to a real recipe — there should be an
-      // instructions header somewhere after it (within 100 lines) before the
-      // next strong anchor. Otherwise it's just stray text.
-      final nextAnchorLine = i + 1 < strongAnchors.length
-          ? strongAnchors[i + 1].line
-          : lines.length;
-      final hasInstructions = candidates.any((c) =>
-          c.kind == 'instructions_header' &&
-          c.line > anchor.line &&
-          c.line < nextAnchorLine);
-      if (!hasInstructions && i > 0) continue; // first segment can be lenient
-
-      boundaries.add(anchor.line);
+    for (final head in heads) {
+      // The header of the method before, and the first step under it,
+      // belong to the recipe before.
+      final floor = boundaries.isEmpty ? 0 : methodAbove[head] + 2;
+      final top = isNumber(head) || floor > head ? head : topOf(head, floor);
+      if (boundaries.isEmpty || top > boundaries.last) boundaries.add(top);
     }
 
-    // Need at least 2 boundaries to make multiple recipes
-    if (boundaries.length < 2) {
-      return [parseOcrText(text)];
-    }
-
-    // ── Phase 3: split text at boundaries and parse each segment ──
+    // ── Phase 4: split text at boundaries and parse each segment ──
     // We track the START line of each segment so we can map back to a PDF page
     // for cover image assignment.
     final segments = <_RecipeSegment>[];
     for (var i = 0; i < boundaries.length; i++) {
       final start = boundaries[i];
-      final end = i + 1 < boundaries.length ? boundaries[i + 1] : lines.length;
-      final segment = lines.sublist(start, end).join('\n');
+      final end = i + 1 < boundaries.length ? at[boundaries[i + 1]] : allLines.length;
+      final segment = allLines.sublist(at[start], end).join('\n');
       if (segment.trim().length > 60) {
         segments.add(_RecipeSegment(text: segment, startLine: start));
       }
     }
 
     if (segments.length < 2) {
-      return [parseOcrText(text)];
+      return [whole()];
     }
 
-    // ── Phase 4: parse each segment, recover titles, and assign cover image ──
+    // ── Phase 5: parse each segment, recover titles, and assign cover image ──
     final recipes = <ImportedRecipe>[];
     for (var i = 0; i < segments.length; i++) {
       final seg = segments[i];
       try {
-        final recipe = _parseStructuredText(seg.text);
+        final recipe = _parseStructuredText(seg.text, wrapped: scanned);
 
         // Skip segments with no real content (e.g. orphaned TOC fragments)
         if (recipe.ingredients.isEmpty && recipe.instructions.isEmpty) continue;
@@ -1162,8 +1257,20 @@ class RecipeImportEngine {
         // Recover title if the parser couldn't figure it out OR latched onto
         // an obviously-wrong line like the macros/ingredients header.
         if (_titleNeedsRecovery(recipe.title)) {
-          final recovered = _recoverTitleFromSegment(seg.text);
-          if (recovered != null) recipe.title = recovered;
+          final recovered = _recoverTitleFromSegment(
+              scanned ? seg.text : seg.text.split('\n').map(_withoutMarkup).join('\n'));
+          if (recovered != null) {
+            recipe.title = recovered;
+            // A title printed under the list was read as the end of it,
+            // with the introduction that follows the title.
+            final inList = recipe.ingredients.indexOf(recovered);
+            if (inList > 0 && !recipe.ingredients.skip(inList).any(_startsWithAmount.hasMatch)) {
+              final introduction = recipe.ingredients.sublist(inList + 1).join(' ');
+              recipe.ingredients.removeRange(inList, recipe.ingredients.length);
+              if (introduction.isNotEmpty) recipe.description ??= introduction;
+            }
+            _detectCourseAndCategory(recipe);
+          }
         }
 
         // Assign cover image: find the PDF page whose line range contains
@@ -1196,8 +1303,10 @@ class RecipeImportEngine {
           }
         }
 
-        recipe.parseConfidence = _scoreParseConfidence(recipe, seg.text);
-        recipe.rawOcrText = seg.text;
+        if (scanned) {
+          recipe.parseConfidence = _scoreParseConfidence(recipe, seg.text);
+          recipe.rawOcrText = seg.text;
+        }
         recipes.add(recipe);
       } catch (_) {
         continue;
@@ -1205,11 +1314,54 @@ class RecipeImportEngine {
     }
 
     if (recipes.isEmpty) {
-      return [parseOcrText(text)];
+      return [whole()];
     }
 
     return recipes;
   }
+
+  // A nutrition line: "Macros per serving", "Nutrition facts", "501 calories
+  // 40g protein".
+  static final _macrosLine = RegExp(
+      r'^(?:macros?\s+per\s+serving|nutrition\s*(?:facts|info|per)|\d+\s*(?:cal|kcal)(?:ories)?\b)',
+      caseSensitive: false);
+  // "Recipe 12", "Recipe 3: Lemon Loaf".
+  static final _recipeNumberLine = RegExp(r'^recipe\s+\d+', caseSensitive: false);
+
+  // Words a title leaves in lower case: "Mac and Cheese", "Coq au Vin".
+  static const _smallWords = {
+    'a', 'an', 'and', 'as', 'at', 'au', 'aux', 'by', 'con', 'de', 'del', 'di', 'du', 'e', 'en', 'et', 'for', 'from',
+    'in', 'la', 'le', 'of', 'on', 'or', 'the', 'to', 'with', 'y',
+  };
+  static final _upperOrDigitStart = RegExp(r'^[\p{Lu}\p{N}]', unicode: true);
+
+  /// True when every word of [text] that counts opens with a capital or a
+  /// figure: "Garlic Butter Shrimp", "GUACAMOLE", "Mac and Cheese".
+  static bool _titleCased(String text) {
+    final words = text.split(_spaces).map((w) => w.replaceFirst(_leadingSymbols, '')).where((w) => w.isNotEmpty);
+    var counted = 0;
+    for (final word in words) {
+      if (counted > 0 && _smallWords.contains(word.toLowerCase())) continue;
+      if (!_upperOrDigitStart.hasMatch(word)) return false;
+      counted++;
+    }
+    return counted > 0;
+  }
+
+  /// True when [line] has the shape of a recipe's name: short, opening with
+  /// a capital or a figure, with no full stop at its end. A fact, an
+  /// ingredient and a short order ("Serve warm") have other shapes.
+  static bool _titleShaped(String line) {
+    if (line.length < 2 || line.length > 60 || !_hasLetter(line)) return false;
+    if (_lowerStart.hasMatch(line) || RegExp(r'[.,:;!?]$').hasMatch(line)) return false;
+    if (','.allMatches(line).length >= 2 || _recipeCounter.hasMatch(line)) return false;
+    if (_readsAsAmountLine(line) || _extractMetadata(line) != null) return false;
+    return !_startsWithActionVerb(line.toLowerCase()) || _titleCased(line);
+  }
+
+  /// A typed line without its heading marks, list marker and emphasis.
+  static String _withoutMarkup(String line) =>
+      _cleanMarkdown(_cleanListMarkers(line.trim().replaceFirst(RegExp(r'^#{1,6}\s*'), '')));
 
   /// Public version: returns true if the title looks like a parser default
   /// or clearly a non-title line (macros header, ingredient line, etc.).
@@ -1275,7 +1427,7 @@ class RecipeImportEngine {
   /// the one that scores best — shorter, more title-case, fewer descriptive
   /// markers. Single-pass-and-take-first picks descriptions too often.
   static String? _recoverTitleFromSegment(String segment) {
-    final lines = segment.split('\n').map((l) => l.trim()).toList();
+    final lines = segment.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
 
     bool looksLikeTitle(String s) {
       // Real cookbook titles are 3-50 chars (most are 15-35).
@@ -1290,12 +1442,13 @@ class RecipeImportEngine {
       if (','.allMatches(s).length >= 2) return false;
       // Section headers
       if (RegExp(r'^(ingredients?|how to make|macros|how to|method|instructions?|directions?|steps?|preparation|prep time|cook time|total time|serves?|yields?|makes|note[s]?|tip[s]?|nutrition)', caseSensitive: false).hasMatch(s)) return false;
+      if (_detectSectionHeader(s) != _Section.unknown) return false;
       // Description-opener phrases — strong signal it's not a title
       if (RegExp(r'^(one\s+of|a\s+(popular|simple|classic|delicious|quick|healthy|new|tasty|fresh|favorite)|an\s+|the\s+(most|best|easiest|tastiest|perfect)|if\s+you|when\s+you|truly|made\s+with|packed\s+with|perfect\s+for|great\s+for)\b', caseSensitive: false).hasMatch(s)) return false;
       // Ingredient-quantity lines
       if (RegExp(r'^\d+\s*(g|ml|oz|tbsp|tsp|cup|cups|kg|lb|lbs|tablespoon|teaspoon|cloves?)\b', caseSensitive: false).hasMatch(s)) return false;
-      // Mostly numbers/punctuation
-      final letterCount = s.runes.where((r) => RegExp(r'[a-zA-Z]').hasMatch(String.fromCharCode(r))).length;
+      // Mostly numbers/punctuation. Letters of every alphabet count.
+      final letterCount = _anyLetter.allMatches(s).length;
       if (letterCount < s.length * 0.5) return false;
       // URLs / pure numbers (page numbers)
       if (s.contains('://') || s.contains('www.')) return false;
@@ -1361,26 +1514,14 @@ class RecipeImportEngine {
     }
 
     // Strategy A: best-scoring candidate in 8 lines BEFORE "How to make"
-    int howToIdx = -1;
-    for (var i = 0; i < lines.length; i++) {
-      if (RegExp(r'^(how\s+to\s+make|instructions?|method|directions?|steps?|preparation)\s*[:\s]*$', caseSensitive: false).hasMatch(lines[i])) {
-        howToIdx = i;
-        break;
-      }
-    }
+    final howToIdx = lines.indexWhere((l) => _detectSectionHeader(l) == _Section.instructions);
     if (howToIdx > 0) {
       final result = bestInRange(howToIdx - 8, howToIdx);
       if (result != null) return result;
     }
 
     // Strategy B: best candidate between Ingredients and How-to
-    int ingIdx = -1;
-    for (var i = 0; i < lines.length; i++) {
-      if (RegExp(r'^ingredients?', caseSensitive: false).hasMatch(lines[i])) {
-        ingIdx = i;
-        break;
-      }
-    }
+    final ingIdx = lines.indexWhere((l) => _detectSectionHeader(l) == _Section.ingredients);
     if (ingIdx >= 0 && howToIdx > ingIdx) {
       final result = bestInRange(ingIdx + 1, howToIdx);
       if (result != null) return result;
@@ -1400,7 +1541,7 @@ class RecipeImportEngine {
   /// Returns recipe with confidence scoring for quality assessment.
   static ImportedRecipe parseOcrText(String text) {
     final cleaned = _cleanOcrText(text);
-    final recipe = _parseStructuredText(cleaned);
+    final recipe = _parseStructuredText(cleaned, wrapped: true);
 
     // Score parse confidence
     final confidence = _scoreParseConfidence(recipe, cleaned);
@@ -1414,17 +1555,11 @@ class RecipeImportEngine {
   static double _scoreParseConfidence(ImportedRecipe recipe, String cleanedText) {
     double score = 0.0;
 
-    // Section headers found (+0.15) — means the text has clear structure
-    final hasIngredientHeader = RegExp(
-      r'(ingredients?|what you.?ll need)',
-      caseSensitive: false,
-    ).hasMatch(cleanedText);
-    final hasInstructionHeader = RegExp(
-      r'(instructions?|directions?|method|steps?|preparation|how to make)',
-      caseSensitive: false,
-    ).hasMatch(cleanedText);
-    if (hasIngredientHeader) score += 0.1;
-    if (hasInstructionHeader) score += 0.1;
+    // Section headers found (+0.2): the text has clear structure. A header
+    // counts in whatever language it is written.
+    final headers = {for (final line in cleanedText.split('\n')) _detectSectionHeader(line)};
+    if (headers.contains(_Section.ingredients)) score += 0.1;
+    if (headers.contains(_Section.instructions)) score += 0.1;
 
     // Title identified vs defaulted (+0.1)
     if (recipe.title != 'Untitled Recipe' &&
@@ -1443,11 +1578,15 @@ class RecipeImportEngine {
       score += 0.2 * measureRatio;
     }
 
-    // Ratio of classified vs unclassified lines (+0.25)
-    final totalLines = cleanedText.split('\n').where((l) => l.trim().isNotEmpty).length;
-    final classifiedLines = recipe.ingredients.length + recipe.instructions.length;
-    if (totalLines > 0) {
-      final classifyRatio = (classifiedLines / totalLines).clamp(0.0, 1.0);
+    // How much of the text ended up in the two lists (+0.25). Measured in
+    // characters: the printed lines of a wrapped step are one entry now.
+    final total = cleanedText.replaceAll(_spaces, '').length;
+    var classified = 0;
+    for (final line in [...recipe.ingredients, ...recipe.instructions]) {
+      classified += line.replaceAll(_spaces, '').length;
+    }
+    if (total > 0) {
+      final classifyRatio = (classified / total).clamp(0.0, 1.0);
       score += 0.25 * classifyRatio;
     }
 
@@ -4111,10 +4250,18 @@ class RecipeImportEngine {
 
   // ========== MEALMASTER FORMAT (.mmf / .mk) ==========
 
+  // The line Meal-Master opens a recipe with ("MMMMM----- Recipe via
+  // Meal-Master (tm) v8.05", "---------- Recipe via Meal-Master"), and the
+  // two fields every recipe of its starts with.
+  static final _mealMasterBanner =
+      RegExp(r'^(?:MMMMM-{2,}|(?:MMMMM|-{5})[^\n]{0,40}Meal-?Master)', multiLine: true, caseSensitive: false);
+  static final _mealMasterFields =
+      RegExp(r'^[ \t]*Title:[ \t]*\S[^\n]*\n[ \t]*Categories:', multiLine: true, caseSensitive: false);
+
+  /// Only what Meal-Master itself writes counts. Five capital Ms in a row
+  /// also end a recipe that calls itself "YUMMMMM".
   static bool _looksLikeMealMaster(String content) {
-    return content.contains('MMMMM') ||
-        content.contains('---------- Recipe via Meal-Master') ||
-        RegExp(r'Title:\s*.+\nCategories:', caseSensitive: false).hasMatch(content);
+    return _mealMasterBanner.hasMatch(content) || _mealMasterFields.hasMatch(content);
   }
 
   /// Parse MealMaster format (*.mmf, *.mk).
@@ -4260,55 +4407,288 @@ class RecipeImportEngine {
 
   // ========== TEXT PARSING ==========
 
-  static ImportedRecipe _parseStructuredText(String text) {
-    final lines = text.split('\n');
+  /// Reads one recipe out of [text], line by line.
+  ///
+  /// [wrapped] is for text recognised from a photo or a PDF. It arrives as
+  /// one entry for each printed line, so a step or an ingredient that ran
+  /// over several lines on the page is put back together. Text a person
+  /// typed is taken as written.
+  ///
+  /// [titleKnown] says the caller has the title already, from front matter,
+  /// and the first line of [text] must not be used up as one. [titleIfNone]
+  /// is the name of the file the text came from. It names the recipe unless
+  /// the text carries a heading, and a first line is only read as the title
+  /// where it says the same as the file.
+  static ImportedRecipe _parseStructuredText(
+    String text, {
+    bool wrapped = false,
+    bool titleKnown = false,
+    String? titleIfNone,
+  }) {
+    final lines = _linesOf(text).toList();
+    // The section each line opens, for the lines that are headers.
+    final opens = [for (final line in lines) _detectSectionHeader(line)];
+    // Headers still to come. Where a text names its method or its
+    // ingredients, nothing above that header is sorted there by guesswork.
+    int methodHeadersAhead = opens.where((s) => s == _Section.instructions).length;
+    int ingredientHeadersAhead = opens.where((s) => s == _Section.ingredients).length;
 
     String title = 'Untitled Recipe';
     String? description;
     String? servings;
+    String? introServings;
     int? prepTime;
     int? cookTime;
+    int? totalTime;
     List<String> ingredients = [];
     List<String> instructions = [];
     List<String> notes = [];
+    // Lines the writer put under an Ingredients or a Method header. They are
+    // kept unless they are plainly not content. Lines sorted by guesswork are
+    // held to the stricter checks.
+    final listed = <String>{};
+    // Sub-headings that stay in the two lists: "For the sauce:".
+    final headings = <String>{};
 
     _Section currentSection = _Section.unknown;
-    bool foundTitle = false;
+    bool foundTitle = titleKnown;
+    // How many more lines may be tried as the title. Blank lines and facts
+    // do not use them up.
+    int titleLinesLeft = 5;
+    // Where a summary box may next begin. See [_summaryBox].
+    int boxesFrom = 0;
+    // A sub-heading waits here for the line under it, which settles the
+    // list it belongs to.
+    String? pendingHeading;
+    // The list the line above went to, for as long as nothing came between.
+    List<String>? lastList;
+    // The same for the description.
+    bool descriptionAbove = false;
+    // The printed line above this one, as it was filed. A step put together
+    // from several lines ends with it.
+    String lineAbove = '';
+    // A blank line, a rule or a header stood above this line.
+    bool gapAbove = true;
+    // The items of the list being read carry numbers.
+    bool numberedList = false;
+    // In text with no headers: the first step has been read.
+    bool methodBegun = false;
+
+    void file(List<String> list, String line, {bool underHeader = true}) {
+      final heading = pendingHeading;
+      if (heading != null && !identical(list, notes)) {
+        list.add(heading);
+        headings.add(heading);
+      }
+      pendingHeading = null;
+      list.add(line);
+      if (underHeader) listed.add(line);
+      lastList = list;
+      lineAbove = line;
+      descriptionAbove = false;
+    }
+
+    // Adds [more] to the last entry of [list]: the rest of a wrapped line.
+    void carryOn(List<String> list, String more) {
+      final joined = _joinWrapped(list.last, more);
+      if (listed.contains(list.last)) listed.add(joined);
+      list[list.length - 1] = joined;
+      lineAbove = more;
+    }
+
+    // True while the entry being read is the last one of [list] and may
+    // take another printed line. An entry that has grown past any real one
+    // takes no more, and the line starts an entry of its own. Text that is
+    // one endless run of lines would otherwise be read ever more slowly,
+    // each line being added to all those before it.
+    bool open(List<String> list) => identical(lastList, list) && list.last.length < _longestEntry;
+
+    // The next line that is not blank or a rule, or -1.
+    int below(int from) {
+      for (var at = from + 1; at < lines.length; at++) {
+        final next = lines[at].trim();
+        if (next.isNotEmpty && !_ruleLine.hasMatch(next)) return at;
+      }
+      return -1;
+    }
+
+    bool amountsAt(int at) =>
+        at >= 0 &&
+        opens[at] == _Section.unknown &&
+        _readsAsAmountLine(_cleanMarkdown(_cleanListMarkers(lines[at].trim())));
+
+    // True when line [at] is where a method begins that no header
+    // announces.
+    bool methodStartsAt(int at, {required bool newParagraph}) {
+      if (at < 0 || methodHeadersAhead > 0 || opens[at] != _Section.unknown) return false;
+      final raw = lines[at].trim();
+      final cleaned = _cleanMarkdown(_cleanListMarkers(raw));
+      if (cleaned.isEmpty || _startsWithAmount.hasMatch(cleaned)) return false;
+      if (_readsAsStep(cleaned)) return true;
+      // Numbers begin where the list above had none: "1. Peel the banana".
+      if (_isNumbered(raw) && !numberedList && cleaned.split(_spaces).length >= 3) return true;
+      // After a gap, running text is the method, in whatever language it
+      // is written. Unless the list goes on below it.
+      if (!newParagraph) return false;
+      if (!_readsAsProse(cleaned) && cleaned.length < 70) return false;
+      return !amountsAt(below(at));
+    }
 
     for (int i = 0; i < lines.length; i++) {
       String line = lines[i].trim();
 
-      if (line.isEmpty) continue;
-      if (RegExp(r'^[-=_]{3,}$').hasMatch(line)) continue;
-      // Skip Obsidian image embeds
-      if (RegExp(r'^!\[\[.*\]\]$').hasMatch(line)) continue;
+      if (line.isEmpty || _ruleLine.hasMatch(line)) {
+        gapAbove = true;
+        continue;
+      }
+      // A picture on a line of its own: an Obsidian embed, a Markdown image.
+      if (_pictureLine.hasMatch(line)) continue;
+
+      final newParagraph = gapAbove;
+      gapAbove = false;
+
+      // A summary box prints each label over its value. Read each pair as
+      // one line. Not among the steps, where a short line and the one after
+      // it are two halves of a sentence.
+      if (i >= boxesFrom &&
+          currentSection != _Section.instructions &&
+          !_digitOrFraction.hasMatch(line)) {
+        final box = _summaryBox(lines, i);
+        if (box != null && box.$1.isEmpty) {
+          boxesFrom = box.$2 + 1;
+        } else if (box != null) {
+          // A label may read like a header: "Preparation" over "15 mins".
+          for (final taken in opens.getRange(i, box.$2 + 1)) {
+            if (taken == _Section.instructions) methodHeadersAhead--;
+            if (taken == _Section.ingredients) ingredientHeadersAhead--;
+          }
+          lines.replaceRange(i, box.$2 + 1, box.$1);
+          opens.replaceRange(i, box.$2 + 1, List.filled(box.$1.length, _Section.unknown));
+          line = lines[i];
+        }
+      }
+
+      // A printed line that carries on the sentence above it, whatever word
+      // it happens to open with: "...whisk together all of the dry" /
+      // "ingredients and make a well in the center".
+      if (wrapped && !newParagraph && opens[i] == _Section.unknown) {
+        final List<String>? proseList = identical(lastList, ingredients) ? null : lastList;
+        final room = proseList != null ? open(proseList) : descriptionAbove && description!.length < _longestEntry;
+        if (room && _runsOn(lineAbove, line)) {
+          final more = _cleanMarkdown(line);
+          if (proseList != null) {
+            carryOn(proseList, more);
+          } else {
+            description = _joinWrapped(description!, more);
+            lineAbove = more;
+          }
+          continue;
+        }
+      }
 
       // Check for section headers FIRST
-      final newSection = _detectSectionHeader(line);
+      final newSection = opens[i];
       if (newSection != _Section.unknown) {
+        if (newSection == _Section.instructions) methodHeadersAhead--;
+        if (newSection == _Section.ingredients) ingredientHeadersAhead--;
         currentSection = newSection;
+        pendingHeading = null;
+        lastList = null;
+        descriptionAbove = false;
+        gapAbove = true;
+        numberedList = false;
+        titleLinesLeft = 0;
+        if (newSection == _Section.ingredients) {
+          // "Ingredients (4 servings)", "Zutaten für 4 Personen".
+          servings ??= _servingsInHeader(line);
+          // "Ingredients for the crust:" names the group it lists.
+          pendingHeading = _groupInHeader(line);
+        }
         continue;
       }
 
-      // Skip sub-section headers (### Chicken Filling, ### Assembly, etc.)
-      // within ingredient/instruction sections — they're group labels, not content
-      if (RegExp(r'^#{2,6}\s+').hasMatch(line) &&
-          currentSection != _Section.unknown) {
+      // Skip what a social caption leaves behind: a line of hashtags, a short
+      // "follow me" line. One lone hashtag at the top is left alone, it may
+      // be a heading typed without its space.
+      if ((line.length < 80 && _followLine.hasMatch(line)) ||
+          (line.startsWith('#') && _hashtagLine.hasMatch(line) && (foundTitle || line.contains(' ')))) {
+        continue;
+      }
+      // And what a recipe card leaves behind: the "1x 2x 3x" buttons that
+      // scale it, which copy as lines of the ingredient list.
+      if (_scaleButtonsLine.hasMatch(line)) continue;
+
+      // A sub-heading names a part of the dish: "For the sauce:". It stays
+      // in the list it stands in and heads the lines under it there. By
+      // itself it never moves those lines to another list.
+      final heading = currentSection == _Section.notes ? null : _subHeading(line);
+      if (heading != null) {
+        final next = below(i);
+        var heads = currentSection != _Section.unknown;
+        if (currentSection == _Section.instructions) {
+          // A second list of ingredients may follow the method. Then
+          // amounts stand under the sub-heading.
+          if (amountsAt(next)) {
+            currentSection = _Section.ingredients;
+            numberedList = false;
+          }
+        } else if (currentSection == _Section.unknown) {
+          // No header has been read yet. "For the dough:" opens the list
+          // itself. A line that only ends in a colon does so when amounts
+          // or the method follow it, and on the first line it is the title.
+          final methodBelow = methodStartsAt(next, newParagraph: true);
+          if (heading.part ? (heading.marked || foundTitle) : (foundTitle && (amountsAt(next) || (methodBelow && ingredients.isNotEmpty)))) {
+            heads = true;
+            currentSection = methodBelow ? _Section.instructions : _Section.ingredients;
+            numberedList = false;
+          }
+        }
+        if (heads) {
+          pendingHeading = heading.text;
+          lastList = null;
+          descriptionAbove = false;
+          gapAbove = true;
+          titleLinesLeft = 0;
+          continue;
+        }
+      }
+
+      // Extract metadata (servings, times). This comes before the title so
+      // that "Serves 4" on the first line is not taken for it. The first
+      // value found is kept: a later line must not overwrite it.
+      final facts = _extractMetadata(
+        line,
+        section: currentSection,
+        contentBegun: ingredients.isNotEmpty || instructions.isNotEmpty,
+      );
+      if (facts != null) {
+        servings ??= facts.values.servings;
+        prepTime ??= facts.values.prepTime;
+        cookTime ??= facts.values.cookTime;
+        totalTime ??= facts.totalTime;
+        // A fact the app has no field for ("Chill Time: 2 hrs", "Makes 1 1/2
+        // cups") is kept as a note.
+        for (final fact in facts.forNotes) {
+          if (!notes.contains(fact)) notes.add(fact);
+        }
+        lastList = null;
+        descriptionAbove = false;
         continue;
       }
 
-      // Extract title
-      if (!foundTitle) {
-        final headerMatch = RegExp(r'^#{1,2}\s+(.+)$').firstMatch(line);
-        if (headerMatch != null) {
-          title = _cleanMarkdown(headerMatch.group(1)!);
+      // Extract title. Only above the first header and the first line of
+      // content: text that starts at its ingredients has no title, and its
+      // first ingredient must not be used up as one.
+      final hashed = _hashedHeading.firstMatch(line);
+      if (!foundTitle && currentSection == _Section.unknown) {
+        if (hashed != null) {
+          title = _cleanMarkdown(hashed.group(1)!);
           foundTitle = true;
           continue;
         }
 
-        if (i < 5 &&
-            !_isListItem(line) &&
-            line.length > 3) {
+        if (titleLinesLeft > 0 && ingredients.isEmpty && instructions.isEmpty && !_isListItem(line)) {
+          titleLinesLeft--;
           // Detect social media caption patterns and extract recipe name
           final socialTitle = _extractSocialTitle(line);
           if (socialTitle != null) {
@@ -4317,51 +4697,197 @@ class RecipeImportEngine {
             continue;
           }
 
-          if (line.length < 150) {
-            title = _cleanMarkdown(line);
-            foundTitle = true;
-            continue;
+          // What stands under the line, the facts aside.
+          var next = below(i);
+          while (next >= 0 && opens[next] == _Section.unknown && _extractMetadata(lines[next].trim()) != null) {
+            next = below(next);
+          }
+          if (line.length < 150 && _canBeTitle(line, headerBelow: next >= 0 && opens[next] != _Section.unknown)) {
+            final name = _cleanMarkdown(line).replaceFirst(_colonAtEnd, '');
+            // A file is named after its recipe. A first line only comes
+            // before that name when it is set as a title, in bold.
+            if (titleIfNone == null || _boldLine.hasMatch(line) || _sameName(name, titleIfNone)) {
+              title = name;
+              foundTitle = true;
+              continue;
+            }
           }
         }
       }
-
-      // Extract metadata (servings, times)
-      final metaResult = _extractMetadata(line);
-      if (metaResult != null) {
-        if (metaResult.servings != null) servings = metaResult.servings;
-        if (metaResult.prepTime != null) prepTime = metaResult.prepTime;
-        if (metaResult.cookTime != null) cookTime = metaResult.cookTime;
-        continue;
-      }
+      // Any other heading is one this reader has no use for.
+      if (hashed != null) continue;
 
       String cleanedLine = _cleanListMarkers(line);
       cleanedLine = _cleanMarkdown(cleanedLine);
 
       if (cleanedLine.isEmpty) continue;
 
+      final marked = _isListItem(line);
+      final numbered = _isNumbered(line);
+
+      // "501 calories 40g protein 52g carbs" is what the dish holds, not
+      // what goes into it.
+      if (!marked && currentSection != _Section.notes && _calorieLine.hasMatch(cleanedLine)) {
+        notes.add(cleanedLine);
+        lastList = null;
+        descriptionAbove = false;
+        continue;
+      }
+
+      // Where the method begins when no header says so: under the list of
+      // ingredients, at the first line that reads as a step.
+      if (currentSection == _Section.ingredients &&
+          ingredients.isNotEmpty &&
+          methodStartsAt(i, newParagraph: newParagraph)) {
+        currentSection = _Section.instructions;
+        numberedList = false;
+        lastList = null;
+      }
+
       // Route to appropriate section
       switch (currentSection) {
         case _Section.ingredients:
-          ingredients.add(cleanedLine);
+          if (wrapped &&
+              !marked &&
+              open(ingredients) &&
+              _goesOnIngredient(ingredients.last, lineAbove, cleanedLine, newParagraph: newParagraph)) {
+            carryOn(ingredients, cleanedLine);
+          } else {
+            file(ingredients, cleanedLine);
+            if (numbered) numberedList = true;
+          }
           break;
         case _Section.instructions:
-          instructions.add(cleanedLine);
+          // "Step 2" on a line of its own numbers the step under it.
+          if (_stepLabel.hasMatch(cleanedLine)) {
+            numberedList = true;
+            lastList = null;
+            break;
+          }
+          if (wrapped &&
+              !marked &&
+              open(instructions) &&
+              _goesOnStep(lineAbove, cleanedLine, newParagraph: newParagraph, numbered: numberedList)) {
+            carryOn(instructions, cleanedLine);
+          } else {
+            file(instructions, cleanedLine);
+            if (numbered) numberedList = true;
+          }
           break;
         case _Section.notes:
-          notes.add(cleanedLine);
+          if (wrapped &&
+              !marked &&
+              open(notes) &&
+              _goesOnStep(lineAbove, cleanedLine, newParagraph: newParagraph, numbered: false)) {
+            carryOn(notes, cleanedLine);
+          } else {
+            file(notes, cleanedLine, underHeader: false);
+          }
           break;
         case _Section.unknown:
-          if (_looksLikeIngredient(cleanedLine)) {
-            ingredients.add(cleanedLine);
-          } else if (_looksLikeInstruction(cleanedLine)) {
-            instructions.add(cleanedLine);
+          // No header has been read: the line is sorted by what it reads
+          // like.
+          if (wrapped && !marked && !newParagraph) {
+            // The rest of an introduction printed as one paragraph, or of
+            // an ingredient or a step that was wrapped.
+            if (descriptionAbove && description!.length < _longestEntry && !_startsWithAmount.hasMatch(cleanedLine)) {
+              description = _joinWrapped(description, cleanedLine);
+              lineAbove = cleanedLine;
+              break;
+            }
+            if (open(ingredients) && _goesOnIngredient(ingredients.last, lineAbove, cleanedLine, newParagraph: false)) {
+              carryOn(ingredients, cleanedLine);
+              break;
+            }
+          }
+
+          final step = _readsAsStep(cleanedLine);
+          final bool ingredient;
+          if (step) {
+            ingredient = false;
+          } else if (ingredientHeadersAhead > 0) {
+            // The text names its ingredients further down. Above that
+            // header only a line of amounts is one.
+            ingredient = _startsWithAmount.hasMatch(cleanedLine) && _looksLikeIngredient(cleanedLine);
+          } else {
+            // "Salt and pepper to taste" under a list of amounts belongs
+            // to the list.
+            ingredient = _looksLikeIngredient(cleanedLine) ||
+                (identical(lastList, ingredients) && !newParagraph && _mayEndList(cleanedLine));
+          }
+          if (ingredient) {
+            file(ingredients, cleanedLine, underHeader: false);
+            if (numbered) numberedList = true;
+            break;
+          }
+
+          // "This hearty chili serves 6 and freezes well." The sentence
+          // stays, and its number is used if no yield line turns up.
+          if (ingredients.isEmpty && instructions.isEmpty) {
+            final inProse = _proseYield.firstMatch(cleanedLine);
+            if (inProse != null) introServings ??= _servingsNamed(inProse, cleanedLine);
+          }
+
+          // A step, unless the text names its method further down: then
+          // what stands up here is the introduction. An introduction also
+          // comes before the first ingredient and gives no orders.
+          final begun = ingredients.isNotEmpty || methodBegun;
+          final bool instruction;
+          if (methodHeadersAhead > 0) {
+            instruction = false;
+          } else if (step) {
+            instruction = true;
+          } else if (!begun) {
+            instruction = false;
+          } else {
+            instruction = _looksLikeInstruction(cleanedLine) ||
+                (methodBegun && _readsAsProse(cleanedLine)) ||
+                (ingredients.length >= 2 && methodStartsAt(i, newParagraph: newParagraph));
+          }
+          if (instruction) {
+            if (wrapped &&
+                !marked &&
+                open(instructions) &&
+                _goesOnStep(lineAbove, cleanedLine, newParagraph: newParagraph, numbered: numberedList)) {
+              carryOn(instructions, cleanedLine);
+              break;
+            }
+            if (!methodBegun) numberedList = false;
+            methodBegun = true;
+            file(instructions, cleanedLine, underHeader: false);
+            if (numbered) numberedList = true;
           } else if (description == null &&
               cleanedLine.length > 20 &&
               cleanedLine.length < 500) {
             description = cleanedLine;
+            descriptionAbove = true;
+            lineAbove = cleanedLine;
+            lastList = null;
+          } else if (descriptionAbove &&
+              !marked &&
+              !newParagraph &&
+              _readsAsProse(cleanedLine) &&
+              description!.length + cleanedLine.length < 500) {
+            // The introduction goes on with a sentence on a line of its own.
+            description = '$description $cleanedLine';
+            lineAbove = cleanedLine;
           }
           break;
       }
+    }
+
+    servings ??= introServings;
+    // A total time stands in for the cook time only when none was given.
+    if (cookTime == null && totalTime != null) {
+      final rest = totalTime - (prepTime ?? 0);
+      if (rest > 0) cookTime = rest;
+    }
+
+    // Text with no list at all, only a sentence that tells how the dish is
+    // made: that sentence is the method and introduces nothing.
+    if (ingredients.isEmpty && instructions.isEmpty && description != null && _looksLikeInstruction(description)) {
+      instructions = [description];
+      description = null;
     }
 
     // Aggressive fallback
@@ -4392,13 +4918,13 @@ class RecipeImportEngine {
     }
 
     final recipe = ImportedRecipe(
-      title: title,
+      title: foundTitle ? title : (titleIfNone ?? title),
       description: description,
       servings: servings,
       prepTimeMinutes: prepTime,
       cookTimeMinutes: cookTime,
-      ingredients: _cleanIngredients(ingredients),
-      instructions: _cleanInstructions(instructions),
+      ingredients: _withoutIdleHeadings(_cleanIngredients(ingredients, listed, headings), headings),
+      instructions: _withoutIdleHeadings(_cleanInstructions(instructions, listed, headings), headings),
       notes: notes.isNotEmpty ? notes.join('\n') : null,
     );
 
@@ -4406,258 +4932,971 @@ class RecipeImportEngine {
     return recipe;
   }
 
-  static ImportedRecipe _parseMarkdown(String text) {
-    // Strip YAML frontmatter and code fences
-    text = text.replaceAll(RegExp(r'^---[\s\S]*?---\n', multiLine: true), '');
+  // No step, ingredient or introduction is as long as this.
+  static const _longestEntry = 4000;
+
+  /// The lines of [text]. A line longer than any entry of a recipe, such as
+  /// a page pasted as one paragraph or a file with no line breaks in it, is
+  /// cut after a full stop, or at a space where it has none. No pattern that
+  /// reads a line then meets one of a length it was not made for.
+  static List<String> _linesOf(String text) {
+    final lines = text.split('\n');
+    if (lines.every((line) => line.length <= _longestEntry)) return lines;
+
+    const half = _longestEntry ~/ 2;
+    final cut = <String>[];
+    for (final line in lines) {
+      var from = 0;
+      while (line.length - from > _longestEntry) {
+        // The break is looked for in the second half of the stretch, which
+        // keeps every piece a good length.
+        final window = line.substring(from + half, from + _longestEntry);
+        var stop = window.lastIndexOf('. ');
+        if (stop < 0) stop = window.lastIndexOf(' ');
+        var end = stop < 0 ? from + _longestEntry : from + half + stop + 1;
+        // Not between the two halves of one character.
+        if (stop < 0 && (line.codeUnitAt(end) & 0xFC00) == 0xDC00) end--;
+        cut.add(line.substring(from, end));
+        from = end;
+      }
+      cut.add(line.substring(from));
+    }
+    return cut;
+  }
+
+  static final _startsWithAmount = RegExp(r'^\.?[\d½¼¾⅓⅔⅛⅜⅝⅞]');
+  static final _spaces = RegExp(r'\s+');
+
+  // A rule drawn across the text: "---", "===", "* * *". Three marks make
+  // one, and whatever marks and spaces follow them. Written so, the longest
+  // rule is matched in one pass, with nothing kept for each of its marks.
+  static final _ruleLine = RegExp(r'^(?:[-=_*]\s*){3}[-=_*\s]*$');
+  // A count of calories at the head of a line.
+  static final _calorieLine = RegExp(r'^\d{1,4}\s*(?:k?cal|calories)\b', caseSensitive: false);
+  // An Obsidian embed or a Markdown image and nothing else.
+  static final _pictureLine = RegExp(r'^!\[\[[^\]]*\]\]$|^!\[[^\]]*\]\([^)]*\)$');
+  static final _hashedHeading = RegExp(r'^#{1,6}\s+(.+)$');
+
+  // A line of nothing but hashtags: "#chicken #dinner #easyrecipes".
+  static final _hashtagLine = RegExp(r'^(?:#[\p{L}\p{N}_]+[\s,]*)+$', unicode: true);
+
+  // "Follow @tastykitchen for more recipes!", "Subscribe for more", "Full
+  // recipe at the link in bio". "Follow the package directions" is a step.
+  static final _followLine = RegExp(
+      r'^(?:follow|subscribe)\b[^@]*(?<![\w.])@[\w.]{2,}'
+      r'|^(?:follow|subscribe)(?:\s+(?:me|us|along))?\s+for\s+more\b'
+      r'|\blink\s+in\s+(?:my\s+|the\s+|our\s+)?bio\b',
+      caseSensitive: false);
+
+  // "1x", "1x 2x 3x", "Scale 1x 2x 3x".
+  static final _scaleButtonsLine = RegExp(r'^(?:scale\s*:?\s*)?(?:\d(?:[./]\d)?\s?[x×]\s*)+$', caseSensitive: false);
+
+  // A yield inside an ingredients header: "Ingredients (4 servings)",
+  // "Ingredients (serves 4)", "Ingredients (for 4 people)".
+  static final _headerYield = RegExp(
+      r'[(（]\s*(?:(?:serves|makes|yields?|for)\s+(\d{1,3}(?:\s*(?:-|–|to)\s*\d{1,3})?)\b(?![.,/]\d|\s+\d/\d|\s?[½¼¾⅓⅔])'
+      r'|(\d{1,3}(?:\s*(?:-|–|to)\s*\d{1,3})?)\s*(?:servings?|portions?|people|persons?))',
+      caseSensitive: false);
+
+  // The same as other languages write it, with or without a bracket: "für 4
+  // Personen", "pour 4 à 6 personnes", "4 porções", "2人分". Group 1 is a
+  // count told after "for", group 2 a count of people or portions.
+  static final _headerYieldAbroad = RegExp(
+      r'(?:\bfor|\bfür|\bfuer|\bpour|\bpara|\bper|\bvoor|\bdla|на)\s+(?:ca\.?\s+|environ\s+|circa\s+|about\s+)?'
+      r'(\d{1,3}(?:\s*(?:-|–|bis|à|a|o|tot|do|to)\s*\d{1,3})?)(?!\s*(?:g|kg|ml|cl|dl|l)\b|[.,]\d|-)'
+      r'|(\d{1,3}(?:\s*(?:-|–|bis|à|a|o|tot|do|to)\s*\d{1,3})?)\s*'
+      r'(?:servings?|portions?|people|persons?|personen|portionen|stück|stücke|personnes|personas|porciones|raciones'
+      r'|comensales|persone|porzioni|pessoas|porções|porties|osób|osoby|porcj[ei]|порци[ийя]|персон[ыа]?|человек'
+      r'|人分|人前|人份|인분)',
+      caseSensitive: false);
+
+  // A yield told in a sentence: "serves 6", "makes about 24 cookies",
+  // "about 4 servings".
+  static final _proseYield = RegExp(
+      r'\b(?:serves|feeds|makes|yields)\s+(?:(?:about|around|roughly|approximately|up\s+to)\s+)?'
+      r'(\d{1,3}(?:\s*(?:-|–|to)\s*\d{1,3})?)\b(?![.,/]\d|\s+\d/\d|\s?[½¼¾⅓⅔])'
+      r'|\b(\d{1,3}(?:\s*(?:-|–|to)\s*\d{1,3})?)\s+(?:servings|portions)\b',
+      caseSensitive: false);
+
+  /// The servings in a header or a sentence that [found] names, or null when
+  /// what it names is a measure: "makes about 2 cups".
+  static String? _servingsNamed(RegExpMatch found, String line) {
+    if (_measureUnit.matchAsPrefix(line, found.end) != null) return null;
+    return _servingsFrom(found.group(1) ?? found.group(2)!);
+  }
+
+  /// The servings an ingredients header tells, in any of its languages, or
+  /// null when it tells none.
+  static String? _servingsInHeader(String line) {
+    final inEnglish = _headerYield.firstMatch(line);
+    if (inEnglish != null) return _servingsNamed(inEnglish, line);
+    final abroad = _headerYieldAbroad.firstMatch(line);
+    return abroad == null ? null : _servingsFrom(abroad.group(1) ?? abroad.group(2)!);
+  }
+
+  /// The group an ingredients header names, as a sub-heading: "For the
+  /// crust:" out of "Ingredients for the crust:". Null when it names none.
+  static String? _groupInHeader(String line) {
+    final found = _ingredientHeader.firstMatch(_undressed(line).replaceFirst(_colonAtEnd, ''));
+    if (found == null) return null;
+    final whom = found.namedGroup('whom');
+    final name = whom == null ? found.namedGroup('name') : '$whom ${found.namedGroup('what')}';
+    // "Ingredients for 4 people" tells a yield.
+    if (name == null || _digitOrFraction.hasMatch(name)) return null;
+    final group = name.trim();
+    return group.length < 2 ? null : '${group[0].toUpperCase()}${group.substring(1)}:';
+  }
+
+  // "For the sauce", "For serving", "To serve", "To make the glaze": how a
+  // recipe names its parts. "For 4 people" is a yield.
+  static final _partOfDish = RegExp(
+      r'^(?:for\s+(?!\d)\S|to\s+(?:serve|garnish|finish|decorate|assemble|top|coat|glaze|make|prepare|cook|fry)\b)',
+      caseSensitive: false);
+  // A whole line set in bold: "**For the frosting:**", "__Topping__".
+  static final _boldLine = RegExp(r'^(?:\*\*[^*]+\*\*|__[^_]+__)\s*[:：]?$');
+  // "Step 2", "2." and "3)" number a step. They are not its heading.
+  static final _stepLabel = RegExp(r'^(?:step\s*)?\d{1,2}\s*[.:)]?$', caseSensitive: false);
+  static final _sentenceMark = RegExp(r'[.!?;,]');
+  static final _upperStart = RegExp(r'^\p{Lu}', unicode: true);
+  static final _lowerStart = RegExp(r'^\p{Ll}', unicode: true);
+
+  /// The sub-heading [line] is, with a colon at its end, or null. A
+  /// sub-heading names a part of the dish inside a list: "For the sauce:",
+  /// "To serve", "### Filling", "**Topping**", "Dressing:".
+  ///
+  /// [part] is true for a line that says so in its words ("For the..."),
+  /// which is a sub-heading wherever it stands. [marked] is true when it
+  /// carries a colon or is set as a heading or in bold. A line that is only
+  /// marked heads a group where a list is being read, and may be a title
+  /// anywhere else.
+  static ({String text, bool part, bool marked})? _subHeading(String line) {
+    if (line.length > 64 || _isNumbered(line)) return null;
+    final dressed = _boldLine.hasMatch(line) || (line.startsWith('#') && _hashedHeading.hasMatch(line));
+    final plain = _undressed(line);
+    final colon = _colonAtEnd.hasMatch(plain);
+    final text = colon ? plain.replaceFirst(_colonAtEnd, '') : plain;
+    if (text.length < 2 || text.length > 47 || !_hasLetter(text)) return null;
+    if (_startsWithAmount.hasMatch(text) || _sentenceMark.hasMatch(text)) return null;
+    final words = text.split(_spaces).length;
+    if (words > 7 || _stepLabel.hasMatch(text)) return null;
+    // A label that lost its value is no sub-heading: "Prep Time:".
+    if (_bareTimeLabel.hasMatch(text) || _bareYieldLabel.hasMatch(text)) return null;
+
+    final part = _partOfDish.hasMatch(text);
+    final marked = colon || dressed;
+    if (!marked) {
+      if (!part) return null;
+      // Without a colon it takes a capital and few words. "For the glaze
+      // whisk sugar and lemon juice" is a step.
+      final most = text.toLowerCase().startsWith('to') ? 4 : 5;
+      if (words > most || !_upperStart.hasMatch(text)) return null;
+    }
+    return (text: '$text:', part: part, marked: marked);
+  }
+
+  /// [list] without the sub-headings that divide nothing: one with no item
+  /// under it, and one that stands alone at the top and so heads the whole
+  /// list.
+  static List<String> _withoutIdleHeadings(List<String> list, Set<String> headings) {
+    if (headings.isEmpty) return list;
+    final kept = <String>[];
+    for (var i = 0; i < list.length; i++) {
+      final itemBelow = i + 1 < list.length && !headings.contains(list[i + 1]);
+      if (itemBelow || !headings.contains(list[i])) kept.add(list[i]);
+    }
+    if (kept.where(headings.contains).length == 1 && headings.contains(kept.first)) kept.removeAt(0);
+    return kept;
+  }
+
+  // "Recipe 2" counts the recipes of a collection. It names none of them.
+  static final _recipeCounter = RegExp(r'^recipe\s*(?:#|no\.?\s*)?\d{1,4}[.:)]?$', caseSensitive: false);
+  static final _unitWords = {for (final unit in _measurementUnits) unit.toLowerCase()};
+  // What stands in front of the first letter of a word: "(Serves",
+  // "20-Minute".
+  static final _upToLetter = RegExp(r'^[^\p{L}]+', unicode: true);
+
+  /// True when [line], found near the top of a text, can be the name of
+  /// the dish. An order to the cook is a step, and a line that opens with an
+  /// amount is an ingredient unless it reads as a name: "3 Cup Chicken"
+  /// above its Ingredients header ([headerBelow]), "5 Ingredient Peanut
+  /// Butter Cookies".
+  static bool _canBeTitle(String line, {required bool headerBelow}) {
+    final name = _cleanMarkdown(line);
+    if (!_hasLetter(name) || _recipeCounter.hasMatch(name)) return false;
+    if (name.runes.length < 2 && !_nonLatinLetter.hasMatch(name)) return false;
+    // "Stir Fry Chicken" is a name, "Stir fry the chicken" is a step.
+    if (!_startsWithAmount.hasMatch(name)) return !_readsAsStep(name) || _titleCased(name);
+    if (headerBelow) return true;
+
+    // The words after the amount: a unit makes it an ingredient, capitals
+    // make it a name.
+    final words = name.split(_spaces).map((w) => w.replaceFirst(_upToLetter, '')).where((w) => w.isNotEmpty).toList();
+    if (words.length < 2 || _unitWords.contains(words.first.toLowerCase().replaceAll(_wordEdges, ''))) return false;
+    return words.where(_upperStart.hasMatch).length >= words.length - 1;
+  }
+
+  // Words that open an ingredient as readily as an order: "Brown sugar",
+  // "Cream cheese", "Oil for frying", "Roast chicken", "Top round".
+  static const _verbOrFood = {
+    'bread', 'brown', 'cool', 'cream', 'crisp', 'cube', 'dip', 'drizzle', 'drop', 'dry', 'dust', 'fillet',
+    'garnish', 'glaze', 'layer', 'mash', 'mince', 'oil', 'pack', 'pat', 'puree', 'roast', 'roll', 'rub', 'season',
+    'slice', 'spoon', 'spread', 'sprinkle', 'squeeze', 'stuff', 'taste', 'toast', 'top', 'warm', 'whip',
+  };
+
+  // What comes after such a word when it is an order: "Cream the butter",
+  // "Top with cheese", "Roast for 40 minutes".
+  static final _orderGoesOn = RegExp(
+      r'^(?:the|a|an|all|both|each|your|some|in|into|on|onto|over|with|together|until|well|everything|it|them|out'
+      r'|up|off|down|gently|lightly|evenly|generously|thoroughly|immediately|to\s+taste'
+      r'|for\s+(?:about\s+|around\s+|another\s+|at\s+least\s+|up\s+to\s+)?(?:\d|a\s+(?:few|couple)|one|two|three|four|five|ten|several))\b',
+      caseSensitive: false);
+
+  // How a step may open before it comes to its verb: "In a large bowl,
+  // whisk...", "Once cool, slice".
+  static const _stepOpeners = {
+    'in', 'into', 'on', 'using', 'with', 'when', 'once', 'while', 'meanwhile', 'after', 'before', 'then', 'next',
+    'finally', 'first', 'now', 'if', 'to', 'carefully', 'gradually', 'slowly', 'gently', 'lightly', 'quickly',
+  };
+
+  // A full stop, or its like, at the end of a line.
+  static final _sentenceEnding = RegExp(r'[.!。！]["”’)\]]?$');
+
+  /// True when [text] tells the cook to do something: "Mix the flour and
+  /// sugar.", "Bake 20 minutes", "In a large bowl, whisk the eggs". It opens
+  /// with a cooking verb, or comes to one, and reads on like a sentence.
+  /// "Brown sugar 100 g", "Oil for frying" and "Drizzle of honey" open with
+  /// the same words and are ingredients.
+  static bool _readsAsStep(String text) {
+    if (text.isEmpty || _startsWithAmount.hasMatch(text)) return false;
+    final words = text.toLowerCase().split(_spaces);
+    final first = words.first.replaceAll(_wordEdges, '');
+    final sentence = _sentenceEnding.hasMatch(text);
+
+    if (_actionVerbs.contains(first)) {
+      if (words.length < 2) return false;
+      final second = words[1].replaceAll(_wordEdges, '');
+      if (second == 'of') return false;
+      if (_verbOrFood.contains(first) && !_orderGoesOn.hasMatch(text.substring(words.first.length).trimLeft())) {
+        return false;
+      }
+      return sentence || words.length >= 3;
+    }
+    if (_stepOpeners.contains(first)) {
+      // "To serve: lime wedges" lists what to serve with.
+      if (words.first.endsWith(':') || (words.length > 1 && words[1].endsWith(':'))) return false;
+      return (sentence || words.length >= 6) &&
+          words.skip(1).any((word) => _actionVerbs.contains(word.replaceAll(_wordEdges, '')));
+    }
+    return false;
+  }
+
+  /// True when [text] is a sentence of running text in any language: it
+  /// ends like one and has the length of one.
+  static bool _readsAsProse(String text) =>
+      _sentenceEnding.hasMatch(text) &&
+      (text.split(_spaces).length >= 4 || (_nonLatinLetter.hasMatch(text) && text.runes.length >= 8));
+
+  // "20 minutes", "1 hour" at the head of a line.
+  static final _opensWithDuration = RegExp('^$_durationPattern', caseSensitive: false);
+
+  /// True when [text] is an ingredient by its amount: "8 oz cream cheese",
+  /// "2 eggs". Not "2 minutes per side in a hot pan."
+  static bool _readsAsAmountLine(String text) =>
+      _startsWithAmount.hasMatch(text) && !_opensWithDuration.hasMatch(text) && _looksLikeIngredient(text);
+
+  /// True when [text] can stand at the end of a list of amounts without one
+  /// of its own: "Salt and pepper to taste", "lemon juice".
+  static bool _mayEndList(String text) =>
+      text.length < 60 &&
+      text.split(_spaces).length <= 7 &&
+      _hasLetter(text) &&
+      !_sentenceEnding.hasMatch(text) &&
+      !text.endsWith('?') &&
+      !_startsWithActionVerb(text.toLowerCase());
+
+  // ----- Lines that were wrapped on the page -----
+
+  // A sentence that has come to its end. A colon ends one too: a list
+  // follows it.
+  static final _sentenceClosed = RegExp(r'[.!?:。！？]["”’)\]]?$');
+  // A line that breaks off in the middle: at a comma, or at a word that
+  // cannot be the last one.
+  static final _hangingEnd = RegExp(
+      r'(?:[,;(/&-]|\b(?:and|or|the|a|an|of|with|to|in|into|on|onto|over|for|at|by|from|until|then|plus|about|per))$',
+      caseSensitive: false);
+  // The tail of an ingredient that ran onto a second line: "finely chopped",
+  // "peeled and diced", "to serve", "plus more for dusting".
+  static final _ingredientTail = RegExp(
+      r'^(?:(?:(?:very|finely|roughly|thinly|coarsely|freshly|lightly|thickly|well)\s+)?[a-z]{2,}ed'
+      r'(?:\s+(?:and|or)\s+(?:(?:finely|roughly|thinly|coarsely)\s+)?[a-z]{2,}ed)*'
+      r'|to\s+(?:taste|serve|garnish|finish|decorate)'
+      r'|for\s+(?:frying|greasing|dusting|serving|drizzling|garnish|brushing|sprinkling|the\s+pan|deep[-\s]frying)'
+      r'|at\s+room\s+temperature|optional|divided|plus\s+(?:more|extra)\b.{0,40}|or\s+(?:more|to\s+taste)\b.{0,20}'
+      r'|as\s+needed|if\s+(?:desired|needed|using))[.)]?$');
+  // A word cut in two at the end of a line: "mix-" / "ture".
+  static final _brokenWord = RegExp(r'([\p{L}\p{N}]+)-$', unicode: true);
+  // What stands before a hyphen that belongs to the word: "all-purpose",
+  // "extra-virgin", "medium-high".
+  static const _hyphenHeads = {
+    'all', 'extra', 'self', 'semi', 'non', 'low', 'full', 'half', 'well', 'medium', 'high', 'bite', 'oven', 'room',
+    'deep', 'stir', 'pan', 'slow', 'quick', 'heavy', 'light', 'gluten', 'dairy', 'sugar', 'fat', 'store', 'free',
+  };
+
+  /// [above] with the printed line [more] that carries it on. A word that
+  /// was cut in two at the line end is made whole again.
+  static String _joinWrapped(String above, String more) {
+    if (!above.endsWith('-') || !_lowerStart.hasMatch(more)) return '$above $more';
+    // The cut word is the end of [above], however long that has grown.
+    final broken = _brokenWord.firstMatch(above.length > 40 ? above.substring(above.length - 40) : above);
+    if (broken == null) return '$above $more';
+    final head = broken.group(1)!.toLowerCase();
+    final keepsHyphen = _hyphenHeads.contains(head) || _digitOrFraction.hasMatch(head);
+    return keepsHyphen ? '$above$more' : '${above.substring(0, above.length - 1)}$more';
+  }
+
+  /// True when the printed [line] carries on the sentence of the line
+  /// [above] it: that sentence is not finished and the line opens in lower
+  /// case.
+  static bool _runsOn(String above, String line) {
+    if (!_lowerStart.hasMatch(line) || _sentenceClosed.hasMatch(above)) return false;
+    // A short line above an order is a list of steps typed without
+    // capitals: "mix flour and sugar" / "add eggs".
+    return above.length >= 20 || _hangingEnd.hasMatch(above) || !_startsWithActionVerb(line.toLowerCase());
+  }
+
+  /// True when the printed [line] belongs to the step that the line [above]
+  /// it is part of, rather than being a step of its own. [numbered] says the
+  /// steps of this method carry numbers, [newParagraph] that a gap stood
+  /// between the two lines.
+  static bool _goesOnStep(String above, String line, {required bool newParagraph, required bool numbered}) {
+    final closed = _sentenceClosed.hasMatch(above);
+    final lower = _lowerStart.hasMatch(line);
+    // Across a gap only an unfinished sentence goes on.
+    if (newParagraph) return !closed && lower;
+    // Where the steps are numbered, a line with no number is the rest of
+    // the step above it.
+    if (numbered) return true;
+    if (_hangingEnd.hasMatch(above)) return true;
+    if (lower) return closed ? !_startsWithActionVerb(line.toLowerCase()) : _runsOn(above, line);
+    if (closed) return false;
+    // The sentence above is open and this line opens with a capital or a
+    // figure: a name or an amount in the middle of it ("Stir in the grated"
+    // / "Parmesan", "and cook" / "5 minutes per side"), or the next line of
+    // a list written without full stops. A line that was wrapped is a long
+    // one, and a list of amounts is no sentence.
+    if (above.length < 25) return false;
+    if (_startsWithAmount.hasMatch(line)) return !_startsWithAmount.hasMatch(above);
+    final first = line.toLowerCase().split(_spaces).first.replaceAll(_wordEdges, '');
+    return !_actionVerbs.contains(first) && !_stepOpeners.contains(first);
+  }
+
+  // An ingredient that stops at a word which tells of the next one: "1 cup
+  // all-purpose" / "flour", "freshly ground black" / "pepper". After a comma
+  // the same word ends the line: "pecans, toasted".
+  static final _describingEnd = RegExp(
+      r'(?<!,)\s(?:all-purpose|plain|self-raising|self-rising|whole|wholemeal|olive|vegetable|extra-virgin|virgin'
+      r'|unsalted|salted|black|white|brown|red|green|yellow|light|dark|fresh|freshly|dried|ground|granulated'
+      r'|powdered|icing|caster|baking|heavy|double|single|sour|sweet|unsweetened|sweetened|semi-sweet|bittersweet'
+      r'|hot|cold|warm|boneless|skinless|kosher|sea|coarse|fine|finely|roughly|thinly|large|medium|small'
+      r'|low-sodium|smoked|toasted|roasted)$',
+      caseSensitive: false);
+
+  /// True when the printed [line] is the rest of the [ingredient] that the
+  /// line [above] it belongs to.
+  static bool _goesOnIngredient(String ingredient, String above, String line, {required bool newParagraph}) {
+    // A bracket left open runs on, whatever follows: "(about" / "14 ounces)".
+    final open = '('.allMatches(ingredient).length > ')'.allMatches(ingredient).length;
+    if (open && !newParagraph) return true;
+    if (_startsWithAmount.hasMatch(line)) return false;
+    final hanging = open || _hangingEnd.hasMatch(above);
+    if (newParagraph) return hanging && _lowerStart.hasMatch(line);
+    if (hanging || _ingredientTail.hasMatch(line)) return true;
+    return _describingEnd.hasMatch(above) && _lowerStart.hasMatch(line) && line.split(_spaces).length <= 3;
+  }
+
+  /// True when [a] and [b] name the same thing, whatever their capitals,
+  /// spaces and hyphens: "Thai Green Curry" and "thai-green-curry".
+  static bool _sameName(String a, String b) =>
+      a.toLowerCase().replaceAll(_notLettersOrDigits, '') == b.toLowerCase().replaceAll(_notLettersOrDigits, '');
+
+  // How a picture opens in Markdown: "![alt](".
+  static final _pictureOpening = RegExp(r'!\[[^\]\[\n]{0,300}\]\(');
+  static final _linkAtStart = RegExp(r'^https?://\S+');
+
+  /// What the first picture of a Markdown [text] points to: all that stands
+  /// between its brackets. With [linked] it is the first picture that is a
+  /// link, without the caption that may follow the link. Null when the text
+  /// has no such picture.
+  ///
+  /// The closing bracket is looked for on the same line and close by. A
+  /// text full of unclosed brackets is then not read to its end from every
+  /// one of them.
+  static String? _pictureIn(String text, {bool linked = false}) {
+    for (final opening in _pictureOpening.allMatches(text)) {
+      final limit = opening.end + 2000;
+      final rest = text.substring(opening.end, limit < text.length ? limit : text.length);
+      final close = rest.indexOf(')');
+      if (close <= 0) continue;
+      final target = rest.substring(0, close);
+      if (target.contains('\n')) continue;
+      if (!linked) return target;
+      final link = _linkAtStart.stringMatch(target);
+      if (link != null) return link;
+    }
+    return null;
+  }
+
+  /// Reads a Markdown file that has no front matter. [fileTitle] is what the
+  /// name of the file says the recipe is called.
+  static ImportedRecipe _parseMarkdown(String text, {String? fileTitle}) {
+    // Strip code fences
     text = text.replaceAll(RegExp(r'~~~[\s\S]*?~~~', multiLine: true), '');
-    return _parseStructuredText(text);
+    final recipe = _parseStructuredText(text, titleIfNone: fileTitle);
+    recipe.imageUrl ??= _pictureIn(text, linked: true);
+    return recipe;
   }
 
   // ========== OBSIDIAN / YAML FRONTMATTER ==========
 
-  static ImportedRecipe _parseObsidianMarkdown(String text) {
+  // Front matter opens with a line of exactly three dashes at the very top
+  // and is closed by another. A longer rule of dashes is only a rule.
+  static final _frontMatterBlock = RegExp(r'^\s*---[ \t]*\n([\s\S]*?)\n---[ \t]*(?:\n|$)');
+  static final _yamlKey = RegExp(r'^[\p{L}_][\p{L}\p{N}_ .\-]*:(?:\s|$)', unicode: true);
+  static final _yamlItem = RegExp(r'^\s*-\s+(.*)$');
+
+  /// The front matter of [text] and the note under it, or null when the text
+  /// has none. Two rules with a title between them are not front matter:
+  /// every line of the real thing is a key, an item of a list, the indented
+  /// rest of a value or a comment.
+  static ({String yaml, String body})? _splitFrontMatter(String text) {
+    final block = _frontMatterBlock.firstMatch(text);
+    if (block == null) return null;
+    final yaml = block.group(1)!;
+    var keys = 0;
+    for (final line in yaml.split('\n')) {
+      if (line.trim().isEmpty || line.trimLeft().startsWith('#')) continue;
+      if (_yamlItem.hasMatch(line) || line.startsWith(' ')) continue;
+      // A key stands at the head of its line, however long the value is.
+      if (!_yamlKey.hasMatch(line.length > 200 ? line.substring(0, 200) : line)) return null;
+      keys++;
+    }
+    return keys == 0 ? null : (yaml: yaml, body: text.substring(block.end));
+  }
+
+  /// [value] without the quotes around it. A lone quote has no pair to take
+  /// off and stands for nothing.
+  static String _unquoted(String value) {
+    final v = value.trim();
+    if (v == '"' || v == "'") return '';
+    final quoted = v.length > 1 && ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'")));
+    return quoted ? v.substring(1, v.length - 1).trim() : v;
+  }
+
+  /// The items of a list written on one line: "[dinner, beef]" or "dinner,
+  /// beef".
+  static List<String> _inlineList(String value) {
+    var list = value.trim();
+    if (list.startsWith('[') && list.endsWith(']')) list = list.substring(1, list.length - 1);
+    return list.split(',').map(_unquoted).where((item) => item.isNotEmpty).toList();
+  }
+
+  // A rating told in stars.
+  static final _starSign = RegExp(r'[★⭐]');
+  // "4", "4.5", "4/5", "8 / 10".
+  static final _ratingFigure = RegExp(r'(\d+(?:[.,]\d+)?)(?:\s*/\s*(\d+))?');
+
+  /// A rating as a number of stars out of five, from "4", "4.5", "8/10" or
+  /// "★★★★". Null when [value] tells none.
+  static int? _starsOutOfFive(String value) {
+    double? stars;
+    final signs = _starSign.allMatches(value).length;
+    final figure = _ratingFigure.firstMatch(value);
+    if (signs > 0) {
+      stars = signs.toDouble();
+    } else if (figure != null) {
+      stars = double.tryParse(figure.group(1)!.replaceAll(',', '.'));
+      final outOf = double.tryParse(figure.group(2) ?? '');
+      if (stars != null && outOf != null && outOf > 0) stars = stars / outOf * 5;
+    }
+    // A figure of hundreds of digits is no number any more, and no rating.
+    if (stars == null || !stars.isFinite) return null;
+    final rounded = stars.round();
+    return rounded >= 1 && rounded <= 5 ? rounded : null;
+  }
+
+  static final _webLink = RegExp(r'''https?://[^\s)\]>"']+''');
+
+  /// Reads a note that opens with front matter. [fileTitle] is what the name
+  /// of the file says the recipe is called. A title in the front matter and
+  /// a heading in the note both come before it.
+  static ImportedRecipe _parseObsidianMarkdown(String text, {String? fileTitle}) {
     String? title;
     String? description;
     String? imageUrl;
+    String? sourceUrl;
+    int? rating;
     int? prepTime;
     int? cookTime;
+    int? totalTime;
     String? servingsStr;
     List<String>? tags;
     String? cuisine;
     String? course;
+    var yamlIngredients = const <String>[];
+    var yamlSteps = const <String>[];
 
-    // Extract YAML frontmatter between --- markers
-    final frontmatterMatch =
-    RegExp(r'^---\s*\n([\s\S]*?)\n---', multiLine: true).firstMatch(text);
+    final frontMatter = _splitFrontMatter(text);
     String bodyText = text;
 
-    if (frontmatterMatch != null) {
-      final yaml = frontmatterMatch.group(1) ?? '';
-      bodyText = text.substring(frontmatterMatch.end).trim();
+    if (frontMatter != null) {
+      bodyText = frontMatter.body.trim();
 
       // Parse YAML into a simple key→value map, collecting multi-line lists
       final yamlMap = <String, String>{};
       final yamlLists = <String, List<String>>{};
       String? currentListKey;
 
-      for (final line in yaml.split('\n')) {
-        // Check for YAML list item (indented "- value")
-        final listItemMatch = RegExp(r'^\s+-\s+(.+)').firstMatch(line);
-        if (listItemMatch != null && currentListKey != null) {
-          var item = listItemMatch.group(1)!.trim();
-          // Remove quotes
-          if ((item.startsWith('"') && item.endsWith('"')) ||
-              (item.startsWith("'") && item.endsWith("'"))) {
-            item = item.substring(1, item.length - 1);
-          }
-          yamlLists.putIfAbsent(currentListKey, () => []).add(item);
+      for (final line in frontMatter.yaml.split('\n')) {
+        if (line.trim().isEmpty || line.trimLeft().startsWith('#')) continue;
+
+        // An item of a list, indented or not, and the lines of a value
+        // that was written as a block under its key.
+        final listKey = currentListKey;
+        final item = _yamlItem.firstMatch(line);
+        if (listKey != null && (item != null || line.startsWith(' '))) {
+          final value = _unquoted(item?.group(1) ?? line);
+          if (value.isNotEmpty) yamlLists.putIfAbsent(listKey, () => []).add(value);
           continue;
         }
 
         final colonIdx = line.indexOf(':');
         if (colonIdx == -1) continue;
 
-        final key = line.substring(0, colonIdx).trim().toLowerCase();
-        var value = line.substring(colonIdx + 1).trim();
+        // "Prep Time", "prep-time", "prep_time" and "prepTime" are one key.
+        final key = line.substring(0, colonIdx).toLowerCase().replaceAll(RegExp(r'[\s\-_]+'), '');
+        final value = _unquoted(line.substring(colonIdx + 1));
 
         // Empty value after colon means next lines are a list
-        if (value.isEmpty) {
+        if (value.isEmpty || value == '|' || value == '>') {
           currentListKey = key;
           continue;
         }
         currentListKey = null;
+        // What a key tells is short. A value that is not is cut down to a
+        // length the readers of times, ratings and links are made for.
+        yamlMap[key] = value.length > _longestEntry ? value.substring(0, _longestEntry) : value;
+      }
 
-        // Remove surrounding quotes
-        if ((value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))) {
-          value = value.substring(1, value.length - 1);
+      String? firstOf(List<String> keys) {
+        for (final key in keys) {
+          final value = yamlMap[key];
+          if (value != null) return value;
         }
-
-        yamlMap[key] = value;
+        return null;
       }
 
       // Extract values from parsed YAML
-      title = yamlMap['title'] ?? yamlMap['name'];
-      description = yamlMap['description'] ?? yamlMap['summary'];
-      imageUrl = yamlMap['cover'] ?? yamlMap['image'] ?? yamlMap['photo'];
+      title = firstOf(['title', 'name']);
+      description = firstOf(['description', 'summary']) ?? yamlLists['description']?.join(' ');
+      imageUrl = firstOf(['cover', 'image', 'photo']);
       cuisine = yamlMap['cuisine'];
 
       // Map course/type to a known course ID
-      final rawCourse = yamlMap['type'] ?? yamlMap['course'] ?? yamlMap['category'];
+      final rawCourse = firstOf(['type', 'course', 'category']);
       if (rawCourse != null) {
         course = mapToCourseId(rawCourse);
       }
 
-      for (final k in ['prep time', 'prep_time', 'preptime', 'prep']) {
-        if (yamlMap.containsKey(k)) { prepTime = _parseTimeString(yamlMap[k]!); break; }
-      }
-      for (final k in ['cook time', 'cook_time', 'cooktime', 'cook']) {
-        if (yamlMap.containsKey(k)) { cookTime = _parseTimeString(yamlMap[k]!); break; }
-      }
-      for (final k in ['servings', 'serves', 'yield']) {
-        if (yamlMap.containsKey(k)) {
-          final raw = yamlMap[k]!;
-          // Extract first number only (e.g. "4–6 taquitos" → "4", "16 pieces" → "16")
-          final firstNum = RegExp(r'\d+').firstMatch(raw);
-          servingsStr = firstNum?.group(0) ?? raw;
-          break;
-        }
+      final rawPrep = firstOf(['preptime', 'prep']);
+      if (rawPrep != null) prepTime = _parseTimeString(rawPrep);
+      final rawCook = firstOf(['cooktime', 'cook']);
+      if (rawCook != null) cookTime = _parseTimeString(rawCook);
+      final rawTotal = firstOf(['totaltime', 'total', 'time']);
+      if (rawTotal != null) totalTime = _parseTimeString(rawTotal);
+
+      final rawServings = firstOf(['servings', 'serves', 'yield', 'yields', 'makes', 'portions']);
+      if (rawServings != null) {
+        // Extract first number only (e.g. "4–6 taquitos" → "4", "16 pieces" → "16")
+        final firstNum = RegExp(r'\d+').firstMatch(rawServings);
+        servingsStr = firstNum?.group(0) ?? rawServings;
       }
 
-      // Tags: support both inline [a, b] and multi-line YAML list
-      if (yamlLists.containsKey('tags')) {
-        tags = yamlLists['tags'];
-      } else if (yamlMap.containsKey('tags')) {
-        var tagStr = yamlMap['tags']!;
-        if (tagStr.startsWith('[') && tagStr.endsWith(']')) {
-          tagStr = tagStr.substring(1, tagStr.length - 1);
-        }
-        tags = tagStr.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
+      // Where the recipe came from: a link, or a name as it was written.
+      final rawSource = firstOf(['source', 'sourceurl', 'url', 'link']);
+      if (rawSource != null) {
+        final named = _cleanMarkdown(rawSource);
+        sourceUrl = _webLink.firstMatch(rawSource)?.group(0) ?? (named.isEmpty ? null : named);
       }
+
+      final rawRating = firstOf(['rating', 'stars']);
+      if (rawRating != null) rating = _starsOutOfFive(rawRating);
+
+      // Tags: support both inline [a, b] and multi-line YAML list
+      final rawTags = firstOf(['tags', 'tag']);
+      tags = yamlLists['tags'] ?? yamlLists['tag'] ?? (rawTags == null ? null : _inlineList(rawTags));
+
+      // A recipe kept entirely in front matter, as Jekyll sites keep them.
+      yamlIngredients = yamlLists['ingredients'] ?? const [];
+      yamlSteps = yamlLists['directions'] ??
+          yamlLists['instructions'] ??
+          yamlLists['steps'] ??
+          yamlLists['method'] ??
+          const [];
     }
 
     // Remove Obsidian-specific blocks
     bodyText = bodyText.replaceAll(RegExp(r'```button[\s\S]*?```'), '');
     bodyText = bodyText.replaceAll(RegExp(r'```dataview[\s\S]*?```'), '');
-    bodyText = bodyText.replaceAll(RegExp(r'<%[\s\S]*?%>'), '');
+    bodyText = _withoutTemplateTags(bodyText);
 
-    // Extract title from # Header if not in frontmatter
-    if (title == null || title.isEmpty) {
-      final h1Match =
-      RegExp(r'^#\s+(.+)$', multiLine: true).firstMatch(bodyText);
-      if (h1Match != null) {
-        title = _cleanMarkdown(h1Match.group(1) ?? 'Untitled Recipe');
-        bodyText = bodyText.replaceFirst(h1Match.group(0)!, '').trim();
-      }
-    }
-
-    // Extract image from Obsidian ![[...]] or standard ![](...) syntax
+    // Extract image from Obsidian ![[...]] or standard ![](...) syntax. The
+    // name of an embed ends at the next bracket or line, so a note full of
+    // unclosed brackets is not searched to its end from every one of them.
     if (imageUrl == null) {
-      final obsidianImg = RegExp(r'!\[\[([^\]]+)\]\]').firstMatch(bodyText);
-      final standardImg =
-      RegExp(r'!\[[^\]]*\]\(([^)]+)\)').firstMatch(bodyText);
-      imageUrl = obsidianImg?.group(1) ?? standardImg?.group(1);
+      final obsidianImg = RegExp(r'!\[\[([^\]\[\n]{1,300})\]\]').firstMatch(bodyText);
+      imageUrl = obsidianImg?.group(1) ?? _pictureIn(bodyText);
     }
 
-    // Parse body as structured text to get ingredients/instructions
-    final parsed = _parseStructuredText(bodyText);
+    // Parse body as structured text to get ingredients/instructions. With
+    // the title in hand, its first line is content and not a second title.
+    final parsed = _parseStructuredText(bodyText, titleKnown: title != null, titleIfNone: fileTitle);
 
-    return ImportedRecipe(
+    // With both lists in the front matter, the note under it is a note.
+    final inFrontMatter = yamlIngredients.isNotEmpty && yamlSteps.isNotEmpty;
+    final bodyAsNote = _linesOf(bodyText)
+        .map((line) => _cleanMarkdown(_cleanListMarkers(line.trim().replaceFirst(RegExp(r'^#{1,6}\s*'), ''))))
+        .where((line) => line.isNotEmpty && !_ruleLine.hasMatch(line))
+        .join('\n');
+
+    final prep = prepTime ?? parsed.prepTimeMinutes;
+    var cook = cookTime ?? parsed.cookTimeMinutes;
+    // A total time stands in for the cook time only when none was given.
+    if (cook == null && totalTime != null && totalTime > (prep ?? 0)) cook = totalTime - (prep ?? 0);
+
+    final recipe = ImportedRecipe(
       title: title ?? parsed.title,
-      description: description ?? parsed.description,
+      description: description ?? (inFrontMatter ? null : parsed.description),
       imageUrl: imageUrl ?? parsed.imageUrl,
-      prepTimeMinutes: prepTime ?? parsed.prepTimeMinutes,
-      cookTimeMinutes: cookTime ?? parsed.cookTimeMinutes,
+      prepTimeMinutes: prep,
+      cookTimeMinutes: cook,
       servings: servingsStr ?? parsed.servings,
-      ingredients: parsed.ingredients,
-      instructions: parsed.instructions,
-      notes: parsed.notes,
+      ingredients: yamlIngredients.isNotEmpty ? yamlIngredients : parsed.ingredients,
+      instructions: yamlSteps.isNotEmpty ? yamlSteps : parsed.instructions,
+      notes: inFrontMatter ? (bodyAsNote.isEmpty ? null : bodyAsNote) : parsed.notes,
       tags: tags,
       cuisine: cuisine,
-      suggestedCourse: course ?? parsed.suggestedCourse,
-      suggestedCategory: parsed.suggestedCategory,
+      sourceUrl: sourceUrl,
+      rating: rating,
     );
+    // The course is guessed from the title the recipe ends up with. One the
+    // front matter states comes first.
+    _detectCourseAndCategory(recipe);
+    if (course != null) recipe.suggestedCourse = course;
+    return recipe;
+  }
+
+  /// [text] without the "<% ... %>" tags a template leaves in a note. The
+  /// text is gone through once: where a tag is never closed, nothing after
+  /// it is one either.
+  static String _withoutTemplateTags(String text) {
+    var open = text.indexOf('<%');
+    if (open < 0) return text;
+    final kept = StringBuffer();
+    var from = 0;
+    while (open >= 0) {
+      final close = text.indexOf('%>', open + 2);
+      if (close < 0) break;
+      kept.write(text.substring(from, open));
+      from = close + 2;
+      open = text.indexOf('<%', from);
+    }
+    kept.write(text.substring(from));
+    return kept.toString();
+  }
+
+  // Names a file is given when nobody names it.
+  static final _namelessFile = RegExp(
+      r'^(?:untitled|new\s+(?:note|recipe|document|file)|recipes?|notes?|index|readme|pasted|document|draft|scan'
+      r'|export|import|backup|file|text|temp|tmp|test|page|img|image|photo|screenshot)[\s\d()._-]*$',
+      caseSensitive: false);
+
+  /// What the name of a file says its recipe is called: "Thai Green Curry"
+  /// for "Food/Mains/Thai Green Curry.md". Null for a name that says
+  /// nothing, such as "Untitled.md" or "2024-03-05.md".
+  static String? _fileTitle(String filename) {
+    var name = filename.split(RegExp(r'[\\/]')).last;
+    final dot = name.lastIndexOf('.');
+    if (dot > 0) name = name.substring(0, dot);
+    // "thai-green-curry" is a name in the spelling of a link.
+    if (!name.contains(' ') && name == name.toLowerCase()) {
+      name = name
+          .split(RegExp(r'[-_]+'))
+          .where((word) => word.isNotEmpty)
+          .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+          .join(' ');
+    }
+    name = name.trim();
+    return _hasLetter(name) && !_namelessFile.hasMatch(name) ? name : null;
+  }
+
+  /// [recipe] with the name of its file for a title, when the text gave it
+  /// none.
+  static ImportedRecipe _namedByFile(ImportedRecipe recipe, String filename) {
+    final fileTitle = _fileTitle(filename);
+    if (recipe.title == 'Untitled Recipe' && fileTitle != null) {
+      recipe.title = fileTitle;
+      _detectCourseAndCategory(recipe);
+    }
+    return recipe;
   }
 
   // ========== OCR TEXT CLEANUP ==========
 
+  // What a screenshot or a scanned page carries besides the recipe. Every
+  // pattern here describes a whole line. A recipe line that only starts with
+  // one of these words, or has one inside it, is never clutter: "Homemade
+  // Granola", "Save the pasta water", "5g salt", "Bake the cookies".
+
+  // A phone status bar: clock, carrier, signal and battery, in any order.
+  static final _statusBarLine = RegExp(
+      r'^(?:(?:\d{1,2}:\d{2}(?:\s*[AP]M)?|5G\+?|4G|3G|LTE|Wi-?Fi|AT&T|T-Mobile|Verizon|Sprint|Vodafone|\d{1,3}\s?%)(?:\s+|$))+$',
+      caseSensitive: false);
+
+  // The browser's address bar: a domain or a link on a line of its own.
+  static final _addressBarLine = RegExp(
+      r'^(?:https?://)?(?:[a-z0-9-]+\.)+(?:com|org|net|edu|gov|info|blog|kitchen|recipes|food|cooking|app|io|tv|co'
+      r'|uk|us|ca|au|nz|ie|eu|de|at|ch|be|fr|es|it|nl|se|no|dk|fi|pl|pt|br|mx|ru|jp|kr|cn|in)(?::\d+)?(?:[/?#]\S*)?$',
+      caseSensitive: false);
+
+  // A page number with a word in it: "Page 12", "12 of 240".
+  static final _pageNumberLine = RegExp(
+      r'^(?:page\s+\d{1,4}(?:\s*(?:of|/)\s*\d{1,4})?|\d{1,4}\s+of\s+\d{1,4})$',
+      caseSensitive: false);
+
+  // Menus and share buttons: a line made of button labels and nothing else.
+  // Matched against the line in lower case with its punctuation taken out.
+  static final _buttonLabels = RegExp(
+      r'^(?:(?:home|back|menu|search|recipes|saved|tweet|email|subscribe'
+      r'|facebook|pinterest|twitter|instagram|whatsapp|youtube|tiktok'
+      r'|log ?in|sign ?in|sign ?up|read more|see more|show more|pin it|back to top'
+      r'|skip to content|skip to recipe|jump to recipe|jump to video|jump to comments'
+      r'|leave a review|leave a comment|i made it|cook mode|prevent your screen from going dark'
+      r'|add to (?:shopping list|meal plan|collection|cart|favou?rites)|us customary(?: metric)?'
+      r'|privacy policy|cookie policy|terms of use|terms of service|terms (?:and )?conditions|contact us|about us'
+      r'|(?:share|save|print|rate|pin)(?: this)?(?: recipe)?(?: on (?:facebook|pinterest|twitter|instagram|whatsapp))?)(?: |$))+$');
+
+  // A breadcrumb trail: "Home > Recipes > Chicken", "Recipes /...".
+  static final _breadcrumbLine = RegExp(
+      r'^(?:home|recipes)\s*[>›»/|→]\s*\S|^[a-z]+\s*/\.{3}',
+      caseSensitive: false);
+
+  // Share and rating counters: "123 shares", "12,640 Reviews", "1.2K likes",
+  // "4.9 from 312 votes", "4.8 out of 5", "No ratings yet".
+  static final _counterLine = RegExp(
+      r'^\d[\d.,]*\s?[km]?\s*(?:shares?|likes?|comments?|pins?|saves?|views?|followers?|reviews?|ratings?|photos?)$'
+      r'|^\d(?:[.,]\d+)?\s+from\s+\d[\d.,]*\s+(?:votes?|reviews?|ratings?)$'
+      r'|^(?:a\s+star\s+rating\s+of\s+)?\d(?:[.,]\d+)?\s*(?:stars?|out\s+of\s+\d{1,2}(?:\s+stars?)?)\W*$'
+      r'|^no\s+(?:ratings|reviews)\s+yet\W*$',
+      caseSensitive: false);
+
+  // A cookie banner says who uses cookies and talks about the site in the
+  // same breath. "You can use cookies instead of graham crackers" does not.
+  static final _usesCookies = RegExp(
+      r'\b(?:uses?|using|use\s+of)\s+(?:\w+\s+)?cookies\b',
+      caseSensitive: false);
+  static final _siteTalk = RegExp(
+      r'\b(?:(?:web)?sites?|(?:your|best|browsing|user|online)\s+experience|browsing|consent|privacy|policy'
+      r'|personali[sz]\w*|analytics|advertising|ads|traffic|partners)\b',
+      caseSensitive: false);
+  // The banner's opening words, when the rest of it wrapped onto other lines.
+  static final _cookieNoticeLine = RegExp(
+      r'^(?:we|(?:this|our)\s+(?:web)?site)\s+uses?\s+cookies\W*$',
+      caseSensitive: false);
+
+  // The buttons of a cookie banner. "Cookie options" may head a list of
+  // cookies to bake, so the plain words stand with a banner word only.
+  static final _consentButtonLine = RegExp(
+      r'^(?:(?:accept|reject|decline|deny)(?: all)?(?: cookies)?'
+      r'|allow (?:all(?: cookies)?|cookies)'
+      r'|cookies? (?:policy|settings|preferences|notice|consent)'
+      r'|(?:manage|change|privacy|consent) (?:(?:cookies?|consent|privacy) )?(?:preferences|settings|choices|options)'
+      r'|your privacy choices)\W*$',
+      caseSensitive: false);
+
+  // Footers. "(c)" needs a year or the word after it, "(c) Fold in the
+  // butter" is a lettered step.
+  static final _copyrightLine = RegExp(
+      r'^(?:©|\(c\)\s*(?:copyright\b|\d{4})|copyright\b|all rights reserved|powered by\s+\S+(?:\s+\S+){0,3}$)',
+      caseSensitive: false);
+
+  static final _adLine = RegExp(
+      r'^(?:advertisements?|sponsored(?:\s+(?:content|post|links?))?|ads?(?:\s+by\s+\w+)?)\W*$',
+      caseSensitive: false);
+
+  // The placeholder a browser shows for a picture that did not load.
+  static final _missingImageLine = RegExp(
+      r'^(?:(?:the|this)\s+)?(?:requested\s+)?(?:image|photo|picture|page|file|video|link|resource)\b[^.!?]{0,40}\bcould not be found\W*$',
+      caseSensitive: false);
+
+  // Bullets and stray marks in front of a line. A fraction, an accented
+  // letter, an opening bracket and the point of ".5 cup" are part of the line.
+  static final _leadingMarks = RegExp(r'^(?:[^\p{L}\p{N}(\[.]|\.(?!\d))+', unicode: true);
+  // So is a quotation mark that the line closes again: "Nice" Cream, «Tarte»
+  // aux pommes. A lone one is a speck, and the mark in 9" stands for inches.
+  static final _quotedOpening = RegExp(
+      r'"(?=\p{L})[^"]*[\p{L}.,!?]"|“(?=\p{L})[^“”]*”|„(?=\p{L})[^„“”]*[“”]|«(?=\p{L})[^«»]*»',
+      unicode: true);
+  static const _openingQuotes = '"“„«';
+  // Most lines open with a plain letter, a digit or a bracket and have
+  // nothing in front of them. Seeing that is much quicker than telling the
+  // letters and digits of every alphabet from the marks.
+  static final _plainStart = RegExp(r'^[A-Za-z0-9(]');
+
+  /// [line] without the bullets and stray marks in front of it.
+  static String _withoutLeadingMarks(String line) {
+    if (_plainStart.hasMatch(line)) return line;
+    final marks = _leadingMarks.matchAsPrefix(line);
+    if (marks == null) return line;
+    // Only the last of the marks can be a quotation mark with a letter after
+    // it.
+    final last = marks.end - 1;
+    final quoted = _openingQuotes.contains(line[last]) && _quotedOpening.matchAsPrefix(line, last) != null;
+    return line.substring(quoted ? last : marks.end);
+  }
+
+  /// Menus, share buttons, banners and footers: what rides along when a
+  /// recipe is copied out of a web page, or is caught in a screenshot of one.
+  static bool _isPageFurniture(String line) {
+    if (_breadcrumbLine.hasMatch(line)) return true;
+    if (line.length < 80 && _isButtonRow(line.toLowerCase())) return true;
+    if (_counterLine.hasMatch(line)) return true;
+    if (_consentButtonLine.hasMatch(line)) return true;
+    if (_cookieNoticeLine.hasMatch(line)) return true;
+    if (line.length < 200 && _usesCookies.hasMatch(line) && _siteTalk.hasMatch(line)) return true;
+    if (_copyrightLine.hasMatch(line)) return true;
+    return _adLine.hasMatch(line);
+  }
+
+  /// True when [lower] is made of button labels and nothing else, whatever
+  /// marks stand between them.
+  static bool _isButtonRow(String lower) {
+    // Letters of every alphabet are kept, so a line in another script with
+    // one English word in it is not taken for a button. Telling all those
+    // letters apart is slow. A row of buttons also passes with the letters
+    // of the labels alone, and that quick look rules out nearly every line.
+    return _buttonLabels.hasMatch(lower.replaceAll(_notPlainLettersOrDigits, ' ').trim()) &&
+        _buttonLabels.hasMatch(lower.replaceAll(_notLettersOrDigits, ' ').trim());
+  }
+
+  static final _notPlainLettersOrDigits = RegExp(r'[^a-z0-9]+');
+  static final _notLettersOrDigits = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
+
+  /// Page furniture, and what only a screenshot or a scan carries: the
+  /// phone's status bar, the address bar, page numbers and rules.
+  static bool _isScreenClutter(String line) {
+    if (_statusBarLine.hasMatch(line)) return true;
+    // No letter in any alphabet.
+    if (!_hasLetter(line)) return true;
+    if (_addressBarLine.hasMatch(line)) return true;
+    if (_pageNumberLine.hasMatch(line)) return true;
+    if (_missingImageLine.hasMatch(line)) return true;
+    return _isPageFurniture(line);
+  }
+
+  /// True for a short line in capitals with no digits: a running header such
+  /// as "DESSERTS", but just as well a title or "OLIVE OIL".
+  static bool _isShortCapsLine(String line) {
+    return line.length > 3 &&
+        line.length < 20 &&
+        line == line.toUpperCase() &&
+        line != line.toLowerCase() &&
+        !RegExp(r'\d').hasMatch(line) &&
+        _detectSectionHeader(line) == _Section.unknown;
+  }
+
+  // The last word of a wrapped sentence may stand on a line of its own:
+  // "it.", "up", "of".
+  static final _shortTail = RegExp(r'^[a-z]{1,2}[.,;!?]?$');
+
+  /// [text] without the screen clutter, one line for each printed line. The
+  /// paragraphs of the page stay apart: where the recogniser left a blank
+  /// line, or a page ended, one blank line is kept.
   static String _cleanOcrText(String text) {
-    final lines = text.split('\n');
+    final lines = _linesOf(text);
     final filtered = <String>[];
+    // The page each kept line came from. Pages are divided by a "---" line.
+    final pageOf = <int>[];
+    // The kept lines that open a paragraph.
+    final opensParagraph = <bool>[];
+    var page = 0;
+    var gap = false;
 
     for (var line in lines) {
       var trimmed = line.trim();
 
-      if (trimmed.length < 3) continue;
-
-      // Skip phone status bar patterns
-      if (RegExp(r'^\d{1,2}:\d{2}(\s*(AM|PM))?(\s|$)', caseSensitive: false)
-          .hasMatch(trimmed)) {
+      if (trimmed.isEmpty) {
+        gap = true;
+        continue;
+      }
+      if (trimmed == '---') {
+        page++;
+        gap = true;
         continue;
       }
 
-      // Skip signal/battery/carrier indicators
-      if (RegExp(r'^(5G|LTE|4G|WiFi|AT&T|T-Mobile|Verizon|Sprint|Vodafone|\d+%$)',
-          caseSensitive: false)
-          .hasMatch(trimmed)) {
-        continue;
+      // The number printed under a "Servings" label is kept for it. In a
+      // box read row by row, the label is a few lines further up.
+      final valueOfLabel = RegExp(r'^\d{1,3}(?:\s*[-–]\s*\d{1,3})?$').hasMatch(trimmed) &&
+          filtered.skip(filtered.length > 4 ? filtered.length - 4 : 0).any(_bareYieldLabel.hasMatch);
+
+      if (!valueOfLabel) {
+        // One or two characters are specks, unless they are a word in a
+        // script that writes one in a single sign, or the last word of the
+        // sentence above.
+        final tail = !gap && filtered.isNotEmpty && _shortTail.hasMatch(trimmed);
+        if (trimmed.length < 3 && !tail && !_nonLatinLetter.hasMatch(trimmed)) continue;
+        if (_isScreenClutter(trimmed)) continue;
       }
 
-      // Skip lines that are just numbers or symbols
-      if (RegExp(r'^[\d\W]+$').hasMatch(trimmed)) continue;
-
-      // Skip "image not found" type messages
-      if (trimmed.toLowerCase().contains('could not be found')) continue;
-
-      // Skip breadcrumb-like paths
-      if (RegExp(r'^[A-Za-z]+\s*/\.{3}').hasMatch(trimmed)) continue;
-
-      // Skip navigation UI elements
-      if (RegExp(r'^(Home|Back|Menu|Search|Share|Save|Print|Rate|Jump to Recipe|Pin It|Tweet|Email)',
-          caseSensitive: false)
-          .hasMatch(trimmed) &&
-          trimmed.length < 30) {
-        continue;
-      }
-
-      // Skip social media buttons/counters
-      if (RegExp(r'^\d+\s*(shares?|likes?|comments?|pins?|saves?|views?|followers?)$',
-          caseSensitive: false)
-          .hasMatch(trimmed)) {
-        continue;
-      }
-
-      // Skip cookie/GDPR banners
-      if (RegExp(r'(cookie|consent|privacy policy|accept all|we use cookies)',
-          caseSensitive: false)
-          .hasMatch(trimmed) &&
-          trimmed.length < 100) {
-        continue;
-      }
-
-      // Skip footer/copyright lines
-      if (RegExp(r'^(©|\(c\)|Copyright|All rights reserved|Powered by)',
-          caseSensitive: false)
-          .hasMatch(trimmed)) {
-        continue;
-      }
-
-      // Skip ad indicators
-      if (RegExp(r'^(Advertisement|Sponsored|Ad\b|ADVERTISEMENT)',
-          caseSensitive: false)
-          .hasMatch(trimmed) &&
-          trimmed.length < 30) {
-        continue;
-      }
-
-      // Skip watermarks (often short capitalized text)
-      if (trimmed.length < 20 && trimmed == trimmed.toUpperCase() &&
-          !RegExp(r'\d').hasMatch(trimmed) && trimmed.length > 3) {
-        // All caps short text without numbers — likely a watermark or header
-        // But keep measurement units and section headers
-        if (!RegExp(r'^(INGREDIENTS?|INSTRUCTIONS?|DIRECTIONS?|METHOD|NOTES?|SERVES?)$',
-            caseSensitive: false)
-            .hasMatch(trimmed)) {
-          continue;
-        }
-      }
-
-      // Remove leading garbage characters
-      trimmed = trimmed.replaceFirst(RegExp(r'^[^\w\d]+'), '');
+      trimmed = _withoutLeadingMarks(trimmed);
 
       if (trimmed.isNotEmpty) {
         filtered.add(trimmed);
+        pageOf.add(page);
+        opensParagraph.add(gap);
+        gap = false;
       }
     }
 
-    return filtered.join('\n');
+    // A short line in capitals that opens or closes one page after another is
+    // a running header. The first one is kept: a title looks just the same.
+    final repeats = <int>{};
+    if (page > 0) {
+      final firstSeenOn = <String, int>{};
+      for (var i = 0; i < filtered.length; i++) {
+        final opensPage = i == 0 || pageOf[i - 1] != pageOf[i];
+        final closesPage = i == filtered.length - 1 || pageOf[i + 1] != pageOf[i];
+        if (!(opensPage || closesPage) || !_isShortCapsLine(filtered[i])) continue;
+        if (firstSeenOn.putIfAbsent(filtered[i], () => pageOf[i]) != pageOf[i]) repeats.add(i);
+      }
+    }
+
+    final cleaned = StringBuffer();
+    var apart = false;
+    for (var i = 0; i < filtered.length; i++) {
+      apart = apart || opensParagraph[i];
+      if (repeats.contains(i)) continue;
+      if (cleaned.isNotEmpty) cleaned.write(apart ? '\n\n' : '\n');
+      cleaned.write(filtered[i]);
+      apart = false;
+    }
+    return cleaned.toString();
   }
 
   // ========== AGGRESSIVE FALLBACK ==========
 
   static ImportedRecipe _aggressiveParse(String text) {
-    final lines = text
-        .split('\n')
+    final lines = _linesOf(text)
         .map((l) => l.trim())
         .where((l) => l.isNotEmpty)
         .toList();
@@ -4688,26 +5927,59 @@ class RecipeImportEngine {
 
   // ========== SECTION DETECTION ==========
 
+  /// [line] without what a header may be dressed in: heading marks,
+  /// emphasis, an emoji in front. A colon at the end stays, wherever the
+  /// emphasis put it: "**Ingredients:**" and "**Ingredients**:" both come
+  /// back as "Ingredients:".
+  static String _undressed(String line) {
+    var text = line.trim().replaceAll(_headerDress, '');
+    final colon = _colonAtEnd.hasMatch(text);
+    if (colon) text = text.replaceFirst(_colonAtEnd, '');
+    text = _cleanMarkdown(text.replaceAll(_headerDress, '')).replaceAll(_headerDress, '');
+    return colon ? '$text:' : text;
+  }
+
   static _Section _detectSectionHeader(String line) {
     final cleanLine = line.trim();
+    // No header runs to the length of a sentence.
+    if (cleanLine.isEmpty || cleanLine.length > 80) return _Section.unknown;
 
-    for (final pattern in _ingredientHeaderPatterns) {
-      if (pattern.hasMatch(cleanLine)) return _Section.ingredients;
-    }
-    for (final pattern in _instructionHeaderPatterns) {
-      if (pattern.hasMatch(cleanLine)) return _Section.instructions;
-    }
-    for (final pattern in _notesHeaderPatterns) {
-      if (pattern.hasMatch(cleanLine)) return _Section.notes;
-    }
+    var words = _undressed(cleanLine);
+    final colon = _colonAtEnd.hasMatch(words);
+    if (colon) words = words.replaceFirst(_colonAtEnd, '');
 
-    return _Section.unknown;
+    final _Section section;
+    if (_ingredientHeader.hasMatch(words)) {
+      section = _Section.ingredients;
+    } else if (_methodHeader.hasMatch(words)) {
+      section = _Section.instructions;
+    } else if (_notesHeader.hasMatch(words)) {
+      section = _Section.notes;
+    } else {
+      return _Section.unknown;
+    }
+    // A header stands apart by its capital, its colon or its shortness.
+    // Running text may open with the same words: "ingredients for the sauce
+    // and stir until smooth".
+    if (!colon && _lowerStart.hasMatch(words) && words.split(_spaces).length > 4) return _Section.unknown;
+    return section;
   }
 
   // ========== SCORING ==========
 
   static bool _looksLikeIngredient(String text) =>
       _ingredientScore(text) > 0.4;
+
+  // The units of measure as one pattern.
+  static final _unitsPattern = _measurementUnits.map(RegExp.escape).join('|');
+  static final _unitInText = RegExp('\\b(?:$_unitsPattern)\\b', caseSensitive: false);
+  static final _amountWithUnit = RegExp('[\\d½¼¾⅓⅔⅛⅜⅝⅞]\\s*-?\\s*(?:$_unitsPattern)\\b', caseSensitive: false);
+  // How a line of ingredients may open: with a figure, or with an amount in
+  // words.
+  static final _opensWithQuantity = RegExp(
+      r'^(?:\.?\d|[½¼¾⅓⅔⅛⅜⅝⅞⅕⅖⅗⅘⅙⅚]|(?:a|an|one|two|three|four|five|six|half|pinch|dash|handful)\b)',
+      caseSensitive: false);
+  static final _opensWithUnit = RegExp('^(?:(?:large|medium|small)\\s+[a-z]|(?:$_unitsPattern)\\s+of\\b)');
 
   static double _ingredientScore(String text) {
     double score = 0;
@@ -4717,19 +5989,19 @@ class RecipeImportEngine {
     if (text.length < 60) score += 0.1;
     if (text.length > 150) score -= 0.3;
 
-    if (RegExp(r'^\d').hasMatch(text)) score += 0.3;
+    if (RegExp(r'^\.?\d').hasMatch(text)) score += 0.3;
     if (_unicodeFractions.any((f) => text.startsWith(f))) score += 0.3;
     if (RegExp(r'^\d+/\d+').hasMatch(text)) score += 0.3;
 
-    for (final unit in _measurementUnits) {
-      if (RegExp('\\b$unit\\b', caseSensitive: false).hasMatch(lower)) {
-        score += 0.3;
-        break;
-      }
-    }
+    // A unit counts where an amount stands with it: at the head of the
+    // line, or right in front of the unit as in "Butter 200 g". So does a
+    // unit that opens the line itself: "Can of tomatoes", "Large onion". A
+    // step that mentions "a large skillet" or "180°C" has none of these.
+    final unit = _opensWithQuantity.hasMatch(text) ? _unitInText : _amountWithUnit;
+    if (unit.hasMatch(lower) || _opensWithUnit.hasMatch(lower)) score += 0.3;
 
     if (_unicodeFractions.any((f) => text.contains(f))) score += 0.2;
-    if (RegExp(r'\d+/\d+').hasMatch(text)) score += 0.2;
+    if (RegExp(r'\d/\d').hasMatch(text)) score += 0.2;
     if (!RegExp(r'\.\s+[A-Z]').hasMatch(text)) score += 0.1;
     if (!_containsActionVerb(text)) score += 0.1;
 
@@ -4753,9 +6025,7 @@ class RecipeImportEngine {
                 caseSensitive: false)
             .hasMatch(t);
     if (!startsWithQty) return false;
-    final lower = t.toLowerCase();
-    final hasUnit = _measurementUnits.any((u) =>
-        RegExp('\\b${RegExp.escape(u)}\\b', caseSensitive: false).hasMatch(lower));
+    final hasUnit = _unitInText.hasMatch(t);
     final looksProse = RegExp(r'[.!?]\s+\S').hasMatch(t); // multiple sentences
     return hasUnit || (t.length < 45 && !looksProse);
   }
@@ -4771,12 +6041,12 @@ class RecipeImportEngine {
     if (_containsActionVerb(text)) score += 0.4;
     if (_startsWithActionVerb(lower)) score += 0.3;
 
-    if (RegExp(r'\d+\s*(minutes?|mins?|hours?|hrs?|seconds?|secs?)')
+    if (RegExp(r'\d\s*(minutes?|mins?|hours?|hrs?|seconds?|secs?)')
         .hasMatch(lower)) {
       score += 0.2;
     }
 
-    if (RegExp(r'\d+\s*°?\s*[FCfc]').hasMatch(text)) score += 0.2;
+    if (RegExp(r'\d\s*(?:°\s*)?[FCfc]').hasMatch(text)) score += 0.2;
     if (text.endsWith('.')) score += 0.1;
     if (RegExp(r'[.;,]\s+[A-Z]').hasMatch(text)) score += 0.1;
 
@@ -4785,52 +6055,106 @@ class RecipeImportEngine {
 
   // ========== VALIDATION ==========
 
+  static const _headerWords = [
+    'ingredients', 'directions', 'instructions', 'method', 'steps',
+    'notes', 'tips', 'recipe', 'servings', 'serves', 'yield',
+    'prep time', 'cook time', 'total time', 'nutrition',
+  ];
+
+  // Lone words that are the tail of an ingredient, not an ingredient.
+  static const _ingredientJunkWords = [
+    'medium', 'large', 'small', 'optional', 'fresh', 'dried',
+    'chopped', 'minced', 'diced', 'sliced', 'cubed', 'grated',
+    'to taste', 'as needed', 'for garnish', 'or more',
+    ..._headerWords,
+  ];
+
+  // A letter of any alphabet. Recipes are not only written in Latin letters.
+  static final _anyLetter = RegExp(r'\p{L}', unicode: true);
+  // A letter of another alphabet than the Latin one. Chinese and Japanese put
+  // no spaces between words, so word counts say nothing about such a line.
+  static final _nonLatinLetter = RegExp(r'(?!\p{Script=Latin})\p{L}', unicode: true);
+  static final _plainLetter = RegExp(r'[A-Za-z]');
+
+  /// True when [text] holds a letter of any alphabet. Nearly every line has a
+  /// plain one, which is much quicker to find.
+  static bool _hasLetter(String text) => _plainLetter.hasMatch(text) || _anyLetter.hasMatch(text);
+
+  /// For a line that was sorted into the ingredients by guesswork.
   static bool _isValidIngredient(String text) {
     if (text.length < 3) return false;
     if (RegExp(r'^\d+$').hasMatch(text)) return false;
 
-    final junkWords = [
-      'medium', 'large', 'small', 'optional', 'fresh', 'dried',
-      'chopped', 'minced', 'diced', 'sliced', 'cubed', 'grated',
-      'to taste', 'as needed', 'for garnish', 'or more',
-      'ingredients', 'directions', 'instructions', 'method', 'steps',
-      'notes', 'tips', 'recipe', 'servings', 'serves', 'yield',
-      'prep time', 'cook time', 'total time', 'nutrition',
-    ];
-
     final lower = text.toLowerCase().trim();
-    if (junkWords.contains(lower)) return false;
-    if (!text.contains(' ') && text.length < 4) return false;
+    if (_ingredientJunkWords.contains(lower)) return false;
+    if (!text.contains(' ') && text.length < 4 && !_nonLatinLetter.hasMatch(text)) return false;
     if (RegExp(r'^[\d\s\.\,\-\/\(\)]+$').hasMatch(text)) return false;
     if (text.endsWith(':')) return false;
-    if (!RegExp(r'[a-zA-Z]').hasMatch(text)) return false;
+    if (!_hasLetter(text)) return false;
+    // "15 mins" on its own is the value of a "Prep Time" label that got away.
+    if (_bareDuration.hasMatch(text)) return false;
 
     return true;
   }
 
+  /// For a line the writer put under an Ingredients header. It is kept unless
+  /// it is plainly not an ingredient, so "Ice", "Oil" and "卵 3個" stay.
+  static bool _isListedIngredient(String text) {
+    if (!_hasLetter(text)) return false;
+    if (RegExp(r'^[A-Za-z]$').hasMatch(text)) return false;
+    if (text.endsWith(':')) return false;
+    if (_ingredientJunkWords.contains(text.toLowerCase())) return false;
+    if (_bareDuration.hasMatch(text)) return false;
+
+    return true;
+  }
+
+  /// For a line that was sorted into the steps by guesswork.
   static bool _isValidInstruction(String text) {
-    if (text.length < 10) return false;
     if (RegExp(r'^\d+\.?$').hasMatch(text)) return false;
 
-    final headerWords = [
-      'ingredients', 'directions', 'instructions', 'method', 'steps',
-      'notes', 'tips', 'recipe', 'servings', 'serves', 'yield',
-      'prep time', 'cook time', 'total time', 'nutrition',
-    ];
-    if (headerWords.contains(text.toLowerCase().trim())) return false;
+    final lower = text.toLowerCase().trim();
+    if (_headerWords.contains(lower)) return false;
+    // A short order is a whole step: "Stir well.", "Serve cold."
+    if (text.length >= 6 && text.contains(' ') && _startsWithActionVerb(lower)) return true;
+    if (!text.contains(' ') && _nonLatinLetter.hasMatch(text)) return text.runes.length >= 3;
+    if (text.length < 10) return false;
     if (text.split(' ').length < 3) return false;
 
     return true;
   }
 
-  static List<String> _cleanIngredients(List<String> raw) {
-    return raw.map((s) => s.trim()).where((s) => _isValidIngredient(s)).toList();
+  /// For a line the writer put under a Method header. It is kept when it
+  /// reads like a step: it ends like a sentence, opens with a cooking verb,
+  /// runs to three words, or is in a script that has no spaces to count.
+  static bool _isListedInstruction(String text) {
+    if (text.runes.length < 3 || !_hasLetter(text)) return false;
+    if (RegExp(r'^(?:step\s*)?\d+\s*[.:)]?$', caseSensitive: false).hasMatch(text)) return false;
+
+    final lower = text.toLowerCase();
+    if (_headerWords.contains(lower)) return false;
+
+    return RegExp(r'[.。)]$').hasMatch(text) ||
+        _startsWithActionVerb(lower) ||
+        text.split(RegExp(r'\s+')).length >= 3 ||
+        _nonLatinLetter.hasMatch(text);
   }
 
-  static List<String> _cleanInstructions(List<String> raw) {
+  /// [raw] without the lines that are no ingredient. A line in [listed]
+  /// stood under an Ingredients header and is judged leniently. The
+  /// sub-headings of the list, [headings], stay.
+  static List<String> _cleanIngredients(List<String> raw, Set<String> listed, Set<String> headings) {
     return raw
         .map((s) => s.trim())
-        .where((s) => _isValidInstruction(s))
+        .where((s) => headings.contains(s) || (listed.contains(s) ? _isListedIngredient(s) : _isValidIngredient(s)))
+        .toList();
+  }
+
+  /// The same for the steps of a method.
+  static List<String> _cleanInstructions(List<String> raw, Set<String> listed, Set<String> headings) {
+    return raw
+        .map((s) => s.trim())
+        .where((s) => headings.contains(s) || (listed.contains(s) ? _isListedInstruction(s) : _isValidInstruction(s)))
         .toList();
   }
 
@@ -4852,11 +6176,23 @@ class RecipeImportEngine {
     // Name/alias → ID mapping (exact matches only)
     const nameMap = {
       'main dish': 'main',
+      'main dishes': 'main',
       'main course': 'main',
+      'main courses': 'main',
       'entrée': 'main',
+      'entrées': 'main',
       'entree': 'main',
+      'entrees': 'main',
+      'dinner': 'main',
+      'dinners': 'main',
+      'lunch': 'main',
+      'supper': 'main',
       'side dish': 'side',
       'starter': 'appetizer',
+      'starters': 'appetizer',
+      'appetiser': 'appetizer',
+      'appetisers': 'appetizer',
+      "hors d'oeuvres": 'appetizer',
       'drink': 'beverage',
       'drinks': 'beverage',
       'cocktail': 'beverage',
@@ -4880,6 +6216,7 @@ class RecipeImportEngine {
       'pastries': 'dessert',
       'candy': 'dessert',
       'cookies': 'dessert',
+      'sweets': 'dessert',
       'burger': 'main',
       'burgers': 'main',
       'chicken': 'main',
@@ -4906,8 +6243,10 @@ class RecipeImportEngine {
     // e.g. "Breakfast Burritos" → breakfast, "Dessert Bars" → dessert
     for (final id in knownIds) {
       // Must start with the course name to avoid false positives
-      // e.g. "Breakfast Ideas" → breakfast, but "Quick Breakfast" won't match
-      if (lower.startsWith(id)) return id;
+      // e.g. "Breakfast Ideas" → breakfast, but "Quick Breakfast" won't match.
+      // The course is a word of its own there: "Maine Lobster" is no main
+      // and "Sidecar" no side.
+      if (lower.startsWith(id) && _courseWordEnd.matchAsPrefix(lower, id.length) != null) return id;
     }
 
     // Unknown folder — return null so the caller doesn't set a wrong course.
@@ -4915,96 +6254,307 @@ class RecipeImportEngine {
     return null;
   }
 
-  static void _detectCourseAndCategory(ImportedRecipe recipe) {
-    final allText =
-    '${recipe.title} ${recipe.description ?? ''}'.toLowerCase();
+  // What may follow the name of a course that opens a longer name: the
+  // plural, then no further letter.
+  static final _courseWordEnd = RegExp(r'(?:e?s)?(?![a-z])');
 
-    if (_matchesAny(allText, ['breakfast', 'brunch', 'morning', 'pancake', 'waffle', 'omelet', 'omelette', 'scramble', 'french toast'])) {
-      recipe.suggestedCourse = 'breakfast';
-    } else if (_matchesAny(allText, ['appetizer', 'starter', 'finger food', 'hors d\'oeuvre', 'dip', 'bruschetta'])) {
-      recipe.suggestedCourse = 'appetizer';
-    } else if (_matchesAny(allText, ['soup', 'stew', 'chowder', 'bisque', 'broth'])) {
-      recipe.suggestedCourse = 'soup';
-    } else if (_matchesAny(allText, ['salad', 'slaw', 'greens'])) {
-      recipe.suggestedCourse = 'salad';
-    } else if (_matchesAny(allText, ['dessert', 'cake', 'cookie', 'brownie', 'pie', 'tart', 'pudding', 'ice cream', 'sweet', 'chocolate'])) {
-      recipe.suggestedCourse = 'dessert';
-    } else if (_matchesAny(allText, ['side dish', 'side', 'vegetable', 'mashed', 'roasted'])) {
-      recipe.suggestedCourse = 'side';
-    } else if (_matchesAny(allText, ['drink', 'beverage', 'cocktail', 'smoothie', 'juice', 'lemonade', 'tea', 'coffee'])) {
-      recipe.suggestedCourse = 'beverage';
-    } else if (_matchesAny(allText, ['snack', 'chip', 'popcorn', 'trail mix'])) {
-      recipe.suggestedCourse = 'snack';
-    } else if (_matchesAny(allText, ['sauce', 'dressing', 'marinade', 'gravy', 'condiment'])) {
-      recipe.suggestedCourse = 'sauce';
-    } else if (_matchesAny(allText, ['bread', 'roll', 'biscuit', 'muffin', 'scone'])) {
-      recipe.suggestedCourse = 'bread';
-    } else {
-      recipe.suggestedCourse = 'main';
-    }
+  // The dishes a title may name, with the course and the category each one
+  // is filed under. Both are ids of CourseData and CategoryData, or null
+  // where the dish says nothing about it. A word that opens with "~" also
+  // counts as the end of a longer word: "cheesecake", "cornbread",
+  // "applesauce". A word given in the plural counts only in the plural:
+  // "Lemon Bars" are sweets and a "Taco Bar" is not, "Flour Tortillas" are
+  // breads and a Spanish "Tortilla" is an omelette. The kinds marked [light]
+  // are sweets, snacks and drinks. A title names one of those only when it
+  // names no meat, fish or vegetable with it: "Crab Cakes", "Onion Tart" and
+  // "Shrimp Cocktail" are meals.
+  static const _dishKinds = <({String? course, String? category, bool light, List<String> words})>[
+    (course: 'breakfast', category: null, light: false, words: [
+      'pancake', 'hotcake', 'waffle', 'omelet', 'omelette', 'french toast', 'scrambled egg', 'eggs benedict',
+      'granola', 'oatmeal', 'porridge', 'overnight oats', 'muesli', 'frittata', 'hash brown', 'shakshuka',
+      'biscuits and gravy',
+    ]),
+    (course: 'appetizer', category: null, light: false, words: [
+      'dip', 'bruschetta', 'crostini', 'canape', 'deviled egg', 'spring roll', 'egg roll', 'guacamole', 'hummus',
+    ]),
+    (course: 'main', category: 'soup', light: false, words: [
+      'soup', 'stew', 'chowder', 'bisque', 'broth', 'gazpacho', 'minestrone', 'ramen', 'pho',
+    ]),
+    (course: 'side', category: 'salad', light: false, words: ['salad', 'slaw', 'coleslaw']),
+    (course: 'dessert', category: 'dessert', light: true, words: [
+      '~cake', 'cookie', 'brownie', 'blondie', 'pie', 'tart', 'pudding', 'ice cream', 'ice cream sandwich', 'gelato',
+      'sorbet', 'mousse', 'fudge', 'cobbler', 'crumble', 'tiramisu', 'donut', 'doughnut', 'macaron', 'macaroon',
+      'truffle', 'candy', 'custard', 'flan', 'trifle', 'pavlova', 'meringue', 'shortbread', 'gingerbread', 'sundae',
+      'cinnamon roll', 'frosting', 'icing', 'ganache', 'toffee', 'brittle', 'cannoli', 'churro', 'eclair', 'baklava',
+      'panna cotta', 'creme brulee', 'popsicle', 'parfait', 'strudel', 'biscotti', 'bars',
+    ]),
+    (course: 'beverage', category: 'beverage', light: true, words: [
+      'smoothie', 'milkshake', 'shake', 'juice', 'lemonade', 'limeade', 'tea', 'coffee', 'latte', 'cappuccino',
+      'espresso', 'frappe', 'margarita', 'mojito', 'sangria', 'punch', 'hot chocolate', 'hot cocoa', 'cider',
+      'eggnog', 'martini', 'daiquiri', 'spritzer', 'spritz', 'soda', 'kombucha', 'chai', 'lassi', 'horchata',
+      'cocktail', 'mocktail', 'mimosa',
+    ]),
+    (course: 'snack', category: null, light: true, words: [
+      'popcorn', 'trail mix', 'chip', 'pretzel', 'granola bar', 'energy ball', 'energy bite', 'energy bar',
+      'protein bar', 'rice cake', 'chips and salsa',
+    ]),
+    (course: 'sauce', category: 'sauce', light: false, words: [
+      '~sauce', 'dressing', 'marinade', 'gravy', 'condiment', 'salsa', 'pesto', 'vinaigrette', 'aioli', 'chutney',
+      'relish', 'ketchup', 'mayonnaise', 'glaze', 'syrup', 'jam', 'compote', 'curd', 'tzatziki', 'chimichurri',
+      'coulis', 'seasoning', 'spice mix', 'spice blend', 'rub',
+    ]),
+    (course: 'snack', category: 'bread', light: false, words: [
+      '~bread', 'focaccia', 'baguette', 'sourdough', 'biscuit', 'scone', 'dinner roll', 'bread roll', 'bun', 'naan',
+      'pita', 'tortillas', 'flour tortilla', 'corn tortilla', 'bagel', 'loaf', 'brioche', 'challah', 'ciabatta',
+      'crumpet', 'english muffin', 'pizza dough',
+    ]),
+    (course: 'side', category: 'bread', light: false, words: ['yorkshire pudding']),
+    (course: 'snack', category: 'muffin', light: false, words: ['muffin']),
+    (course: 'main', category: 'pasta', light: false, words: [
+      'pasta', 'spaghetti', 'lasagna', 'lasagne', 'macaroni', 'mac and cheese', 'mac & cheese', 'mac n cheese',
+      'fettuccine', 'penne', 'linguine', 'ravioli', 'gnocchi', 'carbonara', 'bolognese', 'alfredo', 'noodle', 'ziti',
+      'rigatoni', 'tortellini', 'orzo', 'tagliatelle', 'pappardelle', 'cannelloni', 'manicotti', 'lo mein',
+      'chow mein', 'pad thai', 'udon', 'soba',
+    ]),
+    (course: 'main', category: 'rice', light: false, words: [
+      'risotto', 'paella', 'biryani', 'pilaf', 'pilau', 'fried rice', 'jambalaya', 'rice bowl', 'congee',
+    ]),
+    (course: null, category: 'rice', light: false, words: ['rice']),
+    (course: 'main', category: 'burrito-taco', light: false, words: [
+      'taco', 'burrito', 'quesadilla', 'enchilada', 'fajita', 'tostada', 'taquito', 'chimichanga', 'nachos', 'tamale',
+    ]),
+    (course: 'main', category: 'casserole', light: false, words: [
+      'casserole', 'pot pie', "shepherd's pie", 'shepherds pie', 'cottage pie', 'hotdish', 'moussaka',
+    ]),
+    (course: 'main', category: 'sandwich', light: false, words: [
+      'sandwich', '~burger', 'wrap', 'panini', 'slider', 'hoagie', 'grilled cheese', 'toastie', 'blt', 'hot dog',
+      'gyro', 'banh mi', 'lobster roll', 'sloppy joe', 'reuben', 'tuna melt', 'patty melt', 'french dip',
+    ]),
+    (course: 'main', category: 'chicken-steak-meat', light: false, words: [
+      'chicken', 'turkey', 'beef', 'steak', 'pork', 'lamb', 'sausage', 'meatball', 'meatloaf', 'meat loaf', 'rib',
+      'prime rib', 'brisket', 'bacon', 'ham', 'duck', 'veal', 'venison', 'schnitzel', 'kebab', 'kabob', 'carnitas',
+      'roast', 'pot roast', 'tenderloin', 'sirloin', 'ribeye', 'filet mignon', 'bratwurst', 'chorizo', 'meat',
+      'wing', 'drumstick', 'cutlet', 'black pudding', 'chicken and waffles',
+    ]),
+    (course: 'main', category: 'fish', light: false, words: [
+      'fish', 'salmon', 'tuna', 'cod', 'tilapia', 'halibut', 'trout', 'sea bass', 'shrimp', 'prawn', 'crab',
+      'lobster', 'scallop', 'seafood', 'mussel', 'clam', 'oyster', 'calamari', 'squid', 'octopus', 'sardine',
+      'mackerel', 'haddock', 'catfish', 'mahi mahi', 'swordfish', 'snapper', 'ceviche', 'sushi', 'poke', 'crab cake',
+      'fish cake', 'fishcake', 'crabcake', 'fish and chips',
+    ]),
+    (course: 'main', category: null, light: false, words: [
+      'chili', 'chilli', 'curry', 'stir fry', 'stir-fry', 'pizza', 'quiche', 'calzone', 'dumpling', 'gyoza',
+      'potsticker', 'pierogi', 'empanada', 'tagine', 'stuffed pepper', 'cabbage roll', 'goulash', 'stroganoff',
+      'tikka masala',
+    ]),
+    (course: null, category: 'bean', light: false, words: [
+      'bean', 'lentil', 'chickpea', 'dal', 'dahl', 'daal', 'falafel',
+    ]),
+    (course: 'side', category: 'vegetable', light: false, words: [
+      'fries', 'french fries', 'mashed potato', 'roasted vegetable', 'baked potato', 'potato wedge', 'onion ring',
+    ]),
+    (course: null, category: 'vegetable', light: false, words: [
+      'vegetable', 'veggie', 'broccoli', 'cauliflower', 'carrot', 'zucchini', 'courgette', 'asparagus',
+      'brussels sprout', 'green bean', 'spinach', 'kale', 'cabbage', 'eggplant', 'aubergine', 'mushroom', 'potato',
+      'sweet potato', 'squash', 'beet', 'beetroot', 'pea', 'artichoke', 'okra', 'turnip', 'parsnip', 'leek',
+      'cucumber', 'bok choy', 'edamame', 'tomato', 'onion',
+    ]),
+    (course: null, category: 'fruit', light: false, words: ['fruit']),
+  ];
 
-    if (_matchesAny(allText, ['vegetarian', 'veggie', 'meatless'])) {
-      recipe.suggestedCategory = 'vegetarian';
-    } else if (_matchesAny(allText, ['vegan', 'plant-based', 'plant based'])) {
-      recipe.suggestedCategory = 'vegan';
-    } else if (_matchesAny(allText, ['gluten-free', 'gluten free', 'gf'])) {
-      recipe.suggestedCategory = 'gluten-free';
-    } else if (_matchesAny(allText, ['quick', 'easy', '15 minute', '20 minute', '30 minute', 'weeknight', 'simple'])) {
-      recipe.suggestedCategory = 'quick-easy';
-    } else if (_matchesAny(allText, ['healthy', 'light', 'low-cal', 'nutritious'])) {
-      recipe.suggestedCategory = 'healthy';
-    } else if (_matchesAny(allText, ['comfort', 'classic', 'traditional', 'homestyle'])) {
-      recipe.suggestedCategory = 'comfort-food';
-    }
+  // One pattern for each kind of dish. The words are matched whole, in the
+  // singular or the plural: "tea" is not in "steak", nor "pie" in "piece".
+  static final _dishPatterns = [
+    for (final kind in _dishKinds)
+      RegExp('(?:(?<![a-z])(?:${_wordsOf(kind.words, tails: false)})|(?:${_wordsOf(kind.words, tails: true)}))'
+          r'(?:e?s)?(?![a-z])'),
+  ];
+
+  /// The alternatives of a pattern for [words], the longest first. With
+  /// [tails] it is the words marked "~", else the others.
+  static String _wordsOf(List<String> words, {required bool tails}) {
+    final chosen = [
+      for (final word in words)
+        if (word.startsWith('~') == tails) RegExp.escape(tails ? word.substring(1) : word),
+    ]..sort((a, b) => b.length.compareTo(a.length));
+    // A pattern with nothing to choose from must match nothing.
+    return chosen.isEmpty ? r'(?!)' : chosen.join('|');
   }
 
-  static bool _matchesAny(String text, List<String> patterns) {
-    return patterns.any((p) => text.contains(p));
+  // Meat, fish and the vegetables of savoury baking. With one of these in
+  // its title a dish is a meal, whatever sweet or snack it is named after.
+  static final _heartyFood = RegExp(
+      r'(?<![a-z])(?:chicken|beef|pork|steak|fish|lamb|turkey|sausage|bacon|ham|salmon|tuna|crab|shrimp|prawn|lobster'
+      r'|meat|veal|duck|cod|oyster|clam|onion|tomato|spinach|mushroom|leek|cheddar|parmesan|feta'
+      r')(?:e?s)?(?![a-z])|fishcake|crabcake|meatball|meatloaf');
+
+  // Where a title turns from the dish to what comes with it: "Spaghetti
+  // with Meat Sauce", "Chicken in White Wine Sauce", "Banana Bread (Vegan)".
+  static final _titleAside = RegExp(r'\s+(?:with|in|on|over|for|from|topped|served|w/)\s+|\s*[(,:|]\s*|\s+[-–\u2014]\s+');
+
+  // Courses a text may name outright.
+  static const _courseWords = {
+    'breakfast': ['breakfast'],
+    'brunch': ['brunch'],
+    'appetizer': ['appetizer', 'appetiser', "hors d'oeuvre", 'finger food'],
+    'dessert': ['dessert'],
+    'snack': ['snack'],
+    'side': ['side dish'],
+    'beverage': ['drink', 'beverage'],
+    'main': ['main course', 'main dish', 'entree', 'entrée'],
+  };
+
+  /// Suggests a course and a category for [recipe], from the dish its title
+  /// names. Only ids the app has are suggested.
+  ///
+  /// The title counts first. A description speaks of many things ("serve
+  /// with a salad"), so it is asked only for a course it names outright,
+  /// and only when the title names nothing. A recipe that names nothing
+  /// keeps what it had: no suggestion is better than a wrong one.
+  static void _detectCourseAndCategory(ImportedRecipe recipe) {
+    // A title names its dish in a few words. One that runs on for pages is
+    // not searched to its end.
+    final name = recipe.title.length > 200 ? recipe.title.substring(0, 200) : recipe.title;
+    final title = name.toLowerCase();
+    final dish = _dishNamed(title);
+    if (dish != null) {
+      // "Breakfast Burritos" are a breakfast, and burritos all the same.
+      recipe.suggestedCourse = _courseNamed(title) ?? dish.course;
+      recipe.suggestedCategory = dish.category;
+      return;
+    }
+    final course = _courseNamed(title) ?? _courseNamed((recipe.description ?? '').toLowerCase());
+    if (course != null) recipe.suggestedCourse = course;
+  }
+
+  /// The kind of dish [title] names, or null. A title names its dish
+  /// last, "Chicken Noodle Soup" is a soup, and before it turns to what the
+  /// dish comes with.
+  static ({String? course, String? category})? _dishNamed(String title) {
+    final aside = _titleAside.firstMatch(title);
+    if (aside == null) return _dishIn(title);
+    return _dishIn(title.substring(0, aside.start)) ?? _dishIn(title.substring(aside.end));
+  }
+
+  // The second half of a pair: "Beef and" before "Broccoli".
+  static final _pairedWith = RegExp(r'\s+(?:and|&)\s+$');
+
+  /// The dish [text] names with its last words, or null. Of two names that
+  /// end at the same word the longer one counts: a "pot pie" is no pie.
+  static ({String? course, String? category})? _dishIn(String text) {
+    final hearty = _heartyFood.hasMatch(text);
+    ({String? course, String? category})? named;
+    var start = -1;
+    var end = -1;
+    for (var k = 0; k < _dishKinds.length; k++) {
+      final kind = _dishKinds[k];
+      if (kind.light && hearty) continue;
+      for (final found in _dishPatterns[k].allMatches(text)) {
+        if (found.end > end || (found.end == end && found.start < start)) {
+          start = found.start;
+          end = found.end;
+          named = (course: kind.course, category: kind.category);
+        }
+      }
+    }
+    if (named == null) return null;
+    // A pair is named by its first half: "Beef and Broccoli" is beef. The
+    // name found may be the end of a longer word, so step back to where
+    // that word begins.
+    while (start > 0 && _plainLetter.hasMatch(text[start - 1])) {
+      start--;
+    }
+    final pair = _pairedWith.firstMatch(text.substring(0, start));
+    return (pair == null ? null : _dishIn(text.substring(0, pair.start))) ?? named;
+  }
+
+  /// The course [text] names outright, or null.
+  static String? _courseNamed(String text) {
+    for (final course in _courseWords.entries) {
+      if (_matchesAny(text, course.value)) return course.key;
+    }
+    return null;
+  }
+
+  static final _wholeWords = <String, RegExp>{};
+
+  /// True when [text] holds one of [words] as a whole word, in the singular
+  /// or the plural.
+  static bool _matchesAny(String text, List<String> words) {
+    return words.any((word) =>
+        (_wholeWords[word] ??= RegExp('(?<![a-z])${RegExp.escape(word)}(?:e?s)?(?![a-z])')).hasMatch(text));
   }
 
   // ========== UTILITY HELPERS ==========
 
+  // Punctuation around a word. Letters of every alphabet count as part of
+  // the word, so "sauté" is not cut down to "saut".
+  static final _wordEdges = RegExp(r'[^\p{L}\p{N}_]', unicode: true);
+
   static bool _containsActionVerb(String text) {
     final words = text.toLowerCase().split(RegExp(r'\s+'));
     return words.any(
-            (word) => _actionVerbs.contains(word.replaceAll(RegExp(r'[^\w]'), '')));
+            (word) => _actionVerbs.contains(word.replaceAll(_wordEdges, '')));
   }
 
   static bool _startsWithActionVerb(String text) {
     final firstWord =
-    text.split(RegExp(r'\s+'))[0].replaceAll(RegExp(r'[^\w]'), '');
+    text.split(RegExp(r'\s+'))[0].replaceAll(_wordEdges, '');
     return _actionVerbs.contains(firstWord);
   }
 
+  // What can stand in front of a list item: a bullet, the checkbox sign that
+  // recipe cards copy as, a dash or an arrow, each followed by a space.
+  static final _bulletMarker = RegExp(r'^[\-\*•◦▪▫▢☐☑☒□■●○◻◼▸►‣⁃·・–\u2014→✓✔+>＊]\s+');
+  static final _numberMarker = RegExp(r'^\d+[\.\)]\s+');
+  static final _checkboxMarker = RegExp(r'^\[\s?[xX]?\]\s*');
+  // Step numbers typed as emoji in captions: "1️⃣" and "①".
+  static final _emojiNumberMarker = RegExp(
+      r'^(?:\d\uFE0F?\u20E3|[\u2460-\u2473\u24F5-\u24FE\u2776-\u277F\u2780-\u2793])\s*');
+  // A step numbered in words, with its text on the same line: "Step 2: Mix".
+  static final _stepMarker = RegExp(r'^step\s*\d{1,2}\s*[:.)\-\u2013]\s*(?=\S)', caseSensitive: false);
+
   static bool _isListItem(String line) {
-    return RegExp(r'^[\-\*•◦▪]\s+').hasMatch(line) ||
-        RegExp(r'^\d+[\.\)]\s+').hasMatch(line) ||
-        RegExp(r'^\[\s?\]\s+').hasMatch(line);
+    return _bulletMarker.hasMatch(line) || _isNumbered(line) || _checkboxMarker.hasMatch(line);
+  }
+
+  /// True when [line] carries a number as a step or a numbered item does.
+  static bool _isNumbered(String line) {
+    return _numberMarker.hasMatch(line) || _emojiNumberMarker.hasMatch(line) || _stepMarker.hasMatch(line);
   }
 
   static String _cleanListMarkers(String line) {
     return line
-        .replaceFirst(RegExp(r'^[\-\*•◦▪]\s+'), '')
-        .replaceFirst(RegExp(r'^\d+[\.\)]\s+'), '')
-        .replaceFirst(RegExp(r'^\[\s?[xX]?\]\s*'), '')
+        .replaceFirst(_bulletMarker, '')
+        .replaceFirst(_numberMarker, '')
+        .replaceFirst(_emojiNumberMarker, '')
+        .replaceFirst(_stepMarker, '')
+        .replaceFirst(_checkboxMarker, '')
         .trim();
   }
 
   static String _cleanMarkdown(String text) {
     return text
+        // Pictures go first. Read as a link, "![alt](url)" would leave its
+        // exclamation mark and its caption behind.
+        .replaceAll(RegExp(r'!\[\[[^\]\[]*\]\]|!\[[^\]\[]*\][\[(][^\])]*[\])]'), '')
         .replaceAllMapped(
         RegExp(r'\*\*([^*]+)\*\*'), (m) => m.group(1) ?? '')
+        // One half of a pair, when the other half was trimmed off the line.
+        .replaceAll('**', '')
         .replaceAllMapped(RegExp(r'\*([^*]+)\*'), (m) => m.group(1) ?? '')
         .replaceAllMapped(RegExp(r'__([^_]+)__'), (m) => m.group(1) ?? '')
         .replaceAllMapped(RegExp(r'_([^_]+)_'), (m) => m.group(1) ?? '')
+        // Link text and what it links to both stop at the next opening
+        // bracket, so a long run of unclosed links is not searched again
+        // from every one of them.
         .replaceAllMapped(
-        RegExp(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]'), (m) => m.group(1) ?? '')
+        RegExp(r'\[\[([^\]\[|]+)(?:\|[^\]\[]+)?\]\]'), (m) => m.group(1) ?? '')
         .replaceAllMapped(
-        RegExp(r'\[([^\]]+)\]\([^)]+\)'), (m) => m.group(1) ?? '')
+        RegExp(r'\[([^\]\[]+)\]\([^)\[]{1,2000}\)'), (m) => m.group(1) ?? '')
         .replaceAllMapped(RegExp(r'`([^`]+)`'), (m) => m.group(1) ?? '')
-        .replaceAll(RegExp(r'!\[.*?\][\[(].*?[\])]'), '')
         // Strip leading emoji characters (food emojis, etc.)
-        .replaceFirst(RegExp(r'^(?:[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]+\s*)', unicode: true), '')
+        .replaceFirst(RegExp(r'^(?:[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]+\s*)', unicode: true), '')
         .trim();
   }
 
@@ -5013,76 +6563,493 @@ class RecipeImportEngine {
     return text.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
-  static _Metadata? _extractMetadata(String line) {
+  /// Reads a line that says how much a recipe makes or how long it takes:
+  /// "Serves 4", "Prep time: 10 min", "Prep: 15 min | Cook: 1 hour 30 minutes".
+  ///
+  /// Null unless the line is made of nothing else, so "Add the onion and cook
+  /// 5 minutes" stays a step and "1 batch pesto (makes 2 cups)" stays an
+  /// ingredient. How strictly that is judged depends on where the line
+  /// stands: under which [section], and whether the first ingredient or step
+  /// has been read ([contentBegun]). At the top of a recipe a line that opens
+  /// with its label may run on a little, and "Cook 30 mins" is how some cards
+  /// print the cook time. Further down the same words are something to do,
+  /// and a line with anything more in it than its facts is left alone.
+  ///
+  /// A total time comes back beside the other values. It only stands in for
+  /// the cook time once every line has been read and none was given. A fact
+  /// the app has no field for, a chilling time or a yield told by the cup,
+  /// comes back as text so that the caller can keep it as a note. Under a
+  /// Method header such a time is left where it was written, between the
+  /// steps it belongs to.
+  static ({_Metadata values, int? totalTime, List<String> forNotes})? _extractMetadata(
+    String line, {
+    _Section section = _Section.unknown,
+    bool contentBegun = false,
+  }) {
+    // A numbered item is a step or an ingredient, whatever it says.
+    if (_isNumbered(line)) return null;
+    if (line.length > 160 || !_digitOrFraction.hasMatch(line)) return null;
+
+    final atTop = section == _Section.unknown && !contentBegun;
+    final inMethod = section == _Section.instructions;
+
+    // A yield in another language is a short line of its own: "Für 12
+    // Stücke", "Pour 6 personnes", "4人分".
+    if (line.length <= 48) {
+      final abroad = _yieldAbroad.firstMatch(_withoutLeadingSymbols(_cleanMarkdown(_cleanListMarkers(line))).trim());
+      final told = abroad?.group(1) ?? abroad?.group(2);
+      // A bare count under a header may be the amount of an ingredient
+      // that was read apart from its name: "2 Stück".
+      final count = told ?? (atTop ? abroad?.group(3) : null);
+      final servings = count == null ? null : _servingsFrom(count);
+      if (servings != null) return (values: _Metadata(servings: servings), totalTime: null, forNotes: const []);
+    }
+
+    // Every fact names itself with one of a few words. Most lines hold none
+    // of them and need no closer look, which keeps a large import quick.
+    if (!_factWord.hasMatch(line)) return null;
+
+    final text = _withoutLeadingSymbols(_cleanMarkdown(_cleanListMarkers(line))).trim();
+    if (text.isEmpty || text.length > 120) return null;
+
+    // The serving on a nutrition label ("Serving size: 1 slice", "Serving: 1
+    // cup | Calories: 250") is not what the recipe makes. "Serving: 4" is.
+    final serving = _servingLabel.firstMatch(text);
+    if (serving != null) {
+      final count = serving.group(1) == null && _wholeCount.hasMatch(serving.group(2)!)
+          ? _servingsFrom(serving.group(2)!)
+          : null;
+      return (values: _Metadata(servings: count), totalTime: null, forNotes: [if (count == null) text]);
+    }
+
+    final endsSentence = _sentenceEnd.hasMatch(text);
+    // Each fact in a row may carry its own sign: "⏱ 30 min | 🍽 4 servings".
+    final segments = text
+        .split(_factSeparator)
+        .map((s) => _withoutLeadingSymbols(s).trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+
     String? servings;
     int? prepTime;
     int? cookTime;
+    int? totalTime;
+    int? activeTime;
+    int? unlabelledTime;
+    final forNotes = <String>[];
+    var facts = 0;
+    var bareVerb = false;
+    var bareVerbIsCook = false;
 
-    // Skip macros/nutrition lines — "Macros per serving 500 calories" was
-    // matching as "serving 500 calories" → bogus servings value.
-    final lowerLine = line.toLowerCase();
-    final isNutritionLine = RegExp(r'\b(macros?|nutrition|calor(?:ie|y)|kcal|protein|carbs?|fat|sugar|sodium)\b').hasMatch(lowerLine);
+    for (final segment in segments) {
+      var rest = segment;
+      var factsHere = 0;
 
-    if (!isNutritionLine) {
-      // (a) Word-before-number form: "Serves 4", "Yields 6 cookies", "Makes 12"
-      // (b) Bracketed form: "Ingredients (4 servings)" — number before the word
-      final wordFirst = RegExp(
-          r'(?:^|[\s(])(?:serves?|servings?|yields?|makes?|portions?)\s*:?\s*(\d+(?:\s*-\s*\d+)?)',
-          caseSensitive: false).firstMatch(line);
-      final numberFirst = RegExp(
-          r'(?:^|[\s(])(\d+(?:\s*-\s*\d+)?)\s*(?:serves?|servings?|portions?)\b',
-          caseSensitive: false).firstMatch(line);
-      // Just the number — strip any trailing units. We only want "4" or "4-6",
-      // never "500 calories" or "4 servings of pasta".
-      final raw = wordFirst?.group(1) ?? numberFirst?.group(1);
-      if (raw != null) {
-        final numeric = RegExp(r'^\s*(\d+(?:\s*-\s*\d+)?)').firstMatch(raw)?.group(1)?.trim();
-        if (numeric != null) {
-          final n = int.tryParse(numeric);
-          // Sanity check: real servings are usually 1-50. Reject anything
-          // suspiciously large (probably a calorie count or weight that slipped through).
-          if (numeric.contains('-') || (n != null && n >= 1 && n <= 50)) {
-            servings = numeric;
+      // The yield, where it opens the segment or follows a comma.
+      var yieldFact = _yieldIn(rest);
+      final yieldFirst = yieldFact?.match.start == 0;
+      if (yieldFact != null) {
+        rest = rest.replaceRange(yieldFact.match.start, yieldFact.match.end, ' ');
+      }
+
+      var bareVerbHere = false;
+      var timeFirst = false;
+      final otherTimes = <String>[];
+      for (final m in _timeFact.allMatches(rest)) {
+        final label = (m.group(1) ?? m.group(3) ?? m.group(4))!.toLowerCase();
+        final minutes = _durationMinutes(m.group(6)!);
+        // "Cook Time: 30 mins" names itself. "Cook 30 mins", with no "time"
+        // and no colon, may be an order.
+        final named = m.group(2) != null || m.group(5) != null;
+        if (m.start == 0 && named) timeFirst = true;
+        if (label.contains('prep')) {
+          prepTime ??= minutes;
+        } else if (label.contains('cook') || label.contains('bak')) {
+          cookTime ??= minutes;
+          if (!named && (label == 'cook' || label == 'bake')) {
+            bareVerbHere = true;
+            bareVerbIsCook = label == 'cook';
           }
+        } else if (label.startsWith('total') || label.startsWith('ready') || label == 'time') {
+          totalTime ??= minutes;
+        } else if (label.startsWith('active') || label.startsWith('hands')) {
+          activeTime ??= minutes;
+        } else {
+          // A resting or chilling time. The line is still a line of facts,
+          // but the app has no field for this one.
+          if (inMethod) return null;
+          if (minutes != null) otherTimes.add(m.group(0)!.trim());
+        }
+        factsHere++;
+      }
+      final timesHere = factsHere;
+      rest = rest.replaceAll(_timeFact, ' ');
+
+      // The yield, where it follows the times: "Prep 10 min Cook 20 min
+      // Servings 4".
+      if (yieldFact == null && factsHere > 0) {
+        rest = rest.trimLeft();
+        yieldFact = _yieldIn(rest);
+        if (yieldFact != null) {
+          rest = rest.replaceRange(yieldFact.match.start, yieldFact.match.end, ' ');
         }
       }
+      if (yieldFact != null) {
+        if (yieldFact.servings != null) {
+          servings ??= yieldFact.servings;
+        } else {
+          forNotes.add(segment);
+        }
+        factsHere++;
+      }
+      // On its own such a time is noted as it was written, with what comes
+      // after it: "Chill time: 2 hours or overnight".
+      forNotes.addAll(factsHere == 1 && otherTimes.length == 1 ? [segment] : otherTimes);
+
+      if (factsHere == 0) {
+        // A time with no label is the total, as long as the row holds a
+        // labelled fact too: "30 min | Serves 4".
+        if (_bareDuration.hasMatch(segment)) {
+          unlabelledTime ??= _durationMinutes(segment);
+          continue;
+        }
+        // A bar of facts may carry other labels ("Course: Main | Prep: 10
+        // min") and, once it has opened with a fact, a word or two ("Serves 4
+        // | Vegetarian"). "Easy Chili | Serves 6" opens with a title.
+        final label = _otherLabel.hasMatch(segment);
+        final tag = facts > 0 && segment.split(RegExp(r'\s+')).length <= 3;
+        if (segments.length == 1 || !(label || tag)) return null;
+        continue;
+      }
+
+      // "Serves 4, 30 minutes": a time with no label beside the yield.
+      if (timesHere == 0 && _digitOrFraction.hasMatch(rest)) {
+        final beside = _besideYield.firstMatch(rest);
+        if (beside != null) unlabelledTime ??= _durationMinutes(beside.group(1)!);
+      }
+
+      final leftover = rest
+          .toLowerCase()
+          .split(_notLetters)
+          .where((w) => w.length > 1 && !_metaFiller.contains(w))
+          .toList();
+      // At the top of a recipe a line that opens with its label may run on a
+      // little: "Serves 4 as a main or 6 as a side", "Cook Time: 4 hours on
+      // high or 8 hours on low". Further down a time is a fact only when
+      // nothing comes after it, and a yield has to be short and in one piece:
+      // "Makes 6 pancakes, keep them warm" is a step, and so is "Cook time: 2
+      // minutes per side, until golden".
+      final wordsAllowed = yieldFirst || (timeFirst && atTop) ? (atTop && !endsSentence ? 6 : 3) : 0;
+      if (leftover.length > wordsAllowed) return null;
+      final oneClauseOnly = yieldFirst ? !atTop : leftover.isNotEmpty;
+      if (oneClauseOnly && _secondClause.hasMatch(rest)) return null;
+      if (bareVerbHere) {
+        if (leftover.isNotEmpty) return null;
+        bareVerb = true;
+      }
+      facts += factsHere;
     }
 
-    final prepMatch = RegExp(
-        r'(?:prep(?:aration)?\s*(?:time)?)\s*:?\s*(\d+)\s*(minutes?|mins?|hours?|hrs?)',
-        caseSensitive: false)
-        .firstMatch(line);
-    if (prepMatch != null) {
-      final value = int.parse(prepMatch.group(1)!);
-      final unit = prepMatch.group(2)!.toLowerCase();
-      prepTime = unit.startsWith('h') ? value * 60 : value;
-    }
+    if (facts == 0) return null;
+    // On its own "Bake 25 minutes" is a step, and so is "Cook 30 mins"
+    // further down. At the top of a recipe "Cook 30 mins" is how some cards
+    // print the cook time, and in a row of facts it is one of them.
+    if (bareVerb && (endsSentence || (facts == 1 && (!atTop || !bareVerbIsCook)))) return null;
 
-    final cookMatch = RegExp(
-        r'(?:cook(?:ing)?\s*(?:time)?)\s*:?\s*(\d+)\s*(minutes?|mins?|hours?|hrs?)',
-        caseSensitive: false)
-        .firstMatch(line);
-    if (cookMatch != null) {
-      final value = int.parse(cookMatch.group(1)!);
-      final unit = cookMatch.group(2)!.toLowerCase();
-      cookTime = unit.startsWith('h') ? value * 60 : value;
-    }
+    return (
+      values: _Metadata(servings: servings, prepTime: prepTime ?? activeTime, cookTime: cookTime),
+      totalTime: totalTime ?? unlabelledTime,
+      forNotes: forNotes,
+    );
+  }
 
-    final totalMatch = RegExp(
-        r'(?:total\s*(?:time)?|time)\s*:?\s*(\d+)\s*(minutes?|mins?|hours?|hrs?)',
-        caseSensitive: false)
-        .firstMatch(line);
-    if (totalMatch != null && prepTime == null && cookTime == null) {
-      final value = int.parse(totalMatch.group(1)!);
-      final unit = totalMatch.group(2)!.toLowerCase();
-      cookTime = unit.startsWith('h') ? value * 60 : value;
-    }
+  static final _digitOrFraction = RegExp(r'[\d½¼¾⅓⅔]');
+  static final _factWord = RegExp(
+      r'serv|yield|makes|portion|feeds|people|person|prep|cook|bak|total|active|hands|ready|time',
+      caseSensitive: false);
+  static final _notLetters = RegExp(r'[^\p{L}]+', unicode: true);
+  static final _leadingSymbols = RegExp(r'^[^\p{L}\p{N}(]+', unicode: true);
 
-    if (servings != null || prepTime != null || cookTime != null) {
-      return _Metadata(
-          servings: servings, prepTime: prepTime, cookTime: cookTime);
+  /// [text] without the signs in front of its first letter, digit or bracket.
+  static String _withoutLeadingSymbols(String text) =>
+      _plainStart.hasMatch(text) ? text : text.replaceFirst(_leadingSymbols, '');
+
+  // The point after "min." or "hrs." closes an abbreviation, not a sentence.
+  static final _sentenceEnd = RegExp(r'[!?]$|(?<!\b(?:mins?|hrs?|h|m))\.$', caseSensitive: false);
+  // "Serves 4, or 6 as a starter" is still one piece.
+  static final _secondClause = RegExp(r'[,;:]\s*(?!or\b)\p{L}', caseSensitive: false, unicode: true);
+  // Facts set side by side: "Serves 4 | Prep 10 min • Cook 20 min".
+  static final _factSeparator = RegExp(r'\s*[|•·]\s*');
+  static final _otherLabel = RegExp(r'^\p{L}[\p{L} ]{0,24}:\s*\S', unicode: true);
+  // Group 1 is the word "size", group 2 what follows the label.
+  static final _servingLabel = RegExp(r'^(?:serving|portion)(?:(\s+size)\b\s*:?|\s*:)\s*(.*)$', caseSensitive: false);
+  static final _wholeCount = RegExp(r'^\d{1,3}(?:\s*(?:-|–|to)\s*\d{1,3})?\W*$');
+
+  // Words that may sit beside a fact without making the line a sentence:
+  // "Prep time: 20 minutes, plus 1 hour chilling", "Yield: 8 servings, about
+  // 1 cup each".
+  static const _metaFiller = <String>{
+    'plus', 'chilling', 'resting', 'marinating', 'overnight', 'soaking', 'cooling', 'standing',
+    'freezing', 'setting', 'proving', 'rising', 'approx', 'about', 'time', 'each', 'per', 'batch',
+    'inactive', 'total', 'active', 'and', 'at', 'least', 'optional',
+    'serving', 'servings', 'portion', 'portions', 'people', 'person', 'persons',
+    'hour', 'hours', 'hr', 'hrs', 'minute', 'minutes', 'min', 'mins',
+  };
+
+  // "Serves 4", "Yield: 12 muffins", "Makes about 24", "Number of servings:
+  // 6". The label opens the line or follows a comma, so "(makes 2 cups)"
+  // inside an ingredient and "Divide into 4 portions" are left alone. "Serve"
+  // and "make" without the final s are orders, not labels. Group 1 is the
+  // count, group 2 a fraction after it, group 3 a fraction with no count
+  // before it and group 4 the word "dozen".
+  static final _yieldLead = RegExp(
+      r'(?:^|[,;/]\s*|\s[–\u2014-]\s+)\(?\s*'
+      r'(?:(?:(?:number|no\.?)\s+of|total|(?:original\s+)?recipe(?:\s+\(\w{1,4}\))?)\s+|yields?\s*:\s*)?'
+      r'(?:serves|servings|yields?|makes|portions|feeds)(?![a-z])\s*(?:[:\-–]\s*)?'
+      r'(?:(?:about|approx\.?|approximately|around|roughly|up\s+to)\s+)?'
+      r'(?:(\d{1,4}(?:\s*(?:-|–|\u2014|to)\s*\d{1,4}(?!\s*(?:hours?|hrs?|h|minutes?|mins?|m)\b))?)(?!\d)'
+      r'([.,]\d{1,3}|\s+\d/\d{1,2}|\s?[½¼¾⅓⅔]|/\d{1,2})?|([½¼¾⅓⅔]))'
+      r'(\s+dozen\b)?',
+      caseSensitive: false);
+
+  // A yield as other languages put it, on a line of its own. Group 1 is a
+  // count that follows the word for "for" or "makes" ("Für 12 Stücke", "Pour
+  // 6 personnes"), group 2 one that follows a label ("Portionen: 4") and
+  // group 3 a count that stands alone ("4 Portionen", "4人分").
+  static const _countAbroad = r'\d{1,3}(?:\s*(?:-|–|bis|à|a|o|tot|do)\s*\d{1,3})?';
+  static const _peopleAbroad = 'personen|portionen|stück|stücke|personnes|personas|porciones|raciones|comensales'
+      '|persone|porzioni|pessoas|porções|porties|stuks|osób|osoby|porcj[ei]|порци[ийя]|персон[ыа]?|человек'
+      '|人分|人前|人份|인분';
+  static final _yieldAbroad = RegExp(
+      r'^\(?(?:(?:für|fuer|ergibt|pour|para|rinde|per|dosi\s+per|voor|rende|dla|на)\s+'
+      r'(?:(?:ca\.?|environ|circa|etwa|unos|unas)\s+)?'
+      '($_countAbroad)'
+      r'\s*(?:'
+      '$_peopleAbroad'
+      r')|(?:portionen|porciones|raciones|porzioni|porções|rendimento|rendimiento|dosi|porties|porcje|порции|ergibt)\s*[:：]\s*'
+      '($_countAbroad)'
+      r'(?:\s+[^\s\d]+)?|'
+      '($_countAbroad)'
+      r'\s*(?:'
+      '$_peopleAbroad'
+      r'))\)?$',
+      caseSensitive: false);
+
+  // "4 servings", "(4 servings)", "12 servings (1/2 cup each)", "4 people". A
+  // word straight after it, or after its brackets, makes the line an
+  // ingredient: "2 servings cooked pasta", "1 portion (150 g) noodles".
+  static final _yieldCount = RegExp(
+      r'(?:^|[,;/]\s*|\s[–\u2014-]\s+)\(?\s*(\d{1,3}(?:\s*(?:-|–|\u2014|to)\s*\d{1,3})?)\s*(?:servings?|portions?|serves|people|persons?)\b'
+      r'(?=\s*(?:\([^()]*\)\s*)?(?:$|[,;:.)]))',
+      caseSensitive: false);
+
+  // A unit of volume or weight straight after the amount: "Makes 2 cups".
+  // In "Makes 4 pint jars" the unit only says how big each one is.
+  static final _measureUnit = RegExp(
+      r'\s*-?(?:cups?|tablespoons?|tbsps?|teaspoons?|tsps?|quarts?|qts?|pints?|gallons?|lit(?:er|re)s?|l|ml'
+      r'|fl\.?\s?oz|oz|ounces?|lbs?|pounds?|g|kg|grams?)\b'
+      r'(?![\s-]+(?:jars?|bottles?|cans?|tins?|pans?|loa(?:f|ves)|bags?|containers?|servings?|portions?)\b)',
+      caseSensitive: false);
+
+  // What is left of "Serves 4, 30 minutes" once the yield is taken out.
+  static final _besideYield = RegExp(
+      r'^[\s,;.()–-]*('
+      '$_durationPattern'
+      r')[\s.)]*$',
+      caseSensitive: false);
+
+  /// The yield in [text] and the servings it stands for. The servings are
+  /// null for a yield told by volume or weight, "Makes 1 1/2 cups": a fact
+  /// about the recipe, but not a number of servings. Null when [text] has no
+  /// yield, or one that names a count no recipe makes.
+  static ({RegExpMatch match, String? servings})? _yieldIn(String text) {
+    final match = _yieldLead.firstMatch(text) ?? _yieldCount.firstMatch(text);
+    if (match == null) return null;
+
+    var dozens = false;
+    if (match.pattern == _yieldLead) {
+      dozens = match.group(4) != null;
+      final fraction = match.group(2) ?? match.group(3);
+      if (fraction != null || _measureUnit.matchAsPrefix(text, match.end) != null) {
+        // "Makes 2 1/2 dozen" is thirty. Any other amount with a fraction or
+        // a unit after it is a measure.
+        final amount = dozens && fraction != null ? _mixedNumber('${match.group(1) ?? ''}$fraction') : null;
+        final count = amount == null ? null : amount * 12;
+        final whole = count != null && (count - count.round()).abs() < 0.01;
+        return (match: match, servings: whole ? _servingsFrom('${count.round()}') : null);
+      }
     }
-    return null;
+    final servings = _servingsFrom(match.group(1)!, dozens: dozens);
+    return servings == null ? null : (match: match, servings: servings);
+  }
+
+  /// "4" or "4-6" from "4", "4 to 6", "4 – 6", and "24" from "2 dozen". Null
+  /// for a count no recipe makes.
+  static String? _servingsFrom(String count, {bool dozens = false}) {
+    final numbers = RegExp(r'\d+')
+        .allMatches(count)
+        .map((m) => int.parse(m.group(0)!) * (dozens ? 12 : 1))
+        .toList();
+    if (numbers.any((n) => n < 1 || n > 200)) return null;
+    return numbers.join('-');
+  }
+
+  static final _mixedNumberPattern = RegExp(r'^(\d{1,4}(?:[.,]\d{1,3})?)?\s*(?:(\d)/(\d{1,2})|([½¼¾⅓⅔]))?$');
+
+  /// "2 1/2" and "2½" as 2.5, "1,5" as 1.5. Null when [text] is not one
+  /// number, as in a range.
+  static double? _mixedNumber(String text) {
+    final m = _mixedNumberPattern.firstMatch(text.trim());
+    if (m == null) return null;
+    var value = double.tryParse((m.group(1) ?? '').replaceAll(',', '.'));
+    if (m.group(2) != null) {
+      final below = int.parse(m.group(3)!);
+      if (below == 0) return null;
+      value = (value ?? 0) + int.parse(m.group(2)!) / below;
+    } else if (m.group(4) != null) {
+      value = (value ?? 0) + _fractionValues[m.group(4)]!;
+    }
+    return value;
+  }
+
+  // A duration as recipes write it: "45 min", "1 hour 30 minutes", "1 hr,
+  // 15 mins", "1.5 hours", "1 1/2 hours", "20-25 minutes". Recipe card plugins
+  // repeat the unit ("15 minutes mins"), so that is allowed too.
+  static const _durationPart = r'(?:\d+(?:[.,]\d+)?(?:\s+\d/\d|\s?[½¼¾⅓⅔])?|[½¼¾⅓⅔]|\d/\d)'
+      r'(?:\s*(?:-|–|\u2014|to)\s*\d+(?:[.,]\d+)?)?'
+      r'\s*(?:(?:hours?|hrs?|h)(?![a-z])\.?(?:'
+      '$_minutesAfterHours'
+      r')?|(?:days?|minutes?|mins?|m)\b\.?)'
+      r'(?:\s+(?:hrs?|mins?)\b\.?)?';
+  // "1h30" and "1 h 30": minutes written after the hours with no unit of
+  // their own. Only where the duration ends there, so that the 6 in "Total 1
+  // hour 6 servings" is left for the servings.
+  static const _minutesAfterHours = r'\s?[0-5]?\d(?=\s*(?:$|[|•·,;.()]|[–\u2014-]\s))';
+  static const _durationPattern = r'(?:(?:about|approx\.?|approximately|around|under|~)\s*)?'
+      '$_durationPart'
+      r'(?:\s*(?:and\s+|,\s*)?'
+      '$_durationPart'
+      r'){0,2}';
+
+  // A letter of the Latin alphabet, accents included. The words of a label
+  // are matched without regard to case, which is slow to do for the letters
+  // of every alphabet at once, and a label that ends in "time" is English.
+  static const _latinLetter = r'[A-Za-z\u00C0-\u024F]';
+
+  // A label and its duration. Group 1 is a label the app knows, group 2 the
+  // word "time" after it, group 3 any other "... time" label, group 4 a bare
+  // "time", group 5 the colon or dash and group 6 the duration.
+  static final _timeFact = RegExp(
+      '(?<!$_latinLetter)'
+      r'(?:(prep(?:aration)?|cook(?:ing)?|bak(?:e|ing)|total|active|hands[\s-]on|ready\s+in)(\s*time)?'
+      '|((?:$_latinLetter'
+      r'+[\s-]+){1,2}time)'
+      r'|(time))'
+      r'\s*(?:([:\-–])\s*)?'
+      '($_durationPattern)',
+      caseSensitive: false);
+
+  // Group 5 is a unit of hours, group 6 the minutes written straight after it
+  // and group 7 any other unit.
+  static final _durationToken = RegExp(
+      r'(\d+(?:[.,]\d+)?)?\s*(?:(?:(\d)/(\d)|([½¼¾⅓⅔]))\s*)?'
+      r'(?:(hours?|hrs?|h)(?![a-z])\.?('
+      '$_minutesAfterHours'
+      r')?|(days?|minutes?|mins?|m)\b)');
+  static const _fractionValues = {'½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3};
+
+  /// Minutes in a duration. Hours and minutes are added up, so "3 hours 30
+  /// minutes" is 210 and "1h30" is 90, and a range counts as its longer end.
+  static int? _durationMinutes(String duration) {
+    var total = 0.0;
+    for (final m in _durationToken.allMatches(duration.toLowerCase())) {
+      var value = double.tryParse((m.group(1) ?? '').replaceAll(',', '.'));
+      if (m.group(2) != null && m.group(3) != '0') {
+        value = (value ?? 0) + int.parse(m.group(2)!) / int.parse(m.group(3)!);
+      } else if (m.group(4) != null) {
+        value = (value ?? 0) + _fractionValues[m.group(4)]!;
+      }
+      if (value == null) continue;
+      if (m.group(5) != null) {
+        total += value * 60 + (int.tryParse(m.group(6)?.trim() ?? '') ?? 0);
+      } else {
+        total += value * (m.group(7)!.startsWith('d') ? 1440 : 1);
+      }
+    }
+    final minutes = total.round();
+    return minutes > 0 && minutes <= 72 * 60 ? minutes : null;
+  }
+
+  // A recipe card copied from a web page prints each label on one line and
+  // its value on the next: "Prep Time" / "15 mins", "Servings" / "8".
+  static final _bareTimeLabel = RegExp(
+      r'^(?:(?:prep(?:aration)?|cook(?:ing)?|bak(?:e|ing)|total|active|ready\s+in)(?:\s+time)?'
+      '|(?:$_latinLetter'
+      r'+[\s-]+){1,2}time|time)\s*:?$',
+      caseSensitive: false);
+  static final _bareYieldLabel = RegExp(r'^(?:serves|servings?|yields?|makes|portions?)\s*:?$', caseSensitive: false);
+  static final _bareDuration = RegExp('^$_durationPattern\$', caseSensitive: false);
+  static final _bareCount = RegExp(
+      r'^(?:(?:about|approx\.?)\s+)?\d{1,3}(?:\s*(?:-|–|\u2014|to)\s*\d{1,3})?(?:\s+\S+){0,3}$',
+      caseSensitive: false);
+
+  /// The label of a summary box on a line of its own, "Prep Time" or
+  /// "Servings:", without its colon. Null for any other line.
+  static String? _bareLabel(String line) {
+    if (line.length > 40 || _digitOrFraction.hasMatch(line) || !_factWord.hasMatch(line)) return null;
+    final name = _withoutLeadingSymbols(_cleanMarkdown(_cleanListMarkers(line))).trim();
+    if (!_bareTimeLabel.hasMatch(name) && !_bareYieldLabel.hasMatch(name)) return null;
+    return name.replaceFirst(RegExp(r'\s*:$'), '');
+  }
+
+  /// [label] and the [value] printed under it as one line, "Prep Time: 15
+  /// mins". Null when the value is not of the label's kind: a time label
+  /// takes a duration, a yield label takes a count.
+  static String? _labelWithValue(String label, String value) {
+    if (value.length > 40) return null;
+    final figure = _cleanMarkdown(value).trim();
+    final isDuration = _bareDuration.hasMatch(figure);
+    if (_bareTimeLabel.hasMatch(label) ? !isDuration : isDuration || !_bareCount.hasMatch(figure)) return null;
+    return '$label: $figure';
+  }
+
+  /// Reads the summary box that opens at [start], if one does. Line by line
+  /// a box comes out as label, value, label, value, or as a row of labels
+  /// followed by the row of their values. Returns its facts as lines of the
+  /// form "Prep Time: 15 mins", and the index of the last line it took up.
+  ///
+  /// A row of labels whose values do not all fit is not paired by guesswork.
+  /// It comes back with no facts and the index of its last label, so that
+  /// the labels are not tried again one by one.
+  static (List<String>, int)? _summaryBox(List<String> lines, int start) {
+    final labels = <String>[];
+    var at = start;
+    var lastLabel = start;
+    // A row holds a handful of labels at most.
+    while (at < lines.length && labels.length < 8) {
+      final line = lines[at].trim();
+      if (line.isNotEmpty) {
+        final label = _bareLabel(line);
+        if (label == null) break;
+        labels.add(label);
+        lastLabel = at;
+      }
+      at++;
+    }
+    if (labels.isEmpty) return null;
+
+    final facts = <String>[];
+    var last = start;
+    for (final label in labels) {
+      while (at < lines.length && lines[at].trim().isEmpty) {
+        at++;
+      }
+      final fact = at < lines.length ? _labelWithValue(label, lines[at].trim()) : null;
+      if (fact == null) return labels.length > 1 ? (const [], lastLabel) : null;
+      facts.add(fact);
+      last = at++;
+    }
+    return (facts, last);
   }
 
   // ========== JSON / TIME / IMAGE HELPERS ==========
@@ -5728,14 +7695,6 @@ class RecipeImportEngine {
 enum _Section { unknown, ingredients, instructions, notes }
 
 enum _Platform { instagram, tiktok, pinterest, youtube, squarespace, generic }
-
-/// One candidate boundary between recipes in a multi-recipe document.
-class _BoundaryCandidate {
-  final int line;
-  final int score;
-  final String kind;
-  const _BoundaryCandidate({required this.line, required this.score, required this.kind});
-}
 
 /// One recipe segment after splitting — text plus its start line in the
 /// original OCR document (used to map back to PDF pages for cover images).
