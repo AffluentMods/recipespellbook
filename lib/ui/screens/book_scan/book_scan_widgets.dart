@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../database/database.dart';
 import '../../../services/book_scan/photo_region.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/native_file_image.dart';
+import '../../../utils/responsive_utils.dart';
+import '../../widgets/sheet_chrome.dart';
 
 /// A scanned page, or the photograph cropped out of it, at any size.
 ///
@@ -395,12 +398,19 @@ class ScanNotice extends StatelessWidget {
   final String text;
   final bool warning;
 
-  const ScanNotice({super.key, required this.icon, required this.text, this.warning = false});
+  /// The one thing to do about it, shown under the sentence.
+  final Widget? action;
+
+  const ScanNotice({super.key, required this.icon, required this.text, this.warning = false, this.action});
 
   @override
   Widget build(BuildContext context) {
     final c = context.appColors;
     final fg = warning ? c.destructive : c.textSecondary;
+    final sentence = Text(
+      text,
+      style: TextStyle(fontSize: 13.5, height: 1.4, color: warning ? c.textPrimary : c.textSecondary),
+    );
     return Container(
       padding: const EdgeInsets.all(Space.md),
       decoration: BoxDecoration(
@@ -413,15 +423,167 @@ class ScanNotice extends StatelessWidget {
           Icon(icon, size: 18, color: fg),
           const SizedBox(width: Space.sm + 2),
           Expanded(
-            child: Text(
-              text,
-              style: TextStyle(fontSize: 13.5, height: 1.4, color: warning ? c.textPrimary : c.textSecondary),
-            ),
+            child: action == null
+                ? sentence
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      sentence,
+                      const SizedBox(height: Space.sm + 2),
+                      action!,
+                    ],
+                  ),
           ),
         ],
       ),
     );
   }
+}
+
+/// What the review step shows when there is no recipe to review: why that is,
+/// and both ways of scanning again.
+///
+/// Looks like the app's other empty states, which have room for one button
+/// only.
+class ScanEmptyState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+
+  /// Something more to say under the message, such as which pages could not
+  /// be read.
+  final Widget? notice;
+
+  final String scanLabel;
+  final String photosLabel;
+
+  /// Null while a scan is being opened.
+  final VoidCallback? onScan;
+  final VoidCallback? onPhotos;
+
+  const ScanEmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.message,
+    required this.scanLabel,
+    required this.photosLabel,
+    required this.onScan,
+    required this.onPhotos,
+    this.notice,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final theme = Theme.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(Space.xxxl),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 56, color: c.textTertiary),
+                const SizedBox(height: Space.lg),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium?.copyWith(color: c.textPrimary, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: c.textSecondary),
+                ),
+                if (notice != null) ...[
+                  const SizedBox(height: Space.lg),
+                  notice!,
+                ],
+                const SizedBox(height: Space.xl),
+                FilledButton(
+                  onPressed: onScan,
+                  style: FilledButton.styleFrom(backgroundColor: c.accent, foregroundColor: c.onAccent),
+                  child: Text(scanLabel),
+                ),
+                TextButton(
+                  onPressed: onPhotos,
+                  style: TextButton.styleFrom(minimumSize: const Size(0, 44)),
+                  child: Text(photosLabel),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Asks which of [cookbooks] the scanned recipes should go to, when the one
+/// they were meant for cannot be used. Null when the user backs out.
+Future<Cookbook?> showScanCookbookPicker(
+  BuildContext context, {
+  required List<Cookbook> cookbooks,
+  required String title,
+  required String message,
+}) {
+  return Responsive.showAdaptiveSheet<Cookbook>(
+    context,
+    builder: (ctx) {
+      final c = ctx.appColors;
+      return SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.7),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: Space.sm),
+              const SheetHandle(top: 0),
+              // The explanation scrolls with the list: with large text on a
+              // phone held sideways it can be taller than the sheet.
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(bottom: Space.sm),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(Space.xl, Space.md, Space.xl, Space.sm),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            title,
+                            style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: c.textPrimary,
+                                ),
+                          ),
+                          const SizedBox(height: Space.xs),
+                          Text(message, style: TextStyle(fontSize: 14, height: 1.4, color: c.textSecondary)),
+                        ],
+                      ),
+                    ),
+                    for (final cookbook in cookbooks)
+                      ListTile(
+                        leading: const Icon(Icons.menu_book_outlined),
+                        title: Text(cookbook.name, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        onTap: () => Navigator.pop(ctx, cookbook),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 /// One of the three tips on the first screen of a scan.

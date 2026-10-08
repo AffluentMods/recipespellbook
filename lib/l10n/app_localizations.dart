@@ -799,6 +799,12 @@ abstract class AppLocalizations {
   /// **'Pages are read on this device. Nothing is uploaded.'**
   String get bookScanPrivacy;
 
+  /// No description provided for @bookScanPrivacySynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages are read on this device. The recipes you add are synced with their pictures.'**
+  String get bookScanPrivacySynced;
+
   /// No description provided for @bookScanCameraDenied.
   ///
   /// In en, this message translates to:
@@ -810,6 +816,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The scanner could not be opened. You can still choose photos you already took.'**
   String get bookScanScannerFailed;
+
+  /// No description provided for @bookScanLostPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{An earlier scan was interrupted. Its page is still on this device.} other{An earlier scan was interrupted. Its {count} pages are still on this device.}}'**
+  String bookScanLostPages(int count);
+
+  /// No description provided for @bookScanReadLostPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Read 1 page} other{Read {count} pages}}'**
+  String bookScanReadLostPages(int count);
 
   /// No description provided for @bookScanReadOnly.
   ///
@@ -1015,6 +1033,36 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 recipe could not be added} other{{count} recipes could not be added}}'**
   String bookScanAddFailed(int count);
 
+  /// No description provided for @bookScanChooseCookbookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cookbook'**
+  String get bookScanChooseCookbookTitle;
+
+  /// No description provided for @bookScanChooseCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the cookbook the scanned recipes should go to.'**
+  String get bookScanChooseCookbook;
+
+  /// No description provided for @bookScanNoCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no cookbook that recipes can be added to.'**
+  String get bookScanNoCookbook;
+
+  /// No description provided for @bookScanCookbookGoneChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'{book} is no longer on this device. Choose the cookbook these recipes should go to.'**
+  String bookScanCookbookGoneChoose(String book);
+
+  /// No description provided for @bookScanCookbookGone.
+  ///
+  /// In en, this message translates to:
+  /// **'{book} is no longer on this device, and there is no other cookbook to add these recipes to.'**
+  String bookScanCookbookGone(String book);
+
   /// No description provided for @bookScanMore.
   ///
   /// In en, this message translates to:
@@ -1033,6 +1081,30 @@ abstract class AppLocalizations {
   /// **'The pages were read, but none of them looked like a recipe. Try again with the whole page in the photo.'**
   String get bookScanEmptyBody;
 
+  /// No description provided for @bookScanNothingReadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing could be read'**
+  String get bookScanNothingReadTitle;
+
+  /// No description provided for @bookScanNothingReadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The page could not be read. Try again in good light, with the whole page in the photo.} other{None of the {count} pages could be read. Try again in good light, with the whole page in the photo.}}'**
+  String bookScanNothingReadBody(int count);
+
+  /// No description provided for @bookScanNothingLeftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to add'**
+  String get bookScanNothingLeftTitle;
+
+  /// No description provided for @bookScanNothingLeftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every recipe that was found has been added or discarded. Scan more pages, or go back.'**
+  String get bookScanNothingLeftBody;
+
   /// No description provided for @bookScanTryAgain.
   ///
   /// In en, this message translates to:
@@ -1044,6 +1116,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 page could not be read. Scan it again to add what is missing.} other{{count} pages could not be read. Scan them again to add what is missing.}}'**
   String bookScanUnreadPages(int count);
+
+  /// photos is the place of each unread page in the scan: 3, or 3, 7, 9.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Photo {photos} could not be read. Scan that page again to add what is missing.} other{Photos {photos} could not be read. Scan those pages again to add what is missing.}}'**
+  String bookScanUnreadPhotos(int count, String photos);
 
   /// No description provided for @bookScanDiscardTitle.
   ///
