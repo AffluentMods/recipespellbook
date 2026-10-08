@@ -3,12 +3,14 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import '../../models/imported_recipe.dart';
 import '../recipe_import_engine.dart';
+import 'import_support.dart';
 
-/// Imports recipes from Paprika 3 (.paprikarecipes) files.
+/// Imports recipes from Paprika 3 (.paprikarecipes, .paprikarecipe) files.
 ///
 /// Format: ZIP archive containing:
 ///   - One gzip-compressed JSON file per recipe (e.g., "Recipe Name.paprikarecipe")
 ///   - Optional image files (JPEG/PNG)
+/// A recipe that Paprika shares on its own is one such gzip-compressed file.
 ///
 /// Each JSON file, when decompressed, contains:
 ///   { name, ingredients (newline-sep), directions (newline-sep),
@@ -34,26 +36,34 @@ class PaprikaImporter {
     String filename,
   ) async {
     final recipes = <ImportedRecipe>[];
-    final archive = ZipDecoder().decodeBytes(bytes);
+    final Archive archive;
+    try {
+      archive = ZipDecoder().decodeBytes(bytes);
+    } catch (_) {
+      throw const FormatException(_damaged);
+    }
 
     // Collect image data by recipe name for matching
     final imageMap = <String, String>{}; // name → base64
     for (final file in archive.files) {
       if (file.isFile && _isImage(file.name)) {
         final baseName = _baseName(file.name);
-        imageMap[baseName.toLowerCase()] = base64Encode(file.content as List<int>);
+        try {
+          imageMap[baseName.toLowerCase()] = base64Encode(file.content as List<int>);
+        } catch (_) {
+          // A photo that does not unpack costs no recipe.
+        }
       }
     }
 
+    var unreadable = 0;
     for (final file in archive.files) {
       if (!file.isFile) continue;
       if (!file.name.toLowerCase().endsWith('.paprikarecipe')) continue;
 
       try {
         // Each .paprikarecipe file is gzip-compressed JSON
-        final decompressed = _decompress(file.content as List<int>);
-        final jsonStr = utf8.decode(decompressed);
-        final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+        final json = _readJson(file.content as List<int>) as Map<String, dynamic>;
 
         final recipe = RecipeImportEngine.parsePaprikaRecipe(json);
         recipe.sourceFile = file.name;
@@ -71,25 +81,55 @@ class PaprikaImporter {
         }
       } catch (_) {
         // Skip malformed recipe files
+        unreadable++;
       }
     }
 
+    // An export may lose a recipe or two and still be worth importing. One
+    // with no readable recipe at all is a damaged file.
+    if (recipes.isEmpty && unreadable > 0) throw const FormatException(_damaged);
     return recipes;
   }
 
-  /// Decompress gzip data. Paprika uses standard gzip compression.
-  static List<int> _decompress(List<int> data) {
+  /// Parse a single .paprikarecipe file: one recipe, the way Paprika shares
+  /// it.
+  ///
+  /// Returns an empty list when the file holds JSON that is not a recipe of
+  /// Paprika.
+  static Future<List<ImportedRecipe>> importSingle(
+    Uint8List bytes,
+    String filename,
+  ) async {
     try {
-      // Try gzip decompression (most common for Paprika)
-      return GZipDecoder().decodeBytes(data);
+      final json = _readJson(bytes);
+      // Paprika gives every recipe a name.
+      if (json is! Map<String, dynamic> || !json.containsKey('name')) return [];
+
+      final recipe = RecipeImportEngine.parsePaprikaRecipe(json);
+      recipe.sourceFile = filename;
+      return [recipe];
     } catch (_) {
-      try {
-        // Try raw deflate without gzip wrapper
-        return Inflate(data).getBytes();
-      } catch (_) {
-        // Return as-is (might already be uncompressed)
-        return data;
-      }
+      throw const FormatException(_damaged);
+    }
+  }
+
+  static const _damaged = 'This Paprika file is damaged or incomplete. Export it again and retry.';
+
+  /// Reads the JSON of one recipe. Paprika uses standard gzip compression.
+  /// Data that is plain JSON, or raw deflate without the gzip wrapper, is
+  /// read as well. Throws a FormatException when it is none of these.
+  static Object? _readJson(List<int> data) {
+    if (ImportSupport.isGzip(data)) {
+      final unpacked = ImportSupport.gunzip(data);
+      if (unpacked == null) throw const FormatException(_damaged);
+      return jsonDecode(ImportSupport.decodeText(unpacked));
+    }
+    try {
+      return jsonDecode(ImportSupport.decodeText(data));
+    } on FormatException {
+      final unpacked = ImportSupport.inflate(data);
+      if (unpacked == null) rethrow;
+      return jsonDecode(ImportSupport.decodeText(unpacked));
     }
   }
 
