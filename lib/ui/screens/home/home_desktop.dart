@@ -8,6 +8,7 @@ import '../../../data/course_category_data.dart';
 import '../../../database/daos/meal_plan_dao.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/collab_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
@@ -25,6 +26,7 @@ import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart' show FileExistsCache;
+import '../book_scan/book_scan_entry.dart';
 import '../craving/craving_screen.dart';
 
 /// The desktop home: a dashboard that uses the width instead of stretching the
@@ -61,6 +63,10 @@ class DesktopHome extends ConsumerWidget {
     final recipes = recipesAsync.valueOrNull ?? const <Recipe>[];
     final showCraving = ref.watch(settingsProvider.select((s) => s.showSurpriseMe));
     final locale = Localizations.localeOf(context).toLanguageTag();
+    // Follows sharing permissions: no scanning into a cookbook that is
+    // shared with the user as view-only.
+    ref.watch(collabRevisionProvider);
+    final canScan = supportsBookScan && cookbook != null && canAddRecipesTo(cookbook!.id);
 
     final subtitle = [
       cookbook?.name ?? l10n.appTitle,
@@ -81,6 +87,18 @@ class DesktopHome extends ConsumerWidget {
               ),
               icon: Icon(Icons.auto_awesome_rounded, size: 17, color: c.accent),
               label: Text(l10n.cravingCardTitle),
+              style: TextButton.styleFrom(
+                foregroundColor: c.textSecondary,
+                textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ),
+          // A tablet held sideways gets this layout and still has a camera:
+          // photograph this cookbook's printed pages into recipes.
+          if (canScan)
+            TextButton.icon(
+              onPressed: () => startBookScan(context, cookbookId: cookbook!.id),
+              icon: Icon(Icons.document_scanner_outlined, size: 17, color: c.accent),
+              label: Text(l10n.bookScanAction),
               style: TextButton.styleFrom(
                 foregroundColor: c.textSecondary,
                 textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),

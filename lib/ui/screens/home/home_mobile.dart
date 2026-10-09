@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/collab_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
@@ -27,6 +28,7 @@ import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sheet_chrome.dart';
+import '../book_scan/book_scan_entry.dart';
 import '../craving/craving_screen.dart';
 import '../planner/planner_screen.dart'
     show selectedPlannerDateProvider, mealTypeLabel;
@@ -213,6 +215,9 @@ class _Header extends ConsumerWidget {
     final c = context.appColors;
     final t = Theme.of(context);
     final top = MediaQuery.paddingOf(context).top;
+    // Rebuild when sharing permissions change, so the scan button follows
+    // whether recipes can be added here.
+    ref.watch(collabRevisionProvider);
 
     return Padding(
       padding: padding.copyWith(top: top + Space.lg),
@@ -228,16 +233,22 @@ class _Header extends ConsumerWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: Space.xxs),
-                      child: Text(
-                        greeting,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.textTheme.headlineMedium?.copyWith(
-                          fontSize: 30,
-                          height: 1.1,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.6,
-                          color: c.textPrimary,
+                      // Beside two header buttons a narrow phone has no room
+                      // for "Good afternoon" at full size: shrink it to fit
+                      // rather than cut it short.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          greeting,
+                          maxLines: 1,
+                          style: t.textTheme.headlineMedium?.copyWith(
+                            fontSize: 30,
+                            height: 1.1,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.6,
+                            color: c.textPrimary,
+                          ),
                         ),
                       ),
                     ),
@@ -292,6 +303,36 @@ class _Header extends ConsumerWidget {
                   ],
                 ),
               ),
+              // Scan pages: photograph this cookbook's printed pages into
+              // recipes. Phones and tablets only, and only where recipes can
+              // be added.
+              if (supportsBookScan && cookbook != null && canAddRecipesTo(cookbook!.id))
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: Space.sm,
+                    top: Space.xxs,
+                  ),
+                  child: Tooltip(
+                    message: l10n.bookScanAction,
+                    child: Material(
+                      color: Colors.transparent,
+                      shape: CircleBorder(side: BorderSide(color: c.hairline)),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () => startBookScan(context, cookbookId: cookbook!.id),
+                        child: SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Icon(
+                            Icons.document_scanner_outlined,
+                            size: 21,
+                            color: c.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               if (showCraving)
                 Padding(
                   padding: const EdgeInsets.only(

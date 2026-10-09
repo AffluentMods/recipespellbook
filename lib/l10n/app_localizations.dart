@@ -676,7 +676,7 @@ abstract class AppLocalizations {
   /// No description provided for @isbnAddedBody.
   ///
   /// In en, this message translates to:
-  /// **'Now add recipes from it — snap a photo of a page, or type one in.'**
+  /// **'Now add the recipes you cook from it.'**
   String get isbnAddedBody;
 
   /// No description provided for @isbnAddRecipes.
@@ -702,6 +702,498 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Camera unavailable. You can still type the ISBN below.'**
   String get isbnCameraUnavailable;
+
+  /// No description provided for @bookScanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan pages'**
+  String get bookScanAction;
+
+  /// No description provided for @bookScanFromBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan pages from this book'**
+  String get bookScanFromBook;
+
+  /// No description provided for @bookScanIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan pages from this book'**
+  String get bookScanIntroTitle;
+
+  /// No description provided for @bookScanIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the recipe pages one after another. They are read on this device and each recipe is filed under {book}.'**
+  String bookScanIntroBody(String book);
+
+  /// No description provided for @bookScanTipLightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat page, good light'**
+  String get bookScanTipLightTitle;
+
+  /// No description provided for @bookScanTipLightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Shadows and curled pages are harder to read.'**
+  String get bookScanTipLightBody;
+
+  /// No description provided for @bookScanTipOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One page after another'**
+  String get bookScanTipOrderTitle;
+
+  /// No description provided for @bookScanTipOrderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A recipe that runs onto the next page is joined up for you.'**
+  String get bookScanTipOrderBody;
+
+  /// No description provided for @bookScanTipPagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Page numbers are kept'**
+  String get bookScanTipPagesTitle;
+
+  /// No description provided for @bookScanTipPagesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Each recipe is saved with the page it came from.'**
+  String get bookScanTipPagesBody;
+
+  /// No description provided for @bookScanStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start scanning'**
+  String get bookScanStart;
+
+  /// No description provided for @bookScanChoosePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photos instead'**
+  String get bookScanChoosePhotos;
+
+  /// No description provided for @bookScanChoosePhotosShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photos'**
+  String get bookScanChoosePhotosShort;
+
+  /// No description provided for @bookScanTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Book pages'**
+  String get bookScanTile;
+
+  /// No description provided for @bookScanMoreSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn printed cookbook pages into recipes'**
+  String get bookScanMoreSubtitle;
+
+  /// No description provided for @bookScanPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages are read on this device. Nothing is uploaded.'**
+  String get bookScanPrivacy;
+
+  /// No description provided for @bookScanPrivacySynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages are read on this device. The recipes you add are synced with their pictures.'**
+  String get bookScanPrivacySynced;
+
+  /// No description provided for @bookScanCameraDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access is off for Recipe Spellbook. Turn it on in Settings, or choose photos you already took.'**
+  String get bookScanCameraDenied;
+
+  /// No description provided for @bookScanScannerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The scanner could not be opened. You can still choose photos you already took.'**
+  String get bookScanScannerFailed;
+
+  /// No description provided for @bookScanLostPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{An earlier scan was interrupted. Its page is still on this device.} other{An earlier scan was interrupted. Its {count} pages are still on this device.}}'**
+  String bookScanLostPages(int count);
+
+  /// No description provided for @bookScanReadLostPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Read 1 page} other{Read {count} pages}}'**
+  String bookScanReadLostPages(int count);
+
+  /// No description provided for @bookScanReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only view this cookbook, so recipes cannot be added to it.'**
+  String get bookScanReadOnly;
+
+  /// No description provided for @bookScanReadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading your pages'**
+  String get bookScanReadingTitle;
+
+  /// No description provided for @bookScanReadingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} of {total}'**
+  String bookScanReadingProgress(int current, int total);
+
+  /// No description provided for @bookScanFindingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding the recipes'**
+  String get bookScanFindingRecipes;
+
+  /// No description provided for @bookScanFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No recipes found} =1{Found 1 recipe} other{Found {count} recipes}}'**
+  String bookScanFound(int count);
+
+  /// No description provided for @bookScanPageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page} other{{count} pages}}'**
+  String bookScanPageCount(int count);
+
+  /// Shown on screen; the space is non-breaking so the number stays with its label.
+  ///
+  /// In en, this message translates to:
+  /// **'p. {page}'**
+  String bookScanPage(String page);
+
+  /// No description provided for @bookScanPages.
+  ///
+  /// In en, this message translates to:
+  /// **'pp. {pages}'**
+  String bookScanPages(String pages);
+
+  /// No description provided for @bookScanSource.
+  ///
+  /// In en, this message translates to:
+  /// **'{book}, p. {page}'**
+  String bookScanSource(String book, String page);
+
+  /// No description provided for @bookScanSourcePages.
+  ///
+  /// In en, this message translates to:
+  /// **'{book}, pp. {pages}'**
+  String bookScanSourcePages(String book, String pages);
+
+  /// No description provided for @bookScanNoPageNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'No page numbers found'**
+  String get bookScanNoPageNumbers;
+
+  /// No description provided for @bookScanSetPageNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Set page numbers'**
+  String get bookScanSetPageNumbers;
+
+  /// No description provided for @bookScanChangePageNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Page numbers'**
+  String get bookScanChangePageNumbers;
+
+  /// No description provided for @bookScanPageNumbersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Page numbers'**
+  String get bookScanPageNumbersTitle;
+
+  /// No description provided for @bookScanFirstPageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First page'**
+  String get bookScanFirstPageLabel;
+
+  /// No description provided for @bookScanFirstPageHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The number printed on the first page you scanned. The rest follow in order.'**
+  String get bookScanFirstPageHelp;
+
+  /// No description provided for @bookScanIngredientCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No ingredients} =1{1 ingredient} other{{count} ingredients}}'**
+  String bookScanIngredientCount(int count);
+
+  /// No description provided for @bookScanStepCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No steps} =1{1 step} other{{count} steps}}'**
+  String bookScanStepCount(int count);
+
+  /// No description provided for @bookScanIssueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a title'**
+  String get bookScanIssueTitle;
+
+  /// No description provided for @bookScanIssueIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredients found'**
+  String get bookScanIssueIngredients;
+
+  /// No description provided for @bookScanIssueSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'No steps found'**
+  String get bookScanIssueSteps;
+
+  /// No description provided for @bookScanDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in this book'**
+  String get bookScanDuplicate;
+
+  /// No description provided for @bookScanUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled recipe'**
+  String get bookScanUntitled;
+
+  /// No description provided for @bookScanMergeNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge with next'**
+  String get bookScanMergeNext;
+
+  /// No description provided for @bookScanSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split in two'**
+  String get bookScanSplit;
+
+  /// No description provided for @bookScanDiscarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe discarded'**
+  String get bookScanDiscarded;
+
+  /// No description provided for @bookScanMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes merged'**
+  String get bookScanMerged;
+
+  /// No description provided for @bookScanSplitHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the line where the second recipe starts.'**
+  String get bookScanSplitHelp;
+
+  /// No description provided for @bookScanSplitEditedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Both halves are read again from the page, so your edits to this recipe will be replaced.'**
+  String get bookScanSplitEditedNote;
+
+  /// No description provided for @bookScanSplitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That line cannot start a second recipe.'**
+  String get bookScanSplitFailed;
+
+  /// No description provided for @bookScanAddAll.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 recipe} other{Add {count} recipes}}'**
+  String bookScanAddAll(int count);
+
+  /// No description provided for @bookScanAdding.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding {current} of {total}'**
+  String bookScanAdding(int current, int total);
+
+  /// No description provided for @bookScanAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Added 1 recipe to {book}} other{Added {count} recipes to {book}}}'**
+  String bookScanAdded(int count, String book);
+
+  /// No description provided for @bookScanAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe could not be added} other{{count} recipes could not be added}}'**
+  String bookScanAddFailed(int count);
+
+  /// No description provided for @bookScanChooseCookbookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cookbook'**
+  String get bookScanChooseCookbookTitle;
+
+  /// No description provided for @bookScanChooseCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the cookbook the scanned recipes should go to.'**
+  String get bookScanChooseCookbook;
+
+  /// No description provided for @bookScanNoCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no cookbook that recipes can be added to.'**
+  String get bookScanNoCookbook;
+
+  /// No description provided for @bookScanCookbookGoneChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'{book} is no longer on this device. Choose the cookbook these recipes should go to.'**
+  String bookScanCookbookGoneChoose(String book);
+
+  /// No description provided for @bookScanCookbookGone.
+  ///
+  /// In en, this message translates to:
+  /// **'{book} is no longer on this device, and there is no other cookbook to add these recipes to.'**
+  String bookScanCookbookGone(String book);
+
+  /// No description provided for @bookScanMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan more pages'**
+  String get bookScanMore;
+
+  /// No description provided for @bookScanEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found'**
+  String get bookScanEmptyTitle;
+
+  /// No description provided for @bookScanEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The pages were read, but none of them looked like a recipe. Try again with the whole page in the photo.'**
+  String get bookScanEmptyBody;
+
+  /// No description provided for @bookScanNothingReadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing could be read'**
+  String get bookScanNothingReadTitle;
+
+  /// No description provided for @bookScanNothingReadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The page could not be read. Try again in good light, with the whole page in the photo.} other{None of the {count} pages could be read. Try again in good light, with the whole page in the photo.}}'**
+  String bookScanNothingReadBody(int count);
+
+  /// No description provided for @bookScanNothingLeftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to add'**
+  String get bookScanNothingLeftTitle;
+
+  /// No description provided for @bookScanNothingLeftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every recipe that was found has been added or discarded. Scan more pages, or go back.'**
+  String get bookScanNothingLeftBody;
+
+  /// No description provided for @bookScanTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan again'**
+  String get bookScanTryAgain;
+
+  /// No description provided for @bookScanUnreadPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page could not be read. Scan it again to add what is missing.} other{{count} pages could not be read. Scan them again to add what is missing.}}'**
+  String bookScanUnreadPages(int count);
+
+  /// photos is the place of each unread page in the scan: 3, or 3, 7, 9.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Photo {photos} could not be read. Scan that page again to add what is missing.} other{Photos {photos} could not be read. Scan those pages again to add what is missing.}}'**
+  String bookScanUnreadPhotos(int count, String photos);
+
+  /// No description provided for @bookScanDiscardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this scan?'**
+  String get bookScanDiscardTitle;
+
+  /// No description provided for @bookScanDiscardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The recipe that was found will not be added.} other{The {count} recipes that were found will not be added.}}'**
+  String bookScanDiscardBody(int count);
+
+  /// No description provided for @bookScanKeepReviewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep reviewing'**
+  String get bookScanKeepReviewing;
+
+  /// No description provided for @bookScanEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit recipe'**
+  String get bookScanEditTitle;
+
+  /// No description provided for @bookScanFieldPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get bookScanFieldPage;
+
+  /// No description provided for @bookScanFieldSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get bookScanFieldSteps;
+
+  /// No description provided for @bookScanIngredientsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One per line. End a line with a colon to make it a heading.'**
+  String get bookScanIngredientsHelp;
+
+  /// No description provided for @bookScanStepsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One step per line.'**
+  String get bookScanStepsHelp;
+
+  /// No description provided for @bookScanViewPage.
+  ///
+  /// In en, this message translates to:
+  /// **'View the page'**
+  String get bookScanViewPage;
+
+  /// No description provided for @bookScanPageOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} of {total}'**
+  String bookScanPageOf(int current, int total);
+
+  /// No description provided for @bookScanOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get bookScanOptions;
+
+  /// No description provided for @recipeSourceOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the source'**
+  String get recipeSourceOpen;
 
   /// No description provided for @cookbookEdit.
   ///

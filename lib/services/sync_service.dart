@@ -549,28 +549,55 @@ class SyncService {
   //  PHOTOS
   // ════════════════════════════════════════════
 
+  /// Recipes whose photo did not go up the last time it was sent. They wait
+  /// at the back of the queue, so a photo the server will never take cannot
+  /// keep every other one waiting behind it.
+  final _photoRefused = <String>{};
+
   /// Upload local recipe photos that never reached the cloud (imports,
   /// duplicates, community saves, failed uploads) so other devices get them.
   /// A few per run keeps each sync quick; the rest follow on later runs.
   Future<void> _backfillImageUploads({int limit = 6}) async {
     if (!supportsLocalFileSystem) return;
     final db = _db!;
-    final candidates = await (db.select(db.recipes)
-          ..where((r) => r.imageServerPath.isNull() & r.imagePath.isNotNull() & r.deletedAt.isNull())
-          ..limit(limit * 3))
+    final recipes = db.recipes;
+    // Every recipe still waiting, newest first: one whose file is gone from
+    // the device is passed over below, and a fixed window of the oldest would
+    // end on such recipes for good. Three columns keep a long list light.
+    final waiting = await (db.selectOnly(recipes)
+          ..addColumns([recipes.id, recipes.cookbookId, recipes.imagePath])
+          ..where(recipes.imageServerPath.isNull() & recipes.imagePath.isNotNull() & recipes.deletedAt.isNull())
+          ..orderBy([OrderingTerm.desc(recipes.createdAt), OrderingTerm.desc(recipes.rowId)]))
         .get();
+    final candidates = [
+      ...waiting.where((row) => !_photoRefused.contains(row.read(recipes.id))),
+      ...waiting.where((row) => _photoRefused.contains(row.read(recipes.id))),
+    ];
     var uploaded = 0;
-    for (final r in candidates) {
+    for (final row in candidates) {
       if (uploaded >= limit) break;
-      final path = r.imagePath!;
+      final id = row.read(recipes.id)!;
+      final path = row.read(recipes.imagePath)!;
       if (ImageService.isServerPath(path) || path.startsWith('http') || path.startsWith('assets/')) continue;
       if (!localFileExists(path)) continue;
       final result = await ImageService.instance.uploadFile(File(path));
-      if (result == null) break; // offline / quota — try again next sync
-      await (db.update(db.recipes)..where((t) => t.id.equals(r.id))).write(RecipesCompanion(
+      if (result == null) {
+        // Offline, over quota, or a photo the server will not take: try
+        // again next sync, with the others ahead of this one.
+        _photoRefused.add(id);
+        break;
+      }
+      _photoRefused.remove(id);
+      await (db.update(recipes)..where((t) => t.id.equals(id))).write(RecipesCompanion(
         imageServerPath: Value(result.path),
         updatedAt: Value(DateTime.now()),
       ));
+      // A recipe in a shared cookbook goes out through the collab push. Until
+      // that push lands the pull must leave it alone: the server's copy is the
+      // older one, has no photo, and would take this one's photo away.
+      if (CollabService.instance.canEditCookbook(row.read(recipes.cookbookId)!)) {
+        await CollabService.instance.markRecipeDirty(id);
+      }
       uploaded++;
     }
     if (uploaded > 0) debugPrint('[Sync] Uploaded $uploaded recipe photo(s) for sync');
