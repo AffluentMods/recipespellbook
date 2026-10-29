@@ -2822,9 +2822,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get premiumFeature => 'プレミアム機能';
 
   @override
-  String get premiumNutrientsDescription => '栄養素の自動計算にはプレミアムサブスクリプションが必要です';
-
-  @override
   String get exportCurrentCookbook => '現在のレシピ本をエクスポート';
 
   @override
@@ -4571,16 +4568,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get helpCloudSync => 'クラウド同期';
 
   @override
-  String get helpCloudSyncDesc => 'Cloud Syncを購読してすべてのデバイスでレシピを同期。';
-
-  @override
   String get accountTitle => 'アカウント';
-
-  @override
-  String get accountSubscription => 'サブスクリプション';
-
-  @override
-  String get accountManageSubscription => 'サブスクリプション管理';
 
   @override
   String get accountCloudSync => 'クラウド同期';
@@ -4674,11 +4662,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get upgradeToPro => 'Proにアップグレード';
-
-  @override
-  String subscriptionDot(String tier) {
-    return 'サブスクリプション · $tier';
-  }
 
   @override
   String get affluentLabsPro => 'Affluent Labs Pro';
@@ -4962,19 +4945,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get oneTimeTab => '一回払い';
 
   @override
-  String get subscriptionTab => 'サブスクリプション';
-
-  @override
   String get payOnceKeepForever => '一度払えばずっと使える';
 
   @override
   String get cloudSyncFreeTrial => 'Try free for 1 week';
-
-  @override
-  String get subscribeCloudSyncMonthlyTrialCta => 'Start free trial — then \$2.99/mo';
-
-  @override
-  String get subscribeCloudSyncYearlyTrialCta => 'Start free trial — then \$29.99/yr';
 
   @override
   String get cloudSyncFeature => 'Cloud Sync';
@@ -5281,46 +5255,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get choosePlanSubtitle => 'あなたのキッチンに合ったプランを選んでください';
 
   @override
-  String get premiumInfoNotice => 'プレミアムは無料体験を向上させる一回払いの購入です。';
-
-  @override
   String get bestValue => 'ベストバリュー';
-
-  @override
-  String get billedMonthly => '月次請求';
-
-  @override
-  String get save16Yearly => '16%節約 — 月2.50ドル';
 
   @override
   String get save16Badge => '16%節約';
 
   @override
-  String get save17Yearly => '17%節約 — 月4.17ドル';
-
-  @override
-  String get subscriptionsIncludePremium => 'すべてのサブスクリプションにはプレミアムのすべてが含まれます。';
-
-  @override
   String get monthly => '月払い';
-
-  @override
-  String get yearly => '年払い';
-
-  @override
-  String get purchasePremiumCta => 'プレミアムを購入 — \$6.99';
-
-  @override
-  String get subscribeCloudSyncMonthlyCta => '購読する — \$2.99/月';
-
-  @override
-  String get subscribeCloudSyncYearlyCta => '購読する — \$29.99/年';
-
-  @override
-  String get subscribeCloudSyncPlusMonthlyCta => '購読する — \$4.99/月';
-
-  @override
-  String get subscribeCloudSyncPlusYearlyCta => '購読する — \$49.99/年';
 
   @override
   String get signInRequiredBeforePurchase => '購入前にサインインが必要です';
@@ -5378,18 +5319,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get comparePrice => '価格';
-
-  @override
-  String get priceFree => '\$0';
-
-  @override
-  String get pricePremium => '\$6.99\n一回払い';
-
-  @override
-  String get priceCloudSync => '\$2.99\n/月';
-
-  @override
-  String get priceCloudSyncPlus => '\$4.99\n/月';
 
   @override
   String get compareDeviceTransfer => 'デバイス転送';
@@ -8524,9 +8453,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shareFamilyCreateJoin => '共有するには家族を作成または参加してください';
 
   @override
-  String get shareFamilyRequiresCloudSync => 'Cloud Syncサブスクリプションが必要です';
-
-  @override
   String get shareFamilyUpgradeMessage => 'Cloud Syncにアップグレードして、レシピブックやリストを家族とリアルタイムで共有しましょう。';
 
   @override
@@ -9138,15 +9064,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallFamilyFeature3 => '共有クックブック＆買い物リスト';
 
   @override
-  String get paywallValueProp => '他のレシピアプリは月5〜10ドル。これはそうじゃない。';
-
-  @override
   String paywallGetPlan(String planName, String planPrice) {
     return '$planNameを取得 — $planPrice';
   }
-
-  @override
-  String get paywallOneTimePurchase => '一回払い · サブスクなし · 永久にあなたのもの';
 
   @override
   String get paywallRestorePurchases => '購入を復元';
@@ -9840,9 +9760,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get paywallPlanFamily => 'ファミリー';
-
-  @override
-  String get paywallPriceFamily => '\$19.99';
 
   @override
   String get paywallSublineFamily => '一回払い · 5人でシェア';

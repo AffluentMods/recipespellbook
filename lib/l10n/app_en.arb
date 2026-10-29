@@ -1293,7 +1293,6 @@
     }
   },
   "premiumFeature": "Premium Feature",
-  "premiumNutrientsDescription": "Automatic nutrition calculation requires a premium subscription",
   "exportCurrentCookbook": "Export Current Cookbook",
   "exporting": "Exporting...",
   "exportAllCookbooks": "Export All Cookbooks",
@@ -2082,10 +2081,7 @@
   "helpFromOtherApps": "From other apps",
   "helpFromOtherAppsDesc": "Most recipe apps can export as HTML or text. Export from your old app, then import the file here using the + button.",
   "helpCloudSync": "Cloud Sync",
-  "helpCloudSyncDesc": "Subscribe to Cloud Sync to keep your recipes in sync across all your devices. Tap the sync button in the sidebar to sync manually.",
   "accountTitle": "Account",
-  "accountSubscription": "Subscription",
-  "accountManageSubscription": "Manage Subscription",
   "accountCloudSync": "Cloud Sync",
   "accountSyncNow": "Sync Now",
   "accountIntegrations": "Integrations",
@@ -2117,14 +2113,6 @@
   "signInSyncLong": "Sync your recipes across devices, unlock cloud backup, and access Pro features.",
   "recipesStayOnDevice": "Your recipes stay on this device even without an account.",
   "upgradeToPro": "Upgrade to Pro",
-  "subscriptionDot": "Subscription · {tier}",
-  "@subscriptionDot": {
-    "placeholders": {
-      "tier": {
-        "type": "String"
-      }
-    }
-  },
   "affluentLabsPro": "Affluent Labs Pro",
   "cancelledAccessUntil": "Cancelled — access until {date}",
   "@cancelledAccessUntil": {
@@ -2321,11 +2309,8 @@
   "restorePurchases": "Restore",
   "compareAllPlans": "Compare all plans",
   "oneTimeTab": "One-Time",
-  "subscriptionTab": "Subscription",
   "payOnceKeepForever": "Pay once, keep forever",
   "cloudSyncFreeTrial": "Try free for 1 week",
-  "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
-  "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",
   "cloudSyncFeature": "Cloud Sync",
   "cloudSyncFamilyFeature": "Cloud Sync Family",
   "unableToLoadProducts": "Unable to load products. Try again.",
@@ -2557,20 +2542,9 @@
   "recipesFavorited": "{count} recipe(s) favorited",
   "upgradeRecipeSpellbook": "Upgrade Recipe Spellbook",
   "choosePlanSubtitle": "Choose the plan that fits your kitchen",
-  "premiumInfoNotice": "Premium is a one-time purchase that enhances your free experience. It does not include family sharing or advanced cloud features — see Subscriptions for those.",
   "bestValue": "BEST VALUE",
-  "billedMonthly": "Billed monthly",
-  "save16Yearly": "Save 16% — only $2.50/mo",
   "save16Badge": "SAVE 16%",
-  "save17Yearly": "Save 17% — only $4.17/mo",
-  "subscriptionsIncludePremium": "All subscriptions include everything in Premium.",
   "monthly": "Monthly",
-  "yearly": "Yearly",
-  "purchasePremiumCta": "Purchase Premium — $6.99",
-  "subscribeCloudSyncMonthlyCta": "Subscribe — $2.99/mo",
-  "subscribeCloudSyncYearlyCta": "Subscribe — $29.99/yr",
-  "subscribeCloudSyncPlusMonthlyCta": "Subscribe — $4.99/mo",
-  "subscribeCloudSyncPlusYearlyCta": "Subscribe — $49.99/yr",
   "signInRequiredBeforePurchase": "Sign-in required before purchase",
   "terms": "Terms",
   "privacy": "Privacy",
@@ -2590,10 +2564,6 @@
   "tierCloudSync": "CLOUD SYNC",
   "tierCloudSyncPlus": "Cloud\nSync+",
   "comparePrice": "Price",
-  "priceFree": "$0",
-  "pricePremium": "$6.99\nonce",
-  "priceCloudSync": "$2.99\n/mo",
-  "priceCloudSyncPlus": "$4.99\n/mo",
   "compareDeviceTransfer": "Device transfer",
   "qrCode": "QR code",
   "cloud": "Cloud",
@@ -4421,7 +4391,6 @@
   "shareFamilyShare": "Family Share",
   "shareFamilySyncSubtitle": "Real-time sync • Per-member permissions",
   "shareFamilyCreateJoin": "Create or join a family to share",
-  "shareFamilyRequiresCloudSync": "Requires Cloud Sync subscription",
   "shareFamilyUpgradeMessage": "Upgrade to Cloud Sync to share cookbooks and lists with your family in real-time.",
   "shareFamilySignIn": "Sign in to use family sharing",
   "shareFamilySetupInSettings": "Create or join a family in Settings → Family Sharing",
@@ -4796,7 +4765,6 @@
   "paywallFamilyFeature1": "Everything in Premium",
   "paywallFamilyFeature2": "Up to 5 family members sync together",
   "paywallFamilyFeature3": "Shared cookbooks & shopping lists",
-  "paywallValueProp": "Most recipe apps charge $5–10/month. This isn't that.",
   "paywallGetPlan": "Get {planName} — {planPrice}",
   "@paywallGetPlan": {
     "placeholders": {
@@ -4808,7 +4776,6 @@
       }
     }
   },
-  "paywallOneTimePurchase": "One-time purchase · No subscription · Yours forever",
   "paywallRestorePurchases": "Restore purchases",
   "paywallCompleteYourPurchase": "Complete Your Purchase",
   "paywallCompleteMessage": "After completing your purchase, tap \"Refresh\" below to activate it.",
@@ -5179,7 +5146,6 @@
   "paywallFeatureStepPhotos": "Step-by-step photos",
   "paywallFeatureAutoBackups": "Automatic backups",
   "paywallPlanFamily": "Family",
-  "paywallPriceFamily": "$19.99",
   "paywallSublineFamily": "one-time · share with 5 people",
   "paywallFeatureEverythingPremium": "Everything in Premium",
   "paywallFeatureFamilySync": "Up to 5 family members sync together",

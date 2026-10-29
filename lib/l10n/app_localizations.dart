@@ -5035,12 +5035,6 @@ abstract class AppLocalizations {
   /// **'Premium Feature'**
   String get premiumFeature;
 
-  /// No description provided for @premiumNutrientsDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatic nutrition calculation requires a premium subscription'**
-  String get premiumNutrientsDescription;
-
   /// No description provided for @exportCurrentCookbook.
   ///
   /// In en, this message translates to:
@@ -8347,29 +8341,11 @@ abstract class AppLocalizations {
   /// **'Cloud Sync'**
   String get helpCloudSync;
 
-  /// No description provided for @helpCloudSyncDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscribe to Cloud Sync to keep your recipes in sync across all your devices. Tap the sync button in the sidebar to sync manually.'**
-  String get helpCloudSyncDesc;
-
   /// No description provided for @accountTitle.
   ///
   /// In en, this message translates to:
   /// **'Account'**
   String get accountTitle;
-
-  /// No description provided for @accountSubscription.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription'**
-  String get accountSubscription;
-
-  /// No description provided for @accountManageSubscription.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage Subscription'**
-  String get accountManageSubscription;
 
   /// No description provided for @accountCloudSync.
   ///
@@ -8556,12 +8532,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upgrade to Pro'**
   String get upgradeToPro;
-
-  /// No description provided for @subscriptionDot.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription · {tier}'**
-  String subscriptionDot(String tier);
 
   /// No description provided for @affluentLabsPro.
   ///
@@ -9007,12 +8977,6 @@ abstract class AppLocalizations {
   /// **'One-Time'**
   String get oneTimeTab;
 
-  /// No description provided for @subscriptionTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription'**
-  String get subscriptionTab;
-
   /// No description provided for @payOnceKeepForever.
   ///
   /// In en, this message translates to:
@@ -9024,18 +8988,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try free for 1 week'**
   String get cloudSyncFreeTrial;
-
-  /// No description provided for @subscribeCloudSyncMonthlyTrialCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Start free trial — then \$2.99/mo'**
-  String get subscribeCloudSyncMonthlyTrialCta;
-
-  /// No description provided for @subscribeCloudSyncYearlyTrialCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Start free trial — then \$29.99/yr'**
-  String get subscribeCloudSyncYearlyTrialCta;
 
   /// No description provided for @cloudSyncFeature.
   ///
@@ -9565,29 +9517,11 @@ abstract class AppLocalizations {
   /// **'Choose the plan that fits your kitchen'**
   String get choosePlanSubtitle;
 
-  /// No description provided for @premiumInfoNotice.
-  ///
-  /// In en, this message translates to:
-  /// **'Premium is a one-time purchase that enhances your free experience. It does not include family sharing or advanced cloud features — see Subscriptions for those.'**
-  String get premiumInfoNotice;
-
   /// No description provided for @bestValue.
   ///
   /// In en, this message translates to:
   /// **'BEST VALUE'**
   String get bestValue;
-
-  /// No description provided for @billedMonthly.
-  ///
-  /// In en, this message translates to:
-  /// **'Billed monthly'**
-  String get billedMonthly;
-
-  /// No description provided for @save16Yearly.
-  ///
-  /// In en, this message translates to:
-  /// **'Save 16% — only \$2.50/mo'**
-  String get save16Yearly;
 
   /// No description provided for @save16Badge.
   ///
@@ -9595,59 +9529,11 @@ abstract class AppLocalizations {
   /// **'SAVE 16%'**
   String get save16Badge;
 
-  /// No description provided for @save17Yearly.
-  ///
-  /// In en, this message translates to:
-  /// **'Save 17% — only \$4.17/mo'**
-  String get save17Yearly;
-
-  /// No description provided for @subscriptionsIncludePremium.
-  ///
-  /// In en, this message translates to:
-  /// **'All subscriptions include everything in Premium.'**
-  String get subscriptionsIncludePremium;
-
   /// No description provided for @monthly.
   ///
   /// In en, this message translates to:
   /// **'Monthly'**
   String get monthly;
-
-  /// No description provided for @yearly.
-  ///
-  /// In en, this message translates to:
-  /// **'Yearly'**
-  String get yearly;
-
-  /// No description provided for @purchasePremiumCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase Premium — \$6.99'**
-  String get purchasePremiumCta;
-
-  /// No description provided for @subscribeCloudSyncMonthlyCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscribe — \$2.99/mo'**
-  String get subscribeCloudSyncMonthlyCta;
-
-  /// No description provided for @subscribeCloudSyncYearlyCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscribe — \$29.99/yr'**
-  String get subscribeCloudSyncYearlyCta;
-
-  /// No description provided for @subscribeCloudSyncPlusMonthlyCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscribe — \$4.99/mo'**
-  String get subscribeCloudSyncPlusMonthlyCta;
-
-  /// No description provided for @subscribeCloudSyncPlusYearlyCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscribe — \$49.99/yr'**
-  String get subscribeCloudSyncPlusYearlyCta;
 
   /// No description provided for @signInRequiredBeforePurchase.
   ///
@@ -9762,30 +9648,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Price'**
   String get comparePrice;
-
-  /// No description provided for @priceFree.
-  ///
-  /// In en, this message translates to:
-  /// **'\$0'**
-  String get priceFree;
-
-  /// No description provided for @pricePremium.
-  ///
-  /// In en, this message translates to:
-  /// **'\$6.99\nonce'**
-  String get pricePremium;
-
-  /// No description provided for @priceCloudSync.
-  ///
-  /// In en, this message translates to:
-  /// **'\$2.99\n/mo'**
-  String get priceCloudSync;
-
-  /// No description provided for @priceCloudSyncPlus.
-  ///
-  /// In en, this message translates to:
-  /// **'\$4.99\n/mo'**
-  String get priceCloudSyncPlus;
 
   /// No description provided for @compareDeviceTransfer.
   ///
@@ -15505,12 +15367,6 @@ abstract class AppLocalizations {
   /// **'Create or join a family to share'**
   String get shareFamilyCreateJoin;
 
-  /// No description provided for @shareFamilyRequiresCloudSync.
-  ///
-  /// In en, this message translates to:
-  /// **'Requires Cloud Sync subscription'**
-  String get shareFamilyRequiresCloudSync;
-
   /// No description provided for @shareFamilyUpgradeMessage.
   ///
   /// In en, this message translates to:
@@ -16633,23 +16489,11 @@ abstract class AppLocalizations {
   /// **'Shared cookbooks & shopping lists'**
   String get paywallFamilyFeature3;
 
-  /// No description provided for @paywallValueProp.
-  ///
-  /// In en, this message translates to:
-  /// **'Most recipe apps charge \$5–10/month. This isn\'t that.'**
-  String get paywallValueProp;
-
   /// No description provided for @paywallGetPlan.
   ///
   /// In en, this message translates to:
   /// **'Get {planName} — {planPrice}'**
   String paywallGetPlan(String planName, String planPrice);
-
-  /// No description provided for @paywallOneTimePurchase.
-  ///
-  /// In en, this message translates to:
-  /// **'One-time purchase · No subscription · Yours forever'**
-  String get paywallOneTimePurchase;
 
   /// No description provided for @paywallRestorePurchases.
   ///
@@ -17952,12 +17796,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Family'**
   String get paywallPlanFamily;
-
-  /// No description provided for @paywallPriceFamily.
-  ///
-  /// In en, this message translates to:
-  /// **'\$19.99'**
-  String get paywallPriceFamily;
 
   /// No description provided for @paywallSublineFamily.
   ///

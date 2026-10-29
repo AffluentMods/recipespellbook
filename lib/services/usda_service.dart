@@ -2,23 +2,17 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import '../data/nutrition_data.dart';
 import '../database/database.dart';
 
-/// Service for interacting with USDA FoodData Central via your server
+/// USDA FoodData Central nutrition data, bundled with the app and cached on device
 class UsdaService {
   final UsdaDao _usdaDao;
-  final String _baseUrl;
 
   /// Whether bundled data has been loaded into the database
   bool _bundledDataLoaded = false;
 
-  UsdaService({
-    required UsdaDao usdaDao,
-    String baseUrl = 'https://api.recipespellbook.app', // Your server
-  })  : _usdaDao = usdaDao,
-        _baseUrl = baseUrl;
+  UsdaService({required UsdaDao usdaDao}) : _usdaDao = usdaDao;
 
   // ============ INITIALIZATION ============
 
@@ -60,153 +54,25 @@ class UsdaService {
       debugPrint('Loaded ${foods.length} bundled ingredients');
     } catch (e) {
       debugPrint('Failed to load bundled USDA data: $e');
-      // Non-fatal - app can still work with server lookups
+      // Non-fatal: search just returns fewer results
     }
   }
 
   // ============ SEARCH ============
 
-  /// Search for foods, combining local cache and server results
+  /// Search the on-device food data: the bundled common ingredients plus
+  /// anything cached earlier. There is no server lookup.
   Future<List<UsdaFoodResult>> searchFoods(String query, {int limit = 20}) async {
     await initialize();
-
-    // Get local results
     final localResults = await _usdaDao.searchLocalFoods(query, limit: limit);
-    final localFoods = localResults.map((f) => UsdaFoodResult.fromDatabase(f)).toList();
-
-    // Always try server too for better results, unless we have good local matches
-    // The bundled data often has obscure items (sheep milk, chicken spread) that
-    // rank above common items — server results are usually better ordered
-    if (localFoods.length >= limit && _hasGoodLocalMatch(query, localFoods)) {
-      return localFoods;
-    }
-
-    // Try server for additional/better results
-    try {
-      final serverResults = await _searchServer(query, limit: limit);
-      if (serverResults.isNotEmpty) {
-        // Merge: deduplicate by fdcId, server results first (better relevance)
-        final seenIds = <int>{};
-        final merged = <UsdaFoodResult>[];
-
-        // Add server results first (better relevance ranking)
-        for (final result in serverResults) {
-          if (seenIds.add(result.fdcId)) {
-            merged.add(result);
-          }
-        }
-
-        // Add local results that weren't in server results
-        for (final result in localFoods) {
-          if (seenIds.add(result.fdcId)) {
-            merged.add(result);
-          }
-        }
-
-        return merged.take(limit).toList();
-      }
-    } catch (e) {
-      debugPrint('Server search failed, using local only: $e');
-    }
-
-    // Fallback to local-only if server failed
-    return localFoods;
+    return localResults.map((f) => UsdaFoodResult.fromDatabase(f)).toList();
   }
 
-  /// Check if local results contain a reasonably good match for the query
-  bool _hasGoodLocalMatch(String query, List<UsdaFoodResult> results) {
-    final normalizedQuery = query.toLowerCase().trim();
-    for (final result in results.take(3)) {
-      final desc = result.description.toLowerCase();
-      final primaryName = desc.split(',').first.trim();
-      // Good match: primary name starts with or equals query
-      if (primaryName == normalizedQuery ||
-          primaryName.startsWith(normalizedQuery) ||
-          normalizedQuery.startsWith(primaryName)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /// Search the server (your USDA proxy)
-  Future<List<UsdaFoodResult>> _searchServer(String query, {int limit = 20}) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/usda/search').replace(queryParameters: {
-          'query': query,
-          'limit': limit.toString(),
-        }),
-      ).timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> foods = data['foods'] ?? [];
-
-        final results = foods.map((f) => UsdaFoodResult.fromJson(f)).toList();
-
-        // Cache results for offline use
-        for (final result in results) {
-          await _cacheFoodResult(result);
-        }
-
-        return results;
-      }
-    } catch (e) {
-      debugPrint('Server search failed: $e');
-    }
-
-    return [];
-  }
-
-  /// Get detailed food data by FDC ID
+  /// Get detailed food data by FDC ID from the on-device data.
   Future<UsdaFoodResult?> getFoodDetails(int fdcId) async {
     await initialize();
-
-    // Check local cache first
     final cached = await _usdaDao.getFoodById(fdcId);
-    if (cached != null) {
-      return UsdaFoodResult.fromDatabase(cached);
-    }
-
-    // Fetch from server
-    try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/usda/food/$fdcId'),
-      ).timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final result = UsdaFoodResult.fromJson(data);
-
-        // Cache for future use
-        await _cacheFoodResult(result);
-
-        return result;
-      }
-    } catch (e) {
-      debugPrint('Failed to fetch food details: $e');
-    }
-
-    return null;
-  }
-
-  /// Cache a food result in the local database
-  Future<void> _cacheFoodResult(UsdaFoodResult result) async {
-    await _usdaDao.upsertFood(UsdaFoodsCompanion(
-      fdcId: Value(result.fdcId),
-      description: Value(result.description),
-      dataType: Value(result.dataType),
-      brandName: Value(result.brandName),
-      brandOwner: Value(result.brandOwner),
-      servingSize: Value(result.servingSize),
-      servingSizeUnit: Value(result.servingSizeUnit),
-      householdServing: Value(result.householdServing),
-      nutrientsJson: Value(jsonEncode(result.nutrients)),
-      foodCategory: Value(result.foodCategory),
-      isBundled: const Value(false),
-      searchKeywords: Value(result.searchKeywords),
-    ));
+    return cached == null ? null : UsdaFoodResult.fromDatabase(cached);
   }
 
   // ============ INGREDIENT MATCHING ============
