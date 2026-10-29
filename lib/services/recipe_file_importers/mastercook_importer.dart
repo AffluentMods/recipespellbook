@@ -238,6 +238,7 @@ class MasterCookImporter {
       if (line.trim().isEmpty) {
         // A blank line above the first row is passed over, unless the
         // columns are gone and nothing else could tell where the table ends.
+        if (recipe.rows.isNotEmpty && columns.aligned && _tableGoesOn(lines, i + 1, end, columns)) continue;
         if (recipe.rows.isNotEmpty || !columns.aligned) break;
         blankBefore = true;
         continue;
@@ -425,19 +426,50 @@ class MasterCookImporter {
     return text.isNotEmpty && !text.endsWith(':') && !_endLine.hasMatch(text);
   }
 
+  /// Whether the ingredient table carries on after a blank row: the next line
+  /// that is not blank is an indented row in the columns, with an amount or a
+  /// measure, or a section title. Directions start at the left edge.
+  static bool _tableGoesOn(List<String> lines, int i, int end, _Columns columns) {
+    for (; i < end; i++) {
+      final line = _expandTabs(lines[i]);
+      if (line.trim().isEmpty) continue;
+      if (!columns.isIndented(line) || _endLine.hasMatch(line)) return false;
+      if (_MasterCookRecipe._undecorated(line.trim()) != null) return true;
+      final cells = columns.cells(line);
+      return cells != null && (cells.amount.isNotEmpty || cells.measure.isNotEmpty);
+    }
+    return false;
+  }
+
   /// Reads the quoted value that starts on line [i] and may run over several
   /// lines. Returns it without its quotes, with the index of its last line.
+  /// A blank line inside the quotes is a paragraph break, as long as the
+  /// closing quote comes before the dashed line.
   static (String, int) _quotedValue(List<String> lines, int i, int end) {
     final parts = <String>[];
     var last = i;
+    var closes = false;
+    if (lines[i].trim().startsWith('"')) {
+      for (var j = i; j < end && !_endLine.hasMatch(lines[j].trim()); j++) {
+        final t = lines[j].trim();
+        if (t.endsWith('"') && (j > i || t.length > 1)) {
+          closes = true;
+          break;
+        }
+      }
+    }
     for (; i < end; i++) {
       final text = lines[i].trim();
+      if (text.isEmpty && closes && parts.isNotEmpty) {
+        if (parts.last != '\n') parts.add('\n');
+        continue;
+      }
       if (text.isEmpty || _endLine.hasMatch(text)) break;
       parts.add(text);
       last = i;
       if (text.endsWith('"') && (parts.length > 1 || text.length > 1)) break;
     }
-    var value = parts.join(' ');
+    var value = parts.join(' ').replaceAll(' \n ', '\n\n');
     if (value.startsWith('"')) value = value.substring(1);
     if (value.endsWith('"')) value = value.substring(0, value.length - 1);
     return (value.trim(), last);
