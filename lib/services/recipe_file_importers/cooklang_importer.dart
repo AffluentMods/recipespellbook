@@ -100,6 +100,9 @@ class CooklangImporter {
       }
 
       // Note lines: > text. A note is for the cook to read, not a step.
+      // A line without ">" after a note starts a step again, so its
+      // ingredients are not lost inside the note.
+      if (isNote && !noComment.startsWith('>')) endParagraph();
       if (noComment.startsWith('>')) {
         if (!isNote) endParagraph();
         isNote = true;

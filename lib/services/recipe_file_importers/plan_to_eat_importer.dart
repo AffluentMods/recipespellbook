@@ -47,6 +47,9 @@ class PlanToEatImporter {
     // First row is headers
     final headers = rows.first.map((h) => h.toLowerCase().trim()).toList();
     final recipes = <ImportedRecipe>[];
+    // A row with only a name and a link is a recipe when the sheet is about
+    // recipes. A plain "Name, URL" sheet is bookmarks or saved passwords.
+    final linksAreRecipes = headers.any((h) => h.contains('recipe') || _cookingColumns.contains(h));
 
     for (var i = 1; i < rows.length; i++) {
       final row = rows[i];
@@ -58,12 +61,18 @@ class PlanToEatImporter {
           fields.putIfAbsent(headers[column], () => row[column]);
         }
         final recipe = _parseFields(fields, filename);
-        if (recipe != null) recipes.add(recipe);
+        if (recipe != null &&
+            (linksAreRecipes || recipe.ingredients.isNotEmpty || recipe.instructions.isNotEmpty)) {
+          recipes.add(recipe);
+        }
       } catch (_) {}
     }
 
     return recipes;
   }
+
+  /// Columns that hold something to cook from.
+  static const _cookingColumns = {'ingredients', 'directions', 'instructions', 'steps'};
 
   /// The columns a recipe's name goes by, the likeliest first.
   static const _titleColumns = ['recipe title', 'title', 'name', 'recipe name'];
@@ -182,6 +191,9 @@ class PlanToEatImporter {
 
   static final _tagSeparator = RegExp(r'[,^\n]');
 
+  /// A list bullet at the start of a line, and the space after it.
+  static final _listBullet = RegExp(r'^[-*•▪◦·]\s+');
+
   /// Builds a recipe from the fields of one CSV row, or of one recipe of the
   /// text export, by their column name or label in lower case.
   static ImportedRecipe? _parseFields(
@@ -193,8 +205,12 @@ class PlanToEatImporter {
       return val.isNotEmpty ? val : null;
     }
 
-    List<String> lines(String? text) =>
-        (text ?? '').split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+    // Lines typed as a list keep their bullet off ("- 1 cup flour").
+    List<String> lines(String? text) => (text ?? '')
+        .split('\n')
+        .map((l) => l.trim().replaceFirst(_listBullet, ''))
+        .where((l) => l.isNotEmpty)
+        .toList();
 
     // Title is required
     final title = _titleColumns.map(get_).nonNulls.firstOrNull;
