@@ -4,6 +4,7 @@
 // service are the real thing.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/drift.dart' as drift;
 import 'package:drift/native.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:image/image.dart' as img;
 import 'package:recipespellbook/data/app_enums.dart';
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -516,8 +518,10 @@ void main() {
     test('are not held up by ones the server will not take', () async {
       await http.runWithClient(() async {
         signIn(db, cloudSync: true);
-        final marked = [...png, 0];
-        server.refuses = (bytes) => bytes.length == marked.length;
+        // Uploads are re-encoded, so the refused picture is told apart by its
+        // size, which survives that, not by its bytes.
+        final marked = img.encodePng(img.Image(width: 2, height: 2));
+        server.refuses = (bytes) => img.decodeImage(Uint8List.fromList(bytes))?.width == 2;
         // A picture that cannot go up at either end of the queue, so that
         // one is in the way whichever end the queue is taken from.
         final oldest = await addScanned('Oldest, refused', picture: pictureFile(marked));

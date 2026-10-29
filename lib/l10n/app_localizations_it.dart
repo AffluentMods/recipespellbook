@@ -2836,9 +2836,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get premiumFeature => 'Funzione Premium';
 
   @override
-  String get premiumNutrientsDescription => 'Il calcolo automatico della nutrizione richiede un abbonamento premium';
-
-  @override
   String get exportCurrentCookbook => 'Esporta ricettario attuale';
 
   @override
@@ -4588,16 +4585,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get helpCloudSync => 'Sincronizzazione cloud';
 
   @override
-  String get helpCloudSyncDesc => 'Abbonati a Cloud Sync per sincronizzare le ricette su tutti i tuoi dispositivi.';
-
-  @override
   String get accountTitle => 'Account';
-
-  @override
-  String get accountSubscription => 'Abbonamento';
-
-  @override
-  String get accountManageSubscription => 'Gestisci abbonamento';
 
   @override
   String get accountCloudSync => 'Sincronizzazione cloud';
@@ -4691,11 +4679,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get upgradeToPro => 'Passa a Pro';
-
-  @override
-  String subscriptionDot(String tier) {
-    return 'Abbonamento · $tier';
-  }
 
   @override
   String get affluentLabsPro => 'Affluent Labs Pro';
@@ -4984,19 +4967,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get oneTimeTab => 'Una tantum';
 
   @override
-  String get subscriptionTab => 'Abbonamento';
-
-  @override
   String get payOnceKeepForever => 'Paga una volta, tienilo per sempre';
 
   @override
   String get cloudSyncFreeTrial => 'Try free for 1 week';
-
-  @override
-  String get subscribeCloudSyncMonthlyTrialCta => 'Start free trial — then \$2.99/mo';
-
-  @override
-  String get subscribeCloudSyncYearlyTrialCta => 'Start free trial — then \$29.99/yr';
 
   @override
   String get cloudSyncFeature => 'Cloud Sync';
@@ -5303,46 +5277,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get choosePlanSubtitle => 'Scegli il piano adatto alla tua cucina';
 
   @override
-  String get premiumInfoNotice => 'Premium è un acquisto unico che migliora la tua esperienza gratuita.';
-
-  @override
   String get bestValue => 'MIGLIOR VALORE';
-
-  @override
-  String get billedMonthly => 'Fatturato mensilmente';
-
-  @override
-  String get save16Yearly => 'Risparmia 16% — solo 2,50\$/mese';
 
   @override
   String get save16Badge => 'RISPARMIA 16%';
 
   @override
-  String get save17Yearly => 'Risparmia 17% — solo 4,17\$/mese';
-
-  @override
-  String get subscriptionsIncludePremium => 'Tutti gli abbonamenti includono tutto ciò che è in Premium.';
-
-  @override
   String get monthly => 'Mensile';
-
-  @override
-  String get yearly => 'Annuale';
-
-  @override
-  String get purchasePremiumCta => 'Acquista Premium — 6,99\$';
-
-  @override
-  String get subscribeCloudSyncMonthlyCta => 'Abbonati — 2,99\$/mese';
-
-  @override
-  String get subscribeCloudSyncYearlyCta => 'Abbonati — 29,99\$/anno';
-
-  @override
-  String get subscribeCloudSyncPlusMonthlyCta => 'Abbonati — 4,99\$/mese';
-
-  @override
-  String get subscribeCloudSyncPlusYearlyCta => 'Abbonati — 49,99\$/anno';
 
   @override
   String get signInRequiredBeforePurchase => 'Accesso richiesto prima dell\'acquisto';
@@ -5400,18 +5341,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get comparePrice => 'Prezzo';
-
-  @override
-  String get priceFree => '0\$';
-
-  @override
-  String get pricePremium => '6,99\$\nunica tantum';
-
-  @override
-  String get priceCloudSync => '2,99\$\n/mese';
-
-  @override
-  String get priceCloudSyncPlus => '4,99\$\n/mese';
 
   @override
   String get compareDeviceTransfer => 'Trasferimento dispositivo';
@@ -8575,9 +8504,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get shareFamilyCreateJoin => 'Crea o unisciti a una famiglia per condividere';
 
   @override
-  String get shareFamilyRequiresCloudSync => 'Richiede abbonamento Cloud Sync';
-
-  @override
   String get shareFamilyUpgradeMessage => 'Passa a Cloud Sync per condividere ricettari e liste con la tua famiglia in tempo reale.';
 
   @override
@@ -9189,15 +9115,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get paywallFamilyFeature3 => 'Libri di ricette e liste della spesa condivisi';
 
   @override
-  String get paywallValueProp => 'La maggior parte delle app di ricette costa \$5–10/mese. Questa no.';
-
-  @override
   String paywallGetPlan(String planName, String planPrice) {
     return 'Ottieni $planName — $planPrice';
   }
-
-  @override
-  String get paywallOneTimePurchase => 'Acquisto unico · Nessun abbonamento · Tuo per sempre';
 
   @override
   String get paywallRestorePurchases => 'Ripristina acquisti';
@@ -9897,9 +9817,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get paywallPlanFamily => 'Famiglia';
-
-  @override
-  String get paywallPriceFamily => '\$19.99';
 
   @override
   String get paywallSublineFamily => 'acquisto unico · condividi con 5 persone';

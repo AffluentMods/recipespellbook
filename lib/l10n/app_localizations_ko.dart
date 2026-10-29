@@ -2822,9 +2822,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get premiumFeature => '프리미엄 기능';
 
   @override
-  String get premiumNutrientsDescription => '자동 영양소 계산은 프리미엄 구독이 필요합니다';
-
-  @override
   String get exportCurrentCookbook => '현재 요리책 내보내기';
 
   @override
@@ -4571,16 +4568,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get helpCloudSync => '클라우드 동기화';
 
   @override
-  String get helpCloudSyncDesc => 'Cloud Sync를 구독하여 모든 기기에서 레시피를 동기화하세요.';
-
-  @override
   String get accountTitle => '계정';
-
-  @override
-  String get accountSubscription => '구독';
-
-  @override
-  String get accountManageSubscription => '구독 관리';
 
   @override
   String get accountCloudSync => '클라우드 동기화';
@@ -4674,11 +4662,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get upgradeToPro => 'Pro로 업그레이드';
-
-  @override
-  String subscriptionDot(String tier) {
-    return '구독 · $tier';
-  }
 
   @override
   String get affluentLabsPro => 'Affluent Labs Pro';
@@ -4962,19 +4945,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get oneTimeTab => '일회성';
 
   @override
-  String get subscriptionTab => '구독';
-
-  @override
   String get payOnceKeepForever => '한 번 결제, 영원히 사용';
 
   @override
   String get cloudSyncFreeTrial => 'Try free for 1 week';
-
-  @override
-  String get subscribeCloudSyncMonthlyTrialCta => 'Start free trial — then \$2.99/mo';
-
-  @override
-  String get subscribeCloudSyncYearlyTrialCta => 'Start free trial — then \$29.99/yr';
 
   @override
   String get cloudSyncFeature => 'Cloud Sync';
@@ -5281,46 +5255,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get choosePlanSubtitle => '주방에 맞는 플랜을 선택하세요';
 
   @override
-  String get premiumInfoNotice => '프리미엄은 무료 경험을 향상시키는 일회성 구매입니다.';
-
-  @override
   String get bestValue => '최고의 가치';
-
-  @override
-  String get billedMonthly => '월별 청구';
-
-  @override
-  String get save16Yearly => '16% 절약 — 월 \$2.50';
 
   @override
   String get save16Badge => '16% 절약';
 
   @override
-  String get save17Yearly => '17% 절약 — 월 \$4.17';
-
-  @override
-  String get subscriptionsIncludePremium => '모든 구독에는 프리미엄의 모든 것이 포함됩니다.';
-
-  @override
   String get monthly => '월간';
-
-  @override
-  String get yearly => '연간';
-
-  @override
-  String get purchasePremiumCta => '프리미엄 구매 — \$6.99';
-
-  @override
-  String get subscribeCloudSyncMonthlyCta => '구독하기 — \$2.99/월';
-
-  @override
-  String get subscribeCloudSyncYearlyCta => '구독하기 — \$29.99/년';
-
-  @override
-  String get subscribeCloudSyncPlusMonthlyCta => '구독하기 — \$4.99/월';
-
-  @override
-  String get subscribeCloudSyncPlusYearlyCta => '구독하기 — \$49.99/년';
 
   @override
   String get signInRequiredBeforePurchase => '구매 전 로그인 필요';
@@ -5378,18 +5319,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get comparePrice => '가격';
-
-  @override
-  String get priceFree => '\$0';
-
-  @override
-  String get pricePremium => '\$6.99\n일회성';
-
-  @override
-  String get priceCloudSync => '\$2.99\n/월';
-
-  @override
-  String get priceCloudSyncPlus => '\$4.99\n/월';
 
   @override
   String get compareDeviceTransfer => '기기 전송';
@@ -8524,9 +8453,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shareFamilyCreateJoin => '공유하려면 가족을 만들거나 참여하세요';
 
   @override
-  String get shareFamilyRequiresCloudSync => 'Cloud Sync 구독이 필요합니다';
-
-  @override
   String get shareFamilyUpgradeMessage => 'Cloud Sync로 업그레이드하여 가족과 레시피북과 목록을 실시간으로 공유하세요.';
 
   @override
@@ -9138,15 +9064,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallFamilyFeature3 => '공유 요리책 & 쇼핑 목록';
 
   @override
-  String get paywallValueProp => '대부분의 레시피 앱은 월 \$5~10을 청구합니다. 이 앱은 다릅니다.';
-
-  @override
   String paywallGetPlan(String planName, String planPrice) {
     return '$planName 구매 — $planPrice';
   }
-
-  @override
-  String get paywallOneTimePurchase => '일회성 구매 · 구독 없음 · 영원히 소유';
 
   @override
   String get paywallRestorePurchases => '구매 복원';
@@ -9840,9 +9760,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get paywallPlanFamily => '패밀리';
-
-  @override
-  String get paywallPriceFamily => '\$19.99';
 
   @override
   String get paywallSublineFamily => '일회성 · 5명과 공유';

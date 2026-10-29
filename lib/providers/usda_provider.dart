@@ -6,14 +6,7 @@ import 'database_provider.dart';
 /// Provider for the USDA service
 final usdaServiceProvider = Provider<UsdaService>((ref) {
   final db = ref.watch(databaseProvider);
-  return UsdaService(
-    usdaDao: db.usdaDao,
-    // Configure your server URL here
-    baseUrl: const String.fromEnvironment(
-      'USDA_API_URL',
-      defaultValue: 'https://api.recipespellbook.app',
-    ),
-  );
+  return UsdaService(usdaDao: db.usdaDao);
 });
 
 /// Provider for the nutrition calculator

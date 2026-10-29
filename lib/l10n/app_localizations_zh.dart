@@ -2822,9 +2822,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get premiumFeature => '高级功能';
 
   @override
-  String get premiumNutrientsDescription => '自动营养素计算需要高级订阅';
-
-  @override
   String get exportCurrentCookbook => '导出当前食谱书';
 
   @override
@@ -4571,16 +4568,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get helpCloudSync => '云端同步';
 
   @override
-  String get helpCloudSyncDesc => '订阅云端同步，在所有设备上同步食谱。';
-
-  @override
   String get accountTitle => '账户';
-
-  @override
-  String get accountSubscription => '订阅';
-
-  @override
-  String get accountManageSubscription => '管理订阅';
 
   @override
   String get accountCloudSync => '云同步';
@@ -4674,11 +4662,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get upgradeToPro => '升级到Pro';
-
-  @override
-  String subscriptionDot(String tier) {
-    return '订阅 · $tier';
-  }
 
   @override
   String get affluentLabsPro => 'Affluent Labs Pro';
@@ -4962,19 +4945,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get oneTimeTab => '一次性';
 
   @override
-  String get subscriptionTab => '订阅';
-
-  @override
   String get payOnceKeepForever => '一次付费，永久使用';
 
   @override
   String get cloudSyncFreeTrial => 'Try free for 1 week';
-
-  @override
-  String get subscribeCloudSyncMonthlyTrialCta => 'Start free trial — then \$2.99/mo';
-
-  @override
-  String get subscribeCloudSyncYearlyTrialCta => 'Start free trial — then \$29.99/yr';
 
   @override
   String get cloudSyncFeature => '云端同步';
@@ -5281,46 +5255,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get choosePlanSubtitle => '选择适合您厨房的方案';
 
   @override
-  String get premiumInfoNotice => '高级版是一次性购买，提升您的免费体验。';
-
-  @override
   String get bestValue => '最佳价值';
-
-  @override
-  String get billedMonthly => '按月计费';
-
-  @override
-  String get save16Yearly => '节省16% — 仅\$2.50/月';
 
   @override
   String get save16Badge => '节省16%';
 
   @override
-  String get save17Yearly => '节省17% — 仅\$4.17/月';
-
-  @override
-  String get subscriptionsIncludePremium => '所有订阅均包含高级版的所有内容。';
-
-  @override
   String get monthly => '月付';
-
-  @override
-  String get yearly => '年付';
-
-  @override
-  String get purchasePremiumCta => '购买高级版 — \$6.99';
-
-  @override
-  String get subscribeCloudSyncMonthlyCta => '订阅 — \$2.99/月';
-
-  @override
-  String get subscribeCloudSyncYearlyCta => '订阅 — \$29.99/年';
-
-  @override
-  String get subscribeCloudSyncPlusMonthlyCta => '订阅 — \$4.99/月';
-
-  @override
-  String get subscribeCloudSyncPlusYearlyCta => '订阅 — \$49.99/年';
 
   @override
   String get signInRequiredBeforePurchase => '购买前需要登录';
@@ -5378,18 +5319,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get comparePrice => '价格';
-
-  @override
-  String get priceFree => '\$0';
-
-  @override
-  String get pricePremium => '\$6.99\n一次性';
-
-  @override
-  String get priceCloudSync => '\$2.99\n/月';
-
-  @override
-  String get priceCloudSyncPlus => '\$4.99\n/月';
 
   @override
   String get compareDeviceTransfer => '设备传输';
@@ -8524,9 +8453,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shareFamilyCreateJoin => '创建或加入家庭以共享';
 
   @override
-  String get shareFamilyRequiresCloudSync => '需要Cloud Sync订阅';
-
-  @override
   String get shareFamilyUpgradeMessage => '升级到Cloud Sync，与家人实时共享食谱本和清单。';
 
   @override
@@ -9138,15 +9064,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get paywallFamilyFeature3 => '共享食谱书和购物清单';
 
   @override
-  String get paywallValueProp => '大多数食谱应用每月收费 \$5–10。这个不一样。';
-
-  @override
   String paywallGetPlan(String planName, String planPrice) {
     return '选择 $planName — $planPrice';
   }
-
-  @override
-  String get paywallOneTimePurchase => '一次性购买 · 无订阅 · 永久拥有';
 
   @override
   String get paywallRestorePurchases => '恢复购买';
@@ -9840,9 +9760,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get paywallPlanFamily => '家庭版';
-
-  @override
-  String get paywallPriceFamily => '\$19.99';
 
   @override
   String get paywallSublineFamily => '一次性 · 与5人共享';
