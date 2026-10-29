@@ -18,6 +18,16 @@ class ImportedRecipe {
   String? suggestedCourse;
   String? suggestedCategory;
   int? rating;
+  String? nutritionJson; // The app's own nutrition format (from a scanned product)
+
+  // From the app's own export, which holds every row the way the app stores
+  // it. The rows, when set, are what gets saved, exactly as they are. The
+  // ingredients and instructions above are then the same lines to read.
+  String? exportId; // The id of the recipe in the file, which links between its recipes go by
+  bool? isFavorite;
+  Map<String, String?>? tagsById; // Its tags by id, each with its name where the file gives it
+  List<ImportedIngredient>? ingredientRows;
+  List<ImportedStep>? stepRows;
 
   // Bulk import tracking
   String? sourceApp; // "paprika", "recipekeeper", "crouton", etc.
@@ -45,6 +55,12 @@ class ImportedRecipe {
     this.suggestedCourse,
     this.suggestedCategory,
     this.rating,
+    this.nutritionJson,
+    this.exportId,
+    this.isFavorite,
+    this.tagsById,
+    this.ingredientRows,
+    this.stepRows,
     this.sourceApp,
     this.sourceFile,
     this.parseConfidence,
@@ -112,4 +128,50 @@ class ImportedRecipe {
     }
     return [];
   }
+}
+
+/// An ingredient that arrives already taken apart, the way the app stores it:
+/// the amount as it was written, the unit, the name and a note. A section
+/// heading among the ingredients has [isHeading] set and only a name.
+class ImportedIngredient {
+  final String name;
+  final String? amount;
+  final String? unit;
+  final String? notes;
+  final bool isHeading;
+
+  /// The recipes this ingredient stands for ("1 Pizza Dough"), each by its
+  /// [ImportedRecipe.exportId] and with how much of it goes in.
+  final List<({String recipeId, double scale})> links;
+
+  const ImportedIngredient({
+    required this.name,
+    this.amount,
+    this.unit,
+    this.notes,
+    this.isHeading = false,
+    this.links = const [],
+  });
+
+  /// The row on one line, as in "2 cup passata (or crushed tomatoes)". A
+  /// heading is its title and no more.
+  String get line => isHeading
+      ? name
+      : [
+          if (amount != null && amount!.isNotEmpty) amount!,
+          if (unit != null && unit!.isNotEmpty) unit!,
+          name,
+          if (notes != null && notes!.isNotEmpty) '($notes)',
+        ].join(' ');
+}
+
+/// A step that arrives the way the app stores it: with its timer and its
+/// photo. A section heading among the steps has [isHeading] set.
+class ImportedStep {
+  final String instruction;
+  final int? durationMinutes;
+  final String? imageData; // Base64 encoded
+  final bool isHeading;
+
+  const ImportedStep({required this.instruction, this.durationMinutes, this.imageData, this.isHeading = false});
 }
