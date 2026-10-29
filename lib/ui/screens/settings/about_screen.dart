@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../services/feedback_service.dart';
 import '../../../utils/responsive_utils.dart';
 
 class AboutScreen extends ConsumerWidget {
@@ -136,14 +137,18 @@ class AboutScreen extends ConsumerWidget {
                   icon: Icons.bug_report_outlined,
                   title: l10n.aboutReportBug,
                   subtitle: l10n.aboutReportBugSub,
-                  onTap: () => _launchUrl('https://discord.gg/NnkUwxSdFX', context),
+                  // An email with the app version and device model filled in.
+                  onTap: () async {
+                    final uri = await FeedbackService.bugReportEmail();
+                    if (context.mounted) await _launchUrl(uri.toString(), context);
+                  },
                 ),
                 _divider(theme),
                 _AboutTile(
                   icon: Icons.star_outline,
                   title: l10n.aboutRateApp,
                   subtitle: l10n.aboutRateAppSub,
-                  onTap: () => _launchUrl('https://play.google.com/store/apps/details?id=app.recipespellbook', context),
+                  onTap: () => _launchUrl('https://play.google.com/store/apps/details?id=com.affluentlabs.recipespellbook', context),
                 ),
               ],
             ),

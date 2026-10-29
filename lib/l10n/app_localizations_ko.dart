@@ -5406,63 +5406,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get joinDiscordSubtitle => '도움을 받고 레시피를 공유하세요';
 
   @override
-  String get actionSend => '보내기';
-
-  @override
-  String get suggestionDescription => '아이디어를 기다립니다! 제안은 팀에 직접 전송됩니다.';
-
-  @override
-  String get suggestionTitleLabel => '제안 제목';
-
-  @override
-  String get suggestionTitleHint => '예: 요리용 다크 모드 추가';
-
-  @override
-  String get suggestionDetailsLabel => '세부 정보';
-
-  @override
-  String get suggestionDetailsHint => '아이디어를 자세히 설명해 주세요...';
-
-  @override
-  String get contactOptionalLabel => '연락처 (선택)';
-
-  @override
-  String get contactOptionalHint => '이메일 또는 Discord 이름';
-
-  @override
-  String get suggestionSent => '감사합니다! 제안이 전송되었습니다 💡';
-
-  @override
-  String get bugDescription => '버그를 발견했나요? 알려주시면 수정하겠습니다.';
-
-  @override
-  String get bugTitleLabel => '버그 제목';
-
-  @override
-  String get bugTitleHint => '예: PDF 가져오기 시 앱이 충돌함';
-
-  @override
-  String get bugDetailsLabel => '무슨 일이 있었나요?';
-
-  @override
-  String get bugDetailsHint => '무엇이 잘못되었는지 설명해 주세요...';
-
-  @override
-  String get bugStepsLabel => '재현 단계 (선택)';
-
-  @override
-  String get bugStepsHint => '1. 레시피 열기\n2. 공유 탭하기\n3. 앱이 충돌함';
-
-  @override
-  String get bugReportSent => '감사합니다! 버그 보고서가 전송되었습니다 🐛';
-
-  @override
-  String get feedbackFieldsRequired => '제목과 세부 정보를 입력하세요';
-
-  @override
-  String get feedbackSendError => '피드백을 전송할 수 없습니다. 연결을 확인하세요.';
-
-  @override
   String get mealTypeAppetizer => '전채';
 
   @override
@@ -6461,36 +6404,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get minutesCookSuffix => '분 조리';
 
   @override
-  String get couldNotOpenBrowser => '브라우저를 열 수 없습니다';
-
-  @override
   String couldNotOpenUrl(String url) {
     return '$url을(를) 열 수 없습니다';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => 'Discord 계정 연결';
-
-  @override
-  String get discordLinkSubtitle => '커뮤니티 기능을 위해 Discord 연결';
-
-  @override
-  String get discordSignInFirst => 'Discord를 연결하려면 먼저 로그인';
-
-  @override
-  String get discordUnlink => 'Discord 연결 해제';
-
-  @override
-  String get discordUnlinkFailed => 'Discord 연결 해제 실패';
-
-  @override
-  String get discordUnlinkSubtitle => 'Discord 연결 제거';
-
-  @override
-  String get discordUnlinked => 'Discord 연결이 해제되었습니다';
 
   @override
   String get familyCodeCopied => '초대 코드가 복사되었습니다!';
@@ -6639,16 +6555,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get integrationsConnectedManage => '연결됨 - 탭하여 관리';
 
   @override
-  String get integrationsLinked => '연결됨';
-
-  @override
-  String get integrationsLinkedManage => '연결됨 - 탭하여 관리';
-
-  @override
   String get integrationsNotConnected => '연결되지 않음';
-
-  @override
-  String get integrationsTapToLink => '탭하여 연결';
 
   @override
   String get integrationsTapToSignIn => '탭하여 로그인';

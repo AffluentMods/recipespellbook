@@ -5526,63 +5526,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get joinDiscordSubtitle => 'Получите помощь и делитесь рецептами';
 
   @override
-  String get actionSend => 'Отправить';
-
-  @override
-  String get suggestionDescription => 'Мы любим ваши идеи! Ваше предложение будет отправлено напрямую нашей команде.';
-
-  @override
-  String get suggestionTitleLabel => 'Заголовок предложения';
-
-  @override
-  String get suggestionTitleHint => 'напр., Добавить тёмный режим для готовки';
-
-  @override
-  String get suggestionDetailsLabel => 'Детали';
-
-  @override
-  String get suggestionDetailsHint => 'Опишите вашу идею подробно...';
-
-  @override
-  String get contactOptionalLabel => 'Контакт (необязательно)';
-
-  @override
-  String get contactOptionalHint => 'Email или имя Discord';
-
-  @override
-  String get suggestionSent => 'Спасибо! Ваше предложение отправлено 💡';
-
-  @override
-  String get bugDescription => 'Нашли ошибку? Расскажите нам, и мы исправим её.';
-
-  @override
-  String get bugTitleLabel => 'Заголовок ошибки';
-
-  @override
-  String get bugTitleHint => 'напр., Приложение вылетает при импорте PDF';
-
-  @override
-  String get bugDetailsLabel => 'Что произошло?';
-
-  @override
-  String get bugDetailsHint => 'Опишите что пошло не так...';
-
-  @override
-  String get bugStepsLabel => 'Шаги для воспроизведения (необязательно)';
-
-  @override
-  String get bugStepsHint => '1. Открыть рецепт\n2. Нажать поделиться\n3. Приложение вылетает';
-
-  @override
-  String get bugReportSent => 'Спасибо! Ваш отчёт об ошибке отправлен 🐛';
-
-  @override
-  String get feedbackFieldsRequired => 'Заполните заголовок и детали';
-
-  @override
-  String get feedbackSendError => 'Не удалось отправить отзыв. Проверьте подключение.';
-
-  @override
   String get mealTypeAppetizer => 'Закуска';
 
   @override
@@ -6585,36 +6528,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get minutesCookSuffix => 'м готовки';
 
   @override
-  String get couldNotOpenBrowser => 'Не удалось открыть браузер';
-
-  @override
   String couldNotOpenUrl(String url) {
     return 'Не удалось открыть $url';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => 'Привязать аккаунт Discord';
-
-  @override
-  String get discordLinkSubtitle => 'Подключите Discord для функций сообщества';
-
-  @override
-  String get discordSignInFirst => 'Сначала войдите, чтобы привязать Discord';
-
-  @override
-  String get discordUnlink => 'Отвязать Discord';
-
-  @override
-  String get discordUnlinkFailed => 'Не удалось отвязать Discord';
-
-  @override
-  String get discordUnlinkSubtitle => 'Удалить связь с Discord';
-
-  @override
-  String get discordUnlinked => 'Discord отвязан';
 
   @override
   String get familyCodeCopied => 'Код приглашения скопирован!';
@@ -6763,16 +6679,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get integrationsConnectedManage => 'Подключено – Нажмите для управления';
 
   @override
-  String get integrationsLinked => 'Привязано';
-
-  @override
-  String get integrationsLinkedManage => 'Привязано – Нажмите для управления';
-
-  @override
   String get integrationsNotConnected => 'Не подключено';
-
-  @override
-  String get integrationsTapToLink => 'Нажмите для привязки';
 
   @override
   String get integrationsTapToSignIn => 'Нажмите для входа';

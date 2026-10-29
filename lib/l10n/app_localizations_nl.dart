@@ -5460,63 +5460,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get joinDiscordSubtitle => 'Krijg hulp en deel recepten';
 
   @override
-  String get actionSend => 'Sturen';
-
-  @override
-  String get suggestionDescription => 'We zijn dol op je ideeën! Je suggestie wordt rechtstreeks naar ons team gestuurd.';
-
-  @override
-  String get suggestionTitleLabel => 'Suggestietitel';
-
-  @override
-  String get suggestionTitleHint => 'bijv. Donkere modus voor koken toevoegen';
-
-  @override
-  String get suggestionDetailsLabel => 'Details';
-
-  @override
-  String get suggestionDetailsHint => 'Beschrijf je idee in detail...';
-
-  @override
-  String get contactOptionalLabel => 'Contact (optioneel)';
-
-  @override
-  String get contactOptionalHint => 'E-mail of Discord-naam';
-
-  @override
-  String get suggestionSent => 'Bedankt! Je suggestie is verstuurd 💡';
-
-  @override
-  String get bugDescription => 'Bug gevonden? Vertel het ons en we lossen het op.';
-
-  @override
-  String get bugTitleLabel => 'Bugtitel';
-
-  @override
-  String get bugTitleHint => 'bijv. App crasht bij PDF importeren';
-
-  @override
-  String get bugDetailsLabel => 'Wat is er gebeurd?';
-
-  @override
-  String get bugDetailsHint => 'Beschrijf wat er misging...';
-
-  @override
-  String get bugStepsLabel => 'Stappen om te reproduceren (optioneel)';
-
-  @override
-  String get bugStepsHint => '1. Recept openen\n2. Op delen tikken\n3. App crasht';
-
-  @override
-  String get bugReportSent => 'Bedankt! Je bugrapport is verstuurd 🐛';
-
-  @override
-  String get feedbackFieldsRequired => 'Vul de titel en details in';
-
-  @override
-  String get feedbackSendError => 'Kan feedback niet versturen. Controleer je verbinding.';
-
-  @override
   String get mealTypeAppetizer => 'Voorgerecht';
 
   @override
@@ -6515,36 +6458,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get minutesCookSuffix => 'm koken';
 
   @override
-  String get couldNotOpenBrowser => 'Kan browser niet openen';
-
-  @override
   String couldNotOpenUrl(String url) {
     return 'Kan $url niet openen';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => 'Discord-account koppelen';
-
-  @override
-  String get discordLinkSubtitle => 'Koppel je Discord voor communityfuncties';
-
-  @override
-  String get discordSignInFirst => 'Log eerst in om Discord te koppelen';
-
-  @override
-  String get discordUnlink => 'Discord ontkoppelen';
-
-  @override
-  String get discordUnlinkFailed => 'Discord ontkoppelen mislukt';
-
-  @override
-  String get discordUnlinkSubtitle => 'Je Discord-verbinding verwijderen';
-
-  @override
-  String get discordUnlinked => 'Discord ontkoppeld';
 
   @override
   String get familyCodeCopied => 'Uitnodigingscode gekopieerd!';
@@ -6693,16 +6609,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get integrationsConnectedManage => 'Verbonden – Tik om te beheren';
 
   @override
-  String get integrationsLinked => 'Gekoppeld';
-
-  @override
-  String get integrationsLinkedManage => 'Gekoppeld – Tik om te beheren';
-
-  @override
   String get integrationsNotConnected => 'Niet verbonden';
-
-  @override
-  String get integrationsTapToLink => 'Tik om te koppelen';
 
   @override
   String get integrationsTapToSignIn => 'Tik om in te loggen';

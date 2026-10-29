@@ -5460,63 +5460,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get joinDiscordSubtitle => 'Hilfe erhalten, chatten und Rezepte teilen';
 
   @override
-  String get actionSend => 'Senden';
-
-  @override
-  String get suggestionDescription => 'Wir freuen uns über deine Ideen! Dein Vorschlag wird direkt an unser Team gesendet.';
-
-  @override
-  String get suggestionTitleLabel => 'Titel des Vorschlags';
-
-  @override
-  String get suggestionTitleHint => 'z.B., Dunkelmodus für den Kochbildschirm';
-
-  @override
-  String get suggestionDetailsLabel => 'Details';
-
-  @override
-  String get suggestionDetailsHint => 'Beschreibe deine Idee im Detail...';
-
-  @override
-  String get contactOptionalLabel => 'Kontakt (optional)';
-
-  @override
-  String get contactOptionalHint => 'E-Mail oder Discord-Benutzername';
-
-  @override
-  String get suggestionSent => 'Danke! Dein Vorschlag wurde gesendet 💡';
-
-  @override
-  String get bugDescription => 'Einen Fehler gefunden? Lass es uns wissen und wir beheben ihn. Geräteinformationen werden automatisch mitgesendet.';
-
-  @override
-  String get bugTitleLabel => 'Fehlertitel';
-
-  @override
-  String get bugTitleHint => 'z.B., App stürzt beim PDF-Import ab';
-
-  @override
-  String get bugDetailsLabel => 'Was ist passiert?';
-
-  @override
-  String get bugDetailsHint => 'Beschreibe, was schiefgelaufen ist...';
-
-  @override
-  String get bugStepsLabel => 'Schritte zum Reproduzieren (optional)';
-
-  @override
-  String get bugStepsHint => '1. Rezept öffnen\n2. Teilen antippen\n3. App stürzt ab';
-
-  @override
-  String get bugReportSent => 'Danke! Dein Fehlerbericht wurde gesendet 🐛';
-
-  @override
-  String get feedbackFieldsRequired => 'Bitte fülle Titel und Details aus';
-
-  @override
-  String get feedbackSendError => 'Senden fehlgeschlagen. Überprüfe deine Internetverbindung.';
-
-  @override
   String get mealTypeAppetizer => 'Vorspeise';
 
   @override
@@ -6515,36 +6458,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get minutesCookSuffix => 'm Kochen';
 
   @override
-  String get couldNotOpenBrowser => 'Browser konnte nicht geöffnet werden';
-
-  @override
   String couldNotOpenUrl(String url) {
     return '$url konnte nicht geöffnet werden';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => 'Discord-Konto verknüpfen';
-
-  @override
-  String get discordLinkSubtitle => 'Verbinde dein Discord für Community-Funktionen';
-
-  @override
-  String get discordSignInFirst => 'Zuerst anmelden, um Discord zu verknüpfen';
-
-  @override
-  String get discordUnlink => 'Discord trennen';
-
-  @override
-  String get discordUnlinkFailed => 'Discord-Trennung fehlgeschlagen';
-
-  @override
-  String get discordUnlinkSubtitle => 'Deine Discord-Verbindung entfernen';
-
-  @override
-  String get discordUnlinked => 'Discord getrennt';
 
   @override
   String get familyCodeCopied => 'Einladungscode kopiert!';
@@ -6693,16 +6609,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get integrationsConnectedManage => 'Verbunden – Zum Verwalten tippen';
 
   @override
-  String get integrationsLinked => 'Verknüpft';
-
-  @override
-  String get integrationsLinkedManage => 'Verknüpft – Zum Verwalten tippen';
-
-  @override
   String get integrationsNotConnected => 'Nicht verbunden';
-
-  @override
-  String get integrationsTapToLink => 'Zum Verknüpfen tippen';
 
   @override
   String get integrationsTapToSignIn => 'Zum Anmelden tippen';

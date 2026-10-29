@@ -5406,63 +5406,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get joinDiscordSubtitle => '获得帮助并分享食谱';
 
   @override
-  String get actionSend => '发送';
-
-  @override
-  String get suggestionDescription => '我们期待您的想法！您的建议将直接发送给我们的团队。';
-
-  @override
-  String get suggestionTitleLabel => '建议标题';
-
-  @override
-  String get suggestionTitleHint => '例如：为烹饪添加深色模式';
-
-  @override
-  String get suggestionDetailsLabel => '详情';
-
-  @override
-  String get suggestionDetailsHint => '详细描述您的想法...';
-
-  @override
-  String get contactOptionalLabel => '联系方式（可选）';
-
-  @override
-  String get contactOptionalHint => '邮箱或Discord名称';
-
-  @override
-  String get suggestionSent => '感谢您！建议已发送 💡';
-
-  @override
-  String get bugDescription => '发现错误？告诉我们，我们会修复它。';
-
-  @override
-  String get bugTitleLabel => '错误标题';
-
-  @override
-  String get bugTitleHint => '例如：导入PDF时应用崩溃';
-
-  @override
-  String get bugDetailsLabel => '发生了什么？';
-
-  @override
-  String get bugDetailsHint => '描述出了什么问题...';
-
-  @override
-  String get bugStepsLabel => '重现步骤（可选）';
-
-  @override
-  String get bugStepsHint => '1. 打开食谱\n2. 点击分享\n3. 应用崩溃';
-
-  @override
-  String get bugReportSent => '感谢您！错误报告已发送 🐛';
-
-  @override
-  String get feedbackFieldsRequired => '请填写标题和详情';
-
-  @override
-  String get feedbackSendError => '无法发送反馈，请检查连接。';
-
-  @override
   String get mealTypeAppetizer => '开胃菜';
 
   @override
@@ -6461,36 +6404,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get minutesCookSuffix => '分钟烹饪';
 
   @override
-  String get couldNotOpenBrowser => '无法打开浏览器';
-
-  @override
   String couldNotOpenUrl(String url) {
     return '无法打开$url';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => '关联Discord账户';
-
-  @override
-  String get discordLinkSubtitle => '连接你的Discord以使用社区功能';
-
-  @override
-  String get discordSignInFirst => '请先登录以关联Discord';
-
-  @override
-  String get discordUnlink => '取消关联Discord';
-
-  @override
-  String get discordUnlinkFailed => '取消关联Discord失败';
-
-  @override
-  String get discordUnlinkSubtitle => '移除你的Discord连接';
-
-  @override
-  String get discordUnlinked => 'Discord已取消关联';
 
   @override
   String get familyCodeCopied => '邀请码已复制！';
@@ -6639,16 +6555,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get integrationsConnectedManage => '已连接 - 点击管理';
 
   @override
-  String get integrationsLinked => '已关联';
-
-  @override
-  String get integrationsLinkedManage => '已关联 - 点击管理';
-
-  @override
   String get integrationsNotConnected => '未连接';
-
-  @override
-  String get integrationsTapToLink => '点击关联';
 
   @override
   String get integrationsTapToSignIn => '点击登录';
