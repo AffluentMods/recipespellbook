@@ -10,7 +10,9 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart' hide Step;
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/ui/screens/import/import_preview_screen.dart';
@@ -122,6 +124,81 @@ void main() {
       expect(saved, hasLength(5));
       expect(saved!.map((r) => r.imagePath), everyElement(isNotNull));
       expect(Directory(p.join(docs.path, 'recipe_images')).listSync(), hasLength(5));
+    });
+
+    testWidgets('an import started from the keyboard runs once, whatever keys follow', (tester) async {
+      // Held at its first step, the import is still running when the keys
+      // come.
+      final folderAsked = Completer<void>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        pathProvider,
+        (call) => folderAsked.future.then((_) => docs.path),
+      );
+      final db = await openDb(tester);
+      await openPreview(tester, db, [recipe('Pancakes'), recipe('Waffles')]);
+      final button = Focus.of(tester.element(find.text('Import 2 recipes')));
+      button.requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(find.text('Importing recipes...'), findsOneWidget);
+
+      // Tab brings the keyboard back to the button while the import runs.
+      button.requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pump();
+
+      folderAsked.complete();
+      await importDone(tester);
+      await clearSnackbar(tester);
+      final rows = await tester.runAsync(() => db.select(db.recipes).get());
+      expect(rows!.map((r) => r.title).toList()..sort(), ['Pancakes', 'Waffles']);
+    });
+
+    testWidgets('the result is told when the preview is closed under the import', (tester) async {
+      final db = await openDb(tester);
+      await openPreview(tester, db, [
+        for (var i = 1; i <= 12; i++) recipe('Weeknight Dinner $i')..imageData = base64Encode(photo(i)),
+      ]);
+      await tester.tap(find.text('Import 12 recipes'));
+      await settleUntil(tester, () => folderRequests > 0);
+      await tester.pump();
+      // A notification opens a page the way the router does, which takes
+      // the preview away with no way back to it.
+      GoRouter.of(tester.element(find.byType(ImportPreviewScreen))).go('/recipe/x');
+      await tester.pump();
+
+      await settleUntil(tester, () => find.text('5 of 12 recipes imported').evaluate().isNotEmpty, rounds: 600);
+      expect(previewOpen(), isFalse);
+      expect(find.text('recipe page'), findsOneWidget);
+      expect(find.text('5 of 12 recipes imported'), findsOneWidget);
+      await clearSnackbar(tester);
+      expect(await tester.runAsync(() => db.select(db.recipes).get()), hasLength(5));
+    });
+
+    testWidgets('Cancel and a failure together say how many were never tried', (tester) async {
+      final db = await openDb(tester);
+      await tester.runAsync(() => db.customStatement(
+            "CREATE TRIGGER fail_one BEFORE INSERT ON recipes WHEN NEW.title = 'Weeknight Dinner 2' "
+            "BEGIN SELECT RAISE(ABORT, 'boom'); END;",
+          ));
+      await openPreview(tester, db, [
+        for (var i = 1; i <= 12; i++) recipe('Weeknight Dinner $i')..imageData = base64Encode(photo(i)),
+      ]);
+      await tester.tap(find.text('Import 12 recipes'));
+      await settleUntil(tester, () => folderRequests > 0);
+      await tester.pump();
+      await tester.tap(find.text('Cancel'));
+      await tester.pump();
+
+      await importDone(tester);
+      expect(find.text('4 of 12 recipes imported, 1 failed'), findsOneWidget);
+      await clearSnackbar(tester);
+      // The picture stored for the recipe that failed was taken away again.
+      expect(Directory(p.join(docs.path, 'recipe_images')).listSync(), hasLength(4));
     });
 
     testWidgets('Cancel before anything is saved leaves the preview as it was', (tester) async {
@@ -245,6 +322,30 @@ void main() {
       expect(find.text('Import 3 recipes'), findsOneWidget);
     });
 
+    testWidgets('titles in any alphabet are compared, and an accent makes no difference', (tester) async {
+      const custard = ['cream', 'egg yolks', 'sugar', 'vanilla'];
+      const soup = ['свёкла', 'капуста', 'картофель', 'морковь'];
+      final db = await openDb(tester, existing: ['Crème brûlée'], ingredients: {'Crème brûlée': custard});
+      await openPreview(tester, db, [
+        recipe('Creme Brulee', ingredients: custard),
+        recipe('Борщ', ingredients: soup),
+        recipe('Борщ', ingredients: soup),
+      ]);
+      await settleUntil(tester, () => find.text('checking duplicates...').evaluate().isEmpty);
+
+      expect(find.text('Similar exists'), findsOneWidget);
+      expect(find.text('Similar in batch'), findsOneWidget);
+    });
+
+    testWidgets('a check that could not be run says so, and the import still works', (tester) async {
+      final db = await openDb(tester, existing: ['Pancakes'], watch: _FailingIngredientsRead());
+      await openPreview(tester, db, [recipe('Pancakes')]);
+      await settleUntil(tester, () => find.text('checking duplicates...').evaluate().isEmpty);
+      expect(find.text('duplicates could not be checked'), findsOneWidget);
+      // Nothing was flagged, so nothing was left out.
+      expect(find.text('Import 1 recipe'), findsOneWidget);
+    });
+
     testWidgets('the ingredients of the whole library are read in one query', (tester) async {
       final watch = _SelectCounter();
       final db = await openDb(
@@ -351,6 +452,16 @@ void main() {
       expect(steps.where((s) => s.notes == null), hasLength(3));
     });
   });
+}
+
+/// Fails the one query that reads the ingredients of the whole library.
+class _FailingIngredientsRead extends drift.QueryInterceptor {
+  @override
+  Future<List<Map<String, Object?>>> runSelect(drift.QueryExecutor executor, String statement, List<Object?> args) {
+    final sql = statement.toLowerCase();
+    if (sql.contains('from "ingredients"') && !sql.contains('where')) throw StateError('disk I/O error');
+    return executor.runSelect(statement, args);
+  }
 }
 
 /// Records the SELECT statements a database is asked to run.

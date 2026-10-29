@@ -281,19 +281,6 @@ void expectQuantity(Ingredient row, double value, {required String line}) {
   expect(row.unit, isNotNull, reason: line);
 }
 
-/// The line was not cut in the middle of its quantity: the name does not
-/// begin with what joins two numbers, each of [numbers] is still on the line,
-/// and a row without an amount is the line exactly as it was written.
-void expectNotCutUp(Ingredient row, String line, {List<String> numbers = const []}) {
-  final shown = [row.amount, row.unit, row.name].whereType<String>().join(' ');
-  final reason = '"$line" stored as amount "${row.amount}", unit "${row.unit}", name "${row.name}"';
-  for (final n in numbers) {
-    expect(shown, contains(n), reason: reason);
-  }
-  expect(row.name, isNot(matches(RegExp(r'^(?:[-,./]|to\s)'))), reason: reason);
-  if (row.amount == null) expect(row.name, line, reason: reason);
-}
-
 /// Lets a transition, a sheet or a database call finish.
 ///
 /// The database lives outside the test's fake clock, so its answers only

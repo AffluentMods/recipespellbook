@@ -1,5 +1,6 @@
 import '../database/database.dart';
 import '../models/imported_recipe.dart';
+import 'text_normalize.dart';
 
 /// Lightweight recipe similarity scoring for duplicate detection on import.
 ///
@@ -45,16 +46,33 @@ class RecipeSimilarity {
     'the', 'a', 'an', 'of', 'and', 'or', 'with', 'to', 'in',
   };
 
-  /// Tokenize and normalize a string for comparison.
+  static final _notWord = RegExp(r'[^\p{L}\p{N}\s]', unicode: true);
+  static final _spaces = RegExp(r'\s+');
+
+  /// Kana, Han and Hangul are written without spaces, and one of their
+  /// characters can be a whole word.
+  static final _wordCharacter = RegExp(r'[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]');
+
+  /// Tokenize and normalize a string for comparison. Letters of every
+  /// alphabet count, and an accent makes no difference.
   static Set<String> _tokens(String input, Set<String> stopWords) {
-    return input
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
-        .split(RegExp(r'\s+'))
-        .map((t) => t.trim())
-        .where((t) => t.length > 1 && !stopWords.contains(t))
+    return foldAccents(input)
+        .replaceAll(_notWord, ' ')
+        .split(_spaces)
+        .where((t) => (t.length > 1 || _wordCharacter.hasMatch(t)) && !stopWords.contains(t))
         .toSet();
   }
+
+  /// The words of a title that say what the dish is.
+  static Set<String> titleTokens(String title) => _tokens(title, _titleStopWords);
+
+  /// The words of an ingredient list that say what goes in.
+  static Set<String> ingredientTokens(Iterable<String> ingredients) => {
+        for (final ingredient in ingredients) ..._tokens(ingredient, _ingredientStopWords),
+      };
+
+  /// Jaccard similarity between two sets of tokens (0-1).
+  static double tokenSimilarity(Set<String> a, Set<String> b) => _jaccard(a, b);
 
   /// Jaccard similarity between two sets: |A ∩ B| / |A ∪ B|.
   static double _jaccard(Set<String> a, Set<String> b) {
@@ -66,21 +84,13 @@ class RecipeSimilarity {
 
   /// Score title similarity (0-1).
   static double titleSimilarity(String a, String b) {
-    return _jaccard(_tokens(a, _titleStopWords), _tokens(b, _titleStopWords));
+    return _jaccard(titleTokens(a), titleTokens(b));
   }
 
   /// Score ingredient list similarity (0-1).
   /// Each ingredient is reduced to its canonical "what" tokens.
   static double ingredientSimilarity(List<String> a, List<String> b) {
-    final aTokens = <String>{};
-    final bTokens = <String>{};
-    for (final ing in a) {
-      aTokens.addAll(_tokens(ing, _ingredientStopWords));
-    }
-    for (final ing in b) {
-      bTokens.addAll(_tokens(ing, _ingredientStopWords));
-    }
-    return _jaccard(aTokens, bTokens);
+    return _jaccard(ingredientTokens(a), ingredientTokens(b));
   }
 
   /// Returns true if two recipes are near-duplicates (same dish, possibly
@@ -137,35 +147,67 @@ class ImportDuplicateChecker {
       }
     }
 
+    // Every title is taken apart once, and an ingredient list only when a
+    // title has matched. Two titles can only be similar when they share a
+    // word, so each recipe is compared with the ones filed under its words
+    // and not with the whole library.
+    final importTitles = [for (final r in imports) RecipeSimilarity.titleTokens(r.title)];
+    final importIngredients = List<Set<String>?>.filled(imports.length, null);
+    Set<String> ingredientsOfImport(int i) =>
+        importIngredients[i] ??= RecipeSimilarity.ingredientTokens(imports[i].ingredients);
+
+    bool similar(Set<String> titleA, Set<String> titleB, Set<String> Function() ingredientsA, Set<String> Function() ingredientsB) =>
+        RecipeSimilarity.tokenSimilarity(titleA, titleB) >= RecipeSimilarity.titleThreshold &&
+        RecipeSimilarity.tokenSimilarity(ingredientsA(), ingredientsB()) >= RecipeSimilarity.ingredientThreshold;
+
     // Pass 2: near-duplicate against existing recipes
     // Skip ones already flagged as exact matches.
+    final existingTitles = [for (final r in existing) RecipeSimilarity.titleTokens(r.title)];
+    final existingByWord = <String, List<int>>{};
+    for (var e = 0; e < existing.length; e++) {
+      for (final word in existingTitles[e]) {
+        (existingByWord[word] ??= []).add(e);
+      }
+    }
+    final existingIngredientTokens = List<Set<String>?>.filled(existing.length, null);
+    Set<String> ingredientsOfExisting(int e) => existingIngredientTokens[e] ??=
+        RecipeSimilarity.ingredientTokens(existingIngredients[existing[e].id] ?? const <String>[]);
+
     for (var i = 0; i < imports.length; i++) {
       if (result[i] != DuplicateStatus.none) continue;
-      final imp = imports[i];
-      for (final ex in existing) {
-        if (RecipeSimilarity.titleSimilarity(imp.title, ex.title) < RecipeSimilarity.titleThreshold) continue;
-        final exIngs = existingIngredients[ex.id] ?? const <String>[];
-        if (RecipeSimilarity.ingredientSimilarity(imp.ingredients, exIngs) < RecipeSimilarity.ingredientThreshold) continue;
-        result[i] = DuplicateStatus.nearExisting;
-        break;
+      final compared = <int>{};
+      search:
+      for (final word in importTitles[i]) {
+        for (final e in existingByWord[word] ?? const <int>[]) {
+          if (!compared.add(e)) continue;
+          if (similar(importTitles[i], existingTitles[e], () => ingredientsOfImport(i), () => ingredientsOfExisting(e))) {
+            result[i] = DuplicateStatus.nearExisting;
+            break search;
+          }
+        }
       }
     }
 
     // Pass 3: near-duplicate within the import batch itself
     // (e.g. same recipe appearing twice in a cookbook PDF). Only flag the
     // second+ occurrence so the first one stays selected.
+    final earlierByWord = <String, List<int>>{};
     for (var i = 0; i < imports.length; i++) {
-      if (result[i] != DuplicateStatus.none) continue;
-      for (var j = 0; j < i; j++) {
-        if (RecipeSimilarity.areNearDuplicates(
-          titleA: imports[i].title,
-          ingredientsA: imports[i].ingredients,
-          titleB: imports[j].title,
-          ingredientsB: imports[j].ingredients,
-        )) {
-          result[i] = DuplicateStatus.nearInternal;
-          break;
+      if (result[i] == DuplicateStatus.none) {
+        final compared = <int>{};
+        search:
+        for (final word in importTitles[i]) {
+          for (final j in earlierByWord[word] ?? const <int>[]) {
+            if (!compared.add(j)) continue;
+            if (similar(importTitles[i], importTitles[j], () => ingredientsOfImport(i), () => ingredientsOfImport(j))) {
+              result[i] = DuplicateStatus.nearInternal;
+              break search;
+            }
+          }
         }
+      }
+      for (final word in importTitles[i]) {
+        (earlierByWord[word] ??= []).add(i);
       }
     }
 
