@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 
-import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/ai_import_service.dart';
 import '../../../utils/responsive_utils.dart';
@@ -20,11 +19,10 @@ import '../../widgets/sheet_chrome.dart';
 ///   2. Paste / load response area
 ///   3. Preview & Import
 class AiImportScreen extends ConsumerStatefulWidget {
-  /// The cookbook the recipes go into. When the caller does not say, it is
-  /// the one currently selected.
-  final String? cookbookId;
+  /// The cookbook the recipes go into: the one the import was started from.
+  final String cookbookId;
 
-  const AiImportScreen({super.key, this.cookbookId});
+  const AiImportScreen({super.key, required this.cookbookId});
 
   @override
   ConsumerState<AiImportScreen> createState() => _AiImportScreenState();
@@ -261,8 +259,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     final navigator = Navigator.of(context);
     final route = ModalRoute.of(context);
     final db = ref.read(databaseProvider);
-    final wantedId =
-        widget.cookbookId ?? ref.read(selectedCookbookIdProvider) ?? 'starter';
+    final wantedId = widget.cookbookId;
     setState(() {
       _importing = true;
       _error = null;
