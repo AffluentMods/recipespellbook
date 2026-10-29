@@ -1,19 +1,18 @@
-import 'dart:convert';
-import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
-import '../../../utils/ingredient_utils.dart';
+import '../../../services/imported_recipe_saver.dart';
 import '../../../utils/recipe_similarity.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/platform_brand.dart';
 
@@ -38,62 +37,142 @@ class ImportPreviewScreen extends ConsumerStatefulWidget {
 }
 
 class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
+  /// How many recipes have their pictures fetched at the same time.
+  static const _batchSize = 5;
+
   late List<ImportedRecipe> _recipes;
   late List<bool> _selected;
   late List<bool> _expanded;
   late List<DuplicateStatus> _dupStatus;
   bool _loading = false;
+  bool _stopRequested = false;
   bool _checkedDuplicates = false;
-  int _importedCount = 0;
-  String? _lastImportedRecipeId;
+  bool _checkingDuplicates = true;
+
+  /// The latest duplicate check could not be run, so nothing is flagged.
+  bool _duplicateCheckFailed = false;
   double _progress = 0;
   String _progressStatus = '';
+
+  /// Only the answer of the latest duplicate check counts. A rename starts a
+  /// new one while an older one may still be running.
+  int _duplicateRun = 0;
+
+  /// Rows the duplicate check unticked. A row the user ticks or unticks
+  /// leaves this set: from then on the choice is theirs.
+  final Set<int> _leftOut = {};
+
+  /// What the library has, so each card can show the course, category and
+  /// tags its recipe will be saved with.
+  ImportLibrary? _library;
+
+  /// How many of the recipes handed over had nothing in them and are not
+  /// listed.
+  late final int _emptyCount;
 
   @override
   void initState() {
     super.initState();
-    _recipes = List.from(widget.recipes);
+    // Whichever way a recipe comes in, one with no ingredient and no step is
+    // not offered: a title alone is not a recipe.
+    _recipes = widget.recipes.where(hasRecipeContent).toList();
+    _emptyCount = widget.recipes.length - _recipes.length;
     _selected = List.filled(_recipes.length, true);
     _expanded = List.filled(_recipes.length, false);
     _dupStatus = List.filled(_recipes.length, DuplicateStatus.none);
     _checkForDuplicates();
+    _loadLibrary();
   }
 
-  Future<void> _checkForDuplicates() async {
-    final recipeDao = ref.read(recipeDaoProvider);
-    final existing = await recipeDao.getAllRecipes();
-
-    // Pre-fetch ingredient names for each existing recipe (needed for near-dup scoring)
-    final existingIngredients = <String, List<String>>{};
-    for (final r in existing) {
-      final ings = await recipeDao.getIngredientsForRecipe(r.id);
-      existingIngredients[r.id] = ings.map((i) => i.name).toList();
+  Future<void> _loadLibrary() async {
+    try {
+      final library = await ImportLibrary.load(ref.read(databaseProvider));
+      if (mounted) setState(() => _library = library);
+    } catch (e) {
+      // The cards then show no course, category or tags. The import looks
+      // them up again when it saves.
+      debugPrint('[Import] Could not load the library: $e');
     }
+  }
 
-    final dupStatus = ImportDuplicateChecker.check(
-      imports: _recipes,
-      existing: existing,
-      existingIngredients: existingIngredients,
-    );
+  /// Flags the recipes the library already has, and the same recipe twice in
+  /// this import. Runs when the screen opens and again after a rename.
+  Future<void> _checkForDuplicates() async {
+    final run = ++_duplicateRun;
+    if (!_checkingDuplicates) setState(() => _checkingDuplicates = true);
+
+    var dupStatus = List.filled(_recipes.length, DuplicateStatus.none);
+    var failed = false;
+    try {
+      final db = ref.read(databaseProvider);
+      final existing = await ref.read(recipeDaoProvider).getAllRecipes();
+
+      // Ingredient names of every existing recipe (needed for near-dup
+      // scoring), in one query grouped here. A query per recipe took most of
+      // a second on a library of 1,500.
+      final existingIds = {for (final r in existing) r.id};
+      final existingIngredients = <String, List<String>>{};
+      final rows = await (db.selectOnly(db.ingredients)
+            ..addColumns([db.ingredients.recipeId, db.ingredients.name]))
+          .get();
+      for (final row in rows) {
+        final recipeId = row.read(db.ingredients.recipeId);
+        final name = row.read(db.ingredients.name);
+        if (recipeId == null || name == null || !existingIds.contains(recipeId)) continue;
+        existingIngredients.putIfAbsent(recipeId, () => []).add(name);
+      }
+
+      // Comparing every import with every recipe takes seconds on a large
+      // library, so it runs on another isolate and the screen stays usable.
+      // Everything handed over is copied there: titles and ingredient lines
+      // go, photos and the long text columns do not.
+      dupStatus = await compute(
+        _findDuplicates,
+        _DuplicateSearch(
+          imports: [
+            for (final r in _recipes) ImportedRecipe(title: r.title, ingredients: r.ingredients, instructions: const []),
+          ],
+          existing: [
+            for (final r in existing)
+              r.copyWith(
+                description: const drift.Value(null),
+                notes: const drift.Value(null),
+                nutritionJson: const drift.Value(null),
+              ),
+          ],
+          existingIngredients: existingIngredients,
+        ),
+      );
+    } catch (e) {
+      // Without the check nothing is flagged. The import itself still works,
+      // and the summary says that duplicates were not looked for.
+      failed = true;
+      debugPrint('[Import] Duplicate check failed: $e');
+    }
+    if (!mounted || run != _duplicateRun) return;
 
     setState(() {
+      final firstAnswer = !_checkedDuplicates;
       _dupStatus = dupStatus;
+      _duplicateCheckFailed = failed;
       _checkedDuplicates = true;
+      _checkingDuplicates = false;
 
-      // Auto-deselect exact duplicates only — leave near-duplicates checked
-      // but visually flagged so the user can decide.
       for (var i = 0; i < _recipes.length; i++) {
-        if (_dupStatus[i] == DuplicateStatus.exactExisting) {
+        final exact = _dupStatus[i] == DuplicateStatus.exactExisting;
+        if (exact && firstAnswer) {
+          // Auto-deselect exact duplicates only. Near-duplicates stay checked
+          // but visually flagged so the user can decide.
           _selected[i] = false;
+          _leftOut.add(i);
+        } else if (!exact && _leftOut.remove(i)) {
+          // Renamed to a title the library does not have: the recipe the
+          // check left out is wanted again. One renamed INTO a duplicate is
+          // flagged but keeps its tick, the user has just had a say in it.
+          _selected[i] = true;
         }
       }
     });
-  }
-
-  bool _isDuplicate(String title) {
-    // Compatibility shim — checks any kind of duplicate flag for the recipe.
-    final idx = _recipes.indexWhere((r) => r.title == title);
-    return idx >= 0 && _dupStatus[idx] != DuplicateStatus.none;
   }
 
   int get _selectedCount => _selected.where((s) => s).length;
@@ -101,15 +180,10 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     if (!_checkedDuplicates) return 0;
     return _dupStatus.where((s) => s != DuplicateStatus.none).length;
   }
-  int get _exactDupCount =>
-      _dupStatus.where((s) => s == DuplicateStatus.exactExisting).length;
-  int get _nearDupCount =>
-      _dupStatus.where((s) =>
-          s == DuplicateStatus.nearExisting ||
-          s == DuplicateStatus.nearInternal).length;
 
   void _toggleAll(bool value) {
     setState(() {
+      _leftOut.clear();
       for (var i = 0; i < _selected.length; i++) {
         _selected[i] = value;
       }
@@ -118,6 +192,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
 
   void _selectNonDuplicates() {
     setState(() {
+      _leftOut.clear();
       for (var i = 0; i < _selected.length; i++) {
         _selected[i] = _dupStatus[i] == DuplicateStatus.none;
       }
@@ -125,8 +200,13 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   }
 
   Future<void> _importSelected() async {
+    // The button is off while an import runs, but a key press can still
+    // reach it on its way out. One import at a time.
+    if (_loading) return;
     final l10n = AppLocalizations.of(context)!;
-    const uuid = Uuid();
+    // Should this screen be closed under the import (a notification opening
+    // another page), the result is still told, on whatever is shown then.
+    final navigator = Navigator.of(context, rootNavigator: true);
     final selectedRecipes = <ImportedRecipe>[];
     for (var i = 0; i < _recipes.length; i++) {
       if (_selected[i]) selectedRecipes.add(_recipes[i]);
@@ -135,265 +215,213 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
 
     setState(() {
       _loading = true;
+      _stopRequested = false;
       _progress = 0;
-      _importedCount = 0;
-      _lastImportedRecipeId = null;
+      _progressStatus = '';
     });
 
-    final db = ref.read(databaseProvider);
-    final errors = <String>[];
-    final imageFailures = <String>[];
-
-    // Phase 1: Download all images in parallel (max 5 concurrent)
-    final imageResults = <int, String?>{};
-    final imageIndices = <int>[];
-    for (var i = 0; i < selectedRecipes.length; i++) {
-      final r = selectedRecipes[i];
-      final hasAny = (r.imageUrl != null && r.imageUrl!.isNotEmpty) ||
-          (r.imageData != null && r.imageData!.isNotEmpty) ||
-          (r.imagePath != null && r.imagePath!.isNotEmpty);
-      if (hasAny) imageIndices.add(i);
-    }
-
-    // Download in batches of 5
-    for (var batch = 0; batch < imageIndices.length; batch += 5) {
-      final end = (batch + 5).clamp(0, imageIndices.length);
-      final batchIndices = imageIndices.sublist(batch, end);
-      final futures = batchIndices.map((i) async {
-        final r = selectedRecipes[i];
-        // Local file path takes priority (from PDF page extraction)
-        if (r.imagePath != null && r.imagePath!.isNotEmpty) {
-          return MapEntry(i, r.imagePath);
+    var closing = false;
+    try {
+      final result = await _saveAll(selectedRecipes, l10n);
+      if (!mounted) {
+        final below = _contextOnTop(navigator);
+        if (below != null && below.mounted && (result.imported > 0 || result.errors.isNotEmpty)) {
+          _showResult(below, result, selectedRecipes.length, l10n);
         }
-        if (r.imageUrl != null && r.imageUrl!.isNotEmpty) {
-          return MapEntry(i, await _downloadRecipeImage(r.imageUrl!));
-        } else if (r.imageData != null && r.imageData!.isNotEmpty) {
-          return MapEntry(i, await _saveBase64Image(r.imageData!));
-        }
-        return MapEntry(i, null as String?);
-      });
-      final results = await Future.wait(futures);
-      for (final entry in results) {
-        imageResults[entry.key] = entry.value;
-        // Track failed image downloads for recipes that had an image source
-        if (entry.value == null) {
-          imageFailures.add(selectedRecipes[entry.key].title);
-        }
+        return;
       }
-      if (mounted) {
-        final done = batch + batchIndices.length;
-        setState(() {
-          _progress = done / (selectedRecipes.length * 2);
-          _progressStatus = 'Downloading images ($done/${selectedRecipes.length})...';
-        });
-      }
-    }
+      // Stopped before anything was saved: the preview is as it was.
+      if (result.stopped && result.imported == 0 && result.errors.isEmpty) return;
 
-    // Phase 2: Insert all recipes in DB with transactions
-    for (var idx = 0; idx < selectedRecipes.length; idx++) {
-      final recipe = selectedRecipes[idx];
-      final recipeId = 'recipe_${uuid.v4()}';
-
-      try {
-        await db.transaction(() async {
-          await db.into(db.recipes).insert(RecipesCompanion.insert(
-            id: recipeId,
-            cookbookId: widget.cookbookId,
-            title: recipe.title,
-            description: drift.Value(recipe.description),
-            servings: drift.Value(recipe.servings),
-            prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
-            cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
-            sourceUrl: drift.Value(recipe.sourceUrl),
-            courseId: drift.Value(recipe.suggestedCourse),
-            categoryId: drift.Value(recipe.suggestedCategory),
-            notes: drift.Value(recipe.notes),
-            imagePath: drift.Value(imageResults[idx]),
-            lastViewedAt: drift.Value(DateTime.now()),
-          ));
-
-          // Batch insert ingredients (parse amount/unit from raw strings)
-          await db.batch((batch) {
-            for (var i = 0; i < recipe.ingredients.length; i++) {
-              final parsed = parseIngredient(recipe.ingredients[i]);
-              // Guard the name against the column constraints (min 1,
-              // max 200). Recipe-site parsers sometimes capture a tip
-              // paragraph as an "ingredient" — without clamping, that one
-              // over-long line throws InvalidDataException and rolls back
-              // the ENTIRE recipe insert (the "imported 100% but the
-              // recipe vanished" bug). Clamp instead of losing everything.
-              var name = parsed.name.trim();
-              if (name.isEmpty) continue; // skip blank lines (violate min:1)
-              if (name.length > 200) name = '${name.substring(0, 197)}…';
-              batch.insert(db.ingredients, IngredientsCompanion.insert(
-                id: 'ing_${uuid.v4()}',
-                recipeId: recipeId,
-                sortOrder: i,
-                name: name,
-                amount: parsed.amount != null
-                    ? drift.Value(formatAmount(parsed.amount!))
-                    : const drift.Value.absent(),
-                unit: parsed.unit != null
-                    ? drift.Value(parsed.unit)
-                    : const drift.Value.absent(),
-              ));
-            }
-          });
-
-          // Batch insert steps
-          await db.batch((batch) {
-            for (var i = 0; i < recipe.instructions.length; i++) {
-              batch.insert(db.steps, StepsCompanion.insert(
-                id: 'step_${uuid.v4()}',
-                recipeId: recipeId,
-                sortOrder: i,
-                instruction: recipe.instructions[i],
-              ));
-            }
-          });
-        });
-
-        _importedCount++;
-        _lastImportedRecipeId = recipeId;
-      } catch (e) {
-        final message = _sanitizeError(e);
-        errors.add('${recipe.title}: $message');
-        debugPrint('[Import] Failed to import "${recipe.title}": $e');
-      }
-
-      if (mounted) {
-        setState(() {
-          _progress = 0.5 + ((idx + 1) / selectedRecipes.length) * 0.5;
-          _progressStatus = 'Importing ${idx + 1}/${selectedRecipes.length}...';
-        });
-      }
-    }
-
-    if (mounted) {
-      final router = GoRouter.of(context);
-      final lastId = _lastImportedRecipeId;
-      final imgFailSuffix = imageFailures.isNotEmpty
-          ? ' (${imageFailures.length} image${imageFailures.length == 1 ? '' : 's'} failed to download)'
-          : '';
-
-      // Show the result snackbar on THIS screen's context — which sits
-      // below the root Overlay — BEFORE popping. AppSnackbar inserts its
-      // entry into the root overlay (rootOverlay: true), so the message
-      // survives the pop and stays visible on the screen underneath.
-      //
-      // The previous approach showed it on the root navigator's OWN
-      // context after popping, which has no Overlay ancestor (the
-      // Overlay is the navigator's child) — that threw "No Overlay
-      // widget found" and the user got no feedback at all.
-      if (_importedCount == 0) {
-        // Nothing was saved — make the failure LOUD. The progress bar
-        // reaching 100% only means the loop finished, NOT that a recipe
-        // was persisted. Without this branch a total failure closed the
-        // screen silently and the recipe "vanished".
-        AppSnackbar.error(
-          context,
-          errors.isNotEmpty
-              ? l10n.failedToImport(errors.first)
-              : l10n.importNothingSaved,
-        );
-      } else if (errors.isNotEmpty) {
-        AppSnackbar.error(context, '$_importedCount imported, ${errors.length} failed$imgFailSuffix');
-      } else if (_importedCount == 1 && lastId != null) {
-        AppSnackbar.successWithAction(
-          context,
-          '$_importedCount recipe imported$imgFailSuffix',
-          actionLabel: l10n.actionView,
-          onAction: () => router.push('/recipe/$lastId'),
-        );
+      _showResult(context, result, selectedRecipes.length, l10n);
+      closing = true;
+      // Now close the import screen. The root-overlay snackbar persists.
+      // Another screen may have opened over this one while it was importing
+      // (a link shared into the app): then this one is taken out from under
+      // it, because pop would close the one on top and leave this one locked.
+      final route = ModalRoute.of(context);
+      if (route != null && !route.isCurrent) {
+        Navigator.of(context).removeRoute(route);
       } else {
-        AppSnackbar.success(context, '$_importedCount recipes imported$imgFailSuffix');
+        Navigator.of(context).pop();
       }
-
-      // Now pop the import screen. The root-overlay snackbar persists.
-      Navigator.of(context).pop();
+    } finally {
+      // Whatever went wrong, the screen must not stay locked behind the
+      // overlay with the way back closed.
+      if (mounted && !closing) setState(() => _loading = false);
     }
   }
 
-  /// Decodes a base64-encoded image and saves it to local storage.
-  static Future<String?> _saveBase64Image(String base64Data) async {
+  /// Saves [recipes] one after the other. Never throws: what went wrong is in
+  /// the result.
+  Future<_ImportResult> _saveAll(List<ImportedRecipe> recipes, AppLocalizations l10n) async {
+    final result = _ImportResult();
+    final db = ref.read(databaseProvider);
+    final client = http.Client();
     try {
-      // Strip data URI prefix if present (data:image/jpeg;base64,...)
-      var data = base64Data;
-      if (data.contains(',')) {
-        data = data.split(',').last;
+      final library = await ImportLibrary.load(db);
+      final documentsDir = await _documentsDir();
+
+      // Pictures are fetched a few at a time, because a download can take
+      // seconds, and the recipes they belong to are saved straight after.
+      for (var start = 0; start < recipes.length; start += _batchSize) {
+        // Cancel, or the screen going away, stops the import here, between
+        // batches, so every picture stored belongs to a saved recipe.
+        if (!mounted || _stopRequested) {
+          result.stopped = true;
+          break;
+        }
+        final end = (start + _batchSize).clamp(0, recipes.length);
+        final batch = recipes.sublist(start, end);
+        final images = await Future.wait([
+          for (final recipe in batch)
+            documentsDir != null && _hasImage(recipe)
+                ? ImportedRecipeSaver.storeImage(recipe, documentsDir: documentsDir, client: client)
+                : Future<String?>.value(),
+        ]);
+
+        for (var i = 0; i < batch.length; i++) {
+          final recipe = batch[i];
+          var stepImages = const <String?>[];
+          try {
+            if (documentsDir != null) {
+              stepImages = await ImportedRecipeSaver.storeStepImages(recipe, documentsDir: documentsDir);
+            }
+            result.lastId = await ImportedRecipeSaver.save(
+              db,
+              cookbookId: widget.cookbookId,
+              recipe: recipe,
+              imagePath: images[i],
+              stepImagePaths: stepImages,
+              sectionHeadings: true,
+              dashedHeadings: true,
+              // One recipe is something the user will want to open next. A
+              // batch would push everything else out of the recents.
+              markViewed: recipes.length == 1,
+              library: library,
+            );
+            result.imported++;
+            if (images[i] == null && _hasImage(recipe)) result.imagesMissing++;
+            result.imagesMissing += _stepPhotoCount(recipe) - stepImages.whereType<String>().length;
+          } catch (e) {
+            result.errors.add('${recipe.title}: ${_sanitizeError(e)}');
+            debugPrint('[Import] Failed to import "${recipe.title}": $e');
+            // The pictures stored for it belong to no recipe now.
+            if (documentsDir != null) {
+              await ImportedRecipeSaver.discardImages(
+                [if (images[i] != recipe.imagePath) images[i], ...stepImages],
+                documentsDir: documentsDir,
+              );
+            }
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            _progress = end / recipes.length;
+            _progressStatus = l10n.importingCount(end, recipes.length);
+          });
+        }
       }
 
-      final bytes = base64Decode(data);
-      if (bytes.length < 1024) return null; // Skip tiny images
-
-      final dir = await getApplicationDocumentsDirectory();
-      final imageDir = Directory('${dir.path}/recipe_images');
-      if (!await imageDir.exists()) {
-        await imageDir.create(recursive: true);
+      // Recipes of the app's own export can use each other as an ingredient.
+      // They are all in by now, so those links can be made again. Should
+      // that fail, every recipe is still whole without them.
+      try {
+        await ImportedRecipeSaver.saveLinks(db, library);
+      } catch (e) {
+        result.linksMissing = true;
+        debugPrint('[Import] Failed to link the imported recipes: $e');
       }
-
-      final filename = 'img_${const Uuid().v4()}.jpg';
-      final file = File('${imageDir.path}/$filename');
-      await file.writeAsBytes(bytes);
-
-      debugPrint('[Import] Saved base64 image: ${file.path} (${bytes.length} bytes)');
-      return file.path;
     } catch (e) {
-      debugPrint('[Import] Failed to save base64 image: $e');
-      return null;
+      result.errors.add(_sanitizeError(e));
+    } finally {
+      client.close();
     }
+    return result;
   }
 
-  /// Downloads a recipe image from a URL and saves it to local app storage.
-  /// Returns the local file path, or null on failure.
-  static Future<String?> _downloadRecipeImage(String imageUrl) async {
-    try {
-      final response = await http.get(
-        Uri.parse(imageUrl),
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
-          'Accept': 'image/*,*/*;q=0.8',
-        },
-      ).timeout(const Duration(seconds: 15));
+  /// Tells the user how the import went.
+  ///
+  /// The snackbar is shown on THIS screen's context, which sits below the
+  /// root Overlay, BEFORE the screen is popped. AppSnackbar inserts its entry
+  /// into the root overlay (rootOverlay: true), so the message survives the
+  /// pop and stays visible on the screen underneath. The root navigator's own
+  /// context has no Overlay ancestor (the Overlay is the navigator's child):
+  /// showing the message there after the pop threw "No Overlay widget found"
+  /// and the user got no feedback at all.
+  void _showResult(BuildContext context, _ImportResult result, int wanted, AppLocalizations l10n) {
+    final router = GoRouter.maybeOf(context);
+    final lastId = result.lastId;
+    final notes = [
+      if (result.imagesMissing > 0) l10n.importImagesNotSaved(result.imagesMissing),
+      if (result.linksMissing) l10n.importLinksNotSaved,
+    ];
+    final imagesNote = notes.isEmpty ? '' : ' (${notes.join(', ')})';
 
-      if (response.statusCode != 200 || response.bodyBytes.isEmpty) return null;
-
-      // Skip tiny images (likely tracking pixels or icons)
-      if (response.bodyBytes.length < 1024) return null;
-
-      final dir = await getApplicationDocumentsDirectory();
-      final imageDir = Directory('${dir.path}/recipe_images');
-      if (!await imageDir.exists()) {
-        await imageDir.create(recursive: true);
-      }
-
-      final ext = _guessImageExtension(
-        response.headers['content-type'],
-        imageUrl,
+    if (result.imported == 0) {
+      // Nothing was saved, so the failure has to be LOUD. The progress bar
+      // reaching 100% only means the loop finished, NOT that a recipe was
+      // persisted. Without this branch a total failure closed the screen
+      // silently and the recipe "vanished".
+      AppSnackbar.error(
+        context,
+        result.errors.isNotEmpty ? l10n.failedToImport(result.errors.first) : l10n.importNothingSaved,
       );
-      final filename = 'img_${const Uuid().v4()}$ext';
-      final file = File('${imageDir.path}/$filename');
-      await file.writeAsBytes(response.bodyBytes);
-
-      debugPrint('[Import] Downloaded recipe image: ${file.path} (${response.bodyBytes.length} bytes)');
-      return file.path;
-    } catch (e) {
-      debugPrint('[Import] Failed to download recipe image: $e');
-      return null;
+    } else if (result.errors.isNotEmpty && result.stopped) {
+      // Some were never tried, and the message has to say so as well.
+      AppSnackbar.error(
+        context,
+        '${l10n.importStoppedSomeFailed(result.imported, wanted, result.errors.length)}$imagesNote',
+      );
+    } else if (result.errors.isNotEmpty) {
+      AppSnackbar.error(context, '${l10n.importSomeFailed(result.imported, result.errors.length)}$imagesNote');
+    } else if (result.stopped) {
+      AppSnackbar.info(context, '${l10n.importStoppedCount(result.imported, wanted)}$imagesNote');
+    } else if (result.imported == 1 && lastId != null && router != null) {
+      AppSnackbar.successWithAction(
+        context,
+        '${l10n.recipesImported(1)}$imagesNote',
+        actionLabel: l10n.actionView,
+        onAction: () => router.push('/recipe/$lastId'),
+      );
+    } else {
+      AppSnackbar.success(context, '${l10n.recipesImported(result.imported)}$imagesNote');
     }
   }
 
-  static String _guessImageExtension(String? contentType, String url) {
-    if (contentType != null) {
-      if (contentType.contains('png')) return '.png';
-      if (contentType.contains('webp')) return '.webp';
-      if (contentType.contains('gif')) return '.gif';
+  /// The context of the page [navigator] shows on top, for a message after
+  /// this screen is gone. Null when there is none.
+  static BuildContext? _contextOnTop(NavigatorState navigator) {
+    if (!navigator.mounted) return null;
+    Route<dynamic>? top;
+    // Asks for the top route only: the first one asked about stops it, so
+    // nothing is popped.
+    navigator.popUntil((route) {
+      top = route;
+      return true;
+    });
+    final route = top;
+    return route is ModalRoute ? route.subtreeContext : null;
+  }
+
+  static bool _hasImage(ImportedRecipe r) =>
+      (r.imagePath ?? '').trim().isNotEmpty ||
+      (r.imageData ?? '').trim().isNotEmpty ||
+      (r.imageUrl ?? '').trim().isNotEmpty;
+
+  /// How many steps of [r] come with a photo.
+  static int _stepPhotoCount(ImportedRecipe r) =>
+      r.stepRows?.where((step) => (step.imageData ?? '').trim().isNotEmpty).length ?? 0;
+
+  /// Where imported pictures are kept, or null where the app has no folder
+  /// of its own (the web build). Recipes are then saved without one.
+  static Future<String?> _documentsDir() async {
+    try {
+      return (await getApplicationDocumentsDirectory()).path;
+    } catch (_) {
+      return null;
     }
-    final lower = url.toLowerCase().split('?').first;
-    if (lower.endsWith('.png')) return '.png';
-    if (lower.endsWith('.webp')) return '.webp';
-    if (lower.endsWith('.gif')) return '.gif';
-    return '.jpg';
   }
 
   /// Extracts a user-friendly message from a raw exception.
@@ -420,122 +448,103 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     return msg;
   }
 
-  void _showErrorDetails(List<String> errors) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.amber[700]),
-            const SizedBox(width: 8),
-            const Text('Import Issues'),
-          ],
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: errors.length,
-            itemBuilder: (_, i) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.error_outline, size: 16, color: Colors.red[400]),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      errors[i],
-                      style: Theme.of(ctx).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  @override
+  Widget build(BuildContext context) {
+    // An import that is running is not left by accident: the way back is
+    // closed until it is done. The overlay has a Cancel button for stopping it.
+    return PopScope(
+      canPop: !_loading,
+      child: _buildScaffold(context),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildScaffold(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: !_loading,
         title: Text(l10n.importPreview),
         centerTitle: true,
         actions: [
           if (_duplicateCount > 0)
             TextButton.icon(
-              onPressed: _selectNonDuplicates,
+              onPressed: _loading ? null : _selectNonDuplicates,
               icon: Icon(Icons.filter_alt_outlined, size: 18),
               label: Text(l10n.skipDuplicates),
             ),
         ],
       ),
-      body: Responsive.constrainWidth(context, child: Stack(
+      body: _recipes.isEmpty ? const _NothingToImport() : Responsive.constrainWidth(context, child: Stack(
         children: [
-          Column(
-            children: [
-              // ── Branded source header ("Imported from Instagram") ──
-              if (detectPlatform(widget.sourceUrl) != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: PlatformBadge(detectPlatform(widget.sourceUrl)!),
+          // While the import runs only the overlay is there to use, for the
+          // keyboard and a screen reader as much as for a tap.
+          _OutOfReach(
+            when: _loading,
+            child: Column(
+              children: [
+                // ── Branded source header ("Imported from Instagram") ──
+                if (detectPlatform(widget.sourceUrl) != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: PlatformBadge(detectPlatform(widget.sourceUrl)!),
+                    ),
+                  ),
+
+                // ── Summary bar ──
+                _SummaryBar(
+                  total: _recipes.length,
+                  selected: _selectedCount,
+                  duplicates: _duplicateCount,
+                  leftOut: _emptyCount,
+                  checkedDuplicates: !_checkingDuplicates,
+                  duplicateCheckFailed: _duplicateCheckFailed,
+                  allSelected: _selectedCount == _recipes.length,
+                  onToggleAll: _toggleAll,
+                ),
+
+                // ── Recipe list ──
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                    itemCount: _recipes.length,
+                    itemBuilder: (context, index) {
+                      final recipe = _recipes[index];
+                      final dupStatus = _checkedDuplicates ? _dupStatus[index] : DuplicateStatus.none;
+                      final isDupe = dupStatus != DuplicateStatus.none;
+
+                      return _RecipePreviewCard(
+                        recipe: recipe,
+                        index: index,
+                        cookbookId: widget.cookbookId,
+                        library: _library,
+                        isSelected: _selected[index],
+                        isExpanded: _expanded[index],
+                        isDuplicate: isDupe,
+                        duplicateStatus: dupStatus,
+                        onSelectedChanged: (val) {
+                          setState(() {
+                            _selected[index] = val;
+                            _leftOut.remove(index);
+                          });
+                        },
+                        onExpandToggle: () {
+                          setState(() => _expanded[index] = !_expanded[index]);
+                        },
+                        onRenameTitle: (newTitle) {
+                          if (!mounted) return;
+                          setState(() => _recipes[index].title = newTitle);
+                          // The flag and the tick belonged to the old title.
+                          _checkForDuplicates();
+                        },
+                      );
+                    },
                   ),
                 ),
-
-              // ── Summary bar ──
-              _SummaryBar(
-                total: _recipes.length,
-                selected: _selectedCount,
-                duplicates: _duplicateCount,
-                checkedDuplicates: _checkedDuplicates,
-                allSelected: _selectedCount == _recipes.length,
-                onToggleAll: _toggleAll,
-              ),
-
-              // ── Recipe list ──
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                  itemCount: _recipes.length,
-                  itemBuilder: (context, index) {
-                    final recipe = _recipes[index];
-                    final dupStatus = _checkedDuplicates ? _dupStatus[index] : DuplicateStatus.none;
-                    final isDupe = dupStatus != DuplicateStatus.none;
-
-                    return _RecipePreviewCard(
-                      recipe: recipe,
-                      index: index,
-                      isSelected: _selected[index],
-                      isExpanded: _expanded[index],
-                      isDuplicate: isDupe,
-                      duplicateStatus: dupStatus,
-                      onSelectedChanged: (val) {
-                        setState(() => _selected[index] = val);
-                      },
-                      onExpandToggle: () {
-                        setState(() => _expanded[index] = !_expanded[index]);
-                      },
-                      onRenameTitle: (newTitle) {
-                        setState(() => _recipes[index].title = newTitle);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           // ── Bottom action bar ──
@@ -543,14 +552,24 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: _BottomActionBar(
-              selectedCount: _selectedCount,
-              onImport: _selectedCount > 0 ? _importSelected : null,
+            child: _OutOfReach(
+              when: _loading,
+              child: _BottomActionBar(
+                selectedCount: _selectedCount,
+                // The duplicate check may still untick recipes, so the import
+                // waits for it.
+                onImport: _selectedCount > 0 && !_checkingDuplicates && !_loading ? _importSelected : null,
+              ),
             ),
           ),
 
           // ── Loading overlay ──
-          if (_loading) _LoadingOverlay(progress: _progress, status: _progressStatus),
+          if (_loading)
+            _LoadingOverlay(
+              progress: _progress,
+              status: _stopRequested ? l10n.importStopping : _progressStatus,
+              onCancel: _stopRequested ? null : () => setState(() => _stopRequested = true),
+            ),
         ],
       )),
     );
@@ -565,7 +584,11 @@ class _SummaryBar extends StatelessWidget {
   final int total;
   final int selected;
   final int duplicates;
+
+  /// Entries that had no ingredients and no steps and are not in the list.
+  final int leftOut;
   final bool checkedDuplicates;
+  final bool duplicateCheckFailed;
   final bool allSelected;
   final ValueChanged<bool> onToggleAll;
 
@@ -573,7 +596,9 @@ class _SummaryBar extends StatelessWidget {
     required this.total,
     required this.selected,
     required this.duplicates,
+    required this.leftOut,
     required this.checkedDuplicates,
+    this.duplicateCheckFailed = false,
     required this.allSelected,
     required this.onToggleAll,
   });
@@ -597,14 +622,14 @@ class _SummaryBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$total ${total == 1 ? 'recipe' : 'recipes'} found',
+                  l10n.importRecipesFound(total),
                   style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 2),
                 Row(
                   children: [
                     Text(
-                      '$selected selected',
+                      l10n.countSelected(selected),
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
                     ),
                     if (checkedDuplicates && duplicates > 0) ...[
@@ -612,8 +637,18 @@ class _SummaryBar extends StatelessWidget {
                       Icon(Icons.copy, size: 12, color: theme.colorScheme.tertiary),
                       const SizedBox(width: 2),
                       Text(
-                        '$duplicates ${duplicates == 1 ? 'duplicate' : 'duplicates'}',
+                        l10n.importDuplicatesCount(duplicates),
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.tertiary),
+                      ),
+                    ],
+                    if (checkedDuplicates && duplicateCheckFailed) ...[
+                      Text(' · ', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                      Flexible(
+                        child: Text(
+                          l10n.importDuplicateCheckFailed,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                        ),
                       ),
                     ],
                     if (!checkedDuplicates) ...[
@@ -625,12 +660,19 @@ class _SummaryBar extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'checking duplicates...',
+                        l10n.importCheckingDuplicates,
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                       ),
                     ],
                   ],
                 ),
+                if (leftOut > 0) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.importEntriesLeftOut(leftOut),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                  ),
+                ],
               ],
             ),
           ),
@@ -647,12 +689,46 @@ class _SummaryBar extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Nothing To Import (what was handed over holds no recipe)
+// ═══════════════════════════════════════════════════════════════════
+
+class _NothingToImport extends StatelessWidget {
+  const _NothingToImport();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline),
+            const SizedBox(height: 16),
+            Text(
+              l10n.importNothingToImport,
+              style: theme.textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Recipe Preview Card
 // ═══════════════════════════════════════════════════════════════════
 
 class _RecipePreviewCard extends StatelessWidget {
   final ImportedRecipe recipe;
   final int index;
+  final String cookbookId;
+  final ImportLibrary? library;
   final bool isSelected;
   final bool isExpanded;
   final bool isDuplicate;
@@ -664,6 +740,8 @@ class _RecipePreviewCard extends StatelessWidget {
   const _RecipePreviewCard({
     required this.recipe,
     required this.index,
+    required this.cookbookId,
+    required this.library,
     required this.isSelected,
     required this.isExpanded,
     required this.isDuplicate,
@@ -673,42 +751,21 @@ class _RecipePreviewCard extends StatelessWidget {
     this.onRenameTitle,
   });
 
-  void _showRenameDialog(BuildContext context) {
-    final controller = TextEditingController(text: recipe.title);
-    showDialog(
+  Future<void> _showRenameDialog(BuildContext context) async {
+    final title = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Rename Recipe'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Title',
-            border: OutlineInputBorder(),
-          ),
-          onSubmitted: (val) {
-            if (val.trim().isNotEmpty) {
-              onRenameTitle?.call(val.trim());
-              Navigator.pop(ctx);
-            }
-          },
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () {
-              final val = controller.text.trim();
-              if (val.isNotEmpty) {
-                onRenameTitle?.call(val);
-                Navigator.pop(ctx);
-              }
-            },
-            child: const Text('Rename'),
-          ),
-        ],
-      ),
-    ).then((_) => controller.dispose());
+      builder: (_) => _RenameDialog(title: recipe.title),
+    );
+    if (title != null) onRenameTitle?.call(title);
   }
+
+  /// A scan or pasted text the parser could not make full sense of: it said
+  /// so itself, or it found no ingredients or no steps at all.
+  bool get _needsReview =>
+      recipe.parseConfidence != null &&
+      (recipe.parseConfidence! < 0.5 ||
+          _itemCount(_ingredientLines(recipe)) == 0 ||
+          _itemCount(_stepLines(recipe)) == 0);
 
   @override
   Widget build(BuildContext context) {
@@ -793,13 +850,13 @@ class _RecipePreviewCard extends StatelessWidget {
                             children: [
                               _MetaChip(
                                 icon: Icons.egg_outlined,
-                                label: '${recipe.ingredients.length}',
+                                label: '${_itemCount(_ingredientLines(recipe))}',
                                 theme: theme,
                               ),
                               const SizedBox(width: 8),
                               _MetaChip(
                                 icon: Icons.format_list_numbered,
-                                label: '${recipe.instructions.length}',
+                                label: '${_itemCount(_stepLines(recipe))}',
                                 theme: theme,
                               ),
                               if (recipe.sourceApp != null) ...[
@@ -840,7 +897,7 @@ class _RecipePreviewCard extends StatelessWidget {
             ),
 
             // Low confidence warning
-            if (recipe.parseConfidence != null && recipe.parseConfidence! < 0.5)
+            if (_needsReview)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 margin: const EdgeInsets.symmetric(horizontal: 12),
@@ -855,7 +912,7 @@ class _RecipePreviewCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'OCR quality is low — tap "Fix with AI" for better results',
+                        l10n.importNeedsReview,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.amber[800],
                           fontWeight: FontWeight.w500,
@@ -871,6 +928,8 @@ class _RecipePreviewCard extends StatelessWidget {
               firstChild: const SizedBox.shrink(),
               secondChild: _ExpandedContent(
                 recipe: recipe,
+                cookbookId: cookbookId,
+                library: library,
               ),
               crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
               duration: const Duration(milliseconds: 200),
@@ -891,6 +950,7 @@ class _RecipePreviewCard extends StatelessWidget {
       case 'mealie': return 'Mealie';
       case 'samsungfood': return 'Samsung Food';
       case 'paprika': return 'Paprika';
+      case OwnExport.sourceApp: return 'Recipe Spellbook';
       default: return app;
     }
   }
@@ -909,15 +969,39 @@ class _RecipePreviewCard extends StatelessWidget {
 
 class _ExpandedContent extends StatelessWidget {
   final ImportedRecipe recipe;
+  final String cookbookId;
+  final ImportLibrary? library;
 
   const _ExpandedContent({
     required this.recipe,
+    required this.cookbookId,
+    required this.library,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+
+    // Shown as they will be saved: a guessed course the app does not have, or
+    // a keyword that is not one of the user's tags, would be gone after the
+    // import and is not shown here either.
+    final library = this.library;
+    final translator = TaxonomyTranslator(l10n);
+    final course = library?.courseIdFor(recipe, cookbookId: cookbookId);
+    final categories = library?.categoryIdFor(recipe, cookbookId: cookbookId)?.split(',') ?? const <String>[];
+    final tags = library?.tagsFor(recipe, cookbookId: cookbookId) ?? const [];
+
+    final ingredients = _ingredientLines(recipe).toList();
+    final steps = _stepLines(recipe).toList();
+
+    // The first steps as they will be numbered: a section heading among them
+    // takes no number.
+    final firstSteps = <({int? number, String text})>[];
+    var stepNumber = 0;
+    for (final line in steps.take(5)) {
+      firstSteps.add((number: line.heading ? null : ++stepNumber, text: line.text));
+    }
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -927,30 +1011,22 @@ class _ExpandedContent extends StatelessWidget {
           Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
           const SizedBox(height: 8),
 
-          // Course / Category / Cuisine chips
-          if (recipe.suggestedCourse != null ||
-              recipe.suggestedCategory != null ||
-              recipe.cuisine != null) ...[
+          // Course / Category chips
+          if (library != null && (course != null || categories.isNotEmpty)) ...[
             Wrap(
               spacing: 6,
               runSpacing: 4,
               children: [
-                if (recipe.suggestedCourse != null)
+                if (course != null)
                   _CategoryChip(
                     icon: Icons.restaurant_menu,
-                    label: recipe.suggestedCourse!,
+                    label: library.customCourseName(course) ?? translator.translateCourse(course),
                     theme: theme,
                   ),
-                if (recipe.suggestedCategory != null)
+                for (final category in categories)
                   _CategoryChip(
                     icon: Icons.category,
-                    label: recipe.suggestedCategory!,
-                    theme: theme,
-                  ),
-                if (recipe.cuisine != null)
-                  _CategoryChip(
-                    icon: Icons.public,
-                    label: recipe.cuisine!,
+                    label: library.customCategoryName(category) ?? translator.translateCategory(category),
                     theme: theme,
                   ),
               ],
@@ -973,7 +1049,7 @@ class _ExpandedContent extends StatelessWidget {
           ],
 
           // Ingredients
-          if (recipe.ingredients.isNotEmpty) ...[
+          if (ingredients.isNotEmpty) ...[
             Row(
               children: [
                 Icon(Icons.egg_outlined, size: 16, color: theme.colorScheme.primary),
@@ -988,28 +1064,31 @@ class _ExpandedContent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            ...recipe.ingredients.take(10).map((ing) => Padding(
-              padding: const EdgeInsets.only(left: 22, bottom: 3),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('• ', style: TextStyle(color: theme.colorScheme.outline, fontSize: 12)),
-                  Expanded(
-                    child: Text(
-                      ing,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+            ...ingredients.take(10).map((ing) {
+              if (ing.heading) return _SectionHeading(title: ing.text, theme: theme);
+              return Padding(
+                padding: const EdgeInsets.only(left: 22, bottom: 3),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('• ', style: TextStyle(color: theme.colorScheme.outline, fontSize: 12)),
+                    Expanded(
+                      child: Text(
+                        ing.text,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            )),
-            if (recipe.ingredients.length > 10)
+                  ],
+                ),
+              );
+            }),
+            if (ingredients.length > 10)
               Padding(
                 padding: const EdgeInsets.only(left: 22, top: 2),
                 child: Text(
-                  '+${recipe.ingredients.length - 10} more',
+                  l10n.homeAndMore(ingredients.length - 10),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.outline,
                     fontStyle: FontStyle.italic,
@@ -1020,7 +1099,7 @@ class _ExpandedContent extends StatelessWidget {
           ],
 
           // Instructions preview
-          if (recipe.instructions.isNotEmpty) ...[
+          if (steps.isNotEmpty) ...[
             Row(
               children: [
                 Icon(Icons.format_list_numbered, size: 16, color: theme.colorScheme.primary),
@@ -1035,39 +1114,42 @@ class _ExpandedContent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            ...recipe.instructions.take(5).toList().asMap().entries.map((entry) => Padding(
-              padding: const EdgeInsets.only(left: 22, bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    child: Text(
-                      '${entry.key + 1}.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                        fontWeight: FontWeight.bold,
+            ...firstSteps.map((step) {
+              if (step.number == null) return _SectionHeading(title: step.text, theme: theme);
+              return Padding(
+                padding: const EdgeInsets.only(left: 22, bottom: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      child: Text(
+                        '${step.number}.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      entry.value,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                    Expanded(
+                      child: Text(
+                        step.text,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-            )),
-            if (recipe.instructions.length > 5)
+                  ],
+                ),
+              );
+            }),
+            if (steps.length > 5)
               Padding(
                 padding: const EdgeInsets.only(left: 22, top: 2),
                 child: Text(
-                  '+${recipe.instructions.length - 5} more steps',
+                  l10n.importMoreSteps(steps.length - 5),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.outline,
                     fontStyle: FontStyle.italic,
@@ -1077,19 +1159,19 @@ class _ExpandedContent extends StatelessWidget {
           ],
 
           // Tags / source
-          if (recipe.tags != null && recipe.tags!.isNotEmpty) ...[
+          if (tags.isNotEmpty) ...[
             const SizedBox(height: 12),
             Wrap(
               spacing: 6,
               runSpacing: 4,
-              children: recipe.tags!.take(5).map((tag) => Container(
+              children: tags.take(5).map((tag) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  tag,
+                  tag.name,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
@@ -1118,6 +1200,116 @@ class _ExpandedContent extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Lines of a recipe (what is listed, counted and offered)
+// ═══════════════════════════════════════════════════════════════════
+
+/// A line of a recipe as the preview lists it: an ingredient or a step, or
+/// the title of a section heading among them.
+typedef _Line = ({String text, bool heading});
+
+/// The ingredients of [recipe], line by line. A recipe out of the app's own
+/// export says which of its rows are headings. Anywhere else a heading is a
+/// line written like one ("For the sauce:", or a line an importer wrapped in
+/// dashes). The import saves by the same rule, so the preview shows a heading
+/// as one and leaves it out of the counts.
+Iterable<_Line> _ingredientLines(ImportedRecipe recipe) =>
+    recipe.ingredientRows?.map((row) => (text: row.line, heading: row.isHeading)) ??
+    recipe.ingredients.map(_lineOf);
+
+/// The steps of [recipe], line by line, by the same rule.
+Iterable<_Line> _stepLines(ImportedRecipe recipe) =>
+    recipe.stepRows?.map((row) => (text: row.instruction, heading: row.isHeading)) ??
+    recipe.instructions.map(_lineOf);
+
+_Line _lineOf(String line) {
+  final heading = ImportedRecipeSaver.headingTitle(
+    line,
+    sectionHeadings: true,
+    dashedHeadings: true,
+    stepsEndInColons: true,
+  );
+  return (text: heading ?? line, heading: heading != null);
+}
+
+/// How many of [lines] are ingredients or steps, not headings or blanks.
+int _itemCount(Iterable<_Line> lines) => lines.where((line) => !line.heading && line.text.trim().isNotEmpty).length;
+
+/// Whether [recipe] has anything to import: an ingredient or a step.
+///
+/// A title alone is not a recipe. Neither is a title that comes back as its
+/// own only ingredient or step, which is what the text reader makes of a
+/// single line it found nothing in. Nutrition facts count: a scanned product
+/// is worth keeping for them when nobody listed its ingredients.
+///
+/// A recipe out of another recipe app is the user's own, kept there on
+/// purpose: a card kept as a photo with its title, a recipe typed into the
+/// notes, a bookmark. A picture, notes, a description or a link count for
+/// those.
+///
+/// One sentence with no title is a recipe only when it holds a quantity:
+/// "Whisk 2 eggs with 1 cup milk, then fry" is one, "Check out this recipe
+/// I found!" is not.
+bool hasRecipeContent(ImportedRecipe recipe) {
+  if ((recipe.nutritionJson ?? '').trim().isNotEmpty) return true;
+  if (recipe.sourceApp != null &&
+      [recipe.imageData, recipe.imagePath, recipe.imageUrl, recipe.notes, recipe.description, recipe.sourceUrl]
+          .any((field) => (field ?? '').trim().isNotEmpty)) {
+    return true;
+  }
+
+  String? title;
+  bool counts(_Line line) {
+    if (line.heading) return false;
+    final text = line.text.trim();
+    // A line much longer than the title cannot be the title again. Taking it
+    // apart letter by letter would cost time on a long text.
+    if (text.length > recipe.title.length + 8) return _nameCharacter.hasMatch(text);
+    final letters = _lettersOf(text);
+    return letters.isNotEmpty && letters != (title ??= _lettersOf(recipe.title));
+  }
+
+  final ingredients = _ingredientLines(recipe).where(counts).length;
+  final steps = _stepLines(recipe).where(counts).take(2).toList();
+  if (ingredients == 0 && steps.length == 1 && recipe.sourceApp == null && _untitled.contains(recipe.title.trim().toLowerCase())) {
+    return _quantity.hasMatch(steps.single.text);
+  }
+  return ingredients > 0 || steps.isNotEmpty;
+}
+
+/// The titles the readers give a recipe they found no title for.
+const _untitled = {'', 'untitled recipe', 'imported recipe'};
+final _quantity = RegExp('[0-9½¼¾⅓⅔⅛⅜⅝⅞⅙⅚⅕⅖⅗⅘]');
+
+String _lettersOf(String text) => text.toLowerCase().replaceAll(_notLetters, '');
+final _notLetters = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
+final _nameCharacter = RegExp(r'[\p{L}\p{N}]', unicode: true);
+
+// ═══════════════════════════════════════════════════════════════════
+// Section Heading (a heading among the ingredients or the steps)
+// ═══════════════════════════════════════════════════════════════════
+
+class _SectionHeading extends StatelessWidget {
+  final String title;
+  final ThemeData theme;
+
+  const _SectionHeading({required this.title, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 22, top: 2, bottom: 4),
+      child: Text(
+        title,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -1262,6 +1454,7 @@ class _BottomActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Container(
@@ -1285,9 +1478,7 @@ class _BottomActionBar extends StatelessWidget {
             onPressed: onImport,
             icon: const Icon(Icons.download_rounded),
             label: Text(
-              selectedCount == 0
-                  ? 'Select recipes to import'
-                  : 'Import $selectedCount ${selectedCount == 1 ? 'recipe' : 'recipes'}',
+              selectedCount == 0 ? l10n.importSelectRecipes : l10n.importCountRecipes(selectedCount),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
@@ -1297,6 +1488,24 @@ class _BottomActionBar extends StatelessWidget {
   }
 }
 
+/// [child], out of reach of taps, the keyboard and a screen reader [when]
+/// asked to be.
+class _OutOfReach extends StatelessWidget {
+  final bool when;
+  final Widget child;
+
+  const _OutOfReach({required this.when, required this.child});
+
+  @override
+  Widget build(BuildContext context) => ExcludeFocus(
+        excluding: when,
+        child: ExcludeSemantics(
+          excluding: when,
+          child: AbsorbPointer(absorbing: when, child: child),
+        ),
+      );
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // Loading Overlay
 // ═══════════════════════════════════════════════════════════════════
@@ -1304,7 +1513,11 @@ class _BottomActionBar extends StatelessWidget {
 class _LoadingOverlay extends StatelessWidget {
   final double progress;
   final String status;
-  const _LoadingOverlay({required this.progress, this.status = ''});
+
+  /// Stops the import after the recipes being saved right now. Null once
+  /// that has been asked for.
+  final VoidCallback? onCancel;
+  const _LoadingOverlay({required this.progress, this.status = '', this.onCancel});
 
   @override
   Widget build(BuildContext context) {
@@ -1342,6 +1555,8 @@ class _LoadingOverlay extends StatelessWidget {
                   status.isNotEmpty ? status : '${(progress * 100).toInt()}%',
                   style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                 ),
+                const SizedBox(height: 12),
+                TextButton(onPressed: onCancel, child: Text(l10n.actionCancel)),
               ],
             ),
           ),
@@ -1350,3 +1565,89 @@ class _LoadingOverlay extends StatelessWidget {
     );
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// Rename Dialog
+// ═══════════════════════════════════════════════════════════════════
+
+/// Asks for a new title and closes with it, or with nothing when cancelled.
+class _RenameDialog extends StatefulWidget {
+  final String title;
+  const _RenameDialog({required this.title});
+
+  @override
+  State<_RenameDialog> createState() => _RenameDialogState();
+}
+
+class _RenameDialogState extends State<_RenameDialog> {
+  // Owned by the dialog, so it lives exactly as long as the text field does,
+  // the closing animation included.
+  late final _controller = TextEditingController(text: widget.title);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final title = _controller.text.trim();
+    if (title.isNotEmpty) Navigator.pop(context, title);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return AlertDialog(
+      title: Text(l10n.importRenameRecipe),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(
+          labelText: l10n.recipeFieldTitle,
+          border: const OutlineInputBorder(),
+        ),
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(onPressed: _submit, child: Text(l10n.rename)),
+      ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Import result and duplicate search
+// ═══════════════════════════════════════════════════════════════════
+
+/// What an import run did, for the message shown when it ends.
+class _ImportResult {
+  int imported = 0;
+  int imagesMissing = 0;
+  bool linksMissing = false;
+  String? lastId;
+  bool stopped = false;
+  final errors = <String>[];
+}
+
+/// What the duplicate search compares. It is sent to another isolate, so it
+/// holds plain data only.
+class _DuplicateSearch {
+  final List<ImportedRecipe> imports;
+  final List<Recipe> existing;
+  final Map<String, List<String>> existingIngredients;
+
+  const _DuplicateSearch({
+    required this.imports,
+    required this.existing,
+    required this.existingIngredients,
+  });
+}
+
+List<DuplicateStatus> _findDuplicates(_DuplicateSearch search) => ImportDuplicateChecker.check(
+      imports: search.imports,
+      existing: search.existing,
+      existingIngredients: search.existingIngredients,
+    );

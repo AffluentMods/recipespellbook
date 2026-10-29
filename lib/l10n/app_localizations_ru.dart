@@ -4280,6 +4280,117 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get importSelectRecipes => 'Выберите рецепты для импорта';
+
+  @override
+  String importRecipesFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count рецепта',
+      many: '$count рецептов',
+      few: '$count рецепта',
+      one: '$count рецепт',
+    );
+    return 'Найдено $_temp0';
+  }
+
+  @override
+  String importDuplicatesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дубликата',
+      many: '$count дубликатов',
+      few: '$count дубликата',
+      one: '$count дубликат',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importCheckingDuplicates => 'проверка дубликатов...';
+
+  @override
+  String importMoreSteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count шага',
+      many: '$count шагов',
+      few: '$count шага',
+      one: '$count шаг',
+    );
+    return 'Ещё $_temp0';
+  }
+
+  @override
+  String get importRenameRecipe => 'Переименовать рецепт';
+
+  @override
+  String get importNeedsReview => 'Часть текста могла быть распознана неверно. После импорта проверьте ингредиенты и шаги.';
+
+  @override
+  String importingCount(int current, int total) {
+    return 'Импорт $current из $total...';
+  }
+
+  @override
+  String get importStopping => 'Остановка...';
+
+  @override
+  String importStoppedCount(int imported, int total) {
+    return 'Импортировано рецептов: $imported из $total';
+  }
+
+  @override
+  String importSomeFailed(int imported, int failed) {
+    return 'Импортировано: $imported, с ошибкой: $failed';
+  }
+
+  @override
+  String importImagesNotSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count изображения',
+      many: '$count изображений',
+      few: '$count изображения',
+      one: '$count изображение',
+    );
+    return 'не удалось сохранить $_temp0';
+  }
+
+  @override
+  String importEntriesLeftOut(int count) {
+    return 'Пропущено записей без ингредиентов и шагов: $count';
+  }
+
+  @override
+  String get importNothingToImport => 'Рецепт не найден. Нет ни ингредиентов, ни шагов для импорта.';
+
+  @override
+  String get importNoRecipeAtLink => 'По этой ссылке рецепт не найден.';
+
+  @override
+  String get importNoRecipeInText => 'В этом тексте рецепт не найден. Нужны ингредиенты или шаги.';
+
+  @override
+  String get importNoRecipeInFile => 'В этом файле рецепт не найден.';
+
+  @override
+  String get importFileUnreadable => 'Не удалось прочитать этот файл.';
+
+  @override
+  String get importPdfMobileOnly => 'PDF можно прочитать только в мобильном приложении. На этом устройстве скопируйте текст рецепта и вставьте его как текст.';
+
+  @override
+  String get importPhotoMobileOnly => 'Фото можно прочитать только в мобильном приложении.';
+
+  @override
+  String get scanProductNoRecipe => 'У этого продукта нет ингредиентов или пищевой ценности, чтобы сохранить его как рецепт.';
+
+  @override
   String get productNotFound => 'Продукт не найден';
 
   @override
@@ -8971,12 +9082,18 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get scanNoRecipePdf => 'В PDF рецепт не найден. Проверьте, что на страницах видны ингредиенты или шаги, или вставьте текст вместо этого.';
+
+  @override
   String get scanNoTextImage => 'Текст на изображении не найден. Попробуйте сфотографировать при лучшем освещении или воспользуйтесь вставкой текста.';
 
   @override
   String scanLittleTextImage(int count) {
     return 'Обнаружено очень мало текста ($count символов). Попробуйте сделать более чёткое фото при лучшем освещении или воспользуйтесь вставкой текста.';
   }
+
+  @override
+  String get scanNoRecipeImage => 'На изображении рецепт не найден. Проверьте, что на фото видны ингредиенты или шаги, или вставьте текст вместо этого.';
 
   @override
   String scanProgress(int current, int total) {
@@ -10819,4 +10936,23 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
+
+  @override
+  String get importLinksNotSaved => 'не удалось сохранить связи между рецептами';
+
+  @override
+  String importStoppedSomeFailed(int imported, int total, int failed) {
+    return 'Импортировано рецептов: $imported из $total, с ошибкой: $failed';
+  }
+
+  @override
+  String get importDuplicateCheckFailed => 'не удалось проверить дубликаты';
+
+  @override
+  String scanProductFrom(String brand) {
+    return 'Отсканированный продукт $brand';
+  }
+
+  @override
+  String get scanProductNoName => 'У этого продукта нет названия для списка покупок.';
 }

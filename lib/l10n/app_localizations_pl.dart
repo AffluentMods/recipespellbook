@@ -4280,6 +4280,125 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get importSelectRecipes => 'Wybierz przepisy do zaimportowania';
+
+  @override
+  String importRecipesFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count przepisu',
+      many: '$count przepisów',
+      few: '$count przepisy',
+      one: '$count przepis',
+    );
+    return 'Znaleziono $_temp0';
+  }
+
+  @override
+  String importDuplicatesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count duplikatu',
+      many: '$count duplikatów',
+      few: '$count duplikaty',
+      one: '$count duplikat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importCheckingDuplicates => 'sprawdzanie duplikatów...';
+
+  @override
+  String importMoreSteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kroku',
+      many: '$count kroków',
+      few: '$count kroki',
+      one: '$count krok',
+    );
+    return '+$_temp0';
+  }
+
+  @override
+  String get importRenameRecipe => 'Zmień nazwę przepisu';
+
+  @override
+  String get importNeedsReview => 'Część treści mogła zostać odczytana niepoprawnie. Po imporcie sprawdź składniki i kroki.';
+
+  @override
+  String importingCount(int current, int total) {
+    return 'Importowanie $current z $total...';
+  }
+
+  @override
+  String get importStopping => 'Zatrzymywanie...';
+
+  @override
+  String importStoppedCount(int imported, int total) {
+    return 'Zaimportowano $imported z $total przepisów';
+  }
+
+  @override
+  String importSomeFailed(int imported, int failed) {
+    return 'Zaimportowano: $imported, błędy: $failed';
+  }
+
+  @override
+  String importImagesNotSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count obrazu',
+      many: '$count obrazów',
+      few: '$count obrazów',
+      one: '$count obrazu',
+    );
+    return 'nie udało się zapisać $_temp0';
+  }
+
+  @override
+  String importEntriesLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pozycji',
+      many: '$count pozycji',
+      few: '$count pozycje',
+      one: '$count pozycję',
+    );
+    return 'Pominięto $_temp0 bez składników i kroków';
+  }
+
+  @override
+  String get importNothingToImport => 'Nie znaleziono przepisu. Brak składników i kroków do zaimportowania.';
+
+  @override
+  String get importNoRecipeAtLink => 'Pod tym linkiem nie znaleziono przepisu.';
+
+  @override
+  String get importNoRecipeInText => 'W tym tekście nie znaleziono przepisu. Potrzebne są składniki lub kroki.';
+
+  @override
+  String get importNoRecipeInFile => 'W tym pliku nie znaleziono przepisu.';
+
+  @override
+  String get importFileUnreadable => 'Nie udało się odczytać tego pliku.';
+
+  @override
+  String get importPdfMobileOnly => 'Pliki PDF można odczytać tylko w aplikacji mobilnej. Na tym urządzeniu skopiuj tekst przepisu i wklej go jako tekst.';
+
+  @override
+  String get importPhotoMobileOnly => 'Zdjęcia można odczytać tylko w aplikacji mobilnej.';
+
+  @override
+  String get scanProductNoRecipe => 'Ten produkt nie ma składników ani wartości odżywczych, które można zapisać jako przepis.';
+
+  @override
   String get productNotFound => 'Produkt nie znaleziony';
 
   @override
@@ -8971,12 +9090,18 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get scanNoRecipePdf => 'W pliku PDF nie znaleziono przepisu. Sprawdź, czy strony pokazują składniki lub kroki, albo wklej zamiast tego tekst.';
+
+  @override
   String get scanNoTextImage => 'Nie znaleziono tekstu na zdjęciu. Spróbuj zrobić zdjęcie przy lepszym oświetleniu lub użyj opcji wklejania tekstu.';
 
   @override
   String scanLittleTextImage(int count) {
     return 'Wykryto bardzo mało tekstu ($count znaków). Spróbuj wyraźniejszego zdjęcia z lepszym oświetleniem lub użyj opcji wklejania tekstu.';
   }
+
+  @override
+  String get scanNoRecipeImage => 'Na obrazie nie znaleziono przepisu. Sprawdź, czy zdjęcie pokazuje składniki lub kroki, albo wklej zamiast tego tekst.';
 
   @override
   String scanProgress(int current, int total) {
@@ -10819,4 +10944,23 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
+
+  @override
+  String get importLinksNotSaved => 'nie udało się zapisać powiązań między przepisami';
+
+  @override
+  String importStoppedSomeFailed(int imported, int total, int failed) {
+    return 'Zaimportowano $imported z $total przepisów, błędy: $failed';
+  }
+
+  @override
+  String get importDuplicateCheckFailed => 'nie udało się sprawdzić duplikatów';
+
+  @override
+  String scanProductFrom(String brand) {
+    return 'Zeskanowany produkt marki $brand';
+  }
+
+  @override
+  String get scanProductNoName => 'Ten produkt nie ma nazwy, którą można dodać do listy zakupów.';
 }

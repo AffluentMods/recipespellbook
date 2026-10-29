@@ -2,6 +2,7 @@ import 'dart:convert';
 import '../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,10 +10,13 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../utils/platform_utils.dart';
 import 'package:path/path.dart' as p;
+import '../../data/nutrition_data.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/imported_recipe.dart';
+import '../../services/imported_recipe_saver.dart';
 import '../../services/recipe_file_importers/file_import_dispatcher.dart';
+import '../../services/recipe_file_importers/import_support.dart';
 import '../../providers/database_provider.dart';
 import '../../services/ocr_service.dart';
 import '../../services/recipe_import_engine.dart';
@@ -24,6 +28,7 @@ import 'app_snackbar.dart';
 import 'platform_brand.dart';
 import '../../services/barcode_scanner_service.dart';
 import '../../utils/responsive_utils.dart';
+import '../../utils/text_normalize.dart';
 import 'sheet_chrome.dart';
 
 /// Shows the MODERN add recipe dialog with 2 options
@@ -150,6 +155,26 @@ class _OptionCard extends StatelessWidget {
 
 // ============ IMPORT SHEET ============
 
+/// The recipes of the app's own export, when that is what the [bytes] of a
+/// JSON file hold, or null when they hold anything else. Runs in the
+/// background: a backup with its photos in it is a long text to take apart.
+List<ImportedRecipe>? _ownExportIn(Uint8List bytes) {
+  // Read the way the file importers read text: UTF-8 or, behind its byte
+  // order mark, UTF-16. The mark is not part of the JSON.
+  final text = ImportSupport.decodeText(bytes);
+  // The JSON of another app is left to its importer and not decoded twice.
+  if (!text.contains('"version"') || !text.contains('"cookbook')) return null;
+  try {
+    final json = jsonDecode(text);
+    return OwnExport.matches(json) ? OwnExport.recipes(json as Map) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// The kinds of picked file that are read with the text recognition.
+enum _FileKind { pdf, photo }
+
 class _ImportRecipeSheet extends ConsumerStatefulWidget {
   final String cookbookId;
   final bool autoScanBarcode;
@@ -201,8 +226,17 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     super.dispose();
   }
 
-  void _showLoading(String message) => setState(() { _isLoading = true; _loadingMessage = message; });
-  void _hideLoading() => setState(() { _isLoading = false; _loadingMessage = null; });
+  // The sheet can be closed while a scan or a download is still running, so
+  // what comes back afterwards must not touch it any more.
+  void _showLoading(String message) {
+    if (!mounted) return;
+    setState(() { _isLoading = true; _loadingMessage = message; });
+  }
+
+  void _hideLoading() {
+    if (!mounted) return;
+    setState(() { _isLoading = false; _loadingMessage = null; });
+  }
 
   void _showError(String message) {
     if (!mounted) return;
@@ -226,7 +260,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       return _importPastedJson(raw);
     }
 
-    final finalUrl = _normalizeAndValidateUrl(raw);
+    // What gets pasted is often a share message with the link somewhere in
+    // it ("Check out this recipe! https://..."). The link is what counts then.
+    final link = _linkIn(raw);
+    final finalUrl = _normalizeAndValidateUrl(link ?? raw);
     if (finalUrl == null) {
       // Not a valid link. If it's a decent chunk of text, treat it as a pasted
       // recipe; otherwise tell the user plainly.
@@ -237,16 +274,69 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       return;
     }
 
-    _showLoading(AppLocalizations.of(context)!.importProgress);
+    final around = link == null ? '' : raw.replaceAll(_links, ' ').trim();
+    if (around.isNotEmpty) return _importPastedText(around, link: finalUrl);
+    return _importFromLink(finalUrl);
+  }
+
+  /// Fetches the recipe behind [url]. [otherwise] is what the text pasted
+  /// around the link was read as: it is offered when the link gives nothing.
+  Future<void> _importFromLink(String url, {List<ImportedRecipe> otherwise = const [], String? sourceText}) async {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    var failure = l10n.importNoRecipeAtLink;
+    _showLoading(l10n.importProgress);
     try {
-      final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
-      _hideLoading();
-      _showImportPreview([recipe], sourceUrl: finalUrl);
+      final recipe = await RecipeImportEngine.parseFromUrl(url);
+      if (hasRecipeContent(recipe)) {
+        _hideLoading();
+        _showImportPreview([recipe], sourceUrl: url);
+        return;
+      }
     } catch (e) {
-      _hideLoading();
-      _showError(_friendlyImportError(e));
+      failure = _friendlyImportError(e, l10n);
+    }
+    _hideLoading();
+    if (otherwise.any(hasRecipeContent)) {
+      _showImportPreview(otherwise, sourceText: sourceText);
+    } else {
+      _showError(failure);
     }
   }
+
+  // A link ends where something comes that no address holds: a space, a
+  // quote of any kind, the punctuation of Chinese and Japanese text, the
+  // full-width forms, guillemets and the long dashes.
+  static final _links = RegExp(
+    r'https?://[^\s<>"{}|\\^`\[\]\u2010-\u205E\u3000-\u303F\uFF00-\uFF65«»]+',
+    caseSensitive: false,
+  );
+
+  /// The first http(s) link in [text], without the full stop, bracket or
+  /// quote of the sentence around it. Null when there is none.
+  static String? _linkIn(String text) {
+    final found = _links.firstMatch(text)?.group(0);
+    if (found == null) return null;
+    // Brackets the link itself has open, as in ".../wiki/Roux_(sauce)". A
+    // closing one beyond those belongs to the sentence.
+    var open = '('.allMatches(found).length - ')'.allMatches(found).length;
+    var end = found.length;
+    while (end > 0) {
+      final last = found[end - 1];
+      if (last == ')' && open < 0) {
+        open++;
+      } else if (!_sentenceEnd.hasMatch(last) || _addressEnd.contains(last)) {
+        break;
+      }
+      end--;
+    }
+    return found.substring(0, end);
+  }
+
+  /// Punctuation and symbols, of any script, that a sentence can put after a
+  /// link. Of those, an address can end in the ones in [_addressEnd].
+  static final _sentenceEnd = RegExp(r'[\p{P}\p{S}]', unicode: true);
+  static const _addressEnd = '/=&#%+-_~)';
 
   /// Validate + normalize a user-entered URL. Returns null when it isn't a safe
   /// http(s) link — blocks other schemes (file:, javascript:, data:…) and
@@ -254,8 +344,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   /// the device's own network.
   String? _normalizeAndValidateUrl(String input) {
     var s = input.trim();
-    if (s.isEmpty) return null;
-    if (!s.startsWith('http://') && !s.startsWith('https://')) {
+    // Several lines are a text, whatever the first of them looks like.
+    if (s.isEmpty || s.contains('\n') || s.contains('\r')) return null;
+    final lower = s.toLowerCase();
+    if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
       // A different explicit scheme is never a recipe link — reject it rather
       // than blindly prefixing https://.
       if (RegExp(r'^[a-zA-Z][a-zA-Z0-9+.\-]*:').hasMatch(s)) return null;
@@ -265,6 +357,9 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     if (uri == null || !uri.hasAuthority || uri.host.isEmpty) return null;
     if (uri.scheme != 'http' && uri.scheme != 'https') return null;
     if (!uri.host.contains('.')) return null; // needs a real domain
+    // Uri takes a sentence for a host name and writes its spaces as %20. No
+    // host has those, and a pasted sentence must not be fetched as a link.
+    if (uri.host.contains('%')) return null;
     if (_isBlockedHost(uri.host)) return null;
     return uri.toString();
   }
@@ -295,6 +390,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
           .replaceFirst(RegExp(r'```\s*$'), '')
           .trim();
     }
+    const noRecipe = 'We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.';
     _showLoading(AppLocalizations.of(context)!.parsingRecipe);
     try {
       // App's own export bundle?
@@ -303,52 +399,63 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         decoded = jsonDecode(body);
       } catch (_) {
         _hideLoading();
+        // "[Budget Bytes] One Pot Chili https://..." only starts like JSON.
+        // A share message is read for its link.
+        final link = _linkIn(body);
+        final url = link == null ? null : _normalizeAndValidateUrl(link);
+        if (url != null) {
+          final around = body.replaceAll(_links, ' ').trim();
+          return around.isEmpty ? _importFromLink(url) : _importPastedText(around, link: url);
+        }
         _showError('That looks like recipe data, but it isn’t valid JSON. Copy the whole thing and try again.');
         return;
       }
-      if (decoded is Map<String, dynamic> && decoded.containsKey('version') &&
-          (decoded.containsKey('cookbook') || decoded.containsKey('cookbooks'))) {
+      if (OwnExport.matches(decoded)) {
         _hideLoading();
-        _processOwnExportFormat(decoded);
+        _processOwnExportFormat(OwnExport.recipes(decoded as Map), nothingFound: noRecipe);
         return;
       }
 
       final recipes = RecipeImportEngine.parseFromFileBulk(body, 'pasted.json');
       _hideLoading();
-      if (recipes.isNotEmpty) {
+      if (recipes.any(hasRecipeContent)) {
         _showImportPreview(recipes, sourceText: body);
         return;
       }
-      _showError('We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.');
+      _showError(noRecipe);
     } catch (e) {
       _hideLoading();
-      _showError('We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.');
+      _showError(noRecipe);
     }
   }
 
-  /// Parse a big blob of pasted recipe text that isn't a link.
-  Future<void> _importPastedText(String text) async {
-    _showLoading(AppLocalizations.of(context)!.parsingRecipe);
+  /// Parse a big blob of pasted recipe text that isn't a link. [link] is the
+  /// link that was pasted along with it, if there was one.
+  Future<void> _importPastedText(String text, {String? link}) async {
+    final l10n = AppLocalizations.of(context)!;
+    _showLoading(l10n.parsingRecipe);
     try {
       final recipes = RecipeImportEngine.parseTextMulti(text);
-      final empty = recipes.isEmpty ||
-          (recipes.length == 1 &&
-              recipes.first.ingredients.isEmpty &&
-              recipes.first.instructions.isEmpty);
       _hideLoading();
-      if (empty) {
+      // A share message says little besides its link, and the recipe is
+      // behind the link. Only a text that is a whole recipe by itself, with
+      // ingredients and steps, is taken for what it says.
+      if (link != null && !recipes.any((r) => r.ingredients.isNotEmpty && r.instructions.isNotEmpty)) {
+        return _importFromLink(link, otherwise: recipes, sourceText: text);
+      }
+      if (!recipes.any(hasRecipeContent)) {
         _showError('We couldn’t find a recipe in that text. For long recipes, use “Paste text” below.');
         return;
       }
       _showImportPreview(recipes, sourceText: text);
     } catch (e) {
       _hideLoading();
-      _showError(_friendlyImportError(e));
+      _showError(_friendlyImportError(e, l10n));
     }
   }
 
   /// Turn a raw import failure into a plain-English message.
-  String _friendlyImportError(Object e) {
+  String _friendlyImportError(Object e, AppLocalizations l10n) {
     final s = e.toString().toLowerCase();
     if (s.contains('socketexception') || s.contains('failed host lookup') ||
         s.contains('network') || s.contains('timeout') || s.contains('timed out') ||
@@ -363,7 +470,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       return 'That link couldn’t be found. Double-check the URL.';
     }
     if (s.contains('no recipe') || s.contains('empty')) {
-      return 'We couldn’t find a recipe at that link.';
+      return l10n.importNoRecipeAtLink;
     }
     return 'We couldn’t read a recipe from that link. Try a different link, or paste the recipe text below.';
   }
@@ -388,19 +495,27 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
       case 'saveAsRecipe':
       // Barcode product → create a quick pantry recipe
+        final l10n = AppLocalizations.of(context)!;
         final product = result['product'] as ProductInfo;
-        final data = product.toRecipeData();
+        // Taken from the product itself: whatever form its figures came in,
+        // nothing here can fail on them.
+        final nutrition = _productNutrition(product);
+        final brand = _brandOf(product);
+        final servingSize = product.servingSize?.trim();
         final recipe = ImportedRecipe(
-          title: data['title'] as String,
-          description: data['description'] as String?,
-          servings: data['servings'] as String?,
-          ingredients: List<String>.from(data['ingredients'] as List),
+          title: _productName(product) ?? l10n.unknownProduct,
+          description: brand == null ? null : l10n.scanProductFrom(brand),
+          servings: nutrition?.servings ?? (servingSize == null || servingSize.isEmpty ? null : servingSize),
+          ingredients: List.of(product.ingredients ?? const <String>[]),
           instructions: [],
-          imageUrl: data['imageUrl'] as String?,
+          imageUrl: product.imageUrl,
+          nutritionJson: nutrition?.json,
         );
-        // Attach nutrition if available
-        if (data['nutritionJson'] != null) {
-          recipe.notes = 'Nutrition data available from product scan.';
+        // With no list of ingredients and no nutrition facts there is only
+        // a name, and a name alone is not a recipe.
+        if (!hasRecipeContent(recipe)) {
+          _showError(l10n.scanProductNoRecipe);
+          break;
         }
         _showImportPreview([recipe]);
         break;
@@ -409,9 +524,11 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       // Add scanned product to default shopping list
         final product = result['product'] as ProductInfo?;
         final manualName = result['name'] as String?;
-        final itemName = product?.displayName ?? manualName;
+        final itemName = (product == null ? manualName : _productName(product))?.trim();
 
-        if (itemName != null && itemName.isNotEmpty) {
+        if (itemName == null || itemName.isEmpty) {
+          _showError(AppLocalizations.of(context)!.scanProductNoName);
+        } else {
           try {
             final shoppingDao = ref.read(shoppingDaoProvider);
             final itemId = 'item_${DateTime.now().millisecondsSinceEpoch}';
@@ -442,8 +559,133 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     }
   }
 
+  /// What a scanned product is called: its name, with its brand in front
+  /// unless the name already says it. The product database lists several
+  /// brands for some products ("Nutella, Ferrero"), repeats the brand in the
+  /// name of others and leaves either field empty for many. Null when it has
+  /// neither.
+  ///
+  /// "Lays Classic" says the brand "Lay's", and "Nestle KitKat" says
+  /// "Nestlé": accents and apostrophes do not count. A name that starts with
+  /// the first word of the brand says it too ("Coca-Cola Original" of
+  /// "COCA-COLA SERVICES SA/NV").
+  static String? _productName(ProductInfo product) {
+    final name = (product.name ?? '').trim();
+    final brand = _brandOf(product);
+    if (name.isEmpty) return brand;
+    if (brand == null) return name;
+    final plainName = _plain(name), plainBrand = _plain(brand);
+    final firstWord = plainBrand.split(' ').first;
+    if (plainName.contains(plainBrand) || (firstWord.isNotEmpty && plainName.split(' ').first == firstWord)) return name;
+    return '$brand $name';
+  }
+
+  /// The first brand a product lists, or null when it lists none.
+  static String? _brandOf(ProductInfo product) {
+    final brand = (product.brand ?? '').split(',').first.trim();
+    return brand.isEmpty ? null : brand;
+  }
+
+  /// [text] in lower case without accents and apostrophes, its words split
+  /// at anything that is not a letter or a digit.
+  static String _plain(String text) =>
+      foldAccents(text).replaceAll(_apostrophes, '').replaceAll(_notWord, ' ').trim();
+  static final _apostrophes = RegExp('[\'\u2019]');
+  static final _notWord = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
+
+  /// The nutrition facts of a scanned product in the app's own format, and
+  /// what the recipe then gives as its servings. Null when the product has
+  /// none.
+  ///
+  /// The product database gives them for 100 g. When the pack says what a
+  /// serving weighs ("2 tbsp (37 g)") they are worked out for that serving,
+  /// otherwise 100 g is the serving.
+  ///
+  /// A recipe counts its servings, and the recipe screen takes the first
+  /// number in that text for the count: it divides the nutrition by it and
+  /// steps it up and down. So the product is one serving, with the size of
+  /// it in brackets, "1 (15 g)". Left as "15 g" it would be read as fifteen
+  /// servings, each with a fifteenth of the figures.
+  static ({String json, String servings})? _productNutrition(ProductInfo product) {
+    final per100g = product.nutrition;
+    if (per100g == null) return null;
+    final weight = _servingWeight(product.servingSize);
+    final serving = weight == null ? '100 g' : product.servingSize!.trim();
+
+    double? perServing(String key) {
+      final value = per100g[key];
+      final number = value is num ? value.toDouble() : (value is String ? double.tryParse(value.trim()) : null);
+      if (number == null || !number.isFinite) return null;
+      return (number * (weight ?? 100)).roundToDouble() / 100;
+    }
+
+    final facts = NutritionData(
+      calories: perServing('calories'),
+      protein: perServing('protein'),
+      carbohydrates: perServing('carbs'),
+      fat: perServing('fat'),
+      fiber: perServing('fiber'),
+      sugar: perServing('sugar'),
+      sodium: perServing('sodium'),
+      saturatedFat: perServing('saturatedFat'),
+      servingSize: serving,
+      calculatedServings: 1,
+    );
+    if (!facts.hasAnyData && facts.saturatedFat == null) return null;
+    return (json: jsonEncode(facts.toJson()), servings: '1 ($serving)');
+  }
+
+  /// What one serving weighs in grams (or measures in millilitres), as far as
+  /// the serving size printed on a pack says: "39g", "1 cup (240 ml)",
+  /// "1 biscuit (12,5 g)", "2 Löffel (30 g)", "30 grams".
+  ///
+  /// The weight in brackets is the one that counts when there is one: the
+  /// count in front of it is of spoons, biscuits or slices. A unit is a unit
+  /// only when no letter follows it, so the G of "2 gâteaux" is not grams.
+  static double? _servingWeight(String? servingSize) {
+    final text = servingSize ?? '';
+    // The serving size of a pack is a few words. Anything longer is not one.
+    if (text.length > 100) return null;
+    final bracketed = _bracketed.allMatches(text).map((m) => m.group(1)!);
+    for (final part in [...bracketed, text]) {
+      final found = _weight.firstMatch(part);
+      if (found == null) continue;
+      final digits = found.group(1)!;
+      // "1,000 g" is a thousand grams, "12,5 g" twelve and a half.
+      final amount = double.tryParse(
+        RegExp(r'^\d{1,3},\d{3}$').hasMatch(digits) ? digits.replaceFirst(',', '') : digits.replaceFirst(',', '.'),
+      );
+      if (amount == null || amount <= 0) return null;
+      final unit = found.group(2)!.toLowerCase();
+      return amount *
+          switch (unit) {
+            'kg' || 'l' || 'л' => 1000,
+            'dl' => 100,
+            'cl' => 10,
+            'mg' => 0.001,
+            _ => 1,
+          };
+    }
+    return null;
+  }
+
+  static final _bracketed = RegExp(r'\(([^()]*)\)');
+  static final _weight = RegExp(
+    r'(?<![\d.,])(\d{1,6}(?:[.,]\d{1,3})?)\s*(kg|mg|grammes?|grams?|gr|g|ml|мл|cl|dl|l|г|л)(?![\p{L}\p{N}])',
+    caseSensitive: false,
+    unicode: true,
+  );
+
+  // ========== SCANS (PDF + IMAGE) ==========
+
+  /// The parser scores how much of the text it understood, the text
+  /// recognition how well it could read the picture. Either being low is
+  /// worth a warning in the preview, so the lower one is kept.
+  static double _lowerConfidence(double? parsed, double read) => parsed != null && parsed < read ? parsed : read;
+
   // ========== PDF IMPORT ==========
   Future<void> _processPdfFile(String path) async {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.readingImage);
     try {
@@ -476,11 +718,19 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         pageImageScores: result.pageImageScores,
       );
 
+      // A scan nothing could be made of: no ingredient and no step in any of
+      // the recipes.
+      if (!recipes.any(hasRecipeContent)) {
+        _hideLoading();
+        _showError(l10n.scanNoRecipePdf);
+        return;
+      }
+
       // Use filename as fallback title only when there's a single result
       // (otherwise each recipe should keep its own recovered title)
       if (recipes.length == 1) {
         final r = recipes.first;
-        r.parseConfidence = result.confidence;
+        r.parseConfidence = _lowerConfidence(r.parseConfidence, result.confidence);
         r.rawOcrText = result.text;
         if (RecipeImportEngine.isTitleSuspicious(r.title)) {
           r.title = p.basenameWithoutExtension(path).replaceAll(RegExp(r'[-_]'), ' ');
@@ -561,6 +811,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   }
 
   Future<void> _processMultipleImages(List<String> imagePaths) async {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     _showLoading(imagePaths.length > 1
         ? l10n.scanProgress(1, imagePaths.length)
@@ -592,17 +843,26 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       // the text only looks like one recipe.
       final recipes = RecipeImportEngine.parseOcrTextMulti(result.text);
 
+      if (!recipes.any(hasRecipeContent)) {
+        _hideLoading();
+        _showError(l10n.scanNoRecipeImage);
+        return;
+      }
+
+      // A picked photo is a file on this device, so it goes in imagePath and
+      // the save copies it out of the picker's temp folder. imageUrl is for
+      // web addresses only.
       if (recipes.length == 1) {
         // Single-recipe path — use the first picked image as the cover
         final r = recipes.first;
-        r.imageUrl = imagePaths.first;
-        r.parseConfidence = result.confidence;
+        r.imagePath = imagePaths.first;
+        r.parseConfidence = _lowerConfidence(r.parseConfidence, result.confidence);
         r.rawOcrText = result.text;
       } else {
         // Multi-recipe path — assign each image as a cover round-robin
         // (best-effort; user can swap covers in preview)
         for (var i = 0; i < recipes.length; i++) {
-          recipes[i].imageUrl = imagePaths[i % imagePaths.length];
+          recipes[i].imagePath = imagePaths[i % imagePaths.length];
         }
       }
 
@@ -628,6 +888,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       // Try multi-recipe parser — pasted text might be a whole cookbook section
       final recipes = RecipeImportEngine.parseTextMulti(text);
       _hideLoading();
+      if (!recipes.any(hasRecipeContent)) {
+        _showError(l10n.importNoRecipeInText);
+        return;
+      }
       _showImportPreview(recipes, sourceText: text);
     } catch (e) {
       _hideLoading();
@@ -637,29 +901,93 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   // ========== FILE IMPORT ==========
 
+  /// A picked photo is read with the text recognition, the way the Photo
+  /// tile does it. Taken apart as text it would be offered as a recipe made
+  /// of noise.
+  static const _photoExtensions = {'jpg', 'jpeg', 'png', 'heic', 'heif', 'webp', 'bmp', 'gif'};
+
   Future<void> _importFromFile() async {
-    // Use FileType.any because Android doesn't recognize custom extensions
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    final path = file.path;
-    if (path == null) return;
-    final ext = file.extension?.toLowerCase() ?? '';
+    final l10n = AppLocalizations.of(context)!;
+    final PlatformFile file;
+    try {
+      // Use FileType.any because Android doesn't recognize custom extensions.
+      // In the browser a picked file has no path, so it has to come with its
+      // bytes. Anywhere else it is read from its path, and asking the picker
+      // for the bytes too would hold a large export in memory twice.
+      final result = await FilePicker.platform.pickFiles(type: FileType.any, withData: isWeb);
+      if (result == null || result.files.isEmpty) return;
+      file = result.files.first;
+    } catch (_) {
+      _showError(l10n.importFileUnreadable);
+      return;
+    }
+    if (!mounted) return;
 
-    // PDF is handled separately (OCR flow)
-    if (ext == 'pdf') {
-      _processPdfFile(path);
+    // The bytes are looked at first and the path only when there are none:
+    // in the browser even asking for the path throws.
+    final picked = file.bytes;
+    final path = picked == null && !isWeb ? file.path : null;
+    final ext = p.extension(file.name).replaceFirst('.', '').toLowerCase();
+
+    // PDF is handled separately (OCR flow), and so is a photo. Both need the
+    // text recognition of a phone and a file on the device to point it at.
+    // How the file starts tells them apart from text when the name does not:
+    // IMG_2041.jfif, scan.tiff, a photo saved without an extension.
+    var kind = ext == 'pdf' ? _FileKind.pdf : (_photoExtensions.contains(ext) ? _FileKind.photo : null);
+    kind ??= _kindOf(picked ?? await _startOf(path));
+    if (!mounted) return;
+    if (kind != null) {
+      if (!supportsOcr) {
+        _showError(kind == _FileKind.pdf ? l10n.importPdfMobileOnly : l10n.importPhotoMobileOnly);
+      } else if (path == null) {
+        // The mobile app reads them, but the picker gave no file to read.
+        _showError(l10n.importFileUnreadable);
+      } else if (kind == _FileKind.pdf) {
+        _processPdfFile(path);
+      } else {
+        _processMultipleImages([path]);
+      }
       return;
     }
 
-    // JSON might be our own export format — check first
-    if (ext == 'json') {
-      _processJsonFile(path);
-      return;
+    _processFileWithDispatcher(file.name, bytes: picked, path: path);
+  }
+
+  /// The first bytes of the file at [path], or nothing when it cannot be
+  /// read.
+  static Future<List<int>> _startOf(String? path) async {
+    if (path == null) return const [];
+    try {
+      final start = <int>[];
+      await for (final chunk in File(path).openRead(0, 16)) {
+        start.addAll(chunk);
+      }
+      return start;
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// A PDF or a photo, by how [bytes] start, or null for anything else.
+  static _FileKind? _kindOf(List<int> bytes) {
+    bool has(int offset, List<int> signature) {
+      if (bytes.length < offset + signature.length) return false;
+      for (var i = 0; i < signature.length; i++) {
+        if (bytes[offset + i] != signature[i]) return false;
+      }
+      return true;
     }
 
-    // All other formats → unified FileImportDispatcher
-    _processFileWithDispatcher(path, file.name);
+    if (has(0, '%PDF-'.codeUnits)) return _FileKind.pdf;
+    final photo = has(0, const [0xFF, 0xD8, 0xFF]) ||
+        has(0, const [0x89, 0x50, 0x4E, 0x47]) ||
+        has(0, 'GIF8'.codeUnits) ||
+        (has(0, 'RIFF'.codeUnits) && has(8, 'WEBP'.codeUnits)) ||
+        has(0, const [0x49, 0x49, 0x2A, 0x00]) ||
+        has(0, const [0x4D, 0x4D, 0x00, 0x2A]) ||
+        (has(4, 'ftyp'.codeUnits) &&
+            const ['heic', 'heix', 'hevc', 'mif1', 'msf1', 'avif', 'avis'].any((brand) => has(8, brand.codeUnits)));
+    return photo ? _FileKind.photo : null;
   }
 
   void _createManually() {
@@ -671,121 +999,64 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   /// Handles all formats: ZIP-based (Paprika, Mela, Recipe Keeper, Cookmate),
   /// text-based (MasterCook, Plan to Eat CSV, Cooklang, Living Cookbook),
   /// and legacy formats (MealMaster, HTML, Markdown, etc.)
-  Future<void> _processFileWithDispatcher(String path, String filename) async {
+  ///
+  /// The file is what the picker handed over: its [bytes], or the [path] to
+  /// read them from.
+  Future<void> _processFileWithDispatcher(String filename, {Uint8List? bytes, String? path}) async {
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.importProcessing);
+    if (bytes == null && path != null) {
+      try {
+        bytes = await File(path).readAsBytes();
+      } catch (_) {
+        // Told below, like a file that came with nothing to read.
+      }
+    }
+    if (bytes == null) {
+      _hideLoading();
+      _showError(l10n.importFileUnreadable);
+      return;
+    }
     try {
-      final bytes = Uint8List.fromList(await File(path).readAsBytes());
+      // JSON might be our own export format: check first
+      if (p.extension(filename).toLowerCase() == '.json') {
+        final exported = await compute(_ownExportIn, bytes);
+        if (exported != null) {
+          _hideLoading();
+          _processOwnExportFormat(exported, nothingFound: l10n.importNoRecipeInFile);
+          return;
+        }
+      }
+
       final recipes = await FileImportDispatcher.importFromBytes(bytes, filename);
 
       _hideLoading();
-      if (recipes.isEmpty) {
-        _showError(l10n.errorNoRecipeFound);
+      if (!recipes.any(hasRecipeContent)) {
+        _showError(l10n.importNoRecipeInFile);
         return;
       }
       _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();
-      _showError(l10n.failedToImport(e.toString()));
+      // What an importer could not read, it says in a sentence of its own,
+      // and that sentence is the message.
+      _showError(e is FormatException && e.message.trim().isNotEmpty ? e.message : l10n.failedToImport(e.toString()));
     }
   }
 
-  Future<void> _processJsonFile(String path) async {
-    final l10n = AppLocalizations.of(context)!;
-    _showLoading(l10n.importProcessing);
-    try {
-      final content = await File(path).readAsString();
-      final data = jsonDecode(content);
-
-      // ── Detect Recipe Spellbook's own export format ──
-      if (data is Map<String, dynamic> && data.containsKey('version') &&
-          (data.containsKey('cookbook') || data.containsKey('cookbooks'))) {
-        _hideLoading();
-        _processOwnExportFormat(data);
-        return;
-      }
-
-      final recipes = RecipeImportEngine.parseFromFileBulk(content, path.split('/').last);
-
-      _hideLoading();
-      if (recipes.isEmpty) {
-        // Fallback: try as generic JSON
-        final single = RecipeImportEngine.parseFromFile(content, path.split('/').last);
-        if (single.ingredients.isNotEmpty || single.instructions.isNotEmpty) {
-          _showImportPreview([single], sourceText: content);
-        } else {
-          _showError(l10n.errorNoRecipeFound);
-        }
-        return;
-      }
-      _showImportPreview(recipes);
-    } catch (e) {
-      _hideLoading();
-      _showError(l10n.failedToImport(e.toString()));
-    }
-  }
-
-  /// Handle Recipe Spellbook's own JSON export format.
-  /// Converts structured recipe data into ImportedRecipe objects for preview.
-  void _processOwnExportFormat(Map<String, dynamic> data) {
-    final allRecipeData = <Map<String, dynamic>>[];
-
-    if (data.containsKey('cookbooks')) {
-      // Full export — multiple cookbooks
-      for (final cb in (data['cookbooks'] as List)) {
-        final cbData = cb as Map<String, dynamic>;
-        allRecipeData.addAll((cbData['recipes'] as List).cast<Map<String, dynamic>>());
-      }
-    } else if (data.containsKey('recipes')) {
-      // Single cookbook export
-      allRecipeData.addAll((data['recipes'] as List).cast<Map<String, dynamic>>());
-    }
-
-    if (allRecipeData.isEmpty) {
-      _showError(AppLocalizations.of(context)!.errorNoRecipeFound);
+  /// Handle Recipe Spellbook's own JSON export format: a cookbook export or
+  /// a backup. Its [recipes] go through the preview like any others, into the
+  /// cookbook that is open, and keep everything the file says about them.
+  void _processOwnExportFormat(List<ImportedRecipe> recipes, {required String nothingFound}) {
+    if (!recipes.any(hasRecipeContent)) {
+      _showError(nothingFound);
       return;
     }
-
-    final recipes = allRecipeData.map((r) {
-      // Convert structured ingredients to text lines
-      final ingredients = (r['ingredients'] as List? ?? []).map((ing) {
-        final i = ing as Map<String, dynamic>;
-        final parts = <String>[];
-        if (i['amount'] != null && i['amount'].toString().isNotEmpty) parts.add(i['amount'].toString());
-        if (i['unit'] != null && i['unit'].toString().isNotEmpty) parts.add(i['unit'].toString());
-        parts.add(i['name'] as String? ?? '');
-        if (i['notes'] != null && i['notes'].toString().isNotEmpty && i['notes'] != '__header__') {
-          parts.add('(${i['notes']})');
-        }
-        return parts.join(' ').trim();
-      }).toList();
-
-      // Convert structured steps to text lines
-      final instructions = (r['steps'] as List? ?? [])
-          .map((s) => (s as Map<String, dynamic>)['instruction'] as String? ?? '')
-          .where((s) => s.isNotEmpty)
-          .toList();
-
-      return ImportedRecipe(
-        title: r['title'] as String? ?? 'Untitled',
-        description: r['description'] as String?,
-        servings: r['servings']?.toString(),
-        prepTimeMinutes: r['prepTimeMinutes'] as int?,
-        cookTimeMinutes: r['cookTimeMinutes'] as int?,
-        ingredients: ingredients.cast<String>(),
-        instructions: instructions.cast<String>(),
-        sourceUrl: r['sourceUrl'] as String?,
-        suggestedCategory: r['categoryId'] as String?,
-        suggestedCourse: r['courseId'] as String?,
-        notes: r['notes'] as String?,
-        imageData: r['imageBase64'] as String?,
-      );
-    }).toList();
-
     _showImportPreview(recipes, sourceText: 'Recipe Spellbook export (${recipes.length} recipes)');
   }
 
   void _showImportPreview(List<ImportedRecipe> recipes, {String? sourceUrl, String? sourceText}) {
+    if (!mounted) return;
     // Navigate to the full import preview screen
     Navigator.of(context).pop(); // Close the new recipe dialog first
     Navigator.of(context).push(

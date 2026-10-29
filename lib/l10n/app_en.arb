@@ -1903,6 +1903,92 @@
       }
     }
   },
+  "importSelectRecipes": "Select recipes to import",
+  "importRecipesFound": "{count} {count, plural, =1{recipe} other{recipes}} found",
+  "@importRecipesFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importDuplicatesCount": "{count} {count, plural, =1{duplicate} other{duplicates}}",
+  "@importDuplicatesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importCheckingDuplicates": "checking duplicates...",
+  "importMoreSteps": "+{count} more {count, plural, =1{step} other{steps}}",
+  "@importMoreSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importRenameRecipe": "Rename Recipe",
+  "importNeedsReview": "Some of this may not have been read correctly. Check the ingredients and steps after importing.",
+  "importingCount": "Importing {current} of {total}...",
+  "@importingCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importStopping": "Stopping...",
+  "importStoppedCount": "{imported} of {total} recipes imported",
+  "@importStoppedCount": {
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importSomeFailed": "{imported} imported, {failed} failed",
+  "@importSomeFailed": {
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "importImagesNotSaved": "{count} {count, plural, =1{image} other{images}} could not be saved",
+  "@importImagesNotSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importEntriesLeftOut": "{count} {count, plural, =1{entry without ingredients or steps was} other{entries without ingredients or steps were}} left out",
+  "@importEntriesLeftOut": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importNothingToImport": "No recipe found. There are no ingredients and no steps to import.",
+  "importNoRecipeAtLink": "We couldn't find a recipe at that link.",
+  "importNoRecipeInText": "We couldn't find a recipe in that text. It needs the ingredients or the steps.",
+  "importNoRecipeInFile": "No recipe found in that file.",
+  "importFileUnreadable": "That file could not be read.",
+  "importPdfMobileOnly": "PDFs can only be read in the mobile app. On this device, copy the recipe text and use Paste text.",
+  "importPhotoMobileOnly": "Photos can only be read in the mobile app.",
+  "scanProductNoRecipe": "This product has no ingredients or nutrition facts to save as a recipe.",
   "productNotFound": "Product Not Found",
   "barcodeNotFound": "No product found for barcode:\n{barcode}",
   "@barcodeNotFound": {
@@ -4597,6 +4683,7 @@
       }
     }
   },
+  "scanNoRecipePdf": "No recipe found in PDF. Check that the pages show the ingredients or the steps, or use the Text paste option instead.",
   "scanNoTextImage": "No text found in image. Try taking the photo in better lighting, or use the Text paste option instead.",
   "scanLittleTextImage": "Very little text detected ({count} characters). Try a clearer photo with better lighting, or use the Text paste option instead.",
   "@scanLittleTextImage": {
@@ -4606,6 +4693,7 @@
       }
     }
   },
+  "scanNoRecipeImage": "No recipe found in image. Check that the photo shows the ingredients or the steps, or use the Text paste option instead.",
   "scanProgress": "Scanning page {current} of {total}...",
   "@scanProgress": {
     "placeholders": {
@@ -5687,5 +5775,30 @@
   },
   "familyJoinOpenFamily": "Open family",
   "familyJoinInvalid": "This family invite isn't valid anymore",
-  "familyJoinInvalidHint": "The invite code may have been changed. Ask for a new link, or paste another one."
+  "familyJoinInvalidHint": "The invite code may have been changed. Ask for a new link, or paste another one.",
+  "importLinksNotSaved": "links between recipes could not be saved",
+  "importStoppedSomeFailed": "{imported} of {total} recipes imported, {failed} failed",
+  "@importStoppedSomeFailed": {
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "importDuplicateCheckFailed": "duplicates could not be checked",
+  "scanProductFrom": "Scanned product from {brand}",
+  "@scanProductFrom": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "scanProductNoName": "This product has no name to add to the shopping list."
 }

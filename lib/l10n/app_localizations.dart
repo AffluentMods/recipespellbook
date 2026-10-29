@@ -7651,6 +7651,132 @@ abstract class AppLocalizations {
   /// **'Import {count} {count, plural, =1{recipe} other{recipes}}'**
   String importCountRecipes(int count);
 
+  /// No description provided for @importSelectRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Select recipes to import'**
+  String get importSelectRecipes;
+
+  /// No description provided for @importRecipesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{recipe} other{recipes}} found'**
+  String importRecipesFound(int count);
+
+  /// No description provided for @importDuplicatesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{duplicate} other{duplicates}}'**
+  String importDuplicatesCount(int count);
+
+  /// No description provided for @importCheckingDuplicates.
+  ///
+  /// In en, this message translates to:
+  /// **'checking duplicates...'**
+  String get importCheckingDuplicates;
+
+  /// No description provided for @importMoreSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more {count, plural, =1{step} other{steps}}'**
+  String importMoreSteps(int count);
+
+  /// No description provided for @importRenameRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Recipe'**
+  String get importRenameRecipe;
+
+  /// No description provided for @importNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Some of this may not have been read correctly. Check the ingredients and steps after importing.'**
+  String get importNeedsReview;
+
+  /// No description provided for @importingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing {current} of {total}...'**
+  String importingCount(int current, int total);
+
+  /// No description provided for @importStopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping...'**
+  String get importStopping;
+
+  /// No description provided for @importStoppedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{imported} of {total} recipes imported'**
+  String importStoppedCount(int imported, int total);
+
+  /// No description provided for @importSomeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{imported} imported, {failed} failed'**
+  String importSomeFailed(int imported, int failed);
+
+  /// No description provided for @importImagesNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{image} other{images}} could not be saved'**
+  String importImagesNotSaved(int count);
+
+  /// No description provided for @importEntriesLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{entry without ingredients or steps was} other{entries without ingredients or steps were}} left out'**
+  String importEntriesLeftOut(int count);
+
+  /// No description provided for @importNothingToImport.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found. There are no ingredients and no steps to import.'**
+  String get importNothingToImport;
+
+  /// No description provided for @importNoRecipeAtLink.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find a recipe at that link.'**
+  String get importNoRecipeAtLink;
+
+  /// No description provided for @importNoRecipeInText.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find a recipe in that text. It needs the ingredients or the steps.'**
+  String get importNoRecipeInText;
+
+  /// No description provided for @importNoRecipeInFile.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in that file.'**
+  String get importNoRecipeInFile;
+
+  /// No description provided for @importFileUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'That file could not be read.'**
+  String get importFileUnreadable;
+
+  /// No description provided for @importPdfMobileOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'PDFs can only be read in the mobile app. On this device, copy the recipe text and use Paste text.'**
+  String get importPdfMobileOnly;
+
+  /// No description provided for @importPhotoMobileOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos can only be read in the mobile app.'**
+  String get importPhotoMobileOnly;
+
+  /// No description provided for @scanProductNoRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'This product has no ingredients or nutrition facts to save as a recipe.'**
+  String get scanProductNoRecipe;
+
   /// No description provided for @productNotFound.
   ///
   /// In en, this message translates to:
@@ -16033,6 +16159,12 @@ abstract class AppLocalizations {
   /// **'Very little text detected in PDF ({count} characters). The scan may be too blurry. Try a higher quality PDF, or use the Text paste option instead.'**
   String scanLittleTextPdf(int count);
 
+  /// No description provided for @scanNoRecipePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in PDF. Check that the pages show the ingredients or the steps, or use the Text paste option instead.'**
+  String get scanNoRecipePdf;
+
   /// No description provided for @scanNoTextImage.
   ///
   /// In en, this message translates to:
@@ -16044,6 +16176,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Very little text detected ({count} characters). Try a clearer photo with better lighting, or use the Text paste option instead.'**
   String scanLittleTextImage(int count);
+
+  /// No description provided for @scanNoRecipeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in image. Check that the photo shows the ingredients or the steps, or use the Text paste option instead.'**
+  String get scanNoRecipeImage;
 
   /// No description provided for @scanProgress.
   ///
@@ -19248,6 +19386,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The invite code may have been changed. Ask for a new link, or paste another one.'**
   String get familyJoinInvalidHint;
+
+  /// No description provided for @importLinksNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'links between recipes could not be saved'**
+  String get importLinksNotSaved;
+
+  /// No description provided for @importStoppedSomeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{imported} of {total} recipes imported, {failed} failed'**
+  String importStoppedSomeFailed(int imported, int total, int failed);
+
+  /// No description provided for @importDuplicateCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'duplicates could not be checked'**
+  String get importDuplicateCheckFailed;
+
+  /// No description provided for @scanProductFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned product from {brand}'**
+  String scanProductFrom(String brand);
+
+  /// No description provided for @scanProductNoName.
+  ///
+  /// In en, this message translates to:
+  /// **'This product has no name to add to the shopping list.'**
+  String get scanProductNoName;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

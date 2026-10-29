@@ -4,6 +4,7 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 import 'web_page_decoder.dart';
 import '../models/imported_recipe.dart';
+import 'recipe_file_importers/mastercook_importer.dart';
 
 /// Consolidated recipe import engine.
 /// Replaces both RecipeParser and RecipeScraperService.
@@ -906,8 +907,7 @@ class RecipeImportEngine {
             ? recipes.first
             : ImportedRecipe(title: 'Imported Recipe', ingredients: [], instructions: []);
       case 'mxp':
-      // MasterCook — delegate to file importers
-        final mxpRecipes = _parseMasterCookMxp(content);
+        final mxpRecipes = MasterCookImporter.import_(content, filename);
         return mxpRecipes.isNotEmpty
             ? mxpRecipes.first
             : ImportedRecipe(title: 'Imported Recipe', ingredients: [], instructions: []);
@@ -919,8 +919,8 @@ class RecipeImportEngine {
           if (recipes.isNotEmpty) return recipes.first;
         }
         // Try MasterCook detection
-        if (_looksLikeMasterCook(content)) {
-          final recipes = _parseMasterCookMxp(content);
+        if (MasterCookImporter.looksLikeMxp(content)) {
+          final recipes = MasterCookImporter.import_(content, filename);
           if (recipes.isNotEmpty) return recipes.first;
         }
         return _namedByFile(parseFromText(content), filename);
@@ -947,7 +947,7 @@ class RecipeImportEngine {
       case 'mk':
         return _parseMealMaster(content);
       case 'mxp':
-        return _parseMasterCookMxp(content);
+        return MasterCookImporter.import_(content, filename);
       case 'txt':
         // A file that only resembles one of these formats yields nothing
         // there and is read as plain text.
@@ -955,8 +955,8 @@ class RecipeImportEngine {
           final recipes = _parseMealMaster(content);
           if (recipes.isNotEmpty) return recipes;
         }
-        if (_looksLikeMasterCook(content)) {
-          final recipes = _parseMasterCookMxp(content);
+        if (MasterCookImporter.looksLikeMxp(content)) {
+          final recipes = MasterCookImporter.import_(content, filename);
           if (recipes.isNotEmpty) return recipes;
         }
         final recipe = _namedByFile(parseFromText(content), filename);
@@ -965,109 +965,6 @@ class RecipeImportEngine {
         final recipe = parseFromFile(content, filename);
         return (recipe.ingredients.isNotEmpty || recipe.instructions.isNotEmpty) ? [recipe] : [];
     }
-  }
-
-  // The banner MasterCook writes over each recipe it exports, and the
-  // heading of its ingredient table.
-  static final _masterCookBanner = RegExp(r'\*\s*Exported\s+from\s+MasterCook', caseSensitive: false);
-  static final _masterCookTable =
-      RegExp(r'^[ \t]*Amount\s+Measure\s+Ingredient\s+--\s+Preparation Method', multiLine: true, caseSensitive: false);
-
-  /// Check if text looks like MasterCook format. Only what MasterCook itself
-  /// writes counts: "Serving Size: 8" stands in many a plain recipe and on
-  /// every nutrition label.
-  static bool _looksLikeMasterCook(String content) {
-    return _masterCookBanner.hasMatch(content) || _masterCookTable.hasMatch(content);
-  }
-
-  /// Parse MasterCook .mxp format text.
-  /// Delegates to the MasterCook importer for the actual parsing logic.
-  static List<ImportedRecipe> _parseMasterCookMxp(String content) {
-    // Inline MasterCook parsing (same logic as MasterCookImporter)
-    // to avoid circular dependency with file_importers package.
-    final recipes = <ImportedRecipe>[];
-
-    final blocks = content.split(RegExp(
-      r'(?:^\s*\*\s*EXPORTED\s+FROM\s+MASTERCOOK\s*\*\s*$|'
-      r'^-\s*-\s*-\s*-\s*-\s*-\s*-\s*-\s*-.*$)',
-      multiLine: true,
-      caseSensitive: false,
-    ));
-
-    for (final block in blocks) {
-      final trimmed = block.trim();
-      if (trimmed.isEmpty || trimmed.length < 20) continue;
-
-      String? title;
-      String? servings;
-      List<String>? tags;
-      final ingredients = <String>[];
-      final instructions = <String>[];
-
-      final lines = trimmed.split('\n');
-      var inInstructions = false;
-
-      for (final rawLine in lines) {
-        final line = rawLine.trim();
-        if (line.isEmpty) {
-          if (ingredients.isNotEmpty && !inInstructions) inInstructions = true;
-          continue;
-        }
-
-        // Header fields
-        if (line.toLowerCase().startsWith('recipe by')) continue;
-        if (line.toLowerCase().startsWith('serving size') && line.contains(':')) {
-          servings = RegExp(r':\s*(\d+)').firstMatch(line)?.group(1);
-          continue;
-        }
-        if (line.toLowerCase().startsWith('categories') && line.contains(':')) {
-          tags = line.substring(line.indexOf(':') + 1).trim()
-              .split(RegExp(r'\s{2,}'))
-              .map((c) => c.trim())
-              .where((c) => c.isNotEmpty)
-              .toList();
-          continue;
-        }
-        if (line.toLowerCase().contains('amount') &&
-            line.toLowerCase().contains('measure')) {
-          continue;
-        }
-        if (RegExp(r'^[-\s]+$').hasMatch(line) && line.contains('---')) continue;
-        if (line.startsWith('*')) continue;
-
-        // Title
-        if (title == null && !inInstructions && ingredients.isEmpty) {
-          title = line;
-          continue;
-        }
-
-        // Ingredients vs instructions
-        if (!inInstructions) {
-          if (RegExp(r'^\s*[\d½¼¾⅓⅔⅛]').hasMatch(rawLine) ||
-              rawLine.startsWith('     ')) {
-            ingredients.add(line);
-          } else {
-            inInstructions = true;
-            instructions.add(line);
-          }
-        } else {
-          instructions.add(line);
-        }
-      }
-
-      if (title != null && (ingredients.isNotEmpty || instructions.isNotEmpty)) {
-        recipes.add(ImportedRecipe(
-          title: title,
-          ingredients: ingredients,
-          instructions: instructions,
-          servings: servings,
-          tags: tags,
-          sourceApp: 'mastercook',
-        ));
-      }
-    }
-
-    return recipes;
   }
 
   /// Parse OCR text from a multi-recipe document (e.g. cookbook PDF).

@@ -4205,6 +4205,105 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get importSelectRecipes => '选择要导入的食谱';
+
+  @override
+  String importRecipesFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱',
+    );
+    return '找到 $_temp0';
+  }
+
+  @override
+  String importDuplicatesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个重复',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importCheckingDuplicates => '正在检查重复...';
+
+  @override
+  String importMoreSteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个步骤',
+    );
+    return '还有 $_temp0';
+  }
+
+  @override
+  String get importRenameRecipe => '重命名食谱';
+
+  @override
+  String get importNeedsReview => '部分内容可能未被正确读取。导入后请检查食材和步骤。';
+
+  @override
+  String importingCount(int current, int total) {
+    return '正在导入第 $current 个，共 $total 个...';
+  }
+
+  @override
+  String get importStopping => '正在停止...';
+
+  @override
+  String importStoppedCount(int imported, int total) {
+    return '已导入 $imported 个食谱，共 $total 个';
+  }
+
+  @override
+  String importSomeFailed(int imported, int failed) {
+    return '已导入 $imported 个，$failed 个失败';
+  }
+
+  @override
+  String importImagesNotSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 张图片',
+    );
+    return '$_temp0无法保存';
+  }
+
+  @override
+  String importEntriesLeftOut(int count) {
+    return '已略过 $count 个没有食材或步骤的条目';
+  }
+
+  @override
+  String get importNothingToImport => '未找到食谱。没有可导入的食材或步骤。';
+
+  @override
+  String get importNoRecipeAtLink => '在该链接中找不到食谱。';
+
+  @override
+  String get importNoRecipeInText => '在该文本中找不到食谱。需要包含食材或步骤。';
+
+  @override
+  String get importNoRecipeInFile => '在该文件中找不到食谱。';
+
+  @override
+  String get importFileUnreadable => '无法读取该文件。';
+
+  @override
+  String get importPdfMobileOnly => 'PDF 只能在移动应用中读取。在此设备上，请复制食谱文本并以文本方式粘贴。';
+
+  @override
+  String get importPhotoMobileOnly => '照片只能在移动应用中读取。';
+
+  @override
+  String get scanProductNoRecipe => '此产品没有可保存为食谱的配料或营养成分。';
+
+  @override
   String get productNotFound => '找不到产品';
 
   @override
@@ -8838,12 +8937,18 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get scanNoRecipePdf => 'PDF 中未找到食谱。请检查页面是否显示了食材或步骤，或改为粘贴文本。';
+
+  @override
   String get scanNoTextImage => '在图片中未找到文字。请尝试在更好的光线下拍照，或使用文本粘贴选项。';
 
   @override
   String scanLittleTextImage(int count) {
     return '检测到的文字很少（$count个字符）。请尝试在更好的光线下拍摄更清晰的照片，或使用文本粘贴选项。';
   }
+
+  @override
+  String get scanNoRecipeImage => '图片中未找到食谱。请检查照片是否显示了食材或步骤，或改为粘贴文本。';
 
   @override
   String scanProgress(int current, int total) {
@@ -10672,4 +10777,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
+
+  @override
+  String get importLinksNotSaved => '无法保存食谱之间的链接';
+
+  @override
+  String importStoppedSomeFailed(int imported, int total, int failed) {
+    return '已导入 $imported 个食谱，共 $total 个，$failed 个失败';
+  }
+
+  @override
+  String get importDuplicateCheckFailed => '无法检查重复项';
+
+  @override
+  String scanProductFrom(String brand) {
+    return '扫描的 $brand 产品';
+  }
+
+  @override
+  String get scanProductNoName => '此产品没有可添加到购物清单的名称。';
 }

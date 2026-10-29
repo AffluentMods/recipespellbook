@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recipespellbook/models/imported_recipe.dart';
 import 'package:recipespellbook/services/recipe_file_importers/file_import_dispatcher.dart';
 import 'package:recipespellbook/services/recipe_file_importers/mastercook_importer.dart';
+import 'package:recipespellbook/services/recipe_import_engine.dart';
 
 /// A fixture with `\n` line endings, however this file was checked out.
 String lf(String s) => s.replaceAll('\r\n', '\n');
@@ -221,6 +222,17 @@ Nutr. Assoc. : 0 0 0 0 0
 
 void main() {
   group('MasterCook text export', () {
+    test('the text reader reads it the way the MasterCook importer does', () {
+      final file = lf('$appleCrisp\n\n$beefChili');
+      final expected = MasterCookImporter.import_(file, 'recipes.mxp');
+      expect(expected, hasLength(2));
+      String shape(ImportedRecipe r) => jsonEncode([r.title, r.servings, r.tags, r.ingredients, r.instructions, r.notes]);
+      for (final name in ['recipes.mxp', 'recipes.txt']) {
+        expect(RecipeImportEngine.parseFromFileBulk(file, name).map(shape), expected.map(shape), reason: name);
+      }
+      expect(shape(RecipeImportEngine.parseFromFile(file, 'recipes.mxp')), shape(expected.first));
+    });
+
     test('a recipe is not cut in two at its ingredient table', () {
       final recipes = mxp(appleCrisp);
       expect(recipes, hasLength(1));

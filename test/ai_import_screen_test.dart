@@ -109,7 +109,7 @@ void main() {
 
   /// Opens the screen the way the import sheet does: pushed over the page
   /// that is showing.
-  Future<void> openImport(WidgetTester tester, _App app, {String? cookbookId}) async {
+  Future<void> openImport(WidgetTester tester, _App app, {String cookbookId = 'starter'}) async {
     app.navigator.currentState!.push(
       MaterialPageRoute<void>(builder: (_) => AiImportScreen(cookbookId: cookbookId)),
     );
@@ -348,19 +348,19 @@ void main() {
       await clearSnackbar(tester);
     });
 
-    testWidgets('opened without one, they go into the selected cookbook', (tester) async {
+    testWidgets('the cookbook selected elsewhere does not change where they go', (tester) async {
       final app = await pumpApp(tester, selectedCookbook: 'baking');
       await addCookbook(tester, app, 'baking', 'Baking');
-      await openImport(tester, app);
+      await openImport(tester, app, cookbookId: 'starter');
       await import(tester, _recipeJson('Scones'));
 
-      expect((await imported(tester, app)).single.cookbookId, 'baking');
+      expect((await imported(tester, app)).single.cookbookId, 'starter');
       await clearSnackbar(tester);
     });
 
     testWidgets('a cookbook that is gone is never written to: the starter cookbook is used, and named', (tester) async {
-      final app = await pumpApp(tester, selectedCookbook: 'cookbook_deleted');
-      await openImport(tester, app);
+      final app = await pumpApp(tester);
+      await openImport(tester, app, cookbookId: 'cookbook_deleted');
       await import(tester, _recipeJson('Soup A'));
       expect(find.text('Recipe imported into My Recipes.'), findsOneWidget);
       await clearSnackbar(tester);

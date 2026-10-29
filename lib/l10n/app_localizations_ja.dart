@@ -4205,6 +4205,110 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get importSelectRecipes => 'インポートするレシピを選択';
+
+  @override
+  String importRecipesFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のレシピ',
+    );
+    return '$_temp0が見つかりました';
+  }
+
+  @override
+  String importDuplicatesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件',
+    );
+    return '重複 $_temp0';
+  }
+
+  @override
+  String get importCheckingDuplicates => '重複を確認中...';
+
+  @override
+  String importMoreSteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件の手順',
+    );
+    return 'あと$_temp0';
+  }
+
+  @override
+  String get importRenameRecipe => 'レシピ名を変更';
+
+  @override
+  String get importNeedsReview => '一部が正しく読み取れていない可能性があります。インポート後に材料と手順を確認してください。';
+
+  @override
+  String importingCount(int current, int total) {
+    return '$total件中$current件をインポート中...';
+  }
+
+  @override
+  String get importStopping => '停止中...';
+
+  @override
+  String importStoppedCount(int imported, int total) {
+    return '$total件中$imported件のレシピをインポートしました';
+  }
+
+  @override
+  String importSomeFailed(int imported, int failed) {
+    return '$imported件をインポート、$failed件が失敗';
+  }
+
+  @override
+  String importImagesNotSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件の画像',
+    );
+    return '$_temp0を保存できませんでした';
+  }
+
+  @override
+  String importEntriesLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件の項目',
+    );
+    return '材料も手順もない$_temp0を除外しました';
+  }
+
+  @override
+  String get importNothingToImport => 'レシピが見つかりません。インポートできる材料や手順がありません。';
+
+  @override
+  String get importNoRecipeAtLink => 'そのリンクにはレシピが見つかりませんでした。';
+
+  @override
+  String get importNoRecipeInText => 'そのテキストにはレシピが見つかりませんでした。材料か手順が必要です。';
+
+  @override
+  String get importNoRecipeInFile => 'そのファイルにはレシピが見つかりませんでした。';
+
+  @override
+  String get importFileUnreadable => 'そのファイルを読み込めませんでした。';
+
+  @override
+  String get importPdfMobileOnly => 'PDFはモバイルアプリでのみ読み取れます。この端末では、レシピのテキストをコピーしてテキストとして貼り付けてください。';
+
+  @override
+  String get importPhotoMobileOnly => '写真はモバイルアプリでのみ読み取れます。';
+
+  @override
+  String get scanProductNoRecipe => 'この商品には、レシピとして保存できる材料も栄養成分もありません。';
+
+  @override
   String get productNotFound => '商品が見つかりません';
 
   @override
@@ -8838,12 +8942,18 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get scanNoRecipePdf => 'PDFにレシピが見つかりませんでした。ページに材料か手順が載っているか確認するか、代わりにテキストを貼り付けてください。';
+
+  @override
   String get scanNoTextImage => '画像にテキストが見つかりませんでした。より良い照明で撮影するか、テキスト貼り付けオプションをお試しください。';
 
   @override
   String scanLittleTextImage(int count) {
     return 'テキストがほとんど検出されませんでした（$count文字）。より鮮明な写真で撮り直すか、テキスト貼り付けオプションをお試しください。';
   }
+
+  @override
+  String get scanNoRecipeImage => '画像にレシピが見つかりませんでした。写真に材料か手順が写っているか確認するか、代わりにテキストを貼り付けてください。';
 
   @override
   String scanProgress(int current, int total) {
@@ -10672,4 +10782,23 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
+
+  @override
+  String get importLinksNotSaved => 'レシピ間のリンクを保存できませんでした';
+
+  @override
+  String importStoppedSomeFailed(int imported, int total, int failed) {
+    return '$total件中$imported件のレシピをインポート、$failed件が失敗';
+  }
+
+  @override
+  String get importDuplicateCheckFailed => '重複を確認できませんでした';
+
+  @override
+  String scanProductFrom(String brand) {
+    return '$brandのスキャンした商品';
+  }
+
+  @override
+  String get scanProductNoName => 'この商品には買い物リストに追加できる名前がありません。';
 }
