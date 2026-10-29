@@ -191,6 +191,22 @@ void main() {
     await expectLasagnaAsExported(tester, db);
   });
 
+  testWidgets('saved as UTF-16 it comes back the same', (tester) async {
+    final db = await openDb(tester);
+    final export = await exportedLasagna(tester, db);
+    // Little-endian UTF-16 behind its byte order mark, as Notepad saves it.
+    final bytes = <int>[0xFF, 0xFE];
+    for (final unit in jsonEncode(export).codeUnits) {
+      bytes..add(unit & 0xFF)..add(unit >> 8);
+    }
+    await pickFile(tester, db, BrowserFile('Family.json', Uint8List.fromList(bytes)));
+    expect(previewOpen(), isTrue);
+
+    await importSelected(tester, 1);
+    await clearSnackbar(tester);
+    await expectLasagnaAsExported(tester, db);
+  });
+
   testWidgets('a backup of the whole library offers its recipes the same way', (tester) async {
     final db = await openDb(tester);
     final export = await exportedLasagna(tester, db, wholeLibrary: true);

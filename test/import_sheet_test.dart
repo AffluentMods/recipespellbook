@@ -164,10 +164,8 @@ void main() {
       await pickFile(tester, db, BrowserFile('My Recipes.paprikarecipes', whole.sublist(0, whole.length ~/ 2)));
       expect(tester.takeException(), isNull);
       expect(previewOpen(), isFalse);
-      final said = sheetMessage(tester);
-      expect(said, isNotNull);
-      // What went wrong, without the name of the error class in front of it.
-      expect(said, isNot(contains('Exception')));
+      // The importer's own sentence is the message, as it is.
+      expect(sheetMessage(tester), 'This Paprika file is damaged or incomplete. Export it again and retry.');
       await clearSnackbar(tester);
     });
 
@@ -234,6 +232,18 @@ void main() {
       expect(find.text('Pancakes'), findsOneWidget);
     });
 
+    testWidgets('a recipe written on one line is offered', (tester) async {
+      for (final text in [
+        'Whisk 2 eggs with 1 cup milk and 1 cup flour, rest 30 minutes, then fry thin pancakes in butter.',
+        '2 Eier mit 250 ml Milch und 125 g Mehl verrühren, 30 Minuten ruhen lassen und in Butter ausbacken.',
+      ]) {
+        final db = await openDb(tester);
+        await openSheet(tester, db);
+        await pasteText(tester, text);
+        expect(previewOpen(), isTrue, reason: text);
+      }
+    });
+
     testWidgets('a file with no recipe in it', (tester) async {
       final db = await openDb(tester);
       final files = {
@@ -247,7 +257,12 @@ void main() {
       for (final file in files.entries) {
         await pickFile(tester, db, BrowserFile(file.key, utf8.encode(file.value)));
         expect(previewOpen(), isFalse, reason: file.key);
-        expect(sheetMessage(tester), 'No recipe found in that file.', reason: file.key);
+        // An empty file is said to be one, in the sentence of the importer.
+        expect(
+          sheetMessage(tester),
+          file.key == 'empty.txt' ? 'This file is empty.' : 'No recipe found in that file.',
+          reason: file.key,
+        );
         await clearSnackbar(tester);
       }
     });
@@ -282,6 +297,35 @@ void main() {
       expect(rows!.map((r) => r.title).toSet(), {'Mushroom Risotto', 'Chana Masala'});
     });
 
+    testWidgets('an entry of another app with a photo, notes or a link is kept', (tester) async {
+      final db = await openDb(tester);
+      await pickFile(
+        tester,
+        db,
+        BrowserFile(
+          'My Recipes.paprikarecipes',
+          paprikaFile([
+            {'name': 'Typed In', 'ingredients': '2 cups flour', 'directions': 'Bake.'},
+            {
+              'name': "Grandma's Handwritten Card",
+              'ingredients': '',
+              'directions': '',
+              'notes': 'See the photo of the card.',
+              'photo_data': base64Encode(photo(35)),
+              'rating': 5,
+            },
+            {'name': 'Restaurant Idea', 'ingredients': '', 'directions': '', 'source_url': 'https://example.com/idea'},
+            {'name': 'Nothing At All', 'ingredients': '', 'directions': ''},
+          ]),
+        ),
+      );
+      expect(previewOpen(), isTrue);
+      expect(find.text('3 recipes found'), findsOneWidget);
+      expect(find.text("Grandma's Handwritten Card"), findsOneWidget);
+      expect(find.text('Restaurant Idea'), findsOneWidget);
+      expect(find.text('1 entry without ingredients or steps was left out'), findsOneWidget);
+    });
+
     testWidgets('a photo picked as a file is read as a photo', (tester) async {
       final page = File(p.join(elsewhere.path, 'IMG_2041.jpg'))..writeAsBytesSync(photo(31));
       fakePhotos({
@@ -312,10 +356,9 @@ void main() {
       expect(previewOpen(), isFalse);
       expect(sheetMessage(tester), 'PDFs can only be read in the mobile app. On this device, copy the recipe text and use Paste text.');
       await clearSnackbar(tester);
-      debugDefaultTargetPlatformOverride = null;
 
-      // The same in the browser, where a picked file is bytes with no path to
-      // point the text recognition at.
+      // The same for a file that came as bytes with no path to point the
+      // text recognition at, as in the browser.
       await pickFile(tester, db, BrowserFile('IMG_2041.jpg', photo(33)));
       expect(tester.takeException(), isNull);
       expect(previewOpen(), isFalse);
@@ -326,6 +369,31 @@ void main() {
       expect(previewOpen(), isFalse);
       expect(sheetMessage(tester), startsWith('PDFs can only be read in the mobile app.'));
       await clearSnackbar(tester);
+      debugDefaultTargetPlatformOverride = null;
+
+      // On a phone they are read, but a picker that hands over no file to
+      // read them from has nothing to give. The mobile app is not sent to
+      // itself.
+      await pickFile(tester, db, BrowserFile('IMG_2041.jpg', photo(33)));
+      expect(previewOpen(), isFalse);
+      expect(sheetMessage(tester), 'That file could not be read.');
+      await clearSnackbar(tester);
+    });
+
+    testWidgets('a photo or a PDF is told by how it starts, whatever it is called', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      final db = await openDb(tester);
+      for (final name in ['IMG_2041.jfif', 'scan.tiff', 'photo', 'IMG_2041.JPG.download']) {
+        await pickFile(tester, db, BrowserFile(name, photo(34)));
+        expect(previewOpen(), isFalse, reason: name);
+        expect(sheetMessage(tester), 'Photos can only be read in the mobile app.', reason: name);
+        await clearSnackbar(tester);
+      }
+      await pickFile(tester, db, BrowserFile('Cookbook', utf8.encode('%PDF-1.4\n')));
+      expect(sheetMessage(tester), startsWith('PDFs can only be read in the mobile app.'));
+      await clearSnackbar(tester);
+      debugDefaultTargetPlatformOverride = null;
     });
 
     testWidgets('a PDF picked on a phone still goes to the PDF reader', (tester) async {
@@ -449,6 +517,17 @@ void main() {
         'Start with a roux (https://cooking.example.com/wiki/Roux_(sauce)), then add milk':
             'https://cooking.example.com/wiki/Roux_(sauce)',
         '"https://www.budgetbytes.com/chili/?recipe=42&servings=4"!': 'https://www.budgetbytes.com/chili/?recipe=42&servings=4',
+        // The punctuation of Chinese and Japanese text, typographic quotes,
+        // guillemets and an ellipsis are not part of the link.
+        '看看这个食谱 https://www.budgetbytes.com/chili/。': 'https://www.budgetbytes.com/chili/',
+        'これ作って→https://www.budgetbytes.com/chili/！': 'https://www.budgetbytes.com/chili/',
+        'http://xhslink.com/aBcDe，复制本条信息，打开【小红书】App': 'http://xhslink.com/aBcDe',
+        'Look \u201Chttps://www.budgetbytes.com/chili/\u201D': 'https://www.budgetbytes.com/chili/',
+        'Regarde «https://www.budgetbytes.com/chili/»': 'https://www.budgetbytes.com/chili/',
+        'So good https://www.budgetbytes.com/chili/\u2026': 'https://www.budgetbytes.com/chili/',
+        // A share message that starts with a bracket is not JSON.
+        '[Budget Bytes] One Pot Chili Pasta https://www.budgetbytes.com/chili/': 'https://www.budgetbytes.com/chili/',
+        '[네이버 블로그] 김치찌개 레시피 https://www.budgetbytes.com/chili/': 'https://www.budgetbytes.com/chili/',
       };
       for (final entry in messages.entries) {
         final db = await openDb(tester);
@@ -750,6 +829,17 @@ void main() {
         '0.25 l': 2.5,
         '1 large egg (50 g)': 0.5,
         '100g': 1.0,
+        // The count in front is of something else, whose name only starts
+        // like a unit.
+        '2 gâteaux (25 g)': 0.25,
+        '1 lámina (10 g)': 0.1,
+        '2 Löffel (30 g)': 0.3,
+        '3 läckra kex (36 g)': 0.36,
+        '1 gélule (500 mg)': 0.005,
+        '1,000 g': 10.0,
+        '30 gram': 0.3,
+        '30 grams': 0.3,
+        '30 г': 0.3,
       };
       for (final entry in servings.entries) {
         final db = await openDb(tester);
@@ -769,6 +859,75 @@ void main() {
         expect(recipe.servings, '1 (${entry.key})', reason: entry.key);
         expect(servingCount(recipe.servings), 1, reason: entry.key);
       }
+    });
+
+    testWidgets('a serving size that is no serving size is not taken apart', (tester) async {
+      final db = await openDb(tester);
+      await saveProduct(
+        tester,
+        db,
+        ProductInfo(barcode: '1', name: 'Granola', servingSize: '9' * 20000, nutrition: {'calories': 400}),
+      );
+      expect(previewOpen(), isTrue);
+      await importSelected(tester, 1);
+      await clearSnackbar(tester);
+      final recipe = await saved(tester, db, 'Granola');
+      // Read as 100 g, the size the figures are given for.
+      expect(recipe.servings, '1 (100 g)');
+    });
+
+    testWidgets('nutrition facts that came as text are still used', (tester) async {
+      final db = await openDb(tester);
+      await saveProduct(
+        tester,
+        db,
+        ProductInfo(
+          barcode: '1',
+          name: 'Spread',
+          brand: 'Ferrero',
+          servingSize: '15 g',
+          nutrition: {'calories': '539', 'protein': '6.3', 'fat': double.nan, 'fiber': true},
+        ),
+      );
+      expect(previewOpen(), isTrue);
+      await importSelected(tester, 1);
+      await clearSnackbar(tester);
+      final recipe = await saved(tester, db, 'Ferrero Spread');
+      final nutrition = NutritionData.fromJson(jsonDecode(recipe.nutritionJson!) as Map<String, dynamic>);
+      expect(nutrition.calories, closeTo(80.85, 0.01));
+      expect(nutrition.protein, closeTo(0.95, 0.01));
+      expect(recipe.description, 'Scanned product from Ferrero');
+    });
+
+    testWidgets('a brand written another way in the name is not added twice', (tester) async {
+      const titles = {
+        ('Lays Classic', "Lay's"): 'Lays Classic',
+        ('Nestle KitKat', 'Nestlé'): 'Nestle KitKat',
+        ('Coca-Cola Original', 'COCA-COLA SERVICES SA/NV'): 'Coca-Cola Original',
+      };
+      for (final entry in titles.entries) {
+        final db = await openDb(tester);
+        await saveProduct(
+          tester,
+          db,
+          ProductInfo(barcode: '1', name: entry.key.$1, brand: entry.key.$2, ingredients: ['sugar']),
+        );
+        expect(find.text(entry.value), findsOneWidget, reason: '${entry.key}');
+      }
+    });
+
+    testWidgets('a product with no name is not added to the shopping list', (tester) async {
+      final db = await openDb(tester);
+      await openSheet(tester, db);
+      await tapTile(tester, 'Scan');
+      await settle(tester);
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .pop({'action': 'addToShopping', 'product': ProductInfo(barcode: '1', name: null, brand: null)});
+      await sheetAnswered(tester);
+      expect(sheetMessage(tester), 'This product has no name to add to the shopping list.');
+      await clearSnackbar(tester);
+      expect(await tester.runAsync(() => db.select(db.shoppingListItems).get()), isEmpty);
     });
 
     testWidgets('a product the database knows nothing about is not saved as an empty recipe', (tester) async {

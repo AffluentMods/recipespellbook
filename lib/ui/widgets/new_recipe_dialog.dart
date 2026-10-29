@@ -16,6 +16,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/imported_recipe.dart';
 import '../../services/imported_recipe_saver.dart';
 import '../../services/recipe_file_importers/file_import_dispatcher.dart';
+import '../../services/recipe_file_importers/import_support.dart';
 import '../../providers/database_provider.dart';
 import '../../services/ocr_service.dart';
 import '../../services/recipe_import_engine.dart';
@@ -27,6 +28,7 @@ import 'app_snackbar.dart';
 import 'platform_brand.dart';
 import '../../services/barcode_scanner_service.dart';
 import '../../utils/responsive_utils.dart';
+import '../../utils/text_normalize.dart';
 import 'sheet_chrome.dart';
 
 /// Shows the MODERN add recipe dialog with 2 options
@@ -157,9 +159,9 @@ class _OptionCard extends StatelessWidget {
 /// JSON file hold, or null when they hold anything else. Runs in the
 /// background: a backup with its photos in it is a long text to take apart.
 List<ImportedRecipe>? _ownExportIn(Uint8List bytes) {
-  // A byte order mark in front is not part of the JSON.
-  final hasMark = bytes.length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
-  final text = utf8.decode(hasMark ? Uint8List.sublistView(bytes, 3) : bytes, allowMalformed: true);
+  // Read the way the file importers read text: UTF-8 or, behind its byte
+  // order mark, UTF-16. The mark is not part of the JSON.
+  final text = ImportSupport.decodeText(bytes);
   // The JSON of another app is left to its importer and not decoded twice.
   if (!text.contains('"version"') || !text.contains('"cookbook')) return null;
   try {
@@ -169,6 +171,9 @@ List<ImportedRecipe>? _ownExportIn(Uint8List bytes) {
     return null;
   }
 }
+
+/// The kinds of picked file that are read with the text recognition.
+enum _FileKind { pdf, photo }
 
 class _ImportRecipeSheet extends ConsumerStatefulWidget {
   final String cookbookId;
@@ -299,7 +304,13 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     }
   }
 
-  static final _links = RegExp(r'https?://[^\s<>"{}|\\^`\[\]]+', caseSensitive: false);
+  // A link ends where something comes that no address holds: a space, a
+  // quote of any kind, the punctuation of Chinese and Japanese text, the
+  // full-width forms, guillemets and the long dashes.
+  static final _links = RegExp(
+    r'https?://[^\s<>"{}|\\^`\[\]\u2010-\u205E\u3000-\u303F\uFF00-\uFF65«»]+',
+    caseSensitive: false,
+  );
 
   /// The first http(s) link in [text], without the full stop, bracket or
   /// quote of the sentence around it. Null when there is none.
@@ -314,13 +325,18 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       final last = found[end - 1];
       if (last == ')' && open < 0) {
         open++;
-      } else if (!'.,;:!?\'"'.contains(last)) {
+      } else if (!_sentenceEnd.hasMatch(last) || _addressEnd.contains(last)) {
         break;
       }
       end--;
     }
     return found.substring(0, end);
   }
+
+  /// Punctuation and symbols, of any script, that a sentence can put after a
+  /// link. Of those, an address can end in the ones in [_addressEnd].
+  static final _sentenceEnd = RegExp(r'[\p{P}\p{S}]', unicode: true);
+  static const _addressEnd = '/=&#%+-_~)';
 
   /// Validate + normalize a user-entered URL. Returns null when it isn't a safe
   /// http(s) link — blocks other schemes (file:, javascript:, data:…) and
@@ -383,6 +399,14 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         decoded = jsonDecode(body);
       } catch (_) {
         _hideLoading();
+        // "[Budget Bytes] One Pot Chili https://..." only starts like JSON.
+        // A share message is read for its link.
+        final link = _linkIn(body);
+        final url = link == null ? null : _normalizeAndValidateUrl(link);
+        if (url != null) {
+          final around = body.replaceAll(_links, ' ').trim();
+          return around.isEmpty ? _importFromLink(url) : _importPastedText(around, link: url);
+        }
         _showError('That looks like recipe data, but it isn’t valid JSON. Copy the whole thing and try again.');
         return;
       }
@@ -473,15 +497,18 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       // Barcode product → create a quick pantry recipe
         final l10n = AppLocalizations.of(context)!;
         final product = result['product'] as ProductInfo;
-        final data = product.toRecipeData();
+        // Taken from the product itself: whatever form its figures came in,
+        // nothing here can fail on them.
         final nutrition = _productNutrition(product);
+        final brand = _brandOf(product);
+        final servingSize = product.servingSize?.trim();
         final recipe = ImportedRecipe(
           title: _productName(product) ?? l10n.unknownProduct,
-          description: data['description'] as String?,
-          servings: nutrition?.servings ?? data['servings'] as String?,
-          ingredients: List<String>.from(data['ingredients'] as List),
+          description: brand == null ? null : l10n.scanProductFrom(brand),
+          servings: nutrition?.servings ?? (servingSize == null || servingSize.isEmpty ? null : servingSize),
+          ingredients: List.of(product.ingredients ?? const <String>[]),
           instructions: [],
-          imageUrl: data['imageUrl'] as String?,
+          imageUrl: product.imageUrl,
           nutritionJson: nutrition?.json,
         );
         // With no list of ingredients and no nutrition facts there is only
@@ -497,9 +524,11 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       // Add scanned product to default shopping list
         final product = result['product'] as ProductInfo?;
         final manualName = result['name'] as String?;
-        final itemName = (product == null ? manualName : _productName(product) ?? product.displayName)?.trim();
+        final itemName = (product == null ? manualName : _productName(product))?.trim();
 
-        if (itemName != null && itemName.isNotEmpty) {
+        if (itemName == null || itemName.isEmpty) {
+          _showError(AppLocalizations.of(context)!.scanProductNoName);
+        } else {
           try {
             final shoppingDao = ref.read(shoppingDaoProvider);
             final itemId = 'item_${DateTime.now().millisecondsSinceEpoch}';
@@ -535,13 +564,34 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   /// brands for some products ("Nutella, Ferrero"), repeats the brand in the
   /// name of others and leaves either field empty for many. Null when it has
   /// neither.
+  ///
+  /// "Lays Classic" says the brand "Lay's", and "Nestle KitKat" says
+  /// "Nestlé": accents and apostrophes do not count. A name that starts with
+  /// the first word of the brand says it too ("Coca-Cola Original" of
+  /// "COCA-COLA SERVICES SA/NV").
   static String? _productName(ProductInfo product) {
     final name = (product.name ?? '').trim();
-    final brand = (product.brand ?? '').split(',').first.trim();
-    if (name.isEmpty) return brand.isEmpty ? null : brand;
-    if (brand.isEmpty || name.toLowerCase().contains(brand.toLowerCase())) return name;
+    final brand = _brandOf(product);
+    if (name.isEmpty) return brand;
+    if (brand == null) return name;
+    final plainName = _plain(name), plainBrand = _plain(brand);
+    final firstWord = plainBrand.split(' ').first;
+    if (plainName.contains(plainBrand) || (firstWord.isNotEmpty && plainName.split(' ').first == firstWord)) return name;
     return '$brand $name';
   }
+
+  /// The first brand a product lists, or null when it lists none.
+  static String? _brandOf(ProductInfo product) {
+    final brand = (product.brand ?? '').split(',').first.trim();
+    return brand.isEmpty ? null : brand;
+  }
+
+  /// [text] in lower case without accents and apostrophes, its words split
+  /// at anything that is not a letter or a digit.
+  static String _plain(String text) =>
+      foldAccents(text).replaceAll(_apostrophes, '').replaceAll(_notWord, ' ').trim();
+  static final _apostrophes = RegExp('[\'\u2019]');
+  static final _notWord = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
 
   /// The nutrition facts of a scanned product in the app's own format, and
   /// what the recipe then gives as its servings. Null when the product has
@@ -587,23 +637,44 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   /// What one serving weighs in grams (or measures in millilitres), as far as
   /// the serving size printed on a pack says: "39g", "1 cup (240 ml)",
-  /// "1 biscuit (12,5 g)".
+  /// "1 biscuit (12,5 g)", "2 Löffel (30 g)", "30 grams".
+  ///
+  /// The weight in brackets is the one that counts when there is one: the
+  /// count in front of it is of spoons, biscuits or slices. A unit is a unit
+  /// only when no letter follows it, so the G of "2 gâteaux" is not grams.
   static double? _servingWeight(String? servingSize) {
-    final found = _weight.firstMatch(servingSize ?? '');
-    if (found == null) return null;
-    final amount = double.tryParse(found.group(1)!.replaceFirst(',', '.'));
-    if (amount == null || amount <= 0) return null;
-    return amount *
-        switch (found.group(2)!.toLowerCase()) {
-          'kg' || 'l' => 1000,
-          'dl' => 100,
-          'cl' => 10,
-          'mg' => 0.001,
-          _ => 1,
-        };
+    final text = servingSize ?? '';
+    // The serving size of a pack is a few words. Anything longer is not one.
+    if (text.length > 100) return null;
+    final bracketed = _bracketed.allMatches(text).map((m) => m.group(1)!);
+    for (final part in [...bracketed, text]) {
+      final found = _weight.firstMatch(part);
+      if (found == null) continue;
+      final digits = found.group(1)!;
+      // "1,000 g" is a thousand grams, "12,5 g" twelve and a half.
+      final amount = double.tryParse(
+        RegExp(r'^\d{1,3},\d{3}$').hasMatch(digits) ? digits.replaceFirst(',', '') : digits.replaceFirst(',', '.'),
+      );
+      if (amount == null || amount <= 0) return null;
+      final unit = found.group(2)!.toLowerCase();
+      return amount *
+          switch (unit) {
+            'kg' || 'l' || 'л' => 1000,
+            'dl' => 100,
+            'cl' => 10,
+            'mg' => 0.001,
+            _ => 1,
+          };
+    }
+    return null;
   }
 
-  static final _weight = RegExp(r'(\d+(?:[.,]\d+)?)\s*(kg|mg|g|ml|cl|dl|l)\b', caseSensitive: false);
+  static final _bracketed = RegExp(r'\(([^()]*)\)');
+  static final _weight = RegExp(
+    r'(?<![\d.,])(\d{1,6}(?:[.,]\d{1,3})?)\s*(kg|mg|grammes?|grams?|gr|g|ml|мл|cl|dl|l|г|л)(?![\p{L}\p{N}])',
+    caseSensitive: false,
+    unicode: true,
+  );
 
   // ========== SCANS (PDF + IMAGE) ==========
 
@@ -860,10 +931,18 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
     // PDF is handled separately (OCR flow), and so is a photo. Both need the
     // text recognition of a phone and a file on the device to point it at.
-    if (ext == 'pdf' || _photoExtensions.contains(ext)) {
-      if (!supportsOcr || path == null) {
-        _showError(ext == 'pdf' ? l10n.importPdfMobileOnly : l10n.importPhotoMobileOnly);
-      } else if (ext == 'pdf') {
+    // How the file starts tells them apart from text when the name does not:
+    // IMG_2041.jfif, scan.tiff, a photo saved without an extension.
+    var kind = ext == 'pdf' ? _FileKind.pdf : (_photoExtensions.contains(ext) ? _FileKind.photo : null);
+    kind ??= _kindOf(picked ?? await _startOf(path));
+    if (!mounted) return;
+    if (kind != null) {
+      if (!supportsOcr) {
+        _showError(kind == _FileKind.pdf ? l10n.importPdfMobileOnly : l10n.importPhotoMobileOnly);
+      } else if (path == null) {
+        // The mobile app reads them, but the picker gave no file to read.
+        _showError(l10n.importFileUnreadable);
+      } else if (kind == _FileKind.pdf) {
         _processPdfFile(path);
       } else {
         _processMultipleImages([path]);
@@ -872,6 +951,43 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     }
 
     _processFileWithDispatcher(file.name, bytes: picked, path: path);
+  }
+
+  /// The first bytes of the file at [path], or nothing when it cannot be
+  /// read.
+  static Future<List<int>> _startOf(String? path) async {
+    if (path == null) return const [];
+    try {
+      final start = <int>[];
+      await for (final chunk in File(path).openRead(0, 16)) {
+        start.addAll(chunk);
+      }
+      return start;
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// A PDF or a photo, by how [bytes] start, or null for anything else.
+  static _FileKind? _kindOf(List<int> bytes) {
+    bool has(int offset, List<int> signature) {
+      if (bytes.length < offset + signature.length) return false;
+      for (var i = 0; i < signature.length; i++) {
+        if (bytes[offset + i] != signature[i]) return false;
+      }
+      return true;
+    }
+
+    if (has(0, '%PDF-'.codeUnits)) return _FileKind.pdf;
+    final photo = has(0, const [0xFF, 0xD8, 0xFF]) ||
+        has(0, const [0x89, 0x50, 0x4E, 0x47]) ||
+        has(0, 'GIF8'.codeUnits) ||
+        (has(0, 'RIFF'.codeUnits) && has(8, 'WEBP'.codeUnits)) ||
+        has(0, const [0x49, 0x49, 0x2A, 0x00]) ||
+        has(0, const [0x4D, 0x4D, 0x00, 0x2A]) ||
+        (has(4, 'ftyp'.codeUnits) &&
+            const ['heic', 'heix', 'hevc', 'mif1', 'msf1', 'avif', 'avis'].any((brand) => has(8, brand.codeUnits)));
+    return photo ? _FileKind.photo : null;
   }
 
   void _createManually() {
@@ -922,8 +1038,9 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();
-      // What an importer could not read, it says in a sentence of its own.
-      _showError(l10n.failedToImport(e is FormatException ? e.message : e.toString()));
+      // What an importer could not read, it says in a sentence of its own,
+      // and that sentence is the message.
+      _showError(e is FormatException && e.message.trim().isNotEmpty ? e.message : l10n.failedToImport(e.toString()));
     }
   }
 

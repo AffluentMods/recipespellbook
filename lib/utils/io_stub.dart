@@ -16,6 +16,7 @@ class File {
   bool existsSync() => false;
   Future<Uint8List> readAsBytes() async => Uint8List(0);
   Future<String> readAsString() async => '';
+  Stream<List<int>> openRead([int? start, int? end]) => const Stream.empty();
   Future<File> writeAsBytes(List<int> bytes, {bool flush = false}) async => this;
   Future<File> writeAsString(String content, {bool flush = false}) async => this;
   Future<File> copy(String newPath) async => File(newPath);
