@@ -171,8 +171,9 @@ class ImportedRecipeSaver {
           // "2 cups flour" comes apart into amount, unit and name. A line the
           // parser could not take apart cleanly ("2" on its own, "6 cloves",
           // "1 000 g" read as 1 and "000 g") is stored whole, as it was
-          // written, instead of as a wrong amount and half a name.
-          final split = (amount != null || parsed.unit != null) &&
+          // written, instead of as a wrong amount and half a name. A zero in
+          // front ("0 salt (to taste)") is no amount and is left out.
+          final split = (amount != null || parsed.unit != null || _zeroAmount.hasMatch(text)) &&
               (amount == null || amount.isFinite) &&
               name.isNotEmpty &&
               name != text &&
@@ -610,6 +611,7 @@ class ImportedRecipeSaver {
   /// as French, Polish, Russian and German do: "1 000 g farine", "1.000 g
   /// Mehl". The parser reads the first group as the whole amount.
   static final _groupedThousands = RegExp(r'^[1-9]\d{0,2}(?:\s|\.)\d{3}(?![\d.,])');
+  static final _zeroAmount = RegExp(r'^0+(?:[.,]0+)?\s');
   static final _unitSign = RegExp(r'^\p{L}{1,2}(?!\p{L})', unicode: true);
   static final _accentedStart = RegExp(r'^[À-ÖØ-öø-ɏ]');
   static final _letterEnd = RegExp(r'[A-Za-zÀ-ÖØ-öø-ɏ]$');
