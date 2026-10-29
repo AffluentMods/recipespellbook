@@ -28,13 +28,8 @@ Future<void> _launchExternalUrl(BuildContext context, String url) async {
   }
 }
 
-Future<void> _launchEmail(BuildContext context, String email, {String? subject}) async {
+Future<void> _launchMailto(BuildContext context, Uri uri) async {
   try {
-    final uri = Uri(
-      scheme: 'mailto',
-      path: email,
-      queryParameters: subject != null ? {'subject': subject} : null,
-    );
     final launched = await launchUrl(uri);
     if (!launched && context.mounted) {
       AppSnackbar.error(context, 'Could not open email client');
@@ -54,7 +49,7 @@ class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
 
   static const _discordUrl = 'https://discord.gg/NnkUwxSdFX';
-  static const _supportEmail = 'support@recipespellbook.app';
+  static const _supportEmail = FeedbackService.supportEmail;
   static const _websiteUrl = 'https://recipespellbook.app';
 
   @override
@@ -120,7 +115,7 @@ class HelpSupportScreen extends StatelessWidget {
             icon: Icons.email_rounded, iconColor: theme.colorScheme.primary,
             title: l10n.helpContactUs,
             subtitle: _supportEmail,
-            onTap: () => _launchEmail(context, _supportEmail, subject: 'Recipe Spellbook — Support Request'),
+            onTap: () => _launchMailto(context, FeedbackService.email('Recipe Spellbook support request')),
           ),
           const SizedBox(height: 10),
           _SupportCard(
@@ -158,14 +153,14 @@ class HelpSupportScreen extends StatelessWidget {
             icon: Icons.lightbulb_outline, iconColor: context.appColors.accent,
             title: l10n.sendSuggestion,
             subtitle: l10n.sendSuggestionSubtitle,
-            onTap: () => _showSuggestionDialog(context),
+            onTap: () => _sendSuggestion(context),
           ),
           const SizedBox(height: 10),
           _SupportCard(
             icon: Icons.bug_report_outlined, iconColor: context.appColors.destructive,
             title: l10n.reportBug,
             subtitle: l10n.reportBugSubtitle,
-            onTap: () => _showBugReportDialog(context),
+            onTap: () => _reportBug(context),
           ),
           const SizedBox(height: 32),
         ],
@@ -234,7 +229,7 @@ class HelpSupportScreen extends StatelessWidget {
                 icon: Icons.mail_outline_rounded,
                 title: l10n.helpContactUs,
                 subtitle: _supportEmail,
-                onTap: () => _launchEmail(context, _supportEmail, subject: 'Recipe Spellbook — Support Request'),
+                onTap: () => _launchMailto(context, FeedbackService.email('Recipe Spellbook support request')),
               ),
               TouchRow(
                 icon: Icons.menu_book_outlined,
@@ -261,13 +256,13 @@ class HelpSupportScreen extends StatelessWidget {
                 icon: Icons.lightbulb_outline_rounded,
                 title: l10n.sendSuggestion,
                 subtitle: l10n.sendSuggestionSubtitle,
-                onTap: () => _showSuggestionDialog(context),
+                onTap: () => _sendSuggestion(context),
               ),
               TouchRow(
                 icon: Icons.bug_report_outlined,
                 title: l10n.reportBug,
                 subtitle: l10n.reportBugSubtitle,
-                onTap: () => _showBugReportDialog(context),
+                onTap: () => _reportBug(context),
               ),
             ]),
           ],
@@ -276,205 +271,14 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  void _showSuggestionDialog(BuildContext context) {
-    final theme = Theme.of(context);
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final contactController = TextEditingController();
+  /// Feedback goes by email; the bug report comes with the app version and
+  /// device model filled in.
+  void _sendSuggestion(BuildContext context) =>
+      _launchMailto(context, FeedbackService.email('Recipe Spellbook suggestion'));
 
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        bool isSending = false;
-        return StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          return AlertDialog(
-            icon: Icon(Icons.lightbulb, color: theme.colorScheme.primary, size: 32),
-            title: Text(l10n.sendSuggestion),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.suggestionDescription,
-                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.suggestionTitleLabel,
-                      hintText: l10n.suggestionTitleHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: l10n.suggestionDetailsLabel,
-                      hintText: l10n.suggestionDetailsHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 4,
-                    minLines: 3,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: contactController,
-                    decoration: InputDecoration(
-                      labelText: l10n.contactOptionalLabel,
-                      hintText: l10n.contactOptionalHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-              FilledButton.icon(
-                onPressed: isSending ? null : () async {
-                  if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
-                    AppSnackbar.warning(ctx, l10n.feedbackFieldsRequired);
-                    return;
-                  }
-                  setDialogState(() => isSending = true);
-                  final (success, error) = await FeedbackService.sendSuggestion(
-                    title: titleController.text.trim(),
-                    description: descriptionController.text.trim(),
-                    contactInfo: contactController.text.trim(),
-                  );
-                  if (ctx.mounted) {
-                    Navigator.pop(ctx);
-                    if (success) {
-                      AppSnackbar.success(context, l10n.suggestionSent);
-                    } else {
-                      AppSnackbar.warning(context, error ?? l10n.feedbackSendError);
-                    }
-                  }
-                },
-                icon: isSending
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.send),
-                label: Text(l10n.actionSend),
-              ),
-            ],
-          );
-        },
-      );
-      },
-    );
-  }
-
-  void _showBugReportDialog(BuildContext context) {
-    final theme = Theme.of(context);
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final stepsController = TextEditingController();
-    final contactController = TextEditingController();
-
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        bool isSending = false;
-        return StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          return AlertDialog(
-            icon: Icon(Icons.bug_report, color: theme.colorScheme.error, size: 32),
-            title: Text(l10n.reportBug),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.bugDescription,
-                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.bugTitleLabel,
-                      hintText: l10n.bugTitleHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: l10n.bugDetailsLabel,
-                      hintText: l10n.bugDetailsHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 3, minLines: 2,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: stepsController,
-                    decoration: InputDecoration(
-                      labelText: l10n.bugStepsLabel,
-                      hintText: l10n.bugStepsHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 3, minLines: 2,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: contactController,
-                    decoration: InputDecoration(
-                      labelText: l10n.contactOptionalLabel,
-                      hintText: l10n.contactOptionalHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-              FilledButton.icon(
-                onPressed: isSending ? null : () async {
-                  if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
-                    AppSnackbar.warning(ctx, l10n.feedbackFieldsRequired);
-                    return;
-                  }
-                  setDialogState(() => isSending = true);
-                  final (success, error) = await FeedbackService.sendBugReport(
-                    title: titleController.text.trim(),
-                    description: descriptionController.text.trim(),
-                    stepsToReproduce: stepsController.text.trim(),
-                    contactInfo: contactController.text.trim(),
-                  );
-                  if (ctx.mounted) {
-                    Navigator.pop(ctx);
-                    if (success) {
-                      AppSnackbar.success(context, l10n.bugReportSent);
-                    } else {
-                      AppSnackbar.warning(context, error ?? l10n.feedbackSendError);
-                    }
-                  }
-                },
-                icon: isSending
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.send),
-                label: Text(l10n.actionSend),
-              ),
-            ],
-          );
-        },
-      );
-      },
-    );
+  Future<void> _reportBug(BuildContext context) async {
+    final uri = await FeedbackService.bugReportEmail();
+    if (context.mounted) await _launchMailto(context, uri);
   }
 }
 

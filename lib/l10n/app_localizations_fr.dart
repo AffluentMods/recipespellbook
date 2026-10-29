@@ -5448,63 +5448,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get joinDiscordSubtitle => 'Obtenez de l\'aide et partagez des recettes';
 
   @override
-  String get actionSend => 'Envoyer';
-
-  @override
-  String get suggestionDescription => 'Nous adorons vos idées ! Votre suggestion sera envoyée directement à notre équipe.';
-
-  @override
-  String get suggestionTitleLabel => 'Titre de la suggestion';
-
-  @override
-  String get suggestionTitleHint => 'ex. : Ajouter un mode sombre pour la cuisine';
-
-  @override
-  String get suggestionDetailsLabel => 'Détails';
-
-  @override
-  String get suggestionDetailsHint => 'Décrivez votre idée en détail...';
-
-  @override
-  String get contactOptionalLabel => 'Contact (optionnel)';
-
-  @override
-  String get contactOptionalHint => 'Email ou nom Discord';
-
-  @override
-  String get suggestionSent => 'Merci ! Votre suggestion a été envoyée 💡';
-
-  @override
-  String get bugDescription => 'Trouvé un bug ? Dites-le nous et nous le corrigerons.';
-
-  @override
-  String get bugTitleLabel => 'Titre du bug';
-
-  @override
-  String get bugTitleHint => 'ex. : L\'application plante lors de l\'importation PDF';
-
-  @override
-  String get bugDetailsLabel => 'Que s\'est-il passé ?';
-
-  @override
-  String get bugDetailsHint => 'Décrivez ce qui s\'est mal passé...';
-
-  @override
-  String get bugStepsLabel => 'Étapes pour reproduire (optionnel)';
-
-  @override
-  String get bugStepsHint => '1. Ouvrir la recette\n2. Appuyer sur partager\n3. L\'app plante';
-
-  @override
-  String get bugReportSent => 'Merci ! Votre rapport de bug a été envoyé 🐛';
-
-  @override
-  String get feedbackFieldsRequired => 'Veuillez remplir le titre et les détails';
-
-  @override
-  String get feedbackSendError => 'Impossible d\'envoyer le commentaire. Vérifiez votre connexion.';
-
-  @override
   String get mealTypeAppetizer => 'Entrée';
 
   @override
@@ -6503,36 +6446,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get minutesCookSuffix => 'm cuisson';
 
   @override
-  String get couldNotOpenBrowser => 'Impossible d\'ouvrir le navigateur';
-
-  @override
   String couldNotOpenUrl(String url) {
     return 'Impossible d\'ouvrir $url';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => 'Lier le compte Discord';
-
-  @override
-  String get discordLinkSubtitle => 'Connectez votre Discord pour les fonctions communautaires';
-
-  @override
-  String get discordSignInFirst => 'Connectez-vous d\'abord pour lier Discord';
-
-  @override
-  String get discordUnlink => 'Délier Discord';
-
-  @override
-  String get discordUnlinkFailed => 'Échec de la déconnexion de Discord';
-
-  @override
-  String get discordUnlinkSubtitle => 'Supprimer votre connexion Discord';
-
-  @override
-  String get discordUnlinked => 'Discord délié';
 
   @override
   String get familyCodeCopied => 'Code d\'invitation copié !';
@@ -6681,16 +6597,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get integrationsConnectedManage => 'Connecté - Appuyez pour gérer';
 
   @override
-  String get integrationsLinked => 'Lié';
-
-  @override
-  String get integrationsLinkedManage => 'Lié - Appuyez pour gérer';
-
-  @override
   String get integrationsNotConnected => 'Non connecté';
-
-  @override
-  String get integrationsTapToLink => 'Appuyez pour lier';
 
   @override
   String get integrationsTapToSignIn => 'Appuyez pour vous connecter';

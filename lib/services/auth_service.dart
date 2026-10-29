@@ -17,7 +17,6 @@ class AuthUser {
   final String? avatarUrl;
   final String tier; // free, basic, standard, premium
   final String role; // user, admin
-  final String? discordId;
   final DateTime? createdAt;
 
   const AuthUser({
@@ -27,7 +26,6 @@ class AuthUser {
     this.avatarUrl,
     this.tier = 'free',
     this.role = 'user',
-    this.discordId,
     this.createdAt,
   });
 
@@ -41,7 +39,6 @@ class AuthUser {
       avatarUrl: json['avatarUrl'] as String? ?? json['avatar_url'] as String?,
       tier: json['tier'] as String? ?? 'free',
       role: json['role'] as String? ?? 'user',
-      discordId: json['discordId'] as String? ?? json['discord_id'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,
@@ -54,13 +51,11 @@ class AuthUser {
     'name': name,
     'avatarUrl': avatarUrl,
     'tier': tier,
-    'discordId': discordId,
     'createdAt': createdAt?.toIso8601String(),
   };
 
   bool get isSubscribed => tier != 'free';
   bool get isPremium => tier == 'cloudSyncFamily' || tier == 'creator' || tier == 'admin';
-  bool get hasDiscord => discordId != null && discordId!.isNotEmpty;
 
   String get displayName => name ?? email.split('@').first;
   String get initials {
@@ -154,7 +149,7 @@ class AuthService {
       if (tier != null && u != null && tier != u.tier) {
         _currentUser = AuthUser(
           id: u.id, email: u.email, name: u.name, avatarUrl: u.avatarUrl,
-          tier: tier, role: u.role, discordId: u.discordId, createdAt: u.createdAt,
+          tier: tier, role: u.role, createdAt: u.createdAt,
         );
         // Persisting is best-effort (the keychain can be locked in the
         // background); the server already has the new tier either way.
@@ -411,58 +406,6 @@ class AuthService {
   }
 
   // ════════════════════════════════════════════
-  //  DISCORD LINK / UNLINK
-  // ════════════════════════════════════════════
-
-  /// URL to open in browser to start Discord OAuth link flow.
-  /// Backend handles the entire OAuth dance; user just authorizes and closes the tab.
-  String get discordLinkUrl =>
-      '$_apiBaseUrl/v1/auth/discord/link#token=$_currentJwt';
-
-  /// Check if current user has Discord linked.
-  Future<({bool linked, String? discordId})> getDiscordStatus() async {
-    try {
-      final response = await get('/v1/auth/discord/status');
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return (
-        linked: data['linked'] as bool? ?? false,
-        discordId: data['discordId'] as String?,
-        );
-      }
-    } catch (e) {
-      debugPrint('[Auth] Discord status check failed: $e');
-    }
-    return (linked: false, discordId: null);
-  }
-
-  /// Unlink Discord from current user account.
-  Future<bool> unlinkDiscord() async {
-    try {
-      final response = await post('/v1/auth/discord/unlink', {});
-      if (response.statusCode == 200) {
-        // Update cached user
-        if (_currentUser != null) {
-          _currentUser = AuthUser(
-            id: _currentUser!.id,
-            email: _currentUser!.email,
-            name: _currentUser!.name,
-            avatarUrl: _currentUser!.avatarUrl,
-            tier: _currentUser!.tier,
-            discordId: null,
-            createdAt: _currentUser!.createdAt,
-          );
-          await _saveUser(_currentUser!);
-        }
-        return true;
-      }
-    } catch (e) {
-      debugPrint('[Auth] Discord unlink failed: $e');
-    }
-    return false;
-  }
-
-  // ════════════════════════════════════════════
   //  PROFILE UPDATE
   // ════════════════════════════════════════════
 
@@ -492,7 +435,6 @@ class AuthService {
           avatarUrl: data['avatarUrl'] as String?,
           tier: data['tier'] as String? ?? _currentUser?.tier ?? 'free',
           role: data['role'] as String? ?? _currentUser?.role ?? 'user',
-          discordId: _currentUser?.discordId,
           createdAt: _currentUser?.createdAt,
         );
         _currentUser = updated;

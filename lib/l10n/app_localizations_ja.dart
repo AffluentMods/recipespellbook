@@ -5406,63 +5406,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get joinDiscordSubtitle => 'サポートを受けてレシピを共有';
 
   @override
-  String get actionSend => '送信';
-
-  @override
-  String get suggestionDescription => 'アイデアをお待ちしています！提案はチームに直接送信されます。';
-
-  @override
-  String get suggestionTitleLabel => '提案のタイトル';
-
-  @override
-  String get suggestionTitleHint => '例：料理用ダークモードを追加';
-
-  @override
-  String get suggestionDetailsLabel => '詳細';
-
-  @override
-  String get suggestionDetailsHint => 'アイデアを詳しく説明してください...';
-
-  @override
-  String get contactOptionalLabel => '連絡先（任意）';
-
-  @override
-  String get contactOptionalHint => 'メールまたはDiscord名';
-
-  @override
-  String get suggestionSent => 'ありがとうございます！提案を送信しました 💡';
-
-  @override
-  String get bugDescription => 'バグを見つけましたか？お知らせください。修正します。';
-
-  @override
-  String get bugTitleLabel => 'バグのタイトル';
-
-  @override
-  String get bugTitleHint => '例：PDFインポート時にアプリがクラッシュする';
-
-  @override
-  String get bugDetailsLabel => '何が起きましたか？';
-
-  @override
-  String get bugDetailsHint => '何が問題だったか説明してください...';
-
-  @override
-  String get bugStepsLabel => '再現手順（任意）';
-
-  @override
-  String get bugStepsHint => '1. レシピを開く\n2. 共有をタップ\n3. アプリがクラッシュする';
-
-  @override
-  String get bugReportSent => 'ありがとうございます！バグ報告を送信しました 🐛';
-
-  @override
-  String get feedbackFieldsRequired => 'タイトルと詳細を入力してください';
-
-  @override
-  String get feedbackSendError => 'フィードバックを送信できません。接続を確認してください。';
-
-  @override
   String get mealTypeAppetizer => '前菜';
 
   @override
@@ -6461,36 +6404,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get minutesCookSuffix => '分調理';
 
   @override
-  String get couldNotOpenBrowser => 'ブラウザを開けませんでした';
-
-  @override
   String couldNotOpenUrl(String url) {
     return '$urlを開けませんでした';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => 'Discordアカウントを連携';
-
-  @override
-  String get discordLinkSubtitle => 'コミュニティ機能のためにDiscordを接続';
-
-  @override
-  String get discordSignInFirst => 'Discordを連携するにはまずサインイン';
-
-  @override
-  String get discordUnlink => 'Discordの連携を解除';
-
-  @override
-  String get discordUnlinkFailed => 'Discordの連携解除に失敗しました';
-
-  @override
-  String get discordUnlinkSubtitle => 'Discordの接続を解除';
-
-  @override
-  String get discordUnlinked => 'Discordの連携を解除しました';
 
   @override
   String get familyCodeCopied => '招待コードをコピーしました！';
@@ -6639,16 +6555,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get integrationsConnectedManage => '接続済み - タップして管理';
 
   @override
-  String get integrationsLinked => '連携済み';
-
-  @override
-  String get integrationsLinkedManage => '連携済み - タップして管理';
-
-  @override
   String get integrationsNotConnected => '未接続';
-
-  @override
-  String get integrationsTapToLink => 'タップして連携';
 
   @override
   String get integrationsTapToSignIn => 'タップしてサインイン';

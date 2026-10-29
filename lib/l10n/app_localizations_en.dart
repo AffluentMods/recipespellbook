@@ -5472,63 +5472,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get joinDiscordSubtitle => 'Get help, chat, and share recipes';
 
   @override
-  String get actionSend => 'Send';
-
-  @override
-  String get suggestionDescription => 'We\'d love to hear your ideas! Your suggestion will be sent directly to our team.';
-
-  @override
-  String get suggestionTitleLabel => 'Suggestion Title';
-
-  @override
-  String get suggestionTitleHint => 'e.g., Add dark mode for cooking screen';
-
-  @override
-  String get suggestionDetailsLabel => 'Details';
-
-  @override
-  String get suggestionDetailsHint => 'Describe your idea in detail...';
-
-  @override
-  String get contactOptionalLabel => 'Contact (optional)';
-
-  @override
-  String get contactOptionalHint => 'Email or Discord username';
-
-  @override
-  String get suggestionSent => 'Thanks! Your suggestion has been sent 💡';
-
-  @override
-  String get bugDescription => 'Found a bug? Let us know and we\'ll squash it. Device info is included automatically.';
-
-  @override
-  String get bugTitleLabel => 'Bug Title';
-
-  @override
-  String get bugTitleHint => 'e.g., App crashes when importing PDF';
-
-  @override
-  String get bugDetailsLabel => 'What happened?';
-
-  @override
-  String get bugDetailsHint => 'Describe what went wrong...';
-
-  @override
-  String get bugStepsLabel => 'Steps to Reproduce (optional)';
-
-  @override
-  String get bugStepsHint => '1. Open recipe\n2. Tap share\n3. App crashes';
-
-  @override
-  String get bugReportSent => 'Thanks! Your bug report has been sent 🐛';
-
-  @override
-  String get feedbackFieldsRequired => 'Please fill in the title and details';
-
-  @override
-  String get feedbackSendError => 'Couldn\'t send feedback. Check your internet connection.';
-
-  @override
   String get mealTypeAppetizer => 'Appetizer';
 
   @override
@@ -6527,36 +6470,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minutesCookSuffix => 'm cook';
 
   @override
-  String get couldNotOpenBrowser => 'Could not open browser';
-
-  @override
   String couldNotOpenUrl(String url) {
     return 'Could not open $url';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => 'Link Discord Account';
-
-  @override
-  String get discordLinkSubtitle => 'Connect your Discord for community features';
-
-  @override
-  String get discordSignInFirst => 'Sign in first to link Discord';
-
-  @override
-  String get discordUnlink => 'Unlink Discord';
-
-  @override
-  String get discordUnlinkFailed => 'Failed to unlink Discord';
-
-  @override
-  String get discordUnlinkSubtitle => 'Remove your Discord connection';
-
-  @override
-  String get discordUnlinked => 'Discord unlinked';
 
   @override
   String get familyCodeCopied => 'Invite code copied!';
@@ -6705,16 +6621,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsConnectedManage => 'Connected - Tap to manage';
 
   @override
-  String get integrationsLinked => 'Linked';
-
-  @override
-  String get integrationsLinkedManage => 'Linked - Tap to manage';
-
-  @override
   String get integrationsNotConnected => 'Not connected';
-
-  @override
-  String get integrationsTapToLink => 'Tap to link';
 
   @override
   String get integrationsTapToSignIn => 'Tap to sign in';
