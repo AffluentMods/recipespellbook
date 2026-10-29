@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Voice control in cooking mode (speech_to_text) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
@@ -11,12 +12,18 @@
         </intent>
     </queries>
 
+    <!-- The document scanner plugin (Scan this book) declares an app-wide
+         theme and backup rules in its own manifest. Left alone they would be
+         merged in here and restyle every screen that has no theme of its own,
+         which is the subscription paywall. Its scanner screen carries its own
+         theme, so these are dropped. -->
     <application
         android:label="Recipe Spellbook"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:allowBackup="false"
-        android:hasFragileUserData="true">
+        android:hasFragileUserData="true"
+        tools:remove="android:theme,android:dataExtractionRules,android:fullBackupContent">
         <activity
             android:name=".MainActivity"
             android:exported="true"

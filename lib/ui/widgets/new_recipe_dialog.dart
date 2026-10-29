@@ -16,6 +16,7 @@ import '../../services/recipe_file_importers/file_import_dispatcher.dart';
 import '../../providers/database_provider.dart';
 import '../../services/ocr_service.dart';
 import '../../services/recipe_import_engine.dart';
+import '../screens/book_scan/book_scan_entry.dart';
 import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_guides_screen.dart';
 import '../screens/import/import_preview_screen.dart';
@@ -954,6 +955,15 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                     children: [
                       if (supportsOcr)
                         _ImportOptionTile(icon: Icons.photo_camera_rounded, label: 'Photo', color: theme.colorScheme.tertiary, onTap: _importFromImage),
+                      // Many pages of a printed cookbook in one sitting.
+                      if (supportsBookScan && canAddRecipesTo(widget.cookbookId))
+                        _ImportOptionTile(icon: Icons.document_scanner_rounded, label: l10n.bookScanTile, color: theme.colorScheme.secondary, onTap: () {
+                          // The sheet closes first, so start from a context
+                          // that outlives it.
+                          final root = Navigator.of(context, rootNavigator: true).context;
+                          Navigator.pop(context);
+                          startBookScan(root, cookbookId: widget.cookbookId);
+                        }),
                       _ImportOptionTile(icon: Icons.notes_rounded, label: 'Paste text', color: theme.colorScheme.primary, onTap: _importFromText),
                       _ImportOptionTile(icon: Icons.folder_open_rounded, label: 'File', color: theme.colorScheme.secondary, onTap: _importFromFile),
                       _ImportOptionTile(icon: Icons.auto_awesome_rounded, label: 'AI', color: theme.colorScheme.tertiary, onTap: () {

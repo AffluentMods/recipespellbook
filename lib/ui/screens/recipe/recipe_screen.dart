@@ -37,6 +37,7 @@ import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_share_sheet.dart';
 import '../../widgets/recipe_image.dart';
+import '../../widgets/recipe_source_line.dart';
 import '../../widgets/recipe_tags_display.dart';
 import '../../widgets/sub_recipe_selection_sheet.dart';
 // ============ DISMISSED ALLERGY WARNINGS ============
@@ -452,6 +453,13 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             style: desktop
                 ? theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)
                 : theme.textTheme.bodyLarge?.copyWith(fontSize: 15.5, height: 1.5, color: c.textSecondary),
+          ),
+        ],
+        if (_recipe!.sourceUrl != null && _recipe!.sourceUrl!.trim().isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: RecipeSourceLine(source: _recipe!.sourceUrl!),
           ),
         ],
         const SizedBox(height: 16),

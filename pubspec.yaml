@@ -75,6 +75,10 @@ dependencies:
   # Voice control in cooking mode (next/back/timer hands-free)
   speech_to_text: ^7.0.0
 
+  # Scan this book: the system document scanner (ML Kit on Android, VisionKit
+  # on iOS) for page capture with edge detection and perspective correction.
+  cunning_document_scanner: ^3.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

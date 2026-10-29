@@ -302,7 +302,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get isbnAddedTitle => 'Added to your cookbooks';
 
   @override
-  String get isbnAddedBody => 'Now add recipes from it — snap a photo of a page, or type one in.';
+  String get isbnAddedBody => 'Now add the recipes you cook from it.';
 
   @override
   String get isbnAddRecipes => 'Add recipes from this book';
@@ -317,6 +317,379 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get isbnCameraUnavailable => 'Camera unavailable. You can still type the ISBN below.';
+
+  @override
+  String get bookScanAction => 'Scan pages';
+
+  @override
+  String get bookScanFromBook => 'Scan pages from this book';
+
+  @override
+  String get bookScanIntroTitle => 'Scan pages from this book';
+
+  @override
+  String bookScanIntroBody(String book) {
+    return 'Photograph the recipe pages one after another. They are read on this device and each recipe is filed under $book.';
+  }
+
+  @override
+  String get bookScanTipLightTitle => 'Flat page, good light';
+
+  @override
+  String get bookScanTipLightBody => 'Shadows and curled pages are harder to read.';
+
+  @override
+  String get bookScanTipOrderTitle => 'One page after another';
+
+  @override
+  String get bookScanTipOrderBody => 'A recipe that runs onto the next page is joined up for you.';
+
+  @override
+  String get bookScanTipPagesTitle => 'Page numbers are kept';
+
+  @override
+  String get bookScanTipPagesBody => 'Each recipe is saved with the page it came from.';
+
+  @override
+  String get bookScanStart => 'Start scanning';
+
+  @override
+  String get bookScanChoosePhotos => 'Choose photos instead';
+
+  @override
+  String get bookScanChoosePhotosShort => 'Choose photos';
+
+  @override
+  String get bookScanTile => 'Book pages';
+
+  @override
+  String get bookScanMoreSubtitle => 'Turn printed cookbook pages into recipes';
+
+  @override
+  String get bookScanPrivacy => 'Pages are read on this device. Nothing is uploaded.';
+
+  @override
+  String get bookScanPrivacySynced => 'Pages are read on this device. The recipes you add are synced with their pictures.';
+
+  @override
+  String get bookScanCameraDenied => 'Camera access is off for Recipe Spellbook. Turn it on in Settings, or choose photos you already took.';
+
+  @override
+  String get bookScanScannerFailed => 'The scanner could not be opened. You can still choose photos you already took.';
+
+  @override
+  String bookScanLostPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'An earlier scan was interrupted. Its $count pages are still on this device.',
+      one: 'An earlier scan was interrupted. Its page is still on this device.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanReadLostPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Read $count pages',
+      one: 'Read 1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bookScanReadOnly => 'You can only view this cookbook, so recipes cannot be added to it.';
+
+  @override
+  String get bookScanReadingTitle => 'Reading your pages';
+
+  @override
+  String bookScanReadingProgress(int current, int total) {
+    return 'Page $current of $total';
+  }
+
+  @override
+  String get bookScanFindingRecipes => 'Finding the recipes';
+
+  @override
+  String bookScanFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Found $count recipes',
+      one: 'Found 1 recipe',
+      zero: 'No recipes found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanPageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanPage(String page) {
+    return 'p. $page';
+  }
+
+  @override
+  String bookScanPages(String pages) {
+    return 'pp. $pages';
+  }
+
+  @override
+  String bookScanSource(String book, String page) {
+    return '$book, p. $page';
+  }
+
+  @override
+  String bookScanSourcePages(String book, String pages) {
+    return '$book, pp. $pages';
+  }
+
+  @override
+  String get bookScanNoPageNumbers => 'No page numbers found';
+
+  @override
+  String get bookScanSetPageNumbers => 'Set page numbers';
+
+  @override
+  String get bookScanChangePageNumbers => 'Page numbers';
+
+  @override
+  String get bookScanPageNumbersTitle => 'Page numbers';
+
+  @override
+  String get bookScanFirstPageLabel => 'First page';
+
+  @override
+  String get bookScanFirstPageHelp => 'The number printed on the first page you scanned. The rest follow in order.';
+
+  @override
+  String bookScanIngredientCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredients',
+      one: '1 ingredient',
+      zero: 'No ingredients',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanStepCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count steps',
+      one: '1 step',
+      zero: 'No steps',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bookScanIssueTitle => 'Needs a title';
+
+  @override
+  String get bookScanIssueIngredients => 'No ingredients found';
+
+  @override
+  String get bookScanIssueSteps => 'No steps found';
+
+  @override
+  String get bookScanDuplicate => 'Already in this book';
+
+  @override
+  String get bookScanUntitled => 'Untitled recipe';
+
+  @override
+  String get bookScanMergeNext => 'Merge with next';
+
+  @override
+  String get bookScanSplit => 'Split in two';
+
+  @override
+  String get bookScanDiscarded => 'Recipe discarded';
+
+  @override
+  String get bookScanMerged => 'Recipes merged';
+
+  @override
+  String get bookScanSplitHelp => 'Tap the line where the second recipe starts.';
+
+  @override
+  String get bookScanSplitEditedNote => 'Both halves are read again from the page, so your edits to this recipe will be replaced.';
+
+  @override
+  String get bookScanSplitFailed => 'That line cannot start a second recipe.';
+
+  @override
+  String bookScanAddAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count recipes',
+      one: 'Add 1 recipe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanAdding(int current, int total) {
+    return 'Adding $current of $total';
+  }
+
+  @override
+  String bookScanAdded(int count, String book) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count recipes to $book',
+      one: 'Added 1 recipe to $book',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanAddFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes could not be added',
+      one: '1 recipe could not be added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bookScanChooseCookbookTitle => 'Choose a cookbook';
+
+  @override
+  String get bookScanChooseCookbook => 'Choose the cookbook the scanned recipes should go to.';
+
+  @override
+  String get bookScanNoCookbook => 'There is no cookbook that recipes can be added to.';
+
+  @override
+  String bookScanCookbookGoneChoose(String book) {
+    return '$book is no longer on this device. Choose the cookbook these recipes should go to.';
+  }
+
+  @override
+  String bookScanCookbookGone(String book) {
+    return '$book is no longer on this device, and there is no other cookbook to add these recipes to.';
+  }
+
+  @override
+  String get bookScanMore => 'Scan more pages';
+
+  @override
+  String get bookScanEmptyTitle => 'No recipes found';
+
+  @override
+  String get bookScanEmptyBody => 'The pages were read, but none of them looked like a recipe. Try again with the whole page in the photo.';
+
+  @override
+  String get bookScanNothingReadTitle => 'Nothing could be read';
+
+  @override
+  String bookScanNothingReadBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'None of the $count pages could be read. Try again in good light, with the whole page in the photo.',
+      one: 'The page could not be read. Try again in good light, with the whole page in the photo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bookScanNothingLeftTitle => 'Nothing left to add';
+
+  @override
+  String get bookScanNothingLeftBody => 'Every recipe that was found has been added or discarded. Scan more pages, or go back.';
+
+  @override
+  String get bookScanTryAgain => 'Scan again';
+
+  @override
+  String bookScanUnreadPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages could not be read. Scan them again to add what is missing.',
+      one: '1 page could not be read. Scan it again to add what is missing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanUnreadPhotos(int count, String photos) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Photos $photos could not be read. Scan those pages again to add what is missing.',
+      one: 'Photo $photos could not be read. Scan that page again to add what is missing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bookScanDiscardTitle => 'Discard this scan?';
+
+  @override
+  String bookScanDiscardBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The $count recipes that were found will not be added.',
+      one: 'The recipe that was found will not be added.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bookScanKeepReviewing => 'Keep reviewing';
+
+  @override
+  String get bookScanEditTitle => 'Edit recipe';
+
+  @override
+  String get bookScanFieldPage => 'Page';
+
+  @override
+  String get bookScanFieldSteps => 'Steps';
+
+  @override
+  String get bookScanIngredientsHelp => 'One per line. End a line with a colon to make it a heading.';
+
+  @override
+  String get bookScanStepsHelp => 'One step per line.';
+
+  @override
+  String get bookScanViewPage => 'View the page';
+
+  @override
+  String bookScanPageOf(int current, int total) {
+    return 'Page $current of $total';
+  }
+
+  @override
+  String get bookScanOptions => 'More options';
+
+  @override
+  String get recipeSourceOpen => 'Open the source';
 
   @override
   String get cookbookEdit => '编辑食谱书';
