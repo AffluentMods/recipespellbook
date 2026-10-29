@@ -148,7 +148,7 @@ class AboutScreen extends ConsumerWidget {
                   icon: Icons.star_outline,
                   title: l10n.aboutRateApp,
                   subtitle: l10n.aboutRateAppSub,
-                  onTap: () => _launchUrl('https://play.google.com/store/apps/details?id=app.recipespellbook', context),
+                  onTap: () => _launchUrl('https://play.google.com/store/apps/details?id=com.affluentlabs.recipespellbook', context),
                 ),
               ],
             ),
