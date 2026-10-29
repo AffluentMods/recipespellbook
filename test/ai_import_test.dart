@@ -932,6 +932,38 @@ void main() {
       expect(await linkedIngredients(ids[1]), isEmpty);
     });
 
+    test('with only, just those recipes are saved, and a link to one left out is dropped', () async {
+      final ids = await AiImportService.importAllFromJson(
+        jsonEncode({
+          'recipes': [
+            _recipe('Cream Pie', ingredients: [
+              {'amount': '1', 'name': 'Pie Crust'},
+              {'amount': '2', 'unit': 'cups', 'name': 'Pastry Cream'},
+            ]),
+            _recipe('Pastry Cream', ingredients: [
+              {'name': 'milk'},
+            ]),
+            _recipe('Pie Crust', ingredients: [
+              {'name': 'flour'},
+            ]),
+          ],
+          'links': {
+            'Pastry Cream': ['Pastry Cream'],
+            'Pie Crust': ['Pie Crust'],
+          },
+        }),
+        db,
+        cookbookId: 'starter',
+        only: {0, 2},
+      );
+      expect(ids, hasLength(2));
+      expect([for (final id in ids) (await load(id)).title], ['Cream Pie', 'Pie Crust']);
+      expect(await linkedIngredients(ids[0]), [
+        ['flour'],
+      ]);
+      expect((await db.select(db.recipes).get()).where((r) => r.title == 'Pastry Cream'), isEmpty);
+    });
+
     test('a link still reaches a recipe elsewhere in the paste, whatever the letter case', () async {
       final ids = await import([
         _recipe('Pie Crust', ingredients: [

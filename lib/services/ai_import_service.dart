@@ -127,14 +127,21 @@ class AiImportService {
   /// turn down throws a [FormatException], a [cookbookId] that does not exist
   /// throws an [ArgumentError], and a failure while saving leaves nothing
   /// behind.
+  /// With [only], just the recipes at those positions of the list
+  /// [extractRecipes] gives for the same text are saved; a link to a recipe
+  /// that was left out is dropped.
   /// Returns a list of created recipe IDs.
   static Future<List<String>> importAllFromJson(
       String jsonString,
       AppDatabase db, {
         required String cookbookId,
+        Set<int>? only,
       }) async {
     final (allRecipes, linkedBlobs) = _decodeMultipleBlobs(jsonString);
-    return _saveRecipes(allRecipes, linkedBlobs, db, cookbookId: cookbookId);
+    final picked = only == null
+        ? allRecipes
+        : [for (var i = 0; i < allRecipes.length; i++) if (only.contains(i)) allRecipes[i]];
+    return _saveRecipes(picked, linkedBlobs, db, cookbookId: cookbookId);
   }
 
   /// Parse and import a recipe from JSON string into the database.

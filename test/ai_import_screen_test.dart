@@ -427,6 +427,49 @@ void main() {
       await clearSnackbar(tester);
     });
 
+    testWidgets('a recipe unticked in the preview is left out of the import', (tester) async {
+      final app = await pumpApp(tester);
+      await openImport(tester, app);
+      await preview(tester, '[${[for (var i = 1; i <= 3; i++) _recipeJson('Recipe $i')].join(',')}]');
+      expect(find.text('3 Recipes Found'), findsOneWidget);
+      expect(find.byType(Checkbox), findsNWidgets(3));
+
+      await tester.tap(find.byType(Checkbox).at(1));
+      await settle(tester);
+      expect(find.text('2 of 3 will be imported.'), findsOneWidget);
+
+      // Ticked again, then a different one left out.
+      await tester.tap(find.byType(Checkbox).at(1));
+      await tester.tap(find.byType(Checkbox).at(2));
+      await settle(tester);
+      await tester.tap(find.text('Import 2 Recipes'));
+      await settle(tester, rounds: 6);
+      final titles = [for (final r in await imported(tester, app)) r.title];
+      expect(titles, unorderedEquals(['Recipe 1', 'Recipe 2']));
+      await clearSnackbar(tester);
+    });
+
+    testWidgets('with every recipe unticked there is nothing to import', (tester) async {
+      final app = await pumpApp(tester);
+      await openImport(tester, app);
+      await preview(tester, '[${_recipeJson('Soup')},${_recipeJson('Bread')}]');
+      await tester.tap(find.byType(Checkbox).at(0));
+      await tester.tap(find.byType(Checkbox).at(1));
+      await settle(tester);
+      final button = tester.widget<ButtonStyleButton>(
+        find.ancestor(of: find.text('Nothing selected'), matching: find.byWidgetPredicate((w) => w is ButtonStyleButton)),
+      );
+      expect(button.onPressed, isNull);
+    });
+
+    testWidgets('a single recipe has no checkbox', (tester) async {
+      final app = await pumpApp(tester);
+      await openImport(tester, app);
+      await preview(tester, _recipeJson('Soup'));
+      expect(find.byType(Checkbox), findsNothing);
+      expect(find.text('Import to Cookbook'), findsOneWidget);
+    });
+
     testWidgets('an answer that cannot be read is explained on the page, with no sheet', (tester) async {
       final app = await pumpApp(tester);
       await openImport(tester, app);
