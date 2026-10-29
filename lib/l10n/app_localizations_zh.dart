@@ -3395,7 +3395,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get helpContactUs => '联系我们';
 
   @override
-  String get helpContactUsDesc => '有问题？请发邮件至support@recipespellbook.com';
+  String get helpContactUsDesc => '有问题？请发邮件至support@recipespellbook.app';
 
   @override
   String get navCommunity => '社区';

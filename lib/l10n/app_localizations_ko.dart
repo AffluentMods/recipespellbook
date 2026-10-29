@@ -3395,7 +3395,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get helpContactUs => '문의하기';
 
   @override
-  String get helpContactUsDesc => '질문이 있으신가요? support@recipespellbook.com으로 문의하세요.';
+  String get helpContactUsDesc => '질문이 있으신가요? support@recipespellbook.app으로 문의하세요.';
 
   @override
   String get navCommunity => '커뮤니티';

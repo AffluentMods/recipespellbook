@@ -3428,7 +3428,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpContactUs => 'Contact Us';
 
   @override
-  String get helpContactUsDesc => 'Have questions or feedback? Email us at support@recipespellbook.com';
+  String get helpContactUsDesc => 'Have questions or feedback? Email us at support@recipespellbook.app';
 
   @override
   String get navCommunity => 'Community';

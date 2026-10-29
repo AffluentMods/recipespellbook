@@ -11,7 +11,7 @@ final usdaServiceProvider = Provider<UsdaService>((ref) {
     // Configure your server URL here
     baseUrl: const String.fromEnvironment(
       'USDA_API_URL',
-      defaultValue: 'https://api.recipespellbook.com',
+      defaultValue: 'https://api.recipespellbook.app',
     ),
   );
 });
