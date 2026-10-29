@@ -10875,4 +10875,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
+
+  @override
+  String get importLinksNotSaved => 'links between recipes could not be saved';
+
+  @override
+  String importStoppedSomeFailed(int imported, int total, int failed) {
+    return '$imported of $total recipes imported, $failed failed';
+  }
+
+  @override
+  String get importDuplicateCheckFailed => 'duplicates could not be checked';
+
+  @override
+  String scanProductFrom(String brand) {
+    return 'Scanned product from $brand';
+  }
+
+  @override
+  String get scanProductNoName => 'This product has no name to add to the shopping list.';
 }

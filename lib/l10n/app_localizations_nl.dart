@@ -4234,17 +4234,17 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get importSelectRecipes => 'Select recipes to import';
+  String get importSelectRecipes => 'Selecteer recepten om te importeren';
 
   @override
   String importRecipesFound(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'recipes',
-      one: 'recipe',
+      other: 'recepten',
+      one: 'recept',
     );
-    return '$count $_temp0 found';
+    return '$count $_temp0 gevonden';
   }
 
   @override
@@ -4252,48 +4252,48 @@ class AppLocalizationsNl extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'duplicates',
-      one: 'duplicate',
+      other: 'duplicaten',
+      one: 'duplicaat',
     );
     return '$count $_temp0';
   }
 
   @override
-  String get importCheckingDuplicates => 'checking duplicates...';
+  String get importCheckingDuplicates => 'duplicaten controleren...';
 
   @override
   String importMoreSteps(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'steps',
-      one: 'step',
+      other: 'extra stappen',
+      one: 'extra stap',
     );
-    return '+$count more $_temp0';
+    return '+$count $_temp0';
   }
 
   @override
-  String get importRenameRecipe => 'Rename Recipe';
+  String get importRenameRecipe => 'Recept hernoemen';
 
   @override
-  String get importNeedsReview => 'Some of this may not have been read correctly. Check the ingredients and steps after importing.';
+  String get importNeedsReview => 'Mogelijk is niet alles goed gelezen. Controleer na het importeren de ingrediënten en stappen.';
 
   @override
   String importingCount(int current, int total) {
-    return 'Importing $current of $total...';
+    return '$current van $total importeren...';
   }
 
   @override
-  String get importStopping => 'Stopping...';
+  String get importStopping => 'Stoppen...';
 
   @override
   String importStoppedCount(int imported, int total) {
-    return '$imported of $total recipes imported';
+    return '$imported van $total recepten geïmporteerd';
   }
 
   @override
   String importSomeFailed(int imported, int failed) {
-    return '$imported imported, $failed failed';
+    return '$imported geïmporteerd, $failed mislukt';
   }
 
   @override
@@ -4301,10 +4301,10 @@ class AppLocalizationsNl extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'images',
-      one: 'image',
+      other: 'afbeeldingen konden',
+      one: 'afbeelding kon',
     );
-    return '$count $_temp0 could not be saved';
+    return '$count $_temp0 niet worden opgeslagen';
   }
 
   @override
@@ -4312,35 +4312,35 @@ class AppLocalizationsNl extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'entries without ingredients or steps were',
-      one: 'entry without ingredients or steps was',
+      other: 'items zonder ingrediënten of stappen zijn',
+      one: 'item zonder ingrediënten of stappen is',
     );
-    return '$count $_temp0 left out';
+    return '$count $_temp0 weggelaten';
   }
 
   @override
-  String get importNothingToImport => 'No recipe found. There are no ingredients and no steps to import.';
+  String get importNothingToImport => 'Geen recept gevonden. Er zijn geen ingrediënten en geen stappen om te importeren.';
 
   @override
-  String get importNoRecipeAtLink => 'We couldn\'t find a recipe at that link.';
+  String get importNoRecipeAtLink => 'We konden geen recept vinden via die link.';
 
   @override
-  String get importNoRecipeInText => 'We couldn\'t find a recipe in that text. It needs the ingredients or the steps.';
+  String get importNoRecipeInText => 'We konden geen recept vinden in die tekst. Er zijn ingrediënten of stappen nodig.';
 
   @override
-  String get importNoRecipeInFile => 'No recipe found in that file.';
+  String get importNoRecipeInFile => 'Geen recept gevonden in dat bestand.';
 
   @override
-  String get importFileUnreadable => 'That file could not be read.';
+  String get importFileUnreadable => 'Dat bestand kon niet worden gelezen.';
 
   @override
-  String get importPdfMobileOnly => 'PDFs can only be read in the mobile app. On this device, copy the recipe text and use Paste text.';
+  String get importPdfMobileOnly => 'PDF\'s kunnen alleen in de mobiele app worden gelezen. Kopieer op dit apparaat de recepttekst en plak die als tekst.';
 
   @override
-  String get importPhotoMobileOnly => 'Photos can only be read in the mobile app.';
+  String get importPhotoMobileOnly => 'Foto\'s kunnen alleen in de mobiele app worden gelezen.';
 
   @override
-  String get scanProductNoRecipe => 'This product has no ingredients or nutrition facts to save as a recipe.';
+  String get scanProductNoRecipe => 'Dit product heeft geen ingrediënten of voedingswaarden om als recept op te slaan.';
 
   @override
   String get productNotFound => 'Product niet gevonden';
@@ -9004,7 +9004,7 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get scanNoRecipePdf => 'No recipe found in PDF. Check that the pages show the ingredients or the steps, or use the Text paste option instead.';
+  String get scanNoRecipePdf => 'Geen recept gevonden in de PDF. Controleer of de pagina\'s de ingrediënten of de stappen tonen, of plak in plaats daarvan de tekst.';
 
   @override
   String get scanNoTextImage => 'Geen tekst gevonden in afbeelding. Probeer de foto bij betere verlichting te nemen of gebruik de optie Tekst plakken.';
@@ -9015,7 +9015,7 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get scanNoRecipeImage => 'No recipe found in image. Check that the photo shows the ingredients or the steps, or use the Text paste option instead.';
+  String get scanNoRecipeImage => 'Geen recept gevonden in de afbeelding. Controleer of de foto de ingrediënten of de stappen toont, of plak in plaats daarvan de tekst.';
 
   @override
   String scanProgress(int current, int total) {
@@ -10844,4 +10844,23 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
+
+  @override
+  String get importLinksNotSaved => 'koppelingen tussen recepten konden niet worden opgeslagen';
+
+  @override
+  String importStoppedSomeFailed(int imported, int total, int failed) {
+    return '$imported van $total recepten geïmporteerd, $failed mislukt';
+  }
+
+  @override
+  String get importDuplicateCheckFailed => 'duplicaten konden niet worden gecontroleerd';
+
+  @override
+  String scanProductFrom(String brand) {
+    return 'Gescand product van $brand';
+  }
+
+  @override
+  String get scanProductNoName => 'Dit product heeft geen naam om aan de boodschappenlijst toe te voegen.';
 }

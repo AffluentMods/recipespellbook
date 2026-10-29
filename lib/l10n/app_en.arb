@@ -5775,5 +5775,30 @@
   },
   "familyJoinOpenFamily": "Open family",
   "familyJoinInvalid": "This family invite isn't valid anymore",
-  "familyJoinInvalidHint": "The invite code may have been changed. Ask for a new link, or paste another one."
+  "familyJoinInvalidHint": "The invite code may have been changed. Ask for a new link, or paste another one.",
+  "importLinksNotSaved": "links between recipes could not be saved",
+  "importStoppedSomeFailed": "{imported} of {total} recipes imported, {failed} failed",
+  "@importStoppedSomeFailed": {
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "importDuplicateCheckFailed": "duplicates could not be checked",
+  "scanProductFrom": "Scanned product from {brand}",
+  "@scanProductFrom": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "scanProductNoName": "This product has no name to add to the shopping list."
 }

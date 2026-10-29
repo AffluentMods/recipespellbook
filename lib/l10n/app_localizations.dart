@@ -19386,6 +19386,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The invite code may have been changed. Ask for a new link, or paste another one.'**
   String get familyJoinInvalidHint;
+
+  /// No description provided for @importLinksNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'links between recipes could not be saved'**
+  String get importLinksNotSaved;
+
+  /// No description provided for @importStoppedSomeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{imported} of {total} recipes imported, {failed} failed'**
+  String importStoppedSomeFailed(int imported, int total, int failed);
+
+  /// No description provided for @importDuplicateCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'duplicates could not be checked'**
+  String get importDuplicateCheckFailed;
+
+  /// No description provided for @scanProductFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned product from {brand}'**
+  String scanProductFrom(String brand);
+
+  /// No description provided for @scanProductNoName.
+  ///
+  /// In en, this message translates to:
+  /// **'This product has no name to add to the shopping list.'**
+  String get scanProductNoName;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
