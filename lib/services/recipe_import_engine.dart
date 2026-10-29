@@ -1138,10 +1138,18 @@ class RecipeImportEngine {
     // The header of the whole list. "Ingredients for the filling:" heads one
     // group of a list and opens no recipe.
     bool isListHeader(int i) => sections[i] == _Section.ingredients && _groupInHeader(lines[i]) == null;
-    // For each line, the header of a method nearest above it, or -1.
+    // For each line, the header of a method nearest above it, or -1. A
+    // method that no header announces counts too: the first numbered line
+    // or step under a list of ingredients.
     final methodAbove = List<int>.filled(lines.length + 1, -1);
+    var listAbove = -1;
     for (var i = 0; i < lines.length; i++) {
-      methodAbove[i + 1] = sections[i] == _Section.instructions ? i : methodAbove[i];
+      final opensMethod = sections[i] == _Section.instructions ||
+          (sections[i] == _Section.unknown &&
+              listAbove > methodAbove[i] &&
+              ((_isNumbered(lines[i]) && !_readsAsAmountLine(plain[i])) || _readsAsStep(plain[i])));
+      if (isListHeader(i)) listAbove = i;
+      methodAbove[i + 1] = opensMethod ? i : methodAbove[i];
     }
     bool methodBetween(int from, int to) => methodAbove[to] > from;
 
@@ -1204,10 +1212,14 @@ class RecipeImportEngine {
       var bestScore = -1;
       for (var i = top - 1; i >= floor && i >= top - 8; i--) {
         if (sections[i] != _Section.unknown || _isNumbered(lines[i]) || _readsAsStep(plain[i])) break;
-        if (!_titleShaped(plain[i])) continue;
         // A title stands apart, is set in capitals and is short. Of two
         // lines as good as each other the upper one is the title.
         final apart = i == 0 || at[i] - at[i - 1] > 1;
+        // Right over the list, or over its introduction, a line that stands
+        // apart may end in "!" or hold several commas: "Best Ever
+        // Brownies!", "Chicken, Leek, and Mushroom Pie".
+        final overList = apart && plain.sublist(i + 1, top).every(_readsAsProse);
+        if (!_titleShaped(plain[i], loose: overList)) continue;
         final score =
             (apart ? 2 : 0) + (_titleCased(plain[i]) ? 2 : 0) + (plain[i].split(_spaces).length <= 6 ? 1 : 0);
         if (score >= bestScore) {
@@ -1222,23 +1234,46 @@ class RecipeImportEngine {
     for (final head in heads) {
       // The header of the method before, and the first step under it,
       // belong to the recipe before.
-      final floor = boundaries.isEmpty ? 0 : methodAbove[head] + 2;
+      final method = methodAbove[head];
+      final floor = boundaries.isEmpty
+          ? 0
+          : method + (method >= 0 && sections[method] == _Section.instructions ? 2 : 1);
       final top = isNumber(head) || floor > head ? head : topOf(head, floor);
       if (boundaries.isEmpty || top > boundaries.last) boundaries.add(top);
     }
+    // What stands above the first recipe's list is that recipe's: its
+    // title and introduction.
+    boundaries[0] = 0;
 
     // ── Phase 4: split text at boundaries and parse each segment ──
     // We track the START line of each segment so we can map back to a PDF page
     // for cover image assignment.
     final segments = <_RecipeSegment>[];
+    // A short piece that holds no recipe, waiting for the next one.
+    _RecipeSegment? held;
     for (var i = 0; i < boundaries.length; i++) {
       final start = boundaries[i];
       final end = i + 1 < boundaries.length ? at[boundaries[i + 1]] : allLines.length;
-      final segment = allLines.sublist(at[start], end).join('\n');
-      if (segment.trim().length > 60) {
-        segments.add(_RecipeSegment(text: segment, startLine: start));
+      var segment = allLines.sublist(at[start], end).join('\n');
+      var startLine = start;
+      if (held != null) {
+        segment = '${held.text}\n$segment';
+        startLine = held.startLine;
+        held = null;
+      }
+      // A short recipe is still one ("Toast" / "1 slice bread" / "Toast
+      // it."). A piece that is none goes with the recipe before it, or the
+      // one after, and no text is lost.
+      if (segment.trim().length > 60 || _hasContent(_parseStructuredText(segment, wrapped: scanned))) {
+        segments.add(_RecipeSegment(text: segment, startLine: startLine));
+      } else if (segments.isNotEmpty) {
+        final last = segments.removeLast();
+        segments.add(_RecipeSegment(text: '${last.text}\n$segment', startLine: last.startLine));
+      } else {
+        held = _RecipeSegment(text: segment, startLine: startLine);
       }
     }
+    if (held != null) segments.add(held);
 
     if (segments.length < 2) {
       return [whole()];
@@ -1258,7 +1293,8 @@ class RecipeImportEngine {
         // an obviously-wrong line like the macros/ingredients header.
         if (_titleNeedsRecovery(recipe.title)) {
           final recovered = _recoverTitleFromSegment(
-              scanned ? seg.text : seg.text.split('\n').map(_withoutMarkup).join('\n'));
+              scanned ? seg.text : seg.text.split('\n').map(_withoutMarkup).join('\n'),
+              steps: recipe.instructions);
           if (recovered != null) {
             recipe.title = recovered;
             // A title printed under the list was read as the end of it,
@@ -1351,10 +1387,12 @@ class RecipeImportEngine {
   /// True when [line] has the shape of a recipe's name: short, opening with
   /// a capital or a figure, with no full stop at its end. A fact, an
   /// ingredient and a short order ("Serve warm") have other shapes.
-  static bool _titleShaped(String line) {
+  ///
+  /// A [loose] one may end in "!" and hold several commas.
+  static bool _titleShaped(String line, {bool loose = false}) {
     if (line.length < 2 || line.length > 60 || !_hasLetter(line)) return false;
-    if (_lowerStart.hasMatch(line) || RegExp(r'[.,:;!?]$').hasMatch(line)) return false;
-    if (','.allMatches(line).length >= 2 || _recipeCounter.hasMatch(line)) return false;
+    if (_lowerStart.hasMatch(line) || RegExp(loose ? r'[.,:;?]$' : r'[.,:;!?]$').hasMatch(line)) return false;
+    if ((!loose && ','.allMatches(line).length >= 2) || _recipeCounter.hasMatch(line)) return false;
     if (_readsAsAmountLine(line) || _extractMetadata(line) != null) return false;
     return !_startsWithActionVerb(line.toLowerCase()) || _titleCased(line);
   }
@@ -1426,13 +1464,17 @@ class RecipeImportEngine {
   /// Strategy: collect ALL candidate lines that look title-shaped, then pick
   /// the one that scores best — shorter, more title-case, fewer descriptive
   /// markers. Single-pass-and-take-first picks descriptions too often.
-  static String? _recoverTitleFromSegment(String segment) {
+  ///
+  /// A line read as one of the recipe's [steps] is none.
+  static String? _recoverTitleFromSegment(String segment, {List<String> steps = const []}) {
     final lines = segment.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
 
     bool looksLikeTitle(String s) {
       // Real cookbook titles are 3-50 chars (most are 15-35).
       // Anything longer is almost certainly a description.
       if (s.isEmpty || s.length > 50 || s.length < 3) return false;
+      // An ingredient by its amount ("1 1/2 cups milk"), or a step.
+      if (_readsAsAmountLine(s) || steps.contains(s)) return false;
       // Don't blanket-reject leading digits — "5 Ingredient Cookies",
       // "20-Minute Pasta", "3-Hour Pulled Pork" are valid titles. But reject
       // pure numbers (page) and ingredient measurements (handled below).
@@ -4504,6 +4546,8 @@ class RecipeImportEngine {
     bool gapAbove = true;
     // The items of the list being read carry numbers.
     bool numberedList = false;
+    // The steps being read are numbered without a full stop: "1 Season...".
+    bool bareNumbers = false;
     // In text with no headers: the first step has been read.
     bool methodBegun = false;
 
@@ -4556,7 +4600,9 @@ class RecipeImportEngine {
       if (at < 0 || methodHeadersAhead > 0 || opens[at] != _Section.unknown) return false;
       final raw = lines[at].trim();
       final cleaned = _cleanMarkdown(_cleanListMarkers(raw));
-      if (cleaned.isEmpty || _startsWithAmount.hasMatch(cleaned)) return false;
+      if (cleaned.isEmpty) return false;
+      if (_numberedWithoutStop(cleaned)) return true;
+      if (_startsWithAmount.hasMatch(cleaned)) return false;
       if (_readsAsStep(cleaned)) return true;
       // Numbers begin where the list above had none: "1. Peel the banana".
       if (_isNumbered(raw) && !numberedList && cleaned.split(_spaces).length >= 3) return true;
@@ -4630,6 +4676,7 @@ class RecipeImportEngine {
         descriptionAbove = false;
         gapAbove = true;
         numberedList = false;
+        bareNumbers = false;
         titleLinesLeft = 0;
         if (newSection == _Section.ingredients) {
           // "Ingredients (4 servings)", "Zutaten für 4 Personen".
@@ -4756,7 +4803,19 @@ class RecipeImportEngine {
       if (cleanedLine.isEmpty) continue;
 
       final marked = _isListItem(line);
-      final numbered = _isNumbered(line);
+      var numbered = _isNumbered(line);
+      // "1 Season the chicken": a step numbered without a full stop. Its
+      // number goes, as a "1." would. So does that of the steps after it.
+      final bareNumber = _bareStepNumber.firstMatch(cleanedLine);
+      if (bareNumber != null &&
+          (_numberedWithoutStop(cleanedLine) ||
+              (bareNumbers && currentSection == _Section.instructions))) {
+        cleanedLine = cleanedLine.substring(bareNumber.end);
+        numbered = true;
+        bareNumbers = true;
+      } else if (currentSection != _Section.instructions || !numbered) {
+        bareNumbers = false;
+      }
 
       // "501 calories 40g protein 52g carbs" is what the dish holds, not
       // what goes into it.
@@ -4904,6 +4963,22 @@ class RecipeImportEngine {
             // The introduction goes on with a sentence on a line of its own.
             description = '$description $cleanedLine';
             lineAbove = cleanedLine;
+          } else if (description != null &&
+              newParagraph &&
+              !marked &&
+              ingredients.isEmpty &&
+              instructions.isEmpty &&
+              _readsAsProse(cleanedLine)) {
+            // A further paragraph of the introduction. What will not fit in
+            // the description is kept as a note.
+            if (description.length + cleanedLine.length + 2 < 500) {
+              description = '$description\n\n$cleanedLine';
+              descriptionAbove = true;
+              lineAbove = cleanedLine;
+              lastList = null;
+            } else {
+              notes.add(cleanedLine);
+            }
           }
           break;
       }
@@ -5104,8 +5179,11 @@ class RecipeImportEngine {
   /// anywhere else.
   static ({String text, bool part, bool marked})? _subHeading(String line) {
     if (line.length > 64 || _isNumbered(line)) return null;
-    final dressed = _boldLine.hasMatch(line) || (line.startsWith('#') && _hashedHeading.hasMatch(line));
-    final plain = _undressed(line);
+    final hashed = line.startsWith('#') && _hashedHeading.hasMatch(line);
+    final dressed = _boldLine.hasMatch(line) || hashed;
+    // "### 1. Make the dough" numbers a part of the method. The number goes.
+    var plain = _undressed(line);
+    if (hashed) plain = plain.replaceFirst(_numberMarker, '');
     final colon = _colonAtEnd.hasMatch(plain);
     final text = colon ? plain.replaceFirst(_colonAtEnd, '') : plain;
     if (text.length < 2 || text.length > 47 || !_hasLetter(text)) return null;
@@ -5235,7 +5313,22 @@ class RecipeImportEngine {
   /// True when [text] is an ingredient by its amount: "8 oz cream cheese",
   /// "2 eggs". Not "2 minutes per side in a hot pan."
   static bool _readsAsAmountLine(String text) =>
-      _startsWithAmount.hasMatch(text) && !_opensWithDuration.hasMatch(text) && _looksLikeIngredient(text);
+      _startsWithAmount.hasMatch(text) &&
+      !_opensWithDuration.hasMatch(text) &&
+      !_numberedWithoutStop(text) &&
+      _looksLikeIngredient(text);
+
+  // The number of a step typed without a full stop after it, and the space
+  // after the number.
+  static final _bareStepNumber = RegExp(r'^\d{1,2}\s+(?=\p{Lu})', unicode: true);
+
+  /// True when [text] is a step numbered without a full stop: "1 Season
+  /// the chicken and sear 6 minutes per side." Not "2 eggs" or "1 onion,
+  /// diced", whose words after the number give no order.
+  static bool _numberedWithoutStop(String text) {
+    final number = _bareStepNumber.firstMatch(text);
+    return number != null && _readsAsStep(text.substring(number.end));
+  }
 
   /// True when [text] can stand at the end of a list of amounts without one
   /// of its own: "Salt and pepper to taste", "lemon juice".
@@ -5337,14 +5430,24 @@ class RecipeImportEngine {
   /// True when the printed [line] is the rest of the [ingredient] that the
   /// line [above] it belongs to.
   static bool _goesOnIngredient(String ingredient, String above, String line, {required bool newParagraph}) {
-    // A bracket left open runs on, whatever follows: "(about" / "14 ounces)".
+    // A bracket left open runs on: "(about" / "14 ounces)". A line of
+    // amounts that does not close it is the next ingredient, the bracket a
+    // slip of the page: "2 tbsp butter (or olive oil" / "1 onion, chopped".
     final open = '('.allMatches(ingredient).length > ')'.allMatches(ingredient).length;
-    if (open && !newParagraph) return true;
-    if (_startsWithAmount.hasMatch(line)) return false;
+    final amount = _startsWithAmount.hasMatch(line);
+    if (open && !newParagraph && (!amount || _closesBracket(line))) return true;
+    if (amount) return false;
     final hanging = open || _hangingEnd.hasMatch(above);
     if (newParagraph) return hanging && _lowerStart.hasMatch(line);
     if (hanging || _ingredientTail.hasMatch(line)) return true;
     return _describingEnd.hasMatch(above) && _lowerStart.hasMatch(line) && line.split(_spaces).length <= 3;
+  }
+
+  /// True when [line] closes a bracket opened above it: "14 ounces)".
+  static bool _closesBracket(String line) {
+    final close = line.indexOf(')');
+    final opening = line.indexOf('(');
+    return close >= 0 && (opening < 0 || close < opening);
   }
 
   /// True when [a] and [b] name the same thing, whatever their capitals,
