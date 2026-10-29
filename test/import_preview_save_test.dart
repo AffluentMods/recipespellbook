@@ -62,9 +62,9 @@ void main() {
       final pancakes = await saved(tester, db, 'Clipped Pancakes');
       expect(pancakes.rating, isNull);
       expect(File(pancakes.imagePath!).readAsBytesSync(), clippedPhoto);
-      // Its categories arrive as tags or not at all, never as one tag that
-      // spells out the whole list.
-      expect((await tagNamesOf(tester, db, pancakes.id)).difference({'Breakfast', 'Kids'}), isEmpty);
+      // Its categories, written as a list, arrive as the tags they are and
+      // never as one tag that spells out the whole list.
+      expect(await tagNamesOf(tester, db, pancakes.id), {'Breakfast', 'Kids'});
       final tags = await tester.runAsync(() => db.select(db.tags).get());
       expect(tags!.where((t) => t.name.contains('[')), isEmpty);
     });
@@ -267,10 +267,12 @@ void main() {
       expectQuantity(rows[2], 0.05, line: '0.05 g saffron');
       expectQuantity(rows[3], 1.1, line: '1.1 kg beef');
       expectQuantity(rows[4], 1.5, line: '1 1/2 cups flour');
-      expectNotCutUp(rows[5], '2-3 tbsp olive oil', numbers: ['2', '3']);
-      expectNotCutUp(rows[6], '1,5 kg Kartoffeln');
-      if (rows[6].amount != null) expect(parseAmount(rows[6].amount!), closeTo(1.5, 0.01));
-      expectNotCutUp(rows[7], '2 to 3 cups water', numbers: ['2', '3']);
+      // A range is kept as one, and doubles like any other row.
+      expect((rows[5].amount, rows[5].unit, rows[5].name), ('2-3', 'tbsp', 'olive oil'));
+      expect(scaleQuantityString(rows[5].amount!, rows[5].unit!, 2.0), ('4-6', 'tbsp'));
+      expectQuantity(rows[6], 1.5, line: '1,5 kg Kartoffeln');
+      expect(rows[6].name, 'Kartoffeln');
+      expect((rows[7].amount, rows[7].name), ('2-3', 'water'));
     });
 
     testWidgets('section headers are saved as headers, not as ingredients', (tester) async {

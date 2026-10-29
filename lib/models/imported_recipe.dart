@@ -26,6 +26,8 @@ class ImportedRecipe {
   String? exportId; // The id of the recipe in the file, which links between its recipes go by
   bool? isFavorite;
   Map<String, String?>? tagsById; // Its tags by id, each with its name where the file gives it
+  String? courseName; // The name of a course of its own that suggestedCourse is the id of
+  String? categoryName; // The same for a category of its own
   List<ImportedIngredient>? ingredientRows;
   List<ImportedStep>? stepRows;
 
@@ -59,6 +61,8 @@ class ImportedRecipe {
     this.exportId,
     this.isFavorite,
     this.tagsById,
+    this.courseName,
+    this.categoryName,
     this.ingredientRows,
     this.stepRows,
     this.sourceApp,

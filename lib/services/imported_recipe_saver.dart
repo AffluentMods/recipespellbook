@@ -55,7 +55,8 @@ class ImportedRecipeSaver {
   /// and lists ingredients by, so what is saved is what was shown there.
   /// [dashedHeadings] does the same for a line wrapped in dashes, as in
   /// "-- Ragu --", which is how the file importers write the sections of
-  /// what they read. [markViewed] stamps the recipe as just opened, which
+  /// what they read; a line out of a file that ends in a colon is then a
+  /// heading only by the stricter rule of [headingTitle]. [markViewed] stamps the recipe as just opened, which
   /// puts it in "Jump back in"; bulk imports leave it off so they do not
   /// flood that list. [library] is what the recipe's course, category and
   /// tags are matched against; an import of many recipes loads it once with
@@ -140,7 +141,12 @@ class ImportedRecipeSaver {
           final line = raw.trim();
           if (line.isEmpty) continue;
 
-          final heading = headingTitle(line, sectionHeadings: sectionHeadings, dashedHeadings: dashedHeadings);
+          final heading = headingTitle(
+            line,
+            sectionHeadings: sectionHeadings,
+            dashedHeadings: dashedHeadings,
+            stepsEndInColons: dashedHeadings,
+          );
           if (heading != null) {
             batch.insert(
               db.ingredients,
@@ -155,19 +161,24 @@ class ImportedRecipeSaver {
             continue;
           }
 
-          final parsed = parseIngredient(line);
+          // A range comes back as one, so "2-3 tbsp oil" is stored as the
+          // amount "2-3" and scales like any other row. An ingredient an
+          // importer wrapped in dashes is read without them.
+          final text = dashedHeadings ? _betweenDashes(line) ?? line : line;
+          final parsed = parseIngredient(text, ranges: true);
           final name = parsed.name.trim();
           final amount = parsed.amount;
           // "2 cups flour" comes apart into amount, unit and name. A line the
           // parser could not take apart cleanly ("2" on its own, "6 cloves",
-          // "2-3 tbsp oil" read as 2 and "-3 tbsp oil") is stored whole, as it
-          // was written, instead of as a wrong amount and half a name.
+          // "1 000 g" read as 1 and "000 g") is stored whole, as it was
+          // written, instead of as a wrong amount and half a name.
           final split = (amount != null || parsed.unit != null) &&
               (amount == null || amount.isFinite) &&
               name.isNotEmpty &&
-              name != line &&
-              !_cutMidway(line, name) &&
-              !(amount == null && _startsWithUnitSign(line, name));
+              name != text &&
+              !_cutMidway(text, name) &&
+              !_groupedThousands.hasMatch(text) &&
+              !(amount == null && _startsWithUnitSign(text, name));
           batch.insert(
             db.ingredients,
             IngredientsCompanion.insert(
@@ -175,7 +186,7 @@ class ImportedRecipeSaver {
               recipeId: recipeId,
               sortOrder: order++,
               name: _clamp(split ? name : line),
-              amount: split && amount != null ? drift.Value(_amountText(amount)) : const drift.Value.absent(),
+              amount: split && amount != null ? drift.Value(parsed.amountText) : const drift.Value.absent(),
               unit: split && parsed.unit != null ? drift.Value(parsed.unit) : const drift.Value.absent(),
             ),
           );
@@ -211,7 +222,12 @@ class ImportedRecipeSaver {
         for (final raw in recipe.instructions) {
           final line = raw.trim();
           if (line.isEmpty) continue;
-          final heading = headingTitle(line, sectionHeadings: sectionHeadings, dashedHeadings: dashedHeadings);
+          final heading = headingTitle(
+            line,
+            sectionHeadings: sectionHeadings,
+            dashedHeadings: dashedHeadings,
+            stepsEndInColons: dashedHeadings,
+          );
           batch.insert(
             db.steps,
             StepsCompanion.insert(
@@ -357,6 +373,21 @@ class ImportedRecipeSaver {
     return stored;
   }
 
+  /// Deletes the pictures at [paths] that [storeImage] or [storeStepImages]
+  /// put under [documentsDir], when the recipe they were for could not be
+  /// saved after all. A path anywhere else is never touched.
+  static Future<void> discardImages(List<String?> paths, {required String documentsDir}) async {
+    final folder = p.join(documentsDir, imageFolder);
+    for (final path in paths.whereType<String>()) {
+      if (!p.isWithin(folder, path)) continue;
+      try {
+        await File(path).delete();
+      } catch (_) {
+        // Already gone.
+      }
+    }
+  }
+
   /// A photo the app itself put on this device. One that already sits in the
   /// documents directory (a page cut out of a PDF) is used where it is. A
   /// picked or freshly taken photo lives in a temp folder the system empties
@@ -482,15 +513,53 @@ class ImportedRecipeSaver {
   /// "-- Ragu --" (the importers use the long dash). With [sectionHeadings]
   /// on, "For the sauce:" is one, and "2 cups flour:" or "a pinch of salt:"
   /// is an ingredient with a stray colon.
-  static String? headingTitle(String line, {bool sectionHeadings = false, bool dashedHeadings = false}) {
-    final text = line.trim();
+  ///
+  /// [stepsEndInColons] is for lines out of a file or a web page, where a
+  /// step often leads into a list: "Mix the dry ingredients, then add:" or
+  /// "In a large bowl, whisk together:" is a step then, and so is any line
+  /// of more than seven words before its colon. A book scan leaves it off, so
+  /// the scan review and the scan save keep to one rule.
+  static String? headingTitle(
+    String line, {
+    bool sectionHeadings = false,
+    bool dashedHeadings = false,
+    bool stepsEndInColons = false,
+  }) {
+    var text = line.trim();
     final wrapped = dashedHeadings ? _dashWrapped(text) : null;
     if (wrapped != null) return wrapped;
-    return sectionHeadings && isSectionHeading(text) ? sectionHeadingTitle(text) : null;
+    if (!sectionHeadings) return null;
+    if (stepsEndInColons) {
+      // Chinese and Japanese text ends a heading in the full-width colon.
+      if (text.endsWith('：')) text = '${text.substring(0, text.length - 1)}:';
+      text = stripListMarker(text);
+    }
+    if (!isSectionHeading(text)) return null;
+    final title = sectionHeadingTitle(text);
+    if (stepsEndInColons && (title.contains(_clauseBreak) || title.split(_whitespace).length > 7)) return null;
+    return title;
   }
+
+  static final _clauseBreak = RegExp('[,;，、；]');
 
   /// The text between the dashes of "-- Ragu --", whichever dash is used.
   static String? _dashWrapped(String line) {
+    final title = _betweenDashes(line);
+    if (title == null) return null;
+    // A row of dashes, or dashes round an ornament, is a rule across the
+    // page and not a heading.
+    if (!_nameCharacter.hasMatch(title)) return null;
+    // Nor is a quantity between dashes ("- 2 eggs -"): that is an ingredient,
+    // and as a heading it would lose its amount. A number alone ("- 2 -")
+    // still numbers a section.
+    // "- 2nd layer -" numbers one too.
+    if (_quantityFirst.hasMatch(title) && parseIngredient(title).amount != null) return null;
+    return title;
+  }
+
+  /// The text of [line] inside the dashes at both its ends, or null when it
+  /// has none at one end.
+  static String? _betweenDashes(String line) {
     // Em dash, en dash and hyphen.
     const dashes = '\u2014\u2013-';
     var start = 0;
@@ -502,10 +571,7 @@ class ImportedRecipeSaver {
       end--;
     }
     if (start == 0 || end == line.length) return null;
-    final title = line.substring(start, end).trim();
-    // A row of dashes, or dashes round an ornament, is a rule across the
-    // page and not a heading.
-    return _nameCharacter.hasMatch(title) ? title : null;
+    return line.substring(start, end).trim();
   }
 
   /// True when [name], the part of [line] the parser calls the ingredient
@@ -539,28 +605,17 @@ class ImportedRecipeSaver {
     caseSensitive: false,
     unicode: true,
   );
+
+  /// A thousand written with its digits grouped by a space or a full stop,
+  /// as French, Polish, Russian and German do: "1 000 g farine", "1.000 g
+  /// Mehl". The parser reads the first group as the whole amount.
+  static final _groupedThousands = RegExp(r'^[1-9]\d{0,2}(?:\s|\.)\d{3}(?![\d.,])');
   static final _unitSign = RegExp(r'^\p{L}{1,2}(?!\p{L})', unicode: true);
   static final _accentedStart = RegExp(r'^[À-ÖØ-öø-ɏ]');
   static final _letterEnd = RegExp(r'[A-Za-zÀ-ÖØ-öø-ɏ]$');
   static final _nameCharacter = RegExp(r'[\p{L}\p{N}]', unicode: true);
+  static final _quantityFirst = RegExp(r'^[\d½¼¾⅓⅔⅛⅜⅝⅞⅙⅚⅕⅖⅗⅘]+(?:[.,/]\d+)?\s');
   static final _whitespace = RegExp(r'\s+');
-
-  /// The amount as it is stored. [formatAmount] writes kitchen fractions
-  /// ("1 ½"), which is what the recipe screen shows, but it does so by
-  /// snapping to the nearest one, and 0.7 would be stored as ⅔. When the
-  /// fraction does not read back as the number the parser found, the number
-  /// itself is stored.
-  static String _amountText(double amount) {
-    final shown = formatAmount(amount);
-    if (_reads(shown, amount)) return shown;
-    final digits = amount.toStringAsFixed(4).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
-    return _reads(digits, amount) ? digits : amount.toString();
-  }
-
-  static bool _reads(String text, double amount) {
-    final value = parseAmount(text);
-    return value != null && (value - amount).abs() <= amount.abs() * 0.01;
-  }
 
   static String _clamp(String name) => name.length > maxIngredientNameLength
       ? '${name.substring(0, maxIngredientNameLength - 1)}…'
@@ -645,14 +700,28 @@ class ImportLibrary {
       custom: {for (final c in _courses) if (c.cookbookId == cookbookId) c.id},
     );
     if (id != null || raw.isEmpty || recipe.sourceApp == null) return id;
-    final ownExport = recipe.sourceApp == OwnExport.sourceApp;
-    final name = ownExport ? customCourseName(raw) : raw;
-    if (name == null) return null;
+    if (recipe.sourceApp == OwnExport.sourceApp) {
+      // A course made in another library is known by the name the file gives
+      // it.
+      final name = customCourseName(raw) ?? recipe.courseName;
+      return name == null ? null : _courseNamed(name, cookbookId);
+    }
+    // An app that files a recipe under several courses writes them in a list
+    // ("Dinner, Lunch"). The first one this app has is the course.
+    for (final part in _parts(raw)) {
+      final id = _courseIdOf(part, cookbookId);
+      if (id != null) return id;
+    }
+    return null;
+  }
+
+  String? _courseNamed(String name, String cookbookId) {
+    if (name.length > _longestName) return null;
     final key = _nameKey(name);
     for (final c in _courses) {
       if (c.cookbookId == cookbookId && _sameName(_nameKey(c.name), key)) return c.id;
     }
-    return ownExport ? null : ImportedRecipeSaver.validCourseId(RecipeImportEngine.mapToCourseId(raw));
+    return null;
   }
 
   /// The category [recipe] is filed under in [cookbookId], or null. The same
@@ -664,19 +733,37 @@ class ImportLibrary {
       custom: {for (final c in _categories) if (c.cookbookId == cookbookId) c.id},
     );
     if (id != null || raw.isEmpty || recipe.sourceApp == null) return id;
-    final ownExport = recipe.sourceApp == OwnExport.sourceApp;
-    final name = ownExport ? customCategoryName(raw) : raw;
-    if (name == null) return null;
+    if (recipe.sourceApp == OwnExport.sourceApp) {
+      final name = customCategoryName(raw) ?? recipe.categoryName;
+      return name == null ? null : _categoryNamed(name, cookbookId, builtIn: false);
+    }
+    // "Pasta, Soups" is two categories, and a recipe can have both.
+    final ids = <String>{
+      for (final part in _parts(raw))
+        if (_categoryIdOf(part, cookbookId) case final id?) id,
+    };
+    return ids.isEmpty ? null : ids.join(',');
+  }
+
+  String? _categoryNamed(String name, String cookbookId, {bool builtIn = true}) {
+    if (name.length > _longestName) return null;
     final key = _nameKey(name);
     for (final c in _categories) {
       if (c.cookbookId == cookbookId && _sameName(_nameKey(c.name), key)) return c.id;
     }
-    if (ownExport) return null;
+    if (!builtIn) return null;
     for (final c in CategoryData.categories) {
       if (_sameName(_nameKey(c.name), key) || _sameName(_nameKey(c.id), key)) return c.id;
     }
     return null;
   }
+
+  /// The names in a list another app wrote out as one text.
+  static Iterable<String> _parts(String raw) => raw.split(',').map((part) => part.trim()).where((part) => part.isNotEmpty);
+
+  /// A longer name is a sentence in the wrong field and not compared with
+  /// anything: taking it apart costs time and it can match nothing.
+  static const int _longestName = 200;
 
   /// The tags [recipe] is saved with: its own tags, its cuisine and, out of
   /// another recipe app, a course or category that matched nothing here. Each
@@ -713,11 +800,18 @@ class ImportLibrary {
     names.addAll([
       ...?recipe.tags,
       if (recipe.cuisine != null) recipe.cuisine!,
-      if (named && courseIdFor(recipe, cookbookId: cookbookId) == null) recipe.suggestedCourse ?? '',
-      if (named && categoryIdFor(recipe, cookbookId: cookbookId) == null) recipe.suggestedCategory ?? '',
+      if (named) ..._unfiled(recipe.suggestedCourse, (part) => _courseIdOf(part, cookbookId)),
+      if (named) ..._unfiled(recipe.suggestedCategory, (part) => _categoryIdOf(part, cookbookId)),
+      // A course or category made in another library, out of the app's own
+      // export, that this one does not have.
+      if (!named && fromApp && courseIdFor(recipe, cookbookId: cookbookId) == null) ?recipe.courseName,
+      if (!named && fromApp && categoryIdFor(recipe, cookbookId: cookbookId) == null) ?recipe.categoryName,
     ]);
     for (final raw in names) {
-      final name = raw.trim();
+      // A name taken from a file can hold a line break ("Dinner" and "Party"
+      // on two lines), and a tag name is one line.
+      final name = raw.trim().replaceAll(_whitespace, ' ');
+      if (name.length > _longestName) continue;
       final key = _nameKey(name);
       if (key.isEmpty || !seen.add(key)) continue;
       final existing = _tags[key];
@@ -729,6 +823,22 @@ class ImportLibrary {
     }
     return tags;
   }
+
+  /// The parts of a course or category [raw] another app gave, that nothing
+  /// here is called. [filed] is what a part is filed under, or null.
+  static Iterable<String> _unfiled(String? raw, String? Function(String part) filed) =>
+      raw == null ? const [] : _parts(raw).where((part) => filed(part) == null);
+
+  /// The course one name or id of another app stands for here, or null.
+  String? _courseIdOf(String part, String cookbookId) =>
+      ImportedRecipeSaver.validCourseId(part, custom: {for (final c in _courses) if (c.cookbookId == cookbookId) c.id}) ??
+      _courseNamed(part, cookbookId) ??
+      ImportedRecipeSaver.validCourseId(RecipeImportEngine.mapToCourseId(part));
+
+  /// The category one name or id of another app stands for here, or null.
+  String? _categoryIdOf(String part, String cookbookId) =>
+      ImportedRecipeSaver.validCategoryId(part, custom: {for (final c in _categories) if (c.cookbookId == cookbookId) c.id}) ??
+      _categoryNamed(part, cookbookId);
 
   /// The name of a course the user made, or null for any other id.
   String? customCourseName(String id) => _courses.where((c) => c.id == id).firstOrNull?.name;
@@ -762,9 +872,19 @@ class ImportLibrary {
   static bool _isLabel(String name) =>
       name.length <= maxTagNameLength && !(name.startsWith('[') && name.endsWith(']'));
 
-  /// "Gluten-Free", "gluten free" and "GLUTEN FREE" are one name.
-  static String _nameKey(String name) => foldAccents(name).replaceAll(_notWord, '');
+  /// "Gluten-Free", "gluten free" and "GLUTEN FREE" are one name, and so are
+  /// "Quick & Easy" and "quick and easy". A name of symbols or emoji only is
+  /// its own key.
+  static String _nameKey(String name) {
+    final key = foldAccents(name).split(_notWord).where((word) => word != 'and' && word != 'und').join();
+    if (key.isNotEmpty) return key;
+    // Punctuation alone ("---") is no name at all.
+    final trimmed = name.trim();
+    return trimmed.codeUnits.any((unit) => unit > 0x7F) ? trimmed : '';
+  }
+
   static final _notWord = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
+  static final _whitespace = RegExp(r'\s+');
 
   /// "Desserts" is the Dessert course.
   static bool _sameName(String a, String b) =>
@@ -799,20 +919,32 @@ class OwnExport {
   static List<ImportedRecipe> recipes(Map<dynamic, dynamic> data) {
     // A backup lists the tags of the library it was made from. A cookbook
     // export only has their ids.
-    final tagNames = <String, String>{};
-    for (final tag in _maps(data['tags'])) {
-      final id = _text(tag['id']);
-      final name = _text(tag['name']);
-      if (id != null && name != null) tagNames[id] = name;
-    }
+    // It lists the courses and categories its user made as well, so that a
+    // recipe filed under one finds the one of that name here, or keeps the
+    // name as a tag.
+    final names = (
+      tags: _names(data['tags']),
+      courses: _names(data['customCourses']),
+      categories: _names(data['customCategories']),
+    );
     return [
       for (final cookbook in _maps(data['cookbooks']))
-        for (final recipe in _maps(cookbook['recipes'])) _recipe(recipe, tagNames),
-      for (final recipe in _maps(data['recipes'])) _recipe(recipe, tagNames),
+        for (final recipe in _maps(cookbook['recipes'])) _recipe(recipe, names),
+      for (final recipe in _maps(data['recipes'])) _recipe(recipe, names),
     ];
   }
 
-  static ImportedRecipe _recipe(Map<dynamic, dynamic> r, Map<String, String> tagNames) {
+  /// The names of a list of rows, by their id.
+  static Map<String, String> _names(Object? rows) => {
+        for (final row in _maps(rows))
+          if ((_text(row['id']), _text(row['name'])) case (final id?, final name?)) id: name,
+      };
+
+  static ImportedRecipe _recipe(
+    Map<dynamic, dynamic> r,
+    ({Map<String, String> tags, Map<String, String> courses, Map<String, String> categories}) names,
+  ) {
+    final tagNames = names.tags;
     // Which of its ingredients stand for another recipe ("1 Pizza Dough"),
     // by the id of the ingredient and in the order the recipe shows them.
     final links = <String, List<({String recipeId, double scale})>>{};
@@ -879,6 +1011,8 @@ class OwnExport {
       imageData: _text(r['imageBase64']),
       exportId: _text(r['id']),
       tagsById: tagsById,
+      courseName: names.courses[_text(r['courseId'])],
+      categoryName: names.categories[_text(r['categoryId'])],
       ingredients: [for (final row in ingredientRows) row.line],
       instructions: [for (final row in stepRows) if (row.instruction.isNotEmpty) row.instruction],
       ingredientRows: ingredientRows,

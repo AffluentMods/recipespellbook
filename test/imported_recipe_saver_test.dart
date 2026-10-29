@@ -469,6 +469,35 @@ void main() {
     });
   });
 
+  group('tags out of another app', () {
+    Future<List<String>> tagsOf(ImportedRecipe recipe) async =>
+        tagNamesOf(await ImportedRecipeSaver.save(db, cookbookId: 'book', recipe: recipe));
+
+    ImportedRecipe from({List<String>? tags, String? category, String? course}) => ImportedRecipe(
+          title: 'Soup',
+          tags: tags,
+          suggestedCategory: category,
+          suggestedCourse: course,
+          sourceApp: 'recipekeeper',
+          ingredients: ['1 onion'],
+          instructions: ['Simmer.'],
+        );
+
+    test('several categories written as one text are filed one by one', () async {
+      final id = await ImportedRecipeSaver.save(db, cookbookId: 'book', recipe: from(category: 'Pasta, Soups, Grandma'));
+      expect((await load(id)).categoryId, 'pasta,soup');
+      // The one that matched nothing is kept as a tag, by itself.
+      expect(await tagNamesOf(id), ['Grandma']);
+    });
+
+    test('a tag is matched however its words are joined, and kept on one line', () async {
+      final before = (await allTags()).length;
+      expect(await tagsOf(from(tags: ['quick and easy', 'Dinner\nParty', '🎉', '---'])), ['Dinner Party', 'Quick & Easy', '🎉']);
+      // The emoji and the party are new, the quick one is the tag the app has.
+      expect(await allTags(), hasLength(before + 2));
+    });
+  });
+
   group('ingredient lines', () {
     test('an amount is stored as the quantity that was written', () async {
       const written = {
@@ -551,6 +580,43 @@ void main() {
           expect(shown(row), contains(number), reason: '"${entry.key}" stored as "${shown(row)}"');
         }
       }
+    });
+
+    test('a range is stored as its two numbers, and scales like any amount', () async {
+      final rows = await savedRows([
+        '2-3 tbsp olive oil',
+        '1-2 cloves garlic, minced',
+        '2 to 3 cups chicken stock',
+        '3 $enDash 4 apples',
+      ]);
+      expect([for (final r in rows) (r.amount, r.unit, r.name)], [
+        ('2-3', 'tbsp', 'olive oil'),
+        ('1-2', 'cloves', 'garlic, minced'),
+        ('2-3', 'cup', 'chicken stock'),
+        ('3-4', null, 'apples'),
+      ]);
+      expect(scaleQuantityString(rows[0].amount!, rows[0].unit!, 2.0), ('4-6', 'tbsp'));
+    });
+
+    test('a decimal comma is read as the decimal it is', () async {
+      final rows = await savedRows(['1,5 kg Kartoffeln', '0,5 l Milch']);
+      expect([for (final r in rows) (parseAmount(r.amount!), r.unit, r.name)], [
+        (1.5, 'kg', 'Kartoffeln'),
+        (0.5, 'l', 'Milch'),
+      ]);
+    });
+
+    test('a thousand with its digits grouped is not cut after the first group', () async {
+      final lines = ['1 000 g farine', '1\u00A0000 g farine', '1.000 g Mehl', '2.500 ml Wasser'];
+      final rows = await savedRows(lines);
+      for (var i = 0; i < lines.length; i++) {
+        // Left as written: never one gram of "000 g farine", nor one gram of Mehl.
+        expect((rows[i].amount, rows[i].unit, rows[i].name), (null, null, lines[i]));
+      }
+      // The comma that English groups with is read as the thousand it is.
+      final grams = await savedRows(['1,000 g flour', '0.125 l cream']);
+      expect((grams[0].amount, grams[0].unit), ('1000', 'g'));
+      expect(parseAmount(grams[1].amount!), closeTo(0.125, 0.0001));
     });
 
     test('a number written another way is read as that number or left as written', () async {
@@ -660,6 +726,53 @@ void main() {
       final steps = await stepsOf(id);
       expect(steps.map((s) => s.instruction), ['Make the ragu', 'Brown the beef.']);
       expect(steps.map((s) => s.notes), ['__header__', null]);
+    });
+
+    test('a quantity between dashes is an ingredient, not a heading', () async {
+      final rows = await savedRows(
+        ['$enDash 1 cup milk $enDash', '- 2 eggs -', '$emDash 12 $emDash', '$emDash Ragu $emDash'],
+        dashedHeadings: true,
+      );
+      expect(rows.map((r) => r.notes), [null, null, '__header__', '__header__']);
+      expect(rows[0].amount, '1');
+      expect(rows[1].amount, '2');
+    });
+
+    test('a step out of a file that leads into a list stays a step', () async {
+      const lines = [
+        'Salt:',
+        'Make the sauce:',
+        '- For the sauce:',
+        '▢ Topping:',
+        'For the sauce\uFF1A',
+        'Mix the dry ingredients, then add:',
+        'In a large bowl, whisk together:',
+        'Put everything that is left over into the big pot:',
+        '2 cups flour:',
+      ];
+      final titles = [
+        for (final line in lines)
+          ImportedRecipeSaver.headingTitle(line, sectionHeadings: true, dashedHeadings: true, stepsEndInColons: true),
+      ];
+      expect(titles, ['Salt', 'Make the sauce', 'For the sauce', 'Topping', 'For the sauce', null, null, null, null]);
+
+      // What the preview saves goes by the same rule, the steps included.
+      final id = await ImportedRecipeSaver.save(
+        db,
+        cookbookId: 'book',
+        sectionHeadings: true,
+        dashedHeadings: true,
+        recipe: ImportedRecipe(
+          title: 'Cake',
+          ingredients: ['For the batter:', '2 cups flour'],
+          instructions: ['Mix the dry ingredients, then add:', 'the eggs and the milk.', 'Frosting:', 'Spread it on.'],
+        ),
+      );
+      expect((await ingredientsOf(id)).map((r) => r.notes), ['__header__', null]);
+      expect((await stepsOf(id)).map((s) => s.notes), [null, null, '__header__', null]);
+
+      // A book scan keeps to the rule its review shows.
+      expect(ImportedRecipeSaver.headingTitle('In a large bowl, whisk together:', sectionHeadings: true), isNotNull);
     });
 
     test('dashes mean nothing where no importer put them', () async {
@@ -1124,6 +1237,42 @@ void main() {
       // Not the tag that was deleted here, and not one this library never had.
       expect(await tagIdsOf(id), {'tag_family', 'tag_1700000000000'});
       expect(await allTags(), hasLength(before));
+    });
+
+    test('a course and a category made in another library are found by their names', () async {
+      await db.into(db.customCourses).insert(
+            CustomCoursesCompanion.insert(id: 'custom_first', cookbookId: 'book', name: 'Первое'),
+          );
+      final recipe = OwnExport.recipes({
+        'version': 2,
+        'cookbooks': [
+          {
+            'id': 'cb1',
+            'name': 'Family',
+            'recipes': [
+              {
+                'title': 'Борщ',
+                'courseId': 'custom_100',
+                'categoryId': 'custom_200',
+                'ingredients': [{'name': 'beets'}],
+                'steps': [],
+              },
+            ],
+          },
+        ],
+        'customCourses': [
+          {'id': 'custom_100', 'cookbookId': 'cb1', 'name': 'Первое'},
+        ],
+        'customCategories': [
+          {'id': 'custom_200', 'cookbookId': 'cb1', 'name': 'Супы бабушки'},
+        ],
+      }).single;
+      final id = await ImportedRecipeSaver.save(db, cookbookId: 'book', recipe: recipe);
+      final saved = await load(id);
+      expect(saved.courseId, 'custom_first');
+      // This library has no such category, so its name is kept as a tag.
+      expect(saved.categoryId, isNull);
+      expect(await tagNamesOf(id), ['Супы бабушки']);
     });
 
     test('a tag that was renamed here is still the same tag', () async {
