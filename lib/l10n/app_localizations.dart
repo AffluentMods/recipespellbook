@@ -799,6 +799,12 @@ abstract class AppLocalizations {
   /// **'Pages are read on this device. Nothing is uploaded.'**
   String get bookScanPrivacy;
 
+  /// No description provided for @bookScanPrivacySynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages are read on this device. The recipes you add are synced with their pictures.'**
+  String get bookScanPrivacySynced;
+
   /// No description provided for @bookScanCameraDenied.
   ///
   /// In en, this message translates to:
@@ -810,6 +816,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The scanner could not be opened. You can still choose photos you already took.'**
   String get bookScanScannerFailed;
+
+  /// No description provided for @bookScanLostPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{An earlier scan was interrupted. Its page is still on this device.} other{An earlier scan was interrupted. Its {count} pages are still on this device.}}'**
+  String bookScanLostPages(int count);
+
+  /// No description provided for @bookScanReadLostPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Read 1 page} other{Read {count} pages}}'**
+  String bookScanReadLostPages(int count);
 
   /// No description provided for @bookScanReadOnly.
   ///
@@ -1015,6 +1033,36 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 recipe could not be added} other{{count} recipes could not be added}}'**
   String bookScanAddFailed(int count);
 
+  /// No description provided for @bookScanChooseCookbookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cookbook'**
+  String get bookScanChooseCookbookTitle;
+
+  /// No description provided for @bookScanChooseCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the cookbook the scanned recipes should go to.'**
+  String get bookScanChooseCookbook;
+
+  /// No description provided for @bookScanNoCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no cookbook that recipes can be added to.'**
+  String get bookScanNoCookbook;
+
+  /// No description provided for @bookScanCookbookGoneChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'{book} is no longer on this device. Choose the cookbook these recipes should go to.'**
+  String bookScanCookbookGoneChoose(String book);
+
+  /// No description provided for @bookScanCookbookGone.
+  ///
+  /// In en, this message translates to:
+  /// **'{book} is no longer on this device, and there is no other cookbook to add these recipes to.'**
+  String bookScanCookbookGone(String book);
+
   /// No description provided for @bookScanMore.
   ///
   /// In en, this message translates to:
@@ -1033,6 +1081,30 @@ abstract class AppLocalizations {
   /// **'The pages were read, but none of them looked like a recipe. Try again with the whole page in the photo.'**
   String get bookScanEmptyBody;
 
+  /// No description provided for @bookScanNothingReadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing could be read'**
+  String get bookScanNothingReadTitle;
+
+  /// No description provided for @bookScanNothingReadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The page could not be read. Try again in good light, with the whole page in the photo.} other{None of the {count} pages could be read. Try again in good light, with the whole page in the photo.}}'**
+  String bookScanNothingReadBody(int count);
+
+  /// No description provided for @bookScanNothingLeftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to add'**
+  String get bookScanNothingLeftTitle;
+
+  /// No description provided for @bookScanNothingLeftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every recipe that was found has been added or discarded. Scan more pages, or go back.'**
+  String get bookScanNothingLeftBody;
+
   /// No description provided for @bookScanTryAgain.
   ///
   /// In en, this message translates to:
@@ -1044,6 +1116,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 page could not be read. Scan it again to add what is missing.} other{{count} pages could not be read. Scan them again to add what is missing.}}'**
   String bookScanUnreadPages(int count);
+
+  /// photos is the place of each unread page in the scan: 3, or 3, 7, 9.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Photo {photos} could not be read. Scan that page again to add what is missing.} other{Photos {photos} could not be read. Scan those pages again to add what is missing.}}'**
+  String bookScanUnreadPhotos(int count, String photos);
 
   /// No description provided for @bookScanDiscardTitle.
   ///
@@ -6802,7 +6880,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpContactUsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Have questions or feedback? Email us at support@recipespellbook.com'**
+  /// **'Have questions or feedback? Email us at support@recipespellbook.app'**
   String get helpContactUsDesc;
 
   /// No description provided for @navCommunity.
@@ -10423,120 +10501,6 @@ abstract class AppLocalizations {
   /// **'Get help, chat, and share recipes'**
   String get joinDiscordSubtitle;
 
-  /// No description provided for @actionSend.
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get actionSend;
-
-  /// No description provided for @suggestionDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'We\'d love to hear your ideas! Your suggestion will be sent directly to our team.'**
-  String get suggestionDescription;
-
-  /// No description provided for @suggestionTitleLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggestion Title'**
-  String get suggestionTitleLabel;
-
-  /// No description provided for @suggestionTitleHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g., Add dark mode for cooking screen'**
-  String get suggestionTitleHint;
-
-  /// No description provided for @suggestionDetailsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Details'**
-  String get suggestionDetailsLabel;
-
-  /// No description provided for @suggestionDetailsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Describe your idea in detail...'**
-  String get suggestionDetailsHint;
-
-  /// No description provided for @contactOptionalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Contact (optional)'**
-  String get contactOptionalLabel;
-
-  /// No description provided for @contactOptionalHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Email or Discord username'**
-  String get contactOptionalHint;
-
-  /// No description provided for @suggestionSent.
-  ///
-  /// In en, this message translates to:
-  /// **'Thanks! Your suggestion has been sent 💡'**
-  String get suggestionSent;
-
-  /// No description provided for @bugDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Found a bug? Let us know and we\'ll squash it. Device info is included automatically.'**
-  String get bugDescription;
-
-  /// No description provided for @bugTitleLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Bug Title'**
-  String get bugTitleLabel;
-
-  /// No description provided for @bugTitleHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g., App crashes when importing PDF'**
-  String get bugTitleHint;
-
-  /// No description provided for @bugDetailsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'What happened?'**
-  String get bugDetailsLabel;
-
-  /// No description provided for @bugDetailsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Describe what went wrong...'**
-  String get bugDetailsHint;
-
-  /// No description provided for @bugStepsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Steps to Reproduce (optional)'**
-  String get bugStepsLabel;
-
-  /// No description provided for @bugStepsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'1. Open recipe\n2. Tap share\n3. App crashes'**
-  String get bugStepsHint;
-
-  /// No description provided for @bugReportSent.
-  ///
-  /// In en, this message translates to:
-  /// **'Thanks! Your bug report has been sent 🐛'**
-  String get bugReportSent;
-
-  /// No description provided for @feedbackFieldsRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Please fill in the title and details'**
-  String get feedbackFieldsRequired;
-
-  /// No description provided for @feedbackSendError.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t send feedback. Check your internet connection.'**
-  String get feedbackSendError;
-
   /// No description provided for @mealTypeAppetizer.
   ///
   /// In en, this message translates to:
@@ -12457,65 +12421,11 @@ abstract class AppLocalizations {
   /// **'m cook'**
   String get minutesCookSuffix;
 
-  /// No description provided for @couldNotOpenBrowser.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not open browser'**
-  String get couldNotOpenBrowser;
-
   /// No description provided for @couldNotOpenUrl.
   ///
   /// In en, this message translates to:
   /// **'Could not open {url}'**
   String couldNotOpenUrl(String url);
-
-  /// No description provided for @discord.
-  ///
-  /// In en, this message translates to:
-  /// **'Discord'**
-  String get discord;
-
-  /// No description provided for @discordLinkAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Link Discord Account'**
-  String get discordLinkAccount;
-
-  /// No description provided for @discordLinkSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Connect your Discord for community features'**
-  String get discordLinkSubtitle;
-
-  /// No description provided for @discordSignInFirst.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in first to link Discord'**
-  String get discordSignInFirst;
-
-  /// No description provided for @discordUnlink.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlink Discord'**
-  String get discordUnlink;
-
-  /// No description provided for @discordUnlinkFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to unlink Discord'**
-  String get discordUnlinkFailed;
-
-  /// No description provided for @discordUnlinkSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove your Discord connection'**
-  String get discordUnlinkSubtitle;
-
-  /// No description provided for @discordUnlinked.
-  ///
-  /// In en, this message translates to:
-  /// **'Discord unlinked'**
-  String get discordUnlinked;
 
   /// No description provided for @familyCodeCopied.
   ///
@@ -12781,29 +12691,11 @@ abstract class AppLocalizations {
   /// **'Connected - Tap to manage'**
   String get integrationsConnectedManage;
 
-  /// No description provided for @integrationsLinked.
-  ///
-  /// In en, this message translates to:
-  /// **'Linked'**
-  String get integrationsLinked;
-
-  /// No description provided for @integrationsLinkedManage.
-  ///
-  /// In en, this message translates to:
-  /// **'Linked - Tap to manage'**
-  String get integrationsLinkedManage;
-
   /// No description provided for @integrationsNotConnected.
   ///
   /// In en, this message translates to:
   /// **'Not connected'**
   String get integrationsNotConnected;
-
-  /// No description provided for @integrationsTapToLink.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap to link'**
-  String get integrationsTapToLink;
 
   /// No description provided for @integrationsTapToSignIn.
   ///

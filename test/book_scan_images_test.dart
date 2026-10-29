@@ -458,6 +458,89 @@ void main() {
       });
     });
 
+    group('through the splitter, with a caption that is the title word for word', () {
+      // Recognised paragraphs on a 1000 x 1400 page, the way the device
+      // reports them.
+      PageBlock para(double left, double top, List<String> lines, {double lineHeight = 24}) {
+        final out = <PageLine>[];
+        var y = top;
+        var right = left;
+        for (final text in lines) {
+          final r = left + text.length * 11;
+          if (r > right) right = r;
+          out.add(PageLine(text, left: left, top: y, right: r, bottom: y + lineHeight));
+          y += lineHeight * 1.25;
+        }
+        return PageBlock(left: left, top: top, right: right, bottom: y - lineHeight * 0.25, lines: out);
+      }
+
+      ScannedPage scanned(List<PageBlock> blocks, {PhotoRegion? photo}) => ScannedPage(
+            imagePath: 'page.jpg',
+            text: PageText.fromBlocks(blocks, width: 1000, height: 1400),
+            photo: photo,
+            width: 1000,
+            height: 1400,
+          );
+
+      // The title sits in the top margin of its page, where a running head
+      // would be.
+      ScannedPage recipe(String title, List<String> list, String method, int folio) => scanned([
+            para(80, 90, [title], lineHeight: 46),
+            para(80, 200, list),
+            para(80, 400, [method]),
+            para(470, 1340, ['$folio'], lineHeight: 18),
+          ]);
+
+      ScannedPage photograph(String caption) => scanned(
+            [para(80, 1300, [caption], lineHeight: 20)],
+            photo: const PhotoRegion(left: 0, top: 0, right: 1, bottom: 1, score: 1.4),
+          );
+
+      final soup = recipe(
+        'Lentil Soup',
+        ['250 g red lentils', '1 onion, chopped', '2 carrots, diced'],
+        'Fry the onion in a little oil until soft, add everything else and simmer for 25 minutes.',
+        50,
+      );
+      ScannedPage bread(int folio) => recipe(
+            'Garlic Bread',
+            ['1 baguette', '100 g butter, softened', '3 cloves garlic, crushed'],
+            'Mix the butter and garlic, spread it between the slices and bake for 15 minutes.',
+            folio,
+          );
+
+      (BookSplitResult, List<DraftImage>) run(List<ScannedPage> pages) {
+        final result = BookPageSplitter.split([for (final p in pages) p.text], photoPages: photoPagesOf(pages));
+        return (result, assignDraftImages(result.drafts, pages, pageNumbers: result.pageNumbers));
+      }
+
+      test('the title is kept and the photograph goes to that recipe', () {
+        final (result, images) = run([soup, bread(51), photograph('Garlic Bread')]);
+        expect(result.drafts.map((d) => d.recipe.title), ['Lentil Soup', 'Garlic Bread']);
+        expect(result.drafts.every((d) => d.titleFound), isTrue);
+        expect(images[1].page, 2);
+        expect(images[1].crop, isNotNull);
+        expect(images[0].page, 0);
+        expect(images[0].crop, isNull);
+      });
+
+      test('a photograph printed overleaf, before its recipe, is not given to the recipe before it', () {
+        final lamb = recipe(
+          'Braised Lamb with White Beans',
+          ['1.5 kg lamb shoulder', '500 g white beans', '6 sprigs rosemary'],
+          'Brown the lamb, add the beans and rosemary and cook for 4 hours.',
+          22,
+        );
+        final (result, images) = run([bread(20), photograph('Braised Lamb with White Beans'), lamb]);
+        expect(result.drafts.map((d) => d.recipe.title), ['Garlic Bread', 'Braised Lamb with White Beans']);
+        expect(result.drafts.every((d) => d.titleFound), isTrue);
+        expect(images[1].page, 1);
+        expect(images[1].crop, isNotNull);
+        expect(images[0].page, 0);
+        expect(images[0].crop, isNull);
+      });
+    });
+
     test('pages out of range are clamped, never thrown on', () {
       final images = assignDraftImages([draft('Soup', 7, 9)], [textPage(), textPage()]);
       expect(images.single.page, 1);

@@ -63,11 +63,20 @@ abstract class BookScanBackend {
   /// Lets the user choose page photos they already took.
   Future<List<String>> pickPhotos();
 
+  /// Page images of an earlier scan that never reached the app, because the
+  /// system closed it while the scanner or the photo picker was in front.
+  /// In page order as far as that can be told; empty when there are none.
+  Future<List<String>> lostPages();
+
   /// Reads one page image. Must not throw for an unreadable page.
   Future<ScannedPage> readPage(String sourcePath);
 
   /// Stores the image for a recipe being saved and returns its path.
   Future<String?> saveRecipeImage(ScannedPage page, {PhotoRegion? crop, required String recipeId});
+
+  /// Removes an image [saveRecipeImage] stored, when the recipe it was for
+  /// could not be saved after all. Must not throw.
+  Future<void> discardRecipeImage(String path);
 
   /// Releases everything the scan was holding.
   Future<void> close();

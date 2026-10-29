@@ -371,10 +371,35 @@ class AppLocalizationsNl extends AppLocalizations {
   String get bookScanPrivacy => 'Pages are read on this device. Nothing is uploaded.';
 
   @override
+  String get bookScanPrivacySynced => 'Pages are read on this device. The recipes you add are synced with their pictures.';
+
+  @override
   String get bookScanCameraDenied => 'Camera access is off for Recipe Spellbook. Turn it on in Settings, or choose photos you already took.';
 
   @override
   String get bookScanScannerFailed => 'The scanner could not be opened. You can still choose photos you already took.';
+
+  @override
+  String bookScanLostPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'An earlier scan was interrupted. Its $count pages are still on this device.',
+      one: 'An earlier scan was interrupted. Its page is still on this device.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanReadLostPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Read $count pages',
+      one: 'Read 1 page',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get bookScanReadOnly => 'You can only view this cookbook, so recipes cannot be added to it.';
@@ -550,6 +575,25 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get bookScanChooseCookbookTitle => 'Choose a cookbook';
+
+  @override
+  String get bookScanChooseCookbook => 'Choose the cookbook the scanned recipes should go to.';
+
+  @override
+  String get bookScanNoCookbook => 'There is no cookbook that recipes can be added to.';
+
+  @override
+  String bookScanCookbookGoneChoose(String book) {
+    return '$book is no longer on this device. Choose the cookbook these recipes should go to.';
+  }
+
+  @override
+  String bookScanCookbookGone(String book) {
+    return '$book is no longer on this device, and there is no other cookbook to add these recipes to.';
+  }
+
+  @override
   String get bookScanMore => 'Scan more pages';
 
   @override
@@ -557,6 +601,26 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get bookScanEmptyBody => 'The pages were read, but none of them looked like a recipe. Try again with the whole page in the photo.';
+
+  @override
+  String get bookScanNothingReadTitle => 'Nothing could be read';
+
+  @override
+  String bookScanNothingReadBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'None of the $count pages could be read. Try again in good light, with the whole page in the photo.',
+      one: 'The page could not be read. Try again in good light, with the whole page in the photo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bookScanNothingLeftTitle => 'Nothing left to add';
+
+  @override
+  String get bookScanNothingLeftBody => 'Every recipe that was found has been added or discarded. Scan more pages, or go back.';
 
   @override
   String get bookScanTryAgain => 'Scan again';
@@ -568,6 +632,17 @@ class AppLocalizationsNl extends AppLocalizations {
       locale: localeName,
       other: '$count pages could not be read. Scan them again to add what is missing.',
       one: '1 page could not be read. Scan it again to add what is missing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bookScanUnreadPhotos(int count, String photos) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Photos $photos could not be read. Scan those pages again to add what is missing.',
+      one: 'Photo $photos could not be read. Scan that page again to add what is missing.',
     );
     return '$_temp0';
   }
@@ -3720,7 +3795,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get helpContactUs => 'Neem contact op';
 
   @override
-  String get helpContactUsDesc => 'Vragen? Schrijf ons op support@recipespellbook.com';
+  String get helpContactUsDesc => 'Vragen? Schrijf ons op support@recipespellbook.app';
 
   @override
   String get navCommunity => 'Community';
@@ -5778,63 +5853,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get joinDiscordSubtitle => 'Krijg hulp en deel recepten';
 
   @override
-  String get actionSend => 'Sturen';
-
-  @override
-  String get suggestionDescription => 'We zijn dol op je ideeën! Je suggestie wordt rechtstreeks naar ons team gestuurd.';
-
-  @override
-  String get suggestionTitleLabel => 'Suggestietitel';
-
-  @override
-  String get suggestionTitleHint => 'bijv. Donkere modus voor koken toevoegen';
-
-  @override
-  String get suggestionDetailsLabel => 'Details';
-
-  @override
-  String get suggestionDetailsHint => 'Beschrijf je idee in detail...';
-
-  @override
-  String get contactOptionalLabel => 'Contact (optioneel)';
-
-  @override
-  String get contactOptionalHint => 'E-mail of Discord-naam';
-
-  @override
-  String get suggestionSent => 'Bedankt! Je suggestie is verstuurd 💡';
-
-  @override
-  String get bugDescription => 'Bug gevonden? Vertel het ons en we lossen het op.';
-
-  @override
-  String get bugTitleLabel => 'Bugtitel';
-
-  @override
-  String get bugTitleHint => 'bijv. App crasht bij PDF importeren';
-
-  @override
-  String get bugDetailsLabel => 'Wat is er gebeurd?';
-
-  @override
-  String get bugDetailsHint => 'Beschrijf wat er misging...';
-
-  @override
-  String get bugStepsLabel => 'Stappen om te reproduceren (optioneel)';
-
-  @override
-  String get bugStepsHint => '1. Recept openen\n2. Op delen tikken\n3. App crasht';
-
-  @override
-  String get bugReportSent => 'Bedankt! Je bugrapport is verstuurd 🐛';
-
-  @override
-  String get feedbackFieldsRequired => 'Vul de titel en details in';
-
-  @override
-  String get feedbackSendError => 'Kan feedback niet versturen. Controleer je verbinding.';
-
-  @override
   String get mealTypeAppetizer => 'Voorgerecht';
 
   @override
@@ -6907,36 +6925,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get minutesCookSuffix => 'm koken';
 
   @override
-  String get couldNotOpenBrowser => 'Kan browser niet openen';
-
-  @override
   String couldNotOpenUrl(String url) {
     return 'Kan $url niet openen';
   }
-
-  @override
-  String get discord => 'Discord';
-
-  @override
-  String get discordLinkAccount => 'Discord-account koppelen';
-
-  @override
-  String get discordLinkSubtitle => 'Koppel je Discord voor communityfuncties';
-
-  @override
-  String get discordSignInFirst => 'Log eerst in om Discord te koppelen';
-
-  @override
-  String get discordUnlink => 'Discord ontkoppelen';
-
-  @override
-  String get discordUnlinkFailed => 'Discord ontkoppelen mislukt';
-
-  @override
-  String get discordUnlinkSubtitle => 'Je Discord-verbinding verwijderen';
-
-  @override
-  String get discordUnlinked => 'Discord ontkoppeld';
 
   @override
   String get familyCodeCopied => 'Uitnodigingscode gekopieerd!';
@@ -7085,16 +7076,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get integrationsConnectedManage => 'Verbonden – Tik om te beheren';
 
   @override
-  String get integrationsLinked => 'Gekoppeld';
-
-  @override
-  String get integrationsLinkedManage => 'Gekoppeld – Tik om te beheren';
-
-  @override
   String get integrationsNotConnected => 'Niet verbonden';
-
-  @override
-  String get integrationsTapToLink => 'Tik om te koppelen';
 
   @override
   String get integrationsTapToSignIn => 'Tik om in te loggen';

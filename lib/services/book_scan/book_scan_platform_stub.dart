@@ -20,11 +20,17 @@ class BookScanSession implements BookScanBackend {
       throw const BookScanException(BookScanError.unsupported);
 
   @override
+  Future<List<String>> lostPages() async => const [];
+
+  @override
   Future<ScannedPage> readPage(String sourcePath) async =>
       throw const BookScanException(BookScanError.unsupported);
 
   @override
   Future<String?> saveRecipeImage(ScannedPage page, {PhotoRegion? crop, required String recipeId}) async => null;
+
+  @override
+  Future<void> discardRecipeImage(String path) async {}
 
   @override
   Future<void> close() async {}

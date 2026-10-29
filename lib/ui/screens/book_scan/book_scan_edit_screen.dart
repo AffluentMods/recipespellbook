@@ -13,7 +13,8 @@ import 'book_scan_widgets.dart';
 /// servings, ingredients and steps, with the scanned page a tap away to check
 /// against.
 ///
-/// Pops with `true` once the changes are written to [draft].
+/// Pops with `true` once changes are written to [draft], and with `false`
+/// when Done is tapped with nothing changed.
 class BookScanEditScreen extends StatefulWidget {
   final BookRecipeDraft draft;
 
@@ -76,6 +77,13 @@ class _BookScanEditScreenState extends State<BookScanEditScreen> {
       text.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
 
   void _save() {
+    // Done on a recipe that was only looked at changes nothing, and says so:
+    // the queue treats a recipe the user rewrote differently from one that is
+    // still as it was read.
+    if (!_changed) {
+      Navigator.of(context).pop(false);
+      return;
+    }
     final draft = widget.draft;
     final r = draft.recipe;
     final title = _title.text.trim();

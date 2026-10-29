@@ -98,15 +98,16 @@ class ImageService {
       var bytes = await file.readAsBytes();
       var contentType = _contentTypeFromPath(file.path);
 
-      // Compress if over 1MB — significant size savings with minimal quality loss.
-      // compressImageBytes re-encodes as real JPEG, so update contentType to match.
-      if (bytes.length > 1024 * 1024) {
-        final compressed = await compressImageBytes(bytes);
-        if (compressed != null && compressed.length < bytes.length) {
-          debugPrint('[ImageService] Compressed ${bytes.length} → ${compressed.length} bytes');
-          bytes = compressed;
-          contentType = 'image/jpeg';
-        }
+      // Always re-encode, so no photo goes up with its camera metadata
+      // (GPS location included). Over 1MB it is also compressed. Both paths
+      // produce a real JPEG, so contentType follows.
+      final reencoded = bytes.length > 1024 * 1024
+          ? await compressImageBytes(bytes)
+          : await _decodeResizeJpeg(bytes, maxDimension: maxDimension, quality: 90);
+      if (reencoded != null && reencoded.isNotEmpty) {
+        debugPrint('[ImageService] Re-encoded ${bytes.length} → ${reencoded.length} bytes');
+        bytes = reencoded;
+        contentType = 'image/jpeg';
       }
 
       if (bytes.length > maxFileSize) {
@@ -240,25 +241,18 @@ class ImageService {
       var contentType = _contentTypeFromPath(file.path);
       final origLen = bytes.length;
 
-      // Re-encode as JPEG when the file is large OR not already a JPEG.
+      // Always re-encode as JPEG: published photos must not carry camera
+      // metadata (GPS location included). Large files get the usual
+      // quality; small ones a higher one so they don't get visibly worse.
       // Crucially: NEVER upscale — small images stay at their native
       // resolution. The previous implementation forced every image up
       // to 1920px wide via `instantiateImageCodec(targetWidth:…)`,
       // which is what made uploaded photos look "zoomed and stretched".
-      final shouldRecompress = bytes.length > 500 * 1024 ||
-          (contentType != 'image/jpeg' && contentType != 'image/jpg');
-      if (shouldRecompress) {
-        final reencoded = await _decodeResizeJpeg(bytes,
-            maxDimension: maxDimension, quality: 82);
-        if (reencoded != null && reencoded.isNotEmpty) {
-          // Only swap in the re-encoded version if it's actually smaller
-          // OR the original wasn't a JPEG to begin with. This avoids
-          // making a small high-quality JPEG worse for no reason.
-          if (reencoded.length < bytes.length || contentType != 'image/jpeg') {
-            bytes = reencoded;
-            contentType = 'image/jpeg';
-          }
-        }
+      final reencoded = await _decodeResizeJpeg(bytes,
+          maxDimension: maxDimension, quality: bytes.length > 500 * 1024 ? 82 : 90);
+      if (reencoded != null && reencoded.isNotEmpty) {
+        bytes = reencoded;
+        contentType = 'image/jpeg';
       }
 
       if (bytes.length > maxFileSize) {
@@ -524,9 +518,14 @@ class _ImgWork {
 /// Top-level so it can run via `compute()`. Never upscales: if both
 /// width and height are already at or below maxDimension, the image is
 /// encoded at native resolution.
+///
+/// The output carries no metadata: the camera's rotation is applied to the
+/// pixels, then the EXIF block (GPS location, device, timestamps) is dropped.
+/// The encoder would otherwise copy it into the new file.
 Uint8List? _decodeResizeJpegSync(_ImgWork work) {
-  final decoded = img.decodeImage(work.bytes);
-  if (decoded == null) return null;
+  final raw = img.decodeImage(work.bytes);
+  if (raw == null) return null;
+  final decoded = img.bakeOrientation(raw);
 
   img.Image working = decoded;
   final w = decoded.width;
@@ -548,5 +547,6 @@ Uint8List? _decodeResizeJpegSync(_ImgWork work) {
     }
   }
 
+  working.exif.clear();
   return Uint8List.fromList(img.encodeJpg(working, quality: work.quality));
 }

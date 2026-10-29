@@ -938,6 +938,84 @@ Melt the chocolate and butter together and spread over the cake.
       expect(BookPageSplitter.splitAt(d, 0, const []), isNull);
       expect(BookPageSplitter.splitAt(d, d.source.length, const []), isNull);
     });
+
+    const pieAndTopping = '''
+Fish Pie
+
+A proper fish pie is worth the washing up.
+
+Serves 6
+
+600 g white fish
+400 ml milk
+50 g butter
+
+Poach the fish in the milk for 8 minutes, then flake it into
+a baking dish and keep the milk for the sauce.
+
+Mash Topping
+
+This topping also works on shepherd's pie, so make double.
+
+1 kg potatoes
+50 g butter
+100 ml milk
+
+Boil the potatoes until tender, mash with the butter and milk
+and spread over the fish. Bake for 30 minutes.
+''';
+
+    test('merging keeps the headnote of the second recipe', () {
+      final r = split([pieAndTopping]);
+      expect(r.drafts, hasLength(2));
+      expect(r.drafts[1].recipe.description, "This topping also works on shepherd's pie, so make double.");
+
+      final merged = BookPageSplitter.merge(r.drafts[0], r.drafts[1]).recipe;
+      expect(merged.description, 'A proper fish pie is worth the washing up.');
+      expect(merged.notes, "This topping also works on shepherd's pie, so make double.");
+      expect(merged.rawOcrText, contains('shepherd'));
+      expect(merged.ingredients, contains('Mash Topping:'));
+    });
+
+    test('merging puts that headnote between the notes of the two', () {
+      final r = split([pieAndTopping]);
+      r.drafts[0].recipe.notes = 'Freezes well.';
+      r.drafts[1].recipe.notes = 'Use floury potatoes.';
+      final merged = BookPageSplitter.merge(r.drafts[0], r.drafts[1]).recipe;
+      expect(merged.notes!.split('\n\n'), [
+        'Freezes well.',
+        "This topping also works on shepherd's pie, so make double.",
+        'Use floury potatoes.',
+      ]);
+    });
+
+    test('merging onto a recipe with no headnote takes the second one as the description', () {
+      final r = split([pieAndTopping]);
+      r.drafts[0].recipe.description = null;
+      final merged = BookPageSplitter.merge(r.drafts[0], r.drafts[1]).recipe;
+      expect(merged.description, "This topping also works on shepherd's pie, so make double.");
+      expect(merged.notes, isNull);
+    });
+
+    test('merging copes with whatever was typed as the page', () {
+      final r = split([pieAndTopping]);
+      BookRecipeDraft merge(String? a, String? b) {
+        r.drafts[0].pageLabel = a;
+        r.drafts[1].pageLabel = b;
+        return BookPageSplitter.merge(r.drafts[0], r.drafts[1]);
+      }
+
+      expect(merge('99999999999999999999', '12').pageLabel, '99999999999999999999');
+      expect(merge('12', '99999999999999999999').pageLabel, '12');
+      expect(merge('xii', '12').pageLabel, 'xii');
+      expect(merge('12', 'back cover').pageLabel, '12');
+      expect(merge('', '12').pageLabel, '12');
+      expect(merge(null, '12').pageLabel, '12');
+      expect(merge('12', null).pageLabel, '12');
+      expect(merge('142-143', '143').pageLabel, '142-143');
+      expect(merge('p. 142', '144').pageLabel, '142-144');
+      expect(merge('12', '12').pageLabel, '12');
+    });
   });
 
   group('section headings', () {
