@@ -129,14 +129,14 @@ class AboutScreen extends ConsumerWidget {
                   icon: Icons.discord,
                   title: l10n.aboutCommunity,
                   subtitle: l10n.aboutCommunitySub,
-                  onTap: () => _launchUrl('https://discord.gg/fqtrekcKFt', context),
+                  onTap: () => _launchUrl('https://discord.gg/NnkUwxSdFX', context),
                 ),
                 _divider(theme),
                 _AboutTile(
                   icon: Icons.bug_report_outlined,
                   title: l10n.aboutReportBug,
                   subtitle: l10n.aboutReportBugSub,
-                  onTap: () => _launchUrl('https://discord.gg/fqtrekcKFt', context),
+                  onTap: () => _launchUrl('https://discord.gg/NnkUwxSdFX', context),
                 ),
                 _divider(theme),
                 _AboutTile(

@@ -3464,7 +3464,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get helpContactUs => 'Skontaktuj się';
 
   @override
-  String get helpContactUsDesc => 'Pytania? Napisz do nas na support@recipespellbook.com';
+  String get helpContactUsDesc => 'Pytania? Napisz do nas na support@recipespellbook.app';
 
   @override
   String get navCommunity => 'Społeczność';

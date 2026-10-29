@@ -3422,7 +3422,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get helpContactUs => 'Neem contact op';
 
   @override
-  String get helpContactUsDesc => 'Vragen? Schrijf ons op support@recipespellbook.com';
+  String get helpContactUsDesc => 'Vragen? Schrijf ons op support@recipespellbook.app';
 
   @override
   String get navCommunity => 'Community';

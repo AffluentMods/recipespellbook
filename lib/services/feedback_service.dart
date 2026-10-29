@@ -14,7 +14,7 @@ class FeedbackService {
   );
 
   /// Discord invite link for your server
-  static const discordInviteUrl = 'https://discord.gg/fqtrekcKFt';
+  static const discordInviteUrl = 'https://discord.gg/NnkUwxSdFX';
 
   /// Send a suggestion via the backend API
   static Future<(bool success, String? error)> sendSuggestion({

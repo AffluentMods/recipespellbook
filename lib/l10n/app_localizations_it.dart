@@ -3410,7 +3410,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get helpContactUs => 'Contattaci';
 
   @override
-  String get helpContactUsDesc => 'Domande? Scrivici a support@recipespellbook.com';
+  String get helpContactUsDesc => 'Domande? Scrivici a support@recipespellbook.app';
 
   @override
   String get navCommunity => 'Community';

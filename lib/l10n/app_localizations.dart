@@ -6388,7 +6388,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpContactUsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Have questions or feedback? Email us at support@recipespellbook.com'**
+  /// **'Have questions or feedback? Email us at support@recipespellbook.app'**
   String get helpContactUsDesc;
 
   /// No description provided for @navCommunity.

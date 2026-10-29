@@ -3464,7 +3464,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get helpContactUs => 'Свяжитесь с нами';
 
   @override
-  String get helpContactUsDesc => 'Есть вопросы? Напишите нам на support@recipespellbook.com';
+  String get helpContactUsDesc => 'Есть вопросы? Напишите нам на support@recipespellbook.app';
 
   @override
   String get navCommunity => 'Сообщество';

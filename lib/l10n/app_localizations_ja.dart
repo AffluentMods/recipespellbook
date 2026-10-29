@@ -3395,7 +3395,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get helpContactUs => 'お問い合わせ';
 
   @override
-  String get helpContactUsDesc => 'ご質問はsupport@recipespellbook.comまで。';
+  String get helpContactUsDesc => 'ご質問はsupport@recipespellbook.appまで。';
 
   @override
   String get navCommunity => 'コミュニティ';

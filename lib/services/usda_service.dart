@@ -16,7 +16,7 @@ class UsdaService {
 
   UsdaService({
     required UsdaDao usdaDao,
-    String baseUrl = 'https://api.recipespellbook.com', // Your server
+    String baseUrl = 'https://api.recipespellbook.app', // Your server
   })  : _usdaDao = usdaDao,
         _baseUrl = baseUrl;
 
