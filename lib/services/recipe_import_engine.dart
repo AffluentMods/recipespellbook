@@ -1933,6 +1933,16 @@ class RecipeImportEngine {
   static final _blockMarkup =
       RegExp(r'<\s*(?:p|br|li|div|tr|h[1-6])\b', caseSensitive: false);
 
+  /// A "<" that starts no tag a recipe's text is written with, as in
+  /// "water<rice". The HTML parser would take the rest of the text for a
+  /// tag and drop it.
+  static final _strayLessThan = RegExp(
+      r'<(?!!|/?(?:a|abbr|article|b|big|blockquote|body|br|center|cite|code|dd|del|div|dl|dt|em|'
+      r'figcaption|figure|font|footer|h[1-6]|head|header|hr|html|i|img|ins|label|li|mark|nav|ol|p|'
+      r'picture|pre|q|s|script|section|small|source|span|strike|strong|style|sub|sup|table|tbody|td|'
+      r'tfoot|th|thead|time|tr|tt|u|ul|wbr)\b[^<>]*>)',
+      caseSensitive: false);
+
   /// The plain text of a string that may carry HTML, as JSON-LD written by
   /// recipe plugins often does: entities ("&amp;", "&frac12;") are decoded
   /// and tags removed, with a line break wherever a paragraph, a list item
@@ -1952,6 +1962,7 @@ class RecipeImportEngine {
                 _anyTag, (tag) => _blockMarkup.matchAsPrefix(tag[0]!) == null ? '' : '\n')
             .replaceAll('<', '&lt;');
       }
+      text = text.replaceAll(_strayLessThan, '&lt;');
       // Without block tags the string's own line breaks are the only ones.
       final keepLines = !_blockMarkup.hasMatch(text);
       text = _blockLines(html_parser.parseFragment(text), keepLines: keepLines)
@@ -2022,9 +2033,13 @@ class RecipeImportEngine {
     // "ingredients" is the name the property had before schema.org renamed
     // it. Older recipe plugins still write it.
     final ingredients = <String>[];
-    for (final element in _microdataProps(
-        item, '[itemprop~="recipeIngredient"], [itemprop~="ingredients"]')) {
-      ingredients.addAll(_microdataLines(element));
+    final ingredientProps = _microdataProps(
+        item, '[itemprop~="recipeIngredient"], [itemprop~="ingredients"]');
+    for (final element in ingredientProps) {
+      // A <br> ends a line of a property that wraps the whole list. In one
+      // of several it only breaks the ingredient ("1 cup flour<br>sifted").
+      ingredients.addAll(
+          _microdataLines(element, splitBreaks: ingredientProps.length == 1));
     }
 
     final instructions = <String>[];
@@ -2040,14 +2055,15 @@ class RecipeImportEngine {
       }
       // Otherwise a property on its own wraps the whole method, and each of
       // its lines is a step. One of several is one step, unless it holds a
-      // list or paragraphs of its own (a section of the method). A line that
-      // only numbers the step is left out.
+      // list or paragraphs of its own (a section of the method); a <br> in
+      // it only breaks the step's text. A line that only numbers the step is
+      // left out.
       final lines = _microdataLines(element, everyLine: true)
           .map(_stepText)
           .where((line) => line.isNotEmpty)
           .toList();
       final holdsList =
-          methods.length == 1 || element.querySelector('li, p, tr, br') != null;
+          methods.length == 1 || element.querySelector('li, p, tr') != null;
       if (holdsList) {
         instructions.addAll(lines);
       } else if (lines.isNotEmpty) {
@@ -2128,15 +2144,17 @@ class RecipeImportEngine {
   ///
   /// An ingredient laid out in blocks of its own (amount, then name) is still
   /// one line, so only list markup splits it. With [everyLine] any block
-  /// does.
-  static List<String> _microdataLines(Element element, {bool everyLine = false}) {
+  /// does. A <br> splits only with [splitBreaks].
+  static List<String> _microdataLines(Element element,
+      {bool everyLine = false, bool splitBreaks = true}) {
     final lines = _blockLines(element);
     if (lines.isEmpty) {
       final content = _microdataText(element);
       return content == null ? [] : [content];
     }
     final holdsList = lines.length > 1 &&
-        (everyLine || element.querySelector('li, p, tr, br') != null);
+        (everyLine ||
+            element.querySelector(splitBreaks ? 'li, p, tr, br' : 'li, p, tr') != null);
     return holdsList ? lines : [lines.join(' ')];
   }
 
@@ -3231,8 +3249,16 @@ class RecipeImportEngine {
     if (document.querySelector('.recipe-details') != null ||
         rawHtml.contains('RecipeKeeper') ||
         document.querySelectorAll('[class*="recipe-details"]').length > 1) {
-      final recipes = _parseRecipeKeeperHtml(document);
-      if (recipes.isNotEmpty) return recipes;
+      // Recipe plugins on ordinary pages use the class too. A page without
+      // what only Recipe Keeper writes is read by its recipe data first.
+      final writtenByKeeper = rawHtml.contains('RecipeKeeper') ||
+          document.querySelector(
+                  '[itemprop="recipeIngredients"], [itemprop="recipeDirections"]') !=
+              null;
+      if (writtenByKeeper || _jsonLdRecipes(document).where(_hasContent).isEmpty) {
+        final recipes = _parseRecipeKeeperHtml(document);
+        if (recipes.isNotEmpty) return recipes;
+      }
     }
 
     // CopyMeThat: HTML export with <div class="recipe"> blocks. The file only
@@ -3559,6 +3585,13 @@ class RecipeImportEngine {
       // Single recipe, bare or wrapped: {"recipe": {...}}
       if (recipes.isEmpty) addEach([json]);
       if (recipes.isEmpty) addEach([json['recipe']]);
+    }
+    // schema.org data saved on its own, as a web page carries it: the recipe
+    // sits in a @graph or under a page's mainEntity.
+    if (recipes.isEmpty) {
+      final found = <Map<String, dynamic>>[];
+      _collectJsonLdRecipes(json, found, 0);
+      addEach(found);
     }
     return recipes;
   }
@@ -7422,11 +7455,16 @@ class RecipeImportEngine {
           collect(entry, depth + 1);
         }
       } else if (item is Map) {
+        final type = item['@type'];
         final text = _stepObjectText(item);
+        // An ItemList's ListItem holds its step under `item`.
+        if (text == null && type == 'ListItem' && item['item'] != null) {
+          collect(item['item'], depth + 1);
+          return;
+        }
         final group = item['itemListElement'] ?? item['steps'];
         // A group holds its steps, or stands in front of them as a marker of
         // its own (a HowToSection with nothing but a name).
-        final type = item['@type'];
         final isGroup = group != null || (type is String && type.endsWith('Section'));
         if (text != null) {
           steps.add((_htmlToText(text), false));

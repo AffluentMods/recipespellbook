@@ -365,7 +365,12 @@ class FileImportDispatcher {
     String filename,
     ImportPhotoLookup? photo,
   ) {
-    if (RecipeKeeperImporter.looksLikeExport(content)) {
+    // A recipe plugin's page can share the class name. One without Recipe
+    // Keeper's own fields that carries recipe data is left to the engine.
+    final keeperFields = content.contains('itemprop="recipeIngredients"') ||
+        content.contains('itemprop="recipeDirections"');
+    if (RecipeKeeperImporter.looksLikeExport(content) &&
+        (keeperFields || !content.contains('application/ld+json'))) {
       final recipes = RecipeKeeperImporter.importHtml(content, filename, photo: photo);
       if (recipes.isNotEmpty) return recipes;
     }
