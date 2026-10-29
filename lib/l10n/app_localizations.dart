@@ -7669,6 +7669,18 @@ abstract class AppLocalizations {
   /// **'You can manually enter the product name.'**
   String get manualEntryHint;
 
+  /// No description provided for @productLookupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could Not Look Up Product'**
+  String get productLookupFailed;
+
+  /// No description provided for @productLookupFailedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The product database did not answer. Check your connection and try again, or enter the product name yourself.'**
+  String get productLookupFailedHint;
+
   /// No description provided for @scanAgain.
   ///
   /// In en, this message translates to:
@@ -8832,6 +8844,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recipe imported successfully!'**
   String get aiImportSuccess;
+
+  /// Shown in place of the usual success message when the cookbook that was asked for no longer exists and another one was used.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Recipe imported into {cookbook}.} other{{count} recipes imported into {cookbook}.}}'**
+  String aiImportedInto(int count, String cookbook);
+
+  /// No description provided for @aiNoCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no cookbook to import into. Add a cookbook first.'**
+  String get aiNoCookbook;
 
   /// No description provided for @aiPreviewImport.
   ///
@@ -10645,11 +10669,53 @@ abstract class AppLocalizations {
   /// **'This code expires in 1 hour'**
   String get transferCodeExpires;
 
+  /// No description provided for @transferCodeExpiresAt.
+  ///
+  /// In en, this message translates to:
+  /// **'This code expires at {time}'**
+  String transferCodeExpiresAt(String time);
+
+  /// No description provided for @transferPhotosLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo did not fit into the transfer and stays on this device.} other{{count} photos did not fit into the transfer and stay on this device.}} To move everything with every photo, do not use this code. Use Export Data in Settings on this device and Import Data on the other instead.'**
+  String transferPhotosLeftOut(int count);
+
+  /// No description provided for @transferPhotosLeftOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not every photo fits'**
+  String get transferPhotosLeftOutTitle;
+
+  /// No description provided for @transferPhotosLeftOutAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo does not fit into a transfer and would stay on this device.} other{{count} photos do not fit into a transfer and would stay on this device.}} A backup file carries every photo: cancel, then use Export Data in Settings on this device and Import Data on the other. Use one or the other. A backup imported after a transfer adds every recipe a second time.'**
+  String transferPhotosLeftOutAsk(int count);
+
+  /// No description provided for @transferSendWithoutPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Send without them'**
+  String get transferSendWithoutPhotos;
+
+  /// No description provided for @transferSignInToSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to send your recipes to another device. The device that receives them does not need an account.'**
+  String get transferSignInToSend;
+
   /// No description provided for @transferComplete.
   ///
   /// In en, this message translates to:
   /// **'Transfer complete!'**
   String get transferComplete;
+
+  /// No description provided for @transferAlreadyHere.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe was already on this device and was left as it is.} other{{count} recipes were already on this device and were left as they are.}}'**
+  String transferAlreadyHere(int count);
 
   /// No description provided for @transferAccountSynced.
   ///
@@ -10686,6 +10752,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Existing data on this device will be merged. Duplicates are skipped.'**
   String get transferMergeNote;
+
+  /// No description provided for @transferErrorTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library is too large to send in one transfer. Use Export Data in Settings to make a backup file, and Import Data on the other device.'**
+  String get transferErrorTooLarge;
+
+  /// No description provided for @transferErrorOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server. Check your connection and try again.'**
+  String get transferErrorOffline;
+
+  /// No description provided for @transferErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not complete the transfer. Try again in a moment.'**
+  String get transferErrorServer;
+
+  /// No description provided for @transferErrorCodeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer code not found. Check the code and try again.'**
+  String get transferErrorCodeNotFound;
+
+  /// No description provided for @transferErrorCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This transfer code has expired. Create a new one on the sending device.'**
+  String get transferErrorCodeExpired;
+
+  /// No description provided for @transferErrorCodeUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'This transfer code has already been used. If the transfer did not finish, create a new code on the sending device. Nothing will be imported twice.'**
+  String get transferErrorCodeUsed;
+
+  /// No description provided for @transferErrorSyncRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'A sync is in progress. Try again in a moment.'**
+  String get transferErrorSyncRunning;
+
+  /// No description provided for @transferErrorUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'This transfer could not be read. Create a new code on the sending device.'**
+  String get transferErrorUnreadable;
+
+  /// No description provided for @transferErrorNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'The transfer arrived but could not be saved. Nothing on this device was changed. Try again with the same code.'**
+  String get transferErrorNotSaved;
 
   /// No description provided for @transferPointCamera.
   ///
@@ -13222,7 +13342,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferImportedSuccess.
   ///
   /// In en, this message translates to:
-  /// **'{count} items imported successfully.'**
+  /// **'{count, plural, =0{Nothing new was imported.} =1{1 item imported successfully.} other{{count} items imported successfully.}}'**
   String transferImportedSuccess(int count);
 
   /// No description provided for @transferOr.
@@ -18270,6 +18390,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Supports .json and .zip backup files'**
   String get importFromFileSubtitle;
+
+  /// No description provided for @importErrorNoPicker.
+  ///
+  /// In en, this message translates to:
+  /// **'The file picker could not be opened. Try again.'**
+  String get importErrorNoPicker;
+
+  /// No description provided for @importErrorUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup file could not be read. It may be damaged or incomplete.'**
+  String get importErrorUnreadable;
+
+  /// No description provided for @importErrorNotABackup.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a Recipe Spellbook backup.'**
+  String get importErrorNotABackup;
+
+  /// No description provided for @importErrorMissingData.
+  ///
+  /// In en, this message translates to:
+  /// **'This zip file is not a Recipe Spellbook backup. It has no data.json in it.'**
+  String get importErrorMissingData;
+
+  /// No description provided for @importErrorRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup could not be restored. Nothing was imported.'**
+  String get importErrorRestoreFailed;
 
   /// No description provided for @exportAdvanced.
   ///

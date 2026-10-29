@@ -1,46 +1,74 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:archive/archive.dart';
+import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import '../../models/imported_recipe.dart';
+import 'import_fields.dart';
+import 'import_support.dart';
 
 /// Imports recipes from Recipe Keeper export files.
 ///
 /// Format: ZIP archive containing:
-///   - recipes.html (or index.html) — All recipes as HTML cards
-///   - images/ folder — Recipe photos (JPEG/PNG)
+///   - recipes.html with all recipes, one block for each
+///   - an images folder with the recipes' photos (JPEG/PNG)
 ///
-/// HTML structure per recipe:
-///   <div class="recipe-details">
-///     <h2 class="recipe-name">...</h2>
-///     <img class="recipe-photo" src="images/xxx.jpg">
-///     <div class="recipe-ingredients"><p>ingredient per line</p></div>
-///     <div class="recipe-directions"><p>step per paragraph</p></div>
-///     <div class="recipe-notes"><p>...</p></div>
-///     <span class="recipe-course">...</span>
-///     <span class="recipe-category">...</span>
-///     <span class="recipe-quantity">...</span> (servings)
-///     <span class="recipe-prep-time">...</span>
-///     <span class="recipe-cook-time">...</span>
-///     <span class="recipe-source">...</span>
-///     <span class="recipe-rating">★★★★☆</span>
-///   </div>
+/// HTML structure per recipe. The parts are told apart by their itemprop
+/// attribute, and only a few of them carry a class:
+/// ```html
+/// <div class="recipe-details">
+///   <meta content="4" itemprop="recipeRating">               (0 when not rated)
+///   <img src="images/xxx_0.jpg" class="recipe-photo"/>
+///   <h2 itemprop="name">...</h2>
+///   <span itemprop="recipeCourse">Main Dish</span>
+///   <meta content="Chicken" itemprop="recipeCategory">       (one for each)
+///   <meta content="Favourites" itemprop="recipeCollection">  (one for each)
+///   <span itemprop="recipeSource"><a href="https://...">...</a></span>
+///   <span itemprop="recipeYield">4 servings</span>
+///   <meta content="PT15M" itemprop="prepTime">
+///   <meta content="PT1H10M" itemprop="cookTime">
+///   <div class="recipe-ingredients" itemprop="recipeIngredients"><p>ingredient per line</p></div>
+///   <div itemprop="recipeDirections"><p>step per paragraph</p></div>
+///   <div class="recipe-notes" itemprop="recipeNotes"><p>...</p></div>
+/// </div>
+/// ```
+/// A page that marks the parts with classes instead is read as well:
+/// recipe-name, recipe-directions, recipe-quantity (servings),
+/// recipe-prep-time, recipe-cook-time, recipe-source, recipe-course,
+/// recipe-category, recipe-tag and recipe-rating (★★★★☆).
 class RecipeKeeperImporter {
   RecipeKeeperImporter._();
+
+  /// Whether [html] is the page of a Recipe Keeper export: one that holds a
+  /// "recipe-details" block, written the way the app writes it. Other pages
+  /// use that word in longer class names.
+  static bool looksLikeExport(String html) => html.contains('class="recipe-details"');
 
   /// Check if ZIP contents look like a Recipe Keeper export.
   static bool canHandle(Uint8List bytes) {
     try {
-      final archive = ZipDecoder().decodeBytes(bytes);
-      return archive.files.any((f) {
-        final name = f.name.toLowerCase();
-        return name == 'recipes.html' ||
-            name == 'index.html' ||
-            name.endsWith('/recipes.html');
-      });
+      return _pageIn(ZipDecoder().decodeBytes(bytes)) != null;
     } catch (_) {
       return false;
     }
+  }
+
+  /// The page of the export in [archive]: recipes.html, in a folder or not,
+  /// or index.html. Other archives hold pages of those names too, so the page
+  /// must also read like one of Recipe Keeper's.
+  static String? _pageIn(Archive archive) {
+    for (final file in archive.files) {
+      if (!file.isFile) continue;
+      final name = file.name.toLowerCase();
+      if (name != 'recipes.html' && name != 'index.html' && !name.endsWith('/recipes.html')) {
+        continue;
+      }
+      try {
+        final content = ImportSupport.decodeText(file.content as List<int>);
+        if (looksLikeExport(content)) return content;
+      } catch (_) {}
+    }
+    return null;
   }
 
   /// Parse a Recipe Keeper ZIP export.
@@ -48,164 +76,44 @@ class RecipeKeeperImporter {
     Uint8List bytes,
     String filename,
   ) async {
-    final archive = ZipDecoder().decodeBytes(bytes);
-
-    // Find the HTML file
-    String? htmlContent;
-    for (final file in archive.files) {
-      if (!file.isFile) continue;
-      final name = file.name.toLowerCase();
-      if (name == 'recipes.html' ||
-          name == 'index.html' ||
-          name.endsWith('/recipes.html')) {
-        htmlContent = utf8.decode(file.content as List<int>);
-        break;
-      }
+    final Archive archive;
+    try {
+      archive = ZipDecoder().decodeBytes(bytes);
+    } catch (_) {
+      throw const FormatException(
+          'This Recipe Keeper file is damaged or incomplete. Export it again and retry.');
     }
 
-    if (htmlContent == null) return [];
-
-    // Build image map: filename → base64
-    final imageMap = <String, String>{};
-    for (final file in archive.files) {
-      if (!file.isFile) continue;
-      if (_isImage(file.name)) {
-        final content = file.content as List<int>;
-        if (content.length > 1024) {
-          // Skip tracking pixels
-          imageMap[file.name.toLowerCase()] = base64Encode(content);
-          // Also map just the filename (without path)
-          final baseName = file.name.split('/').last.toLowerCase();
-          imageMap[baseName] = base64Encode(content);
-        }
-      }
-    }
-
-    return _parseHtml(htmlContent, imageMap, filename);
+    final page = _pageIn(archive);
+    if (page == null) return [];
+    return importHtml(page, filename, photo: ImportSupport.photosIn(archive));
   }
 
-  /// Parse Recipe Keeper HTML into recipes.
-  static List<ImportedRecipe> _parseHtml(
-    String html,
-    Map<String, String> imageMap,
-    String sourceFile,
-  ) {
-    final doc = html_parser.parse(html);
+  /// Parse the page of a Recipe Keeper export: the recipes.html inside the
+  /// ZIP, or that file picked on its own.
+  ///
+  /// [photo] finds the pictures the archive carries next to the page. The
+  /// page only names them, so without it the recipes come without a photo.
+  static List<ImportedRecipe> importHtml(
+    String content,
+    String filename, {
+    ImportPhotoLookup? photo,
+  }) {
     final recipes = <ImportedRecipe>[];
 
     // Recipe Keeper uses <div class="recipe-details"> for each recipe
-    final recipeElements = doc.querySelectorAll('.recipe-details');
-    if (recipeElements.isEmpty) {
-      // Alternative: try <div class="recipe-card"> or <article>
-      recipeElements.addAll(doc.querySelectorAll('.recipe-card'));
-      recipeElements.addAll(doc.querySelectorAll('article.recipe'));
+    final List<Element> blocks;
+    try {
+      blocks = html_parser.parse(content).querySelectorAll('.recipe-details');
+    } catch (_) {
+      // A page nested too deep to search. Recipe Keeper writes none like it.
+      return recipes;
     }
 
-    for (final el in recipeElements) {
+    for (final block in blocks) {
       try {
-        // Title
-        final titleEl = el.querySelector('.recipe-name') ??
-            el.querySelector('h2') ??
-            el.querySelector('h1') ??
-            el.querySelector('.recipe-title');
-        final title = titleEl?.text.trim();
-        if (title == null || title.isEmpty) continue;
-
-        // Ingredients
-        final ingEl = el.querySelector('.recipe-ingredients');
-        final ingredients = <String>[];
-        if (ingEl != null) {
-          // Each ingredient might be in <p>, <li>, or just newline-separated
-          final items = ingEl.querySelectorAll('p, li');
-          if (items.isNotEmpty) {
-            for (final item in items) {
-              final text = item.text.trim();
-              if (text.isNotEmpty) ingredients.add(text);
-            }
-          } else {
-            ingredients.addAll(ingEl.text
-                .split('\n')
-                .map((l) => l.trim())
-                .where((l) => l.isNotEmpty));
-          }
-        }
-
-        // Instructions/Directions
-        final dirEl = el.querySelector('.recipe-directions') ??
-            el.querySelector('.recipe-instructions');
-        final instructions = <String>[];
-        if (dirEl != null) {
-          final items = dirEl.querySelectorAll('p, li');
-          if (items.isNotEmpty) {
-            for (final item in items) {
-              final text = item.text.trim();
-              if (text.isNotEmpty) {
-                // Remove step numbers (e.g., "1. " or "Step 1: ")
-                final cleaned = text
-                    .replaceFirst(RegExp(r'^\d+[\.\)]\s*'), '')
-                    .replaceFirst(RegExp(r'^Step\s+\d+[:\.\)]\s*', caseSensitive: false), '');
-                instructions.add(cleaned);
-              }
-            }
-          } else {
-            instructions.addAll(dirEl.text
-                .split('\n')
-                .map((l) => l.trim())
-                .where((l) => l.isNotEmpty));
-          }
-        }
-
-        // Notes
-        final notesEl = el.querySelector('.recipe-notes');
-        final notes = notesEl?.text.trim();
-
-        // Image
-        String? imageData;
-        final imgEl = el.querySelector('.recipe-photo') ??
-            el.querySelector('img');
-        if (imgEl != null) {
-          final src = imgEl.attributes['src']?.toLowerCase() ?? '';
-          // Try to find in our image map
-          imageData = imageMap[src] ?? imageMap[src.split('/').last];
-        }
-
-        // Metadata
-        final servings = _textOf(el, '.recipe-quantity');
-        final prepTime = _parseTime(_textOf(el, '.recipe-prep-time'));
-        final cookTime = _parseTime(_textOf(el, '.recipe-cook-time'));
-        final source = _textOf(el, '.recipe-source');
-        final course = _textOf(el, '.recipe-course');
-        final category = _textOf(el, '.recipe-category');
-        final rating = _parseRating(_textOf(el, '.recipe-rating'));
-
-        // Tags from categories
-        final tagEl = el.querySelector('.recipe-tag');
-        List<String>? tags;
-        if (tagEl != null) {
-          tags = tagEl.text
-              .split(',')
-              .map((t) => t.trim())
-              .where((t) => t.isNotEmpty)
-              .toList();
-        }
-
-        recipes.add(ImportedRecipe(
-          title: title,
-          ingredients: ingredients,
-          instructions: instructions,
-          notes: notes?.isNotEmpty == true ? notes : null,
-          imageData: imageData,
-          servings: servings,
-          prepTimeMinutes: prepTime,
-          cookTimeMinutes: cookTime,
-          sourceUrl: source,
-          suggestedCourse: course,
-          suggestedCategory: category,
-          rating: rating,
-          tags: tags,
-          sourceApp: 'recipekeeper',
-          sourceFile: sourceFile,
-        ));
+        final recipe = _parseBlock(block, filename, photo);
+        if (recipe != null) recipes.add(recipe);
       } catch (_) {
         // Skip malformed recipe entries
       }
@@ -214,37 +122,141 @@ class RecipeKeeperImporter {
     return recipes;
   }
 
-  static String? _textOf(dynamic el, String selector) {
-    final found = el.querySelector(selector);
-    final text = found?.text.trim();
-    return (text != null && text.isNotEmpty) ? text : null;
+  static ImportedRecipe? _parseBlock(
+    Element block,
+    String filename,
+    ImportPhotoLookup? photo,
+  ) {
+    final parts = _Parts(block);
+
+    // A block with neither box is another page's block of the same class,
+    // not a recipe of this export.
+    final ingredientBox = parts.element('recipeIngredients', '.recipe-ingredients');
+    final directionBox =
+        parts.element('recipeDirections', '.recipe-directions, .recipe-instructions');
+    if (ingredientBox == null && directionBox == null) return null;
+
+    // Title
+    final title = parts.value('name') ??
+        parts.textOf('.recipe-name') ??
+        parts.textOf('h2') ??
+        parts.textOf('h1') ??
+        parts.textOf('.recipe-title');
+    if (title == null) return null;
+
+    // Instructions/Directions
+    final instructions = <String>[];
+    for (final line in _lines(directionBox)) {
+      final step = ImportFields.withoutStepNumber(line);
+      if (step.isNotEmpty) instructions.add(step);
+    }
+
+    // Image: the first picture the block names that the archive holds.
+    String? imageData;
+    if (photo != null) {
+      for (final image in block.querySelectorAll('img')) {
+        final bytes = photo(image.attributes['src'] ?? '');
+        if (bytes == null) continue;
+        imageData = base64Encode(bytes);
+        break;
+      }
+    }
+
+    // Source: a web address when the recipe was saved from one, otherwise
+    // what the cook typed ("Grandma's notebook").
+    final sourceBox = parts.element('recipeSource', '.recipe-source');
+    final link = sourceBox?.querySelector('a[href]')?.attributes['href']?.trim() ?? '';
+    final source = link.isNotEmpty ? link : ImportFields.oneLine(sourceBox?.text ?? '');
+
+    // Metadata
+    final prepTime = ImportFields.minutes(parts.value('prepTime', '.recipe-prep-time'));
+    final cookTime = ImportFields.minutes(parts.value('cookTime', '.recipe-cook-time'));
+    final rating = int.tryParse(parts.value('recipeRating') ?? '') ??
+        _parseRating(parts.textOf('.recipe-rating'));
+
+    // Tags: the categories and collections. Recipe Keeper's categories are
+    // the cook's own, so none of them is passed on as a category of this app.
+    final categories = [
+      ...parts.values('recipeCategory'),
+      ...?parts.textOf('.recipe-category')?.split(','),
+    ];
+    final tags = <String>[];
+    for (final name in [
+      ...categories,
+      ...parts.values('recipeCollection'),
+      ...?parts.textOf('.recipe-tag')?.split(','),
+    ]) {
+      ImportFields.addTag(tags, name);
+    }
+
+    // Course: the one the recipe is filed under. A recipe filed under none
+    // may still have a category that says ("Desserts").
+    final courses = [
+      for (final names in parts.values('recipeCourse', '.recipe-course')) ...names.split(','),
+    ];
+    final course = ImportFields.courseFrom(courses, tags) ?? ImportSupport.courseFor(categories);
+
+    final notes = _lines(parts.element('recipeNotes', '.recipe-notes')).join('\n');
+
+    return ImportedRecipe(
+      title: title,
+      ingredients: _lines(ingredientBox),
+      instructions: instructions,
+      notes: notes.isEmpty ? null : notes,
+      imageData: imageData,
+      servings: parts.value('recipeYield', '.recipe-quantity'),
+      prepTimeMinutes: prepTime,
+      cookTimeMinutes: cookTime,
+      sourceUrl: source.isEmpty ? null : source,
+      suggestedCourse: course,
+      // 0 is how the app writes a recipe that was never rated.
+      rating: rating != null && rating >= 1 && rating <= 5 ? rating : null,
+      tags: tags.isEmpty ? null : tags,
+      sourceApp: 'recipekeeper',
+      sourceFile: filename,
+    );
   }
 
-  /// Parse time strings like "30 min", "1 hr 15 min", "01:30:00"
-  static int? _parseTime(String? time) {
-    if (time == null || time.isEmpty) return null;
-    final t = time.toLowerCase().trim();
+  /// Marks where a line ends while a box is read: at a `br`, and around each
+  /// paragraph and list item. A new line of the file is not always a line
+  /// break, so the two are kept apart.
+  static const _lineBreak = '\u{2028}';
+  static final _anyLineBreak = RegExp('[\n$_lineBreak]');
 
-    // HH:MM:SS format
-    final hhmmss = RegExp(r'^(\d+):(\d+)(?::(\d+))?$').firstMatch(t);
-    if (hhmmss != null) {
-      final hours = int.tryParse(hhmmss.group(1)!) ?? 0;
-      final mins = int.tryParse(hhmmss.group(2)!) ?? 0;
-      return hours * 60 + mins;
+  /// The lines of text in [box], one for each paragraph or list item. A box
+  /// with neither is split where its lines break.
+  static List<String> _lines(Element? box) {
+    if (box == null) return const [];
+    final text = StringBuffer();
+    var hasItems = false;
+    // An explicit stack rather than recursion: a damaged page can nest
+    // thousands of elements.
+    final pending = <Object>[...box.nodes.reversed];
+    while (pending.isNotEmpty) {
+      final node = pending.removeLast();
+      if (node is Text) {
+        text.write(node.data);
+      } else if (node is Element) {
+        final isItem = node.localName == 'p' || node.localName == 'li';
+        if (isItem || node.localName == 'br') text.write(_lineBreak);
+        if (isItem) {
+          hasItems = true;
+          // Comes up again once the item's own text has been read.
+          pending.add(_lineBreak);
+        }
+        pending.addAll(node.nodes.reversed);
+      } else if (node == _lineBreak) {
+        text.write(_lineBreak);
+      }
     }
 
-    int minutes = 0;
-    final hrMatch = RegExp(r'(\d+)\s*(?:hr|hour)s?').firstMatch(t);
-    if (hrMatch != null) minutes += (int.tryParse(hrMatch.group(1)!) ?? 0) * 60;
-    final minMatch = RegExp(r'(\d+)\s*(?:min|minute)s?').firstMatch(t);
-    if (minMatch != null) minutes += int.tryParse(minMatch.group(1)!) ?? 0;
-
-    if (minutes == 0) {
-      final plain = int.tryParse(t);
-      if (plain != null) return plain;
+    final lines = <String>[];
+    // Inside a paragraph a new line of the file is only wrapping.
+    for (final written in text.toString().split(hasItems ? _lineBreak : _anyLineBreak)) {
+      final line = ImportFields.oneLine(written);
+      if (line.isNotEmpty) lines.add(line);
     }
-
-    return minutes > 0 ? minutes : null;
+    return lines;
   }
 
   /// Parse star rating from "★★★★☆" or "4/5" format.
@@ -261,13 +273,51 @@ class RecipeKeeperImporter {
 
     return null;
   }
+}
 
-  static bool _isImage(String name) {
-    final lower = name.toLowerCase();
-    return lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg') ||
-        lower.endsWith('.png') ||
-        lower.endsWith('.gif') ||
-        lower.endsWith('.webp');
+/// The labelled parts of one recipe block, found by their itemprop attribute
+/// or, on a page that has none, by a class.
+class _Parts {
+  _Parts(this._block) {
+    for (final part in _block.querySelectorAll('[itemprop]')) {
+      _labelled.putIfAbsent(part.attributes['itemprop']!, () => []).add(part);
+    }
+  }
+
+  final Element _block;
+  final _labelled = <String, List<Element>>{};
+
+  /// Every part labelled [itemprop]. When there is none, the parts that match
+  /// [selector].
+  List<Element> elements(String itemprop, [String? selector]) {
+    final labelled = _labelled[itemprop];
+    if (labelled != null) return labelled;
+    return selector == null ? const [] : _block.querySelectorAll(selector);
+  }
+
+  /// The first of [elements], or null.
+  Element? element(String itemprop, [String? selector]) => elements(itemprop, selector).firstOrNull;
+
+  /// What each of [elements] says, left out when it says nothing. A meta
+  /// element says it in its content attribute.
+  List<String> values(String itemprop, [String? selector]) {
+    final values = <String>[];
+    for (final part in elements(itemprop, selector)) {
+      final value = ImportFields.oneLine(
+        part.localName == 'meta' ? part.attributes['content'] ?? '' : part.text,
+      );
+      if (value.isNotEmpty) values.add(value);
+    }
+    return values;
+  }
+
+  /// The first of [values], or null.
+  String? value(String itemprop, [String? selector]) => values(itemprop, selector).firstOrNull;
+
+  /// What the first element that matches [selector] says, or null when there
+  /// is none or it says nothing.
+  String? textOf(String selector) {
+    final text = ImportFields.oneLine(_block.querySelector(selector)?.text ?? '');
+    return text.isEmpty ? null : text;
   }
 }

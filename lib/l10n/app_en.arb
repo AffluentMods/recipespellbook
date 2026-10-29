@@ -1913,6 +1913,8 @@
     }
   },
   "manualEntryHint": "You can manually enter the product name.",
+  "productLookupFailed": "Could Not Look Up Product",
+  "productLookupFailedHint": "The product database did not answer. Check your connection and try again, or enter the product name yourself.",
   "scanAgain": "Scan Again",
   "enterManually": "Enter Manually",
   "enterProductName": "Enter Product Name",
@@ -2243,6 +2245,9 @@
   "aiImporting": "Importing...",
   "aiImportToCookbook": "Import to Cookbook",
   "aiImportSuccess": "Recipe imported successfully!",
+  "aiImportedInto": "{count, plural, =1{Recipe imported into {cookbook}.} other{{count} recipes imported into {cookbook}.}}",
+  "@aiImportedInto": {"description": "Shown in place of the usual success message when the cookbook that was asked for no longer exists and another one was used.", "placeholders": {"count": {"type": "int"}, "cookbook": {"type": "String"}}},
+  "aiNoCookbook": "There is no cookbook to import into. Add a cookbook first.",
   "aiPreviewImport": "Preview & Import",
   "aiPromptCopied": "Prompt copied! Paste it into any AI with your recipe.",
   "aiLoadJsonFile": "Load .json file",
@@ -2839,13 +2844,57 @@
   "transferScanDesc": "Scan this QR on your other device, or enter the code below.",
   "transferReady": "Ready to transfer",
   "transferCodeExpires": "This code expires in 1 hour",
+  "transferCodeExpiresAt": "This code expires at {time}",
+  "@transferCodeExpiresAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "transferPhotosLeftOut": "{count, plural, =1{1 photo did not fit into the transfer and stays on this device.} other{{count} photos did not fit into the transfer and stay on this device.}} To move everything with every photo, do not use this code. Use Export Data in Settings on this device and Import Data on the other instead.",
+  "@transferPhotosLeftOut": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transferPhotosLeftOutTitle": "Not every photo fits",
+  "transferPhotosLeftOutAsk": "{count, plural, =1{1 photo does not fit into a transfer and would stay on this device.} other{{count} photos do not fit into a transfer and would stay on this device.}} A backup file carries every photo: cancel, then use Export Data in Settings on this device and Import Data on the other. Use one or the other. A backup imported after a transfer adds every recipe a second time.",
+  "@transferPhotosLeftOutAsk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transferSendWithoutPhotos": "Send without them",
+  "transferSignInToSend": "Sign in to send your recipes to another device. The device that receives them does not need an account.",
   "transferComplete": "Transfer complete!",
+  "transferAlreadyHere": "{count, plural, =1{1 recipe was already on this device and was left as it is.} other{{count} recipes were already on this device and were left as they are.}}",
+  "@transferAlreadyHere": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transferAccountSynced": "Account signed in from sender",
   "transferScanQr": "Scan QR Code",
   "transferScanQrDesc": "Point your camera at the QR on the other device",
   "transferEnterCode": "Enter transfer code",
   "transferWhatMoves": "What gets transferred:",
   "transferMergeNote": "Existing data on this device will be merged. Duplicates are skipped.",
+  "transferErrorTooLarge": "Your library is too large to send in one transfer. Use Export Data in Settings to make a backup file, and Import Data on the other device.",
+  "transferErrorOffline": "Could not reach the server. Check your connection and try again.",
+  "transferErrorServer": "The server could not complete the transfer. Try again in a moment.",
+  "transferErrorCodeNotFound": "Transfer code not found. Check the code and try again.",
+  "transferErrorCodeExpired": "This transfer code has expired. Create a new one on the sending device.",
+  "transferErrorCodeUsed": "This transfer code has already been used. If the transfer did not finish, create a new code on the sending device. Nothing will be imported twice.",
+  "transferErrorSyncRunning": "A sync is in progress. Try again in a moment.",
+  "transferErrorUnreadable": "This transfer could not be read. Create a new code on the sending device.",
+  "transferErrorNotSaved": "The transfer arrived but could not be saved. Nothing on this device was changed. Try again with the same code.",
   "transferPointCamera": "Point at the QR code on the sending device",
   "labelPrepMin": "Prep (min)",
   "labelCookMin": "Cook (min)",
@@ -3877,7 +3926,7 @@
       }
     }
   },
-  "transferImportedSuccess": "{count} items imported successfully.",
+  "transferImportedSuccess": "{count, plural, =0{Nothing new was imported.} =1{1 item imported successfully.} other{{count} items imported successfully.}}",
   "@transferImportedSuccess": {
     "placeholders": {
       "count": {
@@ -5368,6 +5417,11 @@
   "exportFullZip": "Full Backup (ZIP)",
   "exportFullZipSubtitle": "All data + images in a portable archive",
   "importFromFileSubtitle": "Supports .json and .zip backup files",
+  "importErrorNoPicker": "The file picker could not be opened. Try again.",
+  "importErrorUnreadable": "This backup file could not be read. It may be damaged or incomplete.",
+  "importErrorNotABackup": "This file is not a Recipe Spellbook backup.",
+  "importErrorMissingData": "This zip file is not a Recipe Spellbook backup. It has no data.json in it.",
+  "importErrorRestoreFailed": "This backup could not be restored. Nothing was imported.",
   "exportAdvanced": "Advanced options",
   "exportCurrentCookbookSubtitle": "JSON file of current cookbook only",
   "exportJsonCustom": "Custom JSON export",

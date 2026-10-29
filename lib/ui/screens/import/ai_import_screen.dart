@@ -20,7 +20,11 @@ import '../../widgets/sheet_chrome.dart';
 ///   2. Paste / load response area
 ///   3. Preview & Import
 class AiImportScreen extends ConsumerStatefulWidget {
-  const AiImportScreen({super.key});
+  /// The cookbook the recipes go into. When the caller does not say, it is
+  /// the one currently selected.
+  final String? cookbookId;
+
+  const AiImportScreen({super.key, this.cookbookId});
 
   @override
   ConsumerState<AiImportScreen> createState() => _AiImportScreenState();
@@ -72,7 +76,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     }
   }
 
-  void _validateAndPreview() {
+  Future<void> _validateAndPreview() async {
     final text = _jsonController.text.trim();
     if (text.isEmpty) {
       setState(() => _error = 'Paste or load the AI response first.');
@@ -86,19 +90,28 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     }
 
     setState(() => _error = null);
-    _showPreviewSheet(text);
+    final keep = await _showPreviewSheet(text);
+    if (keep != null && keep.isNotEmpty && mounted) await _doImport(text, only: keep);
   }
 
-  void _showPreviewSheet(String jsonString) {
+  /// Shows what was found. Returns the positions of the recipes to import
+  /// when the user confirms (every one, unless some were unticked), or null;
+  /// the import itself runs on this screen, once the sheet has closed.
+  Future<Set<int>?> _showPreviewSheet(String jsonString) async {
     final recipes = _parsePreview(jsonString);
-    if (recipes == null || recipes.isEmpty) return;
+    if (recipes == null || recipes.isEmpty) return null;
 
     final recipeCount = recipes.length;
     final theme = Theme.of(context);
+    // Recipes the user unticked. Lives outside the builder so it outlasts
+    // the sheet's rebuilds.
+    final skipped = <int>{};
 
-    Responsive.showAdaptiveSheet(
+    return Responsive.showAdaptiveSheet<Set<int>>(
       context,
-      builder: (ctx) => DraggableScrollableSheet(
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheetState) {
+        final keepCount = recipeCount - skipped.length;
+        return DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.75,
         maxChildSize: 0.95,
@@ -124,10 +137,25 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                         color: theme.colorScheme.primary),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        '$recipeCount ${recipeCount == 1 ? 'Recipe' : 'Recipes'} Found',
-                        style: theme.textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$recipeCount ${recipeCount == 1 ? 'Recipe' : 'Recipes'} Found',
+                            style: theme.textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          // With several, any that are not wanted can be
+                          // unticked before importing the rest.
+                          if (recipeCount > 1)
+                            Text(
+                              skipped.isEmpty
+                                  ? 'Untick any you don\'t want to import.'
+                                  : '$keepCount of $recipeCount will be imported.',
+                              style: theme.textTheme.bodySmall
+                                  ?.copyWith(color: theme.colorScheme.outline),
+                            ),
+                        ],
                       ),
                     ),
                   ],
@@ -157,6 +185,11 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                       ingredientCount: ingCount,
                       stepCount: steps.length,
                       theme: theme,
+                      included: !skipped.contains(index),
+                      onIncludedChanged: recipeCount > 1
+                          ? (include) => setSheetState(() =>
+                              include ? skipped.remove(index) : skipped.add(index))
+                          : null,
                     );
                   },
                 ),
@@ -177,27 +210,34 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                 child: SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: _importing
+                    // The sheet only confirms, and only while it is the
+                    // route on top: a second tap that lands as it closes
+                    // must not close the page underneath as well.
+                    onPressed: keepCount == 0
                         ? null
-                        : () => _doImport(ctx, jsonString),
-                    icon: _importing
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
-                        : const Icon(Icons.add),
-                    label: Text(
-                        _importing
-                            ? 'Importing...'
+                        : () {
+                            if (ModalRoute.of(ctx)?.isCurrent ?? true) {
+                              Navigator.pop(ctx, {
+                                for (var i = 0; i < recipeCount; i++)
+                                  if (!skipped.contains(i)) i,
+                              });
+                            }
+                          },
+                    icon: const Icon(Icons.add),
+                    label: Text(keepCount == 0
+                        ? 'Nothing selected'
+                        : keepCount > 1
+                            ? 'Import $keepCount Recipes'
                             : recipeCount > 1
-                                ? 'Import $recipeCount Recipes'
+                                ? 'Import 1 Recipe'
                                 : 'Import to Cookbook'),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       backgroundColor: const Color(0xFFE8A860),
+                      disabledBackgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                     ),
                   ),
                 ),
@@ -205,50 +245,87 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
             ],
           ),
         ),
-      ),
+        );
+      }),
     );
   }
 
-  Future<void> _doImport(BuildContext sheetContext, String json) async {
+  Future<void> _doImport(String json, {Set<int>? only}) async {
+    if (_importing) return;
     final l10n = AppLocalizations.of(context)!;
-    setState(() => _importing = true);
+    // Everything that is needed after the screen may be gone is taken hold of
+    // before the first wait: "View" on the banner is tapped once this screen
+    // has closed, and only this screen's own route may be closed, whatever
+    // is on top by then.
+    final router = GoRouter.of(context);
+    final navigator = Navigator.of(context);
+    final route = ModalRoute.of(context);
+    final db = ref.read(databaseProvider);
+    final wantedId =
+        widget.cookbookId ?? ref.read(selectedCookbookIdProvider) ?? 'starter';
+    setState(() {
+      _importing = true;
+      _error = null;
+    });
 
     try {
-      final db = ref.read(databaseProvider);
-      final cookbookId =
-          ref.read(selectedCookbookIdProvider) ?? 'starter';
+      // The cookbook may have been deleted since it was chosen. Home then
+      // shows the starter cookbook, so that is where the recipes go.
+      final cookbook = await db.cookbookDao.getCookbookById(wantedId) ??
+          await db.cookbookDao.getCookbookById('starter') ??
+          await db.cookbookDao.getDefaultCookbook();
+      if (cookbook == null) {
+        if (mounted) {
+          setState(() {
+            _error = l10n.aiNoCookbook;
+            _importing = false;
+          });
+        }
+        return;
+      }
 
       final recipeIds = await AiImportService.importAllFromJson(
         json,
         db,
-        cookbookId: cookbookId,
+        cookbookId: cookbook.id,
+        only: only,
       );
 
-      if (sheetContext.mounted) Navigator.pop(sheetContext);
+      // Left while it was saving: the recipes are in, and nothing of this
+      // screen is left to close.
+      if (!mounted) return;
 
-      if (mounted) {
-        Navigator.of(context).pop();
-        await Future.delayed(const Duration(milliseconds: 100));
-        if (context.mounted) {
-          if (recipeIds.length == 1) {
-            AppSnackbar.successWithAction(
-              context,
-              l10n.recipeImportedSuccess,
-              actionLabel: l10n.actionView,
-              onAction: () => context.push('/recipe/${recipeIds.first}'),
-            );
-          } else {
-            AppSnackbar.success(
-              context,
-              '${recipeIds.length} recipes imported successfully!',
-            );
-          }
-        }
+      // The banner goes up on this screen's context BEFORE the screen closes.
+      // It sits in the root overlay, so it stays over the page underneath;
+      // after the pop there may be no context left to show it on (with
+      // animations switched off the screen is gone at once).
+      final count = recipeIds.length;
+      final message = cookbook.id != wantedId
+          ? l10n.aiImportedInto(count, cookbook.name)
+          : count == 1
+              ? l10n.recipeImportedSuccess
+              : '$count recipes imported successfully!';
+      if (count == 1) {
+        AppSnackbar.successWithAction(
+          context,
+          message,
+          actionLabel: l10n.actionView,
+          onAction: () => router.push('/recipe/${recipeIds.first}'),
+        );
+      } else {
+        AppSnackbar.success(context, message);
+      }
+
+      if (route != null && route.isCurrent) {
+        navigator.pop();
+      } else if (route != null && route.isActive) {
+        navigator.removeRoute(route);
       }
     } catch (e) {
+      debugPrint('[Import] Failed to import the pasted recipes: $e');
       if (mounted) {
         setState(() {
-          _error = 'Import failed: $e';
+          _error = l10n.importNothingSaved;
           _importing = false;
         });
       }
@@ -523,9 +600,15 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: hasInput ? _validateAndPreview : null,
-                icon: const Icon(Icons.auto_awesome),
-                label: Text(l10n.previewAndImport),
+                onPressed: hasInput && !_importing ? _validateAndPreview : null,
+                icon: _importing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.auto_awesome),
+                label: Text(
+                    _importing ? l10n.aiImporting : l10n.previewAndImport),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -571,18 +654,24 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
 
 // ── Helper widgets ──
 
-/// Expandable card for each recipe in the AI import preview sheet.
+/// Expandable card for each recipe in the AI import preview sheet. With
+/// [onIncludedChanged] it has a checkbox, and an unticked recipe is faded and
+/// left out of the import.
 class _AiRecipePreviewCard extends StatefulWidget {
   final Map<String, dynamic> data;
   final int ingredientCount;
   final int stepCount;
   final ThemeData theme;
+  final bool included;
+  final ValueChanged<bool>? onIncludedChanged;
 
   const _AiRecipePreviewCard({
     required this.data,
     required this.ingredientCount,
     required this.stepCount,
     required this.theme,
+    this.included = true,
+    this.onIncludedChanged,
   });
 
   @override
@@ -599,9 +688,14 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
     final ingredients = (data['ingredients'] as List?) ?? [];
     final steps = (data['steps'] as List?) ?? [];
 
+    final onIncludedChanged = widget.onIncludedChanged;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: AnimatedContainer(
+      child: AnimatedOpacity(
+        opacity: widget.included ? 1 : 0.5,
+        duration: const Duration(milliseconds: 200),
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerLowest,
@@ -617,9 +711,17 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
               onTap: () => setState(() => _expanded = !_expanded),
               borderRadius: BorderRadius.circular(14),
               child: Padding(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.fromLTRB(onIncludedChanged != null ? 4 : 14, 14, 14, 14),
                 child: Row(
                   children: [
+                    if (onIncludedChanged != null)
+                      Checkbox(
+                        value: widget.included,
+                        onChanged: (v) => onIncludedChanged(v ?? false),
+                        semanticLabel: widget.included
+                            ? 'Import ${data['title'] ?? 'this recipe'}'
+                            : 'Leave out ${data['title'] ?? 'this recipe'}',
+                      ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -710,6 +812,9 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
                           _MetaChip(
                               icon: Icons.local_fire_department,
                               label: '${data['cookTimeMinutes']}m cook'),
+                        // The tags the recipe will carry, its cuisine first.
+                        for (final tag in (data['tags'] as List?) ?? const [])
+                          _MetaChip(icon: Icons.label_outline, label: tag),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -795,6 +900,7 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

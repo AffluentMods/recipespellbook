@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import '../../models/imported_recipe.dart';
 import '../recipe_import_engine.dart';
+import 'import_support.dart';
 
 /// Imports recipes from Mela (.melarecipe / .melarecipes) files.
 ///
@@ -33,8 +34,14 @@ class MelaImporter {
     String filename,
   ) async {
     final recipes = <ImportedRecipe>[];
-    final archive = ZipDecoder().decodeBytes(bytes);
+    final Archive archive;
+    try {
+      archive = ZipDecoder().decodeBytes(bytes);
+    } catch (_) {
+      throw const FormatException(_damaged);
+    }
 
+    var unreadable = 0;
     for (final file in archive.files) {
       if (!file.isFile) continue;
       if (!file.name.toLowerCase().endsWith('.melarecipe')) continue;
@@ -44,47 +51,52 @@ class MelaImporter {
         if (recipe != null) recipes.add(recipe);
       } catch (_) {
         // Skip malformed files
+        unreadable++;
       }
     }
 
+    // An export may lose a recipe or two and still be worth importing. One
+    // with no readable recipe at all is a damaged file.
+    if (recipes.isEmpty && unreadable > 0) throw const FormatException(_damaged);
     return recipes;
   }
 
   /// Parse a single .melarecipe file (gzip-compressed or plain JSON).
+  ///
+  /// Returns an empty list when the file holds JSON that is not a recipe of
+  /// Mela.
   static Future<List<ImportedRecipe>> importSingle(
     Uint8List bytes,
     String filename,
   ) async {
-    final recipe = _parseMelaFile(bytes.toList(), filename);
+    final ImportedRecipe? recipe;
+    try {
+      recipe = _parseMelaFile(bytes, filename);
+    } catch (_) {
+      throw const FormatException(_damaged);
+    }
     return recipe != null ? [recipe] : [];
   }
 
-  /// Parse a single Mela recipe from bytes (may be gzip-compressed).
-  static ImportedRecipe? _parseMelaFile(List<int> data, String filename) {
-    String jsonStr;
+  static const _damaged = 'This Mela file is damaged or incomplete. Export it again and retry.';
 
-    try {
-      // Try gzip decompression first (most common)
-      final decompressed = GZipDecoder().decodeBytes(data);
-      jsonStr = utf8.decode(decompressed);
-    } catch (_) {
-      // Not compressed — try as plain UTF-8
-      try {
-        jsonStr = utf8.decode(data);
-      } catch (_) {
-        jsonStr = String.fromCharCodes(data);
-      }
+  /// Parse a single Mela recipe from bytes (may be gzip-compressed). Null
+  /// when the bytes are JSON but no recipe. Throws a FormatException when
+  /// they are not JSON at all.
+  static ImportedRecipe? _parseMelaFile(List<int> data, String filename) {
+    var plain = data;
+    if (ImportSupport.isGzip(data)) {
+      final unpacked = ImportSupport.gunzip(data);
+      if (unpacked == null) throw const FormatException(_damaged);
+      plain = unpacked;
     }
 
-    try {
-      final json = jsonDecode(jsonStr);
-      if (json is Map<String, dynamic>) {
-        final recipe = RecipeImportEngine.parseMelaRecipe(json);
-        recipe.sourceFile = filename;
-        return recipe;
-      }
-    } catch (_) {}
+    final json = jsonDecode(ImportSupport.decodeText(plain));
+    // Mela gives every recipe a title.
+    if (json is! Map<String, dynamic> || !json.containsKey('title')) return null;
 
-    return null;
+    final recipe = RecipeImportEngine.parseMelaRecipe(json);
+    recipe.sourceFile = filename;
+    return recipe;
   }
 }

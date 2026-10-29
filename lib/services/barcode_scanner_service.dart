@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/additive_data.dart';
@@ -11,16 +12,49 @@ import '../ui/widgets/app_snackbar.dart';
 import 'isbn_lookup_service.dart';
 import '../utils/responsive_utils.dart';
 
+/// How looking up a barcode ended. "Nobody knows this product" and "nobody
+/// answered" are different things to tell a shopper: both used to come
+/// back as null, and a phone without signal said the product did not exist.
+sealed class ProductLookup {
+  const ProductLookup();
+}
+
+class ProductFound extends ProductLookup {
+  const ProductFound(this.product);
+  final ProductInfo product;
+}
+
+/// The database answered, and it does not have the barcode.
+class ProductNotFound extends ProductLookup {
+  const ProductNotFound();
+}
+
+/// No answer: no connection, a timeout, or a server that is not itself.
+class ProductLookupFailed extends ProductLookup {
+  const ProductLookupFailed();
+}
+
 /// Service for scanning barcodes and looking up product information
 class BarcodeScannerService {
   /// Open Food Facts asks every client to send a descriptive User-Agent.
   /// Without one, requests can be throttled or return incomplete records.
-  static const Map<String, String> _offHeaders = {
-    'User-Agent': 'RecipeSpellbook/1.6 (support@recipespellbook.app)',
-  };
+  /// The version is the running app's, it used to be typed in and went stale.
+  static Future<Map<String, String>> _offHeaders() async {
+    var app = 'RecipeSpellbook';
+    try {
+      final info = await PackageInfo.fromPlatform().timeout(const Duration(seconds: 2));
+      app = '$app/${info.version}';
+    } catch (_) {
+      // Without the version the request is still welcome.
+    }
+    return {'User-Agent': '$app (support@recipespellbook.app)'};
+  }
 
   /// Look up product info from Open Food Facts API
-  static Future<ProductInfo?> lookupProduct(String barcode) async {
+  static Future<ProductLookup> lookupProduct(String barcode) async {
+    ProductInfo? product;
+    var reached = false;
+    var answered = false;
     try {
       // Prefer the device's region so a US bag pulls the US record instead of
       // Open Food Facts' merged global one — a common cause of stale/wrong
@@ -31,22 +65,38 @@ class BarcodeScannerService {
       final url = 'https://world.openfoodfacts.org/api/v0/product/$barcode.json'
           '?lc=$lc&cc=$cc';
       final response = await http
-          .get(Uri.parse(url), headers: _offHeaders)
+          .get(Uri.parse(url), headers: await _offHeaders())
           .timeout(const Duration(seconds: 10));
+      reached = true;
 
-      if (response.statusCode == 200) {
+      // A barcode it does not know comes back as 404 with the same kind of
+      // body, so the body says whether this is an answer, not the status.
+      // The sign-in page of a hotel Wi-Fi arrives as 200 and is not one.
+      if (response.statusCode == 200 || response.statusCode == 404) {
         final data = jsonDecode(response.body);
-        if (data['status'] == 1 && data['product'] != null) {
-          return ProductInfo.fromOpenFoodFacts(data['product']);
+        if (data is Map<String, dynamic> && data.containsKey('status')) {
+          answered = true;
+          final record = data['product'];
+          if (data['status'] == 1 && record is Map<String, dynamic>) {
+            product = ProductInfo.fromOpenFoodFacts(record, languageCode: lc);
+          }
         }
       }
-
-      // Try UPC Database as fallback
-      return await _lookupUpcDatabase(barcode);
     } catch (e) {
       debugPrint('Product lookup failed: $e');
-      return null;
+      // No connection, or no reply in time. Asking the fallback as well
+      // would only keep the shopper waiting as long again.
+      if (!reached) return const ProductLookupFailed();
     }
+    if (product != null) return ProductFound(product);
+
+    // Try UPC Database as fallback
+    final fallback = await _lookupUpcDatabase(barcode);
+    if (fallback != null) return ProductFound(fallback);
+
+    // Only Open Food Facts decides between "unknown" and "no answer". The
+    // fallback is a rate-limited trial that turns requests away all day.
+    return answered ? const ProductNotFound() : const ProductLookupFailed();
   }
 
   static Future<ProductInfo?> _lookupUpcDatabase(String barcode) async {
@@ -111,75 +161,127 @@ class ProductInfo {
   /// (crowd-sourced records are often incomplete or from another region).
   bool get lowConfidence => completeness != null && completeness! < 0.5;
 
-  factory ProductInfo.fromOpenFoodFacts(Map<String, dynamic> data) {
+  /// [languageCode] is the language the user reads, for records that only
+  /// name the product in some languages.
+  ///
+  /// The records are filled in by volunteers and any field can be missing,
+  /// empty or of another type than expected. Each one is read for what it
+  /// is, so that an odd record still gives a product instead of an error.
+  factory ProductInfo.fromOpenFoodFacts(Map<String, dynamic> data, {String? languageCode}) {
     // Parse ingredients text into list
-    List<String>? ingredientsList;
-    if (data['ingredients_text'] != null) {
-      ingredientsList = (data['ingredients_text'] as String)
-          .split(RegExp(r',\s*'))
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-    }
+    final ingredientsText = _text(data['ingredients_text']);
+    final ingredientsList = ingredientsText
+        ?.split(RegExp(r',\s*'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
 
     // Parse nutrition
     Map<String, dynamic>? nutrition;
-    if (data['nutriments'] != null) {
-      final n = data['nutriments'];
+    final n = data['nutriments'];
+    if (n is Map) {
+      final sodium = _number(n['sodium_100g']);
       nutrition = {
-        'calories': n['energy-kcal_100g'],
-        'protein': n['proteins_100g'],
-        'carbs': n['carbohydrates_100g'],
-        'fat': n['fat_100g'],
-        'fiber': n['fiber_100g'],
-        'sugar': n['sugars_100g'],
-        'sodium': n['sodium_100g'] != null ? (n['sodium_100g'] * 1000) : null, // Convert to mg
-        'saturatedFat': n['saturated-fat_100g'],
+        'calories': _number(n['energy-kcal_100g']),
+        'protein': _number(n['proteins_100g']),
+        'carbs': _number(n['carbohydrates_100g']),
+        'fat': _number(n['fat_100g']),
+        'fiber': _number(n['fiber_100g']),
+        'sugar': _number(n['sugars_100g']),
+        'sodium': sodium != null ? (sodium * 1000) : null, // Convert to mg
+        'saturatedFat': _number(n['saturated-fat_100g']),
       };
     }
 
+    final lastModified = _number(data['last_modified_t']);
     return ProductInfo(
-      barcode: data['code'] ?? '',
-      name: data['product_name'] ?? data['product_name_en'],
-      brand: data['brands'],
-      category: data['categories']?.split(',')?.first?.trim(),
-      imageUrl: data['image_url'] ?? data['image_front_url'],
+      barcode: _text(data['code']) ?? '',
+      name: _name(data, languageCode),
+      brand: _firstOf(data['brands']),
+      category: _firstOf(data['categories'], languageTagged: true),
+      imageUrl: _text(data['image_url']) ?? _text(data['image_front_url']),
       nutrition: nutrition,
       ingredients: ingredientsList,
-      servingSize: data['serving_size'],
-      novaGroup: data['nova_group'] as int?,
-      nutriScoreGrade: (data['nutriscore_grade'] ?? data['nutrition_grades']) as String?,
-      additivesTags: (data['additives_tags'] as List?)?.cast<String>() ?? [],
-      allergensTags: (data['allergens_tags'] as List?)?.cast<String>() ?? [],
-      ingredientsAnalysisTags: (data['ingredients_analysis_tags'] as List?)?.cast<String>() ?? [],
-      lastModified: data['last_modified_t'] != null
-          ? DateTime.fromMillisecondsSinceEpoch((data['last_modified_t'] as num).toInt() * 1000)
-          : null,
-      completeness: (data['completeness'] as num?)?.toDouble(),
+      servingSize: _text(data['serving_size']),
+      novaGroup: _number(data['nova_group'])?.toInt(),
+      nutriScoreGrade: _text(data['nutriscore_grade']) ?? _text(data['nutrition_grades']),
+      additivesTags: _tags(data['additives_tags']),
+      allergensTags: _tags(data['allergens_tags']),
+      ingredientsAnalysisTags: _tags(data['ingredients_analysis_tags']),
+      lastModified: lastModified != null ? DateTime.fromMillisecondsSinceEpoch(lastModified.toInt() * 1000) : null,
+      completeness: _number(data['completeness'])?.toDouble(),
     );
   }
 
   factory ProductInfo.fromUpcDatabase(Map<String, dynamic> data) {
+    final images = data['images'];
     return ProductInfo(
-      barcode: data['upc'] ?? data['ean'] ?? '',
-      name: data['title'],
-      brand: data['brand'],
-      category: data['category'],
-      imageUrl: (data['images'] as List?)?.isNotEmpty == true ? data['images'][0] : null,
+      barcode: _text(data['upc']) ?? _text(data['ean']) ?? '',
+      name: _text(data['title']),
+      brand: _text(data['brand']),
+      category: _text(data['category']),
+      imageUrl: images is List && images.isNotEmpty ? _text(images[0]) : null,
     );
   }
+
+  /// The text in [value], or null when there is none. A field nobody filled
+  /// in comes as an empty string, and that is not a name: it made products
+  /// called "Jaouda " and shopping items that were a single space.
+  static String? _text(Object? value) {
+    if (value is! String) return null;
+    final text = value.trim();
+    return text.isEmpty ? null : text;
+  }
+
+  static num? _number(Object? value) => value is num ? value : (value is String ? num.tryParse(value.trim()) : null);
+
+  static List<String> _tags(Object? value) => value is List ? value.whereType<String>().toList() : const [];
+
+  /// What the product is called: the record's own name, else the name in
+  /// the user's language, in English, or in whatever language has one. A
+  /// description of what it is ("Hazelnut spread") stands in for a name
+  /// that is missing everywhere.
+  static String? _name(Map<String, dynamic> data, String? languageCode) {
+    for (final field in const ['product_name', 'generic_name']) {
+      final name = _text(data[field]) ?? _text(data['${field}_$languageCode']) ?? _text(data['${field}_en']);
+      if (name != null) return name;
+      for (final entry in data.entries) {
+        // product_name_fr and the like, not product_name_fr_debug_tags.
+        final inOneLanguage = entry.key.startsWith('${field}_') && entry.key.length == field.length + 3;
+        final inThatLanguage = inOneLanguage ? _text(entry.value) : null;
+        if (inThatLanguage != null) return inThatLanguage;
+      }
+    }
+    return null;
+  }
+
+  /// The first entry of a list written with commas, which is how brands
+  /// ("Nutella, Ferrero") and categories ("en:Breakfast cereals, Cereals")
+  /// arrive. The letters in front of a category say which language it is
+  /// in and are not part of it.
+  static String? _firstOf(Object? list, {bool languageTagged = false}) {
+    for (final entry in _text(list)?.split(',') ?? const <String>[]) {
+      final text = _text(languageTagged ? entry.replaceFirst(_languageTag, '') : entry);
+      if (text != null) return text;
+    }
+    return null;
+  }
+
+  static final _languageTag = RegExp(r'^\s*[a-z]{2,3}:');
 
   /// Whether the nutri-score is a valid A-E grade (not "not-applicable", "unknown", etc.)
   bool get hasValidNutriScore =>
       nutriScoreGrade != null &&
       const {'a', 'b', 'c', 'd', 'e'}.contains(nutriScoreGrade!.toLowerCase());
 
-  /// Get display name (brand + name)
+  /// What the product is called in a shopping list or as a recipe title:
+  /// the brand and the name, unless the name already says the brand
+  /// ("Cheerios Cheerios").
   String get displayName {
-    if (brand != null && name != null) {
-      return '$brand $name';
-    }
-    return name ?? brand ?? 'Unknown Product';
+    final name = this.name, brand = this.brand;
+    if (name == null) return brand ?? 'Unknown Product';
+    if (brand == null || name.toLowerCase().contains(brand.toLowerCase())) return name;
+    return '$brand $name';
   }
 
   /// Convert to recipe-compatible data map for saving as a pantry recipe.
@@ -228,6 +330,11 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   String? _lastScannedBarcode;
   bool _torchEnabled = false;
 
+  // The camera keeps running under a sheet or dialog, and while the page
+  // slides away. What it sees then must not open anything.
+  bool _showingResult = false;
+  bool _closing = false;
+
   @override
   void initState() {
     super.initState();
@@ -245,7 +352,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   }
 
   void _onDetect(BarcodeCapture capture) async {
-    if (_isProcessing) return;
+    if (_isProcessing || _showingResult || _closing) return;
     if (capture.barcodes.isEmpty) return;
 
     final barcode = capture.barcodes.first;
@@ -263,7 +370,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     if (value.startsWith('http://') || value.startsWith('https://')) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        Navigator.pop(context, {'action': 'importFromUrl', 'url': value});
+        _close({'action': 'importFromUrl', 'url': value});
       }
       return;
     }
@@ -282,43 +389,102 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     }
 
     // Standard barcode → product lookup
-    final product = await BarcodeScannerService.lookupProduct(value);
-
-    if (mounted) {
-      setState(() {
-        _isProcessing = false;
-      });
-
-      if (product != null) {
-        _showProductSheet(product);
-      } else {
-        _showNotFoundDialog(value);
-      }
-    }
+    await _lookUp(value);
   }
 
-  void _showProductSheet(ProductInfo product) {
-    Responsive.showAdaptiveSheet(
+  /// Looks [barcode] up and shows what came of it.
+  Future<void> _lookUp(String barcode) async {
+    if (!_isProcessing) setState(() => _isProcessing = true);
+    final lookup = await BarcodeScannerService.lookupProduct(barcode);
+    if (!mounted) return;
+    setState(() {
+      _isProcessing = false;
+    });
+
+    _showingResult = true;
+    try {
+      switch (lookup) {
+        case ProductFound(:final product):
+          await _showProductSheet(product);
+        case ProductNotFound():
+          await _showNotFoundDialog(barcode);
+        case ProductLookupFailed():
+          await _showLookupFailedDialog(barcode);
+      }
+    } finally {
+      _showingResult = false;
+    }
+    // Still here, so whatever was shown has been closed again, by a button
+    // or by swiping it away. The same barcode may be scanned once more.
+    if (mounted && !_closing) setState(() => _lastScannedBarcode = null);
+  }
+
+  /// Closes the scanner and hands [result] to whoever opened it.
+  void _close(Map<String, dynamic> result) {
+    _closing = true;
+    Navigator.pop(context, result);
+  }
+
+  Future<void> _showProductSheet(ProductInfo product) async {
+    // The sheet closes itself, through its own context, and says what was
+    // chosen. On a phone it sits on the root navigator while the scanner
+    // may sit on the one inside a tab: closing "the sheet" from here closed
+    // the scanner instead, then the Shopping tab, and left the app blank.
+    final action = await Responsive.showAdaptiveSheet<String>(
       context,
       builder: (ctx) => _ProductInfoSheet(
         product: product,
-        onAddToShopping: () => _addToShopping(product),
-        onSearchRecipes: () => _searchRecipes(product),
-        onSaveAsRecipe: () => _saveAsRecipe(product),
-        onScanAnother: () {
-          Navigator.pop(ctx);
-          setState(() {
-            _lastScannedBarcode = null;
-          });
-        },
+        onAddToShopping: () => Navigator.pop(ctx, 'addToShopping'),
+        onSearchRecipes: () => Navigator.pop(ctx, 'searchRecipes'),
+        onSaveAsRecipe: () => Navigator.pop(ctx, 'saveAsRecipe'),
+        onScanAnother: () => Navigator.pop(ctx),
       ),
     );
+    if (action != null && mounted) _close({'action': action, 'product': product});
   }
 
-  void _showNotFoundDialog(String barcode) {
+  /// Nobody answered the lookup. That is not "product not found": the
+  /// shopper gets to try again, or to type the name.
+  Future<void> _showLookupFailedDialog(String barcode) async {
     final l10n = AppLocalizations.of(context)!;
 
-    showDialog(
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.productLookupFailed),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.wifi_off, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(l10n.productLookupFailedHint),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.scanAgain),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'manual'),
+            child: Text(l10n.enterManually),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, 'retry'),
+            child: Text(l10n.actionRetry),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (choice == 'retry') await _lookUp(barcode);
+    if (choice == 'manual') await _showManualEntryDialog(barcode);
+  }
+
+  Future<void> _showNotFoundDialog(String barcode) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final enterManually = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.productNotFound),
@@ -337,29 +503,24 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _lastScannedBarcode = null);
-            },
+            onPressed: () => Navigator.pop(ctx, false),
             child: Text(l10n.scanAgain),
           ),
           FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _showManualEntryDialog(barcode);
-            },
+            onPressed: () => Navigator.pop(ctx, true),
             child: Text(l10n.enterManually),
           ),
         ],
       ),
     );
+    if (enterManually == true && mounted) await _showManualEntryDialog(barcode);
   }
 
-  void _showManualEntryDialog(String barcode) {
+  Future<void> _showManualEntryDialog(String barcode) async {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
 
-    showDialog(
+    final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.enterProductName),
@@ -378,38 +539,13 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             child: Text(l10n.actionCancel),
           ),
           FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              if (controller.text.trim().isNotEmpty) {
-                _addManualProductToShopping(controller.text.trim());
-              }
-              setState(() => _lastScannedBarcode = null);
-            },
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
             child: Text(l10n.actionAdd),
           ),
         ],
       ),
     );
-  }
-
-  void _addToShopping(ProductInfo product) {
-    // Add to shopping list
-    Navigator.pop(context); // Close sheet
-    Navigator.pop(context, {'action': 'addToShopping', 'product': product});
-  }
-
-  void _saveAsRecipe(ProductInfo product) {
-    Navigator.pop(context); // Close sheet
-    Navigator.pop(context, {'action': 'saveAsRecipe', 'product': product});
-  }
-
-  void _addManualProductToShopping(String name) {
-    Navigator.pop(context, {'action': 'addToShopping', 'name': name});
-  }
-
-  void _searchRecipes(ProductInfo product) {
-    Navigator.pop(context); // Close sheet
-    Navigator.pop(context, {'action': 'searchRecipes', 'product': product});
+    if (name != null && name.isNotEmpty && mounted) _close({'action': 'addToShopping', 'name': name});
   }
 
   @override
