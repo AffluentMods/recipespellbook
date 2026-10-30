@@ -4143,5 +4143,18 @@
   "importStoppedSomeFailed": "Zaimportowano {imported} z {total} przepisów, błędy: {failed}",
   "importDuplicateCheckFailed": "nie udało się sprawdzić duplikatów",
   "scanProductFrom": "Zeskanowany produkt marki {brand}",
-  "scanProductNoName": "Ten produkt nie ma nazwy, którą można dodać do listy zakupów."
+  "scanProductNoName": "Ten produkt nie ma nazwy, którą można dodać do listy zakupów.",
+  "communityUsedInRecipes": "{count, plural, =1{Użyty w 1 przepisie} other{Użyty w {count} przepisach}}",
+  "communityPhotosNotDownloaded": "{count, plural, =1{Nie udało się pobrać 1 zdjęcia} other{Nie udało się pobrać {count} zdjęć}}",
+  "communityRecipesSelected": "Wybrano {selected} z {total}",
+  "communityPublishUnderReview": "Twoja publikacja jest sprawdzana. Będzie widoczna po zatwierdzeniu.",
+  "communityTagsSelected": "Wybrane tagi: {count}/{max}",
+  "communityPublishPhotosRejected": "{count, plural, =1{Moderacja nie zaakceptowała 1 zdjęcia, pominięto je w:} other{Moderacja nie zaakceptowała zdjęć ({count}), pominięto je w:}}",
+  "communityPublishPhotosFailedTitle": "Nie wszystkie zdjęcia zostały przesłane",
+  "communityPublishPhotosFailedBody": "Nic nie zostało opublikowane. W tych przepisach są zdjęcia, których nie udało się przesłać:",
+  "communityRetryFailedPhotos": "Ponów nieudane zdjęcia",
+  "communityPublishRateLimitWait": "{seconds, plural, =1{Osiągnięto limit przesyłania. Wznowienie za 1 sekundę} few{Osiągnięto limit przesyłania. Wznowienie za {seconds} sekundy} other{Osiągnięto limit przesyłania. Wznowienie za {seconds} sekund}}",
+  "communityPublishServerBusy": "Inne przesyłanie jest jeszcze przetwarzane. Spróbuj ponownie za kilka minut.",
+  "communityPublishDailyLimit": "To przekroczyłoby dzisiejszy limit przesyłania zdjęć. Spróbuj jutro albo opublikuj bez zdjęć.",
+  "communityFeedLoadMoreFailed": "Nie udało się wczytać więcej"
 }

@@ -3168,5 +3168,18 @@
   "importStoppedSomeFailed": "{imported} recettes sur {total} importées, {failed} en échec",
   "importDuplicateCheckFailed": "impossible de rechercher les doublons",
   "scanProductFrom": "Produit scanné de {brand}",
-  "scanProductNoName": "Ce produit n'a pas de nom à ajouter à la liste de courses."
+  "scanProductNoName": "Ce produit n'a pas de nom à ajouter à la liste de courses.",
+  "communityUsedInRecipes": "{count, plural, =1{Utilisée dans 1 recette} other{Utilisée dans {count} recettes}}",
+  "communityPhotosNotDownloaded": "{count, plural, =1{1 photo n'a pas pu être téléchargée} other{{count} photos n'ont pas pu être téléchargées}}",
+  "communityRecipesSelected": "{selected} sur {total} sélectionnées",
+  "communityPublishUnderReview": "Votre publication est en cours de vérification. Elle sera visible une fois approuvée.",
+  "communityTagsSelected": "{count}/{max} tags sélectionnés",
+  "communityPublishPhotosRejected": "{count, plural, =1{1 photo a été refusée par la modération et retirée de :} other{{count} photos ont été refusées par la modération et retirées de :}}",
+  "communityPublishPhotosFailedTitle": "Certaines photos n'ont pas été envoyées",
+  "communityPublishPhotosFailedBody": "Rien n'a été publié. Ces recettes ont des photos qui n'ont pas pu être envoyées :",
+  "communityRetryFailedPhotos": "Renvoyer les photos en échec",
+  "communityPublishRateLimitWait": "{seconds, plural, =1{Limite d'envoi atteinte. Reprise dans 1 seconde} other{Limite d'envoi atteinte. Reprise dans {seconds} secondes}}",
+  "communityPublishServerBusy": "Un autre envoi est encore en cours de traitement. Réessayez dans quelques minutes.",
+  "communityPublishDailyLimit": "Cela dépasserait la limite quotidienne d'envoi de photos. Réessayez demain ou publiez sans photos.",
+  "communityFeedLoadMoreFailed": "Impossible de charger la suite"
 }

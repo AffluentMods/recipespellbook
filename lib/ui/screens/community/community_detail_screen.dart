@@ -29,6 +29,48 @@ import 'community_screen.dart'; // StarRating
 //  COMMUNITY DETAIL — View, Rate & Download
 // ════════════════════════════════════════════
 
+/// One row of the detail screen's recipe list. [usedIn] is how many other
+/// recipes use this one as a sub-recipe.
+typedef CommunityRecipeRow = ({int index, int depth, int usedIn, bool hasChildren});
+
+/// Orders [recipes] for the detail screen: each recipe that is nobody's
+/// sub-recipe, followed by its sub-recipes, theirs indented one level more
+/// (A uses B uses C puts C under B). Every recipe gets exactly one row: a
+/// sub-recipe used by several recipes sits under the first and carries the
+/// count, and recipes only reachable through a cycle still get a row.
+List<CommunityRecipeRow> communityRecipeRows(List<CommunityRecipe> recipes) {
+  final n = recipes.length;
+  final childrenOf = List.generate(n, (_) => <int>[]);
+  final parentsOf = List.generate(n, (_) => <int>{});
+  for (var i = 0; i < n; i++) {
+    for (final link in recipes[i].recipeLinks) {
+      final child = link.linkedRecipeIndex;
+      if (child < 0 || child >= n || child == i || childrenOf[i].contains(child)) continue;
+      childrenOf[i].add(child);
+      parentsOf[child].add(i);
+    }
+  }
+
+  final rows = <CommunityRecipeRow>[];
+  final visited = <int>{};
+  void visit(int i, int depth) {
+    if (!visited.add(i)) return;
+    rows.add((index: i, depth: depth, usedIn: parentsOf[i].length, hasChildren: childrenOf[i].isNotEmpty));
+    for (final child in childrenOf[i]) {
+      visit(child, depth + 1);
+    }
+  }
+
+  for (var i = 0; i < n; i++) {
+    if (parentsOf[i].isEmpty) visit(i, 0);
+  }
+  // Anything left is only used inside a cycle (A uses B, B uses A).
+  for (var i = 0; i < n; i++) {
+    visit(i, 0);
+  }
+  return rows;
+}
+
 class CommunityDetailScreen extends ConsumerStatefulWidget {
   final String publicationId;
   const CommunityDetailScreen({super.key, required this.publicationId});
@@ -189,43 +231,47 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
       final db = ref.read(databaseProvider);
       final cookbookId = targetCookbookId ?? 'community_${uuid.v4()}';
-      final totalRecipes = recipesToDownload.length;
 
       // --- Phase 1: Download images (before DB writes) ---
-      final Map<int, String?> coverImages = {};
-      final Map<int, List<String?>> stepImages = {};
-
-      for (int idx = 0; idx < totalRecipes; idx++) {
-        final i = recipesToDownload[idx];
-        final recipe = result.recipes[i];
-        if (mounted) setState(() => _downloadStatus = l10n.communityDownloadingImages(idx + 1, totalRecipes));
-
-        // Cover image
-        String? coverPath;
-        if (withImages && recipe.imagePath != null && recipe.imagePath!.isNotEmpty) {
-          try {
-            final url = CommunityService.communityImageUrl(widget.publicationId, recipe.imagePath!);
-            final filename = 'community_${widget.publicationId}_${uuid.v4()}_cover.jpg';
-            coverPath = await ImageService.instance.downloadAndSaveImage(url, filename);
-          } catch (_) { /* image fail is non-fatal */ }
-        }
-        coverImages[i] = coverPath;
-
-        // Step images
-        final List<String?> sImgs = [];
-        for (final step in recipe.steps) {
-          String? stepPath;
-          if (withImages && step.imagePath != null && step.imagePath!.isNotEmpty) {
-            try {
-              final url = CommunityService.communityImageUrl(widget.publicationId, step.imagePath!);
-              final filename = 'community_${widget.publicationId}_${uuid.v4()}_step${step.sortOrder}.jpg';
-              stepPath = await ImageService.instance.downloadAndSaveImage(url, filename);
-            } catch (_) { /* image fail is non-fatal */ }
+      // Every photo of the selection, a few at a time, each with a timeout
+      // and one retry. A photo that still fails is left out (non-fatal) and
+      // counted for the message at the end.
+      final photoJobs = <({String url, String filename})>[];
+      final coverJob = <int, int>{}; // recipe index → photo job
+      final stepJob = <String, int>{}; // "recipe_step" index → photo job
+      if (withImages) {
+        for (final i in recipesToDownload) {
+          final recipe = result.recipes[i];
+          if (recipe.imagePath != null && recipe.imagePath!.isNotEmpty) {
+            coverJob[i] = photoJobs.length;
+            photoJobs.add((
+              url: CommunityService.communityImageUrl(widget.publicationId, recipe.imagePath!),
+              filename: 'community_${widget.publicationId}_${uuid.v4()}_cover.jpg',
+            ));
           }
-          sImgs.add(stepPath);
+          for (var s = 0; s < recipe.steps.length; s++) {
+            final step = recipe.steps[s];
+            if (step.imagePath == null || step.imagePath!.isEmpty) continue;
+            stepJob['${i}_$s'] = photoJobs.length;
+            photoJobs.add((
+              url: CommunityService.communityImageUrl(widget.publicationId, step.imagePath!),
+              filename: 'community_${widget.publicationId}_${uuid.v4()}_step${step.sortOrder}.jpg',
+            ));
+          }
         }
-        stepImages[i] = sImgs;
       }
+      if (photoJobs.isNotEmpty && mounted) {
+        setState(() => _downloadStatus = l10n.communityDownloadingImages(0, photoJobs.length));
+      }
+      final savedPhotos = await ImageService.instance.downloadAndSaveImages(
+        photoJobs,
+        onProgress: (done) {
+          if (mounted) setState(() => _downloadStatus = l10n.communityDownloadingImages(done, photoJobs.length));
+        },
+      );
+      final failedPhotos = savedPhotos.where((path) => path == null).length;
+      String? coverImage(int i) => coverJob[i] == null ? null : savedPhotos[coverJob[i]!];
+      String? stepImage(int i, int s) => stepJob['${i}_$s'] == null ? null : savedPhotos[stepJob['${i}_$s']!];
 
       // --- Phase 2: Insert everything in a single transaction ---
       if (mounted) setState(() => _downloadStatus = l10n.communitySavingRecipes);
@@ -266,7 +312,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             rating: drift.Value(recipe.rating),
             notes: drift.Value(recipe.notes),
             nutritionJson: drift.Value(recipe.nutritionJson),
-            imagePath: drift.Value(coverImages[i]),
+            imagePath: drift.Value(coverImage(i)),
             lastViewedAt: drift.Value(DateTime.now()),
           ));
 
@@ -286,7 +332,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             ));
           }
 
-          // Insert steps
+          // Insert steps (notes too: '__header__' marks a section header)
           for (int s = 0; s < recipe.steps.length; s++) {
             final step = recipe.steps[s];
             await db.into(db.steps).insert(StepsCompanion.insert(
@@ -295,7 +341,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               sortOrder: step.sortOrder,
               instruction: step.instruction,
               durationMinutes: drift.Value(step.durationMinutes),
-              imagePath: drift.Value(stepImages[i]?[s]),
+              notes: drift.Value(step.notes),
+              imagePath: drift.Value(stepImage(i, s)),
             ));
           }
 
@@ -346,7 +393,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         final msg = count == allCount
             ? l10n.communityDownloadSuccess(result.title, count)
             : l10n.communityPartialDownloadSuccess(count, result.title);
-        AppSnackbar.success(context, msg);
+        if (failedPhotos > 0) {
+          AppSnackbar.warning(context, '$msg\n${l10n.communityPhotosNotDownloaded(failedPhotos)}');
+        } else {
+          AppSnackbar.success(context, msg);
+        }
       }
     } catch (e) {
       if (mounted) AppSnackbar.error(context, l10n.communityDownloadFailedError(e.toString()));
@@ -767,7 +818,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           backgroundImage: d.publisher.avatarUrl != null
                               ? NetworkImage(_resolveAvatarUrl(d.publisher.avatarUrl!))
                               : null,
-                          onBackgroundImageError: (_, __) {},
+                          // Only with an image: CircleAvatar asserts otherwise.
+                          onBackgroundImageError: d.publisher.avatarUrl != null ? (_, __) {} : null,
                           child: d.publisher.avatarUrl == null
                               ? Text(d.publisher.displayName[0].toUpperCase(),
                                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colors.accent))
@@ -849,7 +901,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     children: [
                       Expanded(child: Text(
                         _selectMode
-                            ? '${_selectedIndices.length} of ${d.recipes.length} selected'
+                            ? l10n.communityRecipesSelected(_selectedIndices.length, d.recipes.length)
                             : l10n.recipesTitle,
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       )),
@@ -926,20 +978,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
   /// Builds a flat widget list with sub-recipes indented below their parent.
   List<Widget> _buildRecipeListWithHierarchy(CommunityDetail d, AppLocalizations l10n, ThemeData theme) {
-    // Collect all indices that are linked as sub-recipes
-    final childIndices = <int>{};
-    final childrenOf = <int, List<int>>{}; // parent index → [child indices]
-    for (int i = 0; i < d.recipes.length; i++) {
-      for (final link in d.recipes[i].recipeLinks) {
-        final childIdx = link.linkedRecipeIndex;
-        if (childIdx >= 0 && childIdx < d.recipes.length && childIdx != i) {
-          childIndices.add(childIdx);
-          childrenOf.putIfAbsent(i, () => []).add(childIdx);
-        }
-      }
-    }
-
-    Widget buildCard(int i, {bool isSubRecipe = false}) {
+    Widget buildCard(CommunityRecipeRow row) {
+      final i = row.index;
       final recipe = d.recipes[i];
       return _RecipePreviewCard(
         index: i,
@@ -947,8 +987,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         publicationId: d.id,
         selectMode: _selectMode,
         isSelected: _selectedIndices.contains(i),
-        isSubRecipe: isSubRecipe,
-        hasSubRecipes: childrenOf.containsKey(i),
+        depth: row.depth,
+        usedIn: row.usedIn,
+        hasSubRecipes: row.hasChildren,
         onTap: () {
           if (_selectMode) {
             setState(() {
@@ -965,23 +1006,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       );
     }
 
-    final widgets = <Widget>[];
-    for (int i = 0; i < d.recipes.length; i++) {
-      // Skip recipes that only appear as children
-      if (childIndices.contains(i)) continue;
-
-      widgets.add(buildCard(i));
-
-      // Show sub-recipes indented below parent
-      final children = childrenOf[i];
-      if (children != null) {
-        for (final childIdx in children) {
-          widgets.add(buildCard(childIdx, isSubRecipe: true));
-        }
-      }
-    }
-
-    return widgets;
+    return [for (final row in communityRecipeRows(d.recipes)) buildCard(row)];
   }
 
   void _showRecipePreview(int index) {
@@ -1228,7 +1253,9 @@ class _RecipePreviewCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool selectMode;
   final bool isSelected;
-  final bool isSubRecipe;
+  // Sub-recipe level (0 = not a sub-recipe) and how many recipes use it.
+  final int depth;
+  final int usedIn;
   final bool hasSubRecipes;
 
   const _RecipePreviewCard({
@@ -1238,9 +1265,12 @@ class _RecipePreviewCard extends StatelessWidget {
     required this.onTap,
     this.selectMode = false,
     this.isSelected = false,
-    this.isSubRecipe = false,
+    this.depth = 0,
+    this.usedIn = 0,
     this.hasSubRecipes = false,
   });
+
+  bool get isSubRecipe => depth > 0;
 
   @override
   Widget build(BuildContext context) {
@@ -1254,12 +1284,14 @@ class _RecipePreviewCard extends StatelessWidget {
       final s = int.tryParse(recipe.servings!);
       if (s != null) parts.add(l10n.communityServingsCount(s));
     }
-    if (recipe.ingredients.isNotEmpty) parts.add(l10n.communityIngredientCount(recipe.ingredients.length));
+    final ingredientCount = recipe.ingredients.where((i) => i.notes != '__header__').length;
+    if (ingredientCount > 0) parts.add(l10n.communityIngredientCount(ingredientCount));
 
     final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
 
     return Padding(
-      padding: EdgeInsets.only(left: isSubRecipe ? 28 : 0),
+      // Deeper levels stop indenting after three so phone cards keep room.
+      padding: EdgeInsets.only(left: 28.0 * depth.clamp(0, 3)),
       child: Card(
         margin: const EdgeInsets.only(bottom: 8),
         clipBehavior: Clip.antiAlias,
@@ -1345,7 +1377,7 @@ class _RecipePreviewCard extends StatelessWidget {
                       ),
                       if (isSubRecipe)
                         Text(
-                          l10n.communitySubRecipe,
+                          usedIn > 1 ? l10n.communityUsedInRecipes(usedIn) : l10n.communitySubRecipe,
                           style: TextStyle(fontSize: 10, color: theme.colorScheme.outline),
                         )
                       else if (parts.isNotEmpty)

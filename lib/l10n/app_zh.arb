@@ -4143,5 +4143,18 @@
   "importStoppedSomeFailed": "已导入 {imported} 个食谱，共 {total} 个，{failed} 个失败",
   "importDuplicateCheckFailed": "无法检查重复项",
   "scanProductFrom": "扫描的 {brand} 产品",
-  "scanProductNoName": "此产品没有可添加到购物清单的名称。"
+  "scanProductNoName": "此产品没有可添加到购物清单的名称。",
+  "communityUsedInRecipes": "{count, plural, other{用于 {count} 个食谱}}",
+  "communityPhotosNotDownloaded": "{count, plural, other{有 {count} 张照片无法下载}}",
+  "communityRecipesSelected": "已选择 {selected}/{total}",
+  "communityPublishUnderReview": "你的发布内容正在审核中，通过后才会显示。",
+  "communityTagsSelected": "已选择 {count}/{max} 个标签",
+  "communityPublishPhotosRejected": "{count, plural, other{有 {count} 张照片未通过审核，已从以下食谱中移除：}}",
+  "communityPublishPhotosFailedTitle": "部分照片未能上传",
+  "communityPublishPhotosFailedBody": "未发布任何内容。以下食谱中有照片未能上传：",
+  "communityRetryFailedPhotos": "重试失败的照片",
+  "communityPublishRateLimitWait": "{seconds, plural, other{已达到上传上限，{seconds} 秒后继续}}",
+  "communityPublishServerBusy": "另一个上传仍在处理中，请几分钟后再试。",
+  "communityPublishDailyLimit": "这会超出今天的照片上传上限。请明天再试，或不带照片发布。",
+  "communityFeedLoadMoreFailed": "无法加载更多"
 }

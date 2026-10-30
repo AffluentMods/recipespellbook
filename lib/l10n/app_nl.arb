@@ -4143,5 +4143,18 @@
   "importStoppedSomeFailed": "{imported} van {total} recepten geïmporteerd, {failed} mislukt",
   "importDuplicateCheckFailed": "duplicaten konden niet worden gecontroleerd",
   "scanProductFrom": "Gescand product van {brand}",
-  "scanProductNoName": "Dit product heeft geen naam om aan de boodschappenlijst toe te voegen."
+  "scanProductNoName": "Dit product heeft geen naam om aan de boodschappenlijst toe te voegen.",
+  "communityUsedInRecipes": "{count, plural, =1{Gebruikt in 1 recept} other{Gebruikt in {count} recepten}}",
+  "communityPhotosNotDownloaded": "{count, plural, =1{1 foto kon niet worden gedownload} other{{count} foto's konden niet worden gedownload}}",
+  "communityRecipesSelected": "{selected} van {total} geselecteerd",
+  "communityPublishUnderReview": "Je publicatie wordt beoordeeld. Ze is zichtbaar zodra ze is goedgekeurd.",
+  "communityTagsSelected": "{count}/{max} tags geselecteerd",
+  "communityPublishPhotosRejected": "{count, plural, =1{1 foto is door de moderatie geweigerd en weggelaten bij:} other{{count} foto's zijn door de moderatie geweigerd en weggelaten bij:}}",
+  "communityPublishPhotosFailedTitle": "Sommige foto's zijn niet geüpload",
+  "communityPublishPhotosFailedBody": "Er is niets gepubliceerd. Deze recepten hebben foto's die niet konden worden geüpload:",
+  "communityRetryFailedPhotos": "Mislukte foto's opnieuw proberen",
+  "communityPublishRateLimitWait": "{seconds, plural, =1{Uploadlimiet bereikt. Verder over 1 seconde} other{Uploadlimiet bereikt. Verder over {seconds} seconden}}",
+  "communityPublishServerBusy": "Er wordt nog een andere upload verwerkt. Probeer het over een paar minuten opnieuw.",
+  "communityPublishDailyLimit": "Hiermee ga je over de uploadlimiet voor foto's van vandaag. Probeer het morgen opnieuw of publiceer zonder foto's.",
+  "communityFeedLoadMoreFailed": "Kon niet meer laden"
 }

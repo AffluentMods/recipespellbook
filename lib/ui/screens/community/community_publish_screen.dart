@@ -10,6 +10,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/community_photo_uploader.dart';
 import '../../../services/community_service.dart';
 import '../../../services/image_service.dart';
 import '../../widgets/app_snackbar.dart';
@@ -39,11 +41,16 @@ class CommunityPublishScreen extends ConsumerStatefulWidget {
   /// [republishPublicationId] is also set.
   final String? republishCookbookId;
 
+  /// A cookbook to start a new publish on (skips the picker), as when
+  /// publishing from the cookbook's own menu.
+  final String? cookbookId;
+
   const CommunityPublishScreen({
     super.key,
     this.singleRecipeId,
     this.republishPublicationId,
     this.republishCookbookId,
+    this.cookbookId,
   });
 
   @override
@@ -69,7 +76,11 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
   // Step 3 state
   bool _isPublishing = false;
-  bool _publishCancelled = false;
+  // The publish that is running. Cancel marks only this token, and every
+  // run checks its own, so an older run can never publish after a cancel.
+  PublishRunToken? _run;
+  // What the last run was publishing, kept for "Retry failed photos".
+  _PreparedPublish? _prepared;
 
   bool get _isSingleRecipeMode => widget.singleRecipeId != null;
 
@@ -94,13 +105,13 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           _step = 2;
         });
       });
-    } else if (widget.republishCookbookId != null) {
+    } else if ((widget.cookbookId ?? widget.republishCookbookId) != null) {
       // Republishing a cookbook with a known source — pre-select it so
       // the user doesn't re-pick (and can't pick the wrong one). If the
       // cookbook was deleted since publishing, silently fall back to the
       // picker (we just stay on step 1).
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final cb = await ref.read(cookbookDaoProvider).getCookbookById(widget.republishCookbookId!);
+        final cb = await ref.read(cookbookDaoProvider).getCookbookById((widget.cookbookId ?? widget.republishCookbookId)!);
         if (!mounted || cb == null) return;
         _selectCookbook(cb);
       });
@@ -383,12 +394,15 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
   Widget _buildStep3Publishing(ThemeData theme, AppLocalizations l10n) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: ValueListenableBuilder<PublishProgress?>(
           valueListenable: publishProgressNotifier,
           builder: (ctx, progress, _) {
             final status = progress?.status ?? 'preparing';
+            final rejected = progress?.rejectedRecipes ?? const <String>[];
+            final failed = progress?.failedRecipes ?? const <String>[];
+            final waitSeconds = progress?.waitSeconds ?? 0;
 
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -397,16 +411,38 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                   Icon(Icons.check_circle, size: 64, color: theme.colorScheme.primary),
                   const SizedBox(height: 16),
                   Text(l10n.communityPublishDone, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                  if ((progress?.skippedImages ?? 0) > 0) ...[
-                    const SizedBox(height: 8),
+                  if (rejected.isNotEmpty) ...[
+                    const SizedBox(height: 12),
                     Text(
-                      l10n.communityPublishImagesSkipped(progress!.skippedImages),
+                      l10n.communityPublishPhotosRejected(progress!.skippedImages),
                       style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
                       textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 8),
+                    _RecipeTitleList(titles: rejected),
                   ],
                   const SizedBox(height: 24),
                   FilledButton(onPressed: () => context.pop(), child: Text(l10n.actionDone)),
+                ] else if (status == 'error' && failed.isNotEmpty) ...[
+                  // Photos that did not upload: nothing was published, and
+                  // a retry only sends what is not on the server yet.
+                  Icon(Icons.cloud_off_outlined, size: 64, color: theme.colorScheme.error),
+                  const SizedBox(height: 16),
+                  Text(l10n.communityPublishPhotosFailedTitle,
+                      style: theme.textTheme.headlineSmall, textAlign: TextAlign.center),
+                  const SizedBox(height: 8),
+                  Text(l10n.communityPublishPhotosFailedBody,
+                      style: TextStyle(color: theme.colorScheme.outline), textAlign: TextAlign.center),
+                  const SizedBox(height: 12),
+                  _RecipeTitleList(titles: failed),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: _prepared == null ? null : () => _runPublish(_prepared!),
+                    icon: const Icon(Icons.refresh),
+                    label: Text(l10n.communityRetryFailedPhotos),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(onPressed: () => setState(() { _step = 2; _isPublishing = false; }), child: Text(l10n.communityPublishTryAgain)),
                 ] else if (status == 'error') ...[
                   Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
                   const SizedBox(height: 16),
@@ -433,6 +469,12 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                       value: (progress?.uploadedImages ?? 0) / (progress?.totalImages ?? 1),
                     ),
                     const SizedBox(height: 8),
+                    if (waitSeconds > 0)
+                      Text(
+                        l10n.communityPublishRateLimitWait(waitSeconds),
+                        style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+                        textAlign: TextAlign.center,
+                      ),
                     if ((progress?.skippedImages ?? 0) > 0)
                       Text(
                         l10n.communityPublishRejected(progress!.skippedImages),
@@ -445,12 +487,13 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
                     textAlign: TextAlign.center,
                   ),
-                  if (status == 'uploading' && !_publishCancelled) ...[
+                  if (status == 'uploading' && _run != null) ...[
                     const SizedBox(height: 16),
                     TextButton.icon(
                       onPressed: () {
+                        _run?.cancel();
                         setState(() {
-                          _publishCancelled = true;
+                          _run = null;
                           _isPublishing = false;
                         });
                         publishProgressNotifier.value = PublishProgress(
@@ -464,10 +507,6 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                       style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
                     ),
                   ],
-                  if (_publishCancelled && status == 'uploading') ...[
-                    const SizedBox(height: 16),
-                    Text(l10n.communityCancelling, style: TextStyle(color: theme.colorScheme.outline)),
-                  ],
                 ],
               ],
             );
@@ -478,7 +517,6 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   }
 
   Future<void> _startPublish() async {
-    final l10n = AppLocalizations.of(context)!;
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
 
@@ -539,18 +577,24 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       }
     }
 
-    setState(() { _isPublishing = true; _publishCancelled = false; _step = 3; });
+    if (!mounted) return;
+    setState(() { _isPublishing = true; _step = 3; });
 
+    final _PreparedPublish job;
     try {
-
       final recipeMaps = <Map<String, dynamic>>[];
-      final localImagePaths = <String>[]; // Track all local paths for upload
+      // Local photo → titles of the recipes that use it, for telling the
+      // person which recipes a failed or rejected photo belongs to.
+      final photoRecipes = <String, List<String>>{};
+      void trackPhoto(String? path, String owner) {
+        if (!_includeImages || path == null || path.isEmpty) return;
+        final owners = photoRecipes.putIfAbsent(path, () => []);
+        if (!owners.contains(owner)) owners.add(owner);
+      }
 
       // Collect cookbook cover (only in cookbook mode — single-recipe
       // publications use the recipe's image as the cover).
-      if (!_isSingleRecipeMode && _includeImages && _selectedCookbook!.imagePath != null) {
-        localImagePaths.add(_selectedCookbook!.imagePath!);
-      }
+      if (!_isSingleRecipeMode) trackPhoto(_selectedCookbook!.imagePath, title);
 
       // Build a map of recipe ID → index for recipe link references
       final recipeIdToIndex = <String, int>{};
@@ -563,16 +607,10 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         final steps = await recipeDao.getStepsForRecipe(r.id);
         final tags = await tagsDao.getTagsForRecipe(r.id);
 
-        // Track recipe image
-        if (_includeImages && r.imagePath != null) {
-          localImagePaths.add(r.imagePath!);
-        }
-
-        // Track step images
+        // Track recipe and step images
+        trackPhoto(r.imagePath, r.title);
         for (final s in steps) {
-          if (_includeImages && s.imagePath != null) {
-            localImagePaths.add(s.imagePath!);
-          }
+          trackPhoto(s.imagePath, r.title);
         }
 
         // Gather recipe links (ingredient→sub-recipe references)
@@ -602,7 +640,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           'prepTimeMinutes': r.prepTimeMinutes,
           'cookTimeMinutes': r.cookTimeMinutes,
           'sourceUrl': r.sourceUrl,
-          'imagePath': r.imagePath, // Will be replaced with server path
+          'imagePath': r.imagePath, // Replaced with the server path per run
           'categoryId': r.categoryId,
           'courseId': r.courseId,
           'rating': r.rating,
@@ -620,7 +658,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             'instruction': s.instruction,
             'durationMinutes': s.durationMinutes,
             'notes': s.notes,
-            'imagePath': s.imagePath, // Will be replaced with server path
+            'imagePath': s.imagePath, // Replaced with the server path per run
           }).toList(),
           'tags': tags.map((t) => t.name).toList(),
           if (recipeLinksData.isNotEmpty) 'recipeLinks': recipeLinksData,
@@ -680,100 +718,172 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         }
       }
 
+      final desc = _descController.text.trim();
+      job = _PreparedPublish(
+        title: title,
+        description: desc.isNotEmpty ? desc : null,
+        tags: _selectedTags.isNotEmpty ? _selectedTags.join(',') : null,
+        recipeMaps: recipeMaps,
+        // Unique local files only; server paths need no upload.
+        photoPaths: photoRecipes.keys
+            .where((p) => !ImageService.isServerPath(p) && FileExistsCache.exists(p))
+            .toList(),
+        photoRecipes: photoRecipes,
+        // For cookbook mode use the cookbook cover; for single-recipe mode
+        // fall back to the recipe's own image.
+        coverPath: _isSingleRecipeMode ? _singleRecipe!.imagePath : _selectedCookbook!.imagePath,
+        sourceKey: _isSingleRecipeMode ? 'recipe:${_singleRecipe!.id}' : 'cookbook:${_selectedCookbook!.id}',
+      );
+    } catch (e) {
+      publishProgressNotifier.value = PublishProgress(status: 'error', errorMessage: e.toString());
+      return;
+    }
+
+    _prepared = job;
+    await _runPublish(job);
+  }
+
+  /// Photos still to upload are counted at most this big. Re-encoded photos
+  /// are at most 1920 px and nearly always smaller; the real total goes in
+  /// the publish, which the server checks again.
+  static const _estimatedPhotoBytes = 1024 * 1024;
+
+  /// Before any photo goes up: is another upload still being processed, or
+  /// would this one pass today's limit? Returns the message to stop with, or
+  /// null to go on (also when the status can't be read).
+  Future<String?> _uploadBlockedReason(
+    List<String> photoPaths,
+    CommunityUploadedPhotos store,
+    AppLocalizations l10n,
+  ) async {
+    var estimate = 0;
+    var pending = 0;
+    for (final path in photoPaths) {
+      final key = await store.keyFor(path);
+      final known = key == null ? null : store.lookup(key);
+      if (known != null) {
+        estimate += known.bytes;
+        continue;
+      }
+      pending++;
+      try {
+        final size = File(path).lengthSync();
+        estimate += size < _estimatedPhotoBytes ? size : _estimatedPhotoBytes;
+      } catch (_) {
+        estimate += _estimatedPhotoBytes;
+      }
+    }
+    if (pending == 0) return null;
+
+    final status = await _community.getUploadStatus();
+    if (status == null) return null;
+    if (status.locked) return l10n.communityPublishServerBusy;
+    if (!status.canUpload || status.bytesToday + estimate > status.dailyLimitBytes) {
+      return l10n.communityPublishDailyLimit;
+    }
+    return null;
+  }
+
+  /// Uploads [job]'s photos (skipping ones already on the server) and
+  /// publishes. Runs again as-is for "Retry failed photos".
+  Future<void> _runPublish(_PreparedPublish job) async {
+    final l10n = AppLocalizations.of(context)!;
+    _run?.cancel();
+    final run = PublishRunToken();
+    _run = run;
+    bool live() => !run.cancelled && identical(_run, run);
+    void report(PublishProgress p) {
+      if (live()) publishProgressNotifier.value = p;
+    }
+
+    if (mounted) setState(() { _isPublishing = true; _step = 3; });
+
+    try {
       // ── Upload images (if enabled) ──
-      int totalImageBytes = 0;
-      int skippedImages = 0;
-      final pathMapping = <String, String>{}; // local path → server path
+      var pathMapping = <String, String>{}; // local path → server path
+      var totalImageBytes = 0;
+      var rejected = <String>[];
+      var storeKeys = <String>[];
+      CommunityUploadedPhotos? store;
 
-      if (_includeImages) {
-        // Filter to unique existing local files
-        final uniquePaths = localImagePaths.toSet().where((p) {
-          return !ImageService.isServerPath(p) && FileExistsCache.exists(p);
-        }).toList();
+      if (_includeImages && job.photoPaths.isNotEmpty) {
+        report(PublishProgress(status: 'uploading', totalImages: job.photoPaths.length));
+        store = await CommunityUploadedPhotos.load(AuthService.instance.currentUser?.id ?? '');
+        final blocked = await _uploadBlockedReason(job.photoPaths, store, l10n);
+        if (!live()) return;
+        if (blocked != null) {
+          report(PublishProgress(status: 'error', errorMessage: blocked));
+          return;
+        }
 
-        publishProgressNotifier.value = PublishProgress(
-          status: 'uploading',
-          totalImages: uniquePaths.length,
-        );
-
-        const maxRetries = 3;
-        for (int i = 0; i < uniquePaths.length; i++) {
-          if (_publishCancelled) {
-            publishProgressNotifier.value = PublishProgress(status: 'error', errorMessage: l10n.communityUploadCancelled);
-            setState(() => _isPublishing = false);
-            return;
-          }
-          final localPath = uniquePaths[i];
-
-          // Retry up to maxRetries times for transient failures (e.g. app backgrounded)
-          ImageUploadResult? result;
-          for (int attempt = 1; attempt <= maxRetries; attempt++) {
-            result = await ImageService.instance.communityUploadLocalPath(localPath);
-            if (result != null) break;
-            if (attempt < maxRetries) {
-              debugPrint('[Publish] Image upload failed (attempt $attempt/$maxRetries), retrying in ${attempt * 2}s: $localPath');
-              await Future.delayed(Duration(seconds: attempt * 2));
-            }
-          }
-
-          if (result != null) {
-            pathMapping[localPath] = result.path;
-            totalImageBytes += File(localPath).lengthSync();
-          } else {
-            debugPrint('[Publish] Image skipped after $maxRetries attempts: $localPath');
-            skippedImages++;
-          }
-
-          publishProgressNotifier.value = PublishProgress(
+        final photos = await CommunityPhotoUploader().run(
+          job.photoPaths,
+          token: run,
+          store: store,
+          onProgress: (p) => report(PublishProgress(
             status: 'uploading',
-            uploadedImages: i + 1,
-            totalImages: uniquePaths.length,
-            skippedImages: skippedImages,
-          );
+            uploadedImages: p.done,
+            totalImages: p.total,
+            skippedImages: p.rejected + p.failed,
+            waitSeconds: p.waitSeconds,
+          )),
+        );
+        if (!live()) return;
+
+        // A photo that did not upload must not quietly drop out of the
+        // publication: stop here and let the person retry just those.
+        if (photos.failed.isNotEmpty) {
+          report(PublishProgress(
+            status: 'error',
+            errorMessage: l10n.communityPublishPhotosFailedTitle,
+            uploadedImages: photos.uploaded.length,
+            totalImages: job.photoPaths.length,
+            skippedImages: photos.rejected.length + photos.failed.length,
+            failedRecipes: job.recipesFor(photos.failed),
+            rejectedRecipes: job.recipesFor(photos.rejected),
+          ));
+          return;
         }
+        pathMapping = photos.uploaded;
+        totalImageBytes = photos.bytesSent;
+        rejected = photos.rejected;
+        storeKeys = photos.storeKeys;
       }
 
-      // ── Replace local paths with server paths ──
-      // For cookbook mode use the cookbook cover; for single-recipe mode
-      // fall back to the recipe's own image.
-      String? cookbookImagePath = _isSingleRecipeMode
-          ? _singleRecipe!.imagePath
-          : _selectedCookbook!.imagePath;
-      if (cookbookImagePath != null && pathMapping.containsKey(cookbookImagePath)) {
-        cookbookImagePath = pathMapping[cookbookImagePath];
-      } else if (_includeImages && cookbookImagePath != null && !ImageService.isServerPath(cookbookImagePath)) {
-        cookbookImagePath = null; // Local path, not uploaded
+      // ── Replace local paths with server paths (on a copy) ──
+      String? serverPath(String? path) {
+        if (!_includeImages || path == null) return null;
+        return pathMapping[path] ?? (ImageService.isServerPath(path) ? path : null);
       }
 
-      for (final recipe in recipeMaps) {
-        final rPath = recipe['imagePath'] as String?;
-        if (rPath != null && pathMapping.containsKey(rPath)) {
-          recipe['imagePath'] = pathMapping[rPath];
-        } else if (_includeImages && rPath != null && !ImageService.isServerPath(rPath)) {
-          recipe['imagePath'] = null;
-        } else if (!_includeImages) {
-          recipe['imagePath'] = null;
-        }
+      final recipeMaps = [
+        for (final recipe in job.recipeMaps)
+          {
+            ...recipe,
+            'imagePath': serverPath(recipe['imagePath'] as String?),
+            'steps': [
+              for (final step in recipe['steps'] as List<Map<String, dynamic>>)
+                {...step, 'imagePath': serverPath(step['imagePath'] as String?)},
+            ],
+          },
+      ];
+      final cookbookImagePath = serverPath(job.coverPath);
+      final rejectedRecipes = job.recipesFor(rejected);
 
-        // Replace step image paths
-        final steps = recipe['steps'] as List<Map<String, dynamic>>;
-        for (final step in steps) {
-          final sPath = step['imagePath'] as String?;
-          if (sPath != null && pathMapping.containsKey(sPath)) {
-            step['imagePath'] = pathMapping[sPath];
-          } else if (!_includeImages || (sPath != null && !ImageService.isServerPath(sPath))) {
-            step['imagePath'] = null;
-          }
-        }
+      Future<void> forgetUploadedPhotos() async {
+        store?.removeAll(storeKeys);
+        await store?.save();
       }
 
       // ── Publish ──
-      publishProgressNotifier.value = PublishProgress(
+      // Last check before anything is published: a cancelled run stops here.
+      if (!live()) return;
+      report(PublishProgress(
         status: 'publishing',
         uploadedImages: pathMapping.length,
         totalImages: pathMapping.length,
-        skippedImages: skippedImages,
-      );
+        skippedImages: rejected.length,
+      ));
 
       // Republish-to-update branch: same upload pipeline, different
       // final API. Stats (downloads, ratings) stay attached to the
@@ -787,37 +897,59 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           imagePath: cookbookImagePath,
         );
         if (ok) {
-          publishProgressNotifier.value = PublishProgress(
+          await forgetUploadedPhotos();
+          report(PublishProgress(
             status: 'done',
             uploadedImages: pathMapping.length,
             totalImages: pathMapping.length,
-            skippedImages: skippedImages,
+            skippedImages: rejected.length,
+            rejectedRecipes: rejectedRecipes,
             publicationId: widget.republishPublicationId,
-          );
+          ));
           if (mounted) {
             AppSnackbar.success(context, l10n.communityRepublishSuccess);
           }
         } else {
-          publishProgressNotifier.value = PublishProgress(
+          report(PublishProgress(
             status: 'error',
             errorMessage: l10n.communityPublishingFailed,
-          );
+          ));
         }
         return;
       }
 
-      final result = await _community.publish(
-        title: title,
-        description: _descController.text.trim().isNotEmpty ? _descController.text.trim() : null,
-        imagePath: cookbookImagePath,
-        recipes: recipeMaps,
-        imageCount: pathMapping.length,
-        totalImageBytes: totalImageBytes,
-        tags: _selectedTags.isNotEmpty ? _selectedTags.join(',') : null,
-        kind: _isSingleRecipeMode ? 'recipe' : 'cookbook',
-      );
+      // Same key on every try for this cookbook until one succeeds, so a
+      // retry after a timeout cannot publish it twice.
+      final publishKey = await CommunityService.publishKeyFor(job.sourceKey);
+      if (!live()) return;
+
+      Future<({bool success, String? error, String? publicationId, String? status, Duration? retryAfter})>
+          publishOnce() => _community.publish(
+                title: job.title,
+                description: job.description,
+                imagePath: cookbookImagePath,
+                recipes: recipeMaps,
+                imageCount: pathMapping.length,
+                totalImageBytes: totalImageBytes,
+                tags: job.tags,
+                kind: _isSingleRecipeMode ? 'recipe' : 'cookbook',
+                publishKey: publishKey,
+              );
+
+      // A 429 with Retry-After is the account's upload lock (an earlier try
+      // may still be processing): wait it out a few times. The same key
+      // makes the retry safe. The daily limit has no Retry-After and stops.
+      var result = await publishOnce();
+      for (var tries = 0; !result.success && result.retryAfter != null && tries < 5; tries++) {
+        await Future<void>.delayed(Duration(seconds: result.retryAfter!.inSeconds.clamp(1, 60)));
+        if (!live()) return;
+        result = await publishOnce();
+      }
 
       if (result.success) {
+        await CommunityService.clearPublishKey(job.sourceKey);
+        await forgetUploadedPhotos();
+
         // Remember which local recipe/cookbook this publication came
         // from so "Update published version" can push the right content
         // later without making the user re-pick.
@@ -832,30 +964,96 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           }
         }
 
-        publishProgressNotifier.value = PublishProgress(
+        report(PublishProgress(
           status: 'done',
           uploadedImages: pathMapping.length,
           totalImages: pathMapping.length,
-          skippedImages: skippedImages,
+          skippedImages: rejected.length,
+          rejectedRecipes: rejectedRecipes,
           publicationId: result.publicationId,
-        );
+        ));
 
         // Show under-review notice if flagged
         if (result.status == 'pending_review' && mounted) {
-          AppSnackbar.warning(context, 'Your cookbook is under review — it will be visible after approval.');
+          AppSnackbar.warning(context, l10n.communityPublishUnderReview);
         }
       } else {
-        publishProgressNotifier.value = PublishProgress(
+        report(PublishProgress(
           status: 'error',
           errorMessage: result.error ?? l10n.communityPublishingFailed,
-        );
+        ));
       }
     } catch (e) {
-      publishProgressNotifier.value = PublishProgress(
+      report(PublishProgress(
         status: 'error',
         errorMessage: e.toString(),
-      );
+      ));
     }
+  }
+}
+
+/// Everything a publish sends, built once from the local cookbook. Image
+/// paths in [recipeMaps] stay local; each run swaps in server paths on a
+/// copy, so a retry starts from the same data.
+class _PreparedPublish {
+  final String title;
+  final String? description;
+  final String? tags;
+  final List<Map<String, dynamic>> recipeMaps;
+
+  /// Unique local photos to upload, in order.
+  final List<String> photoPaths;
+
+  /// Local photo → titles of the recipes (or the cookbook) that use it.
+  final Map<String, List<String>> photoRecipes;
+  final String? coverPath;
+
+  /// `cookbook:<id>` or `recipe:<id>`, for the publish key.
+  final String sourceKey;
+
+  const _PreparedPublish({
+    required this.title,
+    required this.description,
+    required this.tags,
+    required this.recipeMaps,
+    required this.photoPaths,
+    required this.photoRecipes,
+    required this.coverPath,
+    required this.sourceKey,
+  });
+
+  /// Titles that use any of [photos], each once, in publish order.
+  List<String> recipesFor(Iterable<String> photos) {
+    final titles = <String>{};
+    for (final photo in photos) {
+      titles.addAll(photoRecipes[photo] ?? const []);
+    }
+    return titles.toList();
+  }
+}
+
+/// A short scrollable list of recipe titles on the result screen.
+class _RecipeTitleList extends StatelessWidget {
+  final List<String> titles;
+  const _RecipeTitleList({required this.titles});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 180),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            for (final t in titles)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(t, style: theme.textTheme.bodyMedium, textAlign: TextAlign.center),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

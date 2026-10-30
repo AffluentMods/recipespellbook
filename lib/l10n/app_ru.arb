@@ -4143,5 +4143,18 @@
   "importStoppedSomeFailed": "Импортировано рецептов: {imported} из {total}, с ошибкой: {failed}",
   "importDuplicateCheckFailed": "не удалось проверить дубликаты",
   "scanProductFrom": "Отсканированный продукт {brand}",
-  "scanProductNoName": "У этого продукта нет названия для списка покупок."
+  "scanProductNoName": "У этого продукта нет названия для списка покупок.",
+  "communityUsedInRecipes": "{count, plural, =1{Используется в 1 рецепте} other{Используется в {count} рецептах}}",
+  "communityPhotosNotDownloaded": "{count, plural, =1{Не удалось скачать 1 фото} other{Не удалось скачать фото: {count}}}",
+  "communityRecipesSelected": "Выбрано {selected} из {total}",
+  "communityPublishUnderReview": "Ваша публикация на проверке. Она станет видна после одобрения.",
+  "communityTagsSelected": "Выбрано тегов: {count}/{max}",
+  "communityPublishPhotosRejected": "{count, plural, =1{1 фото не прошло модерацию и не вошло в:} other{Фото, не прошедшие модерацию ({count}), не вошли в:}}",
+  "communityPublishPhotosFailedTitle": "Не все фото загрузились",
+  "communityPublishPhotosFailedBody": "Ничего не опубликовано. В этих рецептах есть фото, которые не удалось загрузить:",
+  "communityRetryFailedPhotos": "Повторить для неудачных фото",
+  "communityPublishRateLimitWait": "{seconds, plural, =1{Достигнут лимит загрузки. Продолжим через 1 секунду} few{Достигнут лимит загрузки. Продолжим через {seconds} секунды} other{Достигнут лимит загрузки. Продолжим через {seconds} секунд}}",
+  "communityPublishServerBusy": "Другая загрузка ещё обрабатывается. Попробуйте снова через несколько минут.",
+  "communityPublishDailyLimit": "Так будет превышен дневной лимит загрузки фото. Попробуйте завтра или опубликуйте без фото.",
+  "communityFeedLoadMoreFailed": "Не удалось загрузить ещё"
 }

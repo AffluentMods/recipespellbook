@@ -10955,4 +10955,80 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'У этого продукта нет названия для списка покупок.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Используется в $count рецептах',
+      one: 'Используется в 1 рецепте',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не удалось скачать фото: $count',
+      one: 'Не удалось скачать 1 фото',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return 'Выбрано $selected из $total';
+  }
+
+  @override
+  String get communityPublishUnderReview => 'Ваша публикация на проверке. Она станет видна после одобрения.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return 'Выбрано тегов: $count/$max';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Фото, не прошедшие модерацию ($count), не вошли в:',
+      one: '1 фото не прошло модерацию и не вошло в:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => 'Не все фото загрузились';
+
+  @override
+  String get communityPublishPhotosFailedBody => 'Ничего не опубликовано. В этих рецептах есть фото, которые не удалось загрузить:';
+
+  @override
+  String get communityRetryFailedPhotos => 'Повторить для неудачных фото';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Достигнут лимит загрузки. Продолжим через $seconds секунд',
+      few: 'Достигнут лимит загрузки. Продолжим через $seconds секунды',
+      one: 'Достигнут лимит загрузки. Продолжим через 1 секунду',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => 'Другая загрузка ещё обрабатывается. Попробуйте снова через несколько минут.';
+
+  @override
+  String get communityPublishDailyLimit => 'Так будет превышен дневной лимит загрузки фото. Попробуйте завтра или опубликуйте без фото.';
+
+  @override
+  String get communityFeedLoadMoreFailed => 'Не удалось загрузить ещё';
 }

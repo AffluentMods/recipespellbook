@@ -4143,5 +4143,18 @@
   "importStoppedSomeFailed": "{imported} de {total} receitas importadas, {failed} com falha",
   "importDuplicateCheckFailed": "não foi possível verificar duplicadas",
   "scanProductFrom": "Produto escaneado de {brand}",
-  "scanProductNoName": "Este produto não tem nome para adicionar à lista de compras."
+  "scanProductNoName": "Este produto não tem nome para adicionar à lista de compras.",
+  "communityUsedInRecipes": "{count, plural, =1{Usada em 1 receita} other{Usada em {count} receitas}}",
+  "communityPhotosNotDownloaded": "{count, plural, =1{Não foi possível baixar 1 foto} other{Não foi possível baixar {count} fotos}}",
+  "communityRecipesSelected": "{selected} de {total} selecionadas",
+  "communityPublishUnderReview": "Sua publicação está em análise. Ela ficará visível depois de aprovada.",
+  "communityTagsSelected": "{count}/{max} tags selecionadas",
+  "communityPublishPhotosRejected": "{count, plural, =1{1 foto não foi aceita pela moderação e ficou de fora de:} other{{count} fotos não foram aceitas pela moderação e ficaram de fora de:}}",
+  "communityPublishPhotosFailedTitle": "Algumas fotos não foram enviadas",
+  "communityPublishPhotosFailedBody": "Nada foi publicado. Estas receitas têm fotos que não puderam ser enviadas:",
+  "communityRetryFailedPhotos": "Tentar de novo as fotos com falha",
+  "communityPublishRateLimitWait": "{seconds, plural, =1{Limite de envio atingido. Continuando em 1 segundo} other{Limite de envio atingido. Continuando em {seconds} segundos}}",
+  "communityPublishServerBusy": "Outro envio ainda está sendo processado. Tente de novo em alguns minutos.",
+  "communityPublishDailyLimit": "Isso passaria do limite diário de envio de fotos. Tente amanhã ou publique sem fotos.",
+  "communityFeedLoadMoreFailed": "Não foi possível carregar mais"
 }

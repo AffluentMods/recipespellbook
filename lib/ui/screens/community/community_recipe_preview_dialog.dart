@@ -30,6 +30,17 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
+    // Section headers ('__header__' in notes) are labels, not ingredients or
+    // steps: shown as headings, left out of the counts.
+    final ingredientCount = recipe.ingredients.where((i) => !_isHeader(i.notes)).length;
+    final stepCount = recipe.steps.where((s) => !_isHeader(s.notes)).length;
+    final previewIngredients = <CommunityIngredient>[];
+    var previewed = 0;
+    for (final ing in recipe.ingredients) {
+      if (previewed >= 5) break;
+      previewIngredients.add(ing);
+      if (!_isHeader(ing.notes)) previewed++;
+    }
 
     return Dialog(
       clipBehavior: Clip.antiAlias,
@@ -148,14 +159,22 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                     ],
 
                     // Ingredients preview (first 5)
-                    if (recipe.ingredients.isNotEmpty) ...[
+                    if (ingredientCount > 0) ...[
                       const SizedBox(height: 16),
                       Text(
-                        l10n.communityIngredientCount(recipe.ingredients.length),
+                        l10n.communityIngredientCount(ingredientCount),
                         style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 6),
-                      ...recipe.ingredients.take(5).map((ing) => Padding(
+                      ...previewIngredients.map((ing) => _isHeader(ing.notes)
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 4, bottom: 3),
+                              child: Text(
+                                ing.name,
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: theme.colorScheme.primary),
+                              ),
+                            )
+                          : Padding(
                         padding: const EdgeInsets.only(bottom: 3),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,20 +189,20 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                           ],
                         ),
                       )),
-                      if (recipe.ingredients.length > 5) ...[
+                      if (ingredientCount > previewed) ...[
                         const SizedBox(height: 4),
                         Text(
-                          l10n.communityMoreIngredients(recipe.ingredients.length - 5),
+                          l10n.communityMoreIngredients(ingredientCount - previewed),
                           style: TextStyle(fontSize: 12, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
                         ),
                       ],
                     ],
 
                     // Steps count
-                    if (recipe.steps.isNotEmpty) ...[
+                    if (stepCount > 0) ...[
                       const SizedBox(height: 12),
                       Text(
-                        l10n.communityStepCount(recipe.steps.length),
+                        l10n.communityStepCount(stepCount),
                         style: TextStyle(fontSize: 13, color: theme.colorScheme.outline),
                       ),
                     ],
@@ -214,6 +233,8 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
       ),
     );
   }
+
+  static bool _isHeader(String? notes) => notes == '__header__';
 
   String _formatIngredient(CommunityIngredient ing) {
     final parts = <String>[];

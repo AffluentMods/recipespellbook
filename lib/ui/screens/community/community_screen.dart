@@ -56,6 +56,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   int _page = 1;
   bool _loading = false;
   bool _hasMore = true;
+  // The next page failed to load: show a retry instead of loading on scroll.
+  bool _loadMoreFailed = false;
+  // Bumped by every fresh load, so a page that was still loading for the
+  // old search or filter is dropped instead of appended.
+  int _feedGeneration = 0;
   List<CommunityListItem> _items = [];
   List<CommunityRecipeFeedItem> _recipeItems = [];
   final Set<String> _selectedTags = {};
@@ -124,7 +129,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      if (!_loading && _hasMore) _loadMore();
+      if (!_loading && _hasMore && !_loadMoreFailed) _loadMore();
     }
 
     final offset = _scrollController.offset;
@@ -142,7 +147,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _page = 1; });
+    final generation = ++_feedGeneration;
+    setState(() { _loading = true; _page = 1; _loadMoreFailed = false; });
 
     if (_browseMode == _BrowseMode.recipes) {
       final result = await _community.browseRecipes(
@@ -152,7 +158,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
         hasImages: _filterHasImages ? true : null,
       );
-      if (mounted) {
+      if (mounted && generation == _feedGeneration) {
         setState(() {
           _recipeItems = result?.recipes ?? [];
           _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
@@ -167,7 +173,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
         hasImages: _filterHasImages ? true : null,
       );
-      if (mounted) {
+      if (mounted && generation == _feedGeneration) {
         setState(() {
           // The cookbook tab shows cookbook publications only — single
           // recipes live in the recipes feed. The server filters this
@@ -184,44 +190,94 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   Future<void> _loadMore() async {
     if (_loading) return;
-    setState(() => _loading = true);
-    _page++;
+    final generation = _feedGeneration;
+    final page = _page + 1;
+    setState(() { _loading = true; _loadMoreFailed = false; });
 
     if (_browseMode == _BrowseMode.recipes) {
       final result = await _community.browseRecipes(
         sort: _sort == 'top_rated' ? 'popular' : _sort,
-        page: _page,
+        page: page,
         query: _query.isEmpty ? null : _query,
         tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
         hasImages: _filterHasImages ? true : null,
       );
-      if (mounted) {
+      if (mounted && generation == _feedGeneration) {
         setState(() {
-          _recipeItems.addAll(result?.recipes ?? []);
-          _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
           _loading = false;
+          // A failed page keeps _hasMore and _page as they were, so the
+          // retry asks for the same page again.
+          if (result == null) {
+            _loadMoreFailed = true;
+            return;
+          }
+          _page = page;
+          // New items can shift pages between requests (sort by recent,
+          // random), so a recipe may come back twice: keep the first.
+          final seen = {for (final r in _recipeItems) if (r.id != null) r.id};
+          _recipeItems.addAll(result.recipes.where((r) => r.id == null || seen.add(r.id)));
+          _hasMore = result.page < result.totalPages;
         });
       }
     } else {
       final result = await _community.browse(
         sort: _sort,
-        page: _page,
+        page: page,
         query: _query.isEmpty ? null : _query,
         tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
         hasImages: _filterHasImages ? true : null,
       );
-      if (mounted) {
+      if (mounted && generation == _feedGeneration) {
         setState(() {
-          // Same single-recipe guard as _load (older backends).
-          _items.addAll(
-            (result?.publications ?? []).where((p) => !p.isSingleRecipe),
-          );
-          _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
           _loading = false;
+          if (result == null) {
+            _loadMoreFailed = true;
+            return;
+          }
+          _page = page;
+          // Same single-recipe guard as _load (older backends), and the
+          // same duplicate guard as the recipe feed.
+          final seen = {for (final p in _items) p.id};
+          _items.addAll(
+            result.publications.where((p) => !p.isSingleRecipe && seen.add(p.id)),
+          );
+          _hasMore = result.page < result.totalPages;
         });
       }
     }
   }
+
+  /// The row under the feed: a spinner while the next page loads, a retry
+  /// when it failed.
+  Widget _feedFooter() {
+    if (_loadMoreFailed && !_loading) {
+      final l10n = AppLocalizations.of(context)!;
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.communityFeedLoadMoreFailed,
+                  style: TextStyle(color: Theme.of(context).colorScheme.outline)),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: _loadMore,
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n.actionRetry),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return const Padding(
+      padding: EdgeInsets.all(16),
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  bool get _showFeedFooter => _loading || _loadMoreFailed;
 
   /// Desktop header: the title (admin tap preserved) with the feed's actions
   /// right-aligned — Publish is a button, not a floating action.
@@ -850,14 +906,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 104),
-      itemCount: rows + (_loading ? 1 : 0),
+      itemCount: rows + (_showFeedFooter ? 1 : 0),
       itemBuilder: (context, row) {
-        if (row >= rows) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
+        if (row >= rows) return _feedFooter();
         // Rows of intrinsic-height cells: the row sizes to its tallest card,
         // so long titles never overflow a fixed-aspect grid tile.
         final start = row * columns;
@@ -886,14 +937,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 104),
-      itemCount: _recipeItems.length + (_loading ? 1 : 0),
+      itemCount: _recipeItems.length + (_showFeedFooter ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index >= _recipeItems.length) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
+        if (index >= _recipeItems.length) return _feedFooter();
         return Padding(
           padding: const EdgeInsets.only(bottom: 20),
           child: _feedCard(context, _recipeItems[index], dense: false),
@@ -912,14 +958,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 104),
-      itemCount: rows + (_loading ? 1 : 0),
+      itemCount: rows + (_showFeedFooter ? 1 : 0),
       itemBuilder: (context, row) {
-        if (row >= rows) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
+        if (row >= rows) return _feedFooter();
         final start = row * columns;
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
@@ -1054,6 +1095,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             sortOrder: step.sortOrder,
             instruction: step.instruction,
             durationMinutes: drift.Value(step.durationMinutes),
+            notes: drift.Value(step.notes),
           ));
         }
       });

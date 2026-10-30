@@ -19416,6 +19416,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This product has no name to add to the shopping list.'**
   String get scanProductNoName;
+
+  /// No description provided for @communityUsedInRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Used in 1 recipe} other{Used in {count} recipes}}'**
+  String communityUsedInRecipes(int count);
+
+  /// No description provided for @communityPhotosNotDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo could not be downloaded} other{{count} photos could not be downloaded}}'**
+  String communityPhotosNotDownloaded(int count);
+
+  /// No description provided for @communityRecipesSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} of {total} selected'**
+  String communityRecipesSelected(int selected, int total);
+
+  /// No description provided for @communityPublishUnderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your publication is under review. It will be visible once it is approved.'**
+  String get communityPublishUnderReview;
+
+  /// No description provided for @communityTagsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/{max} tags selected'**
+  String communityTagsSelected(int count, int max);
+
+  /// No description provided for @communityPublishPhotosRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo was not accepted by moderation and was left out of:} other{{count} photos were not accepted by moderation and were left out of:}}'**
+  String communityPublishPhotosRejected(int count);
+
+  /// No description provided for @communityPublishPhotosFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some photos did not upload'**
+  String get communityPublishPhotosFailedTitle;
+
+  /// No description provided for @communityPublishPhotosFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was published. These recipes have photos that could not be uploaded:'**
+  String get communityPublishPhotosFailedBody;
+
+  /// No description provided for @communityRetryFailedPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry failed photos'**
+  String get communityRetryFailedPhotos;
+
+  /// No description provided for @communityPublishRateLimitWait.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds, plural, =1{Upload limit reached. Continuing in 1 second} other{Upload limit reached. Continuing in {seconds} seconds}}'**
+  String communityPublishRateLimitWait(int seconds);
+
+  /// No description provided for @communityPublishServerBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Another upload is still being processed. Try again in a few minutes.'**
+  String get communityPublishServerBusy;
+
+  /// No description provided for @communityPublishDailyLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'This would go over today\'s photo upload limit. Try again tomorrow, or publish without photos.'**
+  String get communityPublishDailyLimit;
+
+  /// No description provided for @communityFeedLoadMoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load more'**
+  String get communityFeedLoadMoreFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

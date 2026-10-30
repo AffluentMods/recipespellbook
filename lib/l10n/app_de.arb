@@ -3705,5 +3705,18 @@
   "importStoppedSomeFailed": "{imported} von {total} Rezepten importiert, {failed} fehlgeschlagen",
   "importDuplicateCheckFailed": "Duplikate konnten nicht geprüft werden",
   "scanProductFrom": "Gescanntes Produkt von {brand}",
-  "scanProductNoName": "Dieses Produkt hat keinen Namen, der zur Einkaufsliste hinzugefügt werden kann."
+  "scanProductNoName": "Dieses Produkt hat keinen Namen, der zur Einkaufsliste hinzugefügt werden kann.",
+  "communityUsedInRecipes": "{count, plural, =1{In 1 Rezept verwendet} other{In {count} Rezepten verwendet}}",
+  "communityPhotosNotDownloaded": "{count, plural, =1{1 Foto konnte nicht heruntergeladen werden} other{{count} Fotos konnten nicht heruntergeladen werden}}",
+  "communityRecipesSelected": "{selected} von {total} ausgewählt",
+  "communityPublishUnderReview": "Deine Veröffentlichung wird geprüft. Sie ist sichtbar, sobald sie freigegeben wurde.",
+  "communityTagsSelected": "{count}/{max} Tags ausgewählt",
+  "communityPublishPhotosRejected": "{count, plural, =1{1 Foto wurde von der Moderation abgelehnt und fehlt bei:} other{{count} Fotos wurden von der Moderation abgelehnt und fehlen bei:}}",
+  "communityPublishPhotosFailedTitle": "Einige Fotos wurden nicht hochgeladen",
+  "communityPublishPhotosFailedBody": "Es wurde nichts veröffentlicht. Bei diesen Rezepten konnten Fotos nicht hochgeladen werden:",
+  "communityRetryFailedPhotos": "Fehlgeschlagene Fotos erneut hochladen",
+  "communityPublishRateLimitWait": "{seconds, plural, =1{Upload-Limit erreicht. Weiter in 1 Sekunde} other{Upload-Limit erreicht. Weiter in {seconds} Sekunden}}",
+  "communityPublishServerBusy": "Ein anderer Upload wird noch verarbeitet. Versuche es in ein paar Minuten erneut.",
+  "communityPublishDailyLimit": "Damit würdest du das heutige Limit für Foto-Uploads überschreiten. Versuche es morgen erneut oder veröffentliche ohne Fotos.",
+  "communityFeedLoadMoreFailed": "Weitere Einträge konnten nicht geladen werden"
 }

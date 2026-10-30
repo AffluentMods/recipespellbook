@@ -10863,4 +10863,79 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'Dit product heeft geen naam om aan de boodschappenlijst toe te voegen.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Gebruikt in $count recepten',
+      one: 'Gebruikt in 1 recept',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count foto\'s konden niet worden gedownload',
+      one: '1 foto kon niet worden gedownload',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '$selected van $total geselecteerd';
+  }
+
+  @override
+  String get communityPublishUnderReview => 'Je publicatie wordt beoordeeld. Ze is zichtbaar zodra ze is goedgekeurd.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return '$count/$max tags geselecteerd';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count foto\'s zijn door de moderatie geweigerd en weggelaten bij:',
+      one: '1 foto is door de moderatie geweigerd en weggelaten bij:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => 'Sommige foto\'s zijn niet geüpload';
+
+  @override
+  String get communityPublishPhotosFailedBody => 'Er is niets gepubliceerd. Deze recepten hebben foto\'s die niet konden worden geüpload:';
+
+  @override
+  String get communityRetryFailedPhotos => 'Mislukte foto\'s opnieuw proberen';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Uploadlimiet bereikt. Verder over $seconds seconden',
+      one: 'Uploadlimiet bereikt. Verder over 1 seconde',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => 'Er wordt nog een andere upload verwerkt. Probeer het over een paar minuten opnieuw.';
+
+  @override
+  String get communityPublishDailyLimit => 'Hiermee ga je over de uploadlimiet voor foto\'s van vandaag. Probeer het morgen opnieuw of publiceer zonder foto\'s.';
+
+  @override
+  String get communityFeedLoadMoreFailed => 'Kon niet meer laden';
 }

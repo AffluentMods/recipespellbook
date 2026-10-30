@@ -3167,5 +3167,18 @@
   "importStoppedSomeFailed": "{imported} ricette su {total} importate, {failed} non riuscite",
   "importDuplicateCheckFailed": "impossibile controllare i duplicati",
   "scanProductFrom": "Prodotto scansionato di {brand}",
-  "scanProductNoName": "Questo prodotto non ha un nome da aggiungere alla lista della spesa."
+  "scanProductNoName": "Questo prodotto non ha un nome da aggiungere alla lista della spesa.",
+  "communityUsedInRecipes": "{count, plural, =1{Usata in 1 ricetta} other{Usata in {count} ricette}}",
+  "communityPhotosNotDownloaded": "{count, plural, =1{Non è stato possibile scaricare 1 foto} other{Non è stato possibile scaricare {count} foto}}",
+  "communityRecipesSelected": "{selected} di {total} selezionate",
+  "communityPublishUnderReview": "La tua pubblicazione è in revisione. Sarà visibile una volta approvata.",
+  "communityTagsSelected": "{count}/{max} tag selezionati",
+  "communityPublishPhotosRejected": "{count, plural, =1{1 foto non è stata accettata dalla moderazione ed è stata esclusa da:} other{{count} foto non sono state accettate dalla moderazione e sono state escluse da:}}",
+  "communityPublishPhotosFailedTitle": "Alcune foto non sono state caricate",
+  "communityPublishPhotosFailedBody": "Non è stato pubblicato nulla. Queste ricette hanno foto che non è stato possibile caricare:",
+  "communityRetryFailedPhotos": "Riprova le foto non riuscite",
+  "communityPublishRateLimitWait": "{seconds, plural, =1{Limite di caricamento raggiunto. Si riprende tra 1 secondo} other{Limite di caricamento raggiunto. Si riprende tra {seconds} secondi}}",
+  "communityPublishServerBusy": "Un altro caricamento è ancora in elaborazione. Riprova tra qualche minuto.",
+  "communityPublishDailyLimit": "Così supereresti il limite giornaliero di caricamento foto. Riprova domani o pubblica senza foto.",
+  "communityFeedLoadMoreFailed": "Impossibile caricare altri elementi"
 }

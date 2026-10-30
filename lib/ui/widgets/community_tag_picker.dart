@@ -85,7 +85,7 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(
-              '${_selected.length}/$_maxTags tags selected',
+              l10n.communityTagsSelected(_selected.length, _maxTags),
               style: TextStyle(
                 fontSize: 12,
                 color: atLimit ? theme.colorScheme.error : theme.colorScheme.outline,

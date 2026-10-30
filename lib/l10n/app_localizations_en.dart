@@ -10894,4 +10894,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'This product has no name to add to the shopping list.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Used in $count recipes',
+      one: 'Used in 1 recipe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos could not be downloaded',
+      one: '1 photo could not be downloaded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '$selected of $total selected';
+  }
+
+  @override
+  String get communityPublishUnderReview => 'Your publication is under review. It will be visible once it is approved.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return '$count/$max tags selected';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos were not accepted by moderation and were left out of:',
+      one: '1 photo was not accepted by moderation and was left out of:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => 'Some photos did not upload';
+
+  @override
+  String get communityPublishPhotosFailedBody => 'Nothing was published. These recipes have photos that could not be uploaded:';
+
+  @override
+  String get communityRetryFailedPhotos => 'Retry failed photos';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Upload limit reached. Continuing in $seconds seconds',
+      one: 'Upload limit reached. Continuing in 1 second',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => 'Another upload is still being processed. Try again in a few minutes.';
+
+  @override
+  String get communityPublishDailyLimit => 'This would go over today\'s photo upload limit. Try again tomorrow, or publish without photos.';
+
+  @override
+  String get communityFeedLoadMoreFailed => 'Could not load more';
 }
