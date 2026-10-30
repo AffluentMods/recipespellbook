@@ -138,7 +138,12 @@ flutter:
 
 msix_config:
   display_name: Recipe Spellbook
-  publisher_display_name: AffluentLabs
-  identity_name: com.recipespellbook.app
+  publisher_display_name: Affluent Labs
+  # The name and publisher Partner Center reserved for this app. The Store
+  # refuses a package with anything else.
+  identity_name: AffluentLabs.RecipeSpellbook
+  publisher: CN=0DD23BD3-21D8-4FFB-9634-06D26A8DFA90
   logo_path: assets/images/icon.png
   capabilities: internetClient
+  install_certificate: false
+  languages: en-us,de-de,es-es,fr-fr,it-it,ja-jp,ko-kr,nl-nl,pl-pl,pt-br,ru-ru,zh-cn
