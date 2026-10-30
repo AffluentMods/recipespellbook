@@ -77,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
 
   // Accessors for DAOs
@@ -203,6 +203,21 @@ class AppDatabase extends _$AppDatabase {
           );
           await customStatement(
             "UPDATE recipes SET image_server_path = image_path "
+            "WHERE image_path IS NOT NULL "
+            "AND image_path LIKE '%/%' "
+            "AND image_path NOT LIKE '/%' "
+            "AND image_path NOT LIKE '%/%/%' "
+            "AND image_path NOT LIKE '%:\\%'",
+          );
+        }
+        if (from < 11) {
+          // Cookbook covers join the local-first split. Seeded the same way
+          // as recipes: only a server-shaped image_path is a cloud copy.
+          await customStatement(
+            'ALTER TABLE cookbooks ADD COLUMN image_server_path TEXT',
+          );
+          await customStatement(
+            "UPDATE cookbooks SET image_server_path = image_path "
             "WHERE image_path IS NOT NULL "
             "AND image_path LIKE '%/%' "
             "AND image_path NOT LIKE '/%' "

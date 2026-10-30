@@ -5,6 +5,11 @@ class Cookbooks extends Table {
   TextColumn get name => text()();
   TextColumn get description => text().nullable()();
   TextColumn get imagePath => text().nullable()();
+
+  /// The cover's copy in the cloud, "userId/hash.ext" (sync-only). imagePath
+  /// stays the file this device shows, as for recipes.
+  TextColumn get imageServerPath => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

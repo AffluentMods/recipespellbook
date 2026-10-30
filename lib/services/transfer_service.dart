@@ -720,7 +720,7 @@ class TransferService {
           final cover = await _savePhoto(d['imageBase64'], imagesDir);
           if (cover != null && cover != local?.imagePath) {
             await (db.update(db.cookbooks)..where((t) => t.id.equals(id)))
-                .write(CookbooksCompanion(imagePath: Value(cover)));
+                .write(CookbooksCompanion(imagePath: Value(cover), imageServerPath: const Value(null)));
             arrived = arrived || takesOver;
           }
         }

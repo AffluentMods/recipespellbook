@@ -54,12 +54,15 @@ class CookbookDao extends DatabaseAccessor<AppDatabase> with _$CookbookDaoMixin 
   }
 
   /// Update cookbook with all fields
-  Future<int> updateCookbook(String id, String name, String? description, String? imagePath) {
+  Future<int> updateCookbook(String id, String name, String? description, String? imagePath) async {
+    final current = await (select(cookbooks)..where((c) => c.id.equals(id))).getSingleOrNull();
     return (update(cookbooks)..where((c) => c.id.equals(id)))
         .write(CookbooksCompanion(
       name: Value(name),
       description: Value(description),
       imagePath: Value(imagePath),
+      // A new cover has no cloud copy yet; the next sync sends it up.
+      imageServerPath: current?.imagePath == imagePath ? const Value.absent() : const Value(null),
       updatedAt: Value(DateTime.now()),
     ));
   }

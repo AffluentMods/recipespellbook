@@ -107,11 +107,19 @@ class SyncService {
   /// Drift stores timestamps at 1s precision, and duplicates are harmless.
   static const _pushOverlap = Duration(seconds: 3);
 
+  /// The wait between runs while photos are still going up. With six photos
+  /// and a sync per run this stays well under the server's limit of 1,000
+  /// requests in 15 minutes, and 1,200 photos take about an hour.
+  @visibleForTesting
+  static Duration photoRunGap = const Duration(seconds: 15);
+
   AppDatabase? _db;
 
   /// Must be called once with the app's database instance.
   void setDatabase(AppDatabase db) {
     _db = db;
+    _photoRun?.cancel();
+    _morePhotos = false;
     _tableSub?.cancel();
     _tableSub = db
         .tableUpdates(TableUpdateQuery.onAllTables([
@@ -306,6 +314,16 @@ class SyncService {
       } catch (e) {
         debugPrint('[Sync] Family pull failed (non-fatal): $e');
       }
+      try {
+        await _downloadCookbookCovers();
+      } catch (e) {
+        debugPrint('[Sync] Cover download failed (non-fatal): $e');
+      }
+    }
+
+    if (own.success && _morePhotos) {
+      _photoRun?.cancel();
+      _photoRun = Timer(photoRunGap, () => unawaited(sync()));
     }
 
     if (!own.success) {
@@ -334,7 +352,7 @@ class SyncService {
     final pullCursor = full ? null : await getLastSyncAt(userId);
     final pushMark = full ? null : await _readDate(_pushMarkPrefix, userId);
 
-    await _backfillImageUploads();
+    _morePhotos = await _backfillImageUploads();
 
     final collectStart = DateTime.now();
     final foreign = await _foreignIds(userId);
@@ -554,13 +572,29 @@ class SyncService {
   /// keep every other one waiting behind it.
   final _photoRefused = <String>{};
 
-  /// Upload local recipe photos that never reached the cloud (imports,
-  /// duplicates, community saves, failed uploads) so other devices get them.
-  /// A few per run keeps each sync quick; the rest follow on later runs.
-  Future<void> _backfillImageUploads({int limit = 6}) async {
-    if (!supportsLocalFileSystem) return;
+  /// Photos were still waiting when the last run had sent its share.
+  bool _morePhotos = false;
+
+  /// The next run while photos are going up.
+  Timer? _photoRun;
+
+  /// Upload local photos that never reached the cloud (imports, duplicates,
+  /// community saves, failed uploads) so other devices get them. A few per run
+  /// keeps each sync quick; the rest follow in runs of their own, one after
+  /// the other, so a restored library does not take all day.
+  ///
+  /// Returns whether more are waiting. It says no after a refusal: offline,
+  /// over quota or rate limited, those wait for the next regular sync.
+  Future<bool> _backfillImageUploads({int limit = 6}) async {
+    if (!supportsLocalFileSystem) return false;
     final db = _db!;
     final recipes = db.recipes;
+    // Covers first: there are few of them, and they show on every cookbook tile.
+    // A cover of a cookbook shared with this account is its owner's to send.
+    final covers = await (db.select(db.cookbooks)
+          ..where((c) =>
+              c.imageServerPath.isNull() & c.imagePath.isNotNull() & c.deletedAt.isNull() & c.sharedOwnerId.isNull()))
+        .get();
     // Every recipe still waiting, newest first: one whose file is gone from
     // the device is passed over below, and a fixed window of the oldest would
     // end on such recipes for good. Three columns keep a long list light.
@@ -569,38 +603,102 @@ class SyncService {
           ..where(recipes.imageServerPath.isNull() & recipes.imagePath.isNotNull() & recipes.deletedAt.isNull())
           ..orderBy([OrderingTerm.desc(recipes.createdAt), OrderingTerm.desc(recipes.rowId)]))
         .get();
+    final queue = <_PhotoWaiting>[
+      for (final cb in covers)
+        _PhotoWaiting('cookbook:${cb.id}', cb.imagePath!, (serverPath) async {
+          await (db.update(db.cookbooks)..where((t) => t.id.equals(cb.id))).write(CookbooksCompanion(
+            imageServerPath: Value(serverPath),
+            updatedAt: Value(DateTime.now()),
+          ));
+        }),
+      for (final row in waiting)
+        _PhotoWaiting(row.read(recipes.id)!, row.read(recipes.imagePath)!, (serverPath) async {
+          final id = row.read(recipes.id)!;
+          await (db.update(recipes)..where((t) => t.id.equals(id))).write(RecipesCompanion(
+            imageServerPath: Value(serverPath),
+            updatedAt: Value(DateTime.now()),
+          ));
+          // A recipe in a shared cookbook goes out through the collab push. Until
+          // that push lands the pull must leave it alone: the server's copy is the
+          // older one, has no photo, and would take this one's photo away.
+          if (CollabService.instance.canEditCookbook(row.read(recipes.cookbookId)!)) {
+            await CollabService.instance.markRecipeDirty(id);
+          }
+        }),
+    ];
     final candidates = [
-      ...waiting.where((row) => !_photoRefused.contains(row.read(recipes.id))),
-      ...waiting.where((row) => _photoRefused.contains(row.read(recipes.id))),
+      ...queue.where((photo) => !_photoRefused.contains(photo.key)),
+      ...queue.where((photo) => _photoRefused.contains(photo.key)),
     ];
     var uploaded = 0;
-    for (final row in candidates) {
-      if (uploaded >= limit) break;
-      final id = row.read(recipes.id)!;
-      final path = row.read(recipes.imagePath)!;
+    var more = false;
+    for (final photo in candidates) {
+      final path = photo.path;
       if (ImageService.isServerPath(path) || path.startsWith('http') || path.startsWith('assets/')) continue;
       if (!localFileExists(path)) continue;
+      if (uploaded >= limit) {
+        more = true;
+        break;
+      }
       final result = await ImageService.instance.uploadFile(File(path));
       if (result == null) {
         // Offline, over quota, or a photo the server will not take: try
         // again next sync, with the others ahead of this one.
-        _photoRefused.add(id);
+        _photoRefused.add(photo.key);
         break;
       }
-      _photoRefused.remove(id);
-      await (db.update(recipes)..where((t) => t.id.equals(id))).write(RecipesCompanion(
-        imageServerPath: Value(result.path),
-        updatedAt: Value(DateTime.now()),
-      ));
-      // A recipe in a shared cookbook goes out through the collab push. Until
-      // that push lands the pull must leave it alone: the server's copy is the
-      // older one, has no photo, and would take this one's photo away.
-      if (CollabService.instance.canEditCookbook(row.read(recipes.cookbookId)!)) {
-        await CollabService.instance.markRecipeDirty(id);
-      }
+      _photoRefused.remove(photo.key);
+      await photo.uploaded(result.path);
       uploaded++;
     }
-    if (uploaded > 0) debugPrint('[Sync] Uploaded $uploaded recipe photo(s) for sync');
+    if (uploaded > 0) debugPrint('[Sync] Uploaded $uploaded photo(s) for sync');
+    return more;
+  }
+
+  /// Fetch covers that came from another device, so that the cookbook tiles
+  /// can show them as they show any other cover, also offline. A cover that
+  /// cannot be fetched is tried again next sync.
+  Future<void> _downloadCookbookCovers({int limit = 12}) async {
+    if (!supportsLocalFileSystem) return;
+    final db = _db!;
+    final waiting = await (db.select(db.cookbooks)
+          ..where((c) => c.imageServerPath.isNotNull() & c.deletedAt.isNull()))
+        .get();
+    var fetched = 0;
+    for (final cb in waiting) {
+      if (fetched >= limit) break;
+      final path = cb.imagePath;
+      final cloud = cb.imageServerPath!;
+      final hasFile = path != null &&
+          !ImageService.isServerPath(path) &&
+          !path.startsWith('http') &&
+          localFileExists(path);
+      if (hasFile || !ImageService.isServerPath(cloud)) continue;
+      final url = await ImageService.instance.getImageUrl(cloud);
+      if (url == null) continue;
+      final local = await ImageService.instance.downloadAndSaveImage(url, 'cover_${cloud.split('/').last}');
+      if (local == null) continue;
+      await runAsRemote(() => (db.update(db.cookbooks)..where((t) => t.id.equals(cb.id)))
+          .write(CookbooksCompanion(imagePath: Value(local))));
+      fetched++;
+    }
+  }
+
+  /// What a cover from the server becomes here. Like a recipe photo it never
+  /// replaces a live local file with the same picture, or with nothing.
+  ({String? path, String? server}) _arrivingCover(String? incoming, Cookbook? here) {
+    final herePath = here?.imagePath;
+    final hereIsRemote = ImageService.isServerPath(herePath) || (herePath?.startsWith('http') ?? false);
+    final hereAlive = herePath != null && !hereIsRemote && localFileExists(herePath);
+    final isServer = ImageService.isServerPath(incoming);
+    // Older versions send the path of the file on the device that has it,
+    // which means nothing here. Older data on the server holds the same.
+    if (incoming != null && !isServer && !incoming.startsWith('http')) {
+      return (path: hereAlive || hereIsRemote ? herePath : null, server: here?.imageServerPath);
+    }
+    final keep = hereAlive &&
+        ((isServer && incoming == here?.imageServerPath) || (incoming == null && here?.imageServerPath == null));
+    return (path: keep ? herePath : incoming, server: isServer ? incoming : (keep ? here?.imageServerPath : null));
   }
 
   // ════════════════════════════════════════════
@@ -1192,11 +1290,20 @@ class SyncService {
   //  SERIALIZATION — Local Drift → API JSON
   // ════════════════════════════════════════════
 
+  /// The cover other devices can use: its cloud copy, or the web address an
+  /// ISBN cover has. The path of a file means nothing on another device.
+  String? _sharedCover(Cookbook cb) {
+    final path = cb.imagePath;
+    if (cb.imageServerPath != null) return cb.imageServerPath;
+    if (path != null && (ImageService.isServerPath(path) || path.startsWith('http'))) return path;
+    return null;
+  }
+
   Map<String, dynamic> _serializeCookbook(Cookbook cb) => {
     'id': cb.id,
     'name': cb.name,
     'description': cb.description,
-    'imagePath': cb.imagePath,
+    'imagePath': _sharedCover(cb),
     'createdAt': _iso(cb.createdAt),
     'updatedAt': _iso(cb.updatedAt ?? cb.createdAt),
     'deletedAt': _iso(cb.deletedAt),
@@ -1474,6 +1581,10 @@ class SyncService {
     final db = _db!;
     final local = await _localStamps(db.cookbooks, db.cookbooks.id, db.cookbooks.updatedAt,
         [for (final d in rows) d['id'] as String]);
+    final here = {
+      for (final cb in await (db.select(db.cookbooks)..where((t) => t.id.isIn([for (final d in rows) d['id'] as String]))).get())
+        cb.id: cb,
+    };
     var n = 0;
     for (final d in rows) {
       final id = d['id'] as String;
@@ -1489,12 +1600,14 @@ class SyncService {
       // they're excluded from the owner-only /sync push. On the own-sync path
       // leave the column absent so a value already set locally is preserved.
       final owner = sharedOwners?[id];
+      final cover = _arrivingCover(d['imagePath'] as String?, here[id]);
       await db.into(db.cookbooks).insertOnConflictUpdate(
         CookbooksCompanion(
           id: Value(id),
           name: Value(name),
           description: Value(d['description'] as String?),
-          imagePath: Value(d['imagePath'] as String?),
+          imagePath: Value(cover.path),
+          imageServerPath: Value(cover.server),
           createdAt: Value(_parseDate(d['createdAt'])),
           updatedAt: Value(ctx.localizeNullable(_parseDateNullable(d['updatedAt']))),
           deletedAt: const Value(null),
@@ -2010,4 +2123,13 @@ class _ApplyCtx {
   }
 
   DateTime? localizeNullable(DateTime? serverTime) => serverTime == null ? null : localize(serverTime);
+}
+
+/// A photo waiting to go up, and what to do with the cloud path it gets.
+class _PhotoWaiting {
+  _PhotoWaiting(this.key, this.path, this.uploaded);
+
+  final String key;
+  final String path;
+  final Future<void> Function(String serverPath) uploaded;
 }
