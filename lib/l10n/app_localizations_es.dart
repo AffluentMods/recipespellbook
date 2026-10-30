@@ -10875,4 +10875,79 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'Este producto no tiene nombre para añadirlo a la lista de la compra.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Usada en $count recetas',
+      one: 'Usada en 1 receta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'No se pudieron descargar $count fotos',
+      one: 'No se pudo descargar 1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '$selected de $total seleccionadas';
+  }
+
+  @override
+  String get communityPublishUnderReview => 'Tu publicación está en revisión. Será visible cuando se apruebe.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return '$count/$max etiquetas seleccionadas';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'La moderación no aceptó $count fotos y se omitieron en:',
+      one: 'La moderación no aceptó 1 foto y se omitió en:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => 'Algunas fotos no se subieron';
+
+  @override
+  String get communityPublishPhotosFailedBody => 'No se publicó nada. Estas recetas tienen fotos que no se pudieron subir:';
+
+  @override
+  String get communityRetryFailedPhotos => 'Reintentar fotos fallidas';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Límite de subida alcanzado. Continuando en $seconds segundos',
+      one: 'Límite de subida alcanzado. Continuando en 1 segundo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => 'Todavía se está procesando otra subida. Inténtalo de nuevo en unos minutos.';
+
+  @override
+  String get communityPublishDailyLimit => 'Esto superaría el límite diario de subida de fotos. Inténtalo mañana o publica sin fotos.';
+
+  @override
+  String get communityFeedLoadMoreFailed => 'No se pudieron cargar más';
 }

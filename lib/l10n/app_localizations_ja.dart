@@ -10801,4 +10801,75 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'この商品には買い物リストに追加できる名前がありません。';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のレシピで使用',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count枚の写真をダウンロードできませんでした',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '$total件中$selected件を選択';
+  }
+
+  @override
+  String get communityPublishUnderReview => '公開内容は審査中です。承認後に表示されます。';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return 'タグ $count/$max 件を選択中';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count枚の写真がモデレーションで承認されず、次のレシピから除外されました:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => '一部の写真をアップロードできませんでした';
+
+  @override
+  String get communityPublishPhotosFailedBody => '何も公開されていません。次のレシピの写真をアップロードできませんでした:';
+
+  @override
+  String get communityRetryFailedPhotos => '失敗した写真を再試行';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'アップロード上限に達しました。$seconds秒後に再開します',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => '別のアップロードを処理中です。数分後にもう一度お試しください。';
+
+  @override
+  String get communityPublishDailyLimit => '本日の写真アップロード上限を超えてしまいます。明日もう一度お試しいただくか、写真なしで公開してください。';
+
+  @override
+  String get communityFeedLoadMoreFailed => '続きを読み込めませんでした';
 }

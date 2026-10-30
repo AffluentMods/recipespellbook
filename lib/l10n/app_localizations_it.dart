@@ -10863,4 +10863,79 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'Questo prodotto non ha un nome da aggiungere alla lista della spesa.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Usata in $count ricette',
+      one: 'Usata in 1 ricetta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Non è stato possibile scaricare $count foto',
+      one: 'Non è stato possibile scaricare 1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '$selected di $total selezionate';
+  }
+
+  @override
+  String get communityPublishUnderReview => 'La tua pubblicazione è in revisione. Sarà visibile una volta approvata.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return '$count/$max tag selezionati';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count foto non sono state accettate dalla moderazione e sono state escluse da:',
+      one: '1 foto non è stata accettata dalla moderazione ed è stata esclusa da:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => 'Alcune foto non sono state caricate';
+
+  @override
+  String get communityPublishPhotosFailedBody => 'Non è stato pubblicato nulla. Queste ricette hanno foto che non è stato possibile caricare:';
+
+  @override
+  String get communityRetryFailedPhotos => 'Riprova le foto non riuscite';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Limite di caricamento raggiunto. Si riprende tra $seconds secondi',
+      one: 'Limite di caricamento raggiunto. Si riprende tra 1 secondo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => 'Un altro caricamento è ancora in elaborazione. Riprova tra qualche minuto.';
+
+  @override
+  String get communityPublishDailyLimit => 'Così supereresti il limite giornaliero di caricamento foto. Riprova domani o pubblica senza foto.';
+
+  @override
+  String get communityFeedLoadMoreFailed => 'Impossibile caricare altri elementi';
 }

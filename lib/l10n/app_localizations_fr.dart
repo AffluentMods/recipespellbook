@@ -10863,4 +10863,79 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'Ce produit n\'a pas de nom à ajouter à la liste de courses.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Utilisée dans $count recettes',
+      one: 'Utilisée dans 1 recette',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos n\'ont pas pu être téléchargées',
+      one: '1 photo n\'a pas pu être téléchargée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '$selected sur $total sélectionnées';
+  }
+
+  @override
+  String get communityPublishUnderReview => 'Votre publication est en cours de vérification. Elle sera visible une fois approuvée.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return '$count/$max tags sélectionnés';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos ont été refusées par la modération et retirées de :',
+      one: '1 photo a été refusée par la modération et retirée de :',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => 'Certaines photos n\'ont pas été envoyées';
+
+  @override
+  String get communityPublishPhotosFailedBody => 'Rien n\'a été publié. Ces recettes ont des photos qui n\'ont pas pu être envoyées :';
+
+  @override
+  String get communityRetryFailedPhotos => 'Renvoyer les photos en échec';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Limite d\'envoi atteinte. Reprise dans $seconds secondes',
+      one: 'Limite d\'envoi atteinte. Reprise dans 1 seconde',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => 'Un autre envoi est encore en cours de traitement. Réessayez dans quelques minutes.';
+
+  @override
+  String get communityPublishDailyLimit => 'Cela dépasserait la limite quotidienne d\'envoi de photos. Réessayez demain ou publiez sans photos.';
+
+  @override
+  String get communityFeedLoadMoreFailed => 'Impossible de charger la suite';
 }

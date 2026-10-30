@@ -5800,5 +5800,66 @@
       }
     }
   },
-  "scanProductNoName": "This product has no name to add to the shopping list."
+  "scanProductNoName": "This product has no name to add to the shopping list.",
+  "communityUsedInRecipes": "{count, plural, =1{Used in 1 recipe} other{Used in {count} recipes}}",
+  "@communityUsedInRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPhotosNotDownloaded": "{count, plural, =1{1 photo could not be downloaded} other{{count} photos could not be downloaded}}",
+  "@communityPhotosNotDownloaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityRecipesSelected": "{selected} of {total} selected",
+  "@communityRecipesSelected": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishUnderReview": "Your publication is under review. It will be visible once it is approved.",
+  "communityTagsSelected": "{count}/{max} tags selected",
+  "@communityTagsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPhotosRejected": "{count, plural, =1{1 photo was not accepted by moderation and was left out of:} other{{count} photos were not accepted by moderation and were left out of:}}",
+  "@communityPublishPhotosRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPhotosFailedTitle": "Some photos did not upload",
+  "communityPublishPhotosFailedBody": "Nothing was published. These recipes have photos that could not be uploaded:",
+  "communityRetryFailedPhotos": "Retry failed photos",
+  "communityPublishRateLimitWait": "{seconds, plural, =1{Upload limit reached. Continuing in 1 second} other{Upload limit reached. Continuing in {seconds} seconds}}",
+  "@communityPublishRateLimitWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishServerBusy": "Another upload is still being processed. Try again in a few minutes.",
+  "communityPublishDailyLimit": "This would go over today's photo upload limit. Try again tomorrow, or publish without photos.",
+  "communityFeedLoadMoreFailed": "Could not load more"
 }

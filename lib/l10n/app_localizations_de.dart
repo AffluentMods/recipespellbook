@@ -10875,4 +10875,79 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'Dieses Produkt hat keinen Namen, der zur Einkaufsliste hinzugefügt werden kann.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count Rezepten verwendet',
+      one: 'In 1 Rezept verwendet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Fotos konnten nicht heruntergeladen werden',
+      one: '1 Foto konnte nicht heruntergeladen werden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '$selected von $total ausgewählt';
+  }
+
+  @override
+  String get communityPublishUnderReview => 'Deine Veröffentlichung wird geprüft. Sie ist sichtbar, sobald sie freigegeben wurde.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return '$count/$max Tags ausgewählt';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Fotos wurden von der Moderation abgelehnt und fehlen bei:',
+      one: '1 Foto wurde von der Moderation abgelehnt und fehlt bei:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => 'Einige Fotos wurden nicht hochgeladen';
+
+  @override
+  String get communityPublishPhotosFailedBody => 'Es wurde nichts veröffentlicht. Bei diesen Rezepten konnten Fotos nicht hochgeladen werden:';
+
+  @override
+  String get communityRetryFailedPhotos => 'Fehlgeschlagene Fotos erneut hochladen';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Upload-Limit erreicht. Weiter in $seconds Sekunden',
+      one: 'Upload-Limit erreicht. Weiter in 1 Sekunde',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => 'Ein anderer Upload wird noch verarbeitet. Versuche es in ein paar Minuten erneut.';
+
+  @override
+  String get communityPublishDailyLimit => 'Damit würdest du das heutige Limit für Foto-Uploads überschreiten. Versuche es morgen erneut oder veröffentliche ohne Fotos.';
+
+  @override
+  String get communityFeedLoadMoreFailed => 'Weitere Einträge konnten nicht geladen werden';
 }

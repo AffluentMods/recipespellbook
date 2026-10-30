@@ -10796,4 +10796,75 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scanProductNoName => '此产品没有可添加到购物清单的名称。';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '用于 $count 个食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 张照片无法下载',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '已选择 $selected/$total';
+  }
+
+  @override
+  String get communityPublishUnderReview => '你的发布内容正在审核中，通过后才会显示。';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return '已选择 $count/$max 个标签';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 张照片未通过审核，已从以下食谱中移除：',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => '部分照片未能上传';
+
+  @override
+  String get communityPublishPhotosFailedBody => '未发布任何内容。以下食谱中有照片未能上传：';
+
+  @override
+  String get communityRetryFailedPhotos => '重试失败的照片';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '已达到上传上限，$seconds 秒后继续',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => '另一个上传仍在处理中，请几分钟后再试。';
+
+  @override
+  String get communityPublishDailyLimit => '这会超出今天的照片上传上限。请明天再试，或不带照片发布。';
+
+  @override
+  String get communityFeedLoadMoreFailed => '无法加载更多';
 }

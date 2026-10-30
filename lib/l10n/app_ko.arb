@@ -4143,5 +4143,18 @@
   "importStoppedSomeFailed": "레시피 {total}개 중 {imported}개 가져옴, {failed}개 실패",
   "importDuplicateCheckFailed": "중복을 확인하지 못했습니다",
   "scanProductFrom": "{brand}의 스캔한 제품",
-  "scanProductNoName": "이 제품에는 장보기 목록에 추가할 이름이 없습니다."
+  "scanProductNoName": "이 제품에는 장보기 목록에 추가할 이름이 없습니다.",
+  "communityUsedInRecipes": "{count, plural, other{레시피 {count}개에서 사용됨}}",
+  "communityPhotosNotDownloaded": "{count, plural, other{사진 {count}장을 다운로드하지 못했습니다}}",
+  "communityRecipesSelected": "{total}개 중 {selected}개 선택됨",
+  "communityPublishUnderReview": "게시물이 검토 중입니다. 승인되면 표시됩니다.",
+  "communityTagsSelected": "태그 {count}/{max}개 선택됨",
+  "communityPublishPhotosRejected": "{count, plural, other{사진 {count}장이 검토에서 승인되지 않아 다음 레시피에서 제외되었습니다:}}",
+  "communityPublishPhotosFailedTitle": "일부 사진을 업로드하지 못했습니다",
+  "communityPublishPhotosFailedBody": "아무것도 게시되지 않았습니다. 다음 레시피의 사진을 업로드하지 못했습니다:",
+  "communityRetryFailedPhotos": "실패한 사진 다시 시도",
+  "communityPublishRateLimitWait": "{seconds, plural, other{업로드 한도에 도달했습니다. {seconds}초 후에 계속합니다}}",
+  "communityPublishServerBusy": "다른 업로드가 아직 처리 중입니다. 몇 분 후에 다시 시도하세요.",
+  "communityPublishDailyLimit": "오늘의 사진 업로드 한도를 넘게 됩니다. 내일 다시 시도하거나 사진 없이 게시하세요.",
+  "communityFeedLoadMoreFailed": "더 불러오지 못했습니다"
 }

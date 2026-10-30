@@ -10963,4 +10963,80 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get scanProductNoName => 'Ten produkt nie ma nazwy, którą można dodać do listy zakupów.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Użyty w $count przepisach',
+      one: 'Użyty w 1 przepisie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nie udało się pobrać $count zdjęć',
+      one: 'Nie udało się pobrać 1 zdjęcia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return 'Wybrano $selected z $total';
+  }
+
+  @override
+  String get communityPublishUnderReview => 'Twoja publikacja jest sprawdzana. Będzie widoczna po zatwierdzeniu.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return 'Wybrane tagi: $count/$max';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Moderacja nie zaakceptowała zdjęć ($count), pominięto je w:',
+      one: 'Moderacja nie zaakceptowała 1 zdjęcia, pominięto je w:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => 'Nie wszystkie zdjęcia zostały przesłane';
+
+  @override
+  String get communityPublishPhotosFailedBody => 'Nic nie zostało opublikowane. W tych przepisach są zdjęcia, których nie udało się przesłać:';
+
+  @override
+  String get communityRetryFailedPhotos => 'Ponów nieudane zdjęcia';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Osiągnięto limit przesyłania. Wznowienie za $seconds sekund',
+      few: 'Osiągnięto limit przesyłania. Wznowienie za $seconds sekundy',
+      one: 'Osiągnięto limit przesyłania. Wznowienie za 1 sekundę',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => 'Inne przesyłanie jest jeszcze przetwarzane. Spróbuj ponownie za kilka minut.';
+
+  @override
+  String get communityPublishDailyLimit => 'To przekroczyłoby dzisiejszy limit przesyłania zdjęć. Spróbuj jutro albo opublikuj bez zdjęć.';
+
+  @override
+  String get communityFeedLoadMoreFailed => 'Nie udało się wczytać więcej';
 }

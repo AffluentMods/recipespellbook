@@ -10801,4 +10801,75 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get scanProductNoName => '이 제품에는 장보기 목록에 추가할 이름이 없습니다.';
+
+  @override
+  String communityUsedInRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '레시피 $count개에서 사용됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityPhotosNotDownloaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '사진 $count장을 다운로드하지 못했습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityRecipesSelected(int selected, int total) {
+    return '$total개 중 $selected개 선택됨';
+  }
+
+  @override
+  String get communityPublishUnderReview => '게시물이 검토 중입니다. 승인되면 표시됩니다.';
+
+  @override
+  String communityTagsSelected(int count, int max) {
+    return '태그 $count/$max개 선택됨';
+  }
+
+  @override
+  String communityPublishPhotosRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '사진 $count장이 검토에서 승인되지 않아 다음 레시피에서 제외되었습니다:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishPhotosFailedTitle => '일부 사진을 업로드하지 못했습니다';
+
+  @override
+  String get communityPublishPhotosFailedBody => '아무것도 게시되지 않았습니다. 다음 레시피의 사진을 업로드하지 못했습니다:';
+
+  @override
+  String get communityRetryFailedPhotos => '실패한 사진 다시 시도';
+
+  @override
+  String communityPublishRateLimitWait(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '업로드 한도에 도달했습니다. $seconds초 후에 계속합니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityPublishServerBusy => '다른 업로드가 아직 처리 중입니다. 몇 분 후에 다시 시도하세요.';
+
+  @override
+  String get communityPublishDailyLimit => '오늘의 사진 업로드 한도를 넘게 됩니다. 내일 다시 시도하거나 사진 없이 게시하세요.';
+
+  @override
+  String get communityFeedLoadMoreFailed => '더 불러오지 못했습니다';
 }

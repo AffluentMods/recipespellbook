@@ -4143,5 +4143,18 @@
   "importStoppedSomeFailed": "{total}件中{imported}件のレシピをインポート、{failed}件が失敗",
   "importDuplicateCheckFailed": "重複を確認できませんでした",
   "scanProductFrom": "{brand}のスキャンした商品",
-  "scanProductNoName": "この商品には買い物リストに追加できる名前がありません。"
+  "scanProductNoName": "この商品には買い物リストに追加できる名前がありません。",
+  "communityUsedInRecipes": "{count, plural, other{{count}件のレシピで使用}}",
+  "communityPhotosNotDownloaded": "{count, plural, other{{count}枚の写真をダウンロードできませんでした}}",
+  "communityRecipesSelected": "{total}件中{selected}件を選択",
+  "communityPublishUnderReview": "公開内容は審査中です。承認後に表示されます。",
+  "communityTagsSelected": "タグ {count}/{max} 件を選択中",
+  "communityPublishPhotosRejected": "{count, plural, other{{count}枚の写真がモデレーションで承認されず、次のレシピから除外されました:}}",
+  "communityPublishPhotosFailedTitle": "一部の写真をアップロードできませんでした",
+  "communityPublishPhotosFailedBody": "何も公開されていません。次のレシピの写真をアップロードできませんでした:",
+  "communityRetryFailedPhotos": "失敗した写真を再試行",
+  "communityPublishRateLimitWait": "{seconds, plural, other{アップロード上限に達しました。{seconds}秒後に再開します}}",
+  "communityPublishServerBusy": "別のアップロードを処理中です。数分後にもう一度お試しください。",
+  "communityPublishDailyLimit": "本日の写真アップロード上限を超えてしまいます。明日もう一度お試しいただくか、写真なしで公開してください。",
+  "communityFeedLoadMoreFailed": "続きを読み込めませんでした"
 }
