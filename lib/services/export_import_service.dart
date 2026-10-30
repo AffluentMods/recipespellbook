@@ -1308,12 +1308,12 @@ class ExportImportService {
       final cbBase64 = cookbookData['imageBase64'] as String?;
       if (cbCover != null) {
         await (db.update(db.cookbooks)..where((t) => t.id.equals(cookbookId)))
-            .write(CookbooksCompanion(imagePath: Value(cbCover)));
+            .write(CookbooksCompanion(imagePath: Value(cbCover), imageServerPath: const Value(null)));
       } else if (!isWeb && cbBase64 != null && cbBase64.isNotEmpty) {
         embeddedImages.add(_EmbeddedImage(
           cbBase64,
           (path) => (db.update(db.cookbooks)..where((t) => t.id.equals(cookbookId)))
-              .write(CookbooksCompanion(imagePath: Value(path))),
+              .write(CookbooksCompanion(imagePath: Value(path), imageServerPath: const Value(null))),
         ));
       }
     }

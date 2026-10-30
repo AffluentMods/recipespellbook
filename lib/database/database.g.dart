@@ -31,6 +31,12 @@ class $CookbooksTable extends Cookbooks
   late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
       'image_path', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _imageServerPathMeta =
+      const VerificationMeta('imageServerPath');
+  @override
+  late final GeneratedColumn<String> imageServerPath = GeneratedColumn<String>(
+      'image_server_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -63,6 +69,7 @@ class $CookbooksTable extends Cookbooks
         name,
         description,
         imagePath,
+        imageServerPath,
         createdAt,
         updatedAt,
         deletedAt,
@@ -99,6 +106,12 @@ class $CookbooksTable extends Cookbooks
       context.handle(_imagePathMeta,
           imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
     }
+    if (data.containsKey('image_server_path')) {
+      context.handle(
+          _imageServerPathMeta,
+          imageServerPath.isAcceptableOrUnknown(
+              data['image_server_path']!, _imageServerPathMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -134,6 +147,8 @@ class $CookbooksTable extends Cookbooks
           .read(DriftSqlType.string, data['${effectivePrefix}description']),
       imagePath: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
+      imageServerPath: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}image_server_path']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -156,6 +171,10 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
   final String name;
   final String? description;
   final String? imagePath;
+
+  /// The cover's copy in the cloud, "userId/hash.ext" (sync-only). imagePath
+  /// stays the file this device shows, as for recipes.
+  final String? imageServerPath;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? deletedAt;
@@ -170,6 +189,7 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       required this.name,
       this.description,
       this.imagePath,
+      this.imageServerPath,
       required this.createdAt,
       this.updatedAt,
       this.deletedAt,
@@ -184,6 +204,9 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
     }
     if (!nullToAbsent || imagePath != null) {
       map['image_path'] = Variable<String>(imagePath);
+    }
+    if (!nullToAbsent || imageServerPath != null) {
+      map['image_server_path'] = Variable<String>(imageServerPath);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || updatedAt != null) {
@@ -208,6 +231,9 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       imagePath: imagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(imagePath),
+      imageServerPath: imageServerPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageServerPath),
       createdAt: Value(createdAt),
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
@@ -229,6 +255,7 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
+      imageServerPath: serializer.fromJson<String?>(json['imageServerPath']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -243,6 +270,7 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'imagePath': serializer.toJson<String?>(imagePath),
+      'imageServerPath': serializer.toJson<String?>(imageServerPath),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -255,6 +283,7 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           String? name,
           Value<String?> description = const Value.absent(),
           Value<String?> imagePath = const Value.absent(),
+          Value<String?> imageServerPath = const Value.absent(),
           DateTime? createdAt,
           Value<DateTime?> updatedAt = const Value.absent(),
           Value<DateTime?> deletedAt = const Value.absent(),
@@ -264,6 +293,9 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
         name: name ?? this.name,
         description: description.present ? description.value : this.description,
         imagePath: imagePath.present ? imagePath.value : this.imagePath,
+        imageServerPath: imageServerPath.present
+            ? imageServerPath.value
+            : this.imageServerPath,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -277,6 +309,9 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       description:
           data.description.present ? data.description.value : this.description,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      imageServerPath: data.imageServerPath.present
+          ? data.imageServerPath.value
+          : this.imageServerPath,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -293,6 +328,7 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('imagePath: $imagePath, ')
+          ..write('imageServerPath: $imageServerPath, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -302,8 +338,8 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, imagePath, createdAt,
-      updatedAt, deletedAt, sharedOwnerId);
+  int get hashCode => Object.hash(id, name, description, imagePath,
+      imageServerPath, createdAt, updatedAt, deletedAt, sharedOwnerId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -312,6 +348,7 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           other.name == this.name &&
           other.description == this.description &&
           other.imagePath == this.imagePath &&
+          other.imageServerPath == this.imageServerPath &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -323,6 +360,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
   final Value<String> name;
   final Value<String?> description;
   final Value<String?> imagePath;
+  final Value<String?> imageServerPath;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -333,6 +371,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.imagePath = const Value.absent(),
+    this.imageServerPath = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -344,6 +383,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     required String name,
     this.description = const Value.absent(),
     this.imagePath = const Value.absent(),
+    this.imageServerPath = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -356,6 +396,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     Expression<String>? name,
     Expression<String>? description,
     Expression<String>? imagePath,
+    Expression<String>? imageServerPath,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -367,6 +408,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (imagePath != null) 'image_path': imagePath,
+      if (imageServerPath != null) 'image_server_path': imageServerPath,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -380,6 +422,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       Value<String>? name,
       Value<String?>? description,
       Value<String?>? imagePath,
+      Value<String?>? imageServerPath,
       Value<DateTime>? createdAt,
       Value<DateTime?>? updatedAt,
       Value<DateTime?>? deletedAt,
@@ -390,6 +433,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       name: name ?? this.name,
       description: description ?? this.description,
       imagePath: imagePath ?? this.imagePath,
+      imageServerPath: imageServerPath ?? this.imageServerPath,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -412,6 +456,9 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     }
     if (imagePath.present) {
       map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (imageServerPath.present) {
+      map['image_server_path'] = Variable<String>(imageServerPath.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -438,6 +485,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('imagePath: $imagePath, ')
+          ..write('imageServerPath: $imageServerPath, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -8091,6 +8139,7 @@ typedef $$CookbooksTableCreateCompanionBuilder = CookbooksCompanion Function({
   required String name,
   Value<String?> description,
   Value<String?> imagePath,
+  Value<String?> imageServerPath,
   Value<DateTime> createdAt,
   Value<DateTime?> updatedAt,
   Value<DateTime?> deletedAt,
@@ -8102,6 +8151,7 @@ typedef $$CookbooksTableUpdateCompanionBuilder = CookbooksCompanion Function({
   Value<String> name,
   Value<String?> description,
   Value<String?> imagePath,
+  Value<String?> imageServerPath,
   Value<DateTime> createdAt,
   Value<DateTime?> updatedAt,
   Value<DateTime?> deletedAt,
@@ -8130,6 +8180,7 @@ class $$CookbooksTableTableManager extends RootTableManager<
             Value<String> name = const Value.absent(),
             Value<String?> description = const Value.absent(),
             Value<String?> imagePath = const Value.absent(),
+            Value<String?> imageServerPath = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime?> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -8141,6 +8192,7 @@ class $$CookbooksTableTableManager extends RootTableManager<
             name: name,
             description: description,
             imagePath: imagePath,
+            imageServerPath: imageServerPath,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -8152,6 +8204,7 @@ class $$CookbooksTableTableManager extends RootTableManager<
             required String name,
             Value<String?> description = const Value.absent(),
             Value<String?> imagePath = const Value.absent(),
+            Value<String?> imageServerPath = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime?> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -8163,6 +8216,7 @@ class $$CookbooksTableTableManager extends RootTableManager<
             name: name,
             description: description,
             imagePath: imagePath,
+            imageServerPath: imageServerPath,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -8192,6 +8246,11 @@ class $$CookbooksTableFilterComposer
 
   ColumnFilters<String> get imagePath => $state.composableBuilder(
       column: $state.table.imagePath,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get imageServerPath => $state.composableBuilder(
+      column: $state.table.imageServerPath,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -8249,6 +8308,11 @@ class $$CookbooksTableOrderingComposer
 
   ColumnOrderings<String> get imagePath => $state.composableBuilder(
       column: $state.table.imagePath,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get imageServerPath => $state.composableBuilder(
+      column: $state.table.imageServerPath,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
