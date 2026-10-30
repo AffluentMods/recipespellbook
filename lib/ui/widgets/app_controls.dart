@@ -142,7 +142,7 @@ class RowCount extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.appColors;
     return Text(
-      count > 999 ? '999+' : '$count',
+      count > 9999 ? '9999+' : '$count',
       style: TextStyle(
         fontSize: 12,
         fontWeight: emphasized ? FontWeight.w600 : FontWeight.w500,
