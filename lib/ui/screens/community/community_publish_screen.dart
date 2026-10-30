@@ -41,11 +41,16 @@ class CommunityPublishScreen extends ConsumerStatefulWidget {
   /// [republishPublicationId] is also set.
   final String? republishCookbookId;
 
+  /// A cookbook to start a new publish on (skips the picker), as when
+  /// publishing from the cookbook's own menu.
+  final String? cookbookId;
+
   const CommunityPublishScreen({
     super.key,
     this.singleRecipeId,
     this.republishPublicationId,
     this.republishCookbookId,
+    this.cookbookId,
   });
 
   @override
@@ -100,13 +105,13 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           _step = 2;
         });
       });
-    } else if (widget.republishCookbookId != null) {
+    } else if ((widget.cookbookId ?? widget.republishCookbookId) != null) {
       // Republishing a cookbook with a known source — pre-select it so
       // the user doesn't re-pick (and can't pick the wrong one). If the
       // cookbook was deleted since publishing, silently fall back to the
       // picker (we just stay on step 1).
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final cb = await ref.read(cookbookDaoProvider).getCookbookById(widget.republishCookbookId!);
+        final cb = await ref.read(cookbookDaoProvider).getCookbookById((widget.cookbookId ?? widget.republishCookbookId)!);
         if (!mounted || cb == null) return;
         _selectCookbook(cb);
       });
