@@ -25,7 +25,8 @@ import '../../widgets/sheet_chrome.dart';
 /// Search query provider
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
-/// Search results provider — relevance-ranked.
+/// Search results provider: every cookbook, relevance-ranked. Searching inside
+/// one cookbook is the field on its recipe list.
 ///
 /// Ranking (highest first):
 ///   100 — exact title match
@@ -33,22 +34,28 @@ final searchQueryProvider = StateProvider<String>((ref) => '');
 ///    60 — title contains query
 ///    30 — description contains query
 ///    10 — ingredient name contains query
-/// Ties broken by favorite > recently viewed > title alphabetical.
+/// Ties broken by favorite > the open cookbook > recently viewed > title.
+/// The same recipe in several cookbooks shows once, the first copy in that order.
 final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
   final query = ref.watch(searchQueryProvider);
   if (query.trim().isEmpty) return [];
 
-  final cookbookId = ref.watch(selectedCookbookIdProvider) ?? 'starter';
+  final cookbookId = ref.watch(selectedCookbookIdProvider);
   final db = ref.watch(databaseProvider);
 
+  // A whole library is a lot to read for every letter typed: wait for a pause.
+  var replaced = false;
+  ref.onDispose(() => replaced = true);
+  await Future<void>.delayed(const Duration(milliseconds: 180));
+  if (replaced) return [];
+
   // Accent-folded query so "bearnaise"/"bérnaise" match "Béarnaise".
-  // SQLite LIKE can't fold diacritics, so we fetch the cookbook's
-  // recipes + ingredient names and match/score in Dart.
+  // SQLite LIKE can't fold diacritics, so we fetch the recipes + ingredient
+  // names and match/score in Dart.
   final q = foldAccents(query.trim());
 
   final recipeRows = await db.customSelect(
-    'SELECT * FROM recipes WHERE cookbook_id = ? AND deleted_at IS NULL',
-    variables: [Variable.withString(cookbookId)],
+    'SELECT * FROM recipes WHERE deleted_at IS NULL',
     readsFrom: {db.recipes},
   ).get();
 
@@ -56,18 +63,21 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
     '''
     SELECT i.recipe_id AS rid, i.name AS iname FROM ingredients i
     INNER JOIN recipes r ON r.id = i.recipe_id
-    WHERE r.cookbook_id = ? AND r.deleted_at IS NULL
+    WHERE r.deleted_at IS NULL
+    ORDER BY i.recipe_id, i.sort_order
     ''',
-    variables: [Variable.withString(cookbookId)],
     readsFrom: {db.recipes, db.ingredients},
   ).get();
 
   // recipe_id -> true if any ingredient name folded-contains the query.
   final ingredientMatch = <String>{};
+  final ingredientNames = <String, List<String>>{};
   for (final row in ingredientRows) {
     final name = foldAccents(row.data['iname'] as String? ?? '');
+    final rid = row.data['rid'] as String;
+    (ingredientNames[rid] ??= []).add(name);
     if (name.contains(q)) {
-      ingredientMatch.add(row.data['rid'] as String);
+      ingredientMatch.add(rid);
     }
   }
 
@@ -106,15 +116,26 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
   final ranked = scored.values.toList()..sort((a, b) {
     if (a.score != b.score) return b.score.compareTo(a.score);
     if (a.recipe.isFavorite != b.recipe.isFavorite) return a.recipe.isFavorite ? -1 : 1;
+    final aHere = a.recipe.cookbookId == cookbookId;
+    if (aHere != (b.recipe.cookbookId == cookbookId)) return aHere ? -1 : 1;
     final aViewed = a.recipe.lastViewedAt;
     final bViewed = b.recipe.lastViewedAt;
     if (aViewed != null && bViewed != null) return bViewed.compareTo(aViewed);
     if (aViewed != null) return -1;
     if (bViewed != null) return 1;
-    return a.recipe.title.toLowerCase().compareTo(b.recipe.title.toLowerCase());
+    final byTitle = a.recipe.title.toLowerCase().compareTo(b.recipe.title.toLowerCase());
+    return byTitle != 0 ? byTitle : a.recipe.id.compareTo(b.recipe.id);
   });
 
-  return ranked.map((s) => s.recipe).toList();
+  // The same title with the same ingredients is the same recipe, such as a
+  // sub-recipe copied into each cookbook that uses it. A copy someone changed
+  // is a recipe of its own, and stays.
+  final seen = <String>{};
+  return [
+    for (final s in ranked)
+      if (seen.add('${foldAccents(s.recipe.title.trim())}\n${(ingredientNames[s.recipe.id] ?? const []).join('\n')}'))
+        s.recipe,
+  ];
 });
 
 class _ScoredRecipe {
@@ -770,7 +791,15 @@ class _SearchResultCard extends ConsumerWidget {
 
     final c = context.appColors;
     final l10n = AppLocalizations.of(context)!;
-    final meta = recipeMetaLine(l10n, recipe);
+    // Results come from every cookbook: say which one, once there is a choice.
+    final cookbooks = ref.watch(cookbooksProvider).valueOrNull ?? const <Cookbook>[];
+    final cookbookName = cookbooks.length > 1
+        ? cookbooks.where((cb) => cb.id == recipe.cookbookId).firstOrNull?.name
+        : null;
+    final meta = [
+      if (cookbookName != null) cookbookName,
+      if (recipeMetaLine(l10n, recipe).isNotEmpty) recipeMetaLine(l10n, recipe),
+    ].join(' · ');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: 1),
       child: Material(
@@ -818,7 +847,12 @@ class _SearchResultCard extends ConsumerWidget {
                       ],
                       if (meta.isNotEmpty) ...[
                         const SizedBox(height: 2),
-                        Text(meta, style: TextStyle(fontSize: 12.5, color: c.textTertiary)),
+                        Text(
+                          meta,
+                          style: TextStyle(fontSize: 12.5, color: c.textTertiary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ],
                   ),
