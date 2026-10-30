@@ -23,6 +23,7 @@ class File {
   Future<void> delete({bool recursive = false}) async {}
   int lengthSync() => 0;
   Future<int> length() async => 0;
+  Future<DateTime> lastModified() async => DateTime.fromMillisecondsSinceEpoch(0);
   Directory get parent {
     final idx = path.lastIndexOf('/');
     return Directory(idx >= 0 ? path.substring(0, idx) : '.');

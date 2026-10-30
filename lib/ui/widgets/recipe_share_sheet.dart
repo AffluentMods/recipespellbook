@@ -277,7 +277,7 @@ class _RecipeShareSheet extends StatelessWidget {
         final r = await images
             .communityUploadLocalPath(path)
             .timeout(const Duration(seconds: 20));
-        return r?.path;
+        return r.result?.path;
       } catch (e) {
         debugPrint('[Share] image upload skipped: $e');
         return null; // best-effort: recipe still shares without this photo

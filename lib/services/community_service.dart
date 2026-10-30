@@ -527,12 +527,17 @@ class CommunityTagItem {
 class UploadStatus {
   final bool canUpload;
   final bool activeUpload;
+  /// Another publish holds the account's upload lock right now (a stale
+  /// lock is not reported). Older servers only send [activeUpload].
+  final bool locked;
+  final DateTime? lockExpiresAt;
   final int bytesToday;
   final int dailyLimitBytes;
   final int maxCookbookBytes;
 
   const UploadStatus({
     required this.canUpload, required this.activeUpload,
+    this.locked = false, this.lockExpiresAt,
     required this.bytesToday, required this.dailyLimitBytes,
     required this.maxCookbookBytes,
   });
@@ -540,6 +545,8 @@ class UploadStatus {
   factory UploadStatus.fromJson(Map<String, dynamic> json) => UploadStatus(
     canUpload: json['canUpload'] as bool? ?? true,
     activeUpload: json['activeUpload'] as bool? ?? false,
+    locked: json['locked'] as bool? ?? json['activeUpload'] as bool? ?? false,
+    lockExpiresAt: DateTime.tryParse(json['lockExpiresAt'] as String? ?? ''),
     bytesToday: (json['bytesToday'] as num?)?.toInt() ?? 0,
     dailyLimitBytes: (json['dailyLimitBytes'] as num?)?.toInt() ?? 2147483647,
     maxCookbookBytes: (json['maxCookbookBytes'] as num?)?.toInt() ?? 524288000,
@@ -612,6 +619,16 @@ class PublishProgress {
   final String? errorMessage;
   final String? publicationId;
 
+  /// Seconds left of a photo rate limit wait; 0 while uploading.
+  final int waitSeconds;
+
+  /// Recipes whose photos moderation turned down (left out of the publication).
+  final List<String> rejectedRecipes;
+
+  /// With status 'error': recipes whose photos did not upload, so nothing
+  /// was published. The publish screen offers to retry just those photos.
+  final List<String> failedRecipes;
+
   const PublishProgress({
     required this.status,
     this.uploadedImages = 0,
@@ -619,6 +636,9 @@ class PublishProgress {
     this.skippedImages = 0,
     this.errorMessage,
     this.publicationId,
+    this.waitSeconds = 0,
+    this.rejectedRecipes = const [],
+    this.failedRecipes = const [],
   });
 
   PublishProgress copyWith({
@@ -628,6 +648,9 @@ class PublishProgress {
     int? skippedImages,
     String? errorMessage,
     String? publicationId,
+    int? waitSeconds,
+    List<String>? rejectedRecipes,
+    List<String>? failedRecipes,
   }) => PublishProgress(
     status: status ?? this.status,
     uploadedImages: uploadedImages ?? this.uploadedImages,
@@ -635,6 +658,9 @@ class PublishProgress {
     skippedImages: skippedImages ?? this.skippedImages,
     errorMessage: errorMessage ?? this.errorMessage,
     publicationId: publicationId ?? this.publicationId,
+    waitSeconds: waitSeconds ?? this.waitSeconds,
+    rejectedRecipes: rejectedRecipes ?? this.rejectedRecipes,
+    failedRecipes: failedRecipes ?? this.failedRecipes,
   );
 }
 
@@ -978,7 +1004,7 @@ class CommunityService {
         if (imageCount != null) 'imageCount': imageCount,
         if (totalImageBytes != null) 'totalImageBytes': totalImageBytes,
         if (imagePath != null) 'imagePath': imagePath,
-      });
+      }, timeout: publishTimeout);
       return r.statusCode == 200;
     } catch (e) {
       debugPrint('[Community] replacePublicationRecipes: $e');
@@ -1056,6 +1082,49 @@ class CommunityService {
   }
 
   // ────────────────────────────────────
+  //  Publish keys (local-only)
+  // ────────────────────────────────────
+  //
+  // One key per local cookbook or recipe while its publish has not gone
+  // through, sent as `publishKey`. A retry after a timeout reuses it, so
+  // the server returns the publication the first try made instead of
+  // publishing twice. Dropped after a success.
+
+  static const _publishKeysKey = 'communityPublishKeys';
+
+  /// The key for [sourceKey] (e.g. `cookbook:<id>`), made on first use.
+  static Future<String> publishKeyFor(String sourceKey) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_publishKeysKey);
+      final map = raw != null ? (jsonDecode(raw) as Map<String, dynamic>) : <String, dynamic>{};
+      final existing = map[sourceKey];
+      if (existing is String && existing.isNotEmpty) return existing;
+      final key = const Uuid().v4();
+      map[sourceKey] = key;
+      await prefs.setString(_publishKeysKey, jsonEncode(map));
+      return key;
+    } catch (e) {
+      debugPrint('[Community] publishKeyFor: $e');
+      return const Uuid().v4();
+    }
+  }
+
+  static Future<void> clearPublishKey(String sourceKey) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_publishKeysKey);
+      if (raw == null) return;
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      if (map.remove(sourceKey) != null) {
+        await prefs.setString(_publishKeysKey, jsonEncode(map));
+      }
+    } catch (e) {
+      debugPrint('[Community] clearPublishKey: $e');
+    }
+  }
+
+  // ────────────────────────────────────
   //  Upload Status
   // ────────────────────────────────────
 
@@ -1076,12 +1145,21 @@ class CommunityService {
   //  Publish
   // ────────────────────────────────────
 
+  /// A publish carries every recipe inline; a big cookbook takes the server
+  /// far longer than the usual 15 s request timeout.
+  static const publishTimeout = Duration(seconds: 120);
+
   /// Publish a cookbook to the community feed.
   ///
   /// Sends all cookbook + recipe data inline so the server doesn't need to
   /// look anything up.  [title] is required; [recipes] must be a JSON-ready
   /// list of maps (see CommunityPublishScreen for how they're built).
-  Future<({bool success, String? error, String? publicationId, String? status})> publish({
+  /// [publishKey] makes a retry safe: the server answers a repeated key with
+  /// the publication it already made (200) instead of making another.
+  /// A 429 that carries `Retry-After` is the account's upload lock (another
+  /// publish still being processed) and comes back as [retryAfter]; one
+  /// without it (the daily limit) is a plain failure.
+  Future<({bool success, String? error, String? publicationId, String? status, Duration? retryAfter})> publish({
     required String title,
     String? description,
     String? imagePath,
@@ -1091,6 +1169,7 @@ class CommunityService {
     String? tags,
     /// 'cookbook' (default) or 'recipe' for single-recipe uploads.
     String kind = 'cookbook',
+    String? publishKey,
   }) async {
     try {
       final r = await _auth.post('/v1/community', {
@@ -1102,19 +1181,30 @@ class CommunityService {
         'totalImageBytes': totalImageBytes,
         if (tags != null) 'tags': tags,
         'kind': kind,
-      });
-      if (r.statusCode == 201) {
+        if (publishKey != null) 'publishKey': publishKey,
+      }, timeout: publishTimeout);
+      // 201 is a new publication, 200 the one an earlier try with the same
+      // publishKey already made.
+      if (r.statusCode == 201 || r.statusCode == 200) {
         final data = jsonDecode(r.body);
         return (
           success: true,
           error: null,
           publicationId: data['id'] as String?,
           status: data['status'] as String?,
+          retryAfter: null,
         );
       }
-      return (success: false, error: _parseError(r), publicationId: null, status: null);
+      final retryAfter = r.statusCode == 429 ? int.tryParse(r.headers['retry-after']?.trim() ?? '') : null;
+      return (
+        success: false,
+        error: _parseError(r),
+        publicationId: null,
+        status: null,
+        retryAfter: retryAfter != null && retryAfter > 0 ? Duration(seconds: retryAfter) : null,
+      );
     } catch (e) {
-      return (success: false, error: 'Connection error', publicationId: null, status: null);
+      return (success: false, error: 'Connection error', publicationId: null, status: null, retryAfter: null);
     }
   }
 

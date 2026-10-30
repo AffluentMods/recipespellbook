@@ -31,6 +31,45 @@ class ImageUploadResult {
   }
 }
 
+/// Why a community photo upload did not go through.
+enum CommunityUploadFailure {
+  /// Turned down by the server's image moderation (422). Sending the same
+  /// photo again gets the same answer, so it is not retried.
+  rejected,
+
+  /// Too many uploads for now (429). [CommunityUploadOutcome.retryAfter]
+  /// says when the limit resets.
+  rateLimited,
+
+  /// Anything else: offline, timed out, server error, file too large.
+  failed,
+}
+
+/// What [ImageService.communityUploadFile] did with one photo.
+class CommunityUploadOutcome {
+  /// Set when the photo was stored.
+  final ImageUploadResult? result;
+
+  /// Set when it was not.
+  final CommunityUploadFailure? failure;
+
+  /// For [CommunityUploadFailure.rateLimited]: time until the limit resets.
+  final Duration? retryAfter;
+
+  /// Size of the photo as it was sent (after re-encoding), 0 if not stored.
+  final int bytesSent;
+
+  const CommunityUploadOutcome.uploaded(ImageUploadResult this.result, {required this.bytesSent})
+      : failure = null,
+        retryAfter = null;
+
+  const CommunityUploadOutcome.failed(CommunityUploadFailure this.failure, {this.retryAfter})
+      : result = null,
+        bytesSent = 0;
+
+  bool get ok => result != null;
+}
+
 // ════════════════════════════════════════════
 //  IMAGE SERVICE
 // ════════════════════════════════════════════
@@ -229,11 +268,13 @@ class ImageService {
 
   /// Upload a local image file for community publishing.
   /// Uses the /community-upload endpoint which includes SafeSearch scanning.
-  /// Returns null if rejected by moderation, user not signed in, or upload fails.
-  Future<ImageUploadResult?> communityUploadFile(File file) async {
+  /// The outcome tells a moderation rejection and a rate limit apart from
+  /// other failures, and carries the bytes actually sent.
+  Future<CommunityUploadOutcome> communityUploadFile(File file) async {
+    const failed = CommunityUploadOutcome.failed(CommunityUploadFailure.failed);
     if (!_auth.isSignedIn) {
       debugPrint('[ImageService] Not signed in — cannot upload');
-      return null;
+      return failed;
     }
 
     try {
@@ -267,7 +308,7 @@ class ImageService {
 
       if (bytes.length > maxFileSize) {
         debugPrint('[ImageService] File too large: ${bytes.length} bytes');
-        return null;
+        return failed;
       }
 
       final base64Data = base64Encode(bytes);
@@ -283,33 +324,66 @@ class ImageService {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final result = ImageUploadResult.fromJson(data);
         debugPrint('[ImageService] Community uploaded: ${result.path}');
-        return result;
+        return CommunityUploadOutcome.uploaded(result, bytesSent: bytes.length);
       }
 
       if (response.statusCode == 422) {
         // Rejected by SafeSearch
         debugPrint('[ImageService] Image rejected by moderation${kDebugMode ? ': ${response.body}' : ''}');
-        return null;
+        return const CommunityUploadOutcome.failed(CommunityUploadFailure.rejected);
+      }
+
+      if (response.statusCode == 429) {
+        final wait = rateLimitReset(response.headers);
+        debugPrint('[ImageService] Community upload rate limited, resets in ${wait.inSeconds}s');
+        return CommunityUploadOutcome.failed(CommunityUploadFailure.rateLimited, retryAfter: wait);
       }
 
       debugPrint('[ImageService] Community upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
-      return null;
+      return failed;
     } catch (e) {
       debugPrint('[ImageService] Community upload error: $e');
-      return null;
+      return failed;
     }
   }
 
   /// Upload a local image file by path for community publishing.
   /// Convenience wrapper around [communityUploadFile].
-  Future<ImageUploadResult?> communityUploadLocalPath(String localPath) async {
-    if (!supportsLocalFileSystem) return null;
+  Future<CommunityUploadOutcome> communityUploadLocalPath(String localPath) async {
+    const failed = CommunityUploadOutcome.failed(CommunityUploadFailure.failed);
+    if (!supportsLocalFileSystem) return failed;
     final file = File(localPath);
     if (!await file.exists()) {
       debugPrint('[ImageService] Local file not found: $localPath');
-      return null;
+      return failed;
     }
     return communityUploadFile(file);
+  }
+
+  /// Time until a 429 resets, from the standard rate limit headers:
+  /// `RateLimit-Reset` (seconds, or a Unix time from some servers), then
+  /// `Retry-After` (seconds), then the combined `RateLimit: ..., reset=N`.
+  /// Falls back to a minute when none is readable; never more than an hour.
+  @visibleForTesting
+  static Duration rateLimitReset(Map<String, String> headers, {DateTime? now}) {
+    String? header(String name) {
+      for (final e in headers.entries) {
+        if (e.key.toLowerCase() == name) return e.value.trim();
+      }
+      return null;
+    }
+
+    int? seconds = int.tryParse(header('ratelimit-reset') ?? '');
+    if (seconds != null && seconds > 1000000000) {
+      final nowSeconds = (now ?? DateTime.now()).millisecondsSinceEpoch ~/ 1000;
+      seconds = seconds - nowSeconds;
+    }
+    seconds ??= int.tryParse(header('retry-after') ?? '');
+    if (seconds == null) {
+      final combined = RegExp(r'reset=(\d+)').firstMatch(header('ratelimit') ?? '');
+      if (combined != null) seconds = int.tryParse(combined.group(1)!);
+    }
+    return Duration(seconds: (seconds ?? 60).clamp(1, 3600));
   }
 
   // ════════════════════════════════════════════
@@ -317,8 +391,13 @@ class ImageService {
   // ════════════════════════════════════════════
 
   /// Download an image from a URL, compress if needed, and save locally.
-  /// Returns the local file path, or null on failure.
-  Future<String?> downloadAndSaveImage(String url, String filename) async {
+  /// Returns the local file path, or null on failure. A download that takes
+  /// longer than [timeout] is abandoned.
+  Future<String?> downloadAndSaveImage(
+    String url,
+    String filename, {
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
     if (!supportsLocalFileSystem) return null;
 
     // Sanitize the filename: base name only, no separators or traversal, so a
@@ -346,36 +425,10 @@ class ImageService {
 
     final client = http.Client();
     try {
-      final streamed = await client.send(http.Request('GET', uri));
-      if (streamed.statusCode != 200) {
-        debugPrint('[ImageService] Download failed: ${streamed.statusCode}');
-        return null;
-      }
-      // Reject oversize responses up-front by Content-Length when present…
-      final declared = streamed.contentLength;
-      if (declared != null && declared > _maxDownloadBytes) {
-        debugPrint('[ImageService] Download too large: $declared bytes');
-        return null;
-      }
-
-      // …and enforce a hard cap while streaming, so a lying/chunked response
-      // can't exhaust memory or disk.
-      final chunks = <int>[];
-      await for (final chunk in streamed.stream) {
-        chunks.addAll(chunk);
-        if (chunks.length > _maxDownloadBytes) {
-          debugPrint('[ImageService] Download exceeded cap — aborting');
-          return null;
-        }
-      }
-      var bytes = Uint8List.fromList(chunks);
-
-      // Confirm the payload is actually a decodable image before persisting it
-      // under a .jpg name.
-      if (_sniffImageMime(bytes) == null) {
-        debugPrint('[ImageService] Downloaded bytes are not a recognised image');
-        return null;
-      }
+      // The timeout covers the whole transfer; closing the client in
+      // `finally` then drops the connection.
+      var bytes = await _fetchImageBytes(client, uri).timeout(timeout);
+      if (bytes == null) return null;
 
       final appDir = await getApplicationDocumentsDirectory();
       final communityDir = Directory(p.join(appDir.path, 'images', 'community'));
@@ -399,6 +452,74 @@ class ImageService {
     } finally {
       client.close();
     }
+  }
+
+  /// GET [uri] as image bytes, or null for a bad status, an oversize body or
+  /// something that is not an image.
+  Future<Uint8List?> _fetchImageBytes(http.Client client, Uri uri) async {
+    final streamed = await client.send(http.Request('GET', uri));
+    if (streamed.statusCode != 200) {
+      debugPrint('[ImageService] Download failed: ${streamed.statusCode}');
+      return null;
+    }
+    // Reject oversize responses up-front by Content-Length when present…
+    final declared = streamed.contentLength;
+    if (declared != null && declared > _maxDownloadBytes) {
+      debugPrint('[ImageService] Download too large: $declared bytes');
+      return null;
+    }
+
+    // …and enforce a hard cap while streaming, so a lying/chunked response
+    // can't exhaust memory or disk.
+    final chunks = <int>[];
+    await for (final chunk in streamed.stream) {
+      chunks.addAll(chunk);
+      if (chunks.length > _maxDownloadBytes) {
+        debugPrint('[ImageService] Download exceeded cap — aborting');
+        return null;
+      }
+    }
+    final bytes = Uint8List.fromList(chunks);
+
+    // Confirm the payload is actually a decodable image before persisting it
+    // under a .jpg name.
+    if (_sniffImageMime(bytes) == null) {
+      debugPrint('[ImageService] Downloaded bytes are not a recognised image');
+      return null;
+    }
+    return bytes;
+  }
+
+  /// Download several images with [downloadAndSaveImage], at most
+  /// [concurrency] at a time, trying each failed one [retries] more times.
+  /// The result lines up with [jobs]; null is a photo that could not be
+  /// downloaded. [onProgress] gets the number finished so far.
+  Future<List<String?>> downloadAndSaveImages(
+    List<({String url, String filename})> jobs, {
+    int concurrency = 4,
+    int retries = 1,
+    Duration timeout = const Duration(seconds: 20),
+    void Function(int done)? onProgress,
+  }) async {
+    final results = List<String?>.filled(jobs.length, null);
+    var next = 0;
+    var done = 0;
+
+    Future<void> worker() async {
+      while (next < jobs.length) {
+        final i = next++;
+        String? path;
+        for (var attempt = 0; attempt <= retries && path == null; attempt++) {
+          path = await downloadAndSaveImage(jobs[i].url, jobs[i].filename, timeout: timeout);
+        }
+        results[i] = path;
+        onProgress?.call(++done);
+      }
+    }
+
+    final workers = jobs.isEmpty ? 0 : concurrency.clamp(1, jobs.length);
+    await Future.wait([for (var w = 0; w < workers; w++) worker()]);
+    return results;
   }
 
   /// Target max file size for saved images (2MB).
