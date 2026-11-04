@@ -827,15 +827,13 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       onViewCookbook: recipe.cookbook.isSingleRecipe
           ? null
           : () {
-              Navigator.of(context).pop();
               context.push('/community/${recipe.cookbook.id}')
                   .then((_) { if (mounted) _load(); });
             },
       // Saves in place: returns true so the sheet swaps to "Saved" and the
       // feed card's bookmark fills.
-      onSaveRecipe: () => _saveRecipeFromPreview(context, recipe),
+      onSaveRecipe: (closePreview) => _saveRecipeFromPreview(context, recipe, closePreview),
       onExpandRecipe: () {
-        Navigator.of(context).pop();
         final communityRecipe = CommunityRecipe(
           id: recipe.id,
           cookCount: recipe.cookCount,
@@ -867,7 +865,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   /// there is a choice. Returns true when the recipe was saved (so the
   /// preview sheet can flip to its "Saved" state).
   Future<bool> _saveRecipeFromPreview(
-      BuildContext context, CommunityRecipeFeedItem recipe) async {
+      BuildContext context, CommunityRecipeFeedItem recipe, VoidCallback closePreview) async {
     final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
     if (cookbooks.length == 1) {
       await _saveRecipeToCookbook(context, recipe, cookbooks.first.id);
@@ -876,7 +874,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     // Zero or many cookbooks: hand off to the picker sheet (which closes this
     // preview first), so the preview does not falsely claim a save.
     if (context.mounted) {
-      Navigator.of(context).pop();
+      closePreview();
       _showSaveRecipeSheet(context, recipe);
     }
     return false;
