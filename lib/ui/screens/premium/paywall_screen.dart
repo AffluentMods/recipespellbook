@@ -23,9 +23,16 @@ class PaywallScreen extends ConsumerStatefulWidget {
 }
 
 class _PaywallScreenState extends ConsumerState<PaywallScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   bool _purchasing = false;
   String? _livePrice; // fetched from the store; falls back to l10n price
+
+  /// A Stripe checkout was opened in the browser and not confirmed yet.
+  bool _checkoutPending = false;
+  bool _checkingPurchase = false;
+
+  /// The "complete your purchase" dialog, while it is open.
+  BuildContext? _checkoutDialogContext;
 
   late AnimationController _enterController;
   late Animation<double> _fadeIn;
@@ -43,6 +50,16 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
         .animate(CurvedAnimation(parent: _enterController, curve: Curves.easeOutCubic));
     _enterController.forward();
     _loadPrice();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// Coming back to the app after the browser checkout: check the account
+  /// once more so the purchase shows up without pressing Refresh.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _checkoutPending) {
+      _checkWebPurchase(silent: true);
+    }
   }
 
   /// Pull the real store price so the card never mismatches App Store / Play.
@@ -66,6 +83,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _enterController.dispose();
     super.dispose();
   }
@@ -99,10 +117,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                       ),
                       const Spacer(),
                       TextButton(
-                        onPressed: () {
-                          ref.read(subscriptionProvider.notifier).restorePurchases();
-                          AppSnackbar.info(context, l10n.restoringPurchases);
-                        },
+                        onPressed: _restorePurchases,
                         child: Text(l10n.restorePurchases,
                             style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
                       ),
@@ -285,10 +300,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _trustLink(l10n.paywallRestorePurchases, () {
-                  ref.read(subscriptionProvider.notifier).restorePurchases();
-                  AppSnackbar.info(context, l10n.restoringPurchases);
-                }, theme),
+                _trustLink(l10n.paywallRestorePurchases, _restorePurchases, theme),
                 _trustDot(theme),
                 _trustLink(l10n.paywallPrivacyPolicy, () {
                   launchUrl(Uri.parse('https://recipespellbook.app/privacy'), mode: LaunchMode.externalApplication);
@@ -323,6 +335,28 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
   // ════════════════════════════════════════════════════════════════
   //  PURCHASE LOGIC (unchanged from working implementation)
   // ════════════════════════════════════════════════════════════════
+
+  /// Restore: the store on mobile, the account on the server elsewhere.
+  /// Says what was actually found.
+  Future<void> _restorePurchases() async {
+    final l10n = AppLocalizations.of(context)!;
+    AppSnackbar.info(context, l10n.restoringPurchases);
+    try {
+      final found =
+          await ref.read(subscriptionProvider.notifier).restorePurchases();
+      if (!mounted) return;
+      if (found) {
+        AppSnackbar.success(context, l10n.purchasesRestored);
+        Navigator.pop(context);
+      } else {
+        AppSnackbar.info(context, l10n.noPurchasesFound);
+      }
+    } on PurchaseCheckFailed {
+      if (mounted) AppSnackbar.error(context, l10n.errorNetwork);
+    } catch (_) {
+      if (mounted) AppSnackbar.error(context, l10n.restoreFailed);
+    }
+  }
 
   Future<void> _handlePurchase(AuthState authState) async {
     if (!authState.isSignedIn) {
@@ -402,6 +436,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     final uri = Uri.tryParse(webLink);
     if (uri != null && await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+      _checkoutPending = true;
       if (mounted) _showWebPurchaseRefreshDialog();
     } else if (mounted) {
       _showWebPurchaseUnavailable();
@@ -413,32 +448,52 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        icon: Icon(Icons.open_in_new, size: 40, color: theme.colorScheme.primary),
-        title: Text(l10n.paywallCompleteYourPurchase),
-        content: Text(l10n.paywallCheckoutOpened),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-          FilledButton.icon(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await ref.read(subscriptionProvider.notifier).refreshStatus();
-              if (mounted) {
-                final tier = ref.read(subscriptionProvider).tier;
-                if (tier != SubscriptionTier.free) {
-                  AppSnackbar.success(context, '${l10n.paywallPurchaseSuccess} 🎉');
-                  Navigator.pop(context);
-                } else {
-                  AppSnackbar.info(context, l10n.paywallPurchaseNotDetected);
-                }
-              }
-            },
-            icon: const Icon(Icons.refresh),
-            label: Text(l10n.paywallRefresh),
-          ),
-        ],
-      ),
-    );
+      builder: (ctx) {
+        _checkoutDialogContext = ctx;
+        return AlertDialog(
+          icon: Icon(Icons.open_in_new, size: 40, color: theme.colorScheme.primary),
+          title: Text(l10n.paywallCompleteYourPurchase),
+          content: Text(l10n.paywallCheckoutOpened),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _checkWebPurchase();
+              },
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.paywallRefresh),
+            ),
+          ],
+        );
+      },
+    ).whenComplete(() => _checkoutDialogContext = null);
+  }
+
+  /// Re-read the account after a browser checkout. [silent] is the automatic
+  /// check when the app regains focus: it only speaks up when the purchase is
+  /// there.
+  Future<void> _checkWebPurchase({bool silent = false}) async {
+    if (_checkingPurchase) return;
+    _checkingPurchase = true;
+    try {
+      final checked =
+          await ref.read(subscriptionProvider.notifier).refreshStatus();
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      if (ref.read(subscriptionProvider).tier != SubscriptionTier.free) {
+        _checkoutPending = false;
+        final dialog = _checkoutDialogContext;
+        if (dialog != null && dialog.mounted) Navigator.pop(dialog);
+        AppSnackbar.success(context, '${l10n.paywallPurchaseSuccess} 🎉');
+        Navigator.pop(context);
+      } else if (!silent) {
+        AppSnackbar.info(context,
+            checked ? l10n.paywallPurchaseNotDetected : l10n.errorNetwork);
+      }
+    } finally {
+      _checkingPurchase = false;
+    }
   }
 
   void _showWebPurchaseUnavailable() {

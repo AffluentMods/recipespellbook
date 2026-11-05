@@ -223,6 +223,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return false;
   }
 
+  /// Take the account as re-read from the server (see
+  /// [AuthService.refreshCurrentUser]), for example a new tier after a
+  /// Stripe checkout.
+  void applyRefreshedUser(AuthUser user) {
+    if (!state.isSignedIn || state.user?.id != user.id) return;
+    state = state.copyWith(user: user);
+  }
+
   /// Clear any auth error (e.g. after user dismisses error dialog).
   void clearError() {
     state = state.copyWith(error: null);
