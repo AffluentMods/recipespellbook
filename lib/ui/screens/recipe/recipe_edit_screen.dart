@@ -37,6 +37,7 @@ import '../../../services/sync_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../providers/navigation_guard_provider.dart';
+import '../../shell/shell_navigation.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
 
@@ -1471,14 +1472,26 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         // app-level overlay, so it stays visible on the screen revealed by the
         // pop. Showing it afterwards via rootNavigatorKey.currentContext threw
         // "No Overlay found" — that context's overlay is a descendant.
+        //
+        // View pushes, so back from the recipe returns to the page under the
+        // editor. A `go` left the recipe as the only page in the shell, and its
+        // back button then emptied it (a blank window on desktop). Skip it when
+        // that recipe is already showing (it was edited from its own page).
         AppSnackbar.successWithAction(
           context,
           message,
           actionLabel: l10n.actionView,
-          onAction: () => router.go('/recipe/$savedRecipeId'),
+          onAction: () {
+            if (router.state.uri.path != '/recipe/$savedRecipeId') {
+              router.push('/recipe/$savedRecipeId');
+            }
+          },
         );
 
-        context.pop(true);
+        // Opened where there is nothing under it (a web refresh), show the
+        // recipe instead: a throwing pop read as a failed save, and saving
+        // again made a second copy.
+        popOrGo(context, '/recipe/$savedRecipeId', true);
 
         // TODO: Kitchen Buddy hidden for now
         // if (!_isEditing) {

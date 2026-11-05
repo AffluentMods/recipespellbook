@@ -1218,14 +1218,13 @@ class _DangerZoneCard extends ConsumerWidget {
       title: l10n.dangerZoneSection,
       icon: Icons.warning_amber_rounded,
       children: [
-        // Sign out (no confirmation)
+        // Sign out (no confirmation). Stay on this page: it switches to the
+        // signed-out view. Popping it left a blank window on desktop, where
+        // it is the only page (sidebar) or the settings pane's root.
         ListTile(
           leading: Icon(Icons.logout, color: theme.colorScheme.outline),
           title: Text(l10n.signOut),
-          onTap: () {
-            ref.read(authProvider.notifier).signOut();
-            if (context.mounted) Navigator.pop(context);
-          },
+          onTap: () => ref.read(authProvider.notifier).signOut(),
         ),
 
         // Delete account (type-DELETE confirmation)
@@ -1278,12 +1277,10 @@ class _DangerZoneCard extends ConsumerWidget {
                       ? () async {
                           Navigator.pop(ctx);
                           final success = await ref.read(authProvider.notifier).deleteAccount();
-                          if (context.mounted) {
-                            if (success) {
-                              Navigator.pop(context);
-                            } else {
-                              AppSnackbar.info(context, l10n.deleteAccountFailed);
-                            }
+                          // On success the page switches to the signed-out
+                          // view (no pop, as for sign out).
+                          if (!success && context.mounted) {
+                            AppSnackbar.info(context, l10n.deleteAccountFailed);
                           }
                         }
                       : null,
