@@ -6,6 +6,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/services/ingredient_resolver_service.dart';
+import 'package:recipespellbook/ui/screens/recipe/recipe_screen.dart' show scaleServingsLabel, scaledServingsNumber;
 import 'package:recipespellbook/utils/ingredient_utils.dart' show scaleQuantityString;
 import 'package:recipespellbook/utils/planned_servings.dart';
 
@@ -118,6 +119,19 @@ void main() {
     test('the recipe opens scaled only when a number is planned', () {
       expect(plannedRecipeLocation('chili', _meal('a', servings: 6)), '/recipe/chili?servings=6');
       expect(plannedRecipeLocation('chili', _meal('b')), '/recipe/chili');
+    });
+
+    test('the recipe page says the planned number of people, not "4.0"', () {
+      // The page starts its scaler at the planned scale to four places.
+      double opened(int planned, String servings) =>
+          double.parse(plannedServingsScale(planned, servings).toStringAsFixed(4));
+      expect(scaleServingsLabel('6', opened(4, '6')), '4');
+      expect(scaleServingsLabel('3', opened(5, '3')), '5');
+      expect(scaleServingsLabel('3', opened(2, '3')), '2');
+      expect(scaleServingsLabel('Serves 6', opened(10, '6')), 'Serves 10');
+      expect(scaleServingsLabel('4', opened(6, '4')), '6');
+      expect(scaledServingsNumber(2.5), '2.5');
+      expect(scaledServingsNumber(1 / 49 * 49), '1');
     });
   });
 

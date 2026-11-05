@@ -1191,14 +1191,18 @@ String scaleServingsLabel(String servings, double scale) {
   for (final match in matches.toList().reversed) {
     final original = double.tryParse(match.group(0)!);
     if (original != null) {
-      final scaled = original * scale;
-      final scaledStr = scaled == scaled.roundToDouble()
-          ? scaled.round().toString()
-          : scaled.toStringAsFixed(1);
-      result = result.replaceRange(match.start, match.end, scaledStr);
+      result = result.replaceRange(match.start, match.end, scaledServingsNumber(original * scale));
     }
   }
   return result;
+}
+
+/// A scaled number of servings, whole when it rounds to one ("4", not the
+/// "4.0" that 6 servings scaled to a meal planned for 4 people, ×0.6667,
+/// comes to), else to one decimal ("2.5").
+String scaledServingsNumber(double scaled) {
+  final text = scaled.toStringAsFixed(1);
+  return text.endsWith('.0') ? text.substring(0, text.length - 2) : text;
 }
 
 /// Bottom sheet for scaling a recipe. A slider on top gives fine control;
@@ -1303,9 +1307,7 @@ class _ScaleSheetState extends State<_ScaleSheet> {
 
     String readout;
     if (base != null) {
-      final s = base * _scale;
-      final str = s == s.roundToDouble() ? s.round().toString() : s.toStringAsFixed(1);
-      readout = '$str ${l10n.servingsUnit}';
+      readout = '${scaledServingsNumber(base * _scale)} ${l10n.servingsUnit}';
     } else {
       readout = scaled ? _fmtScale(_scale) : l10n.scaleOriginalLabel;
     }
