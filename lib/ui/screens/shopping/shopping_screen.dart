@@ -2052,6 +2052,7 @@ class _OrderOnlineButton extends StatelessWidget {
       builder: (ctx) => _OrderOnlineSheet(
         itemNames: itemNames,
         itemCount: items.length,
+        pageContext: context,
       ),
     );
   }
@@ -2061,7 +2062,12 @@ class _OrderOnlineButton extends StatelessWidget {
 class _OrderOnlineSheet extends StatefulWidget {
   final List<String> itemNames;
   final int itemCount;
-  const _OrderOnlineSheet({required this.itemNames, required this.itemCount});
+
+  /// The page that opened the sheet, for the message shown once the store
+  /// opens: the sheet is closed (and unmounted) by then.
+  final BuildContext pageContext;
+
+  const _OrderOnlineSheet({required this.itemNames, required this.itemCount, required this.pageContext});
 
   @override
   State<_OrderOnlineSheet> createState() => _OrderOnlineSheetState();
@@ -2180,6 +2186,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
   }
 
   Future<void> _handleProvider(GroceryProvider provider) async {
+    final page = widget.pageContext;
     Navigator.pop(context);
 
     final configured = _configured[provider] ?? false;
@@ -2200,10 +2207,10 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
       } else {
         await GroceryService.openStore(provider);
       }
-      if (mounted) {
+      if (page.mounted) {
         final name = _providerData[provider]?.name ?? 'store';
-        final l10n = AppLocalizations.of(context)!;
-        AppSnackbar.info(context, l10n.shoppingListCopiedOpening(name));
+        final l10n = AppLocalizations.of(page)!;
+        AppSnackbar.info(page, l10n.shoppingListCopiedOpening(name));
       }
     }
   }
@@ -3291,12 +3298,18 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     }
     if (image == null) return;
 
+    // The spinner goes on the root navigator and this screen sits in the
+    // shell's, so Navigator.pop(context) closed the screen and left the
+    // spinner up. Keep its route and remove exactly that.
+    DialogRoute<void>? spinner;
     if (mounted) {
-      showDialog(
+      spinner = DialogRoute<void>(
         context: context,
         barrierDismissible: false,
+        barrierColor: Colors.black54,
         builder: (_) => const Center(child: CircularProgressIndicator()),
       );
+      Navigator.of(context, rootNavigator: true).push(spinner);
     }
 
     try {
@@ -3305,7 +3318,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       final recognized = await recognizer.processImage(inputImage);
       await recognizer.close();
 
-      if (mounted) Navigator.pop(context);
+      if (spinner != null && spinner.isActive) spinner.navigator?.removeRoute(spinner);
 
       final text = recognized.text;
       if (text.trim().isEmpty) {
@@ -3317,7 +3330,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
 
       _showOcrPreview(text);
     } catch (e) {
-      if (mounted) Navigator.pop(context);
+      if (spinner != null && spinner.isActive) spinner.navigator?.removeRoute(spinner);
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         AppSnackbar.info(context, l10n.shoppingErrorReadingImage(e.toString()));

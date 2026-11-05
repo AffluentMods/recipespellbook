@@ -1056,7 +1056,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   }
 
   void _showImportPreview(List<ImportedRecipe> recipes, {String? sourceUrl, String? sourceText}) {
-    if (!mounted) return;
+    // Only while this sheet is still on top: if it was swiped away while the
+    // import finished, pop would close the page under it instead (a blank
+    // screen on phones).
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
     // Navigate to the full import preview screen
     Navigator.of(context).pop(); // Close the new recipe dialog first
     Navigator.of(context).push(

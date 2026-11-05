@@ -61,7 +61,7 @@ void showRecipeShareSheet(
     ) {
   Responsive.showAdaptiveSheet(
     context,
-    builder: (ctx) => _RecipeShareSheet(recipe: recipe, ref: ref),
+    builder: (ctx) => _RecipeShareSheet(recipe: recipe, ref: ref, pageContext: context),
   );
 }
 
@@ -69,7 +69,11 @@ class _RecipeShareSheet extends StatelessWidget {
   final Recipe recipe;
   final WidgetRef ref;
 
-  const _RecipeShareSheet({required this.recipe, required this.ref});
+  /// The page that opened the sheet. Options close the sheet first, so its
+  /// own context is gone by the time they ask a question or report an error.
+  final BuildContext pageContext;
+
+  const _RecipeShareSheet({required this.recipe, required this.ref, required this.pageContext});
 
   @override
   Widget build(BuildContext context) {
@@ -476,8 +480,8 @@ class _RecipeShareSheet extends StatelessWidget {
         subject: '${recipe.title} - Recipe',
       ));
     } catch (e) {
-      if (context.mounted) {
-        AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
+      if (pageContext.mounted) {
+        AppSnackbar.info(pageContext, '${l10n.errorGeneric}: $e');
       }
     }
   }
@@ -507,8 +511,8 @@ class _RecipeShareSheet extends StatelessWidget {
         name: recipe.title,
       );
     } catch (e) {
-      if (context.mounted) {
-        AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
+      if (pageContext.mounted) {
+        AppSnackbar.info(pageContext, '${l10n.errorGeneric}: $e');
       }
     }
   }
@@ -519,12 +523,13 @@ class _RecipeShareSheet extends StatelessWidget {
     final dao = ref.read(recipeDaoProvider);
     final linkedRecipes = await dao.getLinkedRecipes(recipe.id);
 
-    // If there are linked recipes, ask the user what to export
+    // If there are linked recipes, ask the user what to export (from the
+    // page: the sheet is closed by now)
     bool includeLinked = false;
-    if (linkedRecipes.isNotEmpty && context.mounted) {
+    if (linkedRecipes.isNotEmpty && pageContext.mounted) {
       final linkedNames = linkedRecipes.map((r) => r.title).join(', ');
       includeLinked = await showDialog<bool>(
-        context: context,
+        context: pageContext,
         builder: (ctx) {
           final theme = Theme.of(ctx);
           return AlertDialog(
@@ -561,7 +566,7 @@ class _RecipeShareSheet extends StatelessWidget {
       ) ?? false;
     }
 
-    if (!context.mounted) return;
+    if (!pageContext.mounted) return;
 
     final ingredients = await dao.getIngredientsForRecipe(recipe.id);
     final steps = await dao.getStepsForRecipe(recipe.id);

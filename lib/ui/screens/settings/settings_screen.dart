@@ -909,11 +909,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ? ref.read(settingsProvider.notifier)
         : null;
 
-    // Show a simple loading overlay so the user knows it's working
+    // Show a simple loading overlay so the user knows it's working. Keep its
+    // route: PopScope(canPop: false) refuses maybePop(), so the error path
+    // removes the route itself.
+    DialogRoute<void>? progress;
     if (context.mounted) {
-      showDialog(
+      progress = DialogRoute<void>(
         context: context,
         barrierDismissible: false,
+        barrierColor: Colors.black54,
         builder: (_) => PopScope(
           canPop: false,
           child: Center(
@@ -930,6 +934,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
       );
+      Navigator.of(context, rootNavigator: true).push(progress);
     }
 
     try {
@@ -946,8 +951,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // BACK and nothing was deleted. Don't force-close as if it
       // succeeded; tell the user and bail so they can retry/report.
       debugPrint('Reset error: $e');
+      if (progress != null && progress.isActive) progress.navigator?.removeRoute(progress); // drop progress dialog
       if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).maybePop(); // drop progress dialog
         AppSnackbar.error(context, 'Reset failed — no data was deleted. ($e)');
       }
       return;
