@@ -1,14 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/additive_data.dart';
+import '../theme/app_colors.dart';
+import '../theme/tokens.dart';
 import '../ui/screens/cookbooks/cookbook_isbn_screen.dart';
 import '../ui/widgets/app_snackbar.dart';
+import '../ui/widgets/nutrition_facts.dart';
+import '../ui/widgets/scan_viewfinder.dart';
+import '../ui/widgets/sheet_chrome.dart';
 import 'isbn_lookup_service.dart';
 import '../utils/responsive_utils.dart';
 
@@ -451,27 +457,41 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     final choice = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.productLookupFailed),
+        icon: const _DialogBadge(icon: Icons.wifi_off_rounded),
+        title: Text(l10n.productLookupFailed, textAlign: TextAlign.center),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.wifi_off, size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(l10n.productLookupFailedHint),
+            Text(l10n.productLookupFailedHint, textAlign: TextAlign.center),
+            const SizedBox(height: Space.lg),
+            _BarcodeChip(barcode: barcode),
           ],
         ),
+        // Three choices do not fit side by side: stack them, the likely
+        // one first.
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.scanAgain),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, 'manual'),
-            child: Text(l10n.enterManually),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, 'retry'),
-            child: Text(l10n.actionRetry),
+          SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FilledButton.icon(
+                  onPressed: () => Navigator.pop(ctx, 'retry'),
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: Text(l10n.actionRetry),
+                ),
+                const SizedBox(height: Space.sm),
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx, 'manual'),
+                  child: Text(l10n.enterManually),
+                ),
+                const SizedBox(height: Space.xs),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l10n.scanAgain),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -486,32 +506,35 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
     final enterManually = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.productNotFound),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.search_off, size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text('No product found for barcode:\n$barcode'),
-            const SizedBox(height: 8),
-            Text(
-              l10n.manualEntryHint,
-              style: Theme.of(context).textTheme.bodySmall,
+      builder: (ctx) {
+        final c = ctx.appColors;
+        return AlertDialog(
+          icon: const _DialogBadge(icon: Icons.search_off_rounded),
+          title: Text(l10n.productNotFound, textAlign: TextAlign.center),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _BarcodeChip(barcode: barcode),
+              const SizedBox(height: Space.md),
+              Text(
+                l10n.manualEntryHint,
+                textAlign: TextAlign.center,
+                style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(color: c.textSecondary),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.scanAgain),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.enterManually),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.scanAgain),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.enterManually),
-          ),
-        ],
-      ),
+        );
+      },
     );
     if (enterManually == true && mounted) await _showManualEntryDialog(barcode);
   }
@@ -524,14 +547,23 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.enterProductName),
-        content: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            labelText: l10n.productName,
-            hintText: l10n.hintProductExample,
-          ),
-          autofocus: true,
-          textCapitalization: TextCapitalization.words,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(alignment: Alignment.centerLeft, child: _BarcodeChip(barcode: barcode)),
+            const SizedBox(height: Space.lg),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: l10n.productName,
+                hintText: l10n.hintProductExample,
+                prefixIcon: const Icon(Icons.shopping_basket_outlined),
+              ),
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -552,21 +584,48 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final materialL10n = MaterialLocalizations.of(context);
+    final route = ModalRoute.of(context);
+    final canPop = route?.impliesAppBarDismissal ?? false;
+    final asDialog = route is PageRoute && route.fullscreenDialog;
 
     return Scaffold(
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(l10n.scanBarcode),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        automaticallyImplyLeading: false,
+        leading: canPop
+            ? Center(
+                child: _CameraButton(
+                  icon: asDialog ? Icons.close_rounded : Icons.arrow_back_rounded,
+                  tooltip: asDialog ? materialL10n.closeButtonTooltip : materialL10n.backButtonTooltip,
+                  onPressed: () => Navigator.maybePop(context),
+                ),
+              )
+            : null,
+        title: Text(
+          l10n.scanBarcode,
+          style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+        ),
         actions: [
-          IconButton(
-            icon: Icon(_torchEnabled ? Icons.flash_on : Icons.flash_off),
+          _CameraButton(
+            icon: _torchEnabled ? Icons.flash_on_rounded : Icons.flash_off_rounded,
+            active: _torchEnabled,
             onPressed: () {
               _controller?.toggleTorch();
               setState(() => _torchEnabled = !_torchEnabled);
             },
           ),
+          const SizedBox(width: Space.md),
         ],
       ),
       body: Stack(
+        fit: StackFit.expand,
         children: [
           // Camera view
           MobileScanner(
@@ -574,44 +633,32 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             onDetect: _onDetect,
           ),
 
-          // Overlay with scan area
-          _ScanOverlay(),
-
-          // Processing indicator
-          if (_isProcessing)
-            Container(
-              color: Colors.black54,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
-                    Text(
-                      l10n.lookingUpProduct,
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+          // A shade under the app bar so its title reads on any picture.
+          const IgnorePointer(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                height: 140,
+                width: double.infinity,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x99000000), Color(0x00000000)],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
+          ),
 
-          // Instructions
-          Positioned(
-            bottom: 100,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              child: Text(
-                l10n.pointCameraBarcode,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white,
-                  shadows: [const Shadow(blurRadius: 10, color: Colors.black)],
-                ),
-              ),
-            ),
+          // The scan window, with the hint or the lookup under it.
+          ScanViewfinder(
+            hint: l10n.pointCameraBarcode,
+            busy: _isProcessing,
+            busyText: l10n.lookingUpProduct,
+            windowAspect: 1.8,
           ),
         ],
       ),
@@ -619,90 +666,87 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   }
 }
 
-/// Scan overlay with cutout
-class _ScanOverlay extends StatelessWidget {
+/// A round, dark button that reads on top of the camera picture.
+class _CameraButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String? tooltip;
+  final bool active;
+
+  const _CameraButton({required this.icon, required this.onPressed, this.tooltip, this.active = false});
+
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _ScanOverlayPainter(),
-      child: const SizedBox.expand(),
+    final c = context.appColors;
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        backgroundColor: active ? c.accent : Colors.black.withValues(alpha: 0.45),
+        foregroundColor: active ? c.onAccent : Colors.white,
+        fixedSize: const Size(40, 40),
+        minimumSize: const Size(40, 40),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
+      ),
+      icon: Icon(icon, size: 20),
     );
   }
 }
 
-class _ScanOverlayPainter extends CustomPainter {
+/// The round, tinted icon at the top of the scanner's dialogs.
+class _DialogBadge extends StatelessWidget {
+  final IconData icon;
+  const _DialogBadge({required this.icon});
+
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black54
-      ..style = PaintingStyle.fill;
-
-    final cutoutWidth = size.width * 0.8;
-    final cutoutHeight = 120.0;
-    final cutoutLeft = (size.width - cutoutWidth) / 2;
-    final cutoutTop = (size.height - cutoutHeight) / 2;
-    final cutoutRect = Rect.fromLTWH(cutoutLeft, cutoutTop, cutoutWidth, cutoutHeight);
-
-    // Draw overlay with cutout
-    final path = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
-      ..addRRect(RRect.fromRectAndRadius(cutoutRect, const Radius.circular(12)))
-      ..fillType = PathFillType.evenOdd;
-
-    canvas.drawPath(path, paint);
-
-    // Draw corner decorations
-    final cornerPaint = Paint()
-      ..color = const Color(0xFFE8A860)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
-
-    const cornerLength = 24.0;
-    final radius = const Radius.circular(12);
-
-    // Top-left
-    canvas.drawPath(
-      Path()
-        ..moveTo(cutoutLeft, cutoutTop + cornerLength)
-        ..lineTo(cutoutLeft, cutoutTop + 12)
-        ..arcToPoint(Offset(cutoutLeft + 12, cutoutTop), radius: radius)
-        ..lineTo(cutoutLeft + cornerLength, cutoutTop),
-      cornerPaint,
-    );
-
-    // Top-right
-    canvas.drawPath(
-      Path()
-        ..moveTo(cutoutLeft + cutoutWidth - cornerLength, cutoutTop)
-        ..lineTo(cutoutLeft + cutoutWidth - 12, cutoutTop)
-        ..arcToPoint(Offset(cutoutLeft + cutoutWidth, cutoutTop + 12), radius: radius)
-        ..lineTo(cutoutLeft + cutoutWidth, cutoutTop + cornerLength),
-      cornerPaint,
-    );
-
-    // Bottom-left
-    canvas.drawPath(
-      Path()
-        ..moveTo(cutoutLeft, cutoutTop + cutoutHeight - cornerLength)
-        ..lineTo(cutoutLeft, cutoutTop + cutoutHeight - 12)
-        ..arcToPoint(Offset(cutoutLeft + 12, cutoutTop + cutoutHeight), radius: radius)
-        ..lineTo(cutoutLeft + cornerLength, cutoutTop + cutoutHeight),
-      cornerPaint,
-    );
-
-    // Bottom-right
-    canvas.drawPath(
-      Path()
-        ..moveTo(cutoutLeft + cutoutWidth - cornerLength, cutoutTop + cutoutHeight)
-        ..lineTo(cutoutLeft + cutoutWidth - 12, cutoutTop + cutoutHeight)
-        ..arcToPoint(Offset(cutoutLeft + cutoutWidth, cutoutTop + cutoutHeight - 12), radius: radius)
-        ..lineTo(cutoutLeft + cutoutWidth, cutoutTop + cutoutHeight - cornerLength),
-      cornerPaint,
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: c.accent.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, size: 28, color: c.accent),
     );
   }
+}
+
+/// The scanned number, set in a quiet chip.
+class _BarcodeChip extends StatelessWidget {
+  final String barcode;
+  const _BarcodeChip({required this.barcode});
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: c.textPrimary.withValues(alpha: 0.05),
+        borderRadius: Radii.mdAll,
+        border: Border.all(color: c.hairline),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.barcode_reader, size: 16, color: c.textTertiary),
+          const SizedBox(width: 6),
+          Text(
+            barcode,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: c.textSecondary,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w600,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Product info sheet
@@ -724,208 +768,288 @@ class _ProductInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
+    return AdaptiveDraggableSheet(
+      initialChildSize: 0.66,
       minChildSize: 0.4,
-      maxChildSize: 0.9,
+      maxChildSize: 0.92,
+      expand: false,
       builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(20),
+        return ListView(
+          controller: scrollController,
+          padding: const EdgeInsets.fromLTRB(Space.xl, 0, Space.xl, Space.xxl),
+          children: [
+            const SheetHandle(top: 8, bottom: 16),
+
+            _ProductHeader(product: product),
+
+            // NOVA & Nutri-Score badges
+            if (product.novaGroup != null || product.hasValidNutriScore) ...[
+              const SizedBox(height: Space.lg),
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Product image and name
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (product.imageUrl != null)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              product.imageUrl!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                              cacheWidth: 200, // 2x for retina
-                              cacheHeight: 200,
-                              errorBuilder: (_, __, ___) => Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(Icons.inventory_2, size: 40, color: Colors.grey),
-                              ),
-                            ),
-                          )
-                        else
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.inventory_2, size: 40, color: Colors.grey),
-                          ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (product.brand != null)
-                                Text(
-                                  product.brand!,
-                                  style: theme.textTheme.labelLarge?.copyWith(
-                                    color: const Color(0xFFE8A860),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              Text(
-                                product.name ?? l10n.unknownProduct,
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (product.category != null) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  product.category!,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.outline,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Nutrition info
-                    if (product.nutrition != null) ...[
-                      Text(
-                        l10n.nutritionPer100g,
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
-                        children: [
-                          if (product.nutrition!['calories'] != null)
-                            _NutritionChip(label: l10n.nutritionCalories, value: '${product.nutrition!['calories']?.round()}'),
-                          if (product.nutrition!['protein'] != null)
-                            _NutritionChip(label: l10n.nutritionProtein, value: '${product.nutrition!['protein']?.round()}g'),
-                          if (product.nutrition!['carbs'] != null)
-                            _NutritionChip(label: l10n.nutritionCarbs, value: '${product.nutrition!['carbs']?.round()}g'),
-                          if (product.nutrition!['fat'] != null)
-                            _NutritionChip(label: l10n.nutritionFat, value: '${product.nutrition!['fat']?.round()}g'),
-                          if (product.nutrition!['saturatedFat'] != null)
-                            _NutritionChip(label: l10n.nutritionSaturatedFat, value: '${product.nutrition!['saturatedFat']?.round()}g'),
-                          if (product.nutrition!['sugar'] != null)
-                            _NutritionChip(label: l10n.nutritionSugar, value: '${product.nutrition!['sugar']?.round()}g'),
-                          if (product.nutrition!['fiber'] != null)
-                            _NutritionChip(label: l10n.nutritionFiber, value: '${product.nutrition!['fiber']?.round()}g'),
-                          if (product.nutrition!['sodium'] != null)
-                            _NutritionChip(label: l10n.nutritionSodium, value: '${product.nutrition!['sodium']?.round()}mg'),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // NOVA & Nutri-Score badges
-                    if (product.novaGroup != null || product.hasValidNutriScore) ...[
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (product.novaGroup != null)
-                              Expanded(child: _NovaBadge(group: product.novaGroup!)),
-                            if (product.novaGroup != null && product.hasValidNutriScore)
-                              const SizedBox(width: 12),
-                            if (product.hasValidNutriScore)
-                              Expanded(child: _NutriScoreBadge(grade: product.nutriScoreGrade!)),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Additives breakdown
-                    if (product.additivesTags.isNotEmpty) ...[
-                      _AdditivesSection(tags: product.additivesTags),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Where the data comes from + a path to correct it. OFF is
-                    // community-sourced, so records can be stale or wrong-region.
-                    _DataSourceFooter(product: product),
-                    const SizedBox(height: 20),
-
-                    // Actions
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: FilledButton.icon(
-                        onPressed: onAddToShopping,
-                        icon: const Icon(Icons.add_shopping_cart),
-                        label: Text(l10n.addToShoppingList),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextButton.icon(
-                            onPressed: onSearchRecipes,
-                            icon: const Icon(Icons.search, size: 18),
-                            label: Text(l10n.findRecipesWithThis, style: const TextStyle(fontSize: 12)),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextButton.icon(
-                            onPressed: onSaveAsRecipe,
-                            icon: const Icon(Icons.menu_book, size: 18),
-                            label: Text(l10n.saveAsRecipe, style: const TextStyle(fontSize: 12)),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    TextButton(
-                      onPressed: onScanAnother,
-                      child: Text(l10n.scanAnother),
-                    ),
+                    if (product.hasValidNutriScore)
+                      Expanded(child: _NutriScoreBadge(grade: product.nutriScoreGrade!)),
+                    if (product.novaGroup != null && product.hasValidNutriScore)
+                      const SizedBox(width: Space.md),
+                    if (product.novaGroup != null)
+                      Expanded(child: _NovaBadge(group: product.novaGroup!)),
                   ],
                 ),
               ),
             ],
-          ),
+
+            // Actions
+            const SizedBox(height: Space.xl),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: onAddToShopping,
+                icon: const Icon(Icons.add_shopping_cart_rounded),
+                label: Text(l10n.addToShoppingList),
+              ),
+            ),
+            const SizedBox(height: Space.sm),
+            _ActionList(
+              actions: [
+                (Icons.search_rounded, l10n.findRecipesWithThis, onSearchRecipes),
+                (Icons.menu_book_rounded, l10n.saveAsRecipe, onSaveAsRecipe),
+              ],
+            ),
+
+            // Nutrition info
+            if (product.nutrition != null && _facts(l10n).isNotEmpty) ...[
+              const SizedBox(height: Space.xl),
+              NutritionPanel(
+                padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, Space.sm),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    NutritionSectionTitle(l10n.nutritionPer100g, icon: Icons.local_fire_department_outlined),
+                    const SizedBox(height: Space.xs),
+                    NutritionFactsTable(facts: _facts(l10n), showDailyValue: false),
+                  ],
+                ),
+              ),
+            ],
+
+            // Additives breakdown
+            if (product.additivesTags.isNotEmpty) ...[
+              const SizedBox(height: Space.md),
+              NutritionPanel(child: _AdditivesSection(tags: product.additivesTags)),
+            ],
+
+            // Where the data comes from + a path to correct it. OFF is
+            // community-sourced, so records can be stale or wrong-region.
+            const SizedBox(height: Space.md),
+            _DataSourceFooter(product: product),
+            const SizedBox(height: Space.md),
+
+            Center(
+              child: TextButton.icon(
+                onPressed: onScanAnother,
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+                label: Text(l10n.scanAnother),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  /// The label's lines in label order: energy, fat, carbohydrates, protein,
+  /// salt. Lines the record leaves out are left out.
+  List<NutritionFact> _facts(AppLocalizations l10n) {
+    final n = product.nutrition!;
+    double? v(String key) => (n[key] as num?)?.toDouble();
+    NutritionFact? fact(String key, String label, String unit, {bool sub = false, bool headline = false}) {
+      final value = v(key);
+      if (value == null) return null;
+      return NutritionFact(label: label, value: value, unit: unit, isSubItem: sub, isHeadline: headline);
+    }
+
+    return [
+      fact('calories', l10n.nutritionCalories, l10n.unitKcal, headline: true),
+      fact('fat', l10n.nutritionFat, 'g'),
+      fact('saturatedFat', l10n.nutritionSaturatedFat, 'g', sub: true),
+      fact('carbs', l10n.nutritionCarbs, 'g'),
+      fact('sugar', l10n.nutritionSugar, 'g', sub: true),
+      fact('fiber', l10n.nutritionFiber, 'g', sub: true),
+      fact('protein', l10n.nutritionProtein, 'g'),
+      fact('sodium', l10n.nutritionSodium, 'mg'),
+    ].whereType<NutritionFact>().toList();
+  }
+}
+
+/// Photo, brand, name, and what kind of product it is.
+class _ProductHeader extends StatelessWidget {
+  final ProductInfo product;
+  const _ProductHeader({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final c = context.appColors;
+
+    final placeholder = Container(
+      color: c.textPrimary.withValues(alpha: 0.05),
+      alignment: Alignment.center,
+      child: Icon(Icons.inventory_2_outlined, size: 36, color: c.textTertiary),
+    );
+
+    final details = <(IconData, String)>[
+      if (product.servingSize != null) (Icons.restaurant_outlined, product.servingSize!),
+      if (product.category != null) (Icons.sell_outlined, product.category!),
+      if (product.barcode.isNotEmpty) (Icons.barcode_reader, product.barcode),
+    ];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 96,
+          height: 96,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: Radii.xlAll,
+            border: Border.all(color: c.hairline),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: product.imageUrl == null
+              ? placeholder
+              : Image.network(
+                  product.imageUrl!,
+                  fit: BoxFit.cover,
+                  cacheWidth: 192, // 2x for retina
+                  cacheHeight: 192,
+                  errorBuilder: (_, __, ___) => placeholder,
+                ),
+        ),
+        const SizedBox(width: Space.lg),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (product.brand != null) ...[
+                Text(
+                  product.brand!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: c.accent,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+              ],
+              Text(
+                product.name ?? l10n.unknownProduct,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: c.textPrimary,
+                  height: 1.15,
+                ),
+              ),
+              if (details.isNotEmpty) ...[
+                const SizedBox(height: Space.sm),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final (icon, text) in details) _MetaChip(icon: icon, text: text),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _MetaChip({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final theme = Theme.of(context);
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 220),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: c.textPrimary.withValues(alpha: 0.05),
+        borderRadius: Radii.smAll,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: c.textTertiary),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelSmall?.copyWith(color: c.textSecondary, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Secondary actions as rows in one outlined card, so long labels in any
+/// language get the full width instead of squeezing into half a button.
+class _ActionList extends StatelessWidget {
+  final List<(IconData, String, VoidCallback)> actions;
+  const _ActionList({required this.actions});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final theme = Theme.of(context);
+    return Material(
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: Radii.lgAll, side: BorderSide(color: c.hairline)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var i = 0; i < actions.length; i++) ...[
+            if (i > 0) Divider(height: 1, thickness: 1, indent: 48, color: c.hairline),
+            InkWell(
+              onTap: actions[i].$3,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.md),
+                child: Row(
+                  children: [
+                    Icon(actions[i].$1, size: 20, color: c.accent),
+                    const SizedBox(width: Space.lg),
+                    Expanded(
+                      child: Text(
+                        actions[i].$2,
+                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: c.textPrimary),
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, size: 20, color: c.textTertiary),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -942,13 +1066,14 @@ class _DataSourceFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final c = context.appColors;
     final d = product.lastModified;
     final updated = d != null ? ' · updated ${_months[d.month - 1]} ${d.year}' : '';
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(Space.md, Space.md, Space.md, Space.xs),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(10),
+        color: c.textPrimary.withValues(alpha: 0.035),
+        borderRadius: Radii.lgAll,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -957,26 +1082,27 @@ class _DataSourceFooter extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline, size: 16, color: theme.colorScheme.tertiary),
-                const SizedBox(width: 6),
+                Icon(Icons.info_outline_rounded, size: 16, color: c.accent),
+                const SizedBox(width: Space.sm),
                 Expanded(
                   child: Text(
-                    'This record looks incomplete — some details may be missing or out of date.',
-                    style: theme.textTheme.bodySmall,
+                    'This record looks incomplete. Some details may be missing or out of date.',
+                    style: theme.textTheme.bodySmall?.copyWith(color: c.textPrimary),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Space.sm),
           ],
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.public, size: 15, color: theme.colorScheme.outline),
-              const SizedBox(width: 6),
+              Icon(Icons.public_rounded, size: 16, color: c.textTertiary),
+              const SizedBox(width: Space.sm),
               Expanded(
                 child: Text(
                   'Data from Open Food Facts (community-sourced)$updated',
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                  style: theme.textTheme.bodySmall?.copyWith(color: c.textSecondary),
                 ),
               ),
             ],
@@ -988,42 +1114,17 @@ class _DataSourceFooter extends StatelessWidget {
                 Uri.parse(product.openFoodFactsUrl),
                 mode: LaunchMode.externalApplication,
               ),
-              icon: const Icon(Icons.edit_note, size: 18),
-              label: const Text("Doesn't match the label? View / fix", style: TextStyle(fontSize: 12)),
+              icon: const Icon(Icons.flag_outlined, size: 16),
+              label: const Text("Doesn't match the label? View / fix"),
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                minimumSize: const Size(0, 32),
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                minimumSize: const Size(0, 36),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 alignment: Alignment.centerLeft,
+                textStyle: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NutritionChip extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _NutritionChip({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-          Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
         ],
       ),
     );
@@ -1054,37 +1155,9 @@ class _NovaBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final color = _colors[group] ?? Colors.grey;
     final label = _labels[group] ?? 'Unknown';
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('NOVA', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.colorScheme.outline, letterSpacing: 1)),
-              const SizedBox(width: 6),
-              Container(
-                width: 28, height: 28,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                alignment: Alignment.center,
-                child: Text('$group', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
-        ],
-      ),
-    );
+    return _ScoreBadge(title: 'NOVA', mark: '$group', label: label, color: color);
   }
 }
 
@@ -1114,35 +1187,72 @@ class _NutriScoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final g = grade.toLowerCase();
     final color = _gradeColors[g] ?? Colors.grey;
     final label = _gradeLabels[g] ?? '';
+    return _ScoreBadge(title: 'Nutri-Score', mark: grade.toUpperCase(), label: label, color: color);
+  }
+}
 
+/// A score as a coloured mark beside its name and meaning.
+class _ScoreBadge extends StatelessWidget {
+  final String title;
+  final String mark;
+  final String label;
+  final Color color;
+
+  const _ScoreBadge({required this.title, required this.mark, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final c = context.appColors;
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(Space.md),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: 0.09),
+        borderRadius: Radii.lgAll,
+        border: Border.all(color: color.withValues(alpha: 0.28)),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Nutri-Score', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.colorScheme.outline, letterSpacing: 0.5)),
-              const SizedBox(width: 6),
-              Container(
-                width: 28, height: 28,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                alignment: Alignment.center,
-                child: Text(grade.toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-              ),
-            ],
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(color: color, borderRadius: Radii.mdAll),
+            alignment: Alignment.center,
+            child: Text(
+              mark,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+          const SizedBox(width: Space.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: c.textTertiary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                if (label.isNotEmpty)
+                  Text(
+                    label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Color.lerp(color, Colors.black, 0.25),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -1160,6 +1270,7 @@ class _AdditivesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final c = context.appColors;
     final matched = getAdditives(tags);
     final unmatched = tags.where((t) => lookupAdditive(t) == null).toList();
 
@@ -1171,24 +1282,66 @@ class _AdditivesSection extends StatelessWidget {
     final cautionCount = matched.where((e) => e.value.concern == AdditiveConcernLevel.caution).length;
     final moderateCount = matched.where((e) => e.value.concern == AdditiveConcernLevel.moderate).length;
 
+    Widget item({required Color dot, required String name, required String description}) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: Space.sm),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 5),
+                child: Container(width: 8, height: 8, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
+              ),
+              const SizedBox(width: Space.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: c.textPrimary)),
+                    const SizedBox(height: 1),
+                    Text(description, style: theme.textTheme.bodySmall?.copyWith(color: c.textSecondary, height: 1.3)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+
+    final items = <Widget>[
+      ...matched.map((entry) {
+        final info = entry.value;
+        final dot = switch (info.concern) {
+          AdditiveConcernLevel.safe => const Color(0xFF2E7D32),
+          AdditiveConcernLevel.moderate => const Color(0xFFEF6C00),
+          AdditiveConcernLevel.caution => const Color(0xFFC62828),
+        };
+        return item(dot: dot, name: info.name, description: info.description);
+      }),
+      // Unmatched additives (not in our database, shown with a grey dot)
+      ...unmatched.map((tag) => item(
+            dot: c.textTertiary,
+            name: tag.replaceAll('en:', '').toUpperCase(),
+            description: 'Not in database',
+          )),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text('Additives', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(width: 8),
-            Text('${matched.length + unmatched.length} found', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-          ],
+        NutritionSectionTitle(
+          'Additives',
+          icon: Icons.science_outlined,
+          trailing: Text(
+            '${matched.length + unmatched.length} found',
+            style: theme.textTheme.bodySmall?.copyWith(color: c.textTertiary),
+          ),
         ),
-        const SizedBox(height: 8),
 
         // Summary chips
         if (cautionCount > 0 || moderateCount > 0)
           Padding(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(top: Space.sm),
             child: Wrap(
-              spacing: 8,
+              spacing: Space.sm,
               runSpacing: 6,
               children: [
                 if (cautionCount > 0)
@@ -1204,70 +1357,11 @@ class _AdditivesSection extends StatelessWidget {
               ],
             ),
           ),
-
-        // Individual additives
-        ...matched.map((entry) {
-          final info = entry.value;
-          final Color dotColor;
-          switch (info.concern) {
-            case AdditiveConcernLevel.safe:
-              dotColor = const Color(0xFF2E7D32);
-            case AdditiveConcernLevel.moderate:
-              dotColor = const Color(0xFFEF6C00);
-            case AdditiveConcernLevel.caution:
-              dotColor = const Color(0xFFC62828);
-          }
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Container(width: 8, height: 8, decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle)),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(info.name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
-                      Text(info.description, style: TextStyle(fontSize: 12, color: theme.colorScheme.outline, height: 1.3)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-
-        // Unmatched additives (not in our database — show with grey dot)
-        ...unmatched.map((tag) {
-          final code = tag.replaceAll('en:', '').toUpperCase();
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.outline, shape: BoxShape.circle)),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(code, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
-                      Text('Not in database', style: TextStyle(fontSize: 12, color: theme.colorScheme.outline, height: 1.3)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
+        const SizedBox(height: Space.xs),
+        for (var i = 0; i < items.length; i++) ...[
+          if (i > 0) Divider(height: 1, thickness: 1, indent: 20, color: c.hairline),
+          items[i],
+        ],
       ],
     );
   }
