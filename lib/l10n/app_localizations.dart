@@ -13057,6 +13057,120 @@ abstract class AppLocalizations {
   /// **'Push update'**
   String get publicationPushUpdate;
 
+  /// No description provided for @publicationChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed'**
+  String get publicationChanged;
+
+  /// No description provided for @publicationsChangedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cookbook changed since it was published} other{{count} cookbooks changed since they were published}}'**
+  String publicationsChangedCount(int count);
+
+  /// No description provided for @publicationsUpdateAllChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Update all changed'**
+  String get publicationsUpdateAllChanged;
+
+  /// No description provided for @publicationsUpdateAllConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Update 1 cookbook?} other{Update {count} cookbooks?}}'**
+  String publicationsUpdateAllConfirmTitle(int count);
+
+  /// No description provided for @publicationsUpdateAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating your published cookbooks'**
+  String get publicationsUpdateAllTitle;
+
+  /// No description provided for @publicationsUpdateAllChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for changes ({current}/{total})'**
+  String publicationsUpdateAllChecking(int current, int total);
+
+  /// No description provided for @publicationsUpdateAllCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook {current} of {total}'**
+  String publicationsUpdateAllCurrent(int current, int total);
+
+  /// No description provided for @publicationsUpdateAllStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get publicationsUpdateAllStop;
+
+  /// No description provided for @publicationsUpdateAllStopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping...'**
+  String get publicationsUpdateAllStopping;
+
+  /// No description provided for @publicationsUpdateAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Update finished'**
+  String get publicationsUpdateAllDone;
+
+  /// No description provided for @publicationsUpdateAllStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Update stopped'**
+  String get publicationsUpdateAllStopped;
+
+  /// No description provided for @publicationsUpdateAllUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 updated} other{{count} updated}}'**
+  String publicationsUpdateAllUpdated(int count);
+
+  /// No description provided for @publicationsUpdateAllUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 already up to date} other{{count} already up to date}}'**
+  String publicationsUpdateAllUnchanged(int count);
+
+  /// No description provided for @publicationsUpdateAllNoSource.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 is not linked to a cookbook on this device. Update it on its own with Push update.} other{{count} are not linked to a cookbook on this device. Update them one by one with Push update.}}'**
+  String publicationsUpdateAllNoSource(int count);
+
+  /// No description provided for @publicationsUpdateAllFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 could not be updated:} other{{count} could not be updated:}}'**
+  String publicationsUpdateAllFailed(int count);
+
+  /// No description provided for @publicationsUpdateAllNotRun.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more was not updated. Run Update all changed again to finish.} other{{count} more were not updated. Run Update all changed again to finish.}}'**
+  String publicationsUpdateAllNotRun(int count);
+
+  /// No description provided for @publicationsUpdateAllRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Community is limiting uploads right now. Try the rest again later.'**
+  String get publicationsUpdateAllRateLimited;
+
+  /// No description provided for @publicationsUpdateAllNameNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipes were updated, but the new name was not saved.'**
+  String get publicationsUpdateAllNameNotSaved;
+
+  /// No description provided for @publicationsUpdateAllNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing needed an update.'**
+  String get publicationsUpdateAllNothing;
+
   /// No description provided for @publicationNotRated.
   ///
   /// In en, this message translates to:

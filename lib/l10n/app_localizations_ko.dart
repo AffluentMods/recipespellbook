@@ -7283,6 +7283,116 @@ class AppLocalizationsKo extends AppLocalizations {
   String get publicationPushUpdate => '업데이트 게시';
 
   @override
+  String get publicationChanged => '변경됨';
+
+  @override
+  String publicationsChangedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '게시 후 변경된 레시피북 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllChanged => '변경된 항목 모두 업데이트';
+
+  @override
+  String publicationsUpdateAllConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '레시피북 $count개를 업데이트할까요?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllTitle => '게시한 레시피북을 업데이트하는 중';
+
+  @override
+  String publicationsUpdateAllChecking(int current, int total) {
+    return '변경 사항 확인 중 ($current/$total)';
+  }
+
+  @override
+  String publicationsUpdateAllCurrent(int current, int total) {
+    return '레시피북 $current/$total';
+  }
+
+  @override
+  String get publicationsUpdateAllStop => '중지';
+
+  @override
+  String get publicationsUpdateAllStopping => '중지하는 중...';
+
+  @override
+  String get publicationsUpdateAllDone => '업데이트 완료';
+
+  @override
+  String get publicationsUpdateAllStopped => '업데이트 중지됨';
+
+  @override
+  String publicationsUpdateAllUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 업데이트됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개는 이미 최신 상태입니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNoSource(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개는 이 기기의 레시피북과 연결되어 있지 않습니다. 업데이트 게시로 하나씩 업데이트하세요.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개를 업데이트하지 못했습니다:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNotRun(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '나머지 $count개는 업데이트되지 않았습니다. 변경된 항목 모두 업데이트를 다시 실행해 마무리하세요.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllRateLimited => '지금은 커뮤니티에서 업로드를 제한하고 있습니다. 나머지는 나중에 다시 시도하세요.';
+
+  @override
+  String get publicationsUpdateAllNameNotSaved => '레시피는 업데이트되었지만 새 이름은 저장되지 않았습니다.';
+
+  @override
+  String get publicationsUpdateAllNothing => '업데이트할 항목이 없었습니다.';
+
+  @override
   String get publicationNotRated => '평가 없음';
 
   @override

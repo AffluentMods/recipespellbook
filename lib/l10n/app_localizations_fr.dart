@@ -7347,6 +7347,123 @@ class AppLocalizationsFr extends AppLocalizations {
   String get publicationPushUpdate => 'Publier la mise à jour';
 
   @override
+  String get publicationChanged => 'Modifié';
+
+  @override
+  String publicationsChangedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count livres modifiés depuis leur publication',
+      one: '1 livre modifié depuis sa publication',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllChanged => 'Mettre à jour les modifiés';
+
+  @override
+  String publicationsUpdateAllConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mettre à jour $count livres ?',
+      one: 'Mettre à jour 1 livre ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllTitle => 'Mise à jour de vos livres publiés';
+
+  @override
+  String publicationsUpdateAllChecking(int current, int total) {
+    return 'Recherche des modifications ($current/$total)';
+  }
+
+  @override
+  String publicationsUpdateAllCurrent(int current, int total) {
+    return 'Livre $current sur $total';
+  }
+
+  @override
+  String get publicationsUpdateAllStop => 'Arrêter';
+
+  @override
+  String get publicationsUpdateAllStopping => 'Arrêt en cours...';
+
+  @override
+  String get publicationsUpdateAllDone => 'Mise à jour terminée';
+
+  @override
+  String get publicationsUpdateAllStopped => 'Mise à jour arrêtée';
+
+  @override
+  String publicationsUpdateAllUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mis à jour',
+      one: '1 mis à jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count déjà à jour',
+      one: '1 déjà à jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNoSource(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ne sont liés à aucun livre sur cet appareil. Mettez-les à jour un par un avec Publier la mise à jour.',
+      one: '1 n\'est lié à aucun livre sur cet appareil. Mettez-le à jour séparément avec Publier la mise à jour.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count n\'ont pas pu être mis à jour :',
+      one: '1 n\'a pas pu être mis à jour :',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNotRun(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count autres n\'ont pas été mis à jour. Relancez Mettre à jour les modifiés pour terminer.',
+      one: '1 autre n\'a pas été mis à jour. Relancez Mettre à jour les modifiés pour terminer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllRateLimited => 'La Communauté limite les envois en ce moment. Réessayez plus tard pour le reste.';
+
+  @override
+  String get publicationsUpdateAllNameNotSaved => 'Les recettes ont été mises à jour, mais le nouveau nom n\'a pas été enregistré.';
+
+  @override
+  String get publicationsUpdateAllNothing => 'Aucune mise à jour n\'était nécessaire.';
+
+  @override
   String get publicationNotRated => 'Non noté';
 
   @override

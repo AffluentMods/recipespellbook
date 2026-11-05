@@ -7359,6 +7359,123 @@ class AppLocalizationsNl extends AppLocalizations {
   String get publicationPushUpdate => 'Update publiceren';
 
   @override
+  String get publicationChanged => 'Gewijzigd';
+
+  @override
+  String publicationsChangedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kookboeken gewijzigd sinds ze zijn gepubliceerd',
+      one: '1 kookboek gewijzigd sinds het is gepubliceerd',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllChanged => 'Alle gewijzigde bijwerken';
+
+  @override
+  String publicationsUpdateAllConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kookboeken bijwerken?',
+      one: '1 kookboek bijwerken?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllTitle => 'Je gepubliceerde kookboeken worden bijgewerkt';
+
+  @override
+  String publicationsUpdateAllChecking(int current, int total) {
+    return 'Zoeken naar wijzigingen ($current/$total)';
+  }
+
+  @override
+  String publicationsUpdateAllCurrent(int current, int total) {
+    return 'Kookboek $current van $total';
+  }
+
+  @override
+  String get publicationsUpdateAllStop => 'Stoppen';
+
+  @override
+  String get publicationsUpdateAllStopping => 'Bezig met stoppen...';
+
+  @override
+  String get publicationsUpdateAllDone => 'Bijwerken klaar';
+
+  @override
+  String get publicationsUpdateAllStopped => 'Bijwerken gestopt';
+
+  @override
+  String publicationsUpdateAllUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bijgewerkt',
+      one: '1 bijgewerkt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count waren al bijgewerkt',
+      one: '1 was al bijgewerkt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNoSource(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count zijn niet gekoppeld aan een kookboek op dit apparaat. Werk ze een voor een bij met Update publiceren.',
+      one: '1 is niet gekoppeld aan een kookboek op dit apparaat. Werk het apart bij met Update publiceren.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count konden niet worden bijgewerkt:',
+      one: '1 kon niet worden bijgewerkt:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNotRun(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nog $count zijn niet bijgewerkt. Gebruik Alle gewijzigde bijwerken opnieuw om af te ronden.',
+      one: 'Nog 1 is niet bijgewerkt. Gebruik Alle gewijzigde bijwerken opnieuw om af te ronden.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllRateLimited => 'Community beperkt op dit moment uploads. Probeer de rest later opnieuw.';
+
+  @override
+  String get publicationsUpdateAllNameNotSaved => 'De recepten zijn bijgewerkt, maar de nieuwe naam is niet opgeslagen.';
+
+  @override
+  String get publicationsUpdateAllNothing => 'Er hoefde niets te worden bijgewerkt.';
+
+  @override
   String get publicationNotRated => 'Niet beoordeeld';
 
   @override

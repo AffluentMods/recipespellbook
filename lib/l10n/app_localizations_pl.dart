@@ -7473,6 +7473,137 @@ class AppLocalizationsPl extends AppLocalizations {
   String get publicationPushUpdate => 'Opublikuj aktualizację';
 
   @override
+  String get publicationChanged => 'Zmieniono';
+
+  @override
+  String publicationsChangedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count książki zmienione od publikacji',
+      many: '$count książek zmienionych od publikacji',
+      few: '$count książki zmienione od publikacji',
+      one: '1 książka zmieniona od publikacji',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllChanged => 'Zaktualizuj wszystkie zmienione';
+
+  @override
+  String publicationsUpdateAllConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Zaktualizować $count książki?',
+      many: 'Zaktualizować $count książek?',
+      few: 'Zaktualizować $count książki?',
+      one: 'Zaktualizować 1 książkę?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllTitle => 'Aktualizowanie opublikowanych książek';
+
+  @override
+  String publicationsUpdateAllChecking(int current, int total) {
+    return 'Szukanie zmian ($current/$total)';
+  }
+
+  @override
+  String publicationsUpdateAllCurrent(int current, int total) {
+    return 'Książka $current z $total';
+  }
+
+  @override
+  String get publicationsUpdateAllStop => 'Zatrzymaj';
+
+  @override
+  String get publicationsUpdateAllStopping => 'Zatrzymywanie...';
+
+  @override
+  String get publicationsUpdateAllDone => 'Aktualizacja zakończona';
+
+  @override
+  String get publicationsUpdateAllStopped => 'Aktualizacja zatrzymana';
+
+  @override
+  String publicationsUpdateAllUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Zaktualizowano $count',
+      many: 'Zaktualizowano $count',
+      few: 'Zaktualizowano $count',
+      one: 'Zaktualizowano 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count były już aktualne',
+      many: '$count było już aktualnych',
+      few: '$count były już aktualne',
+      one: '1 była już aktualna',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNoSource(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nie są połączone z książkami na tym urządzeniu. Zaktualizuj je po kolei przyciskiem Opublikuj aktualizację.',
+      many: '$count nie jest połączonych z książkami na tym urządzeniu. Zaktualizuj je po kolei przyciskiem Opublikuj aktualizację.',
+      few: '$count nie są połączone z książkami na tym urządzeniu. Zaktualizuj je po kolei przyciskiem Opublikuj aktualizację.',
+      one: '1 nie jest połączona z książką na tym urządzeniu. Zaktualizuj ją osobno przyciskiem Opublikuj aktualizację.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nie udało się zaktualizować $count:',
+      many: 'Nie udało się zaktualizować $count:',
+      few: 'Nie udało się zaktualizować $count:',
+      one: 'Nie udało się zaktualizować 1:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNotRun(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Jeszcze $count nie zostały zaktualizowane. Użyj ponownie Zaktualizuj wszystkie zmienione, aby dokończyć.',
+      many: 'Jeszcze $count nie zostało zaktualizowanych. Użyj ponownie Zaktualizuj wszystkie zmienione, aby dokończyć.',
+      few: 'Jeszcze $count nie zostały zaktualizowane. Użyj ponownie Zaktualizuj wszystkie zmienione, aby dokończyć.',
+      one: 'Jeszcze 1 nie została zaktualizowana. Użyj ponownie Zaktualizuj wszystkie zmienione, aby dokończyć.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllRateLimited => 'Społeczność ogranicza teraz przesyłanie. Spróbuj resztę później.';
+
+  @override
+  String get publicationsUpdateAllNameNotSaved => 'Przepisy zostały zaktualizowane, ale nowa nazwa nie została zapisana.';
+
+  @override
+  String get publicationsUpdateAllNothing => 'Nic nie wymagało aktualizacji.';
+
+  @override
   String get publicationNotRated => 'Brak ocen';
 
   @override

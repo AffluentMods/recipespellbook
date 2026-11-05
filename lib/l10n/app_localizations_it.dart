@@ -7353,6 +7353,123 @@ class AppLocalizationsIt extends AppLocalizations {
   String get publicationPushUpdate => 'Pubblica aggiornamento';
 
   @override
+  String get publicationChanged => 'Modificato';
+
+  @override
+  String publicationsChangedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ricettari modificati dopo la pubblicazione',
+      one: '1 ricettario modificato dopo la pubblicazione',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllChanged => 'Aggiorna tutti i modificati';
+
+  @override
+  String publicationsUpdateAllConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Aggiornare $count ricettari?',
+      one: 'Aggiornare 1 ricettario?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllTitle => 'Aggiornamento dei tuoi ricettari pubblicati';
+
+  @override
+  String publicationsUpdateAllChecking(int current, int total) {
+    return 'Ricerca delle modifiche ($current/$total)';
+  }
+
+  @override
+  String publicationsUpdateAllCurrent(int current, int total) {
+    return 'Ricettario $current di $total';
+  }
+
+  @override
+  String get publicationsUpdateAllStop => 'Interrompi';
+
+  @override
+  String get publicationsUpdateAllStopping => 'Interruzione in corso...';
+
+  @override
+  String get publicationsUpdateAllDone => 'Aggiornamento completato';
+
+  @override
+  String get publicationsUpdateAllStopped => 'Aggiornamento interrotto';
+
+  @override
+  String publicationsUpdateAllUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count aggiornati',
+      one: '1 aggiornato',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count già aggiornati',
+      one: '1 già aggiornato',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNoSource(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count non sono collegati a un ricettario su questo dispositivo. Aggiornali uno alla volta con Pubblica aggiornamento.',
+      one: '1 non è collegato a un ricettario su questo dispositivo. Aggiornalo da solo con Pubblica aggiornamento.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count non sono stati aggiornati:',
+      one: '1 non è stato aggiornato:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNotRun(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Altri $count non sono stati aggiornati. Usa di nuovo Aggiorna tutti i modificati per finire.',
+      one: 'Un altro non è stato aggiornato. Usa di nuovo Aggiorna tutti i modificati per finire.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllRateLimited => 'La Community sta limitando i caricamenti in questo momento. Riprova più tardi per il resto.';
+
+  @override
+  String get publicationsUpdateAllNameNotSaved => 'Le ricette sono state aggiornate, ma il nuovo nome non è stato salvato.';
+
+  @override
+  String get publicationsUpdateAllNothing => 'Non c\'era niente da aggiornare.';
+
+  @override
   String get publicationNotRated => 'Senza valutazione';
 
   @override
