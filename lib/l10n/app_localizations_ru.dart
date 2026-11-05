@@ -11838,4 +11838,101 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Не совпадает с этикеткой? Посмотреть или исправить';
+
+  @override
+  String get cookbookUpdateAvailable => 'Доступно обновление';
+
+  @override
+  String get cookbookUpdateBannerBody => 'Автор изменил эту кулинарную книгу после того, как вы её скачали.';
+
+  @override
+  String get cookbookUpdateReview => 'Посмотреть';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return 'Обновить «$name»';
+  }
+
+  @override
+  String get cookbookUpdateChecking => 'Проверяем, что изменилось…';
+
+  @override
+  String get cookbookUpdateLoadFailed => 'Не удалось загрузить обновление. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get cookbookUpdateUpToDate => 'Эта кулинарная книга уже актуальна.';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count нового рецепта',
+      many: '$count новых рецептов',
+      few: '$count новых рецепта',
+      one: '$count новый рецепт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count изменённого рецепта',
+      many: '$count изменённых рецептов',
+      few: '$count изменённых рецепта',
+      one: '$count изменённый рецепт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count рецепта удалено автором',
+      many: '$count рецептов удалены автором',
+      few: '$count рецепта удалены автором',
+      one: '$count рецепт удалён автором',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => 'Новое название или описание от автора';
+
+  @override
+  String get cookbookUpdateWillUpdate => 'Обновится до новой версии';
+
+  @override
+  String get cookbookUpdateYoursDiffers => 'В вашей копии есть свои изменения';
+
+  @override
+  String get cookbookUpdateKeepMine => 'Оставить мою';
+
+  @override
+  String get cookbookUpdateUseNew => 'Взять новую версию';
+
+  @override
+  String get cookbookUpdateRemovedHint => 'Отметьте те, что нужно переместить в корзину. Остальные останутся в вашей книге.';
+
+  @override
+  String get cookbookUpdateApply => 'Обновить книгу';
+
+  @override
+  String get cookbookUpdateSkip => 'Пропустить это обновление';
+
+  @override
+  String get cookbookUpdateApplying => 'Обновляем кулинарную книгу…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return 'Книга «$name» обновлена';
+  }
+
+  @override
+  String get cookbookUpdateFailed => 'Не удалось сохранить обновление. В вашей книге ничего не изменилось.';
 }

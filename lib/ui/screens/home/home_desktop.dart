@@ -28,6 +28,7 @@ import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart' show FileExistsCache;
 import '../book_scan/book_scan_entry.dart';
+import '../cookbooks/cookbook_update_sheet.dart';
 import '../craving/craving_screen.dart';
 
 /// The desktop home: a dashboard that uses the width instead of stretching the
@@ -119,6 +120,10 @@ class DesktopHome extends ConsumerWidget {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(side, Space.xs, side, Space.huge),
                     children: [
+                      CookbookUpdateBanner(
+                        cookbook: cookbook,
+                        padding: const EdgeInsets.only(bottom: Space.lg),
+                      ),
                       const BackupReminderBanner(),
                       if (stackGlance) ...[
                         SizedBox(height: 232, child: _WeekGlanceCard()),

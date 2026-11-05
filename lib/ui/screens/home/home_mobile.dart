@@ -30,6 +30,7 @@ import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sheet_chrome.dart';
 import '../book_scan/book_scan_entry.dart';
+import '../cookbooks/cookbook_update_sheet.dart';
 import '../craving/craving_screen.dart';
 import '../planner/planner_screen.dart'
     show selectedPlannerDateProvider, mealTypeLabel;
@@ -121,6 +122,10 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
               cookbookId: cookbookId,
               recipeCount: recipes.length,
               padding: pad,
+            ),
+            CookbookUpdateBanner(
+              cookbook: widget.cookbook,
+              padding: EdgeInsets.fromLTRB(side, Space.sm, side, 0),
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: side - Space.lg),

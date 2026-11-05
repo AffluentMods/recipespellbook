@@ -11675,4 +11675,95 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get productReportMismatch => '¿No coincide con la etiqueta? Ver o corregir';
+
+  @override
+  String get cookbookUpdateAvailable => 'Actualización disponible';
+
+  @override
+  String get cookbookUpdateBannerBody => 'El creador cambió este recetario desde que lo descargaste.';
+
+  @override
+  String get cookbookUpdateReview => 'Revisar';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return 'Actualizar «$name»';
+  }
+
+  @override
+  String get cookbookUpdateChecking => 'Comprobando qué cambió…';
+
+  @override
+  String get cookbookUpdateLoadFailed => 'No se pudo cargar la actualización. Comprueba tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get cookbookUpdateUpToDate => 'Este recetario ya está al día.';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recetas nuevas',
+      one: '1 receta nueva',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recetas cambiadas',
+      one: '1 receta cambiada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recetas quitadas por el creador',
+      one: '1 receta quitada por el creador',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => 'Nuevo título o descripción del creador';
+
+  @override
+  String get cookbookUpdateWillUpdate => 'Se actualiza a la nueva versión';
+
+  @override
+  String get cookbookUpdateYoursDiffers => 'Tu copia tiene cambios propios';
+
+  @override
+  String get cookbookUpdateKeepMine => 'Conservar la mía';
+
+  @override
+  String get cookbookUpdateUseNew => 'Usar la nueva versión';
+
+  @override
+  String get cookbookUpdateRemovedHint => 'Marca las que quieras mover a la papelera. Las demás se quedan en tu recetario.';
+
+  @override
+  String get cookbookUpdateApply => 'Actualizar recetario';
+
+  @override
+  String get cookbookUpdateSkip => 'Omitir esta actualización';
+
+  @override
+  String get cookbookUpdateApplying => 'Actualizando el recetario…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '«$name» está al día';
+  }
+
+  @override
+  String get cookbookUpdateFailed => 'No se pudo guardar la actualización. No se cambió nada en tu recetario.';
 }

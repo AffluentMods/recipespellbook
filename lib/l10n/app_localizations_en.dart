@@ -11694,4 +11694,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Doesn\'t match the label? View or fix';
+
+  @override
+  String get cookbookUpdateAvailable => 'Update available';
+
+  @override
+  String get cookbookUpdateBannerBody => 'The creator changed this cookbook since you downloaded it.';
+
+  @override
+  String get cookbookUpdateReview => 'Review';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return 'Update \"$name\"';
+  }
+
+  @override
+  String get cookbookUpdateChecking => 'Checking what changed…';
+
+  @override
+  String get cookbookUpdateLoadFailed => 'Could not load the update. Check your connection and try again.';
+
+  @override
+  String get cookbookUpdateUpToDate => 'This cookbook is already up to date.';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new recipes',
+      one: '1 new recipe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changed recipes',
+      one: '1 changed recipe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes removed by the creator',
+      one: '1 recipe removed by the creator',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => 'New title or description from the creator';
+
+  @override
+  String get cookbookUpdateWillUpdate => 'Updates to the new version';
+
+  @override
+  String get cookbookUpdateYoursDiffers => 'Your copy has changes of its own';
+
+  @override
+  String get cookbookUpdateKeepMine => 'Keep mine';
+
+  @override
+  String get cookbookUpdateUseNew => 'Use the new version';
+
+  @override
+  String get cookbookUpdateRemovedHint => 'Tick the ones to move to the trash. The rest stay in your cookbook.';
+
+  @override
+  String get cookbookUpdateApply => 'Update cookbook';
+
+  @override
+  String get cookbookUpdateSkip => 'Skip this update';
+
+  @override
+  String get cookbookUpdateApplying => 'Updating the cookbook…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '\"$name\" is up to date';
+  }
+
+  @override
+  String get cookbookUpdateFailed => 'The update could not be saved. Nothing in your cookbook was changed.';
 }

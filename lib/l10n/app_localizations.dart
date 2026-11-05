@@ -20568,6 +20568,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Doesn\'t match the label? View or fix'**
   String get productReportMismatch;
+
+  /// No description provided for @cookbookUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get cookbookUpdateAvailable;
+
+  /// No description provided for @cookbookUpdateBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The creator changed this cookbook since you downloaded it.'**
+  String get cookbookUpdateBannerBody;
+
+  /// No description provided for @cookbookUpdateReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get cookbookUpdateReview;
+
+  /// No description provided for @cookbookUpdateSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update \"{name}\"'**
+  String cookbookUpdateSheetTitle(String name);
+
+  /// No description provided for @cookbookUpdateChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking what changed…'**
+  String get cookbookUpdateChecking;
+
+  /// No description provided for @cookbookUpdateLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the update. Check your connection and try again.'**
+  String get cookbookUpdateLoadFailed;
+
+  /// No description provided for @cookbookUpdateUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is already up to date.'**
+  String get cookbookUpdateUpToDate;
+
+  /// No description provided for @cookbookUpdateNewRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 new recipe} other{{count} new recipes}}'**
+  String cookbookUpdateNewRecipes(int count);
+
+  /// No description provided for @cookbookUpdateChangedRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 changed recipe} other{{count} changed recipes}}'**
+  String cookbookUpdateChangedRecipes(int count);
+
+  /// No description provided for @cookbookUpdateRemovedRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe removed by the creator} other{{count} recipes removed by the creator}}'**
+  String cookbookUpdateRemovedRecipes(int count);
+
+  /// No description provided for @cookbookUpdateNewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'New title or description from the creator'**
+  String get cookbookUpdateNewDetails;
+
+  /// No description provided for @cookbookUpdateWillUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates to the new version'**
+  String get cookbookUpdateWillUpdate;
+
+  /// No description provided for @cookbookUpdateYoursDiffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Your copy has changes of its own'**
+  String get cookbookUpdateYoursDiffers;
+
+  /// No description provided for @cookbookUpdateKeepMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep mine'**
+  String get cookbookUpdateKeepMine;
+
+  /// No description provided for @cookbookUpdateUseNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the new version'**
+  String get cookbookUpdateUseNew;
+
+  /// No description provided for @cookbookUpdateRemovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the ones to move to the trash. The rest stay in your cookbook.'**
+  String get cookbookUpdateRemovedHint;
+
+  /// No description provided for @cookbookUpdateApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Update cookbook'**
+  String get cookbookUpdateApply;
+
+  /// No description provided for @cookbookUpdateSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this update'**
+  String get cookbookUpdateSkip;
+
+  /// No description provided for @cookbookUpdateApplying.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating the cookbook…'**
+  String get cookbookUpdateApplying;
+
+  /// No description provided for @cookbookUpdateDone.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" is up to date'**
+  String cookbookUpdateDone(String name);
+
+  /// No description provided for @cookbookUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The update could not be saved. Nothing in your cookbook was changed.'**
+  String get cookbookUpdateFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -11,6 +11,7 @@ import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/community_cookbook_updates.dart';
 import '../../../services/family_service.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../shell/app_shell.dart';
@@ -18,6 +19,7 @@ import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../community/community_publish_screen.dart';
+import 'cookbook_update_sheet.dart';
 import '../../widgets/family_share_sheet.dart';
 import '../../widgets/join_with_link_dialog.dart';
 import '../../widgets/new_cookbook_chooser.dart';
@@ -328,6 +330,8 @@ class _CookbookGrid extends ConsumerWidget {
         // Grid
         Expanded(
           child: AppRefreshIndicator(
+          // Pulling also asks whether downloaded Community cookbooks changed.
+          onRefresh: () => CommunityCookbookUpdates(ref.read(databaseProvider)).checkAll(force: true),
           child: GridView.builder(
             padding: Responsive.isDesktopLayout(context)
                 ? const EdgeInsets.fromLTRB(Space.xxxl - 4, Space.xs, Space.xxxl - 4, Space.huge)
@@ -936,6 +940,15 @@ class _DesktopCookbookTileState extends ConsumerState<_DesktopCookbookTile> {
                       hasImage
                           ? buildFileImage(cookbook.imagePath!, fit: BoxFit.cover, cacheHeight: 440)
                           : const CookbookPlaceholderImage(height: double.infinity),
+                      // A downloaded Community cookbook whose creator
+                      // changed it: open it to review the update.
+                      if (hasCommunityUpdate(cookbook))
+                        const Positioned(
+                          left: Space.sm,
+                          right: Space.sm,
+                          bottom: Space.sm,
+                          child: Align(alignment: Alignment.bottomRight, child: CookbookUpdateBadge()),
+                        ),
                       if (widget.members.length > 1)
                         Positioned(
                           left: Space.sm,
