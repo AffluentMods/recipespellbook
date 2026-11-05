@@ -5,13 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/allergen_data.dart';
 import '../data/app_enums.dart';
 
-// ============ RECIPE LAYOUT MODE ============
-
-enum RecipeLayoutMode {
-  stacked,  // Traditional: ingredients above instructions
-  tabbed,   // Swipe between ingredients and instructions tabs
-}
-
 /// Recipe edit layout mode
 enum RecipeEditLayoutMode { stacked, tabbed }
 
@@ -124,9 +117,6 @@ class AppSettings {
   final PlaceholderImageMode recipePlaceholderMode;
   final PlaceholderImageMode cookbookPlaceholderMode;
 
-  // Recipe display settings
-  final RecipeLayoutMode recipeLayoutMode;
-
   final RecipeEditLayoutMode recipeEditLayoutMode;
 
   // Nutrition display settings
@@ -177,7 +167,6 @@ class AppSettings {
     this.quickAccessShowPinned = true,
     this.recipePlaceholderMode = PlaceholderImageMode.custom,
     this.cookbookPlaceholderMode = PlaceholderImageMode.custom,
-    this.recipeLayoutMode = RecipeLayoutMode.stacked,
     this.allergens = const [],
     this.recipeEditLayoutMode = RecipeEditLayoutMode.stacked,
     this.defaultNutritionView = NutritionDisplayMode.perServing,
@@ -212,7 +201,6 @@ class AppSettings {
     bool? quickAccessShowPinned,
     PlaceholderImageMode? recipePlaceholderMode,
     PlaceholderImageMode? cookbookPlaceholderMode,
-    RecipeLayoutMode? recipeLayoutMode,
     List<Allergen>? allergens,
     RecipeEditLayoutMode? recipeEditLayoutMode,
     NutritionDisplayMode? defaultNutritionView,
@@ -245,7 +233,6 @@ class AppSettings {
       quickAccessShowPinned: quickAccessShowPinned ?? this.quickAccessShowPinned,
       recipePlaceholderMode: recipePlaceholderMode ?? this.recipePlaceholderMode,
       cookbookPlaceholderMode: cookbookPlaceholderMode ?? this.cookbookPlaceholderMode,
-      recipeLayoutMode: recipeLayoutMode ?? this.recipeLayoutMode,
       allergens: allergens ?? this.allergens,
       recipeEditLayoutMode: recipeEditLayoutMode ?? this.recipeEditLayoutMode,
       defaultNutritionView: defaultNutritionView ?? this.defaultNutritionView,
@@ -335,7 +322,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _quickAccessPinnedKey = 'quick_access_show_pinned';
   static const _recipePlaceholderKey = 'recipe_placeholder_mode';
   static const _cookbookPlaceholderKey = 'cookbook_placeholder_mode';
-  static const _recipeLayoutKey = 'recipe_layout_mode';
   static const _allergensKey = 'allergens';
   static const _recipeEditLayoutKey = 'recipe_edit_layout';
   static const _textScaleKey = 'text_scale_factor';
@@ -440,13 +426,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
       orElse: () => PlaceholderImageMode.custom,
     );
 
-    // Load recipe layout mode
-    final recipeLayoutString = prefs.getString(_recipeLayoutKey);
-    final recipeLayoutMode = RecipeLayoutMode.values.firstWhere(
-          (m) => m.name == recipeLayoutString,
-      orElse: () => RecipeLayoutMode.stacked,
-    );
-
     // Load allergens
     final allergenKeys = prefs.getStringList(_allergensKey) ?? [];
     final allergens = allergenKeys
@@ -513,7 +492,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
       quickAccessShowPinned: quickAccessShowPinned,
       recipePlaceholderMode: recipePlaceholderMode,
       cookbookPlaceholderMode: cookbookPlaceholderMode,
-      recipeLayoutMode: recipeLayoutMode,
       allergens: allergens,
       recipeEditLayoutMode: RecipeEditLayoutMode.values[editLayoutIndex],
       defaultNutritionView: nutritionView,
@@ -702,13 +680,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(recipePlaceholderMode: mode, cookbookPlaceholderMode: mode);
   }
 
-  // Recipe layout setting
-  Future<void> setRecipeLayoutMode(RecipeLayoutMode mode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_recipeLayoutKey, mode.name);
-    state = state.copyWith(recipeLayoutMode: mode);
-  }
-
   // Ingredient layout setting
   Future<void> setIngredientLayout(IngredientLayout layout) async {
     final prefs = await SharedPreferences.getInstance();
@@ -772,7 +743,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.remove(_quickAccessHistoryCountKey);
     await prefs.remove(_quickAccessMealPlanKey);
     await prefs.remove(_quickAccessPinnedKey);
-    await prefs.remove(_recipeLayoutKey);
     await prefs.remove(_allergensKey);
     await prefs.remove(_textScaleKey);
     await prefs.remove(_weekStartDayKey);
