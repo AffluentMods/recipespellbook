@@ -89,6 +89,21 @@ if(PLUGIN_BUNDLED_LIBRARIES)
     COMPONENT Runtime)
 endif()
 
+# Bundle the Visual C++ runtime next to the executable. The app and its
+# plugins import msvcp140.dll, vcruntime140.dll and vcruntime140_1.dll, which
+# Windows itself does not ship: on a PC where nothing else installed them the
+# app would not start at all. The installer checks that they are here
+# (windows/installer.iss), and the Store package carries them too. The whole
+# runtime of the toolset that built the app is taken, so a plugin that starts
+# using another part of it still loads.
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+include(InstallRequiredSystemLibraries)
+if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+  install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+endif()
+
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/windows/")
 install(DIRECTORY "${NATIVE_ASSETS_DIR}"
