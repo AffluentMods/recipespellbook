@@ -11922,4 +11922,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cookbookUpdateFailed => 'La mise à jour n\'a pas pu être enregistrée. Rien n\'a été modifié dans votre livre de recettes.';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Repas du jour';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'Rien de prévu aujourd\'hui';
+
+  @override
+  String get widgetTodaysMealsDescription => 'Les repas prévus aujourd\'hui. Touchez-en un pour ouvrir sa recette.';
+
+  @override
+  String get widgetShoppingListTitle => 'Liste de courses';
+
+  @override
+  String get widgetShoppingListEmpty => 'Votre liste est vide';
+
+  @override
+  String get widgetShoppingListDescription => 'Ce qu\'il vous reste à acheter sur votre liste de courses.';
 }

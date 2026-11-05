@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget picker image of the Shopping list for Android 11 and older (newer
+     versions draw layout/widget_shopping_list_preview.xml instead). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="110dp"
+    android:height="110dp"
+    android:viewportWidth="110"
+    android:viewportHeight="110">
+    <!-- Card -->
+    <path
+        android:fillColor="#FBF3E8"
+        android:pathData="M16,0h78a16,16 0,0 1,16 16v78a16,16 0,0 1,-16 16h-78a16,16 0,0 1,-16 -16v-78a16,16 0,0 1,16 -16z" />
+    <!-- Header: icon, title, count -->
+    <path
+        android:fillColor="#B85C38"
+        android:pathData="M13,18a6,6 0,1 0,12 0a6,6 0,1 0,-12 0z" />
+    <path
+        android:fillColor="#3A2E24"
+        android:pathData="M34,14h38a4,4 0,0 1,0 8h-38a4,4 0,0 1,0 -8z" />
+    <path
+        android:fillColor="#B85C38"
+        android:pathData="M86,12h6a6,6 0,0 1,0 12h-6a6,6 0,0 1,0 -12z" />
+    <!-- Four items: tick circle and a line of text -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#7D6B5B"
+        android:strokeWidth="1.5"
+        android:pathData="M14,40a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z M14,57a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z M14,74a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z M14,91a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z" />
+    <path
+        android:fillColor="#B9A796"
+        android:pathData="M32,37.5h50a2.5,2.5 0,0 1,0 5h-50a2.5,2.5 0,0 1,0 -5z M32,54.5h36a2.5,2.5 0,0 1,0 5h-36a2.5,2.5 0,0 1,0 -5z M32,71.5h60a2.5,2.5 0,0 1,0 5h-60a2.5,2.5 0,0 1,0 -5z M32,88.5h42a2.5,2.5 0,0 1,0 5h-42a2.5,2.5 0,0 1,0 -5z" />
+</vector>

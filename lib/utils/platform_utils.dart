@@ -71,7 +71,11 @@ bool get supportsSpeechRecognition => !kIsWeb && !isLinux;
 /// opens a mail link and throws for files; offer Save as there instead.
 bool get supportsFileSharing => !isLinux;
 
-/// share_handler (receive share intents) — mobile only.
+/// Home screen widgets (Today's meals, Shopping list) via home_widget, which
+/// only has Android and iOS implementations.
+bool get supportsHomeWidgets => isMobile;
+
+/// share_handler (receive share intents)— mobile only.
 bool get supportsShareHandler => isMobile;
 
 /// RevenueCat purchases_flutter SDK — mobile only.

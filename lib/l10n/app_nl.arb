@@ -4687,5 +4687,11 @@
   "cookbookUpdateSkip": "Deze update overslaan",
   "cookbookUpdateApplying": "Kookboek wordt bijgewerkt…",
   "cookbookUpdateDone": "“{name}” is bijgewerkt",
-  "cookbookUpdateFailed": "De update kon niet worden opgeslagen. Er is niets in je kookboek veranderd."
+  "cookbookUpdateFailed": "De update kon niet worden opgeslagen. Er is niets in je kookboek veranderd.",
+  "widgetTodaysMealsTitle": "Maaltijden van vandaag",
+  "widgetTodaysMealsEmpty": "Niets gepland vandaag",
+  "widgetTodaysMealsDescription": "De maaltijden die voor vandaag gepland zijn. Tik op een maaltijd om het recept te openen.",
+  "widgetShoppingListTitle": "Boodschappenlijst",
+  "widgetShoppingListEmpty": "Je lijst is leeg",
+  "widgetShoppingListDescription": "Wat je nog moet kopen van je boodschappenlijst."
 }

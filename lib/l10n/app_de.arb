@@ -4249,5 +4249,11 @@
   "cookbookUpdateSkip": "Dieses Update überspringen",
   "cookbookUpdateApplying": "Kochbuch wird aktualisiert…",
   "cookbookUpdateDone": "„{name}“ ist aktuell",
-  "cookbookUpdateFailed": "Das Update konnte nicht gespeichert werden. An deinem Kochbuch wurde nichts geändert."
+  "cookbookUpdateFailed": "Das Update konnte nicht gespeichert werden. An deinem Kochbuch wurde nichts geändert.",
+  "widgetTodaysMealsTitle": "Mahlzeiten heute",
+  "widgetTodaysMealsEmpty": "Heute nichts geplant",
+  "widgetTodaysMealsDescription": "Die für heute geplanten Mahlzeiten. Tippe auf eine, um ihr Rezept zu öffnen.",
+  "widgetShoppingListTitle": "Einkaufsliste",
+  "widgetShoppingListEmpty": "Deine Liste ist leer",
+  "widgetShoppingListDescription": "Was auf deiner Einkaufsliste noch zu kaufen ist."
 }

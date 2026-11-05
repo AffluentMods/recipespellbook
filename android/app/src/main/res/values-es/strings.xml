@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_meals_title">Comidas de hoy</string>
+    <string name="widget_meals_empty">Nada planificado para hoy</string>
+    <string name="widget_meals_description">Las comidas planificadas para hoy. Toca una para abrir su receta.</string>
+    <string name="widget_shopping_title">Lista de compras</string>
+    <string name="widget_shopping_empty">Tu lista está vacía</string>
+    <string name="widget_shopping_description">Lo que te queda por comprar de tu lista de compras.</string>
+</resources>

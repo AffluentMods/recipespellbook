@@ -12086,4 +12086,22 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cookbookUpdateFailed => 'Не удалось сохранить обновление. В вашей книге ничего не изменилось.';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Меню на сегодня';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'На сегодня ничего не запланировано';
+
+  @override
+  String get widgetTodaysMealsDescription => 'Блюда, запланированные на сегодня. Нажмите на блюдо, чтобы открыть рецепт.';
+
+  @override
+  String get widgetShoppingListTitle => 'Список покупок';
+
+  @override
+  String get widgetShoppingListEmpty => 'Ваш список пуст';
+
+  @override
+  String get widgetShoppingListDescription => 'Что ещё осталось купить по вашему списку покупок.';
 }

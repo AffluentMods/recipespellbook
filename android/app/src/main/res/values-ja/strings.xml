@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_meals_title">今日の食事</string>
+    <string name="widget_meals_empty">今日の予定はありません</string>
+    <string name="widget_meals_description">今日予定している食事です。タップするとレシピが開きます。</string>
+    <string name="widget_shopping_title">買い物リスト</string>
+    <string name="widget_shopping_empty">リストは空です</string>
+    <string name="widget_shopping_description">買い物リストでまだ買っていないものです。</string>
+</resources>

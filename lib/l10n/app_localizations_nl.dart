@@ -11934,4 +11934,22 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get cookbookUpdateFailed => 'De update kon niet worden opgeslagen. Er is niets in je kookboek veranderd.';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Maaltijden van vandaag';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'Niets gepland vandaag';
+
+  @override
+  String get widgetTodaysMealsDescription => 'De maaltijden die voor vandaag gepland zijn. Tik op een maaltijd om het recept te openen.';
+
+  @override
+  String get widgetShoppingListTitle => 'Boodschappenlijst';
+
+  @override
+  String get widgetShoppingListEmpty => 'Je lijst is leeg';
+
+  @override
+  String get widgetShoppingListDescription => 'Wat je nog moet kopen van je boodschappenlijst.';
 }

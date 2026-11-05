@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/pending_deep_link.dart';
+import '../../../utils/widget_links.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -133,6 +134,11 @@ class _SplashScreenState extends State<SplashScreen>
         pendingDeepLink = null;
         splashActive = false;
         final router = GoRouter.of(context);
+        if (target != null && WidgetLinks.isTabRoute(target)) {
+          // A main tab (a home screen widget tap) opens as the tab itself.
+          router.go(target);
+          return;
+        }
         router.go('/');
         if (target != null) {
           // Push once the Home route has been applied, so it lands above it.

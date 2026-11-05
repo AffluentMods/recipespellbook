@@ -79,6 +79,10 @@ dependencies:
   # on iOS) for page capture with edge detection and perspective correction.
   cunning_document_scanner: ^3.0.3
 
+  # Home screen widgets (Today's meals, Shopping list): the app writes a small
+  # JSON snapshot to the shared widget storage and asks the widgets to redraw.
+  home_widget: ^0.10.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

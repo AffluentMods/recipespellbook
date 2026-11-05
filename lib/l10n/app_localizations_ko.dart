@@ -11822,4 +11822,22 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cookbookUpdateFailed => '업데이트를 저장하지 못했습니다. 요리책은 변경되지 않았습니다.';
+
+  @override
+  String get widgetTodaysMealsTitle => '오늘의 식사';
+
+  @override
+  String get widgetTodaysMealsEmpty => '오늘 계획된 식사가 없습니다';
+
+  @override
+  String get widgetTodaysMealsDescription => '오늘 계획된 식사입니다. 탭하면 레시피가 열립니다.';
+
+  @override
+  String get widgetShoppingListTitle => '쇼핑 목록';
+
+  @override
+  String get widgetShoppingListEmpty => '목록이 비어 있습니다';
+
+  @override
+  String get widgetShoppingListDescription => '쇼핑 목록에서 아직 사야 할 항목입니다.';
 }

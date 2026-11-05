@@ -1,0 +1,7 @@
+/* Recipe Spellbook home screen widgets. */
+"meals.title" = "今日の食事";
+"meals.empty" = "今日の予定はありません";
+"meals.description" = "今日予定している食事です。タップするとレシピが開きます。";
+"shopping.title" = "買い物リスト";
+"shopping.empty" = "リストは空です";
+"shopping.description" = "買い物リストでまだ買っていないものです。";

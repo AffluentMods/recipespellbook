@@ -4214,5 +4214,11 @@
   "cookbookUpdateSkip": "Omitir esta actualización",
   "cookbookUpdateApplying": "Actualizando el recetario…",
   "cookbookUpdateDone": "«{name}» está al día",
-  "cookbookUpdateFailed": "No se pudo guardar la actualización. No se cambió nada en tu recetario."
+  "cookbookUpdateFailed": "No se pudo guardar la actualización. No se cambió nada en tu recetario.",
+  "widgetTodaysMealsTitle": "Comidas de hoy",
+  "widgetTodaysMealsEmpty": "Nada planificado para hoy",
+  "widgetTodaysMealsDescription": "Las comidas planificadas para hoy. Toca una para abrir su receta.",
+  "widgetShoppingListTitle": "Lista de compras",
+  "widgetShoppingListEmpty": "Tu lista está vacía",
+  "widgetShoppingListDescription": "Lo que te queda por comprar de tu lista de compras."
 }

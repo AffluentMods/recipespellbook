@@ -3711,5 +3711,11 @@
   "cookbookUpdateSkip": "Salta questo aggiornamento",
   "cookbookUpdateApplying": "Aggiornamento del ricettario…",
   "cookbookUpdateDone": "«{name}» è aggiornato",
-  "cookbookUpdateFailed": "Impossibile salvare l'aggiornamento. Nel tuo ricettario non è cambiato nulla."
+  "cookbookUpdateFailed": "Impossibile salvare l'aggiornamento. Nel tuo ricettario non è cambiato nulla.",
+  "widgetTodaysMealsTitle": "Pasti di oggi",
+  "widgetTodaysMealsEmpty": "Niente in programma oggi",
+  "widgetTodaysMealsDescription": "I pasti in programma oggi. Toccane uno per aprire la ricetta.",
+  "widgetShoppingListTitle": "Lista della spesa",
+  "widgetShoppingListEmpty": "La tua lista è vuota",
+  "widgetShoppingListDescription": "Quello che resta da comprare nella tua lista della spesa."
 }

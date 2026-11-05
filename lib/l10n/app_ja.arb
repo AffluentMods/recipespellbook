@@ -4687,5 +4687,11 @@
   "cookbookUpdateSkip": "今回の更新をスキップ",
   "cookbookUpdateApplying": "レシピ本を更新しています…",
   "cookbookUpdateDone": "「{name}」は最新です",
-  "cookbookUpdateFailed": "更新を保存できませんでした。レシピ本は変更されていません。"
+  "cookbookUpdateFailed": "更新を保存できませんでした。レシピ本は変更されていません。",
+  "widgetTodaysMealsTitle": "今日の食事",
+  "widgetTodaysMealsEmpty": "今日の予定はありません",
+  "widgetTodaysMealsDescription": "今日予定している食事です。タップするとレシピが開きます。",
+  "widgetShoppingListTitle": "買い物リスト",
+  "widgetShoppingListEmpty": "リストは空です",
+  "widgetShoppingListDescription": "買い物リストでまだ買っていないものです。"
 }

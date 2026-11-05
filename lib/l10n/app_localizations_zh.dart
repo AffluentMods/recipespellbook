@@ -11790,4 +11790,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cookbookUpdateFailed => '无法保存更新。你的食谱书没有任何改动。';
+
+  @override
+  String get widgetTodaysMealsTitle => '今日餐食';
+
+  @override
+  String get widgetTodaysMealsEmpty => '今天没有安排';
+
+  @override
+  String get widgetTodaysMealsDescription => '今天计划的餐食。轻点一项即可打开食谱。';
+
+  @override
+  String get widgetShoppingListTitle => '购物清单';
+
+  @override
+  String get widgetShoppingListEmpty => '清单是空的';
+
+  @override
+  String get widgetShoppingListDescription => '购物清单上还没买的东西。';
 }

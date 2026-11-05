@@ -4687,5 +4687,11 @@
   "cookbookUpdateSkip": "跳过此更新",
   "cookbookUpdateApplying": "正在更新食谱书…",
   "cookbookUpdateDone": "“{name}”已是最新",
-  "cookbookUpdateFailed": "无法保存更新。你的食谱书没有任何改动。"
+  "cookbookUpdateFailed": "无法保存更新。你的食谱书没有任何改动。",
+  "widgetTodaysMealsTitle": "今日餐食",
+  "widgetTodaysMealsEmpty": "今天没有安排",
+  "widgetTodaysMealsDescription": "今天计划的餐食。轻点一项即可打开食谱。",
+  "widgetShoppingListTitle": "购物清单",
+  "widgetShoppingListEmpty": "清单是空的",
+  "widgetShoppingListDescription": "购物清单上还没买的东西。"
 }

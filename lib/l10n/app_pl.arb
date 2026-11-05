@@ -4687,5 +4687,11 @@
   "cookbookUpdateSkip": "Pomiń tę aktualizację",
   "cookbookUpdateApplying": "Aktualizowanie książki kucharskiej…",
   "cookbookUpdateDone": "Książka „{name}” jest aktualna",
-  "cookbookUpdateFailed": "Nie udało się zapisać aktualizacji. W Twojej książce kucharskiej nic się nie zmieniło."
+  "cookbookUpdateFailed": "Nie udało się zapisać aktualizacji. W Twojej książce kucharskiej nic się nie zmieniło.",
+  "widgetTodaysMealsTitle": "Dzisiejsze posiłki",
+  "widgetTodaysMealsEmpty": "Nic nie zaplanowano na dziś",
+  "widgetTodaysMealsDescription": "Posiłki zaplanowane na dziś. Stuknij posiłek, aby otworzyć przepis.",
+  "widgetShoppingListTitle": "Lista zakupów",
+  "widgetShoppingListEmpty": "Twoja lista jest pusta",
+  "widgetShoppingListDescription": "Co jeszcze zostało do kupienia z Twojej listy zakupów."
 }

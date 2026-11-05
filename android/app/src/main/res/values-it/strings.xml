@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_meals_title">Pasti di oggi</string>
+    <string name="widget_meals_empty">Niente in programma oggi</string>
+    <string name="widget_meals_description">I pasti in programma oggi. Toccane uno per aprire la ricetta.</string>
+    <string name="widget_shopping_title">Lista della spesa</string>
+    <string name="widget_shopping_empty">La tua lista è vuota</string>
+    <string name="widget_shopping_description">Quello che resta da comprare nella tua lista della spesa.</string>
+</resources>

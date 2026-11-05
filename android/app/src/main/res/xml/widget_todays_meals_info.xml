@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Today's meals: 3 x 2 cells by default, resizable down to 2 x 1 (just the
+     heading and the number of meals) and up as far as the launcher allows.
+     The app redraws it whenever meals change; a midnight alarm and the
+     6-hourly update turn the page to the new day without the app. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_meals_description"
+    android:initialLayout="@layout/widget_todays_meals"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="40dp"
+    android:previewImage="@drawable/widget_preview_meals"
+    android:previewLayout="@layout/widget_todays_meals_preview"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="21600000"
+    android:widgetCategory="home_screen" />

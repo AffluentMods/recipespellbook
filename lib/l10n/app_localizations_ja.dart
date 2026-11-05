@@ -11794,4 +11794,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cookbookUpdateFailed => '更新を保存できませんでした。レシピ本は変更されていません。';
+
+  @override
+  String get widgetTodaysMealsTitle => '今日の食事';
+
+  @override
+  String get widgetTodaysMealsEmpty => '今日の予定はありません';
+
+  @override
+  String get widgetTodaysMealsDescription => '今日予定している食事です。タップするとレシピが開きます。';
+
+  @override
+  String get widgetShoppingListTitle => '買い物リスト';
+
+  @override
+  String get widgetShoppingListEmpty => 'リストは空です';
+
+  @override
+  String get widgetShoppingListDescription => '買い物リストでまだ買っていないものです。';
 }

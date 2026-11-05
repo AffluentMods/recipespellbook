@@ -4687,5 +4687,11 @@
   "cookbookUpdateSkip": "Пропустить это обновление",
   "cookbookUpdateApplying": "Обновляем кулинарную книгу…",
   "cookbookUpdateDone": "Книга «{name}» обновлена",
-  "cookbookUpdateFailed": "Не удалось сохранить обновление. В вашей книге ничего не изменилось."
+  "cookbookUpdateFailed": "Не удалось сохранить обновление. В вашей книге ничего не изменилось.",
+  "widgetTodaysMealsTitle": "Меню на сегодня",
+  "widgetTodaysMealsEmpty": "На сегодня ничего не запланировано",
+  "widgetTodaysMealsDescription": "Блюда, запланированные на сегодня. Нажмите на блюдо, чтобы открыть рецепт.",
+  "widgetShoppingListTitle": "Список покупок",
+  "widgetShoppingListEmpty": "Ваш список пуст",
+  "widgetShoppingListDescription": "Что ещё осталось купить по вашему списку покупок."
 }

@@ -3712,5 +3712,11 @@
   "cookbookUpdateSkip": "Ignorer cette mise à jour",
   "cookbookUpdateApplying": "Mise à jour du livre de recettes…",
   "cookbookUpdateDone": "« {name} » est à jour",
-  "cookbookUpdateFailed": "La mise à jour n'a pas pu être enregistrée. Rien n'a été modifié dans votre livre de recettes."
+  "cookbookUpdateFailed": "La mise à jour n'a pas pu être enregistrée. Rien n'a été modifié dans votre livre de recettes.",
+  "widgetTodaysMealsTitle": "Repas du jour",
+  "widgetTodaysMealsEmpty": "Rien de prévu aujourd'hui",
+  "widgetTodaysMealsDescription": "Les repas prévus aujourd'hui. Touchez-en un pour ouvrir sa recette.",
+  "widgetShoppingListTitle": "Liste de courses",
+  "widgetShoppingListEmpty": "Votre liste est vide",
+  "widgetShoppingListDescription": "Ce qu'il vous reste à acheter sur votre liste de courses."
 }

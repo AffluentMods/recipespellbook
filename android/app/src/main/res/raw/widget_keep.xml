@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Release builds shrink resources. Everything the home screen widgets use
+     is referenced from code or the manifest and would be kept anyway; this
+     makes sure of it (the launcher, not the app, inflates these). -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@layout/widget_*,@xml/widget_*,@drawable/widget_*,@drawable/ic_widget_*,@string/widget_*,@color/widget_*,@dimen/widget_*" />

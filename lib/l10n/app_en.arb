@@ -6177,5 +6177,17 @@
   "cookbookUpdateApplying": "Updating the cookbook…",
   "cookbookUpdateDone": "\"{name}\" is up to date",
   "@cookbookUpdateDone": {"placeholders": {"name": {"type": "String"}}},
-  "cookbookUpdateFailed": "The update could not be saved. Nothing in your cookbook was changed."
+  "cookbookUpdateFailed": "The update could not be saved. Nothing in your cookbook was changed.",
+  "widgetTodaysMealsTitle": "Today's meals",
+  "@widgetTodaysMealsTitle": {"description": "Name of the Today's meals home screen widget and its heading."},
+  "widgetTodaysMealsEmpty": "Nothing planned today",
+  "@widgetTodaysMealsEmpty": {"description": "Today's meals widget when no meal is planned for today."},
+  "widgetTodaysMealsDescription": "Today's planned meals. Tap one to open its recipe.",
+  "@widgetTodaysMealsDescription": {"description": "Today's meals widget description in the system widget picker."},
+  "widgetShoppingListTitle": "Shopping list",
+  "@widgetShoppingListTitle": {"description": "Name of the Shopping list home screen widget, and its heading when the list has no name."},
+  "widgetShoppingListEmpty": "Your list is empty",
+  "@widgetShoppingListEmpty": {"description": "Shopping list widget when nothing is left to buy."},
+  "widgetShoppingListDescription": "What is left to buy on your shopping list.",
+  "@widgetShoppingListDescription": {"description": "Shopping list widget description in the system widget picker."}
 }

@@ -1,0 +1,7 @@
+/* Recipe Spellbook home screen widgets. */
+"meals.title" = "Maaltijden van vandaag";
+"meals.empty" = "Niets gepland vandaag";
+"meals.description" = "De maaltijden die voor vandaag gepland zijn. Tik op een maaltijd om het recept te openen.";
+"shopping.title" = "Boodschappenlijst";
+"shopping.empty" = "Je lijst is leeg";
+"shopping.description" = "Wat je nog moet kopen van je boodschappenlijst.";

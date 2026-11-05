@@ -11934,4 +11934,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cookbookUpdateFailed => 'The update could not be saved. Nothing in your cookbook was changed.';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Today\'s meals';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'Nothing planned today';
+
+  @override
+  String get widgetTodaysMealsDescription => 'Today\'s planned meals. Tap one to open its recipe.';
+
+  @override
+  String get widgetShoppingListTitle => 'Shopping list';
+
+  @override
+  String get widgetShoppingListEmpty => 'Your list is empty';
+
+  @override
+  String get widgetShoppingListDescription => 'What is left to buy on your shopping list.';
 }

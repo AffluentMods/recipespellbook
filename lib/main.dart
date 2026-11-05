@@ -12,6 +12,7 @@ import 'l10n/app_localizations.dart';
 import 'utils/invite_link_parser.dart';
 import 'utils/platform_utils.dart';
 import 'utils/pending_deep_link.dart';
+import 'utils/widget_links.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cookbook_provider.dart';
 import 'providers/database_provider.dart';
@@ -29,6 +30,7 @@ import 'services/ocr_service.dart';
 import 'services/recipe_import_engine.dart';
 import 'services/video_recipe_import.dart';
 import 'services/desktop_window_service.dart';
+import 'services/home_widget_service.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
 import 'services/collab_service.dart';
@@ -275,6 +277,12 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     WidgetsBinding.instance.addObserver(this);
     // Delay to avoid modifying providers during widget tree build
     WidgetsBinding.instance.addPostFrameCallback((_) => _initServices());
+    // The home screen widgets use the app's language: redraw them when it
+    // changes.
+    ref.listenManual(
+      settingsProvider.select((s) => s.languageCode),
+      (_, _) => HomeWidgetService.instance.scheduleRefresh(),
+    );
   }
 
   Future<void> _initServices() async {
@@ -289,6 +297,14 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     TransferService.instance.setDatabase(db);
     CollabService.instance.setDatabase(db);
     CollabService.instance.load();
+    // Home screen widgets: first snapshot now, then whenever meals or the
+    // shopping list change. Not awaited: the widgets can wait for auth.
+    if (HomeWidgetService.isSupported) {
+      HomeWidgetService.instance.start(
+        db,
+        languageCode: () => ref.read(settingsProvider).languageCode,
+      );
+    }
 
     // 2. Restore auth session (must be first — determines signed-in state)
     await ref.read(authProvider.notifier).initialize();
@@ -332,8 +348,10 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   //  and cold-start links opened twice.
   //  Every link shape is parsed by InviteLinkParser (utils/invite_link_parser.dart):
   //    /s/<code> share links, recipespellbook://import?code=, community links,
-  //    /family/join/<code> family invites, and recipespellbook://clip links
-  //    from the browser extension (web_clipper/), which open ClipImportScreen.
+  //    /family/join/<code> family invites, recipespellbook://clip links
+  //    from the browser extension (web_clipper/), which open ClipImportScreen,
+  //    and home screen widget taps (recipespellbook://recipe/<id>, ://shopping,
+  //    ://planner), parsed by WidgetLinks (utils/widget_links.dart).
   StreamSubscription<Uri>? _deepLinkSub;
   String? _lastDeepLink;
   DateTime? _lastDeepLinkAt;
@@ -386,7 +404,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
         queryParameters: uri.queryParameters.isEmpty ? null : uri.queryParameters,
       ).toString();
     }
-    return InviteLinkParser.parseUri(uri)?.route;
+    return WidgetLinks.routeFor(uri) ?? InviteLinkParser.parseUri(uri)?.route;
   }
 
   void _navigateToLinkTarget(String target) {
@@ -395,6 +413,9 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     // target (it opens it on top of Home); once warm, navigate directly.
     if (splashActive) {
       pendingDeepLink = target;
+    } else if (WidgetLinks.isTabRoute(target)) {
+      // A main tab (from a home screen widget) is switched to, not stacked.
+      router.go(target);
     } else {
       router.push(target);
     }
@@ -739,12 +760,19 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       // Auto-sync when app comes back to foreground
       ref.read(syncProvider.notifier).autoSync();
     }
+    // Home screen widgets: catch a new day on resume, and leave them current
+    // (e.g. a different shopping list picked) as the app goes to the
+    // background, where they are about to be seen.
+    if (state == AppLifecycleState.resumed || state == AppLifecycleState.paused) {
+      HomeWidgetService.instance.refresh();
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkSub?.cancel();
+    HomeWidgetService.instance.stop();
     super.dispose();
   }
 
