@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/revenuecat_stub.dart' if (dart.library.io) '../services/revenuecat_native.dart';
 import '../services/auth_service.dart';
 import '../services/revenuecat_service.dart';
+import '../utils/platform_utils.dart' show supportsRevenueCatSdk;
+import 'auth_provider.dart';
 
 // ════════════════════════════════════════════════════════════════
 //  SUBSCRIPTION STATUS
@@ -52,13 +54,24 @@ class SubscriptionStatus {
       );
 }
 
+/// The purchase status could not be checked (for example, offline).
+class PurchaseCheckFailed implements Exception {
+  const PurchaseCheckFailed();
+
+  @override
+  String toString() => 'Could not reach the server';
+}
+
 // ════════════════════════════════════════════════════════════════
 //  PROVIDERS
 // ════════════════════════════════════════════════════════════════
 
 final subscriptionProvider =
 StateNotifierProvider<SubscriptionNotifier, SubscriptionStatus>((ref) {
-  return SubscriptionNotifier();
+  return SubscriptionNotifier(
+    onAccountRefreshed: (user) =>
+        ref.read(authProvider.notifier).applyRefreshedUser(user),
+  );
 });
 
 /// Convenience: current tier.
@@ -81,9 +94,14 @@ final isProProvider = Provider<bool>((ref) {
 // ════════════════════════════════════════════════════════════════
 
 class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
-  SubscriptionNotifier() : super(const SubscriptionStatus()) {
+  SubscriptionNotifier({this.onAccountRefreshed})
+      : super(const SubscriptionStatus()) {
     RevenueCatService.instance.addListener(_onTierChanged);
   }
+
+  /// Called with the account re-read from the server, so the signed-in user
+  /// (and its plan badge) matches the new tier.
+  final void Function(AuthUser user)? onAccountRefreshed;
 
   @override
   void dispose() {
@@ -177,19 +195,39 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
     _syncState();
   }
 
-  /// Refresh subscription status from RevenueCat.
-  Future<void> refreshStatus() async {
+  /// Refresh subscription status: from RevenueCat on mobile, or from the
+  /// account on the server where there is no RevenueCat SDK (desktop and web
+  /// buy through Stripe, which only updates the account's tier).
+  /// Returns false when the status could not be checked.
+  Future<bool> refreshStatus() async {
     state = state.copyWith(isLoading: true);
     try {
-      await RevenueCatService.instance.refreshStatus();
+      var checked = true;
+      if (supportsRevenueCatSdk) {
+        await RevenueCatService.instance.refreshStatus();
+      } else {
+        checked = await _refreshFromAccount();
+      }
       _syncState();
       state = state.copyWith(isLoading: false);
+      return checked;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Refresh failed: $e',
       );
+      return false;
     }
+  }
+
+  /// Re-read the signed-in account from the server and take its tier.
+  /// Returns false when signed out or the server could not be reached.
+  Future<bool> _refreshFromAccount() async {
+    final user = await AuthService.instance.refreshCurrentUser();
+    if (user == null) return false;
+    RevenueCatService.instance.setTierFromBackend(user.tier);
+    onAccountRefreshed?.call(user);
+    return true;
   }
 
   /// Update tier from backend after auth changes.
@@ -223,9 +261,24 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
     await refreshStatus();
   }
 
-  /// Restore previous purchases.
+  /// Restore previous purchases. Returns true when a paid plan was found.
+  /// Without the RevenueCat SDK this re-reads the account from the server and
+  /// throws [PurchaseCheckFailed] when that is not possible, so callers can
+  /// say the check failed instead of "no purchases found".
   Future<bool> restorePurchases() async {
     state = state.copyWith(isLoading: true, error: null);
+
+    if (!supportsRevenueCatSdk) {
+      if (AuthService.instance.currentUser == null) {
+        state = state.copyWith(isLoading: false);
+        return false; // Stripe purchases belong to an account
+      }
+      final checked = await _refreshFromAccount();
+      _syncState();
+      state = state.copyWith(isLoading: false);
+      if (!checked) throw const PurchaseCheckFailed();
+      return state.isPaid;
+    }
 
     try {
       final tier = await RevenueCatService.instance.restorePurchases();

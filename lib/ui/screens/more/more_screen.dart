@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../utils/share_origin.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
@@ -168,6 +169,7 @@ class MoreScreen extends ConsumerWidget {
                     ShareParams(
                       text: l10n.menuShareMessage,
                       subject: l10n.appTitle,
+                      sharePositionOrigin: shareOrigin(context),
                     ),
                   ),
                 ),

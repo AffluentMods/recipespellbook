@@ -10878,4 +10878,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => '続きを読み込めませんでした';
+
+  @override
+  String get notifDownloadsOffer => 'ダウンロードを通知する';
+
+  @override
+  String get notifDownloadsOn => '誰かがダウンロードすると通知が届きます。';
+
+  @override
+  String get notifPermissionDenied => 'Recipe Spellbook の通知がオフになっています。端末の設定でオンにしてください。';
 }

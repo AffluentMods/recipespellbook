@@ -10878,4 +10878,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => '더 불러오지 못했습니다';
+
+  @override
+  String get notifDownloadsOffer => '다운로드 알림 받기';
+
+  @override
+  String get notifDownloadsOn => '누군가 다운로드하면 알림을 받게 됩니다.';
+
+  @override
+  String get notifPermissionDenied => 'Recipe Spellbook 알림이 꺼져 있습니다. 기기 설정에서 켜 주세요.';
 }

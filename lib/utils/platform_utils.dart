@@ -63,6 +63,14 @@ bool get supportsImagePicker => isMobile;
 /// mobile_scanner (barcode/QR) — mobile only.
 bool get supportsBarcodeScanner => isMobile;
 
+/// speech_to_text (cooking-mode voice control). The plugin has no Linux
+/// implementation, and the app leaves it off on web.
+bool get supportsSpeechRecognition => !kIsWeb && !isLinux;
+
+/// Sharing files through the system share sheet. share_plus on Linux only
+/// opens a mail link and throws for files; offer Save as there instead.
+bool get supportsFileSharing => !isLinux;
+
 /// share_handler (receive share intents) — mobile only.
 bool get supportsShareHandler => isMobile;
 
@@ -70,8 +78,9 @@ bool get supportsShareHandler => isMobile;
 /// Desktop/web use backend-based subscription validation.
 bool get supportsRevenueCatSdk => isMobile;
 
-/// Apple Sign-In — iOS and macOS only.
-bool get supportsAppleSignIn => isIOS || isMacOS;
+/// Apple Sign-In: iOS only. The macOS build is ad-hoc signed without the
+/// Sign in with Apple entitlement, so the flow cannot complete there.
+bool get supportsAppleSignIn => isIOS;
 
 /// Native splash screen — mobile and desktop, not web.
 bool get supportsNativeSplash => !kIsWeb;

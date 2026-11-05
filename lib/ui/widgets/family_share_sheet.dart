@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../utils/share_origin.dart';
 
 import '../../providers/subscription_provider.dart';
 import '../../services/auth_service.dart';
@@ -480,7 +481,11 @@ class _LinkCard extends StatelessWidget {
             const Spacer(),
             TextButton.icon(
               onPressed: () {
-                SharePlus.instance.share(ShareParams(text: link.url, subject: l10n.shareFromApp));
+                SharePlus.instance.share(ShareParams(
+                  text: link.url,
+                  subject: l10n.shareFromApp,
+                  sharePositionOrigin: shareOrigin(context),
+                ));
               },
               icon: const Icon(Icons.share, size: 14),
               label: Text(l10n.actionShare, style: const TextStyle(fontSize: 12)),

@@ -10,11 +10,13 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/notification_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_photo_uploader.dart';
 import '../../../services/community_service.dart';
 import '../../../services/image_service.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../../utils/platform_utils.dart' show supportsFirebaseMessaging;
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/community_tag_picker.dart';
 import '../../widgets/recipe_image.dart';
@@ -393,6 +395,9 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   // ── Step 3: Publishing (progress) ──
 
   Widget _buildStep3Publishing(ThemeData theme, AppLocalizations l10n) {
+    // Once it is out, offer download notifications (push is mobile only).
+    final offerNotifications = supportsFirebaseMessaging &&
+        !ref.watch(notificationPrefsProvider).communityUpdates;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
@@ -420,6 +425,14 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     ),
                     const SizedBox(height: 8),
                     _RecipeTitleList(titles: rejected),
+                  ],
+                  if (offerNotifications) ...[
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: _turnOnDownloadNotifications,
+                      icon: const Icon(Icons.notifications_active_outlined),
+                      label: Text(l10n.notifDownloadsOffer),
+                    ),
                   ],
                   const SizedBox(height: 24),
                   FilledButton(onPressed: () => context.pop(), child: Text(l10n.actionDone)),
@@ -514,6 +527,24 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         ),
       ),
     );
+  }
+
+  /// Asked only when the user taps the offer: the system prompt (Android 13+,
+  /// iOS) then registers this device for download notifications.
+  Future<void> _turnOnDownloadNotifications() async {
+    final l10n = AppLocalizations.of(context)!;
+    var ok = false;
+    try {
+      ok = await ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(true);
+    } catch (e) {
+      debugPrint('[Publish] Could not turn on notifications: $e');
+    }
+    if (!mounted) return;
+    if (ok) {
+      AppSnackbar.success(context, l10n.notifDownloadsOn);
+    } else {
+      AppSnackbar.info(context, l10n.notifPermissionDenied);
+    }
   }
 
   Future<void> _startPublish() async {

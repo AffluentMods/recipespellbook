@@ -11037,4 +11037,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Не удалось загрузить ещё';
+
+  @override
+  String get notifDownloadsOffer => 'Сообщать о скачиваниях';
+
+  @override
+  String get notifDownloadsOn => 'Вы получите уведомление, когда кто-нибудь это скачает.';
+
+  @override
+  String get notifPermissionDenied => 'Уведомления Recipe Spellbook выключены. Включите их в настройках устройства.';
 }

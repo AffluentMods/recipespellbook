@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../utils/share_origin.dart';
 
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
@@ -715,7 +716,11 @@ class _AccountMenu extends ConsumerWidget {
           ),
           style: _menuItemStyle(c),
           onPressed: () => SharePlus.instance.share(
-            ShareParams(text: l10n.menuShareMessage, subject: l10n.appTitle),
+            ShareParams(
+              text: l10n.menuShareMessage,
+              subject: l10n.appTitle,
+              sharePositionOrigin: shareOrigin(context),
+            ),
           ),
           child: Text(l10n.inviteFriends),
         ),

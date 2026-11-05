@@ -67,6 +67,10 @@ class GroceryService {
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    // The macOS app is ad-hoc signed with no keychain-access-groups
+    // entitlement, so the data protection keychain (the plugin default)
+    // refuses every write with -34018. The login keychain works there.
+    mOptions: MacOsOptions(useDataProtectionKeyChain: false),
   );
 
   // Secure storage keys — user-specific tokens (safe to store on device)

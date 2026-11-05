@@ -10944,4 +10944,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Kon niet meer laden';
+
+  @override
+  String get notifDownloadsOffer => 'Meld me downloads';
+
+  @override
+  String get notifDownloadsOn => 'Je krijgt een melding als iemand het downloadt.';
+
+  @override
+  String get notifPermissionDenied => 'Meldingen voor Recipe Spellbook staan uit. Zet ze aan in de instellingen van je apparaat.';
 }

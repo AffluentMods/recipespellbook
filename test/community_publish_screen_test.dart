@@ -177,6 +177,8 @@ void main() {
 
       await tester.tap(find.text('Retry failed photos'));
       await settleUntil(tester, () => showing('Published!'));
+      // Download notifications are offered, not asked for, once it is out.
+      expect(find.text('Notify me about downloads'), findsOneWidget);
 
       // The cover was not sent again.
       expect(server.uploadRequests, 5);

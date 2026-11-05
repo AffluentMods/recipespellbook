@@ -10956,4 +10956,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Weitere Einträge konnten nicht geladen werden';
+
+  @override
+  String get notifDownloadsOffer => 'Bei Downloads benachrichtigen';
+
+  @override
+  String get notifDownloadsOn => 'Du bekommst eine Benachrichtigung, wenn jemand es herunterlädt.';
+
+  @override
+  String get notifPermissionDenied => 'Benachrichtigungen für Recipe Spellbook sind aus. Schalte sie in den Geräteeinstellungen ein.';
 }

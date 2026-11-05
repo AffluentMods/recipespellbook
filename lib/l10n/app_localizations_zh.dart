@@ -10873,4 +10873,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => '无法加载更多';
+
+  @override
+  String get notifDownloadsOffer => '有人下载时通知我';
+
+  @override
+  String get notifDownloadsOn => '有人下载时你会收到通知。';
+
+  @override
+  String get notifPermissionDenied => 'Recipe Spellbook 的通知已关闭。请在设备设置中开启。';
 }

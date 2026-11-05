@@ -4158,5 +4158,8 @@
   "communityPublishRateLimitWait": "{seconds, plural, =1{Osiągnięto limit przesyłania. Wznowienie za 1 sekundę} few{Osiągnięto limit przesyłania. Wznowienie za {seconds} sekundy} other{Osiągnięto limit przesyłania. Wznowienie za {seconds} sekund}}",
   "communityPublishServerBusy": "Inne przesyłanie jest jeszcze przetwarzane. Spróbuj ponownie za kilka minut.",
   "communityPublishDailyLimit": "To przekroczyłoby dzisiejszy limit przesyłania zdjęć. Spróbuj jutro albo opublikuj bez zdjęć.",
-  "communityFeedLoadMoreFailed": "Nie udało się wczytać więcej"
+  "communityFeedLoadMoreFailed": "Nie udało się wczytać więcej",
+  "notifDownloadsOffer": "Powiadamiaj o pobraniach",
+  "notifDownloadsOn": "Dostaniesz powiadomienie, gdy ktoś to pobierze.",
+  "notifPermissionDenied": "Powiadomienia Recipe Spellbook są wyłączone. Włącz je w ustawieniach urządzenia."
 }

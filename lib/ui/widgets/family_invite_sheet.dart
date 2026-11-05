@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../utils/share_origin.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/family_service.dart';
@@ -89,12 +90,10 @@ class _FamilyInviteSheet extends StatelessWidget {
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: () {
-                  final box = context.findRenderObject() as RenderBox?;
                   SharePlus.instance.share(ShareParams(
                     text: l10n.familyShareMessage(info.inviteCode, info.shareLink),
                     subject: l10n.familyShareSubject,
-                    // iPad needs an anchor for the share popover.
-                    sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+                    sharePositionOrigin: shareOrigin(context),
                   ));
                 },
                 icon: const Icon(Icons.share, size: 18),

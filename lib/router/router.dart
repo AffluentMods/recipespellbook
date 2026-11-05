@@ -38,7 +38,6 @@ import '../ui/screens/settings/ingredient_layout_settings_screen.dart';
 import '../ui/screens/settings/notification_settings_screen.dart';
 import '../ui/screens/settings/account_screen.dart';
 import '../ui/screens/settings/settings_screen.dart';
-import '../ui/screens/notifications/notifications_screen.dart';
 import '../ui/screens/community/community_screen.dart';
 import '../ui/screens/community/community_detail_screen.dart';
 import '../ui/screens/community/community_publish_screen.dart';
@@ -116,14 +115,6 @@ final router = GoRouter(
         final error = state.uri.queryParameters['error'];
         return KrogerCallbackScreen(authCode: code, error: error);
       },
-    ),
-
-    // Notifications (fullscreen overlay)
-    GoRoute(
-      path: '/notifications',
-      name: 'notifications',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const NotificationsScreen(),
     ),
 
     // ═══════════════════════════════════════════════════════

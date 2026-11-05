@@ -5863,5 +5863,8 @@
   },
   "communityPublishServerBusy": "Another upload is still being processed. Try again in a few minutes.",
   "communityPublishDailyLimit": "This would go over today's photo upload limit. Try again tomorrow, or publish without photos.",
-  "communityFeedLoadMoreFailed": "Could not load more"
+  "communityFeedLoadMoreFailed": "Could not load more",
+  "notifDownloadsOffer": "Notify me about downloads",
+  "notifDownloadsOn": "You'll get a notification when someone downloads it.",
+  "notifPermissionDenied": "Notifications are off for Recipe Spellbook. Turn them on in your device settings."
 }

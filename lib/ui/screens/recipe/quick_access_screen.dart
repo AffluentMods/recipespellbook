@@ -6,6 +6,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
@@ -45,20 +46,24 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
 
     final items = <_QuickRecipeItem>[];
     final seenIds = <String>{};
+    // Each source follows its switch in Settings > Quick Access.
+    final settings = ref.read(settingsProvider);
 
     // 1. Today's meal plan
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
-    final todayEnd = todayStart.add(const Duration(days: 1));
+    final todayEnd = DateTime(today.year, today.month, today.day + 1);
 
     try {
-      final todaysMeals = await mealPlanDao.getMealPlansInRange(cookbookId, todayStart, todayEnd);
-      for (final meal in todaysMeals) {
-        if (meal.recipeId != null && meal.recipeId!.isNotEmpty && !seenIds.contains(meal.recipeId)) {
-          final recipe = await recipeDao.getRecipeById(meal.recipeId!);
-          if (recipe != null) {
-            items.add(_QuickRecipeItem(recipe: recipe, source: _Source.mealPlan, addedAt: meal.date));
-            seenIds.add(recipe.id);
+      if (settings.quickAccessShowMealPlan) {
+        final todaysMeals = await mealPlanDao.getMealPlansInRange(cookbookId, todayStart, todayEnd);
+        for (final meal in todaysMeals) {
+          if (meal.recipeId != null && meal.recipeId!.isNotEmpty && !seenIds.contains(meal.recipeId)) {
+            final recipe = await recipeDao.getRecipeById(meal.recipeId!);
+            if (recipe != null) {
+              items.add(_QuickRecipeItem(recipe: recipe, source: _Source.mealPlan, addedAt: meal.date));
+              seenIds.add(recipe.id);
+            }
           }
         }
       }
@@ -68,11 +73,13 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
 
     // 2. Pinned recipes
     try {
-      final pinned = await recipeDao.getPinnedRecipes(cookbookId);
-      for (final recipe in pinned) {
-        if (!seenIds.contains(recipe.id)) {
-          items.add(_QuickRecipeItem(recipe: recipe, source: _Source.pinned, addedAt: recipe.updatedAt));
-          seenIds.add(recipe.id);
+      if (settings.quickAccessShowPinned) {
+        final pinned = await recipeDao.getPinnedRecipes(cookbookId);
+        for (final recipe in pinned) {
+          if (!seenIds.contains(recipe.id)) {
+            items.add(_QuickRecipeItem(recipe: recipe, source: _Source.pinned, addedAt: recipe.updatedAt));
+            seenIds.add(recipe.id);
+          }
         }
       }
     } catch (e) {
@@ -81,17 +88,22 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
 
     // 3. Recently viewed
     try {
-      final recent = await recipeDao.watchRecentlyViewed(cookbookId, limit: 20).first;
-      for (final recipe in recent) {
-        if (!seenIds.contains(recipe.id)) {
-          items.add(_QuickRecipeItem(recipe: recipe, source: _Source.recent, addedAt: recipe.lastViewedAt));
-          seenIds.add(recipe.id);
+      if (settings.quickAccessShowHistory) {
+        final recent = await recipeDao
+            .watchRecentlyViewed(cookbookId, limit: settings.quickAccessHistoryCount)
+            .first;
+        for (final recipe in recent) {
+          if (!seenIds.contains(recipe.id)) {
+            items.add(_QuickRecipeItem(recipe: recipe, source: _Source.recent, addedAt: recipe.lastViewedAt));
+            seenIds.add(recipe.id);
+          }
         }
       }
     } catch (e) {
       debugPrint('Error loading recent: $e');
     }
 
+    if (!mounted) return;
     setState(() {
       _allItems = items;
       _isLoading = false;

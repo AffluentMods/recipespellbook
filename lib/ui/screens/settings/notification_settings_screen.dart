@@ -2,20 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/notification_provider.dart';
-import '../../../services/auth_service.dart';
+import '../../../services/notification_service.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/app_snackbar.dart';
 
-class NotificationSettingsScreen extends ConsumerWidget {
+/// Notification settings for this device. Only shown where push works
+/// (Android and iOS). The one notification the server sends is a download of
+/// something the user published to Community.
+class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificationSettingsScreen> createState() =>
+      _NotificationSettingsScreenState();
+}
+
+class _NotificationSettingsScreenState
+    extends ConsumerState<NotificationSettingsScreen> {
+  /// Whether the system lets the app show notifications; null until known.
+  bool? _systemAllowed;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSystemPermission();
+  }
+
+  Future<void> _checkSystemPermission() async {
+    try {
+      final allowed = await NotificationService.instance.isPermissionGranted();
+      if (mounted) setState(() => _systemAllowed = allowed);
+    } catch (_) {/* push unavailable: leave unknown */}
+  }
+
+  Future<void> _setDownloads(bool v) async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _busy = true);
+    try {
+      final ok = await ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(v);
+      if (!mounted) return;
+      if (!ok) AppSnackbar.info(context, l10n.notifPermissionDenied);
+      await _checkSystemPermission();
+    } catch (_) {
+      if (mounted) AppSnackbar.error(context, l10n.notifPermissionDenied);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final prefs = ref.watch(notificationPrefsProvider);
-    final notifier = ref.read(notificationPrefsProvider.notifier);
-    // TODO: Kitchen Buddy hidden for now
-    // final isKitchenBuddy = ref.watch(settingsProvider).kitchenBuddyEnabled;
+    final blockedBySystem = prefs.communityUpdates && _systemAllowed == false;
 
     return Scaffold(
       appBar: AppBar(
@@ -23,69 +64,20 @@ class NotificationSettingsScreen extends ConsumerWidget {
       ),
       body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView(
         children: [
-          // ── Cooking Reminders ──
-          _SectionHeader(title: l10n.settingsNotifCooking, icon: Icons.schedule),
-          SwitchListTile(
-            secondary: const Icon(Icons.schedule),
-            title: Text(l10n.settingsNotifCooking),
-            subtitle: Text(l10n.settingsNotifCookingSubtitle),
-            value: prefs.cookingReminders,
-            onChanged: (v) => notifier.setCookingReminders(v),
-          ),
-          const Divider(),
-
-          // ── Community Updates ──
+          // ── Community ──
           _SectionHeader(title: l10n.settingsNotifCommunity, icon: Icons.people_outline),
           SwitchListTile(
-            secondary: const Icon(Icons.people_outline),
-            title: Text(l10n.settingsNotifCommunity),
-            subtitle: Text(l10n.settingsNotifCommunitySubtitle),
-            value: prefs.communityUpdates,
-            onChanged: (v) => notifier.setCommunityUpdates(v),
+            secondary: const Icon(Icons.download_outlined),
+            title: Text(l10n.settingsNotifNewDownloads),
+            subtitle: Text(l10n.settingsNotifNewDownloadsSubtitle),
+            value: prefs.communityUpdates && !blockedBySystem,
+            onChanged: _busy ? null : _setDownloads,
           ),
-          if (prefs.communityUpdates) ...[
+          if (blockedBySystem)
             Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: SwitchListTile(
-                title: Text(l10n.settingsNotifNewDownloads),
-                subtitle: Text(l10n.settingsNotifNewDownloadsSubtitle),
-                value: prefs.communityDownloads,
-                onChanged: (v) => notifier.setCommunityDownloads(v),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: SwitchListTile(
-                title: Text(l10n.settingsNotifRatingUpdates),
-                subtitle: Text(l10n.settingsNotifRatingUpdatesSubtitle),
-                value: prefs.communityRatings,
-                onChanged: (v) => notifier.setCommunityRatings(v),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: SwitchListTile(
-                title: Text(l10n.settingsNotifComments),
-                subtitle: Text(l10n.settingsNotifCommentsSubtitle),
-                value: prefs.communityComments,
-                onChanged: (v) => notifier.setCommunityComments(v),
-              ),
-            ),
-          ],
-          const Divider(),
-
-          // TODO: Kitchen Buddy notifications hidden for now
-          // if (isKitchenBuddy) ...[
-          //   _SectionHeader(title: 'Kitchen Buddy Notifications', icon: Icons.emoji_events_outlined),
-          //   ...
-          // ],
-
-          // ── Sync note ──
-          if (AuthService.instance.isSignedIn)
-            Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: Text(
-                l10n.settingsNotifSyncNote,
+                l10n.notifPermissionDenied,
                 style: TextStyle(color: theme.colorScheme.outline, fontSize: 13),
               ),
             ),
