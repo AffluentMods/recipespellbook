@@ -110,6 +110,38 @@
             </intent-filter>
 
         </activity>
+
+        <!-- Home screen widgets (widgets/*.kt). The app writes their data and
+             redraws them (lib/services/home_widget_service.dart); a tap opens
+             a recipespellbook:// link in MainActivity. -->
+        <receiver
+            android:name=".widgets.TodaysMealsWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_meals_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <!-- A new day, clock or time zone change, or language. -->
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_todays_meals_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.ShoppingListWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_shopping_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_shopping_list_info" />
+        </receiver>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

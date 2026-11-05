@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_meals_title">Меню на сегодня</string>
+    <string name="widget_meals_empty">На сегодня ничего не запланировано</string>
+    <string name="widget_meals_description">Блюда, запланированные на сегодня. Нажмите на блюдо, чтобы открыть рецепт.</string>
+    <string name="widget_shopping_title">Список покупок</string>
+    <string name="widget_shopping_empty">Ваш список пуст</string>
+    <string name="widget_shopping_description">Что ещё осталось купить по вашему списку покупок.</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widgets. The same text, in every language, is in lib/l10n/app_*.arb
+     (the app writes those into the widgets' snapshot) and in
+     ios/RecipeWidgets/*.lproj/Localizable.strings. -->
+<resources>
+    <string name="widget_meals_title">Today\'s meals</string>
+    <string name="widget_meals_empty">Nothing planned today</string>
+    <string name="widget_meals_description">Today\'s planned meals. Tap one to open its recipe.</string>
+    <string name="widget_shopping_title">Shopping list</string>
+    <string name="widget_shopping_empty">Your list is empty</string>
+    <string name="widget_shopping_description">What is left to buy on your shopping list.</string>
+</resources>

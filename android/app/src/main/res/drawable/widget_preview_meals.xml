@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget picker image of Today's meals for Android 11 and older (newer
+     versions draw layout/widget_todays_meals_preview.xml instead). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="180dp"
+    android:height="110dp"
+    android:viewportWidth="180"
+    android:viewportHeight="110">
+    <!-- Card -->
+    <path
+        android:fillColor="#FBF3E8"
+        android:pathData="M16,0h148a16,16 0,0 1,16 16v78a16,16 0,0 1,-16 16h-148a16,16 0,0 1,-16 -16v-78a16,16 0,0 1,16 -16z" />
+    <!-- Header: icon, title, count -->
+    <path
+        android:fillColor="#B85C38"
+        android:pathData="M13,18a6,6 0,1 0,12 0a6,6 0,1 0,-12 0z" />
+    <path
+        android:fillColor="#3A2E24"
+        android:pathData="M34,14h60a4,4 0,0 1,0 8h-60a4,4 0,0 1,0 -8z" />
+    <path
+        android:fillColor="#B85C38"
+        android:pathData="M154,12h6a6,6 0,0 1,0 12h-6a6,6 0,0 1,0 -12z" />
+    <!-- Three meal rows -->
+    <path
+        android:fillColor="#F3E4D2"
+        android:pathData="M20,32h140a8,8 0,0 1,8 8v6a8,8 0,0 1,-8 8h-140a8,8 0,0 1,-8 -8v-6a8,8 0,0 1,8 -8z" />
+    <path
+        android:fillColor="#F3E4D2"
+        android:pathData="M20,57h140a8,8 0,0 1,8 8v6a8,8 0,0 1,-8 8h-140a8,8 0,0 1,-8 -8v-6a8,8 0,0 1,8 -8z" />
+    <path
+        android:fillColor="#F3E4D2"
+        android:pathData="M20,82h140a8,8 0,0 1,8 8v6a8,8 0,0 1,-8 8h-140a8,8 0,0 1,-8 -8v-6a8,8 0,0 1,8 -8z" />
+    <path
+        android:fillColor="#F1D6C6"
+        android:pathData="M22,39h22a4,4 0,0 1,0 8h-22a4,4 0,0 1,0 -8z M22,64h22a4,4 0,0 1,0 8h-22a4,4 0,0 1,0 -8z M22,89h22a4,4 0,0 1,0 8h-22a4,4 0,0 1,0 -8z" />
+    <path
+        android:fillColor="#B9A796"
+        android:pathData="M56,40.5h70a2.5,2.5 0,0 1,0 5h-70a2.5,2.5 0,0 1,0 -5z M56,65.5h54a2.5,2.5 0,0 1,0 5h-54a2.5,2.5 0,0 1,0 -5z M56,90.5h82a2.5,2.5 0,0 1,0 5h-82a2.5,2.5 0,0 1,0 -5z" />
+</vector>
