@@ -1,4 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:recipespellbook/services/isbn_lookup_service.dart';
 
 void main() {
@@ -43,5 +46,25 @@ void main() {
       expect(IsbnLookupService.isbnFromDescription(description), '9781476753836');
       expect(IsbnLookupService.isbnFromDescription('Just my notes'), isNull);
     });
+  });
+
+  test('lookups name the running app version, not a typed-in one', () async {
+    PackageInfo.setMockInitialValues(
+      appName: 'Recipe Spellbook',
+      packageName: 'com.affluentlabs.recipespellbook',
+      version: '9.9.9',
+      buildNumber: '1',
+      buildSignature: '',
+    );
+    final agents = <String?>[];
+    await http.runWithClient(
+      () => IsbnLookupService.lookup('9781476753836'),
+      () => MockClient((req) async {
+        agents.add(req.headers['User-Agent']);
+        return http.Response('{}', 404);
+      }),
+    );
+    expect(agents, isNotEmpty);
+    expect(agents, everyElement('RecipeSpellbook/9.9.9 (support@recipespellbook.app)'));
   });
 }
