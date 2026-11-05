@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -102,8 +103,10 @@ class ImageService {
   static const int maxFileSize = 5 * 1024 * 1024;
 
   /// Whether the last [uploadFile] reached the server and was turned down
-  /// (a server error, the daily limit, a photo it will not take), as opposed to
-  /// going through, or not getting there at all (offline, timed out).
+  /// (a server error, the daily limit, a photo it will not take), or could
+  /// never go up at all (too large even compressed, a file that cannot be
+  /// read), as opposed to going through, or not getting there at all
+  /// (offline, timed out).
   bool get lastUploadRefused => _lastUploadRefused;
   bool _lastUploadRefused = false;
 
@@ -157,6 +160,8 @@ class ImageService {
       }
 
       if (bytes.length > maxFileSize) {
+        // It will be just as large next time: as good as refused.
+        _lastUploadRefused = true;
         debugPrint('[ImageService] File too large after compression: ${bytes.length} bytes');
         return null;
       }
@@ -181,9 +186,25 @@ class ImageService {
       debugPrint('[ImageService] Upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
       return null;
     } catch (e) {
+      // Offline or timed out: it goes up later. Anything else (a file that
+      // cannot be read, an answer that cannot be understood) fails the same
+      // way every time, so it counts as refused.
+      _lastUploadRefused = !_isConnectionError(e);
       debugPrint('[ImageService] Upload error: $e');
       return null;
     }
+  }
+
+  /// Whether [e] means the server could not be reached, rather than that
+  /// something is wrong with what was sent.
+  static bool _isConnectionError(Object e) {
+    if (e is TimeoutException || e is SocketException || e is http.ClientException) return true;
+    final msg = e.toString();
+    return msg.contains('SocketException') ||
+        msg.contains('HandshakeException') ||
+        msg.contains('Connection refused') ||
+        msg.contains('Connection reset') ||
+        msg.contains('Failed host lookup');
   }
 
   // ════════════════════════════════════════════
