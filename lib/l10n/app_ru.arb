@@ -4623,5 +4623,11 @@
   "themePreviewSecondary": "Вторичный",
   "nutriSheetEditedStatus": "Изменено вручную",
   "nutriSheetLinkedNoNutrition": "{title}: нет данных о пищевой ценности",
-  "productReportMismatch": "Не совпадает с этикеткой? Посмотреть или исправить"
+  "productReportMismatch": "Не совпадает с этикеткой? Посмотреть или исправить",
+  "widgetTodaysMealsTitle": "Меню на сегодня",
+  "widgetTodaysMealsEmpty": "На сегодня ничего не запланировано",
+  "widgetTodaysMealsDescription": "Блюда, запланированные на сегодня. Нажмите на блюдо, чтобы открыть рецепт.",
+  "widgetShoppingListTitle": "Список покупок",
+  "widgetShoppingListEmpty": "Ваш список пуст",
+  "widgetShoppingListDescription": "Что ещё осталось купить по вашему списку покупок."
 }

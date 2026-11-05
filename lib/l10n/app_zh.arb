@@ -4623,5 +4623,11 @@
   "themePreviewSecondary": "次要",
   "nutriSheetEditedStatus": "已手动编辑",
   "nutriSheetLinkedNoNutrition": "{title}：无营养数据",
-  "productReportMismatch": "与标签不符？查看或更正"
+  "productReportMismatch": "与标签不符？查看或更正",
+  "widgetTodaysMealsTitle": "今日餐食",
+  "widgetTodaysMealsEmpty": "今天没有安排",
+  "widgetTodaysMealsDescription": "今天计划的餐食。轻点一项即可打开食谱。",
+  "widgetShoppingListTitle": "购物清单",
+  "widgetShoppingListEmpty": "清单是空的",
+  "widgetShoppingListDescription": "购物清单上还没买的东西。"
 }

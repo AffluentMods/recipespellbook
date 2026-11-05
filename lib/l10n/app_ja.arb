@@ -4623,5 +4623,11 @@
   "themePreviewSecondary": "セカンダリ",
   "nutriSheetEditedStatus": "手動で編集済み",
   "nutriSheetLinkedNoNutrition": "{title}：栄養データなし",
-  "productReportMismatch": "ラベルと違いますか？確認・修正"
+  "productReportMismatch": "ラベルと違いますか？確認・修正",
+  "widgetTodaysMealsTitle": "今日の食事",
+  "widgetTodaysMealsEmpty": "今日の予定はありません",
+  "widgetTodaysMealsDescription": "今日予定している食事です。タップするとレシピが開きます。",
+  "widgetShoppingListTitle": "買い物リスト",
+  "widgetShoppingListEmpty": "リストは空です",
+  "widgetShoppingListDescription": "買い物リストでまだ買っていないものです。"
 }

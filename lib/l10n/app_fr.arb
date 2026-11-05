@@ -3648,5 +3648,11 @@
   "themePreviewSecondary": "Secondaire",
   "nutriSheetEditedStatus": "Modifié manuellement",
   "nutriSheetLinkedNoNutrition": "{title} : aucune donnée nutritionnelle",
-  "productReportMismatch": "Ne correspond pas à l'étiquette ? Voir ou corriger"
+  "productReportMismatch": "Ne correspond pas à l'étiquette ? Voir ou corriger",
+  "widgetTodaysMealsTitle": "Repas du jour",
+  "widgetTodaysMealsEmpty": "Rien de prévu aujourd'hui",
+  "widgetTodaysMealsDescription": "Les repas prévus aujourd'hui. Touchez-en un pour ouvrir sa recette.",
+  "widgetShoppingListTitle": "Liste de courses",
+  "widgetShoppingListEmpty": "Votre liste est vide",
+  "widgetShoppingListDescription": "Ce qu'il vous reste à acheter sur votre liste de courses."
 }

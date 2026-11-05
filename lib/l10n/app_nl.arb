@@ -4623,5 +4623,11 @@
   "themePreviewSecondary": "Secundair",
   "nutriSheetEditedStatus": "Handmatig bewerkt",
   "nutriSheetLinkedNoNutrition": "{title}: geen voedingswaarden",
-  "productReportMismatch": "Klopt het niet met het etiket? Bekijken of verbeteren"
+  "productReportMismatch": "Klopt het niet met het etiket? Bekijken of verbeteren",
+  "widgetTodaysMealsTitle": "Maaltijden van vandaag",
+  "widgetTodaysMealsEmpty": "Niets gepland vandaag",
+  "widgetTodaysMealsDescription": "De maaltijden die voor vandaag gepland zijn. Tik op een maaltijd om het recept te openen.",
+  "widgetShoppingListTitle": "Boodschappenlijst",
+  "widgetShoppingListEmpty": "Je lijst is leeg",
+  "widgetShoppingListDescription": "Wat je nog moet kopen van je boodschappenlijst."
 }

@@ -4185,5 +4185,11 @@
   "themePreviewSecondary": "Sekundär",
   "nutriSheetEditedStatus": "Manuell bearbeitet",
   "nutriSheetLinkedNoNutrition": "{title}: keine Nährwertangaben",
-  "productReportMismatch": "Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren"
+  "productReportMismatch": "Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren",
+  "widgetTodaysMealsTitle": "Mahlzeiten heute",
+  "widgetTodaysMealsEmpty": "Heute nichts geplant",
+  "widgetTodaysMealsDescription": "Die für heute geplanten Mahlzeiten. Tippe auf eine, um ihr Rezept zu öffnen.",
+  "widgetShoppingListTitle": "Einkaufsliste",
+  "widgetShoppingListEmpty": "Deine Liste ist leer",
+  "widgetShoppingListDescription": "Was auf deiner Einkaufsliste noch zu kaufen ist."
 }

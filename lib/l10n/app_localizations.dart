@@ -20568,6 +20568,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Doesn\'t match the label? View or fix'**
   String get productReportMismatch;
+
+  /// Name of the Today's meals home screen widget and its heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s meals'**
+  String get widgetTodaysMealsTitle;
+
+  /// Today's meals widget when no meal is planned for today.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned today'**
+  String get widgetTodaysMealsEmpty;
+
+  /// Today's meals widget description in the system widget picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s planned meals. Tap one to open its recipe.'**
+  String get widgetTodaysMealsDescription;
+
+  /// Name of the Shopping list home screen widget, and its heading when the list has no name.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list'**
+  String get widgetShoppingListTitle;
+
+  /// Shopping list widget when nothing is left to buy.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list is empty'**
+  String get widgetShoppingListEmpty;
+
+  /// Shopping list widget description in the system widget picker.
+  ///
+  /// In en, this message translates to:
+  /// **'What is left to buy on your shopping list.'**
+  String get widgetShoppingListDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

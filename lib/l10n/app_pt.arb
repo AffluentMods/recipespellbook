@@ -4623,5 +4623,11 @@
   "themePreviewSecondary": "Secundário",
   "nutriSheetEditedStatus": "Editado manualmente",
   "nutriSheetLinkedNoNutrition": "{title}: sem dados nutricionais",
-  "productReportMismatch": "Não confere com o rótulo? Ver ou corrigir"
+  "productReportMismatch": "Não confere com o rótulo? Ver ou corrigir",
+  "widgetTodaysMealsTitle": "Refeições de hoje",
+  "widgetTodaysMealsEmpty": "Nada planejado para hoje",
+  "widgetTodaysMealsDescription": "As refeições planejadas para hoje. Toque em uma para abrir a receita.",
+  "widgetShoppingListTitle": "Lista de compras",
+  "widgetShoppingListEmpty": "Sua lista está vazia",
+  "widgetShoppingListDescription": "O que ainda falta comprar na sua lista de compras."
 }

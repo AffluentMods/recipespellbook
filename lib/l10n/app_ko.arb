@@ -4623,5 +4623,11 @@
   "themePreviewSecondary": "보조",
   "nutriSheetEditedStatus": "직접 수정함",
   "nutriSheetLinkedNoNutrition": "{title}: 영양 정보 없음",
-  "productReportMismatch": "라벨과 다른가요? 보기 또는 수정"
+  "productReportMismatch": "라벨과 다른가요? 보기 또는 수정",
+  "widgetTodaysMealsTitle": "오늘의 식사",
+  "widgetTodaysMealsEmpty": "오늘 계획된 식사가 없습니다",
+  "widgetTodaysMealsDescription": "오늘 계획된 식사입니다. 탭하면 레시피가 열립니다.",
+  "widgetShoppingListTitle": "쇼핑 목록",
+  "widgetShoppingListEmpty": "목록이 비어 있습니다",
+  "widgetShoppingListDescription": "쇼핑 목록에서 아직 사야 할 항목입니다."
 }

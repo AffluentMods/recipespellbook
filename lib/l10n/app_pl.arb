@@ -4623,5 +4623,11 @@
   "themePreviewSecondary": "Dodatkowy",
   "nutriSheetEditedStatus": "Edytowano ręcznie",
   "nutriSheetLinkedNoNutrition": "{title}: brak danych o wartościach odżywczych",
-  "productReportMismatch": "Nie zgadza się z etykietą? Zobacz lub popraw"
+  "productReportMismatch": "Nie zgadza się z etykietą? Zobacz lub popraw",
+  "widgetTodaysMealsTitle": "Dzisiejsze posiłki",
+  "widgetTodaysMealsEmpty": "Nic nie zaplanowano na dziś",
+  "widgetTodaysMealsDescription": "Posiłki zaplanowane na dziś. Stuknij posiłek, aby otworzyć przepis.",
+  "widgetShoppingListTitle": "Lista zakupów",
+  "widgetShoppingListEmpty": "Twoja lista jest pusta",
+  "widgetShoppingListDescription": "Co jeszcze zostało do kupienia z Twojej listy zakupów."
 }

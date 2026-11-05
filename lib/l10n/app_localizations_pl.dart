@@ -11848,4 +11848,22 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Nie zgadza się z etykietą? Zobacz lub popraw';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Dzisiejsze posiłki';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'Nic nie zaplanowano na dziś';
+
+  @override
+  String get widgetTodaysMealsDescription => 'Posiłki zaplanowane na dziś. Stuknij posiłek, aby otworzyć przepis.';
+
+  @override
+  String get widgetShoppingListTitle => 'Lista zakupów';
+
+  @override
+  String get widgetShoppingListEmpty => 'Twoja lista jest pusta';
+
+  @override
+  String get widgetShoppingListDescription => 'Co jeszcze zostało do kupienia z Twojej listy zakupów.';
 }

@@ -27,6 +27,8 @@ import '../../../services/recipe_import_engine.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../import/import_preview_screen.dart';
 import '../../../services/grocery_service.dart';
+import '../../../services/home_widget_service.dart';
+import '../../../services/home_widget_snapshot.dart' show shoppingLastListPrefKey;
 import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/share_file.dart';
 import '../../../services/shopping_list_service.dart';
@@ -165,7 +167,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   Map<String, int> _sharedListCounts = {}; // listId → share count
   Map<String, List<_ShopMember>> _sharedListMembers = {}; // listId → members
 
-  static const _lastListKey = 'shoppingLastListId';
+  // The shopping home screen widget shows this same list.
+  static const _lastListKey = shoppingLastListPrefKey;
   static const _groupModeKey = 'shoppingGroupMode';
 
   Timer? _collabTimer;
@@ -290,7 +293,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       if (!CollabService.instance.canEdit(id)) _quickAddOpen = false;
     });
     SharedPreferences.getInstance()
-        .then((p) => p.setString(_lastListKey, id));
+        .then((p) => p.setString(_lastListKey, id))
+        .then((_) => HomeWidgetService.instance.scheduleRefresh());
   }
 
   Future<void> _loadSharedStatus() async {

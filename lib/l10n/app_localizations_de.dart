@@ -11682,4 +11682,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Mahlzeiten heute';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'Heute nichts geplant';
+
+  @override
+  String get widgetTodaysMealsDescription => 'Die für heute geplanten Mahlzeiten. Tippe auf eine, um ihr Rezept zu öffnen.';
+
+  @override
+  String get widgetShoppingListTitle => 'Einkaufsliste';
+
+  @override
+  String get widgetShoppingListEmpty => 'Deine Liste ist leer';
+
+  @override
+  String get widgetShoppingListDescription => 'Was auf deiner Einkaufsliste noch zu kaufen ist.';
 }

@@ -11682,4 +11682,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Ne correspond pas à l\'étiquette ? Voir ou corriger';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Repas du jour';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'Rien de prévu aujourd\'hui';
+
+  @override
+  String get widgetTodaysMealsDescription => 'Les repas prévus aujourd\'hui. Touchez-en un pour ouvrir sa recette.';
+
+  @override
+  String get widgetShoppingListTitle => 'Liste de courses';
+
+  @override
+  String get widgetShoppingListEmpty => 'Votre liste est vide';
+
+  @override
+  String get widgetShoppingListDescription => 'Ce qu\'il vous reste à acheter sur votre liste de courses.';
 }
