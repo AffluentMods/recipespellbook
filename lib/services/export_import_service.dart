@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' show Rect;
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart';
@@ -16,6 +17,7 @@ import '../utils/platform_utils.dart';
 import '../utils/zip_stream_stub.dart' if (dart.library.io) '../utils/zip_stream_io.dart';
 import 'backup_reminder_service.dart';
 import 'image_service.dart';
+import 'share_file.dart';
 
 // ════════════════════════════════════════════
 //  EXPORT / IMPORT OPTIONS
@@ -297,7 +299,9 @@ class ExportImportService {
   //  SHARE / SAVE
   // ──────────────────────────────────────────
 
-  Future<void> shareExport(Map<String, dynamic> data, String filename) async {
+  /// Share the export through the share sheet (Save as where files cannot
+  /// be shared). [sharePositionOrigin] anchors the iPad / macOS popover.
+  Future<FileShareOutcome> shareExport(Map<String, dynamic> data, String filename, {Rect? sharePositionOrigin}) async {
     final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
     if (isWeb) {
       // On web, share as XFile from bytes (no local filesystem)
@@ -306,11 +310,13 @@ class ExportImportService {
         files: [XFile.fromData(Uint8List.fromList(bytes), name: filename, mimeType: 'application/json')],
         subject: 'Recipe Spellbook Export',
       ));
+      return FileShareOutcome.shared;
     } else {
       final dir = await getTemporaryDirectory();
       final file = File(p.join(dir.path, filename));
       await file.writeAsString(jsonStr);
-      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], subject: 'Recipe Spellbook Export'));
+      return shareOrSaveFile(file.path,
+          subject: 'Recipe Spellbook Export', sharePositionOrigin: sharePositionOrigin);
     }
   }
 
@@ -637,10 +643,11 @@ class ExportImportService {
     return false;
   }
 
-  /// Share the full zip export.
-  Future<void> shareFullZipExport({
+  /// Share the full zip export (Save as where files cannot be shared).
+  Future<FileShareOutcome> shareFullZipExport({
     ExportOptions options = const ExportOptions.all(),
     void Function(String status)? onProgress,
+    Rect? sharePositionOrigin,
   }) async {
     final filename = _exportFilename;
 
@@ -650,18 +657,20 @@ class ExportImportService {
         files: [XFile.fromData(zipBytes, name: filename, mimeType: 'application/zip')],
         subject: 'Recipe Spellbook Full Backup',
       ));
-    } else {
-      // Fully streamed: zip is written to temp on disk and shared by
-      // path — the archive never exists in memory at all.
-      final dir = await getTemporaryDirectory();
-      final file = File(p.join(dir.path, filename));
-      await exportFullZipToPath(file.path, options: options, onProgress: onProgress);
-      await SharePlus.instance.share(ShareParams(
-        files: [XFile(file.path)],
-        subject: 'Recipe Spellbook Full Backup',
-      ));
+      await BackupReminderService.markBackupDone();
+      return FileShareOutcome.shared;
     }
-    await BackupReminderService.markBackupDone();
+    // Fully streamed: zip is written to temp on disk and shared by
+    // path — the archive never exists in memory at all.
+    final dir = await getTemporaryDirectory();
+    final file = File(p.join(dir.path, filename));
+    await exportFullZipToPath(file.path, options: options, onProgress: onProgress);
+    final outcome = await shareOrSaveFile(file.path,
+        subject: 'Recipe Spellbook Full Backup', sharePositionOrigin: sharePositionOrigin);
+    if (outcome != FileShareOutcome.cancelled) {
+      await BackupReminderService.markBackupDone();
+    }
+    return outcome;
   }
 
   /// Convert a recipe map to schema.org Recipe JSON-LD format.

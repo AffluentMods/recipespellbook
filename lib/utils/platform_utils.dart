@@ -63,6 +63,10 @@ bool get supportsImagePicker => isMobile;
 /// mobile_scanner (barcode/QR) — mobile only.
 bool get supportsBarcodeScanner => isMobile;
 
+/// Sharing files through the system share sheet. share_plus on Linux only
+/// opens a mail link and throws for files; offer Save as there instead.
+bool get supportsFileSharing => !isLinux;
+
 /// share_handler (receive share intents) — mobile only.
 bool get supportsShareHandler => isMobile;
 

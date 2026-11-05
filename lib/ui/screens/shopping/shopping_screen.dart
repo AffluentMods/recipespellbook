@@ -18,6 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../data/ingredient_images.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/share_origin.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
@@ -27,6 +28,7 @@ import '../../../providers/cookbook_provider.dart';
 import '../import/import_preview_screen.dart';
 import '../../../services/grocery_service.dart';
 import '../../../services/ingredient_suggestion_service.dart';
+import '../../../services/share_file.dart';
 import '../../../services/shopping_list_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
@@ -781,6 +783,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               title: Text(l10n.shareAsText),
               subtitle: Text(l10n.shareAsTextDescription),
               onTap: () async {
+                final origin = shareOrigin(ctx);
                 Navigator.pop(ctx);
                 final shoppingDao = ref.read(shoppingDaoProvider);
                 final items = await shoppingDao.getItemsForList(id);
@@ -790,7 +793,11 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   final check = item.isChecked ? '☑' : '☐';
                   buffer.writeln('$check ${item.name}');
                 }
-                await SharePlus.instance.share(ShareParams(text: buffer.toString(), subject: name));
+                await SharePlus.instance.share(ShareParams(
+                  text: buffer.toString(),
+                  subject: name,
+                  sharePositionOrigin: origin,
+                ));
               },
             ),
 
@@ -880,7 +887,11 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 const SizedBox(width: 12),
                 Expanded(child: FilledButton.icon(
                   onPressed: () {
-                    SharePlus.instance.share(ShareParams(text: link.url, subject: 'Shared from Recipe Spellbook'));
+                    SharePlus.instance.share(ShareParams(
+                      text: link.url,
+                      subject: 'Shared from Recipe Spellbook',
+                      sharePositionOrigin: shareOrigin(ctx),
+                    ));
                   },
                   icon: const Icon(Icons.share, size: 18),
                   label: Text(l10n.actionShare),
@@ -1442,8 +1453,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 title: Text(l10n.exportBackupFile),
                 subtitle: Text(l10n.exportBackupFileSubtitle),
                 onTap: () {
+                  final origin = shareOrigin(ctx);
                   Navigator.pop(ctx);
-                  _exportAs('json');
+                  _exportAs('json', origin);
                 },
               ),
               ListTile(
@@ -1458,8 +1470,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 title: Text(l10n.exportFormattedList),
                 subtitle: Text(l10n.exportFormattedListSubtitle),
                 onTap: () {
+                  final origin = shareOrigin(ctx);
                   Navigator.pop(ctx);
-                  _exportAs('md');
+                  _exportAs('md', origin);
                 },
               ),
               ListTile(
@@ -1474,8 +1487,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 title: Text(l10n.exportPlainText),
                 subtitle: Text(l10n.exportPlainTextSubtitle),
                 onTap: () {
+                  final origin = shareOrigin(ctx);
                   Navigator.pop(ctx);
-                  _exportAs('txt');
+                  _exportAs('txt', origin);
                 },
               ),
               const SizedBox(height: 16),
@@ -1486,11 +1500,15 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     );
   }
 
-  Future<void> _exportAs(String format) async {
+  Future<void> _exportAs(String format, Rect origin) async {
     try {
       final shoppingDao = ref.read(shoppingDaoProvider);
       final service = ShoppingListService(shoppingDao.attachedDatabase);
-      await service.shareAsFile(_currentListId, format: format);
+      final outcome = await service.shareAsFile(_currentListId,
+          format: format, sharePositionOrigin: origin);
+      if (outcome == FileShareOutcome.saved && mounted) {
+        AppSnackbar.success(context, AppLocalizations.of(context)!.successSaved);
+      }
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;

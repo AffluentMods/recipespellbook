@@ -11,8 +11,9 @@ import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../../providers/kitchen_buddy_provider.dart';
-import '../../../utils/platform_utils.dart' show supportsFirebaseMessaging;
+import '../../../utils/platform_utils.dart' show isDesktop, supportsFileSharing, supportsFirebaseMessaging;
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/share_origin.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/avatar_url.dart';
@@ -24,6 +25,7 @@ import '../../../providers/subscription_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/export_import_service.dart';
+import '../../../services/share_file.dart';
 import '../../../services/family_service.dart';
 import '../../../services/onboarding_service.dart';
 import '../../../services/sync_service.dart';
@@ -619,48 +621,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
         }
       },
-      onExportFullZip: (options) async {
+      // Linux cannot share files: "Save to device" is the way out there.
+      onExportFullZip: !supportsFileSharing ? null : (options) async {
+        final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
+        FileShareOutcome outcome;
         try {
-          await service.shareFullZipExport(
+          outcome = await service.shareFullZipExport(
             options: options,
             onProgress: (status) {
               if (context.mounted) AppSnackbar.loading(context, status);
             },
+            sharePositionOrigin: origin,
           );
         } catch (e) {
           if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
           return;
         }
-        if (context.mounted) AppSnackbar.dismiss(context);
+        if (context.mounted) {
+          AppSnackbar.dismiss(context);
+          if (outcome == FileShareOutcome.saved) AppSnackbar.success(context, l10n.exportSaved);
+        }
       },
       onExportCookbook: () async {
+        final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
-        try {
-          final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
-          final data = await service.exportCookbook(cookbookId);
-          await service.shareExport(data, 'cookbook_export.json');
-        } catch (e) {
-          if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
-          return;
-        }
-        if (context.mounted) AppSnackbar.dismiss(context);
+        final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
+        await _shareOrSaveJson(context, () => service.exportCookbook(cookbookId),
+            service: service, filename: 'cookbook_export.json', origin: origin);
       },
       onExportSelective: (options) async {
+        final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
-        try {
-          final data = await service.exportSelective(options);
-          await service.shareExport(data, 'recipe_spellbook_backup.json');
-        } catch (e) {
-          if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
-          return;
-        }
-        if (context.mounted) AppSnackbar.dismiss(context);
+        await _shareOrSaveJson(context, () => service.exportSelective(options),
+            service: service, filename: 'recipe_spellbook_backup.json', origin: origin);
       },
     ));
+  }
+
+  /// A JSON export: a Save as dialog on desktop, the share sheet on phones
+  /// and tablets. Assumes the "Exporting" snackbar is showing.
+  Future<void> _shareOrSaveJson(
+    BuildContext context,
+    Future<Map<String, dynamic>> Function() build, {
+    required ExportImportService service,
+    required String filename,
+    Rect? origin,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    var saved = false;
+    try {
+      final data = await build();
+      if (isDesktop) {
+        saved = await service.saveExport(data, filename);
+      } else {
+        saved = await service.shareExport(data, filename, sharePositionOrigin: origin) ==
+            FileShareOutcome.saved;
+      }
+    } catch (e) {
+      if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
+      return;
+    }
+    if (context.mounted) {
+      AppSnackbar.dismiss(context);
+      if (saved) AppSnackbar.success(context, l10n.successSaved);
+    }
   }
 
   void _showImportOptions(BuildContext context, WidgetRef ref) {

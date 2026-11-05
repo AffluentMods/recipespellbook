@@ -13,10 +13,12 @@ import '../../providers/database_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/family_service.dart';
 import '../../services/image_service.dart';
+import '../../services/share_file.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_colors.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
+import '../../utils/share_origin.dart';
 import 'sheet_chrome.dart';
 
 /// Strip emoji characters that even Unicode fonts struggle with in PDFs.
@@ -163,6 +165,7 @@ class _RecipeShareSheet extends StatelessWidget {
       return;
     }
 
+    final origin = shareOrigin(context);
     Navigator.pop(context);
 
     // Loading shows on the ROOT overlay and dismiss() is context-independent
@@ -191,6 +194,7 @@ class _RecipeShareSheet extends StatelessWidget {
       SharePlus.instance.share(ShareParams(
         text: '${recipe.title}\n${link.url}',
         subject: recipe.title,
+        sharePositionOrigin: origin,
       ));
       return;
     }
@@ -203,6 +207,7 @@ class _RecipeShareSheet extends StatelessWidget {
           ? '${recipe.title}\n${recipe.sourceUrl!}'
           : '${recipe.title}\n\n${l10n.shareFromApp}',
       subject: recipe.title,
+      sharePositionOrigin: origin,
     ));
   }
 
@@ -359,6 +364,7 @@ class _RecipeShareSheet extends StatelessWidget {
 
   Future<void> _shareAsText(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
+    final origin = shareOrigin(context);
     Navigator.pop(context);
 
     final dao = ref.read(recipeDaoProvider);
@@ -441,11 +447,16 @@ class _RecipeShareSheet extends StatelessWidget {
 
     buffer.writeln(l10n.shareFromApp);
 
-    await SharePlus.instance.share(ShareParams(text: buffer.toString(), subject: recipe.title));
+    await SharePlus.instance.share(ShareParams(
+      text: buffer.toString(),
+      subject: recipe.title,
+      sharePositionOrigin: origin,
+    ));
   }
 
   Future<void> _shareAsDocument(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
+    final origin = shareOrigin(context);
     Navigator.pop(context);
 
     AppSnackbar.info(context, l10n.shareCreatingDocument);
@@ -471,10 +482,11 @@ class _RecipeShareSheet extends StatelessWidget {
       final file = File('${dir.path}/$filename.pdf');
       await file.writeAsBytes(await pdf.save());
 
-      await SharePlus.instance.share(ShareParams(
-        files: [XFile(file.path)],
-        subject: '${recipe.title} - Recipe',
-      ));
+      final outcome = await shareOrSaveFile(file.path,
+          subject: '${recipe.title} - Recipe', sharePositionOrigin: origin);
+      if (outcome == FileShareOutcome.saved && context.mounted) {
+        AppSnackbar.success(context, l10n.successSaved);
+      }
     } catch (e) {
       if (context.mounted) {
         AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
@@ -514,6 +526,7 @@ class _RecipeShareSheet extends StatelessWidget {
   }
 
   Future<void> _exportRecipe(BuildContext context) async {
+    final origin = shareOrigin(context);
     Navigator.pop(context);
 
     final dao = ref.read(recipeDaoProvider);
@@ -656,10 +669,11 @@ class _RecipeShareSheet extends StatelessWidget {
     final file = File('${dir.path}/$filename.json');
     await file.writeAsString(json);
 
-    await SharePlus.instance.share(ShareParams(
-      files: [XFile(file.path)],
-      subject: '${recipe.title} - Recipe Export',
-    ));
+    final outcome = await shareOrSaveFile(file.path,
+        subject: '${recipe.title} - Recipe Export', sharePositionOrigin: origin);
+    if (outcome == FileShareOutcome.saved && context.mounted) {
+      AppSnackbar.success(context, AppLocalizations.of(context)!.successSaved);
+    }
   }
 
   Future<pw.Document> _createRecipePdf(
