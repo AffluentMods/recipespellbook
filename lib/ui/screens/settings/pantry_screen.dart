@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/pantry_cooking_provider.dart';
 import '../../../services/pantry_service.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/tokens.dart';
 import '../../../utils/responsive_utils.dart';
+import '../pantry_cooking/pantry_cooking_widgets.dart';
 
 /// Settings screen for managing pantry items.
 ///
 /// Items in the pantry are auto-unchecked in the shopping list generator
-/// since the user presumably already has them on hand.
-class PantryScreen extends StatefulWidget {
+/// since the user presumably already has them on hand, and "What can I
+/// make?" ranks recipes by them. Shares its state with that page.
+class PantryScreen extends ConsumerStatefulWidget {
   const PantryScreen({super.key});
 
   @override
-  State<PantryScreen> createState() => _PantryScreenState();
+  ConsumerState<PantryScreen> createState() => _PantryScreenState();
 }
 
-class _PantryScreenState extends State<PantryScreen> {
+class _PantryScreenState extends ConsumerState<PantryScreen> {
   List<String> _items = [];
-  bool _loading = true;
+  final _dismissed = <String>{};
   final _addController = TextEditingController();
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
+  PantryNotifier get _pantry => ref.read(pantryProvider.notifier);
 
   @override
   void dispose() {
@@ -34,22 +37,21 @@ class _PantryScreenState extends State<PantryScreen> {
     super.dispose();
   }
 
-  Future<void> _load() async {
-    final items = await PantryService.instance.getAll();
-    if (mounted) setState(() { _items = items; _loading = false; });
-  }
-
   Future<void> _addItem(String name) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
-    await PantryService.instance.addItem(trimmed);
+    await _pantry.add(trimmed);
     _addController.clear();
-    await _load();
   }
 
-  Future<void> _removeItem(String name) async {
-    await PantryService.instance.removeItem(name);
-    await _load();
+  Future<void> _removeItem(String name) => _pantry.remove(name);
+
+  /// Leave this screen (a settings panel on desktop, a page on phones) for
+  /// "What can I make?".
+  void _openCooking() {
+    final router = GoRouter.of(context);
+    Navigator.of(context).maybePop();
+    router.push(pantryCookingPath);
   }
 
   List<String> get _filteredItems {
@@ -69,6 +71,17 @@ class _PantryScreenState extends State<PantryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
+    final pantry = ref.watch(pantryProvider).valueOrNull;
+    // A swiped-away item leaves the list at once, before storage catches up.
+    final stored = pantry?.items ?? const <String>[];
+    _dismissed.removeWhere((i) => !stored.contains(i));
+    _items = [for (final i in stored) if (!_dismissed.contains(i)) i];
+    final loading = pantry == null;
+    final bought = [
+      for (final name in ref.watch(recentlyBoughtProvider).valueOrNull ?? const <String>[])
+        if (pantry != null && !pantry.matcher.hasItem(name)) name,
+    ].take(12).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -96,8 +109,7 @@ class _PantryScreenState extends State<PantryScreen> {
                     ),
                   );
                   if (confirm == true) {
-                    await PantryService.instance.clear();
-                    await _load();
+                    await _pantry.clear();
                   }
                 }
               },
@@ -116,7 +128,7 @@ class _PantryScreenState extends State<PantryScreen> {
             ),
         ],
       ),
-      body: _loading
+      body: loading
           ? const Center(child: CircularProgressIndicator())
           : Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: CustomScrollView(
         slivers: [
@@ -149,6 +161,37 @@ class _PantryScreenState extends State<PantryScreen> {
             ),
           ),
 
+          // What can I make with all this?
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+              child: Material(
+                color: c.selectedFill,
+                borderRadius: Radii.lgAll,
+                child: InkWell(
+                  borderRadius: Radii.lgAll,
+                  onTap: _openCooking,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    child: Row(
+                      children: [
+                        Icon(Icons.restaurant_menu_rounded, size: 20, color: c.accent),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l10n.pantryCookSeeRecipes,
+                            style: TextStyle(fontWeight: FontWeight.w600, color: c.accent),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded, color: c.accent),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           // Add item field
           SliverToBoxAdapter(
             child: Padding(
@@ -173,6 +216,48 @@ class _PantryScreenState extends State<PantryScreen> {
               ),
             ),
           ),
+
+          // Quick-add what was ticked off on the shopping list lately
+          if (bought.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 8, 2),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.pantryCookRecentlyBought,
+                        style: theme.textTheme.labelMedium
+                            ?.copyWith(color: theme.colorScheme.outline),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => _pantry.addAll(bought),
+                      child: Text(l10n.pantryCookAddAll),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    for (final name in bought)
+                      ActionChip(
+                        label: Text(name),
+                        avatar: const Icon(Icons.add, size: 14),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => _addItem(name),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
 
           // Quick-add staples
           if (_suggestedStaples.isNotEmpty) ...[
@@ -210,14 +295,13 @@ class _PantryScreenState extends State<PantryScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextButton(
                     onPressed: () async {
-                      await PantryService.instance
-                          .addItems(_suggestedStaples);
-                      await _load();
-                      if (mounted) {
+                      final staples = _suggestedStaples;
+                      await _pantry.addAll(staples);
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                l10n.pantryAddedStaples(_suggestedStaples.length)),
+                                l10n.pantryAddedStaples(staples.length)),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );
@@ -228,6 +312,14 @@ class _PantryScreenState extends State<PantryScreen> {
                 ),
               ),
           ],
+
+          // Basics that never count as missing in "What can I make?"
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 20, 16, 4),
+              child: PantryBasicsEditor(),
+            ),
+          ),
 
           // Divider
           if (_items.isNotEmpty) ...[
@@ -291,7 +383,10 @@ class _PantryScreenState extends State<PantryScreen> {
                       child: const Icon(Icons.delete,
                           color: Colors.white),
                     ),
-                    onDismissed: (_) => _removeItem(item),
+                    onDismissed: (_) {
+                      setState(() => _dismissed.add(item));
+                      _removeItem(item);
+                    },
                     child: ListTile(
                       dense: true,
                       leading: Icon(Icons.kitchen,

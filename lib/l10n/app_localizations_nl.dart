@@ -11694,4 +11694,485 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Klopt het niet met het etiket? Bekijken of verbeteren';
+
+  @override
+  String get clipScreenTitle => 'Recept uit je browser';
+
+  @override
+  String get clipChooseCookbookTitle => 'In welk kookboek opslaan?';
+
+  @override
+  String get clipChooseCookbookMessage => 'Kies het kookboek voor het recept uit je browser.';
+
+  @override
+  String get clipNoCookbook => 'Er is geen kookboek om het recept in op te slaan. Maak er een aan en sla het recept daarna opnieuw op.';
+
+  @override
+  String get webClipperGuideTitle => 'Webclipper';
+
+  @override
+  String get webClipperGuideSubtitle => 'Sla recepten uit Chrome, Edge, Brave of Firefox op met één klik';
+
+  @override
+  String get webClipperStep1Title => 'Voeg de extensie toe';
+
+  @override
+  String get webClipperStep1Desc => 'Installeer de Recipe Spellbook Web Clipper in Chrome, Edge, Brave of Firefox op je computer.';
+
+  @override
+  String get webClipperStep2Title => 'Open een recept';
+
+  @override
+  String get webClipperStep2Desc => 'Ga in die browser naar een willekeurige receptpagina.';
+
+  @override
+  String get webClipperStep3Title => 'Klik op Save';
+
+  @override
+  String get webClipperStep3Desc => 'Klik op de Recipe Spellbook-knop in de werkbalk en daarna op Save. Of klik met de rechtermuisknop op de pagina en kies ‘Save to Recipe Spellbook’.';
+
+  @override
+  String get webClipperStep4Title => 'Controleer en sla op';
+
+  @override
+  String get webClipperStep4Desc => 'Laat de browser Recipe Spellbook openen, kies een kookboek en sla het recept op vanuit het voorbeeld.';
+
+  @override
+  String get webClipperTip => 'Werkt met de Recipe Spellbook-app voor Windows en Mac. De extensie leest een pagina alleen als je klikt en stuurt niets naar een server.';
+
+  @override
+  String get webClipperGetExtension => 'Extensie downloaden';
+
+  @override
+  String get videoImportFromDescription => 'Uit de videobeschrijving';
+
+  @override
+  String get videoImportFromCaptions => 'Uit de ondertiteling';
+
+  @override
+  String get videoImportCheckText => 'Gelezen uit de tekst van de video. Controleer de ingrediënten en stappen voordat je opslaat.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Geen geschreven recept gevonden';
+
+  @override
+  String get videoImportNoRecipeBody => 'De videobeschrijving noemt geen ingrediënten. De AI-import kan de tekst van de video lezen en er een recept van maken.';
+
+  @override
+  String get videoImportUseAi => 'AI-import gebruiken';
+
+  @override
+  String get videoImportNoRecipe => 'Geen recept gevonden in de beschrijving of ondertiteling van deze video.';
+
+  @override
+  String get videoImportUnavailable => 'Deze video is privé, verwijderd of niet beschikbaar.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform beperkt op dit moment het aantal verzoeken. Probeer het over een paar minuten opnieuw.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Kon $platform niet bereiken. Controleer je internetverbinding en probeer het opnieuw.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform deed er te lang over om te antwoorden. Probeer het opnieuw.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform liet de app deze video niet lezen. Kopieer de beschrijving en gebruik daarna Tekst plakken.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram heeft het bijschrift van dit bericht niet gedeeld. Open het bericht, kopieer het bijschrift en gebruik daarna Tekst plakken.';
+
+  @override
+  String get videoImportUnreadable => 'Kon de pagina van deze video niet lezen. Probeer het later opnieuw, of kopieer de beschrijving en gebruik Tekst plakken.';
+
+  @override
+  String get aiVideoTextIncluded => 'De tekst van de video wordt samen met de prompt gekopieerd. Plak beide in je AI-chat en plak het antwoord hieronder.';
+
+  @override
+  String get plannedServingsHeading => 'Voor hoeveel personen';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personen',
+      one: '1 persoon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'Porties volgens recept';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'Volgens recept: $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return 'Voor $count';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'Als standaard opslaan';
+
+  @override
+  String get plannedServingsUsual => 'Standaard';
+
+  @override
+  String get plannedServingsFewer => 'Minder personen';
+
+  @override
+  String get plannedServingsMore => 'Meer personen';
+
+  @override
+  String get settingsHouseholdServings => 'Huishoudgrootte';
+
+  @override
+  String get settingsHouseholdServingsUnset => 'De porties van elk recept';
+
+  @override
+  String get settingsHouseholdServingsHint => 'Nieuwe maaltijden in de planner beginnen bij dit aantal personen, en hun boodschappenlijsten schalen mee.';
+
+  @override
+  String get cookbookUpdateAvailable => 'Update beschikbaar';
+
+  @override
+  String get cookbookUpdateBannerBody => 'De maker heeft dit kookboek gewijzigd sinds je het hebt gedownload.';
+
+  @override
+  String get cookbookUpdateReview => 'Bekijken';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return '“$name” bijwerken';
+  }
+
+  @override
+  String get cookbookUpdateChecking => 'Wijzigingen controleren…';
+
+  @override
+  String get cookbookUpdateLoadFailed => 'De update kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get cookbookUpdateUpToDate => 'Dit kookboek is al bijgewerkt.';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nieuwe recepten',
+      one: '1 nieuw recept',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count gewijzigde recepten',
+      one: '1 gewijzigd recept',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten verwijderd door de maker',
+      one: '1 recept verwijderd door de maker',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => 'Nieuwe titel of beschrijving van de maker';
+
+  @override
+  String get cookbookUpdateWillUpdate => 'Wordt bijgewerkt naar de nieuwe versie';
+
+  @override
+  String get cookbookUpdateYoursDiffers => 'Jouw kopie heeft eigen wijzigingen';
+
+  @override
+  String get cookbookUpdateKeepMine => 'Mijne houden';
+
+  @override
+  String get cookbookUpdateUseNew => 'Nieuwe versie gebruiken';
+
+  @override
+  String get cookbookUpdateRemovedHint => 'Vink aan welke naar de prullenbak moeten. De rest blijft in je kookboek.';
+
+  @override
+  String get cookbookUpdateApply => 'Kookboek bijwerken';
+
+  @override
+  String get cookbookUpdateSkip => 'Deze update overslaan';
+
+  @override
+  String get cookbookUpdateApplying => 'Kookboek wordt bijgewerkt…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '“$name” is bijgewerkt';
+  }
+
+  @override
+  String get cookbookUpdateFailed => 'De update kon niet worden opgeslagen. Er is niets in je kookboek veranderd.';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Maaltijden van vandaag';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'Niets gepland vandaag';
+
+  @override
+  String get widgetTodaysMealsDescription => 'De maaltijden die voor vandaag gepland zijn. Tik op een maaltijd om het recept te openen.';
+
+  @override
+  String get widgetShoppingListTitle => 'Boodschappenlijst';
+
+  @override
+  String get widgetShoppingListEmpty => 'Je lijst is leeg';
+
+  @override
+  String get widgetShoppingListDescription => 'Wat je nog moet kopen van je boodschappenlijst.';
+
+  @override
+  String get pantryCookTitle => 'Wat kan ik maken?';
+
+  @override
+  String get pantryCookHomeEmpty => 'Voeg toe wat je in je voorraadkast hebt en zie welke recepten je kunt koken';
+
+  @override
+  String get pantryCookHomeSetUp => 'Items toevoegen';
+
+  @override
+  String get pantryCookHomeOpen => 'Recepten bekijken';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count direct te maken',
+      one: '1 direct te maken',
+      zero: 'Nog niets direct te maken',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count missen nog 1 of 2 dingen',
+      one: '1 mist nog 1 of 2 dingen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items in je voorraadkast',
+      one: '1 item in je voorraadkast',
+      zero: 'Je voorraadkast is leeg',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten gebruiken ze',
+      one: '1 recept gebruikt ze',
+      zero: 'Nog geen recepten gebruiken ze',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => 'Voorraadkast bewerken';
+
+  @override
+  String get pantryCookEmptyTitle => 'Wat zit er in je voorraadkast?';
+
+  @override
+  String get pantryCookEmptyBody => 'Voeg toe wat je in huis hebt en zie welke van je recepten je nu kunt koken en wat je voor de rest nog mist.';
+
+  @override
+  String get pantryCookFilterAll => 'Alle';
+
+  @override
+  String get pantryCookFilterReady => 'Direct te maken';
+
+  @override
+  String get pantryCookFilterFew => '1 tot 2 missen';
+
+  @override
+  String get pantryCookAllCourses => 'Alle gangen';
+
+  @override
+  String get pantryCookAllCookbooks => 'Alle kookboeken';
+
+  @override
+  String get pantryCookNoResults => 'Nog geen recepten gebruiken je voorraadkast';
+
+  @override
+  String get pantryCookNoResultsHint => 'Voeg nog een paar dingen toe die je hebt om hier recepten te zien.';
+
+  @override
+  String get pantryCookNoFilterResults => 'Geen recepten voor deze filters';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$covered van $total in je voorraadkast';
+  }
+
+  @override
+  String get pantryCookMissingLabel => 'Mist:';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return 'Heb je $item? Tik om het aan je voorraadkast toe te voegen';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return '+$count meer';
+  }
+
+  @override
+  String get pantryCookAddMissing => 'Ontbrekende toevoegen';
+
+  @override
+  String get pantryCookAddMissingTooltip => 'Ontbrekende op de boodschappenlijst zetten';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return '$item toegevoegd aan je voorraadkast';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => 'Onlangs gekocht';
+
+  @override
+  String get pantryCookAddAll => 'Alles toevoegen';
+
+  @override
+  String get pantryCookAlwaysHave => 'Altijd in huis';
+
+  @override
+  String get pantryCookAlwaysHaveHint => 'Tellen in geen enkel recept mee, dus ze ontbreken nooit.';
+
+  @override
+  String get pantryCookAddBasicHint => 'Basisproduct toevoegen';
+
+  @override
+  String get pantryCookPaletteSubtitle => 'Recepten die je kunt koken met wat je hebt';
+
+  @override
+  String get pantryCookSeeRecipes => 'Bekijk wat je kunt maken';
+
+  @override
+  String get dinnerTitle => 'Wat eten we vanavond?';
+
+  @override
+  String get dinnerShowOthers => 'Andere tonen';
+
+  @override
+  String get dinnerPlannerSuggestions => 'Suggesties';
+
+  @override
+  String get dinnerReasonAllInPantry => 'Alles in je voorraadkast';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Een favoriet die je al $weeks weken niet hebt gemaakt',
+      one: 'Een favoriet die je al 1 week niet hebt gemaakt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => 'Een van je favorieten';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nog maar $count dingen te kopen',
+      one: 'Nog maar 1 ding te kopen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return 'Snel: $minutes min';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks weken geleden voor het laatst gemaakt',
+      one: '1 week geleden voor het laatst gemaakt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks weken niet geopend',
+      one: '1 week niet geopend',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: 'Beoordeeld met $stars sterren',
+      one: 'Beoordeeld met 1 ster',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => 'Nog niet geprobeerd';
+
+  @override
+  String get dinnerReasonFromLibrary => 'Uit je kookboeken';
 }

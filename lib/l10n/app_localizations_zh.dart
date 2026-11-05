@@ -11554,4 +11554,472 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productReportMismatch => '与标签不符？查看或更正';
+
+  @override
+  String get clipScreenTitle => '来自浏览器的食谱';
+
+  @override
+  String get clipChooseCookbookTitle => '保存到哪本食谱书？';
+
+  @override
+  String get clipChooseCookbookMessage => '为来自浏览器的食谱选择一本食谱书。';
+
+  @override
+  String get clipNoCookbook => '没有可保存该食谱的食谱书。请先创建一本，然后再次保存食谱。';
+
+  @override
+  String get webClipperGuideTitle => '网页剪藏';
+
+  @override
+  String get webClipperGuideSubtitle => '一键保存 Chrome、Edge、Brave 或 Firefox 中的食谱';
+
+  @override
+  String get webClipperStep1Title => '添加扩展程序';
+
+  @override
+  String get webClipperStep1Desc => '在电脑上的 Chrome、Edge、Brave 或 Firefox 中安装 Recipe Spellbook Web Clipper。';
+
+  @override
+  String get webClipperStep2Title => '打开食谱';
+
+  @override
+  String get webClipperStep2Desc => '在该浏览器中打开任意食谱页面。';
+
+  @override
+  String get webClipperStep3Title => '点击 Save';
+
+  @override
+  String get webClipperStep3Desc => '点击工具栏中的 Recipe Spellbook 按钮，然后点击 Save。也可以右键点击页面并选择“Save to Recipe Spellbook”。';
+
+  @override
+  String get webClipperStep4Title => '检查并保存';
+
+  @override
+  String get webClipperStep4Desc => '允许浏览器打开 Recipe Spellbook，选择一本食谱书，然后在预览中保存食谱。';
+
+  @override
+  String get webClipperTip => '适用于 Windows 和 Mac 版 Recipe Spellbook 应用。扩展程序只会在你点击时读取页面，不会向任何服务器发送任何内容。';
+
+  @override
+  String get webClipperGetExtension => '获取扩展程序';
+
+  @override
+  String get videoImportFromDescription => '来自视频简介';
+
+  @override
+  String get videoImportFromCaptions => '来自字幕';
+
+  @override
+  String get videoImportCheckText => '从视频文字中读取。保存前请检查食材和步骤。';
+
+  @override
+  String get videoImportNoRecipeTitle => '未找到文字版食谱';
+
+  @override
+  String get videoImportNoRecipeBody => '视频简介中没有列出食材。AI导入可以读取视频文字并将其整理成食谱。';
+
+  @override
+  String get videoImportUseAi => '使用AI导入';
+
+  @override
+  String get videoImportNoRecipe => '未在此视频的简介或字幕中找到食谱。';
+
+  @override
+  String get videoImportUnavailable => '此视频为私密、已删除或无法访问。';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform目前正在限制请求。请几分钟后再试。';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return '无法连接$platform。请检查网络连接后重试。';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform响应时间过长。请重试。';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform不允许应用读取此视频。请复制简介，然后使用“粘贴文本”。';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram未公开此帖子的文案。请打开帖子，复制文案，然后使用“粘贴文本”。';
+
+  @override
+  String get videoImportUnreadable => '无法读取此视频页面。请稍后再试，或复制简介后使用“粘贴文本”。';
+
+  @override
+  String get aiVideoTextIncluded => '视频文字会与提示词一起复制。请将两者粘贴到你的AI聊天中，然后把回答粘贴到下方。';
+
+  @override
+  String get plannedServingsHeading => '几人份';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count人',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => '按食谱份量';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return '按食谱：$servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return '$count人份';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => '设为常用人数';
+
+  @override
+  String get plannedServingsUsual => '常用人数';
+
+  @override
+  String get plannedServingsFewer => '减少人数';
+
+  @override
+  String get plannedServingsMore => '增加人数';
+
+  @override
+  String get settingsHouseholdServings => '家庭人数';
+
+  @override
+  String get settingsHouseholdServingsUnset => '按各食谱的份量';
+
+  @override
+  String get settingsHouseholdServingsHint => '计划中新增的餐食将从这个人数开始，购物清单也会相应调整。';
+
+  @override
+  String get cookbookUpdateAvailable => '有可用更新';
+
+  @override
+  String get cookbookUpdateBannerBody => '你下载后，创作者修改了这本食谱书。';
+
+  @override
+  String get cookbookUpdateReview => '查看';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return '更新“$name”';
+  }
+
+  @override
+  String get cookbookUpdateChecking => '正在检查有哪些变化…';
+
+  @override
+  String get cookbookUpdateLoadFailed => '无法加载更新。请检查网络连接后重试。';
+
+  @override
+  String get cookbookUpdateUpToDate => '这本食谱书已是最新。';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个新食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个已修改的食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '创作者删除了 $count 个食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => '创作者的新标题或简介';
+
+  @override
+  String get cookbookUpdateWillUpdate => '将更新为新版本';
+
+  @override
+  String get cookbookUpdateYoursDiffers => '你的副本有自己的修改';
+
+  @override
+  String get cookbookUpdateKeepMine => '保留我的';
+
+  @override
+  String get cookbookUpdateUseNew => '使用新版本';
+
+  @override
+  String get cookbookUpdateRemovedHint => '勾选要移到回收站的食谱。其余的会留在你的食谱书中。';
+
+  @override
+  String get cookbookUpdateApply => '更新食谱书';
+
+  @override
+  String get cookbookUpdateSkip => '跳过此更新';
+
+  @override
+  String get cookbookUpdateApplying => '正在更新食谱书…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '“$name”已是最新';
+  }
+
+  @override
+  String get cookbookUpdateFailed => '无法保存更新。你的食谱书没有任何改动。';
+
+  @override
+  String get widgetTodaysMealsTitle => '今日餐食';
+
+  @override
+  String get widgetTodaysMealsEmpty => '今天没有安排';
+
+  @override
+  String get widgetTodaysMealsDescription => '今天计划的餐食。轻点一项即可打开食谱。';
+
+  @override
+  String get widgetShoppingListTitle => '购物清单';
+
+  @override
+  String get widgetShoppingListEmpty => '清单是空的';
+
+  @override
+  String get widgetShoppingListDescription => '购物清单上还没买的东西。';
+
+  @override
+  String get pantryCookTitle => '我能做什么？';
+
+  @override
+  String get pantryCookHomeEmpty => '添加储藏室里的食材，看看能做哪些食谱';
+
+  @override
+  String get pantryCookHomeSetUp => '添加食材';
+
+  @override
+  String get pantryCookHomeOpen => '查看食谱';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个可直接做',
+      zero: '暂时没有可直接做的',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个只差 1 到 2 样',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '储藏室里有 $count 样',
+      zero: '储藏室是空的',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱用到它们',
+      zero: '还没有食谱用到它们',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => '编辑储藏室';
+
+  @override
+  String get pantryCookEmptyTitle => '储藏室里有什么？';
+
+  @override
+  String get pantryCookEmptyBody => '添加手头已有的食材，看看现在就能做哪些食谱，其他食谱还缺什么。';
+
+  @override
+  String get pantryCookFilterAll => '全部';
+
+  @override
+  String get pantryCookFilterReady => '可直接做';
+
+  @override
+  String get pantryCookFilterFew => '缺 1 到 2 样';
+
+  @override
+  String get pantryCookAllCourses => '所有菜品类型';
+
+  @override
+  String get pantryCookAllCookbooks => '所有食谱书';
+
+  @override
+  String get pantryCookNoResults => '还没有食谱用到储藏室里的食材';
+
+  @override
+  String get pantryCookNoResultsHint => '再添加几样已有的食材，这里就会显示食谱。';
+
+  @override
+  String get pantryCookNoFilterResults => '没有符合这些筛选条件的食谱';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$total 样中有 $covered 样在储藏室';
+  }
+
+  @override
+  String get pantryCookMissingLabel => '缺少：';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return '有$item吗？点按即可加入储藏室';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return '还有 $count 样';
+  }
+
+  @override
+  String get pantryCookAddMissing => '添加缺少的';
+
+  @override
+  String get pantryCookAddMissingTooltip => '把缺少的加入购物清单';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return '已将$item加入储藏室';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => '最近购买';
+
+  @override
+  String get pantryCookAddAll => '全部添加';
+
+  @override
+  String get pantryCookAlwaysHave => '常备';
+
+  @override
+  String get pantryCookAlwaysHaveHint => '不计入任何食谱，因此不会显示为缺少。';
+
+  @override
+  String get pantryCookAddBasicHint => '添加常备食材';
+
+  @override
+  String get pantryCookPaletteSubtitle => '用现有食材能做的食谱';
+
+  @override
+  String get pantryCookSeeRecipes => '看看能做什么';
+
+  @override
+  String get dinnerTitle => '晚餐吃什么？';
+
+  @override
+  String get dinnerShowOthers => '换一批';
+
+  @override
+  String get dinnerPlannerSuggestions => '推荐';
+
+  @override
+  String get dinnerReasonAllInPantry => '食材都在储藏室';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '收藏的菜，已 $weeks 周没做',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => '你收藏的菜';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '只需买 $count 样',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return '快手：$minutes 分钟';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '上次做是 $weeks 周前',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '已 $weeks 周没打开',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: '评分 $stars 星',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => '还没试过';
+
+  @override
+  String get dinnerReasonFromLibrary => '来自你的食谱书';
 }

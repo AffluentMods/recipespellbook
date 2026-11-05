@@ -11586,4 +11586,472 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get productReportMismatch => '라벨과 다른가요? 보기 또는 수정';
+
+  @override
+  String get clipScreenTitle => '브라우저에서 가져온 레시피';
+
+  @override
+  String get clipChooseCookbookTitle => '어느 요리책에 저장할까요?';
+
+  @override
+  String get clipChooseCookbookMessage => '브라우저에서 가져온 레시피를 넣을 요리책을 선택하세요.';
+
+  @override
+  String get clipNoCookbook => '레시피를 저장할 요리책이 없습니다. 요리책을 만든 다음 레시피를 다시 저장하세요.';
+
+  @override
+  String get webClipperGuideTitle => '웹 클리퍼';
+
+  @override
+  String get webClipperGuideSubtitle => 'Chrome, Edge, Brave, Firefox에서 클릭 한 번으로 레시피 저장';
+
+  @override
+  String get webClipperStep1Title => '확장 프로그램 추가';
+
+  @override
+  String get webClipperStep1Desc => '컴퓨터의 Chrome, Edge, Brave 또는 Firefox에 Recipe Spellbook Web Clipper를 설치하세요.';
+
+  @override
+  String get webClipperStep2Title => '레시피 열기';
+
+  @override
+  String get webClipperStep2Desc => '그 브라우저에서 아무 레시피 페이지로 이동하세요.';
+
+  @override
+  String get webClipperStep3Title => 'Save 클릭';
+
+  @override
+  String get webClipperStep3Desc => '도구 모음에서 Recipe Spellbook 버튼을 클릭한 다음 Save를 클릭하세요. 또는 페이지를 마우스 오른쪽 버튼으로 클릭하고 \'Save to Recipe Spellbook\'을 선택하세요.';
+
+  @override
+  String get webClipperStep4Title => '확인 후 저장';
+
+  @override
+  String get webClipperStep4Desc => '브라우저가 Recipe Spellbook을 열도록 허용하고, 요리책을 선택한 다음 미리보기에서 레시피를 저장하세요.';
+
+  @override
+  String get webClipperTip => 'Windows 및 Mac용 Recipe Spellbook 앱에서 작동합니다. 확장 프로그램은 클릭할 때만 페이지를 읽으며 어떤 서버에도 아무것도 보내지 않습니다.';
+
+  @override
+  String get webClipperGetExtension => '확장 프로그램 받기';
+
+  @override
+  String get videoImportFromDescription => '동영상 설명에서 가져옴';
+
+  @override
+  String get videoImportFromCaptions => '자막에서 가져옴';
+
+  @override
+  String get videoImportCheckText => '동영상의 텍스트에서 읽었습니다. 저장하기 전에 재료와 단계를 확인하세요.';
+
+  @override
+  String get videoImportNoRecipeTitle => '작성된 레시피를 찾을 수 없음';
+
+  @override
+  String get videoImportNoRecipeBody => '동영상 설명에 재료가 나와 있지 않습니다. AI 가져오기로 동영상 텍스트를 읽어 레시피로 만들 수 있습니다.';
+
+  @override
+  String get videoImportUseAi => 'AI 가져오기 사용';
+
+  @override
+  String get videoImportNoRecipe => '이 동영상의 설명이나 자막에서 레시피를 찾을 수 없습니다.';
+
+  @override
+  String get videoImportUnavailable => '이 동영상은 비공개이거나 삭제되었거나 볼 수 없습니다.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform에서 지금 요청을 제한하고 있습니다. 몇 분 후에 다시 시도하세요.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return '$platform에 연결할 수 없습니다. 인터넷 연결을 확인하고 다시 시도하세요.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform의 응답이 너무 오래 걸렸습니다. 다시 시도하세요.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform에서 앱이 이 동영상을 읽도록 허용하지 않았습니다. 설명을 복사한 다음 텍스트 붙여넣기를 사용하세요.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram에서 이 게시물의 캡션을 공유하지 않았습니다. 게시물을 열어 캡션을 복사한 다음 텍스트 붙여넣기를 사용하세요.';
+
+  @override
+  String get videoImportUnreadable => '이 동영상 페이지를 읽을 수 없습니다. 나중에 다시 시도하거나 설명을 복사해 텍스트 붙여넣기를 사용하세요.';
+
+  @override
+  String get aiVideoTextIncluded => '동영상 텍스트가 프롬프트와 함께 복사됩니다. 둘 다 AI 채팅에 붙여넣은 다음 답변을 아래에 붙여넣으세요.';
+
+  @override
+  String get plannedServingsHeading => '몇 인분';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count명',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => '레시피 기준 인분';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return '레시피 기준: $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return '$count인분';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => '평소 인원으로 저장';
+
+  @override
+  String get plannedServingsUsual => '평소 인원';
+
+  @override
+  String get plannedServingsFewer => '인원 줄이기';
+
+  @override
+  String get plannedServingsMore => '인원 늘리기';
+
+  @override
+  String get settingsHouseholdServings => '가구 인원';
+
+  @override
+  String get settingsHouseholdServingsUnset => '각 레시피의 인분';
+
+  @override
+  String get settingsHouseholdServingsHint => '식단에 새로 추가하는 식사는 이 인원으로 시작하며, 장보기 목록도 그에 맞게 조정됩니다.';
+
+  @override
+  String get cookbookUpdateAvailable => '업데이트 있음';
+
+  @override
+  String get cookbookUpdateBannerBody => '다운로드한 후 크리에이터가 이 요리책을 변경했습니다.';
+
+  @override
+  String get cookbookUpdateReview => '확인';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return '“$name” 업데이트';
+  }
+
+  @override
+  String get cookbookUpdateChecking => '변경 사항을 확인하는 중…';
+
+  @override
+  String get cookbookUpdateLoadFailed => '업데이트를 불러오지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get cookbookUpdateUpToDate => '이 요리책은 이미 최신 상태입니다.';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '새 레시피 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '변경된 레시피 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '크리에이터가 삭제한 레시피 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => '크리에이터의 새 제목 또는 설명';
+
+  @override
+  String get cookbookUpdateWillUpdate => '새 버전으로 업데이트됩니다';
+
+  @override
+  String get cookbookUpdateYoursDiffers => '내 사본에 직접 변경한 내용이 있습니다';
+
+  @override
+  String get cookbookUpdateKeepMine => '내 것 유지';
+
+  @override
+  String get cookbookUpdateUseNew => '새 버전 사용';
+
+  @override
+  String get cookbookUpdateRemovedHint => '휴지통으로 옮길 항목을 선택하세요. 나머지는 요리책에 남습니다.';
+
+  @override
+  String get cookbookUpdateApply => '요리책 업데이트';
+
+  @override
+  String get cookbookUpdateSkip => '이번 업데이트 건너뛰기';
+
+  @override
+  String get cookbookUpdateApplying => '요리책을 업데이트하는 중…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '“$name”이(가) 최신 상태입니다';
+  }
+
+  @override
+  String get cookbookUpdateFailed => '업데이트를 저장하지 못했습니다. 요리책은 변경되지 않았습니다.';
+
+  @override
+  String get widgetTodaysMealsTitle => '오늘의 식사';
+
+  @override
+  String get widgetTodaysMealsEmpty => '오늘 계획된 식사가 없습니다';
+
+  @override
+  String get widgetTodaysMealsDescription => '오늘 계획된 식사입니다. 탭하면 레시피가 열립니다.';
+
+  @override
+  String get widgetShoppingListTitle => '쇼핑 목록';
+
+  @override
+  String get widgetShoppingListEmpty => '목록이 비어 있습니다';
+
+  @override
+  String get widgetShoppingListDescription => '쇼핑 목록에서 아직 사야 할 항목입니다.';
+
+  @override
+  String get pantryCookTitle => '무엇을 만들 수 있을까?';
+
+  @override
+  String get pantryCookHomeEmpty => '식료품 저장소에 있는 재료를 추가하고 만들 수 있는 레시피를 확인하세요';
+
+  @override
+  String get pantryCookHomeSetUp => '재료 추가';
+
+  @override
+  String get pantryCookHomeOpen => '레시피 보기';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 바로 만들 수 있어요',
+      zero: '바로 만들 수 있는 레시피가 아직 없어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개는 1~2가지만 더 있으면 돼요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '식료품 저장소에 $count개',
+      zero: '식료품 저장소가 비어 있어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 레시피에서 사용',
+      zero: '아직 사용하는 레시피가 없어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => '식료품 저장소 편집';
+
+  @override
+  String get pantryCookEmptyTitle => '식료품 저장소에 무엇이 있나요?';
+
+  @override
+  String get pantryCookEmptyBody => '가지고 있는 재료를 추가하면 지금 바로 만들 수 있는 레시피와 나머지 레시피에 부족한 재료를 알려드려요.';
+
+  @override
+  String get pantryCookFilterAll => '전체';
+
+  @override
+  String get pantryCookFilterReady => '바로 가능';
+
+  @override
+  String get pantryCookFilterFew => '1~2개 부족';
+
+  @override
+  String get pantryCookAllCourses => '모든 코스';
+
+  @override
+  String get pantryCookAllCookbooks => '모든 요리책';
+
+  @override
+  String get pantryCookNoResults => '아직 식료품 저장소 재료를 쓰는 레시피가 없어요';
+
+  @override
+  String get pantryCookNoResultsHint => '가지고 있는 재료를 몇 가지 더 추가하면 여기에 레시피가 나타나요.';
+
+  @override
+  String get pantryCookNoFilterResults => '이 필터에 맞는 레시피가 없어요';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$total개 중 $covered개 보유';
+  }
+
+  @override
+  String get pantryCookMissingLabel => '부족:';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return '$item 있나요? 탭하여 식료품 저장소에 추가';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return '+$count개 더';
+  }
+
+  @override
+  String get pantryCookAddMissing => '부족한 재료 추가';
+
+  @override
+  String get pantryCookAddMissingTooltip => '부족한 재료를 쇼핑 목록에 추가';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return '$item을(를) 식료품 저장소에 추가했어요';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => '최근 구매';
+
+  @override
+  String get pantryCookAddAll => '모두 추가';
+
+  @override
+  String get pantryCookAlwaysHave => '항상 있는 재료';
+
+  @override
+  String get pantryCookAlwaysHaveHint => '모든 레시피에서 제외되므로 부족한 재료로 표시되지 않아요.';
+
+  @override
+  String get pantryCookAddBasicHint => '기본 재료 추가';
+
+  @override
+  String get pantryCookPaletteSubtitle => '가진 재료로 만들 수 있는 레시피';
+
+  @override
+  String get pantryCookSeeRecipes => '만들 수 있는 요리 보기';
+
+  @override
+  String get dinnerTitle => '저녁은 뭐 먹지?';
+
+  @override
+  String get dinnerShowOthers => '다른 추천 보기';
+
+  @override
+  String get dinnerPlannerSuggestions => '추천';
+
+  @override
+  String get dinnerReasonAllInPantry => '재료가 모두 있어요';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks주 동안 안 만든 즐겨찾기',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => '즐겨찾기 레시피';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count가지만 사면 돼요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return '간단: $minutes분';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks주 전에 마지막으로 만듦',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks주 동안 열지 않음',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: '별점 $stars점',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => '아직 안 만들어 봄';
+
+  @override
+  String get dinnerReasonFromLibrary => '내 요리책에서';
 }

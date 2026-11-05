@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../database/database.dart';
 import '../utils/ingredient_utils.dart' show scaleQuantityString;
+import '../utils/planned_servings.dart' show PlannedRecipe;
 
 // ═══════════════════════════════════════════════════════════════════
 // INGREDIENT RESOLVER SERVICE
@@ -38,6 +39,10 @@ class ResolvedRecipeNode {
   final int depth;
   final double scale;
 
+  /// From the planner: the people its planned meals feed together, which
+  /// [scale] already accounts for. Null otherwise, or when not known.
+  final int? plannedServings;
+
   const ResolvedRecipeNode({
     required this.recipeId,
     required this.title,
@@ -48,6 +53,7 @@ class ResolvedRecipeNode {
     this.parentIngredientId,
     this.depth = 0,
     this.scale = 1.0,
+    this.plannedServings,
   });
 
   int get ingredientCount => directIngredients.length;
@@ -179,6 +185,7 @@ class _ResolveTask {
   final String? parentRecipeId;
   final String? parentIngredientId;
   final double cumulativeScale;
+  final int? plannedServings;
 
   const _ResolveTask({
     required this.recipeId,
@@ -186,6 +193,7 @@ class _ResolveTask {
     this.parentRecipeId,
     this.parentIngredientId,
     this.cumulativeScale = 1.0,
+    this.plannedServings,
   });
 }
 
@@ -212,6 +220,23 @@ class IngredientResolverService {
     final tasks = recipeIds
         .map((id) => _ResolveTask(recipeId: id))
         .toList();
+    return _resolveRecipes(tasks, dao);
+  }
+
+  /// Resolve the recipes of planned meals, each scaled by how many people it
+  /// is planned for (see plannedRecipesFor). Linked recipes scale with it.
+  static Future<RecipeResolutionResult> resolvePlannedRecipes(
+      List<PlannedRecipe> planned,
+      RecipeDao dao,
+      ) {
+    final tasks = [
+      for (final p in planned)
+        _ResolveTask(
+          recipeId: p.recipeId,
+          cumulativeScale: p.scale,
+          plannedServings: p.servings,
+        ),
+    ];
     return _resolveRecipes(tasks, dao);
   }
 
@@ -394,6 +419,7 @@ class IngredientResolverService {
         parentIngredientId: task.parentIngredientId,
         depth: task.depth,
         scale: task.cumulativeScale,
+        plannedServings: task.plannedServings,
       ));
     }
 

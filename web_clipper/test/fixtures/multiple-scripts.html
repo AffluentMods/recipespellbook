@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lemon Herb Chicken - Food Mag</title>
+<!-- Several blocks: the site, a teaser for another recipe, a broken block,
+     then the recipe of this page inside a list, with two types. -->
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "Organization", "name": "Food Mag", "url": "https://foodmag.example/"}
+</script>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "Recipe", "name": "Related: Lemon Bars", "url": "https://foodmag.example/lemon-bars"}
+</script>
+<script type="application/ld+json">
+{ this block is broken and must not stop the others
+</script>
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Dinners", "item": "https://foodmag.example/dinners"}]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": ["Recipe", "NewsArticle"],
+    "name": "Lemon Herb Chicken",
+    "image": {"@type": "ImageObject", "url": "/photos/lemon-chicken.jpg", "width": 1200},
+    "author": [{"@type": "Person", "name": "Ana Ruiz"}, {"@type": "Person", "name": "Lee Park"}],
+    "recipeYield": 4,
+    "totalTime": "PT40M",
+    "recipeIngredient": [
+      "4 chicken thighs",
+      "2 lemons, zested &amp; juiced",
+      "3 cloves garlic",
+      "Salt &amp; pepper",
+      "<a href=\"https://foodmag.example/oregano\">1 tsp dried oregano</a>"
+    ],
+    "recipeInstructions": [
+      {"@type": "HowToStep", "text": "Heat the oven to 425&#176;F."},
+      {"@type": "HowToStep", "text": "Toss the chicken with lemon, garlic, oregano, salt and pepper."},
+      {"@type": "HowToStep", "text": "Roast for 35 minutes, until golden."}
+    ]
+  }
+]
+</script>
+</head>
+<body><h1>Lemon Herb Chicken</h1></body>
+</html>

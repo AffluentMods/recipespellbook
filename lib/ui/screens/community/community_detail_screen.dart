@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,13 +5,12 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:uuid/uuid.dart';
 
 import '../../../data/community_tags_data.dart';
-import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
-import '../../../services/image_service.dart';
+import '../../../services/community_cookbook_writer.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/duration_format.dart';
@@ -236,154 +234,36 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       // Every photo of the selection, a few at a time, each with a timeout
       // and one retry. A photo that still fails is left out (non-fatal) and
       // counted for the message at the end.
-      final photoJobs = <({String url, String filename})>[];
-      final coverJob = <int, int>{}; // recipe index → photo job
-      final stepJob = <String, int>{}; // "recipe_step" index → photo job
-      if (withImages) {
-        for (final i in recipesToDownload) {
-          final recipe = result.recipes[i];
-          if (recipe.imagePath != null && recipe.imagePath!.isNotEmpty) {
-            coverJob[i] = photoJobs.length;
-            photoJobs.add((
-              url: CommunityService.communityImageUrl(widget.publicationId, recipe.imagePath!),
-              filename: 'community_${widget.publicationId}_${uuid.v4()}_cover.jpg',
-            ));
-          }
-          for (var s = 0; s < recipe.steps.length; s++) {
-            final step = recipe.steps[s];
-            if (step.imagePath == null || step.imagePath!.isEmpty) continue;
-            stepJob['${i}_$s'] = photoJobs.length;
-            photoJobs.add((
-              url: CommunityService.communityImageUrl(widget.publicationId, step.imagePath!),
-              filename: 'community_${widget.publicationId}_${uuid.v4()}_step${step.sortOrder}.jpg',
-            ));
-          }
-        }
+      final photos = withImages
+          ? CommunityPhotoPlan.forRecipes(widget.publicationId, result.recipes, recipesToDownload, uuid: uuid)
+          : CommunityPhotoPlan.none();
+      final photoCount = photos.jobs.length;
+      if (photoCount > 0 && mounted) {
+        setState(() => _downloadStatus = l10n.communityDownloadingImages(0, photoCount));
       }
-      if (photoJobs.isNotEmpty && mounted) {
-        setState(() => _downloadStatus = l10n.communityDownloadingImages(0, photoJobs.length));
-      }
-      final savedPhotos = await ImageService.instance.downloadAndSaveImages(
-        photoJobs,
+      await photos.fetch(
         onProgress: (done) {
-          if (mounted) setState(() => _downloadStatus = l10n.communityDownloadingImages(done, photoJobs.length));
+          if (mounted) setState(() => _downloadStatus = l10n.communityDownloadingImages(done, photoCount));
         },
       );
-      final failedPhotos = savedPhotos.where((path) => path == null).length;
-      String? coverImage(int i) => coverJob[i] == null ? null : savedPhotos[coverJob[i]!];
-      String? stepImage(int i, int s) => stepJob['${i}_$s'] == null ? null : savedPhotos[stepJob['${i}_$s']!];
+      final failedPhotos = photos.failed;
 
       // --- Phase 2: Insert everything in a single transaction ---
+      // A whole cookbook saved as a new cookbook also records where it came
+      // from, so the publisher's later updates can reach it.
       if (mounted) setState(() => _downloadStatus = l10n.communitySavingRecipes);
-
-      await db.transaction(() async {
-        // Create cookbook only if no target was specified
-        if (targetCookbookId == null) {
-          await db.into(db.cookbooks).insert(CookbooksCompanion.insert(
-            id: cookbookId,
-            name: result.title,
-            description: drift.Value(result.description),
-          ));
-        }
-
-        // Track generated IDs for recipe link restoration
-        // Maps original recipe index → new local recipe ID
-        final recipeIdByIndex = <int, String>{};
-        // Maps (original recipe index, ingredient index) → new local ingredient ID
-        final ingredientIdByIndex = <String, String>{};
-
-        for (final i in recipesToDownload) {
-          final recipe = result.recipes[i];
-          final recipeId = 'cr_${uuid.v4()}';
-          recipeIdByIndex[i] = recipeId;
-
-          // Insert recipe
-          await db.into(db.recipes).insert(RecipesCompanion.insert(
-            id: recipeId,
-            cookbookId: cookbookId,
-            title: recipe.title,
-            description: drift.Value(recipe.description),
-            servings: drift.Value(recipe.servings),
-            prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
-            cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
-            sourceUrl: drift.Value(recipe.sourceUrl),
-            categoryId: drift.Value(recipe.categoryId),
-            courseId: drift.Value(recipe.courseId),
-            rating: drift.Value(recipe.rating),
-            notes: drift.Value(recipe.notes),
-            nutritionJson: drift.Value(recipe.nutritionJson),
-            imagePath: drift.Value(coverImage(i)),
-            lastViewedAt: drift.Value(DateTime.now()),
-          ));
-
-          // Insert ingredients
-          for (var ingIdx = 0; ingIdx < recipe.ingredients.length; ingIdx++) {
-            final ing = recipe.ingredients[ingIdx];
-            final ingId = 'ci_${uuid.v4()}';
-            ingredientIdByIndex['${i}_$ingIdx'] = ingId;
-            await db.into(db.ingredients).insert(IngredientsCompanion.insert(
-              id: ingId,
-              recipeId: recipeId,
-              sortOrder: ing.sortOrder,
-              amount: drift.Value(ing.amount),
-              unit: drift.Value(ing.unit),
-              name: ing.name,
-              notes: drift.Value(ing.notes),
-            ));
-          }
-
-          // Insert steps (notes too: '__header__' marks a section header)
-          for (int s = 0; s < recipe.steps.length; s++) {
-            final step = recipe.steps[s];
-            await db.into(db.steps).insert(StepsCompanion.insert(
-              id: 'cs_${uuid.v4()}',
-              recipeId: recipeId,
-              sortOrder: step.sortOrder,
-              instruction: step.instruction,
-              durationMinutes: drift.Value(step.durationMinutes),
-              notes: drift.Value(step.notes),
-              imagePath: drift.Value(stepImage(i, s)),
-            ));
-          }
-
-          // Insert recipe tags
-          for (final tag in recipe.tags) {
-            final existing = await (db.select(db.tags)..where((t) => t.id.equals(tag))).getSingleOrNull();
-            if (existing == null) {
-              await db.into(db.tags).insertOnConflictUpdate(TagsCompanion.insert(
-                id: tag,
-                name: tag,
-              ));
-            }
-            await db.into(db.recipeTags).insertOnConflictUpdate(RecipeTagsCompanion.insert(
-              recipeId: recipeId,
-              tagId: tag,
-            ));
-          }
-        }
-
-        // Restore recipe links (ingredient→sub-recipe references)
-        for (final i in recipesToDownload) {
-          final recipe = result.recipes[i];
-          final sourceRecipeId = recipeIdByIndex[i];
-          if (sourceRecipeId == null) continue;
-
-          for (final link in recipe.recipeLinks) {
-            final linkedRecipeId = recipeIdByIndex[link.linkedRecipeIndex];
-            final ingredientId = ingredientIdByIndex['${i}_${link.ingredientIndex}'];
-            if (linkedRecipeId == null || ingredientId == null) continue;
-
-            await db.into(db.recipeLinks).insertOnConflictUpdate(
-              RecipeLinksCompanion.insert(
-                sourceRecipeId: sourceRecipeId,
-                ingredientId: ingredientId,
-                linkedRecipeId: linkedRecipeId,
-                scale: drift.Value(link.scale),
-              ),
-            );
-          }
-        }
-      });
+      await saveCommunityDownload(
+        db: db,
+        publicationId: widget.publicationId,
+        detail: result,
+        indexes: recipesToDownload,
+        cookbookId: cookbookId,
+        newCookbook: targetCookbookId == null,
+        photos: photos,
+        withImages: withImages,
+        currentUserId: AuthService.instance.currentUser?.id,
+        uuid: uuid,
+      );
 
       ref.invalidate(cookbooksProvider);
 

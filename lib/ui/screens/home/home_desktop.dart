@@ -11,12 +11,14 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/collab_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/pantry_cooking_provider.dart' show dinnerDay;
 import '../../../providers/quick_access_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/native_file_image.dart';
+import '../../../utils/planned_servings.dart' show plannedRecipeLocation;
 import '../../../utils/recipe_title.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../shell/shell_navigation.dart';
@@ -28,7 +30,9 @@ import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart' show FileExistsCache;
 import '../book_scan/book_scan_entry.dart';
+import '../cookbooks/cookbook_update_sheet.dart';
 import '../craving/craving_screen.dart';
+import '../pantry_cooking/pantry_cooking_widgets.dart';
 
 /// The desktop home: a dashboard that uses the width instead of stretching the
 /// phone stack. A glance row (the next seven days of meals beside the shopping
@@ -119,6 +123,10 @@ class DesktopHome extends ConsumerWidget {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(side, Space.xs, side, Space.huge),
                     children: [
+                      CookbookUpdateBanner(
+                        cookbook: cookbook,
+                        padding: const EdgeInsets.only(bottom: Space.lg),
+                      ),
                       const BackupReminderBanner(),
                       if (stackGlance) ...[
                         SizedBox(height: 232, child: _WeekGlanceCard()),
@@ -136,6 +144,19 @@ class DesktopHome extends ConsumerWidget {
                             ],
                           ),
                         ),
+                      // Deciding dinner: what the pantry covers, then a few
+                      // suggestions with the reason for each.
+                      const SizedBox(height: Space.lg),
+                      const PantryCookingHomeCard(),
+                      DinnerSuggestionsSection(
+                        day: dinnerDay(),
+                        fitWidth: width,
+                        headerBuilder: (context, onShuffle) => _SectionTitle(
+                          title: l10n.dinnerTitle,
+                          onSeeAll: onShuffle,
+                          actionLabel: l10n.dinnerShowOthers,
+                        ),
+                      ),
                       // Same Quick Access sources and settings as the phone.
                       _RecipeRowSection(
                         title: l10n.homeJumpBackIn,
@@ -293,7 +314,10 @@ class _Panel extends StatelessWidget {
 class _SectionTitle extends StatelessWidget {
   final String title;
   final VoidCallback? onSeeAll;
-  const _SectionTitle({required this.title, this.onSeeAll});
+
+  /// Label of the [onSeeAll] button; "See all" when null.
+  final String? actionLabel;
+  const _SectionTitle({required this.title, this.onSeeAll, this.actionLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +346,7 @@ class _SectionTitle extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
-              child: Text(l10n.seeAll),
+              child: Text(actionLabel ?? l10n.seeAll),
             ),
         ],
       ),
@@ -500,7 +524,7 @@ class _MealChip extends StatelessWidget {
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => context.push('/recipe/${recipe.id}'),
+          onTap: () => context.push(plannedRecipeLocation(recipe.id, meal.mealPlan)),
           child: chip,
         ),
       ),

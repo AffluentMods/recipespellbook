@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_meals_title">今日餐食</string>
+    <string name="widget_meals_empty">今天没有安排</string>
+    <string name="widget_meals_description">今天计划的餐食。轻点一项即可打开食谱。</string>
+    <string name="widget_shopping_title">购物清单</string>
+    <string name="widget_shopping_empty">清单是空的</string>
+    <string name="widget_shopping_description">购物清单上还没买的东西。</string>
+</resources>

@@ -1,0 +1,5 @@
+// Build settings for the RecipeWidgets extension target (see SETUP.md).
+// Generated.xcconfig is written by flutter (pub get, build) and carries the
+// app's version, FLUTTER_BUILD_NAME and FLUTTER_BUILD_NUMBER, which Info.plist
+// uses so the widget always has the same version as the app.
+#include "../Flutter/Generated.xcconfig"

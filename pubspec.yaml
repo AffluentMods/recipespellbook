@@ -2,7 +2,7 @@ name: recipespellbook
 description: "An advanced recipe app for all uses."
 publish_to: 'none'
 
-version: 1.8.3+61
+version: 2.0.0+62
 
 environment:
   sdk: ^3.10.7
@@ -78,6 +78,10 @@ dependencies:
   # Scan this book: the system document scanner (ML Kit on Android, VisionKit
   # on iOS) for page capture with edge detection and perspective correction.
   cunning_document_scanner: ^3.0.3
+
+  # Home screen widgets (Today's meals, Shopping list): the app writes a small
+  # JSON snapshot to the shared widget storage and asks the widgets to redraw.
+  home_widget: ^0.10.0
 
 dev_dependencies:
   flutter_test:

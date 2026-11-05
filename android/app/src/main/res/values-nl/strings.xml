@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_meals_title">Maaltijden van vandaag</string>
+    <string name="widget_meals_empty">Niets gepland vandaag</string>
+    <string name="widget_meals_description">De maaltijden die voor vandaag gepland zijn. Tik op een maaltijd om het recept te openen.</string>
+    <string name="widget_shopping_title">Boodschappenlijst</string>
+    <string name="widget_shopping_empty">Je lijst is leeg</string>
+    <string name="widget_shopping_description">Wat je nog moet kopen van je boodschappenlijst.</string>
+</resources>

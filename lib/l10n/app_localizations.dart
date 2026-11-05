@@ -20568,6 +20568,702 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Doesn\'t match the label? View or fix'**
   String get productReportMismatch;
+
+  /// No description provided for @clipScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe from your browser'**
+  String get clipScreenTitle;
+
+  /// No description provided for @clipChooseCookbookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to which cookbook?'**
+  String get clipChooseCookbookTitle;
+
+  /// No description provided for @clipChooseCookbookMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the cookbook for the recipe from your browser.'**
+  String get clipChooseCookbookMessage;
+
+  /// No description provided for @clipNoCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no cookbook to save the recipe in. Create one, then save the recipe again.'**
+  String get clipNoCookbook;
+
+  /// No description provided for @webClipperGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Web Clipper'**
+  String get webClipperGuideTitle;
+
+  /// No description provided for @webClipperGuideSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save recipes from Chrome, Edge, Brave or Firefox in one click'**
+  String get webClipperGuideSubtitle;
+
+  /// No description provided for @webClipperStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the extension'**
+  String get webClipperStep1Title;
+
+  /// No description provided for @webClipperStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Install the Recipe Spellbook Web Clipper in Chrome, Edge, Brave or Firefox on your computer.'**
+  String get webClipperStep1Desc;
+
+  /// No description provided for @webClipperStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a recipe'**
+  String get webClipperStep2Title;
+
+  /// No description provided for @webClipperStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to any recipe page in that browser.'**
+  String get webClipperStep2Desc;
+
+  /// No description provided for @webClipperStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Click Save'**
+  String get webClipperStep3Title;
+
+  /// No description provided for @webClipperStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Click the Recipe Spellbook button in the toolbar, then Save. Or right-click the page and choose “Save to Recipe Spellbook”.'**
+  String get webClipperStep3Desc;
+
+  /// No description provided for @webClipperStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check and save'**
+  String get webClipperStep4Title;
+
+  /// No description provided for @webClipperStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Let the browser open Recipe Spellbook, pick a cookbook and save the recipe from the preview.'**
+  String get webClipperStep4Desc;
+
+  /// No description provided for @webClipperTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Works with the Recipe Spellbook app for Windows and Mac. The extension reads a page only when you click it and sends nothing to any server.'**
+  String get webClipperTip;
+
+  /// No description provided for @webClipperGetExtension.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the extension'**
+  String get webClipperGetExtension;
+
+  /// No description provided for @videoImportFromDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'From the video description'**
+  String get videoImportFromDescription;
+
+  /// No description provided for @videoImportFromCaptions.
+  ///
+  /// In en, this message translates to:
+  /// **'From the captions'**
+  String get videoImportFromCaptions;
+
+  /// No description provided for @videoImportCheckText.
+  ///
+  /// In en, this message translates to:
+  /// **'Read from the video’s text. Check the ingredients and steps before you save.'**
+  String get videoImportCheckText;
+
+  /// No description provided for @videoImportNoRecipeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No written recipe found'**
+  String get videoImportNoRecipeTitle;
+
+  /// No description provided for @videoImportNoRecipeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The video’s description doesn’t list the ingredients. The AI import can read the video’s text and turn it into a recipe.'**
+  String get videoImportNoRecipeBody;
+
+  /// No description provided for @videoImportUseAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Use AI import'**
+  String get videoImportUseAi;
+
+  /// No description provided for @videoImportNoRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in this video’s description or captions.'**
+  String get videoImportNoRecipe;
+
+  /// No description provided for @videoImportUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This video is private, removed or not available.'**
+  String get videoImportUnavailable;
+
+  /// No description provided for @videoImportRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform} is limiting requests right now. Try again in a few minutes.'**
+  String videoImportRateLimited(String platform);
+
+  /// No description provided for @videoImportOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t reach {platform}. Check your internet connection and try again.'**
+  String videoImportOffline(String platform);
+
+  /// No description provided for @videoImportTimedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform} took too long to answer. Try again.'**
+  String videoImportTimedOut(String platform);
+
+  /// No description provided for @videoImportBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform} didn’t let the app read this video. Copy the description, then use Paste text.'**
+  String videoImportBlocked(String platform);
+
+  /// No description provided for @videoImportInstagramBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram didn’t share this post’s caption. Open the post, copy the caption, then use Paste text.'**
+  String get videoImportInstagramBlocked;
+
+  /// No description provided for @videoImportUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t read this video’s page. Try again later, or copy the description and use Paste text.'**
+  String get videoImportUnreadable;
+
+  /// No description provided for @aiVideoTextIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'The video’s text is copied together with the prompt. Paste both into your AI chat, then paste its answer below.'**
+  String get aiVideoTextIncluded;
+
+  /// No description provided for @plannedServingsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'How many people'**
+  String get plannedServingsHeading;
+
+  /// No description provided for @plannedServingsPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person} other{{count} people}}'**
+  String plannedServingsPeople(int count);
+
+  /// No description provided for @plannedServingsRecipeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe\'s servings'**
+  String get plannedServingsRecipeDefault;
+
+  /// No description provided for @plannedServingsAsWritten.
+  ///
+  /// In en, this message translates to:
+  /// **'As written: {servings}'**
+  String plannedServingsAsWritten(String servings);
+
+  /// No description provided for @plannedServingsBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'For {count}'**
+  String plannedServingsBadge(int count);
+
+  /// No description provided for @plannedServingsSaveUsual.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as our usual'**
+  String get plannedServingsSaveUsual;
+
+  /// No description provided for @plannedServingsUsual.
+  ///
+  /// In en, this message translates to:
+  /// **'Our usual'**
+  String get plannedServingsUsual;
+
+  /// No description provided for @plannedServingsFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer people'**
+  String get plannedServingsFewer;
+
+  /// No description provided for @plannedServingsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More people'**
+  String get plannedServingsMore;
+
+  /// No description provided for @settingsHouseholdServings.
+  ///
+  /// In en, this message translates to:
+  /// **'Household size'**
+  String get settingsHouseholdServings;
+
+  /// No description provided for @settingsHouseholdServingsUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Each recipe\'s own servings'**
+  String get settingsHouseholdServingsUnset;
+
+  /// No description provided for @settingsHouseholdServingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New meals in the planner start at this many people, and their shopping lists scale to match.'**
+  String get settingsHouseholdServingsHint;
+
+  /// No description provided for @cookbookUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get cookbookUpdateAvailable;
+
+  /// No description provided for @cookbookUpdateBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The creator changed this cookbook since you downloaded it.'**
+  String get cookbookUpdateBannerBody;
+
+  /// No description provided for @cookbookUpdateReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get cookbookUpdateReview;
+
+  /// No description provided for @cookbookUpdateSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update \"{name}\"'**
+  String cookbookUpdateSheetTitle(String name);
+
+  /// No description provided for @cookbookUpdateChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking what changed…'**
+  String get cookbookUpdateChecking;
+
+  /// No description provided for @cookbookUpdateLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the update. Check your connection and try again.'**
+  String get cookbookUpdateLoadFailed;
+
+  /// No description provided for @cookbookUpdateUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is already up to date.'**
+  String get cookbookUpdateUpToDate;
+
+  /// No description provided for @cookbookUpdateNewRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 new recipe} other{{count} new recipes}}'**
+  String cookbookUpdateNewRecipes(int count);
+
+  /// No description provided for @cookbookUpdateChangedRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 changed recipe} other{{count} changed recipes}}'**
+  String cookbookUpdateChangedRecipes(int count);
+
+  /// No description provided for @cookbookUpdateRemovedRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe removed by the creator} other{{count} recipes removed by the creator}}'**
+  String cookbookUpdateRemovedRecipes(int count);
+
+  /// No description provided for @cookbookUpdateNewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'New title or description from the creator'**
+  String get cookbookUpdateNewDetails;
+
+  /// No description provided for @cookbookUpdateWillUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates to the new version'**
+  String get cookbookUpdateWillUpdate;
+
+  /// No description provided for @cookbookUpdateYoursDiffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Your copy has changes of its own'**
+  String get cookbookUpdateYoursDiffers;
+
+  /// No description provided for @cookbookUpdateKeepMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep mine'**
+  String get cookbookUpdateKeepMine;
+
+  /// No description provided for @cookbookUpdateUseNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the new version'**
+  String get cookbookUpdateUseNew;
+
+  /// No description provided for @cookbookUpdateRemovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the ones to move to the trash. The rest stay in your cookbook.'**
+  String get cookbookUpdateRemovedHint;
+
+  /// No description provided for @cookbookUpdateApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Update cookbook'**
+  String get cookbookUpdateApply;
+
+  /// No description provided for @cookbookUpdateSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this update'**
+  String get cookbookUpdateSkip;
+
+  /// No description provided for @cookbookUpdateApplying.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating the cookbook…'**
+  String get cookbookUpdateApplying;
+
+  /// No description provided for @cookbookUpdateDone.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" is up to date'**
+  String cookbookUpdateDone(String name);
+
+  /// No description provided for @cookbookUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The update could not be saved. Nothing in your cookbook was changed.'**
+  String get cookbookUpdateFailed;
+
+  /// Name of the Today's meals home screen widget and its heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s meals'**
+  String get widgetTodaysMealsTitle;
+
+  /// Today's meals widget when no meal is planned for today.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned today'**
+  String get widgetTodaysMealsEmpty;
+
+  /// Today's meals widget description in the system widget picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s planned meals. Tap one to open its recipe.'**
+  String get widgetTodaysMealsDescription;
+
+  /// Name of the Shopping list home screen widget, and its heading when the list has no name.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list'**
+  String get widgetShoppingListTitle;
+
+  /// Shopping list widget when nothing is left to buy.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list is empty'**
+  String get widgetShoppingListEmpty;
+
+  /// Shopping list widget description in the system widget picker.
+  ///
+  /// In en, this message translates to:
+  /// **'What is left to buy on your shopping list.'**
+  String get widgetShoppingListDescription;
+
+  /// Title of the page that ranks recipes by what is in the pantry, and of its Home card.
+  ///
+  /// In en, this message translates to:
+  /// **'What can I make?'**
+  String get pantryCookTitle;
+
+  /// No description provided for @pantryCookHomeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add what\'s in your pantry and see which recipes you can cook'**
+  String get pantryCookHomeEmpty;
+
+  /// No description provided for @pantryCookHomeSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items'**
+  String get pantryCookHomeSetUp;
+
+  /// No description provided for @pantryCookHomeOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'See recipes'**
+  String get pantryCookHomeOpen;
+
+  /// Home card: how many recipes can be cooked with nothing to buy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{None ready yet} =1{1 ready now} other{{count} ready now}}'**
+  String pantryCookHomeReady(int count);
+
+  /// Home card: how many recipes need only one or two things bought.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 missing 1 or 2 things} other{{count} missing 1 or 2 things}}'**
+  String pantryCookHomeFew(int count);
+
+  /// No description provided for @pantryCookItemsInPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Your pantry is empty} =1{1 item in your pantry} other{{count} items in your pantry}}'**
+  String pantryCookItemsInPantry(int count);
+
+  /// No description provided for @pantryCookRecipesUsing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No recipes use them yet} =1{1 recipe uses them} other{{count} recipes use them}}'**
+  String pantryCookRecipesUsing(int count);
+
+  /// No description provided for @pantryCookEditPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pantry'**
+  String get pantryCookEditPantry;
+
+  /// No description provided for @pantryCookEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s in your pantry?'**
+  String get pantryCookEmptyTitle;
+
+  /// No description provided for @pantryCookEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add what you have on hand and see which of your recipes you can cook right now, and what is missing for the rest.'**
+  String get pantryCookEmptyBody;
+
+  /// No description provided for @pantryCookFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get pantryCookFilterAll;
+
+  /// No description provided for @pantryCookFilterReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready now'**
+  String get pantryCookFilterReady;
+
+  /// No description provided for @pantryCookFilterFew.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing 1 to 2'**
+  String get pantryCookFilterFew;
+
+  /// No description provided for @pantryCookAllCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'All courses'**
+  String get pantryCookAllCourses;
+
+  /// No description provided for @pantryCookAllCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'All cookbooks'**
+  String get pantryCookAllCookbooks;
+
+  /// No description provided for @pantryCookNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing uses your pantry yet'**
+  String get pantryCookNoResults;
+
+  /// No description provided for @pantryCookNoResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few more things you have to see recipes here.'**
+  String get pantryCookNoResultsHint;
+
+  /// No description provided for @pantryCookNoFilterResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes match these filters'**
+  String get pantryCookNoFilterResults;
+
+  /// How many of a recipe's ingredients are in the pantry.
+  ///
+  /// In en, this message translates to:
+  /// **'{covered} of {total} in your pantry'**
+  String pantryCookCovered(int covered, int total);
+
+  /// Label before the list of ingredients a recipe still needs.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing:'**
+  String get pantryCookMissingLabel;
+
+  /// Tooltip on a missing ingredient: tapping it adds it to the pantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Have {item}? Tap to add it to your pantry'**
+  String pantryCookHaveIt(String item);
+
+  /// No description provided for @pantryCookMoreMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String pantryCookMoreMissing(int count);
+
+  /// No description provided for @pantryCookAddMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add missing'**
+  String get pantryCookAddMissing;
+
+  /// No description provided for @pantryCookAddMissingTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add missing to shopping list'**
+  String get pantryCookAddMissingTooltip;
+
+  /// No description provided for @pantryCookAddedToPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {item} to your pantry'**
+  String pantryCookAddedToPantry(String item);
+
+  /// No description provided for @pantryCookRecentlyBought.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently bought'**
+  String get pantryCookRecentlyBought;
+
+  /// No description provided for @pantryCookAddAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Add all'**
+  String get pantryCookAddAll;
+
+  /// Section for basics like water, salt and pepper that never count as missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Always have'**
+  String get pantryCookAlwaysHave;
+
+  /// No description provided for @pantryCookAlwaysHaveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Left out of every recipe, so they never show as missing.'**
+  String get pantryCookAlwaysHaveHint;
+
+  /// No description provided for @pantryCookAddBasicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a basic'**
+  String get pantryCookAddBasicHint;
+
+  /// No description provided for @pantryCookPaletteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes you can cook with what you have'**
+  String get pantryCookPaletteSubtitle;
+
+  /// No description provided for @pantryCookSeeRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'See what you can make'**
+  String get pantryCookSeeRecipes;
+
+  /// Heading of the dinner suggestions on Home.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s for dinner?'**
+  String get dinnerTitle;
+
+  /// No description provided for @dinnerShowOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show others'**
+  String get dinnerShowOthers;
+
+  /// No description provided for @dinnerPlannerSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get dinnerPlannerSuggestions;
+
+  /// No description provided for @dinnerReasonAllInPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'All in your pantry'**
+  String get dinnerReasonAllInPantry;
+
+  /// Why a recipe is suggested: a favorite last made this many weeks ago.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks, plural, =1{A favorite you haven\'t made in 1 week} other{A favorite you haven\'t made in {weeks} weeks}}'**
+  String dinnerReasonFavouriteWeeks(int weeks);
+
+  /// No description provided for @dinnerReasonFavourite.
+  ///
+  /// In en, this message translates to:
+  /// **'One of your favorites'**
+  String get dinnerReasonFavourite;
+
+  /// Why a recipe is suggested: only this many ingredients need buying.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Just 1 thing to buy} other{Just {count} things to buy}}'**
+  String dinnerReasonMissing(int count);
+
+  /// Why a recipe is suggested: it takes this many minutes in total.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick: {minutes} min'**
+  String dinnerReasonQuick(int minutes);
+
+  /// No description provided for @dinnerReasonLastMade.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks, plural, =1{Last made 1 week ago} other{Last made {weeks} weeks ago}}'**
+  String dinnerReasonLastMade(int weeks);
+
+  /// No description provided for @dinnerReasonNotOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks, plural, =1{Not opened in 1 week} other{Not opened in {weeks} weeks}}'**
+  String dinnerReasonNotOpened(int weeks);
+
+  /// No description provided for @dinnerReasonRated.
+  ///
+  /// In en, this message translates to:
+  /// **'{stars, plural, =1{Rated 1 star} other{Rated {stars} stars}}'**
+  String dinnerReasonRated(int stars);
+
+  /// No description provided for @dinnerReasonNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tried yet'**
+  String get dinnerReasonNew;
+
+  /// No description provided for @dinnerReasonFromLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'From your cookbooks'**
+  String get dinnerReasonFromLibrary;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

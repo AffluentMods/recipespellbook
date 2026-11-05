@@ -1,0 +1,7 @@
+/* Recipe Spellbook home screen widgets. */
+"meals.title" = "Repas du jour";
+"meals.empty" = "Rien de prévu aujourd'hui";
+"meals.description" = "Les repas prévus aujourd'hui. Touchez-en un pour ouvrir sa recette.";
+"shopping.title" = "Liste de courses";
+"shopping.empty" = "Votre liste est vide";
+"shopping.description" = "Ce qu'il vous reste à acheter sur votre liste de courses.";

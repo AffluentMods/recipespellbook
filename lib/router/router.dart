@@ -5,6 +5,7 @@ import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
 import '../ui/screens/cookbooks/cookbook_isbn_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
+import '../ui/screens/import/clip_import_screen.dart';
 import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
 import '../ui/screens/more/more_screen.dart';
@@ -23,6 +24,8 @@ import '../ui/screens/recipe/uncategorized_recipes_screen.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../ui/screens/kitchen_buddy/kitchen_buddy_screen.dart';
 // import '../ui/screens/kitchen_buddy/buddy_naming_screen.dart';
+import '../ui/screens/pantry_cooking/pantry_cooking_screen.dart';
+import '../ui/screens/pantry_cooking/pantry_cooking_widgets.dart' show pantryCookingPath;
 import '../ui/screens/search/search_screen.dart';
 import '../ui/screens/settings/about_screen.dart';
 import '../ui/screens/settings/allergy_settings_screen.dart';
@@ -55,6 +58,16 @@ import '../ui/widgets/app_menu_drawer.dart' show HelpSupportScreen;
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();
+
+/// The recipe page for `/recipe/:id`. `?servings=N` means it was opened from
+/// a meal planned for N people: the page's servings scaler starts there.
+RecipeScreen recipeRouteScreen(GoRouterState state) {
+  final planned = int.tryParse(state.uri.queryParameters['servings'] ?? '');
+  return RecipeScreen(
+    recipeId: state.pathParameters['id']!,
+    plannedServings: planned != null && planned > 0 ? planned : null,
+  );
+}
 
 final router = GoRouter(
   navigatorKey: rootNavigatorKey,
@@ -104,6 +117,10 @@ final router = GoRouter(
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const TransferScreen(),
     ),
+
+    // A recipe page sent from the browser extension
+    // (recipespellbook://clip?url=..., see utils/clip_request.dart).
+    clipImportRoute(parentNavigatorKey: rootNavigatorKey),
 
     // Kroger OAuth callback
     GoRoute(
@@ -270,10 +287,7 @@ final router = GoRouter(
         GoRoute(
           path: '/recipe/:id',
           name: 'recipe',
-          builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            return RecipeScreen(recipeId: id);
-          },
+          builder: (context, state) => recipeRouteScreen(state),
         ),
 
         // ── Search (sidebar visible) ──
@@ -283,6 +297,13 @@ final router = GoRouter(
           builder: (context, state) => SearchScreen(
             initialQuery: state.uri.queryParameters['q'],
           ),
+        ),
+
+        // ── What can I make? Recipes ranked by the pantry (sidebar visible) ──
+        GoRoute(
+          path: pantryCookingPath,
+          name: 'pantry-cooking',
+          builder: (context, state) => const PantryCookingScreen(),
         ),
 
         // ── Help & import guides (in-shell so the desktop sidebar stays) ──

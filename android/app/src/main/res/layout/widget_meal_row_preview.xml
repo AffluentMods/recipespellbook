@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A placeholder meal row for the widget picker preview. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="30dp"
+    android:layout_marginTop="3dp"
+    android:background="@drawable/widget_row_background"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingEnd="10dp">
+
+    <FrameLayout
+        android:layout_width="38dp"
+        android:layout_height="12dp"
+        android:background="@drawable/widget_pill_background" />
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="28dp"
+        android:layout_weight="1"
+        android:background="@drawable/widget_skeleton_bar" />
+</LinearLayout>

@@ -12,12 +12,14 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/collab_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/pantry_cooking_provider.dart' show dinnerDay;
 import '../../../providers/quick_access_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/native_file_image.dart';
+import '../../../utils/planned_servings.dart' show plannedRecipeLocation;
 import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/taxonomy_translator.dart';
@@ -30,7 +32,9 @@ import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sheet_chrome.dart';
 import '../book_scan/book_scan_entry.dart';
+import '../cookbooks/cookbook_update_sheet.dart';
 import '../craving/craving_screen.dart';
+import '../pantry_cooking/pantry_cooking_widgets.dart';
 import '../planner/planner_screen.dart'
     show selectedPlannerDateProvider, mealTypeLabel;
 
@@ -122,6 +126,10 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
               recipeCount: recipes.length,
               padding: pad,
             ),
+            CookbookUpdateBanner(
+              cookbook: widget.cookbook,
+              padding: EdgeInsets.fromLTRB(side, Space.sm, side, 0),
+            ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: side - Space.lg),
               child: const BackupReminderBanner(),
@@ -151,6 +159,23 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
                         const _ShoppingPanel(),
                       ],
                     ),
+            ),
+            // Deciding dinner: what the pantry covers, then a few
+            // suggestions with the reason for each.
+            Padding(
+              padding: pad.copyWith(top: Space.md),
+              child: const PantryCookingHomeCard(),
+            ),
+            DinnerSuggestionsSection(
+              day: dinnerDay(),
+              padding: EdgeInsets.symmetric(horizontal: side),
+              tileWidth: wide ? 196 : 156,
+              headerBuilder: (context, onShuffle) => _SectionTitle(
+                title: l10n.dinnerTitle,
+                side: side,
+                onSeeAll: onShuffle,
+                actionLabel: l10n.dinnerShowOthers,
+              ),
             ),
             _JumpBackInRow(cookbookId: cookbookId, side: side, wide: wide),
             _RecipeCarousel(
@@ -851,7 +876,7 @@ class _MealRow extends StatelessWidget {
     return InkWell(
       borderRadius: Radii.mdAll,
       onTap: recipe != null
-          ? () => context.push('/recipe/${recipe.id}')
+          ? () => context.push(plannedRecipeLocation(recipe.id, plan))
           : onOpenPlanner,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: Space.xs + 2),
@@ -1133,7 +1158,15 @@ class _SectionTitle extends StatelessWidget {
   final String title;
   final double side;
   final VoidCallback? onSeeAll;
-  const _SectionTitle({required this.title, required this.side, this.onSeeAll});
+
+  /// Label of the [onSeeAll] button; "See all" when null.
+  final String? actionLabel;
+  const _SectionTitle({
+    required this.title,
+    required this.side,
+    this.onSeeAll,
+    this.actionLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1162,7 +1195,7 @@ class _SectionTitle extends StatelessWidget {
             ),
           ),
           if (onSeeAll != null)
-            _PanelAction(label: l10n.seeAll, onPressed: onSeeAll!),
+            _PanelAction(label: actionLabel ?? l10n.seeAll, onPressed: onSeeAll!),
         ],
       ),
     );

@@ -10,6 +10,8 @@ import 'package:recipespellbook/data/nutrition_data.dart';
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/providers/database_provider.dart';
+import 'package:recipespellbook/providers/pantry_cooking_provider.dart' show cookHistoryProvider;
+import 'package:recipespellbook/services/cook_history_service.dart';
 
 import '../../../ui/widgets/nutrition_widgets.dart';
 import '../../ui/widgets/font_size_control.dart';
@@ -326,6 +328,12 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   void _finishCooking() {
     // TODO: Kitchen Buddy hidden for now
     // KitchenBuddyIntegration.onRecipeCooked(ref);
+    // Remember it was made today, so dinner suggestions can bring a
+    // favourite back once it has not been made for a while.
+    final container = ProviderScope.containerOf(context, listen: false);
+    CookHistoryService.recordCooked(widget.recipeId)
+        .then((_) => container.invalidate(cookHistoryProvider))
+        .catchError((_) {});
     Navigator.pop(context);
   }
 

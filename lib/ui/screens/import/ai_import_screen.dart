@@ -1,13 +1,20 @@
+import 'dart:async';
+
 import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import 'package:drift/drift.dart' as drift;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 
+import '../../../database/database.dart';
+import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/ai_import_service.dart';
+import '../../../services/imported_recipe_saver.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/sheet_chrome.dart';
@@ -22,7 +29,25 @@ class AiImportScreen extends ConsumerStatefulWidget {
   /// The cookbook the recipes go into: the one the import was started from.
   final String cookbookId;
 
-  const AiImportScreen({super.key, required this.cookbookId});
+  /// Text to read the recipe from, copied together with the prompt: the
+  /// text of a cooking video that the text importer found no recipe in.
+  final String? sourceText;
+
+  /// The page or video [sourceText] came from. A recipe that names no source
+  /// of its own is saved with this one.
+  final String? sourceUrl;
+
+  /// A picture for the recipes that come back, the video's thumbnail. It is
+  /// downloaded once they are saved.
+  final String? photoUrl;
+
+  const AiImportScreen({
+    super.key,
+    required this.cookbookId,
+    this.sourceText,
+    this.sourceUrl,
+    this.photoUrl,
+  });
 
   @override
   ConsumerState<AiImportScreen> createState() => _AiImportScreenState();
@@ -286,7 +311,12 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
         db,
         cookbookId: cookbook.id,
         only: only,
+        sourceUrl: widget.sourceUrl,
       );
+      // The video's picture goes on in the background: the recipes are in,
+      // and a slow download must not hold the screen open.
+      final photoUrl = widget.photoUrl;
+      if (photoUrl != null) unawaited(_attachPhoto(db, recipeIds, photoUrl));
 
       // Left while it was saving: the recipes are in, and nothing of this
       // screen is left to close.
@@ -335,9 +365,32 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     return recipes.isEmpty ? null : recipes;
   }
 
+  /// Downloads [photoUrl] and makes it the picture of each recipe of
+  /// [recipeIds] that has none. A picture that cannot be had is left out.
+  static Future<void> _attachPhoto(AppDatabase db, List<String> recipeIds, String photoUrl) async {
+    try {
+      final documentsDir = (await getApplicationDocumentsDirectory()).path;
+      for (final id in recipeIds) {
+        final path = await ImportedRecipeSaver.storeImage(
+          ImportedRecipe(title: '', ingredients: const [], instructions: const [], imageUrl: photoUrl),
+          documentsDir: documentsDir,
+        );
+        if (path == null) return;
+        await (db.update(db.recipes)..where((r) => r.id.equals(id) & r.imagePath.isNull()))
+            .write(RecipesCompanion(imagePath: drift.Value(path), updatedAt: drift.Value(DateTime.now())));
+      }
+    } catch (e) {
+      debugPrint('[Import] Could not add the video picture: $e');
+    }
+  }
+
+  String get _prompt => widget.sourceText == null
+      ? AiImportService.generateRecipePrompt()
+      : AiImportService.generateRecipePromptForText(widget.sourceText!, sourceUrl: widget.sourceUrl);
+
   void _copyPrompt() {
     final l10n = AppLocalizations.of(context)!;
-    final prompt = AiImportService.generateRecipePrompt();
+    final prompt = _prompt;
     Clipboard.setData(ClipboardData(text: prompt));
     setState(() => _promptCopied = true);
     Future.delayed(const Duration(seconds: 2), () {
@@ -392,7 +445,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    AppLocalizations.of(context)!.aiCopyPromptHelp,
+                    widget.sourceText == null ? l10n.aiCopyPromptHelp : l10n.aiVideoTextIncluded,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
@@ -449,7 +502,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: SelectableText(
-                        AiImportService.generateRecipePrompt(),
+                        _prompt,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontFamily: 'monospace',
                           fontSize: 11,

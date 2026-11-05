@@ -39,6 +39,13 @@ class RecipeImportEngine {
     'Upgrade-Insecure-Requests': '1',
   };
 
+  /// The headers the engine fetches pages with, desktop or [mobile], for
+  /// the other importers that fetch pages of their own.
+  static Map<String, String> pageHeaders({bool mobile = false}) => {
+        ..._browserHeaders,
+        'User-Agent': mobile ? _mobileUserAgent : _userAgent,
+      };
+
   // ========== PLATFORM DETECTION ==========
 
   static _Platform _detectPlatform(String url) {
@@ -1572,6 +1579,33 @@ class RecipeImportEngine {
     return recipes;
   }
 
+  /// The recipe in schema.org JSON-LD that a browser read off [pageUrl] (the
+  /// web clipper sends it along when it opens the app), read the way the
+  /// JSON-LD of a fetched page is. Null when it holds no recipe with
+  /// ingredients or steps.
+  static ImportedRecipe? parseFromJsonLd(String source, {required String pageUrl}) {
+    final entries = <Map<String, dynamic>>[];
+    _collectJsonLdRecipes(_decodeJsonLd(source), entries, 0);
+    for (final entry in entries) {
+      final ImportedRecipe recipe;
+      try {
+        recipe = _recipeFromJsonLd(entry);
+      } catch (_) {
+        continue;
+      }
+      if (!_hasContent(recipe)) continue;
+      final normalized = _normalizeUrl(pageUrl);
+      final siteCourse = recipe.suggestedCourse;
+      recipe.sourceUrl = normalized;
+      recipe.imageUrl = _absoluteUrl(recipe.imageUrl, normalized);
+      _detectCourseAndCategory(recipe);
+      // A course the site names stands. The guess only fills in for none.
+      if (siteCourse != null) recipe.suggestedCourse = siteCourse;
+      return recipe;
+    }
+    return null;
+  }
+
   // ========== WEB SCRAPING ==========
 
   static bool _hasContent(ImportedRecipe? recipe) =>
@@ -2766,6 +2800,80 @@ class RecipeImportEngine {
       }
     }
     return null;
+  }
+
+  // ========== VIDEO TEXT ==========
+
+  /// What a line of a video's text opens with that is only decoration: the
+  /// emoji and bullets creators put in front of their lists ("🧄 2 cloves
+  /// garlic", "• 1 cup rice", "🛒 INGREDIENTS").
+  static final _videoLineDecoration = RegExp(
+      r'^(?:[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2600}-\u{27BF}'
+      r'\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}•●▪▫◦‣⁃►▶]\s*)+',
+      unicode: true);
+
+  /// Reads a recipe out of the text that comes with a video: a YouTube
+  /// description, a TikTok or Instagram caption, or the lines of a video's
+  /// captions. Returns null when the text lists no ingredients, which is how
+  /// most videos are: the recipe is spoken, or it sits behind a link.
+  ///
+  /// [title] is the video's own title. Without one the title is taken from
+  /// the first line of the text, as captions open with the name of the dish,
+  /// and [fallbackTitle] stands in when that line is no name either.
+  static ImportedRecipe? parseVideoText(String text, {String? title, String? fallbackTitle}) {
+    final cleaned = _withoutCaptionNoise(text
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .replaceAll('\t', ' '));
+    // Descriptions are full of links to gear and other channels, and of
+    // chapter marks ("1:23 Mixing"). None of those lines is the recipe.
+    final lines = [
+      for (final raw in cleaned.split('\n'))
+        if (raw.trim().replaceFirst(_videoLineDecoration, '').trim() case final line
+            when line.isNotEmpty && !line.contains('://') && !_chapterMark.hasMatch(line))
+          line,
+    ];
+    if (lines.isEmpty) return null;
+
+    // Most videos are not recipes, so the text has to read like one: an
+    // ingredients heading, or ingredient lines written with amounts.
+    final recipe = _recipeFromLines(lines);
+    if (recipe == null || recipe.ingredients.isEmpty) return null;
+
+    final ownTitle = title == null ? null : _cleanSocialTitle(title);
+    recipe.title = (ownTitle != null && ownTitle.isNotEmpty)
+        ? ownTitle
+        : _captionTitle(cleaned) ?? _cleanSocialTitle(fallbackTitle ?? 'Recipe');
+    _detectCourseAndCategory(recipe);
+    return recipe;
+  }
+
+  /// The caption of an Instagram post, read from the meta tags of its page,
+  /// with the cover picture and the account's name. Null when the page is
+  /// Instagram's login wall or carries no caption: Instagram shows a post to
+  /// visitors without a session only some of the time.
+  static ({String caption, String? image, String? author})? instagramPostText(String html) {
+    final document = html_parser.parse(html);
+    if (_isLoginWall(document)) return null;
+    final description = _getMetaContent(document, 'og:description');
+    final rawTitle = _getMetaContent(document, 'og:title');
+
+    // Both tags wrap the caption: og:title in the account's name,
+    // og:description in the likes, the account and the date. Either can be
+    // cut short, so the longer caption is the one to read.
+    final fromTitle = rawTitle == null ? null : _instagramCaption(rawTitle);
+    final fromDescription = description == null ? null : _instagramCaption(description);
+    var caption = fromDescription;
+    if (fromTitle != null && (caption == null || fromTitle.length > caption.length)) {
+      caption = fromTitle;
+    }
+    if (caption == null || caption.trim().isEmpty) return null;
+
+    // "Name on Instagram: ..." names the account.
+    final author = rawTitle == null
+        ? null
+        : RegExp(r'^(.{1,80}?) on Instagram:').firstMatch(rawTitle)?.group(1)?.trim();
+    return (caption: caption.trim(), image: _getMetaContent(document, 'og:image'), author: author);
   }
 
   /// Squarespace: Try specific Squarespace blog patterns when JSON-LD and standard selectors miss

@@ -5,8 +5,12 @@ import 'package:intl/intl.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../utils/planned_servings.dart';
 import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
+import 'planned_servings_stepper.dart';
+import 'recipe_cards.dart' show servingsLabel;
 import 'sheet_chrome.dart';
 // TODO: Kitchen Buddy hidden for now
 // import 'kitchen_buddy/kitchen_buddy_integration.dart';
@@ -17,19 +21,24 @@ import 'sheet_chrome.dart';
 ///
 /// [courseId] (the recipe's course, e.g. 'main', 'breakfast', 'dessert') is used
 /// to pre-select the most likely meal type and its default time.
+/// [recipeServings] (the recipe's servings as written) is where the "how many
+/// people" stepper starts, unless the household has a usual number.
 void showAddToMealPlanSheet(
     BuildContext context,
     WidgetRef ref,
     String recipeId,
     String recipeTitle, {
     String? courseId,
+    String? recipeServings,
     }) {
   Responsive.showAdaptiveSheet(
     context,
+    desktopMaxHeight: 720,
     builder: (sheetContext) => _AddToMealPlanSheet(
       recipeId: recipeId,
       recipeTitle: recipeTitle,
       courseId: courseId,
+      recipeServings: recipeServings,
       ref: ref,
     ),
   );
@@ -83,12 +92,14 @@ class _AddToMealPlanSheet extends StatefulWidget {
   final String recipeId;
   final String recipeTitle;
   final String? courseId;
+  final String? recipeServings;
   final WidgetRef ref;
 
   const _AddToMealPlanSheet({
     required this.recipeId,
     required this.recipeTitle,
     required this.courseId,
+    required this.recipeServings,
     required this.ref,
   });
 
@@ -103,6 +114,12 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
   bool _timeEdited = false;
   bool _isSaving = false;
 
+  /// How many people the meal is for; null = the recipe's own servings.
+  int? _servings;
+
+  /// The household's usual number of people (0 = none set).
+  int _household = 0;
+
   static const _mealTypeKeys = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Appetizer', 'Dessert'];
 
   @override
@@ -111,6 +128,14 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
     // Detect the meal type from the recipe's course and pre-fill its default time.
     _selectedMealType = mealTypeForCourse(widget.courseId);
     _selectedTime = defaultTimeForMealType(_selectedMealType);
+    // Start at the household's usual number, else the recipe's own servings.
+    _household = widget.ref.read(settingsProvider).householdServings;
+    if (_household > 0) _servings = _household;
+  }
+
+  Future<void> _saveUsual(int people) async {
+    await widget.ref.read(settingsProvider.notifier).setHouseholdServings(people);
+    if (mounted) setState(() => _household = people);
   }
 
   void _selectMealType(String type) {
@@ -159,7 +184,8 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
           borderRadius: SheetPresentation.surfaceRadius(context),
         ),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -317,6 +343,36 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+
+            // How many people: starts at the household's usual number or the
+            // recipe's own servings; the recipe itself never changes.
+            Text(l10n.plannedServingsHeading, style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                PlannedServingsStepper(
+                  value: _servings,
+                  recipeServings: widget.recipeServings,
+                  onChanged: (v) => setState(() => _servings = v),
+                ),
+                PlannedServingsUsualAction(
+                  shown: _servings ?? recipeServingsDefault(widget.recipeServings),
+                  household: _household,
+                  onSave: _saveUsual,
+                ),
+              ],
+            ),
+            if (servingsLabel(l10n, widget.recipeServings) case final asWritten?) ...[
+              const SizedBox(height: 6),
+              Text(
+                l10n.plannedServingsAsWritten(asWritten),
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+              ),
+            ],
             const SizedBox(height: 24),
 
             // Add button
@@ -336,6 +392,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
             ),
             const SizedBox(height: 8),
           ],
+          ),
         ),
       ),
     );
@@ -371,6 +428,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
         mealType: drift.Value(_selectedMealType),
         recipeId: drift.Value(widget.recipeId),
         time: drift.Value(time),
+        servings: drift.Value(normalizePlannedServings(_servings, widget.recipeServings)),
       ));
 
       // TODO: Kitchen Buddy hidden for now

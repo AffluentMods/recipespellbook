@@ -11,6 +11,11 @@ import '../../../utils/responsive_utils.dart';
 
 const _kWebGuideBaseUrl = 'https://recipespellbook.app/guides';
 
+/// Store page of the browser extension in web_clipper/ (Chrome Web Store or
+/// Edge Add-ons). Fill in once it is published. While it is empty the Web
+/// clipper guide shows its steps without a button to the store.
+const webClipperStoreUrl = '';
+
 // ═══════════════════════════════════════════════════════════════════
 // IMPORT GUIDES LANDING PAGE
 // ═══════════════════════════════════════════════════════════════════
@@ -550,6 +555,43 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
                   filename: 'import_preview.jpg',
                 ),
                 tip: l10n.importGuideWebsiteStep5Tip,
+              ),
+            ],
+          ),
+          // The browser extension (web_clipper/ in this repo). Its README
+          // has the same steps.
+          _ImportGuide(
+            id: 'web-clipper',
+            icon: Icons.extension_outlined,
+            color: const Color(0xFF0F9D58),
+            title: l10n.webClipperGuideTitle,
+            subtitle: l10n.webClipperGuideSubtitle,
+            tag: l10n.importGuideTagNew,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime15Sec,
+            actionUrl: webClipperStoreUrl.isEmpty ? null : webClipperStoreUrl,
+            actionLabel: l10n.webClipperGetExtension,
+            steps: [
+              _GuideStep(
+                title: l10n.webClipperStep1Title,
+                description: l10n.webClipperStep1Desc,
+                icon: Icons.extension_outlined,
+              ),
+              _GuideStep(
+                title: l10n.webClipperStep2Title,
+                description: l10n.webClipperStep2Desc,
+                icon: Icons.travel_explore,
+              ),
+              _GuideStep(
+                title: l10n.webClipperStep3Title,
+                description: l10n.webClipperStep3Desc,
+                icon: Icons.bookmark_add_outlined,
+              ),
+              _GuideStep(
+                title: l10n.webClipperStep4Title,
+                description: l10n.webClipperStep4Desc,
+                icon: Icons.check_circle_outline,
+                tip: l10n.webClipperTip,
               ),
             ],
           ),
@@ -1284,7 +1326,13 @@ class _ImportGuide {
   final String? tag;
   final String difficulty;
   final String timeEstimate;
-  final String webSlug;
+
+  /// Its page under [_kWebGuideBaseUrl], when the website has one.
+  final String? webSlug;
+
+  /// A page the guide sends people to, with [actionLabel] on its button.
+  final String? actionUrl;
+  final String? actionLabel;
   final List<_GuideStep> steps;
 
   const _ImportGuide({
@@ -1296,7 +1344,9 @@ class _ImportGuide {
     this.tag,
     required this.difficulty,
     required this.timeEstimate,
-    required this.webSlug,
+    this.webSlug,
+    this.actionUrl,
+    this.actionLabel,
     required this.steps,
   });
 }
@@ -1677,11 +1727,12 @@ class _GuideDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(guide.title),
         actions: [
-          TextButton.icon(
-            onPressed: () => _launchUrl('$_kWebGuideBaseUrl/${guide.webSlug}'),
-            icon: const Icon(Icons.open_in_browser, size: 18),
-            label: Text(l10n.importGuideWebButton),
-          ),
+          if (guide.webSlug != null)
+            TextButton.icon(
+              onPressed: () => _launchUrl('$_kWebGuideBaseUrl/${guide.webSlug}'),
+              icon: const Icon(Icons.open_in_browser, size: 18),
+              label: Text(l10n.importGuideWebButton),
+            ),
         ],
       ),
       body: ListView(
@@ -1748,17 +1799,33 @@ class _GuideDetailScreen extends StatelessWidget {
               isLast: i == guide.steps.length - 1,
             ),
 
-          // ── Open in browser CTA ──
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () => _launchUrl('$_kWebGuideBaseUrl/${guide.webSlug}'),
-            icon: const Icon(Icons.open_in_browser, size: 18),
-            label: Text(l10n.importGuideFollowInBrowser),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          // ── The guide's own page (a store page, say) ──
+          if (guide.actionUrl != null && guide.actionLabel != null) ...[
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              onPressed: () => _launchUrl(guide.actionUrl!),
+              icon: const Icon(Icons.open_in_new, size: 18),
+              label: Text(guide.actionLabel!),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
-          ),
+          ],
+
+          // ── Open in browser CTA ──
+          if (guide.webSlug != null) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => _launchUrl('$_kWebGuideBaseUrl/${guide.webSlug}'),
+              icon: const Icon(Icons.open_in_browser, size: 18),
+              label: Text(l10n.importGuideFollowInBrowser),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
             ],
           )),
         ],

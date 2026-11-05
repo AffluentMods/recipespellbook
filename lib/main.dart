@@ -12,6 +12,7 @@ import 'l10n/app_localizations.dart';
 import 'utils/invite_link_parser.dart';
 import 'utils/platform_utils.dart';
 import 'utils/pending_deep_link.dart';
+import 'utils/widget_links.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cookbook_provider.dart';
 import 'providers/database_provider.dart';
@@ -27,12 +28,16 @@ import 'services/ingredient_suggestion_service.dart';
 import 'services/notification_service.dart';
 import 'services/ocr_service.dart';
 import 'services/recipe_import_engine.dart';
+import 'services/video_recipe_import.dart';
 import 'services/desktop_window_service.dart';
+import 'services/home_widget_service.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
 import 'services/collab_service.dart';
+import 'services/community_cookbook_updates.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
+import 'ui/screens/import/video_import_ui.dart';
 import 'ui/widgets/app_shortcuts.dart';
 
 /// Scroll behaviour: touch, stylus and trackpad drag-scroll everywhere. A
@@ -272,6 +277,12 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     WidgetsBinding.instance.addObserver(this);
     // Delay to avoid modifying providers during widget tree build
     WidgetsBinding.instance.addPostFrameCallback((_) => _initServices());
+    // The home screen widgets use the app's language: redraw them when it
+    // changes.
+    ref.listenManual(
+      settingsProvider.select((s) => s.languageCode),
+      (_, _) => HomeWidgetService.instance.scheduleRefresh(),
+    );
   }
 
   Future<void> _initServices() async {
@@ -286,6 +297,14 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     TransferService.instance.setDatabase(db);
     CollabService.instance.setDatabase(db);
     CollabService.instance.load();
+    // Home screen widgets: first snapshot now, then whenever meals or the
+    // shopping list change. Not awaited: the widgets can wait for auth.
+    if (HomeWidgetService.isSupported) {
+      HomeWidgetService.instance.start(
+        db,
+        languageCode: () => ref.read(settingsProvider).languageCode,
+      );
+    }
 
     // 2. Restore auth session (must be first — determines signed-in state)
     await ref.read(authProvider.notifier).initialize();
@@ -312,6 +331,13 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     // 7. Wire up share intent handling
     _initShareHandler();
+
+    // 8. Have the creators of downloaded Community cookbooks changed them?
+    //    At most once a day; one request for all of them.
+    CommunityCookbookUpdates(db).checkAll().catchError((Object e) {
+      debugPrint('[Init] Community update check failed: $e');
+      return null;
+    });
   }
 
   // ── Deep-link handling (share / invite links) ──────────────────────
@@ -322,7 +348,10 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   //  and cold-start links opened twice.
   //  Every link shape is parsed by InviteLinkParser (utils/invite_link_parser.dart):
   //    /s/<code> share links, recipespellbook://import?code=, community links,
-  //    and /family/join/<code> family invites.
+  //    /family/join/<code> family invites, recipespellbook://clip links
+  //    from the browser extension (web_clipper/), which open ClipImportScreen,
+  //    and home screen widget taps (recipespellbook://recipe/<id>, ://shopping,
+  //    ://planner), parsed by WidgetLinks (utils/widget_links.dart).
   StreamSubscription<Uri>? _deepLinkSub;
   String? _lastDeepLink;
   DateTime? _lastDeepLinkAt;
@@ -375,7 +404,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
         queryParameters: uri.queryParameters.isEmpty ? null : uri.queryParameters,
       ).toString();
     }
-    return InviteLinkParser.parseUri(uri)?.route;
+    return WidgetLinks.routeFor(uri) ?? InviteLinkParser.parseUri(uri)?.route;
   }
 
   void _navigateToLinkTarget(String target) {
@@ -384,6 +413,9 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     // target (it opens it on top of Home); once warm, navigate directly.
     if (splashActive) {
       pendingDeepLink = target;
+    } else if (WidgetLinks.isTabRoute(target)) {
+      // A main tab (from a home screen widget) is switched to, not stacked.
+      router.go(target);
     } else {
       router.push(target);
     }
@@ -615,6 +647,11 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       ),
     );
 
+    // A cooking video shared from YouTube, TikTok or Instagram: the recipe is
+    // in the text that comes with it.
+    final video = VideoLink.parse(finalUrl);
+    if (video != null && await _importSharedVideo(nav, video, cookbookId, l10n)) return;
+
     try {
       final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
 
@@ -649,6 +686,63 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     }
   }
 
+  /// Reads the recipe of a shared video link and opens the preview, or
+  /// offers the AI import when the video's text holds no recipe the text
+  /// importer can find. The loading dialog is up when this is called, and
+  /// closed here. Returns false, with the dialog still up, for a short link
+  /// that turned out not to lead to a video: that is read as any page.
+  Future<bool> _importSharedVideo(
+    NavigatorState nav,
+    VideoLink video,
+    String cookbookId,
+    AppLocalizations l10n,
+  ) async {
+    VideoImportResult? result;
+    String? failure;
+    try {
+      result = await VideoRecipeImporter().import(video);
+    } on VideoImportException catch (e) {
+      if (e.failure == VideoImportFailure.notAVideo) return false;
+      failure = videoImportErrorMessage(l10n, e);
+    } catch (e) {
+      debugPrint('[Import] Shared video import failed: $e');
+      failure = l10n.videoImportUnreadable;
+    }
+    // The loading dialog.
+    if (nav.canPop()) nav.pop();
+
+    final found = result;
+    final recipe = found?.recipe;
+    if (found != null && recipe != null) {
+      nav.push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => ImportPreviewScreen(
+            recipes: [recipe],
+            cookbookId: cookbookId,
+            sourceUrl: found.video.link.url,
+            videoTextSource: found.source,
+          ),
+        ),
+      );
+      return true;
+    }
+    final ctx = nav.context;
+    if (found != null && found.hasTextForAi) {
+      if (ctx.mounted && await askForVideoAiImport(ctx)) nav.push(videoAiImportRoute(found, cookbookId));
+      return true;
+    }
+    if (ctx.mounted) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(failure ?? l10n.videoImportNoRecipe),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    return true;
+  }
+
   /// Extracts the first URL from shared text.
   /// Handles cases like "Check out this recipe! https://example.com/recipe"
   String? _extractUrl(String text) {
@@ -666,12 +760,19 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       // Auto-sync when app comes back to foreground
       ref.read(syncProvider.notifier).autoSync();
     }
+    // Home screen widgets: catch a new day on resume, and leave them current
+    // (e.g. a different shopping list picked) as the app goes to the
+    // background, where they are about to be seen.
+    if (state == AppLifecycleState.resumed || state == AppLifecycleState.paused) {
+      HomeWidgetService.instance.refresh();
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkSub?.cancel();
+    HomeWidgetService.instance.stop();
     super.dispose();
   }
 

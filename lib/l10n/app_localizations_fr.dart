@@ -11682,4 +11682,485 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Ne correspond pas à l\'étiquette ? Voir ou corriger';
+
+  @override
+  String get clipScreenTitle => 'Recette depuis votre navigateur';
+
+  @override
+  String get clipChooseCookbookTitle => 'Dans quel livre l’enregistrer ?';
+
+  @override
+  String get clipChooseCookbookMessage => 'Choisissez le livre pour la recette venue de votre navigateur.';
+
+  @override
+  String get clipNoCookbook => 'Aucun livre ne peut recevoir la recette. Créez-en un, puis enregistrez de nouveau la recette.';
+
+  @override
+  String get webClipperGuideTitle => 'Web Clipper';
+
+  @override
+  String get webClipperGuideSubtitle => 'Enregistrez des recettes depuis Chrome, Edge, Brave ou Firefox en un clic';
+
+  @override
+  String get webClipperStep1Title => 'Ajoutez l’extension';
+
+  @override
+  String get webClipperStep1Desc => 'Installez Recipe Spellbook Web Clipper dans Chrome, Edge, Brave ou Firefox sur votre ordinateur.';
+
+  @override
+  String get webClipperStep2Title => 'Ouvrez une recette';
+
+  @override
+  String get webClipperStep2Desc => 'Allez sur n’importe quelle page de recette dans ce navigateur.';
+
+  @override
+  String get webClipperStep3Title => 'Cliquez sur Save';
+
+  @override
+  String get webClipperStep3Desc => 'Cliquez sur le bouton Recipe Spellbook dans la barre d’outils, puis sur Save. Ou faites un clic droit sur la page et choisissez « Save to Recipe Spellbook ».';
+
+  @override
+  String get webClipperStep4Title => 'Vérifiez et enregistrez';
+
+  @override
+  String get webClipperStep4Desc => 'Laissez le navigateur ouvrir Recipe Spellbook, choisissez un livre et enregistrez la recette depuis l’aperçu.';
+
+  @override
+  String get webClipperTip => 'Fonctionne avec l’app Recipe Spellbook pour Windows et Mac. L’extension ne lit une page que lorsque vous cliquez et n’envoie rien à aucun serveur.';
+
+  @override
+  String get webClipperGetExtension => 'Obtenir l’extension';
+
+  @override
+  String get videoImportFromDescription => 'Extrait de la description de la vidéo';
+
+  @override
+  String get videoImportFromCaptions => 'Extrait des sous-titres';
+
+  @override
+  String get videoImportCheckText => 'Lu dans le texte de la vidéo. Vérifiez les ingrédients et les étapes avant d\'enregistrer.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Aucune recette écrite trouvée';
+
+  @override
+  String get videoImportNoRecipeBody => 'La description de la vidéo ne liste pas les ingrédients. L\'import par IA peut lire le texte de la vidéo et en faire une recette.';
+
+  @override
+  String get videoImportUseAi => 'Utiliser l\'import par IA';
+
+  @override
+  String get videoImportNoRecipe => 'Aucune recette trouvée dans la description ni dans les sous-titres de cette vidéo.';
+
+  @override
+  String get videoImportUnavailable => 'Cette vidéo est privée, supprimée ou indisponible.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform limite les requêtes en ce moment. Réessayez dans quelques minutes.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Impossible de joindre $platform. Vérifiez votre connexion Internet et réessayez.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform a mis trop de temps à répondre. Réessayez.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform n\'a pas laissé l\'application lire cette vidéo. Copiez la description, puis utilisez Coller du texte.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram n\'a pas partagé la légende de cette publication. Ouvrez la publication, copiez la légende, puis utilisez Coller du texte.';
+
+  @override
+  String get videoImportUnreadable => 'Impossible de lire la page de cette vidéo. Réessayez plus tard, ou copiez la description et utilisez Coller du texte.';
+
+  @override
+  String get aiVideoTextIncluded => 'Le texte de la vidéo est copié avec le prompt. Collez les deux dans votre chat d\'IA, puis collez sa réponse ci-dessous.';
+
+  @override
+  String get plannedServingsHeading => 'Pour combien de personnes';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personnes',
+      one: '1 personne',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'Portions de la recette';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'Selon la recette : $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return 'Pour $count';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'Enregistrer comme habituel';
+
+  @override
+  String get plannedServingsUsual => 'Notre habitude';
+
+  @override
+  String get plannedServingsFewer => 'Moins de personnes';
+
+  @override
+  String get plannedServingsMore => 'Plus de personnes';
+
+  @override
+  String get settingsHouseholdServings => 'Taille du foyer';
+
+  @override
+  String get settingsHouseholdServingsUnset => 'Les portions de chaque recette';
+
+  @override
+  String get settingsHouseholdServingsHint => 'Les nouveaux repas du planning commencent avec ce nombre de personnes, et leurs listes de courses s\'adaptent en conséquence.';
+
+  @override
+  String get cookbookUpdateAvailable => 'Mise à jour disponible';
+
+  @override
+  String get cookbookUpdateBannerBody => 'Le créateur a modifié ce livre de recettes depuis que vous l\'avez téléchargé.';
+
+  @override
+  String get cookbookUpdateReview => 'Voir';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return 'Mettre à jour « $name »';
+  }
+
+  @override
+  String get cookbookUpdateChecking => 'Recherche des changements…';
+
+  @override
+  String get cookbookUpdateLoadFailed => 'Impossible de charger la mise à jour. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get cookbookUpdateUpToDate => 'Ce livre de recettes est déjà à jour.';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nouvelles recettes',
+      one: '1 nouvelle recette',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes modifiées',
+      one: '1 recette modifiée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes retirées par le créateur',
+      one: '1 recette retirée par le créateur',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => 'Nouveau titre ou nouvelle description du créateur';
+
+  @override
+  String get cookbookUpdateWillUpdate => 'Passe à la nouvelle version';
+
+  @override
+  String get cookbookUpdateYoursDiffers => 'Votre copie a ses propres modifications';
+
+  @override
+  String get cookbookUpdateKeepMine => 'Garder la mienne';
+
+  @override
+  String get cookbookUpdateUseNew => 'Prendre la nouvelle version';
+
+  @override
+  String get cookbookUpdateRemovedHint => 'Cochez celles à mettre à la corbeille. Les autres restent dans votre livre de recettes.';
+
+  @override
+  String get cookbookUpdateApply => 'Mettre à jour le livre';
+
+  @override
+  String get cookbookUpdateSkip => 'Ignorer cette mise à jour';
+
+  @override
+  String get cookbookUpdateApplying => 'Mise à jour du livre de recettes…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '« $name » est à jour';
+  }
+
+  @override
+  String get cookbookUpdateFailed => 'La mise à jour n\'a pas pu être enregistrée. Rien n\'a été modifié dans votre livre de recettes.';
+
+  @override
+  String get widgetTodaysMealsTitle => 'Repas du jour';
+
+  @override
+  String get widgetTodaysMealsEmpty => 'Rien de prévu aujourd\'hui';
+
+  @override
+  String get widgetTodaysMealsDescription => 'Les repas prévus aujourd\'hui. Touchez-en un pour ouvrir sa recette.';
+
+  @override
+  String get widgetShoppingListTitle => 'Liste de courses';
+
+  @override
+  String get widgetShoppingListEmpty => 'Votre liste est vide';
+
+  @override
+  String get widgetShoppingListDescription => 'Ce qu\'il vous reste à acheter sur votre liste de courses.';
+
+  @override
+  String get pantryCookTitle => 'Que puis-je cuisiner ?';
+
+  @override
+  String get pantryCookHomeEmpty => 'Ajoutez ce que vous avez dans votre garde-manger et découvrez les recettes que vous pouvez cuisiner';
+
+  @override
+  String get pantryCookHomeSetUp => 'Ajouter des articles';
+
+  @override
+  String get pantryCookHomeOpen => 'Voir les recettes';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count prêtes maintenant',
+      one: '1 prête maintenant',
+      zero: 'Aucune prête pour l\'instant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count auxquelles il manque 1 ou 2 choses',
+      one: '1 à laquelle il manque 1 ou 2 choses',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles dans votre garde-manger',
+      one: '1 article dans votre garde-manger',
+      zero: 'Votre garde-manger est vide',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes les utilisent',
+      one: '1 recette les utilise',
+      zero: 'Aucune recette ne les utilise encore',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => 'Modifier le garde-manger';
+
+  @override
+  String get pantryCookEmptyTitle => 'Qu\'y a-t-il dans votre garde-manger ?';
+
+  @override
+  String get pantryCookEmptyBody => 'Ajoutez ce que vous avez sous la main et découvrez lesquelles de vos recettes vous pouvez cuisiner tout de suite, et ce qui manque pour les autres.';
+
+  @override
+  String get pantryCookFilterAll => 'Toutes';
+
+  @override
+  String get pantryCookFilterReady => 'Prêtes maintenant';
+
+  @override
+  String get pantryCookFilterFew => 'Il manque 1 ou 2';
+
+  @override
+  String get pantryCookAllCourses => 'Tous les types de plats';
+
+  @override
+  String get pantryCookAllCookbooks => 'Tous les livres de recettes';
+
+  @override
+  String get pantryCookNoResults => 'Aucune recette n\'utilise encore votre garde-manger';
+
+  @override
+  String get pantryCookNoResultsHint => 'Ajoutez encore quelques articles que vous avez pour voir des recettes ici.';
+
+  @override
+  String get pantryCookNoFilterResults => 'Aucune recette ne correspond à ces filtres';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$covered sur $total dans votre garde-manger';
+  }
+
+  @override
+  String get pantryCookMissingLabel => 'Manque :';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return 'Vous avez $item ? Touchez pour l\'ajouter au garde-manger';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return '+$count de plus';
+  }
+
+  @override
+  String get pantryCookAddMissing => 'Ajouter ce qui manque';
+
+  @override
+  String get pantryCookAddMissingTooltip => 'Ajouter ce qui manque à la liste de courses';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return '$item ajouté au garde-manger';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => 'Achetés récemment';
+
+  @override
+  String get pantryCookAddAll => 'Tout ajouter';
+
+  @override
+  String get pantryCookAlwaysHave => 'Toujours en stock';
+
+  @override
+  String get pantryCookAlwaysHaveHint => 'Ignorés dans chaque recette, ils n\'apparaissent donc jamais comme manquants.';
+
+  @override
+  String get pantryCookAddBasicHint => 'Ajouter un essentiel';
+
+  @override
+  String get pantryCookPaletteSubtitle => 'Les recettes que vous pouvez cuisiner avec ce que vous avez';
+
+  @override
+  String get pantryCookSeeRecipes => 'Voir ce que je peux cuisiner';
+
+  @override
+  String get dinnerTitle => 'Qu\'est-ce qu\'on mange ce soir ?';
+
+  @override
+  String get dinnerShowOthers => 'Voir d\'autres idées';
+
+  @override
+  String get dinnerPlannerSuggestions => 'Suggestions';
+
+  @override
+  String get dinnerReasonAllInPantry => 'Tout est dans le garde-manger';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Un favori pas cuisiné depuis $weeks semaines',
+      one: 'Un favori pas cuisiné depuis 1 semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => 'Un de vos favoris';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Juste $count choses à acheter',
+      one: 'Juste 1 chose à acheter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return 'Rapide : $minutes min';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Cuisiné il y a $weeks semaines',
+      one: 'Cuisiné il y a 1 semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Pas ouvert depuis $weeks semaines',
+      one: 'Pas ouvert depuis 1 semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: 'Noté $stars étoiles',
+      one: 'Noté 1 étoile',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => 'Pas encore essayé';
+
+  @override
+  String get dinnerReasonFromLibrary => 'De vos livres de recettes';
 }
