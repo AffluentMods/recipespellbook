@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/collab_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/quick_access_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
@@ -135,11 +136,16 @@ class DesktopHome extends ConsumerWidget {
                             ],
                           ),
                         ),
+                      // Same Quick Access sources and settings as the phone.
                       _RecipeRowSection(
                         title: l10n.homeJumpBackIn,
-                        recipes: ref.watch(recentRecipesProvider).valueOrNull ?? const [],
+                        recipes: [
+                          for (final i in ref.watch(jumpBackInProvider(cookbookId)).valueOrNull ??
+                              const <QuickAccessItem>[])
+                            i.recipe,
+                        ],
                         width: width,
-                        onSeeAll: () => context.push('/recipes/recent'),
+                        onSeeAll: () => context.push('/recipes/quick-access'),
                       ),
                       _RecipeRowSection(
                         title: l10n.favoritesTitle,
