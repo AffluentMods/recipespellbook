@@ -2882,6 +2882,8 @@
   "shoppingTapToCreateShoppableList": "Dotknij, aby utworzyć listę zakupową",
   "swipeToSwitch": "Przesuń, aby zmienić sekcję",
   "syncFailed": "Synchronizacja nie powiodła się",
+  "syncPhotosStuck": "Zdjęcia się nie przesyłają",
+  "syncPhotosStuckDetail": "Przepisy są zsynchronizowane, ale niektórych zdjęć nie można teraz przesłać. Aplikacja spróbuje ponownie automatycznie.",
   "syncSuccess": "Zsynchronizowano: {pushed} wysłanych, {pulled} pobranych",
   "textSizePreview": "Podgląd",
   "transferDeviceDesktop": "komputer",

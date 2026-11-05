@@ -2882,6 +2882,8 @@
   "shoppingTapToCreateShoppableList": "タップして買い物リストを作成",
   "swipeToSwitch": "スワイプしてセクションを切り替え",
   "syncFailed": "同期に失敗しました",
+  "syncPhotosStuck": "写真をアップロードできません",
+  "syncPhotosStuckDetail": "レシピは同期済みですが、一部の写真を今はアップロードできません。自動的に再試行します。",
   "syncSuccess": "同期完了：{pushed}件プッシュ、{pulled}件プル",
   "textSizePreview": "プレビュー",
   "transferDeviceDesktop": "パソコン",

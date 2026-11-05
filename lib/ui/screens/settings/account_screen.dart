@@ -967,8 +967,16 @@ class _CloudSyncCardState extends State<_CloudSyncCard> {
           ),
           title: Text(l10n.accountSyncNow),
           subtitle: Text(
-            _syncing ? l10n.syncing : l10n.syncDescription,
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+            _syncing
+                ? l10n.syncing
+                : SyncService.instance.photosStuck
+                    ? l10n.syncPhotosStuckDetail
+                    : l10n.syncDescription,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: !_syncing && SyncService.instance.photosStuck
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.outline,
+            ),
           ),
           trailing: _syncing
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))

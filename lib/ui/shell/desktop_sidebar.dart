@@ -518,6 +518,7 @@ class _AccountRow extends ConsumerWidget {
     if (!hasCloud) return tierName;
     if (sync.isSyncing) return l10n.syncing;
     if (sync.hasError) return l10n.syncFailed;
+    if (sync.photosStuck) return l10n.syncPhotosStuck;
     final last = sync.lastSyncAt;
     if (last == null) return l10n.syncStatusLocal;
     final diff = DateTime.now().difference(last);

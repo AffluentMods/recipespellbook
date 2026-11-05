@@ -7563,6 +7563,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get syncFailed => 'Sincronizzazione fallita';
 
   @override
+  String get syncPhotosStuck => 'Le foto non si caricano';
+
+  @override
+  String get syncPhotosStuckDetail => 'Le tue ricette sono sincronizzate, ma alcune foto non si possono caricare ora. Il caricamento verrà ritentato automaticamente.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return 'Sincronizzato: $pushed inviati, $pulled ricevuti';
   }

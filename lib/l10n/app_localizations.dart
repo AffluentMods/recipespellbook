@@ -13429,6 +13429,18 @@ abstract class AppLocalizations {
   /// **'Sync failed'**
   String get syncFailed;
 
+  /// No description provided for @syncPhotosStuck.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos not uploading'**
+  String get syncPhotosStuck;
+
+  /// No description provided for @syncPhotosStuckDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recipes are synced, but some photos can\'t upload right now. They keep trying on their own.'**
+  String get syncPhotosStuckDetail;
+
   /// No description provided for @syncSuccess.
   ///
   /// In en, this message translates to:

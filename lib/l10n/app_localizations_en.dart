@@ -7587,6 +7587,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncFailed => 'Sync failed';
 
   @override
+  String get syncPhotosStuck => 'Photos not uploading';
+
+  @override
+  String get syncPhotosStuckDetail => 'Your recipes are synced, but some photos can\'t upload right now. They keep trying on their own.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return 'Synced: $pushed pushed, $pulled pulled';
   }

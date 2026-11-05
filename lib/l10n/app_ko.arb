@@ -2882,6 +2882,8 @@
   "shoppingTapToCreateShoppableList": "탭하여 쇼핑 목록 만들기",
   "swipeToSwitch": "스와이프하여 섹션 전환",
   "syncFailed": "동기화 실패",
+  "syncPhotosStuck": "사진을 업로드할 수 없음",
+  "syncPhotosStuckDetail": "레시피는 동기화되었지만 일부 사진을 지금 업로드할 수 없습니다. 자동으로 다시 시도합니다.",
   "syncSuccess": "동기화 완료: {pushed}개 푸시, {pulled}개 풀",
   "textSizePreview": "미리보기",
   "transferDeviceDesktop": "컴퓨터",

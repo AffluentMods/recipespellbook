@@ -7513,6 +7513,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get syncFailed => '同期に失敗しました';
 
   @override
+  String get syncPhotosStuck => '写真をアップロードできません';
+
+  @override
+  String get syncPhotosStuckDetail => 'レシピは同期済みですが、一部の写真を今はアップロードできません。自動的に再試行します。';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return '同期完了：$pushed件プッシュ、$pulled件プル';
   }

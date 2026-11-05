@@ -2409,6 +2409,8 @@
   "shoppingTapToCreateShoppableList": "Toca para crear una lista de compras",
   "swipeToSwitch": "Desliza para cambiar secciones",
   "syncFailed": "Error al sincronizar",
+  "syncPhotosStuck": "Las fotos no se suben",
+  "syncPhotosStuckDetail": "Tus recetas están sincronizadas, pero algunas fotos no se pueden subir ahora. Se volverá a intentar automáticamente.",
   "syncSuccess": "Sincronizado: {pushed} enviados, {pulled} recibidos",
   "textSizePreview": "Vista Previa",
   "transferDeviceDesktop": "escritorio",

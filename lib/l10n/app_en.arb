@@ -3986,6 +3986,8 @@
   "shoppingTapToCreateShoppableList": "Tap to create a shoppable list",
   "swipeToSwitch": "Swipe to switch sections",
   "syncFailed": "Sync failed",
+  "syncPhotosStuck": "Photos not uploading",
+  "syncPhotosStuckDetail": "Your recipes are synced, but some photos can't upload right now. They keep trying on their own.",
   "syncSuccess": "Synced: {pushed} pushed, {pulled} pulled",
   "@syncSuccess": {
     "placeholders": {

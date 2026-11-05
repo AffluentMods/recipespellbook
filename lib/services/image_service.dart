@@ -101,6 +101,12 @@ class ImageService {
   /// Max file size in bytes before rejection (5 MB).
   static const int maxFileSize = 5 * 1024 * 1024;
 
+  /// Whether the last [uploadFile] reached the server and was turned down
+  /// (a server error, the daily limit, a photo it will not take), as opposed to
+  /// going through, or not getting there at all (offline, timed out).
+  bool get lastUploadRefused => _lastUploadRefused;
+  bool _lastUploadRefused = false;
+
   // ════════════════════════════════════════════
   //  PICK + UPLOAD (convenience)
   // ════════════════════════════════════════════
@@ -128,6 +134,7 @@ class ImageService {
   /// The file is read, base64-encoded, and sent to POST /v1/images/upload.
   /// Returns the upload result with server path and presigned URL.
   Future<ImageUploadResult?> uploadFile(File file) async {
+    _lastUploadRefused = false;
     if (!_auth.isSignedIn) {
       debugPrint('[ImageService] Not signed in — cannot upload');
       return null;
@@ -170,6 +177,7 @@ class ImageService {
         return result;
       }
 
+      _lastUploadRefused = true;
       debugPrint('[ImageService] Upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
       return null;
     } catch (e) {
