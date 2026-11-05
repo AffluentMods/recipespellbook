@@ -4623,5 +4623,17 @@
   "themePreviewSecondary": "Secundário",
   "nutriSheetEditedStatus": "Editado manualmente",
   "nutriSheetLinkedNoNutrition": "{title}: sem dados nutricionais",
-  "productReportMismatch": "Não confere com o rótulo? Ver ou corrigir"
+  "productReportMismatch": "Não confere com o rótulo? Ver ou corrigir",
+  "plannedServingsHeading": "Para quantas pessoas",
+  "plannedServingsPeople": "{count, plural, =1{1 pessoa} other{{count} pessoas}}",
+  "plannedServingsRecipeDefault": "Porções da receita",
+  "plannedServingsAsWritten": "Conforme a receita: {servings}",
+  "plannedServingsBadge": "Para {count}",
+  "plannedServingsSaveUsual": "Salvar como habitual",
+  "plannedServingsUsual": "O habitual",
+  "plannedServingsFewer": "Menos pessoas",
+  "plannedServingsMore": "Mais pessoas",
+  "settingsHouseholdServings": "Pessoas em casa",
+  "settingsHouseholdServingsUnset": "As porções de cada receita",
+  "settingsHouseholdServingsHint": "Novas refeições no planejador começam com esse número de pessoas, e as listas de compras se ajustam a ele."
 }

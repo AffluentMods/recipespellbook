@@ -38,9 +38,14 @@ import '../../widgets/recipe_image.dart';
 class ShoppingListGeneratorScreen extends ConsumerStatefulWidget {
   final RecipeResolutionResult resolutionResult;
 
+  /// Opened from the planner: the recipes are already planned, so the
+  /// "also add to meal plan" option is left out (it would plan them again).
+  final bool fromMealPlan;
+
   const ShoppingListGeneratorScreen({
     super.key,
     required this.resolutionResult,
+    this.fromMealPlan = false,
   });
 
   @override
@@ -96,6 +101,7 @@ class _ShoppingListGeneratorScreenState
   void initState() {
     super.initState();
     _result = widget.resolutionResult;
+    if (widget.fromMealPlan) _alsoAddToMealPlan = false;
     _currentStep = _result.hasConflicts ? 0 : 1;
     _pageController = PageController(initialPage: _currentStep);
     _initSelections();
@@ -786,6 +792,7 @@ class _ShoppingListGeneratorScreenState
         // them, so let them schedule it in one tap. Date defaults to
         // today; meal type defaults to Dinner. User can adjust either
         // inline before confirming.
+        if (!widget.fromMealPlan)
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: _MealPlanToggleCard(
@@ -1148,6 +1155,13 @@ class _ConflictCard extends StatelessWidget {
 // RECIPE CARD (collapsible)
 // ═══════════════════════════════════════════════════════════════════
 
+/// A scale as a short number: 1.5 → "1.5", 0.666… → "0.67", 2.0 → "2".
+String _scaleText(double scale) {
+  var s = scale.toStringAsFixed(2);
+  if (s.contains('.')) s = s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+  return s;
+}
+
 class _RecipeCard extends StatelessWidget {
   final ResolvedRecipeNode recipe;
   final bool isExpanded;
@@ -1245,10 +1259,24 @@ class _RecipeCard extends StatelessWidget {
                                 ),
                               ),
                             ],
-                            if (recipe.scale != 1.0) ...[
+                            if (recipe.plannedServings case final people?) ...[
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  l10n.plannedServingsBadge(people),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: context.appColors.accent,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            if ((recipe.scale - 1.0).abs() > 0.001) ...[
                               const SizedBox(width: 6),
                               Text(
-                                '${recipe.scale}x',
+                                '${_scaleText(recipe.scale)}x',
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: theme.colorScheme.tertiary,
                                   fontWeight: FontWeight.bold,

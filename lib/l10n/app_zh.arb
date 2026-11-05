@@ -4623,5 +4623,17 @@
   "themePreviewSecondary": "次要",
   "nutriSheetEditedStatus": "已手动编辑",
   "nutriSheetLinkedNoNutrition": "{title}：无营养数据",
-  "productReportMismatch": "与标签不符？查看或更正"
+  "productReportMismatch": "与标签不符？查看或更正",
+  "plannedServingsHeading": "几人份",
+  "plannedServingsPeople": "{count, plural, other{{count}人}}",
+  "plannedServingsRecipeDefault": "按食谱份量",
+  "plannedServingsAsWritten": "按食谱：{servings}",
+  "plannedServingsBadge": "{count}人份",
+  "plannedServingsSaveUsual": "设为常用人数",
+  "plannedServingsUsual": "常用人数",
+  "plannedServingsFewer": "减少人数",
+  "plannedServingsMore": "增加人数",
+  "settingsHouseholdServings": "家庭人数",
+  "settingsHouseholdServingsUnset": "按各食谱的份量",
+  "settingsHouseholdServingsHint": "计划中新增的餐食将从这个人数开始，购物清单也会相应调整。"
 }

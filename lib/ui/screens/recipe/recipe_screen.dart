@@ -14,6 +14,7 @@ import '../../../data/ingredient_images.dart';
 import '../../../data/localized_units.dart';
 import '../../../data/nutrition_data.dart';
 import '../../../utils/ingredient_utils.dart' show scaleInstructionText, scaleQuantityString;
+import '../../../utils/planned_servings.dart' show plannedServingsScale;
 import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
@@ -169,8 +170,17 @@ class RecipeScreen extends ConsumerStatefulWidget {
   final bool isDetailPane;
   /// Called when the user closes the detail pane (X button in master-detail mode).
   final VoidCallback? onClose;
+  /// Opened from a planned meal: the number of people it is planned for. The
+  /// servings scaler starts there; the stored recipe is not changed.
+  final int? plannedServings;
 
-  const RecipeScreen({super.key, required this.recipeId, this.isDetailPane = false, this.onClose});
+  const RecipeScreen({
+    super.key,
+    required this.recipeId,
+    this.isDetailPane = false,
+    this.onClose,
+    this.plannedServings,
+  });
 
   @override
   ConsumerState<RecipeScreen> createState() => _RecipeScreenState();
@@ -184,6 +194,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   Map<String, List<RecipeLinkInfo>> _ingredientLinksMap = {};
   bool _isLoading = true;
   double _scaleFactor = 1.0;
+  bool _plannedScaleApplied = false;
   _UnitConversion _unitConversion = _UnitConversion.none;
 
   late TabController _tabController;
@@ -238,7 +249,18 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       }
     }
 
+    if (!mounted) return;
     setState(() {
+      // Opened from the planner: start the scaler at the planned number of
+      // people, once (a reload after an edit keeps whatever the user set).
+      if (!_plannedScaleApplied) {
+        _plannedScaleApplied = true;
+        final planned = widget.plannedServings;
+        if (planned != null) {
+          final scale = plannedServingsScale(planned, recipe.servings);
+          if (scale != 1.0) _scaleFactor = double.parse(scale.toStringAsFixed(4));
+        }
+      }
       _recipe = recipe;
       _ingredients = ingredients;
       _steps = steps;
@@ -273,7 +295,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
 
   void _showAddToMealPlanSheet() {
     showAddToMealPlanSheet(context, ref, widget.recipeId, _recipe?.title ?? '',
-        courseId: _recipe?.courseId);
+        courseId: _recipe?.courseId, recipeServings: _recipe?.servings);
   }
 
   void _showAddToShoppingSheet() {

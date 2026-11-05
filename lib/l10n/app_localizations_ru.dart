@@ -11838,4 +11838,54 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Не совпадает с этикеткой? Посмотреть или исправить';
+
+  @override
+  String get plannedServingsHeading => 'На сколько человек';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count человека',
+      many: '$count человек',
+      few: '$count человека',
+      one: '$count человек',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'Порции по рецепту';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'По рецепту: $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return 'На $count чел.';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'Сохранить как обычное';
+
+  @override
+  String get plannedServingsUsual => 'Как обычно';
+
+  @override
+  String get plannedServingsFewer => 'Меньше человек';
+
+  @override
+  String get plannedServingsMore => 'Больше человек';
+
+  @override
+  String get settingsHouseholdServings => 'Размер семьи';
+
+  @override
+  String get settingsHouseholdServingsUnset => 'Порции каждого рецепта';
+
+  @override
+  String get settingsHouseholdServingsHint => 'Новые блюда в планировщике начинаются с этого числа человек, а списки покупок пересчитываются под него.';
 }

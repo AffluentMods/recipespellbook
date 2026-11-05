@@ -4623,5 +4623,17 @@
   "themePreviewSecondary": "보조",
   "nutriSheetEditedStatus": "직접 수정함",
   "nutriSheetLinkedNoNutrition": "{title}: 영양 정보 없음",
-  "productReportMismatch": "라벨과 다른가요? 보기 또는 수정"
+  "productReportMismatch": "라벨과 다른가요? 보기 또는 수정",
+  "plannedServingsHeading": "몇 인분",
+  "plannedServingsPeople": "{count, plural, other{{count}명}}",
+  "plannedServingsRecipeDefault": "레시피 기준 인분",
+  "plannedServingsAsWritten": "레시피 기준: {servings}",
+  "plannedServingsBadge": "{count}인분",
+  "plannedServingsSaveUsual": "평소 인원으로 저장",
+  "plannedServingsUsual": "평소 인원",
+  "plannedServingsFewer": "인원 줄이기",
+  "plannedServingsMore": "인원 늘리기",
+  "settingsHouseholdServings": "가구 인원",
+  "settingsHouseholdServingsUnset": "각 레시피의 인분",
+  "settingsHouseholdServingsHint": "식단에 새로 추가하는 식사는 이 인원으로 시작하며, 장보기 목록도 그에 맞게 조정됩니다."
 }

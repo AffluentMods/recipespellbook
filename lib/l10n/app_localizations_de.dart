@@ -11682,4 +11682,52 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren';
+
+  @override
+  String get plannedServingsHeading => 'Für wie viele Personen';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Personen',
+      one: '1 Person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'Portionen laut Rezept';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'Laut Rezept: $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return 'Für $count';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'Als Standard speichern';
+
+  @override
+  String get plannedServingsUsual => 'Unser Standard';
+
+  @override
+  String get plannedServingsFewer => 'Weniger Personen';
+
+  @override
+  String get plannedServingsMore => 'Mehr Personen';
+
+  @override
+  String get settingsHouseholdServings => 'Haushaltsgröße';
+
+  @override
+  String get settingsHouseholdServingsUnset => 'Portionen des jeweiligen Rezepts';
+
+  @override
+  String get settingsHouseholdServingsHint => 'Neue Mahlzeiten im Planer beginnen mit so vielen Personen, und ihre Einkaufslisten werden passend umgerechnet.';
 }

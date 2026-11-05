@@ -17,6 +17,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/native_file_image.dart';
+import '../../../utils/planned_servings.dart' show plannedRecipeLocation;
 import '../../../utils/recipe_title.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../shell/shell_navigation.dart';
@@ -500,7 +501,7 @@ class _MealChip extends StatelessWidget {
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => context.push('/recipe/${recipe.id}'),
+          onTap: () => context.push(plannedRecipeLocation(recipe.id, meal.mealPlan)),
           child: chip,
         ),
       ),

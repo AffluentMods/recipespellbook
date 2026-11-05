@@ -56,6 +56,16 @@ import '../ui/widgets/app_menu_drawer.dart' show HelpSupportScreen;
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();
 
+/// The recipe page for `/recipe/:id`. `?servings=N` means it was opened from
+/// a meal planned for N people: the page's servings scaler starts there.
+RecipeScreen recipeRouteScreen(GoRouterState state) {
+  final planned = int.tryParse(state.uri.queryParameters['servings'] ?? '');
+  return RecipeScreen(
+    recipeId: state.pathParameters['id']!,
+    plannedServings: planned != null && planned > 0 ? planned : null,
+  );
+}
+
 final router = GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: '/splash',
@@ -270,10 +280,7 @@ final router = GoRouter(
         GoRoute(
           path: '/recipe/:id',
           name: 'recipe',
-          builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            return RecipeScreen(recipeId: id);
-          },
+          builder: (context, state) => recipeRouteScreen(state),
         ),
 
         // ── Search (sidebar visible) ──

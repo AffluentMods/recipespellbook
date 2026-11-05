@@ -11675,4 +11675,52 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get productReportMismatch => '¿No coincide con la etiqueta? Ver o corregir';
+
+  @override
+  String get plannedServingsHeading => 'Para cuántas personas';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas',
+      one: '1 persona',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'Raciones de la receta';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'Según la receta: $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return 'Para $count';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'Guardar como habitual';
+
+  @override
+  String get plannedServingsUsual => 'Lo habitual';
+
+  @override
+  String get plannedServingsFewer => 'Menos personas';
+
+  @override
+  String get plannedServingsMore => 'Más personas';
+
+  @override
+  String get settingsHouseholdServings => 'Tamaño del hogar';
+
+  @override
+  String get settingsHouseholdServingsUnset => 'Las raciones de cada receta';
+
+  @override
+  String get settingsHouseholdServingsHint => 'Las comidas nuevas del planificador empiezan con este número de personas y sus listas de la compra se ajustan en proporción.';
 }

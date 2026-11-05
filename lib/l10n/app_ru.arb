@@ -4623,5 +4623,17 @@
   "themePreviewSecondary": "Вторичный",
   "nutriSheetEditedStatus": "Изменено вручную",
   "nutriSheetLinkedNoNutrition": "{title}: нет данных о пищевой ценности",
-  "productReportMismatch": "Не совпадает с этикеткой? Посмотреть или исправить"
+  "productReportMismatch": "Не совпадает с этикеткой? Посмотреть или исправить",
+  "plannedServingsHeading": "На сколько человек",
+  "plannedServingsPeople": "{count, plural, one{{count} человек} few{{count} человека} many{{count} человек} other{{count} человека}}",
+  "plannedServingsRecipeDefault": "Порции по рецепту",
+  "plannedServingsAsWritten": "По рецепту: {servings}",
+  "plannedServingsBadge": "На {count} чел.",
+  "plannedServingsSaveUsual": "Сохранить как обычное",
+  "plannedServingsUsual": "Как обычно",
+  "plannedServingsFewer": "Меньше человек",
+  "plannedServingsMore": "Больше человек",
+  "settingsHouseholdServings": "Размер семьи",
+  "settingsHouseholdServingsUnset": "Порции каждого рецепта",
+  "settingsHouseholdServingsHint": "Новые блюда в планировщике начинаются с этого числа человек, а списки покупок пересчитываются под него."
 }

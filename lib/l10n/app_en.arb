@@ -6101,5 +6101,20 @@
   "nutriSheetEditedStatus": "Manually edited",
   "nutriSheetLinkedNoNutrition": "{title}: no nutrition data",
   "productReportMismatch": "Doesn't match the label? View or fix",
-  "@nutriSheetLinkedNoNutrition": {"placeholders": {"title": {"type": "String"}}}
+  "@nutriSheetLinkedNoNutrition": {"placeholders": {"title": {"type": "String"}}},
+  "plannedServingsHeading": "How many people",
+  "plannedServingsPeople": "{count, plural, =1{1 person} other{{count} people}}",
+  "@plannedServingsPeople": {"placeholders":{"count":{"type":"int"}}},
+  "plannedServingsRecipeDefault": "Recipe's servings",
+  "plannedServingsAsWritten": "As written: {servings}",
+  "@plannedServingsAsWritten": {"placeholders":{"servings":{"type":"String"}}},
+  "plannedServingsBadge": "For {count}",
+  "@plannedServingsBadge": {"placeholders":{"count":{"type":"int"}}},
+  "plannedServingsSaveUsual": "Save as our usual",
+  "plannedServingsUsual": "Our usual",
+  "plannedServingsFewer": "Fewer people",
+  "plannedServingsMore": "More people",
+  "settingsHouseholdServings": "Household size",
+  "settingsHouseholdServingsUnset": "Each recipe's own servings",
+  "settingsHouseholdServingsHint": "New meals in the planner start at this many people, and their shopping lists scale to match."
 }

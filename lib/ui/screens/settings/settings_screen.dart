@@ -44,6 +44,7 @@ import 'nutrition_settings_screen.dart';
 import 'quick_access_settings_screen.dart';
 import 'trash_screen.dart';
 import '../premium/family_screen.dart';
+import '../../widgets/planned_servings_stepper.dart';
 import '../../widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════════════════════
@@ -216,6 +217,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
       // ─── SHOPPING & PLANNING ───
       _section(title: l10n.settingsShoppingPlanning, icon: Icons.shopping_cart_outlined, children: [
+        _m(l10n.settingsHouseholdServings, 'people servings family meal plan') ? _HouseholdServingsTile(
+          people: s.householdServings,
+          onChanged: (n) => ref.read(settingsProvider.notifier).setHouseholdServings(n),
+        ) : null,
         _m(l10n.myPantry, 'always on hand') ? _Tile(
           icon: Icons.kitchen, title: l10n.myPantry, subtitle: l10n.itemsAlwaysOnHand,
           onTap: () {
@@ -1583,6 +1588,76 @@ class _WeekStartDayTile extends StatelessWidget {
         ])));
       },
     );
+  }
+}
+
+// ════════════════════════════════════════════
+//  HOUSEHOLD SIZE TILE
+// ════════════════════════════════════════════
+
+/// Planner > the household's usual number of people: where new planned meals
+/// start, so their shopping lists scale to it. 0 = each recipe's own servings.
+class _HouseholdServingsTile extends StatelessWidget {
+  final int people;
+  final ValueChanged<int?> onChanged;
+  const _HouseholdServingsTile({required this.people, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      leading: _SettingIcon(Icons.people_alt_outlined, color: theme.colorScheme.primary),
+      title: Text(l10n.settingsHouseholdServings, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+      subtitle: Text(
+        people > 0 ? l10n.plannedServingsPeople(people) : l10n.settingsHouseholdServingsUnset,
+        style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
+      ),
+      trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+      onTap: () => _showPicker(context),
+    );
+  }
+
+  void _showPicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    int? current = people > 0 ? people : null;
+    Responsive.showAdaptiveSheet(context, builder: (ctx) => StatefulBuilder(
+      builder: (ctx, ss) => SafeArea(child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SheetHandle(top: 0),
+          const SizedBox(height: 20),
+          Text(l10n.settingsHouseholdServings, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(
+            l10n.settingsHouseholdServingsHint,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 20),
+          PlannedServingsStepper(
+            value: current,
+            recipeServings: null,
+            onChanged: (v) {
+              ss(() => current = v);
+              onChanged(v);
+            },
+          ),
+          const SizedBox(height: 8),
+          if (current != null)
+            TextButton(
+              onPressed: () {
+                ss(() => current = null);
+                onChanged(null);
+              },
+              child: Text(l10n.settingsHouseholdServingsUnset),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      )),
+    ));
   }
 }
 

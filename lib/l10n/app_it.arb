@@ -3647,5 +3647,17 @@
   "themePreviewSecondary": "Secondario",
   "nutriSheetEditedStatus": "Modificato manualmente",
   "nutriSheetLinkedNoNutrition": "{title}: nessun dato nutrizionale",
-  "productReportMismatch": "Non corrisponde all'etichetta? Visualizza o correggi"
+  "productReportMismatch": "Non corrisponde all'etichetta? Visualizza o correggi",
+  "plannedServingsHeading": "Per quante persone",
+  "plannedServingsPeople": "{count, plural, =1{1 persona} other{{count} persone}}",
+  "plannedServingsRecipeDefault": "Porzioni della ricetta",
+  "plannedServingsAsWritten": "Come da ricetta: {servings}",
+  "plannedServingsBadge": "Per {count}",
+  "plannedServingsSaveUsual": "Salva come abituale",
+  "plannedServingsUsual": "Il solito",
+  "plannedServingsFewer": "Meno persone",
+  "plannedServingsMore": "Più persone",
+  "settingsHouseholdServings": "Persone in casa",
+  "settingsHouseholdServingsUnset": "Le porzioni di ogni ricetta",
+  "settingsHouseholdServingsHint": "I nuovi pasti nel planner partono da questo numero di persone e le liste della spesa si adeguano di conseguenza."
 }

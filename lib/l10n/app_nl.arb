@@ -4623,5 +4623,17 @@
   "themePreviewSecondary": "Secundair",
   "nutriSheetEditedStatus": "Handmatig bewerkt",
   "nutriSheetLinkedNoNutrition": "{title}: geen voedingswaarden",
-  "productReportMismatch": "Klopt het niet met het etiket? Bekijken of verbeteren"
+  "productReportMismatch": "Klopt het niet met het etiket? Bekijken of verbeteren",
+  "plannedServingsHeading": "Voor hoeveel personen",
+  "plannedServingsPeople": "{count, plural, =1{1 persoon} other{{count} personen}}",
+  "plannedServingsRecipeDefault": "Porties volgens recept",
+  "plannedServingsAsWritten": "Volgens recept: {servings}",
+  "plannedServingsBadge": "Voor {count}",
+  "plannedServingsSaveUsual": "Als standaard opslaan",
+  "plannedServingsUsual": "Standaard",
+  "plannedServingsFewer": "Minder personen",
+  "plannedServingsMore": "Meer personen",
+  "settingsHouseholdServings": "Huishoudgrootte",
+  "settingsHouseholdServingsUnset": "De porties van elk recept",
+  "settingsHouseholdServingsHint": "Nieuwe maaltijden in de planner beginnen bij dit aantal personen, en hun boodschappenlijsten schalen mee."
 }
