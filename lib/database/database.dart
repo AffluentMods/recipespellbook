@@ -77,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 13;
 
 
   // Accessors for DAOs
@@ -232,6 +232,24 @@ class AppDatabase extends _$AppDatabase {
           // step paths exist.
           await customStatement(
             'ALTER TABLE steps ADD COLUMN image_server_path TEXT',
+          );
+        }
+        if (from < 13) {
+          // Community cookbook updates: where a downloaded cookbook came
+          // from, the version it is based on, a newer version waiting, and
+          // the per-recipe fingerprints that keep the user's edits safe.
+          // All nullable: existing cookbooks simply have no source.
+          await customStatement(
+            'ALTER TABLE cookbooks ADD COLUMN community_source_id TEXT',
+          );
+          await customStatement(
+            'ALTER TABLE cookbooks ADD COLUMN community_source_version INTEGER',
+          );
+          await customStatement(
+            'ALTER TABLE cookbooks ADD COLUMN community_update_version INTEGER',
+          );
+          await customStatement(
+            'ALTER TABLE cookbooks ADD COLUMN community_manifest TEXT',
           );
         }
       },

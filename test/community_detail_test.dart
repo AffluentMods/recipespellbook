@@ -192,6 +192,7 @@ void main() {
         'title': 'Italian Sundays',
         'recipeCount': 5,
         'imageCount': 2,
+        'version': 4,
         'publisher': {'id': 'chef1', 'name': 'Chef'},
         'recipes': [
           _recipe('Lasagne', uses: [1, 3]),
@@ -246,14 +247,15 @@ void main() {
 
         // Read back in test time, pumping, so the queries queue behind
         // whatever the screen still has running on the database.
-        ({List<Recipe> recipes, List<Step> steps, List<RecipeLink> links})? saved;
+        ({List<Recipe> recipes, List<Step> steps, List<RecipeLink> links, Cookbook cookbook})? saved;
         () async {
           final recipes = await db.select(db.recipes).get();
           final ragu = recipes.firstWhere((r) => r.title == 'Ragu');
           final steps = await (db.select(db.steps)..where((s) => s.recipeId.equals(ragu.id))).get()
             ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
           final links = await db.select(db.recipeLinks).get();
-          saved = (recipes: recipes, steps: steps, links: links);
+          final cookbook = await (db.select(db.cookbooks)..where((c) => c.id.equals(ragu.cookbookId))).getSingle();
+          saved = (recipes: recipes, steps: steps, links: links, cookbook: cookbook);
         }();
         await settleUntil(tester, () => saved != null);
         expect(saved!.recipes, hasLength(5));
@@ -261,6 +263,11 @@ void main() {
         expect(saved!.steps[1].imagePath, isNotNull);
         expect(saved!.steps[2].imagePath, isNull);
         expect(saved!.links, hasLength(4));
+        // The whole cookbook, as a new cookbook: it remembers where it came
+        // from, so the creator's updates can reach it.
+        expect(saved!.cookbook.communitySourceId, 'pub1');
+        expect(saved!.cookbook.communitySourceVersion, 4);
+        expect(saved!.cookbook.communityManifest, isNotNull);
 
         await tester.pump(const Duration(seconds: 6));
         await db.close();

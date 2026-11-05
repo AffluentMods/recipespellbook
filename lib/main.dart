@@ -31,6 +31,7 @@ import 'services/desktop_window_service.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
 import 'services/collab_service.dart';
+import 'services/community_cookbook_updates.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/widgets/app_shortcuts.dart';
@@ -312,6 +313,13 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     // 7. Wire up share intent handling
     _initShareHandler();
+
+    // 8. Have the creators of downloaded Community cookbooks changed them?
+    //    At most once a day; one request for all of them.
+    CommunityCookbookUpdates(db).checkAll().catchError((Object e) {
+      debugPrint('[Init] Community update check failed: $e');
+      return null;
+    });
   }
 
   // ── Deep-link handling (share / invite links) ──────────────────────

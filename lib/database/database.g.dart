@@ -63,6 +63,30 @@ class $CookbooksTable extends Cookbooks
   late final GeneratedColumn<String> sharedOwnerId = GeneratedColumn<String>(
       'shared_owner_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _communitySourceIdMeta =
+      const VerificationMeta('communitySourceId');
+  @override
+  late final GeneratedColumn<String> communitySourceId =
+      GeneratedColumn<String>('community_source_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _communitySourceVersionMeta =
+      const VerificationMeta('communitySourceVersion');
+  @override
+  late final GeneratedColumn<int> communitySourceVersion = GeneratedColumn<int>(
+      'community_source_version', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _communityUpdateVersionMeta =
+      const VerificationMeta('communityUpdateVersion');
+  @override
+  late final GeneratedColumn<int> communityUpdateVersion = GeneratedColumn<int>(
+      'community_update_version', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _communityManifestMeta =
+      const VerificationMeta('communityManifest');
+  @override
+  late final GeneratedColumn<String> communityManifest =
+      GeneratedColumn<String>('community_manifest', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -73,7 +97,11 @@ class $CookbooksTable extends Cookbooks
         createdAt,
         updatedAt,
         deletedAt,
-        sharedOwnerId
+        sharedOwnerId,
+        communitySourceId,
+        communitySourceVersion,
+        communityUpdateVersion,
+        communityManifest
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -130,6 +158,30 @@ class $CookbooksTable extends Cookbooks
           sharedOwnerId.isAcceptableOrUnknown(
               data['shared_owner_id']!, _sharedOwnerIdMeta));
     }
+    if (data.containsKey('community_source_id')) {
+      context.handle(
+          _communitySourceIdMeta,
+          communitySourceId.isAcceptableOrUnknown(
+              data['community_source_id']!, _communitySourceIdMeta));
+    }
+    if (data.containsKey('community_source_version')) {
+      context.handle(
+          _communitySourceVersionMeta,
+          communitySourceVersion.isAcceptableOrUnknown(
+              data['community_source_version']!, _communitySourceVersionMeta));
+    }
+    if (data.containsKey('community_update_version')) {
+      context.handle(
+          _communityUpdateVersionMeta,
+          communityUpdateVersion.isAcceptableOrUnknown(
+              data['community_update_version']!, _communityUpdateVersionMeta));
+    }
+    if (data.containsKey('community_manifest')) {
+      context.handle(
+          _communityManifestMeta,
+          communityManifest.isAcceptableOrUnknown(
+              data['community_manifest']!, _communityManifestMeta));
+    }
     return context;
   }
 
@@ -157,6 +209,14 @@ class $CookbooksTable extends Cookbooks
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       sharedOwnerId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}shared_owner_id']),
+      communitySourceId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}community_source_id']),
+      communitySourceVersion: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}community_source_version']),
+      communityUpdateVersion: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}community_update_version']),
+      communityManifest: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}community_manifest']),
     );
   }
 
@@ -184,6 +244,25 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
   /// the owner-only premium `/sync` channel, and editing is gated by the
   /// member's collab permission.
   final String? sharedOwnerId;
+
+  /// The Community publication this cookbook was downloaded from, whole and
+  /// as a new cookbook. Null for every other cookbook (the user's own, ones
+  /// published from here, partial downloads, shared-in ones). Device-local:
+  /// sync and transfers do not carry it.
+  final String? communitySourceId;
+
+  /// The publication's content version this copy is based on. Null when not
+  /// known (a download from before versions, matched later by its photos).
+  final int? communitySourceVersion;
+
+  /// A newer version found by the update check that really changes
+  /// something here; drives "Update available". Null when there is none.
+  final int? communityUpdateVersion;
+
+  /// JSON (`CommunitySourceManifest`): which local recipe came from which
+  /// Community recipe and their fingerprints at the time, so an update can
+  /// tell the publisher's changes from the user's own edits.
+  final String? communityManifest;
   const Cookbook(
       {required this.id,
       required this.name,
@@ -193,7 +272,11 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       required this.createdAt,
       this.updatedAt,
       this.deletedAt,
-      this.sharedOwnerId});
+      this.sharedOwnerId,
+      this.communitySourceId,
+      this.communitySourceVersion,
+      this.communityUpdateVersion,
+      this.communityManifest});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -217,6 +300,18 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
     }
     if (!nullToAbsent || sharedOwnerId != null) {
       map['shared_owner_id'] = Variable<String>(sharedOwnerId);
+    }
+    if (!nullToAbsent || communitySourceId != null) {
+      map['community_source_id'] = Variable<String>(communitySourceId);
+    }
+    if (!nullToAbsent || communitySourceVersion != null) {
+      map['community_source_version'] = Variable<int>(communitySourceVersion);
+    }
+    if (!nullToAbsent || communityUpdateVersion != null) {
+      map['community_update_version'] = Variable<int>(communityUpdateVersion);
+    }
+    if (!nullToAbsent || communityManifest != null) {
+      map['community_manifest'] = Variable<String>(communityManifest);
     }
     return map;
   }
@@ -244,6 +339,18 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       sharedOwnerId: sharedOwnerId == null && nullToAbsent
           ? const Value.absent()
           : Value(sharedOwnerId),
+      communitySourceId: communitySourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(communitySourceId),
+      communitySourceVersion: communitySourceVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(communitySourceVersion),
+      communityUpdateVersion: communityUpdateVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(communityUpdateVersion),
+      communityManifest: communityManifest == null && nullToAbsent
+          ? const Value.absent()
+          : Value(communityManifest),
     );
   }
 
@@ -260,6 +367,14 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       sharedOwnerId: serializer.fromJson<String?>(json['sharedOwnerId']),
+      communitySourceId:
+          serializer.fromJson<String?>(json['communitySourceId']),
+      communitySourceVersion:
+          serializer.fromJson<int?>(json['communitySourceVersion']),
+      communityUpdateVersion:
+          serializer.fromJson<int?>(json['communityUpdateVersion']),
+      communityManifest:
+          serializer.fromJson<String?>(json['communityManifest']),
     );
   }
   @override
@@ -275,6 +390,10 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'sharedOwnerId': serializer.toJson<String?>(sharedOwnerId),
+      'communitySourceId': serializer.toJson<String?>(communitySourceId),
+      'communitySourceVersion': serializer.toJson<int?>(communitySourceVersion),
+      'communityUpdateVersion': serializer.toJson<int?>(communityUpdateVersion),
+      'communityManifest': serializer.toJson<String?>(communityManifest),
     };
   }
 
@@ -287,7 +406,11 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           DateTime? createdAt,
           Value<DateTime?> updatedAt = const Value.absent(),
           Value<DateTime?> deletedAt = const Value.absent(),
-          Value<String?> sharedOwnerId = const Value.absent()}) =>
+          Value<String?> sharedOwnerId = const Value.absent(),
+          Value<String?> communitySourceId = const Value.absent(),
+          Value<int?> communitySourceVersion = const Value.absent(),
+          Value<int?> communityUpdateVersion = const Value.absent(),
+          Value<String?> communityManifest = const Value.absent()}) =>
       Cookbook(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -301,6 +424,18 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         sharedOwnerId:
             sharedOwnerId.present ? sharedOwnerId.value : this.sharedOwnerId,
+        communitySourceId: communitySourceId.present
+            ? communitySourceId.value
+            : this.communitySourceId,
+        communitySourceVersion: communitySourceVersion.present
+            ? communitySourceVersion.value
+            : this.communitySourceVersion,
+        communityUpdateVersion: communityUpdateVersion.present
+            ? communityUpdateVersion.value
+            : this.communityUpdateVersion,
+        communityManifest: communityManifest.present
+            ? communityManifest.value
+            : this.communityManifest,
       );
   Cookbook copyWithCompanion(CookbooksCompanion data) {
     return Cookbook(
@@ -318,6 +453,18 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       sharedOwnerId: data.sharedOwnerId.present
           ? data.sharedOwnerId.value
           : this.sharedOwnerId,
+      communitySourceId: data.communitySourceId.present
+          ? data.communitySourceId.value
+          : this.communitySourceId,
+      communitySourceVersion: data.communitySourceVersion.present
+          ? data.communitySourceVersion.value
+          : this.communitySourceVersion,
+      communityUpdateVersion: data.communityUpdateVersion.present
+          ? data.communityUpdateVersion.value
+          : this.communityUpdateVersion,
+      communityManifest: data.communityManifest.present
+          ? data.communityManifest.value
+          : this.communityManifest,
     );
   }
 
@@ -332,14 +479,30 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('sharedOwnerId: $sharedOwnerId')
+          ..write('sharedOwnerId: $sharedOwnerId, ')
+          ..write('communitySourceId: $communitySourceId, ')
+          ..write('communitySourceVersion: $communitySourceVersion, ')
+          ..write('communityUpdateVersion: $communityUpdateVersion, ')
+          ..write('communityManifest: $communityManifest')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, imagePath,
-      imageServerPath, createdAt, updatedAt, deletedAt, sharedOwnerId);
+  int get hashCode => Object.hash(
+      id,
+      name,
+      description,
+      imagePath,
+      imageServerPath,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      sharedOwnerId,
+      communitySourceId,
+      communitySourceVersion,
+      communityUpdateVersion,
+      communityManifest);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -352,7 +515,11 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.sharedOwnerId == this.sharedOwnerId);
+          other.sharedOwnerId == this.sharedOwnerId &&
+          other.communitySourceId == this.communitySourceId &&
+          other.communitySourceVersion == this.communitySourceVersion &&
+          other.communityUpdateVersion == this.communityUpdateVersion &&
+          other.communityManifest == this.communityManifest);
 }
 
 class CookbooksCompanion extends UpdateCompanion<Cookbook> {
@@ -365,6 +532,10 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
   final Value<DateTime?> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String?> sharedOwnerId;
+  final Value<String?> communitySourceId;
+  final Value<int?> communitySourceVersion;
+  final Value<int?> communityUpdateVersion;
+  final Value<String?> communityManifest;
   final Value<int> rowid;
   const CookbooksCompanion({
     this.id = const Value.absent(),
@@ -376,6 +547,10 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.sharedOwnerId = const Value.absent(),
+    this.communitySourceId = const Value.absent(),
+    this.communitySourceVersion = const Value.absent(),
+    this.communityUpdateVersion = const Value.absent(),
+    this.communityManifest = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CookbooksCompanion.insert({
@@ -388,6 +563,10 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.sharedOwnerId = const Value.absent(),
+    this.communitySourceId = const Value.absent(),
+    this.communitySourceVersion = const Value.absent(),
+    this.communityUpdateVersion = const Value.absent(),
+    this.communityManifest = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name);
@@ -401,6 +580,10 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? sharedOwnerId,
+    Expression<String>? communitySourceId,
+    Expression<int>? communitySourceVersion,
+    Expression<int>? communityUpdateVersion,
+    Expression<String>? communityManifest,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -413,6 +596,12 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (sharedOwnerId != null) 'shared_owner_id': sharedOwnerId,
+      if (communitySourceId != null) 'community_source_id': communitySourceId,
+      if (communitySourceVersion != null)
+        'community_source_version': communitySourceVersion,
+      if (communityUpdateVersion != null)
+        'community_update_version': communityUpdateVersion,
+      if (communityManifest != null) 'community_manifest': communityManifest,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -427,6 +616,10 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       Value<DateTime?>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<String?>? sharedOwnerId,
+      Value<String?>? communitySourceId,
+      Value<int?>? communitySourceVersion,
+      Value<int?>? communityUpdateVersion,
+      Value<String?>? communityManifest,
       Value<int>? rowid}) {
     return CookbooksCompanion(
       id: id ?? this.id,
@@ -438,6 +631,12 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       sharedOwnerId: sharedOwnerId ?? this.sharedOwnerId,
+      communitySourceId: communitySourceId ?? this.communitySourceId,
+      communitySourceVersion:
+          communitySourceVersion ?? this.communitySourceVersion,
+      communityUpdateVersion:
+          communityUpdateVersion ?? this.communityUpdateVersion,
+      communityManifest: communityManifest ?? this.communityManifest,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -472,6 +671,20 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     if (sharedOwnerId.present) {
       map['shared_owner_id'] = Variable<String>(sharedOwnerId.value);
     }
+    if (communitySourceId.present) {
+      map['community_source_id'] = Variable<String>(communitySourceId.value);
+    }
+    if (communitySourceVersion.present) {
+      map['community_source_version'] =
+          Variable<int>(communitySourceVersion.value);
+    }
+    if (communityUpdateVersion.present) {
+      map['community_update_version'] =
+          Variable<int>(communityUpdateVersion.value);
+    }
+    if (communityManifest.present) {
+      map['community_manifest'] = Variable<String>(communityManifest.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -490,6 +703,10 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('sharedOwnerId: $sharedOwnerId, ')
+          ..write('communitySourceId: $communitySourceId, ')
+          ..write('communitySourceVersion: $communitySourceVersion, ')
+          ..write('communityUpdateVersion: $communityUpdateVersion, ')
+          ..write('communityManifest: $communityManifest, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8144,6 +8361,10 @@ typedef $$CookbooksTableCreateCompanionBuilder = CookbooksCompanion Function({
   Value<DateTime?> updatedAt,
   Value<DateTime?> deletedAt,
   Value<String?> sharedOwnerId,
+  Value<String?> communitySourceId,
+  Value<int?> communitySourceVersion,
+  Value<int?> communityUpdateVersion,
+  Value<String?> communityManifest,
   Value<int> rowid,
 });
 typedef $$CookbooksTableUpdateCompanionBuilder = CookbooksCompanion Function({
@@ -8156,6 +8377,10 @@ typedef $$CookbooksTableUpdateCompanionBuilder = CookbooksCompanion Function({
   Value<DateTime?> updatedAt,
   Value<DateTime?> deletedAt,
   Value<String?> sharedOwnerId,
+  Value<String?> communitySourceId,
+  Value<int?> communitySourceVersion,
+  Value<int?> communityUpdateVersion,
+  Value<String?> communityManifest,
   Value<int> rowid,
 });
 
@@ -8185,6 +8410,10 @@ class $$CookbooksTableTableManager extends RootTableManager<
             Value<DateTime?> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<String?> sharedOwnerId = const Value.absent(),
+            Value<String?> communitySourceId = const Value.absent(),
+            Value<int?> communitySourceVersion = const Value.absent(),
+            Value<int?> communityUpdateVersion = const Value.absent(),
+            Value<String?> communityManifest = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               CookbooksCompanion(
@@ -8197,6 +8426,10 @@ class $$CookbooksTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             sharedOwnerId: sharedOwnerId,
+            communitySourceId: communitySourceId,
+            communitySourceVersion: communitySourceVersion,
+            communityUpdateVersion: communityUpdateVersion,
+            communityManifest: communityManifest,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -8209,6 +8442,10 @@ class $$CookbooksTableTableManager extends RootTableManager<
             Value<DateTime?> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<String?> sharedOwnerId = const Value.absent(),
+            Value<String?> communitySourceId = const Value.absent(),
+            Value<int?> communitySourceVersion = const Value.absent(),
+            Value<int?> communityUpdateVersion = const Value.absent(),
+            Value<String?> communityManifest = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               CookbooksCompanion.insert(
@@ -8221,6 +8458,10 @@ class $$CookbooksTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             sharedOwnerId: sharedOwnerId,
+            communitySourceId: communitySourceId,
+            communitySourceVersion: communitySourceVersion,
+            communityUpdateVersion: communityUpdateVersion,
+            communityManifest: communityManifest,
             rowid: rowid,
           ),
         ));
@@ -8271,6 +8512,26 @@ class $$CookbooksTableFilterComposer
 
   ColumnFilters<String> get sharedOwnerId => $state.composableBuilder(
       column: $state.table.sharedOwnerId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get communitySourceId => $state.composableBuilder(
+      column: $state.table.communitySourceId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get communitySourceVersion => $state.composableBuilder(
+      column: $state.table.communitySourceVersion,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get communityUpdateVersion => $state.composableBuilder(
+      column: $state.table.communityUpdateVersion,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get communityManifest => $state.composableBuilder(
+      column: $state.table.communityManifest,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -8333,6 +8594,26 @@ class $$CookbooksTableOrderingComposer
 
   ColumnOrderings<String> get sharedOwnerId => $state.composableBuilder(
       column: $state.table.sharedOwnerId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get communitySourceId => $state.composableBuilder(
+      column: $state.table.communitySourceId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get communitySourceVersion => $state.composableBuilder(
+      column: $state.table.communitySourceVersion,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get communityUpdateVersion => $state.composableBuilder(
+      column: $state.table.communityUpdateVersion,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get communityManifest => $state.composableBuilder(
+      column: $state.table.communityManifest,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
