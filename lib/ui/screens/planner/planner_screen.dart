@@ -9,8 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/recipe_title.dart';
+import '../../../utils/week_start.dart';
 import '../../../services/shopping_list_generator.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
@@ -106,7 +108,7 @@ String _mealTypeForHour(int hour) {
 
 final mealCountsForWeekProvider = StreamProvider.family<Map<DateTime, int>, DateTime>((ref, weekStart) {
   final dao = ref.watch(mealPlanDaoProvider);
-  final weekEnd = weekStart.add(const Duration(days: 7));
+  final weekEnd = addDays(weekStart, 7);
   return dao.watchMealCountsForDateRangeAlt(weekStart, weekEnd);
 });
 
@@ -190,14 +192,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
         ref.read(selectedPlannerDateProvider.notifier).state = m;
       case PlannerViewMode.week:
         setState(() =>
-            _weekStart = _weekStart.subtract(const Duration(days: 7)));
+            _weekStart = addDays(_weekStart, -7));
         final d = ref.read(selectedPlannerDateProvider);
         ref.read(selectedPlannerDateProvider.notifier).state =
-            d.subtract(const Duration(days: 7));
+            addDays(d, -7);
       case PlannerViewMode.day:
         final d = ref.read(selectedPlannerDateProvider);
         ref.read(selectedPlannerDateProvider.notifier).state =
-            d.subtract(const Duration(days: 1));
+            addDays(d, -1);
     }
   }
 
@@ -208,14 +210,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
         setState(() => _monthAnchor = m);
         ref.read(selectedPlannerDateProvider.notifier).state = m;
       case PlannerViewMode.week:
-        setState(() => _weekStart = _weekStart.add(const Duration(days: 7)));
+        setState(() => _weekStart = addDays(_weekStart, 7));
         final d = ref.read(selectedPlannerDateProvider);
         ref.read(selectedPlannerDateProvider.notifier).state =
-            d.add(const Duration(days: 7));
+            addDays(d, 7);
       case PlannerViewMode.day:
         final d = ref.read(selectedPlannerDateProvider);
         ref.read(selectedPlannerDateProvider.notifier).state =
-            d.add(const Duration(days: 1));
+            addDays(d, 1);
     }
   }
 
@@ -233,23 +235,19 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
         .then((p) => p.setString(_viewModeKey, PlannerViewMode.day.name));
   }
 
-  DateTime _getWeekStart(DateTime date) {
-    // Planner always runs Monday → Sunday (Monday leftmost), independent of the
-    // global week-start setting, to match the redesigned week strip.
-    const startDay = DateTime.monday; // 1
-    final diff = (date.weekday - startDay) % 7;
-    return DateTime(date.year, date.month, date.day - diff);
-  }
+  /// Weeks start on the day chosen in Settings > Week starts on.
+  DateTime _getWeekStart(DateTime date) =>
+      startOfWeek(date, ref.read(settingsProvider).weekStartDay);
 
   void _goToPreviousWeek() {
     setState(() {
-      _weekStart = _weekStart.subtract(const Duration(days: 7));
+      _weekStart = addDays(_weekStart, -7);
     });
   }
 
   void _goToNextWeek() {
     setState(() {
-      _weekStart = _weekStart.add(const Duration(days: 7));
+      _weekStart = addDays(_weekStart, 7);
     });
   }
 
@@ -267,6 +265,10 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    // The week start can change in Settings while the planner is open.
+    ref.listen(settingsProvider.select((s) => s.weekStartDay), (_, _) {
+      setState(() => _weekStart = _getWeekStart(ref.read(selectedPlannerDateProvider)));
+    });
     final selectedDate = ref.watch(selectedPlannerDateProvider);
     final mealPlansAsync = ref.watch(mealPlansForDateProvider(selectedDate));
     final mealCountsAsync = ref.watch(mealCountsForWeekProvider(_weekStart));
@@ -300,7 +302,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
       }
     });
 
-    final weekDates = List.generate(7, (i) => _weekStart.add(Duration(days: i)));
+    final weekDates = List.generate(7, (i) => addDays(_weekStart, i));
 
     return PopScope(
       canPop: !selecting,
@@ -767,7 +769,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 onTap: () async {
                   Navigator.pop(ctx);
                   // Collect all recipe IDs from this week's meal plans
-                  final weekEnd = _weekStart.add(const Duration(days: 7));
+                  final weekEnd = addDays(_weekStart, 7);
                   final meals = await mealPlanDao.getMealPlansInRange('', _weekStart, weekEnd);
                   final recipeIds = meals
                       .where((m) => m.recipeId != null)
@@ -821,7 +823,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final weekEnd = _weekStart.add(const Duration(days: 7));
+              final weekEnd = addDays(_weekStart, 7);
               final meals = await mealPlanDao.getMealPlansInRange('', _weekStart, weekEnd);
               for (final meal in meals) {
                 await mealPlanDao.deleteMealPlan(meal.id);
@@ -1284,7 +1286,7 @@ class _PlannerHeader extends StatelessWidget {
       case PlannerViewMode.month:
         title = '${DateFormat.MMMM(locale).format(monthAnchor)} ${monthAnchor.year}';
       case PlannerViewMode.week:
-        final weekEnd = weekStart.add(const Duration(days: 6));
+        final weekEnd = addDays(weekStart, 6);
         title = '${DateFormat.MMMM(locale).format(weekStart)} ${weekStart.year}';
         subtitle =
             '${DateFormat.MMMd(locale).format(weekStart)} – ${DateFormat.MMMd(locale).format(weekEnd)}';
@@ -1402,7 +1404,7 @@ class _PlannerHeader extends StatelessWidget {
     final compactLabel = DateFormat.MMMM(locale).format(date);
     final now = DateTime.now();
     final thisWeek = !DateTime(now.year, now.month, now.day).isBefore(weekStart) &&
-        DateTime(now.year, now.month, now.day).isBefore(weekStart.add(const Duration(days: 7)));
+        DateTime(now.year, now.month, now.day).isBefore(addDays(weekStart, 7));
     return Padding(
       padding: EdgeInsets.fromLTRB(showBack ? Space.xs : Space.md, Space.md, Space.xs, Space.sm),
       child: Row(
@@ -1537,12 +1539,13 @@ class _MonthView extends ConsumerWidget {
     final c = context.appColors;
     final locale = Localizations.localeOf(context).toString();
 
-    // Grid starts on the Monday on/before the 1st and spans 6 weeks (42 days).
-    // Uses calendar arithmetic (DateTime(y,m,d+n)) throughout, not Durations, so
-    // a DST transition inside the span can't shift or drop a day.
+    // Grid starts on the week-start day (Settings) on/before the 1st and spans
+    // 6 weeks (42 days). Uses calendar arithmetic (DateTime(y,m,d+n))
+    // throughout, not Durations, so a DST transition inside the span can't
+    // shift or drop a day.
     final first = DateTime(monthAnchor.year, monthAnchor.month, 1);
-    final offset = (first.weekday - DateTime.monday) % 7;
-    final gridStart = DateTime(first.year, first.month, first.day - offset);
+    final gridStart = startOfWeek(
+        first, ref.watch(settingsProvider.select((s) => s.weekStartDay)));
     final gridEnd =
         DateTime(gridStart.year, gridStart.month, gridStart.day + 42);
     final now = DateTime.now();
@@ -1814,7 +1817,7 @@ class _WeekStrip extends StatelessWidget {
 
     return Row(
       children: List.generate(7, (index) {
-        final date = weekStart.add(Duration(days: index));
+        final date = addDays(weekStart, index);
         final dateNormalized = DateTime(date.year, date.month, date.day);
         final isSelected = dateNormalized == selectedNormalized;
         final isToday = dateNormalized == todayNormalized;
@@ -1983,7 +1986,7 @@ class _WeekRail extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       children: List.generate(7, (index) {
-        final date = weekStart.add(Duration(days: index));
+        final date = addDays(weekStart, index);
         final dateNormalized = DateTime(date.year, date.month, date.day);
         final isSelected = dateNormalized == selectedNormalized;
         final isToday = dateNormalized == todayNormalized;
