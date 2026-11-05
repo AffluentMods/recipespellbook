@@ -4601,5 +4601,8 @@
   "previewIngredientVanilla": "• 1 tl vanille-extract",
   "themePreviewRecipe": "Butter chicken",
   "themePreviewPrimary": "Primair",
-  "themePreviewSecondary": "Secundair"
+  "themePreviewSecondary": "Secundair",
+  "nutriSheetEditedStatus": "Handmatig bewerkt",
+  "nutriSheetLinkedNoNutrition": "{title}: geen voedingswaarden",
+  "productReportMismatch": "Klopt het niet met het etiket? Bekijken of verbeteren"
 }

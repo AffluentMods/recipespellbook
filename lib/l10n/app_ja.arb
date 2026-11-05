@@ -4601,5 +4601,8 @@
   "previewIngredientVanilla": "• バニラエッセンス 小さじ1",
   "themePreviewRecipe": "バターチキンカレー",
   "themePreviewPrimary": "プライマリ",
-  "themePreviewSecondary": "セカンダリ"
+  "themePreviewSecondary": "セカンダリ",
+  "nutriSheetEditedStatus": "手動で編集済み",
+  "nutriSheetLinkedNoNutrition": "{title}：栄養データなし",
+  "productReportMismatch": "ラベルと違いますか？確認・修正"
 }

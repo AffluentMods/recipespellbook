@@ -4601,5 +4601,8 @@
   "previewIngredientVanilla": "• 1 ч. л. ванильного экстракта",
   "themePreviewRecipe": "Курица в сливочном соусе",
   "themePreviewPrimary": "Основной",
-  "themePreviewSecondary": "Вторичный"
+  "themePreviewSecondary": "Вторичный",
+  "nutriSheetEditedStatus": "Изменено вручную",
+  "nutriSheetLinkedNoNutrition": "{title}: нет данных о пищевой ценности",
+  "productReportMismatch": "Не совпадает с этикеткой? Посмотреть или исправить"
 }

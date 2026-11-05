@@ -4601,5 +4601,8 @@
   "previewIngredientVanilla": "• 바닐라 익스트랙 1작은술",
   "themePreviewRecipe": "버터 치킨",
   "themePreviewPrimary": "기본",
-  "themePreviewSecondary": "보조"
+  "themePreviewSecondary": "보조",
+  "nutriSheetEditedStatus": "직접 수정함",
+  "nutriSheetLinkedNoNutrition": "{title}: 영양 정보 없음",
+  "productReportMismatch": "라벨과 다른가요? 보기 또는 수정"
 }

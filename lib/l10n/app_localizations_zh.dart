@@ -11433,4 +11433,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get themePreviewSecondary => '次要';
+
+  @override
+  String get nutriSheetEditedStatus => '已手动编辑';
+
+  @override
+  String nutriSheetLinkedNoNutrition(String title) {
+    return '$title：无营养数据';
+  }
+
+  @override
+  String get productReportMismatch => '与标签不符？查看或更正';
 }

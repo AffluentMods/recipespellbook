@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/nutrition_data.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/tokens.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/nutrition_facts.dart';
 
 // ============================================================
 // NUTRIENT REGISTRY — single source of truth for all nutrients
@@ -174,8 +177,9 @@ class NutritionSettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.only(bottom: 40),
         children: [
           // ─── LIVE PREVIEW ───
+          _SectionTitle(l10n.preview, padding: const EdgeInsets.fromLTRB(16, 8, 16, 8)),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: NutritionWidget(
               nutrition: _sampleNutrition,
               servings: '4',
@@ -186,19 +190,8 @@ class NutritionSettingsScreen extends ConsumerWidget {
             ),
           ),
 
-          const Divider(),
-
           // ─── CHART STYLE ───
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              l10n.nutritionChartStyle,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          _SectionTitle(l10n.nutritionChartStyle),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SizedBox(
@@ -225,17 +218,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
           ),
 
           // ─── PALETTE PICKER ───
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text(
-              l10n.nutritionPaletteTitle,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          _SectionTitle(l10n.nutritionPaletteTitle),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Wrap(
@@ -253,41 +236,27 @@ class NutritionSettingsScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 24),
-          const Divider(),
-
           // ─── VISIBLE NUTRIENTS ───
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Row(
-              children: [
-                Text(
-                  l10n.nutritionVisibleNutrients,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    ref.read(settingsProvider.notifier).setEnabledNutrients(
-                      AppSettings.defaultEnabledNutrients,
-                    );
-                  },
-                  child: Text(l10n.nutritionResetDefaults),
-                ),
-              ],
+          _SectionTitle(
+            l10n.nutritionVisibleNutrients,
+            padding: const EdgeInsets.fromLTRB(16, 24, 8, 0),
+            trailing: TextButton.icon(
+              onPressed: () {
+                ref.read(settingsProvider.notifier).setEnabledNutrients(
+                  AppSettings.defaultEnabledNutrients,
+                );
+              },
+              icon: const Icon(Icons.restart_alt_rounded, size: 18),
+              label: Text(l10n.nutritionResetDefaults),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
             child: Text(
               l10n.nutritionCaloriesAlwaysShow,
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+              style: theme.textTheme.bodySmall?.copyWith(color: context.appColors.textSecondary),
             ),
           ),
-          const SizedBox(height: 8),
 
           // Group by category
           ..._buildNutrientToggleGroups(context, ref, settings),
@@ -299,55 +268,105 @@ class NutritionSettingsScreen extends ConsumerWidget {
   List<Widget> _buildNutrientToggleGroups(BuildContext context, WidgetRef ref, AppSettings settings) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final widgets = <Widget>[];
-    String? lastCategory;
-
+    final c = context.appColors;
+    final groups = <String, List<NutrientInfo>>{};
     for (final info in _nutrientRegistry) {
-      // Category header
-      if (info.category != lastCategory) {
-        lastCategory = info.category;
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text(
-              localizedNutrientCategory(info.category, l10n),
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.outline,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        );
-      }
+      groups.putIfAbsent(info.category, () => []).add(info);
+    }
 
+    Widget toggle(NutrientInfo info) {
       final isCalories = info.key == 'calories';
       final isEnabled = settings.enabledNutrients.contains(info.key);
-
-      widgets.add(
-        SwitchListTile(
-          dense: true,
-          contentPadding: EdgeInsets.only(
-            left: info.isSubItem ? 40 : 16,
-            right: 16,
-          ),
-          value: isCalories || isEnabled,
-          onChanged: isCalories
-              ? null // Calories can't be toggled off
-              : (_) => ref.read(settingsProvider.notifier).toggleNutrient(info.key),
-          title: Text(
-            localizedNutrientLabel(info.key, l10n),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: isCalories ? theme.colorScheme.outline : null,
-            ),
-          ),
-          subtitle: isCalories
-              ? Text(l10n.alwaysVisible, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))
-              : null,
+      return SwitchListTile(
+        dense: true,
+        shape: const RoundedRectangleBorder(),
+        contentPadding: EdgeInsets.only(
+          left: info.isSubItem ? 36 : 16,
+          right: 12,
         ),
+        value: isCalories || isEnabled,
+        onChanged: isCalories
+            ? null // Calories can't be toggled off
+            : (_) => ref.read(settingsProvider.notifier).toggleNutrient(info.key),
+        title: Text(
+          localizedNutrientLabel(info.key, l10n),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: isCalories ? c.textSecondary : c.textPrimary,
+            fontWeight: info.isSubItem ? FontWeight.w400 : FontWeight.w500,
+          ),
+        ),
+        subtitle: isCalories
+            ? Text(l10n.alwaysVisible, style: theme.textTheme.bodySmall?.copyWith(color: c.textTertiary))
+            : null,
       );
     }
 
-    return widgets;
+    return [
+      for (final MapEntry(key: category, value: infos) in groups.entries) ...[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 16, 6),
+          child: Text(
+            localizedNutrientCategory(category, l10n).toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: c.textTertiary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Material(
+            color: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: Radii.lgAll, side: BorderSide(color: c.hairline)),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                for (var i = 0; i < infos.length; i++) ...[
+                  if (i > 0) Divider(height: 1, thickness: 1, indent: infos[i].isSubItem ? 36 : 16, color: c.hairline),
+                  toggle(infos[i]),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    ];
+  }
+}
+
+/// A section heading on the nutrition settings page.
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  final EdgeInsetsGeometry padding;
+  final Widget? trailing;
+
+  const _SectionTitle(
+    this.text, {
+    this.padding = const EdgeInsets.fromLTRB(16, 24, 16, 8),
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: padding,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          if (trailing != null) trailing!,
+        ],
+      ),
+    );
   }
 }
 
@@ -470,6 +489,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
     final n = widget.nutrition;
 
     if (n == null || n.isEmpty) {
@@ -480,19 +500,14 @@ class _NutritionWidgetState extends State<NutritionWidget> {
     final servings = _parseServings();
     final canToggle = servings != null && servings > 1;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-      ),
+    return NutritionPanel(
+      padding: const EdgeInsets.fromLTRB(Space.lg, Space.lg, Space.lg, Space.sm),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header
           _buildHeader(theme, canToggle, servings),
-          const SizedBox(height: 16),
+          const SizedBox(height: Space.lg),
 
           // Body varies by chart style: two options — Bars or Donut (the
           // compact ring). Legacy 'numbers'/full-donut values resolve to Donut.
@@ -502,24 +517,24 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             _buildCompactDonutView(theme, displayNutrition),
 
           // Settings link
-          if (widget.showSettingsLink) ...[
-            const SizedBox(height: 12),
-            Center(
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).push(
+          if (widget.showSettingsLink)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const _NutritionSettingsRoute()),
                 ),
-                child: Text(
-                  l10n.nutritionSettingsLink,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    decoration: TextDecoration.underline,
-                    decorationColor: theme.colorScheme.primary,
-                  ),
+                icon: const Icon(Icons.tune_rounded, size: 16),
+                label: Text(l10n.nutritionSettingsLink),
+                style: TextButton.styleFrom(
+                  foregroundColor: c.textSecondary,
+                  textStyle: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
-            ),
-          ],
+            )
+          else
+            const SizedBox(height: Space.sm),
         ],
       ),
     );
@@ -527,47 +542,50 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 
   Widget _buildEmptyState(ThemeData theme) {
     final l10n = AppLocalizations.of(context)!;
-    final child = Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-      ),
-      child: Row(
+    final c = context.appColors;
+    final canCalculate = widget.onEmptyTap != null;
+    final child = NutritionPanel(
+      padding: const EdgeInsets.symmetric(horizontal: Space.xl, vertical: Space.xxl),
+      child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
+              color: c.accent.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
             ),
-            child: Icon(Icons.local_fire_department_outlined, size: 28, color: theme.colorScheme.outline),
+            child: Icon(Icons.local_fire_department_outlined, size: 26, color: c.accent),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.nutritionEmpty, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.outline)),
-                const SizedBox(height: 4),
-                Text(
-                  widget.onEmptyTap != null
-                      ? l10n.nutritionTapToCalculate
-                      : l10n.nutritionCalculateFromEdit,
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-                ),
-              ],
+          const SizedBox(height: Space.md),
+          Text(
+            l10n.nutritionEmpty,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: c.textPrimary),
+          ),
+          const SizedBox(height: Space.xs),
+          Text(
+            canCalculate ? l10n.nutritionTapToCalculate : l10n.nutritionCalculateFromEdit,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(color: c.textSecondary),
+          ),
+          if (canCalculate) ...[
+            const SizedBox(height: Space.lg),
+            FilledButton.tonalIcon(
+              onPressed: widget.onEmptyTap,
+              icon: const Icon(Icons.calculate_outlined, size: 18),
+              label: Text(l10n.nutritionCalculate),
             ),
-          ),
-          if (widget.onEmptyTap != null)
-            Icon(Icons.chevron_right, color: theme.colorScheme.outline),
+          ],
         ],
       ),
     );
 
-    if (widget.onEmptyTap != null) {
-      return GestureDetector(onTap: widget.onEmptyTap, child: child);
+    if (canCalculate) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(onTap: widget.onEmptyTap, borderRadius: Radii.xlAll, child: child),
+      );
     }
     return child;
   }
@@ -576,42 +594,39 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 
   Widget _buildHeader(ThemeData theme, bool canToggle, int? servings) {
     final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
     final effective = _effectiveServings() ?? servings;
 
-    return Row(
+    if (!canToggle) {
+      return Text(
+        l10n.nutritionTotalLabel,
+        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: c.textPrimary),
+      );
+    }
+
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: Space.md,
+      runSpacing: Space.sm,
       children: [
-        Icon(Icons.local_fire_department, color: theme.colorScheme.primary),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            _showPerServing && canToggle ? l10n.nutritionPerServing : l10n.nutritionTotalLabel,
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
+        _ServingToggle(
+          perServing: _showPerServing,
+          perServingLabel: l10n.nutritionPerServingLabel,
+          totalLabel: l10n.nutritionTotalLabel,
+          onChanged: (perServing) => setState(() => _showPerServing = perServing),
         ),
-        if (canToggle)
-          GestureDetector(
-            onTap: () => setState(() => _showPerServing = !_showPerServing),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
+        if (effective != null)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.people_outline_rounded, size: 16, color: c.textTertiary),
+              const SizedBox(width: Space.xs),
+              Text(
+                l10n.nutritionServings(effective),
+                style: theme.textTheme.labelMedium?.copyWith(color: c.textSecondary, fontWeight: FontWeight.w600),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _showPerServing ? '1 of $effective' : 'All $effective',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.swap_vert, size: 14, color: theme.colorScheme.onPrimaryContainer),
-                ],
-              ),
-            ),
+            ],
           ),
       ],
     );
@@ -619,11 +634,12 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 
   // ─── DONUT VIEW ───
   //
-  // Smaller donut on the left, big calorie number INSIDE the ring,
-  // three macros stacked to the right with `%` on top of each. Reads
-  // closer to the inspiration screenshot than the legacy donut view.
+  // The ring on the left with the calories inside it, the three macros as
+  // a legend to its right (grams and share of the calories), then a facts
+  // table with the other visible nutrients.
   Widget _buildCompactDonutView(ThemeData theme, NutritionData n) {
     final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
     final proteinG = n.protein ?? 0;
     final carbsG = n.carbohydrates ?? 0;
     final fatG = n.fat ?? 0;
@@ -638,338 +654,309 @@ class _NutritionWidgetState extends State<NutritionWidget> {
     final fatPct = macroCal > 0 ? fatCal / macroCal : 0.0;
 
     final colors = NutritionColors.of(widget.palette);
-    final enabled = widget.enabledNutrients;
+    final (facts, more) = _facts(n, withMacros: false);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: 120,
-          child: Row(
-            children: [
-              // Donut + centered cal
-              SizedBox(
-                width: 120,
-                height: 120,
-                child: CustomPaint(
-                  painter: _DonutPainter(
-                    segments: [
-                      _DonutSegment(proteinPct, colors.protein),
-                      _DonutSegment(carbsPct, colors.carbs),
-                      _DonutSegment(fatPct, colors.fat),
+        Row(
+          children: [
+            // Donut + centered cal
+            SizedBox(
+              width: 116,
+              height: 116,
+              child: CustomPaint(
+                painter: _DonutPainter(
+                  segments: [
+                    _DonutSegment(proteinPct, colors.protein),
+                    _DonutSegment(carbsPct, colors.carbs),
+                    _DonutSegment(fatPct, colors.fat),
+                  ],
+                  strokeWidth: 12,
+                  backgroundColor: c.textPrimary.withValues(alpha: 0.07),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${n.calories?.round() ?? 0}',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: c.textPrimary,
+                          height: 1.0,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.unitKcal,
+                        style: theme.textTheme.labelSmall?.copyWith(color: c.textTertiary),
+                      ),
                     ],
-                    strokeWidth: 14,
-                    backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.12),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${n.calories?.round() ?? 0}',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: theme.colorScheme.onSurface,
-                            height: 1.0,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          AppLocalizations.of(context)!.nutritionCalUnit,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
-              // Three macro stats to the right
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+            ),
+            const SizedBox(width: Space.xl),
+            // The three macros as a legend, kept compact on wide screens
+            Flexible(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 320),
+                child: Column(
                   children: [
-                    _compactMacroStat(theme, colors.carbs,   '${(carbsPct * 100).round()}%',   '${carbsG.round()} g',   l10n.nutrientCarbs),
-                    _compactMacroStat(theme, colors.fat,     '${(fatPct * 100).round()}%',     '${fatG.round()} g',     l10n.nutrientFat),
-                    _compactMacroStat(theme, colors.protein, '${(proteinPct * 100).round()}%', '${proteinG.round()} g', l10n.nutrientProtein),
+                    _macroLegendRow(theme, colors.carbs, l10n.nutrientCarbs, carbsG, carbsPct),
+                    Divider(height: 1, thickness: 1, color: c.hairline),
+                    _macroLegendRow(theme, colors.fat, l10n.nutrientFat, fatG, fatPct),
+                    Divider(height: 1, thickness: 1, color: c.hairline),
+                    _macroLegendRow(theme, colors.protein, l10n.nutrientProtein, proteinG, proteinPct),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
 
-        // Optional extras (fiber/sodium/etc.) below — same logic as donut view
-        if (_hasNonMacroNutrients(enabled, n)) ...[
-          const SizedBox(height: 12),
-          Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-          const SizedBox(height: 8),
-          ..._buildNutrientRows(theme, n, enabled, skipMacros: true),
+        // The other visible nutrients (fiber, sodium, ...) as a table.
+        if (facts.isNotEmpty || more.isNotEmpty) ...[
+          const SizedBox(height: Space.md),
+          Divider(height: 1, thickness: 1, color: c.hairline),
+          NutritionFactsTable(
+            facts: facts,
+            moreFacts: more,
+            moreLabel: _moreLabel(l10n),
+          ),
         ],
       ],
     );
   }
 
-  Widget _compactMacroStat(ThemeData theme, Color accent, String pct, String grams, String label) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          pct,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: accent,
-            fontWeight: FontWeight.w700,
+  Widget _macroLegendRow(ThemeData theme, Color color, String label, double grams, double share) {
+    final c = context.appColors;
+    const tabular = [FontFeature.tabularFigures()];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        children: [
+          Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          const SizedBox(width: Space.sm),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(color: c.textSecondary),
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          grams,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: theme.colorScheme.onSurface,
+          Text(
+            '${formatNutrientAmount(grams)} g',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: c.textPrimary,
+              fontFeatures: tabular,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.outline,
+          SizedBox(
+            width: 44,
+            child: Text(
+              '${(share * 100).round()}%',
+              textAlign: TextAlign.end,
+              style: theme.textTheme.bodySmall?.copyWith(color: c.textTertiary, fontFeatures: tabular),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
-  }
-
-  bool _hasNonMacroNutrients(Set<String> enabled, NutritionData n) {
-    const macroKeys = {'calories', 'fat', 'saturatedFat', 'transFat', 'monounsaturatedFat', 'polyunsaturatedFat', 'carbohydrates', 'fiber', 'sugar', 'protein'};
-    return enabled.any((key) => !macroKeys.contains(key) && _getNutrientValue(n, key) != null);
   }
 
   // ─── BAR VIEW ───
 
   Widget _buildBarView(ThemeData theme, NutritionData n) {
     final l10n = AppLocalizations.of(context)!;
-    final enabled = widget.enabledNutrients;
+    final c = context.appColors;
     final servings = _parseServings();
+    final (facts, more) = _facts(n, withMacros: true, bars: true);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Calories at top — tinted with the chosen palette so the
         // bars view picks up the user's chosen accent too.
         if (n.calories != null) ...[
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(l10n.nutrientCalories, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-              const Spacer(),
-              Text(
-                '${n.calories!.round()}',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: NutritionColors.of(widget.palette).calories,
+              Expanded(
+                child: Text(
+                  l10n.nutrientCalories,
+                  style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700, color: c.textPrimary),
                 ),
               ),
-              const SizedBox(width: 4),
-              Text(AppLocalizations.of(context)!.unitKcal, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+              Text.rich(
+                TextSpan(children: [
+                  TextSpan(
+                    text: '${n.calories!.round()}',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      height: 1.0,
+                      color: NutritionColors.of(widget.palette).calories,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' ${l10n.unitKcal}',
+                    style: theme.textTheme.bodySmall?.copyWith(color: c.textTertiary),
+                  ),
+                ]),
+              ),
             ],
           ),
           if (servings != null && servings > 0) ...[
-            const SizedBox(height: 2),
+            const SizedBox(height: Space.xs),
             Align(
               alignment: Alignment.centerRight,
               child: Text(
                 _showPerServing
                     ? l10n.nutritionKcalTotal((n.calories! * servings).round())
                     : l10n.nutritionKcalPerServing((n.calories! / servings).round()),
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                style: theme.textTheme.bodySmall?.copyWith(color: c.textTertiary),
               ),
             ),
           ],
-          const SizedBox(height: 12),
-          Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-          const SizedBox(height: 8),
+          const SizedBox(height: Space.sm),
+          Divider(height: 1, thickness: 1, color: c.hairline),
         ],
 
-        // Bar for each enabled nutrient (except calories)
-        ...enabled
-            .where((key) => key != 'calories')
-            .map((key) {
-          final info = getNutrientInfo(key);
-          if (info == null) return const SizedBox.shrink();
-          final value = _getNutrientValue(n, key);
-          if (value == null) return const SizedBox.shrink();
-          return _buildBarItem(theme, info, value);
-        }),
+        // A bar for each visible nutrient (except calories)
+        NutritionFactsTable(
+          facts: facts,
+          moreFacts: more,
+          moreLabel: _moreLabel(l10n),
+          showBars: true,
+        ),
       ],
     );
   }
 
-  Widget _buildBarItem(ThemeData theme, NutrientInfo info, double value) {
+  /// What the folded part of the table holds.
+  String _moreLabel(AppLocalizations l10n) =>
+      '${localizedNutrientCategory('Minerals', l10n)} · ${localizedNutrientCategory('Vitamins', l10n)}';
+
+  /// The visible nutrients other than calories, in label order: the
+  /// macronutrients (with their sub-items) first, then minerals and
+  /// vitamins, which the table folds away. Without [withMacros] fat,
+  /// carbohydrates and protein are left out (the ring shows them), and the
+  /// lines that belong under them stand on their own.
+  (List<NutritionFact>, List<NutritionFact>) _facts(NutritionData n, {required bool withMacros, bool bars = false}) {
     final l10n = AppLocalizations.of(context)!;
-    final dvPct = info.dailyValue != null && info.dailyValue! > 0
-        ? (value / info.dailyValue!) * 100
-        : null;
-
-    // The three macros get a stable palette color so they're
-    // distinguishable at a glance; everything else uses the %DV
-    // threshold gradient (primary → orange → red).
-    final palette = NutritionColors.of(widget.palette);
-    Color? macroOverride;
-    switch (info.key) {
-      case 'protein': macroOverride = palette.protein; break;
-      case 'carbohydrates': macroOverride = palette.carbs; break;
-      case 'fat': macroOverride = palette.fat; break;
-    }
-
-    Color barColor;
-    if (macroOverride != null) {
-      barColor = macroOverride;
-    } else if (dvPct == null) {
-      barColor = theme.colorScheme.primary;
-    } else if (dvPct > 100) {
-      barColor = Colors.red.shade400;
-    } else if (dvPct > 50) {
-      barColor = Colors.orange.shade400;
-    } else {
-      barColor = theme.colorScheme.primary;
-    }
-
-    final displayValue = value < 1 ? value.toStringAsFixed(1) : value.round().toString();
-
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: 10,
-        left: info.isSubItem ? 16 : 0,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  localizedNutrientLabel(info.key, l10n),
-                  style: info.isSubItem
-                      ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)
-                      : theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
-              Text(
-                '$displayValue${info.unit}',
-                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              if (dvPct != null) ...[
-                const SizedBox(width: 8),
-                SizedBox(
-                  width: 42,
-                  child: Text(
-                    '${dvPct.round()}%',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
-                    textAlign: TextAlign.end,
-                  ),
-                ),
-              ],
-            ],
-          ),
-          if (dvPct != null) ...[
-            const SizedBox(height: 4),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(
-                value: (dvPct / 100).clamp(0.0, 1.0),
-                backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.1),
-                valueColor: AlwaysStoppedAnimation(barColor),
-                minHeight: 6,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // ─── SHARED: build nutrient rows for numbers & donut ───
-
-  List<Widget> _buildNutrientRows(ThemeData theme, NutritionData n, Set<String> enabled, {bool skipMacros = false}) {
-    final l10n = AppLocalizations.of(context)!;
-    const macroKeys = {'calories', 'fat', 'saturatedFat', 'transFat', 'monounsaturatedFat', 'polyunsaturatedFat', 'carbohydrates', 'fiber', 'sugar', 'protein'};
-
-    final rows = <Widget>[];
-    String? lastCategory;
+    final enabled = widget.enabledNutrients;
+    const ringMacros = {'protein', 'carbohydrates', 'fat'};
+    final main = <NutritionFact>[];
+    final more = <NutritionFact>[];
 
     for (final info in _nutrientRegistry) {
       if (info.key == 'calories') continue; // Handled separately
       if (!enabled.contains(info.key)) continue;
-      if (skipMacros && macroKeys.contains(info.key)) continue;
-
+      if (!withMacros && ringMacros.contains(info.key)) continue;
       final value = _getNutrientValue(n, info.key);
       if (value == null) continue;
+      final fact = NutritionFact(
+        label: localizedNutrientLabel(info.key, l10n),
+        value: value,
+        unit: info.unit,
+        dailyValue: info.dailyValue,
+        isSubItem: withMacros && info.isSubItem,
+        barColor: bars ? _barColor(info, value) : null,
+      );
+      (info.category == 'Macronutrients' ? main : more).add(fact);
+    }
+    return (main, more);
+  }
 
-      // Category divider for non-macro sections
-      if (!skipMacros && info.category != lastCategory && lastCategory != null &&
-          info.category != 'Macronutrients') {
-        rows.add(Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-        ));
-      }
-      lastCategory = info.category;
+  /// The three macros get a stable palette color so they're
+  /// distinguishable at a glance; everything else uses the %DV
+  /// threshold gradient (accent → orange → red).
+  Color _barColor(NutrientInfo info, double value) {
+    final palette = NutritionColors.of(widget.palette);
+    switch (info.key) {
+      case 'protein': return palette.protein;
+      case 'carbohydrates': return palette.carbs;
+      case 'fat': return palette.fat;
+    }
+    final accent = context.appColors.accent;
+    final dv = info.dailyValue;
+    if (dv == null || dv <= 0) return accent;
+    final pct = value / dv * 100;
+    if (pct > 100) return Colors.red.shade400;
+    if (pct > 50) return Colors.orange.shade400;
+    return accent;
+  }
+}
 
-      final displayValue = value < 1 ? value.toStringAsFixed(1) : value.round().toString();
-      final dvPct = info.dailyValue != null && info.dailyValue! > 0
-          ? ((value / info.dailyValue!) * 100).round()
-          : null;
+/// Two-way switch between one serving and the whole recipe: a quiet track
+/// with a raised paper thumb, like the recipe page's tabs.
+class _ServingToggle extends StatelessWidget {
+  final bool perServing;
+  final String perServingLabel;
+  final String totalLabel;
+  final ValueChanged<bool> onChanged;
 
-      rows.add(
-        Padding(
-          padding: EdgeInsets.only(
-            left: info.isSubItem ? 16 : 0,
-            top: 4,
-            bottom: 4,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  localizedNutrientLabel(info.key, l10n),
-                  style: info.isSubItem
-                      ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)
-                      : theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                ),
+  const _ServingToggle({
+    required this.perServing,
+    required this.perServingLabel,
+    required this.totalLabel,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final theme = Theme.of(context);
+    Widget segment(String label, bool selected, bool value) {
+      return Semantics(
+        button: true,
+        selected: selected,
+        child: GestureDetector(
+          onTap: selected ? null : () => onChanged(value),
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: Motion.fast,
+            curve: Motion.standard,
+            padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: 6),
+            decoration: BoxDecoration(
+              color: selected ? (theme.brightness == Brightness.dark ? c.surfaceHigh : c.surface) : Colors.transparent,
+              borderRadius: Radii.mdAll,
+              border: Border.all(color: selected ? c.hairline : Colors.transparent),
+              boxShadow: selected
+                  ? [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 4, offset: const Offset(0, 1))]
+                  : null,
+            ),
+            child: Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                color: selected ? c.textPrimary : c.textSecondary,
               ),
-              Text(
-                '$displayValue${info.unit}',
-                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-              ),
-              if (dvPct != null) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '$dvPct%',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       );
     }
 
-    return rows;
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: c.textPrimary.withValues(alpha: 0.055),
+        borderRadius: BorderRadius.circular(Radii.md + 3),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          segment(perServingLabel, perServing, true),
+          segment(totalLabel, !perServing, false),
+        ],
+      ),
+    );
   }
 }
 

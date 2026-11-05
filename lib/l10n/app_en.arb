@@ -6069,5 +6069,9 @@
   "themePreviewPrimary": "Primary",
   "@themePreviewPrimary": {"description": "Sample primary button in the custom theme preview."},
   "themePreviewSecondary": "Secondary",
-  "@themePreviewSecondary": {"description": "Sample secondary button in the custom theme preview."}
+  "@themePreviewSecondary": {"description": "Sample secondary button in the custom theme preview."},
+  "nutriSheetEditedStatus": "Manually edited",
+  "nutriSheetLinkedNoNutrition": "{title}: no nutrition data",
+  "productReportMismatch": "Doesn't match the label? View or fix",
+  "@nutriSheetLinkedNoNutrition": {"placeholders": {"title": {"type": "String"}}}
 }

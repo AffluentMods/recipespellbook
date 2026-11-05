@@ -4601,5 +4601,8 @@
   "previewIngredientVanilla": "• 1 col. chá de extrato de baunilha",
   "themePreviewRecipe": "Frango à indiana",
   "themePreviewPrimary": "Primário",
-  "themePreviewSecondary": "Secundário"
+  "themePreviewSecondary": "Secundário",
+  "nutriSheetEditedStatus": "Editado manualmente",
+  "nutriSheetLinkedNoNutrition": "{title}: sem dados nutricionais",
+  "productReportMismatch": "Não confere com o rótulo? Ver ou corrigir"
 }

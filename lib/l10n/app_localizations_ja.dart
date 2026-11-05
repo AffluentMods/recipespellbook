@@ -11437,4 +11437,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get themePreviewSecondary => 'セカンダリ';
+
+  @override
+  String get nutriSheetEditedStatus => '手動で編集済み';
+
+  @override
+  String nutriSheetLinkedNoNutrition(String title) {
+    return '$title：栄養データなし';
+  }
+
+  @override
+  String get productReportMismatch => 'ラベルと違いますか？確認・修正';
 }

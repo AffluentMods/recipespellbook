@@ -4163,5 +4163,8 @@
   "previewIngredientVanilla": "• 1 TL Vanilleextrakt",
   "themePreviewRecipe": "Butter Chicken",
   "themePreviewPrimary": "Primär",
-  "themePreviewSecondary": "Sekundär"
+  "themePreviewSecondary": "Sekundär",
+  "nutriSheetEditedStatus": "Manuell bearbeitet",
+  "nutriSheetLinkedNoNutrition": "{title}: keine Nährwertangaben",
+  "productReportMismatch": "Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren"
 }

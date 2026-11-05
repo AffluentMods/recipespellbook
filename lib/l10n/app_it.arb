@@ -3625,5 +3625,8 @@
   "previewIngredientVanilla": "• 1 cucchiaino di estratto di vaniglia",
   "themePreviewRecipe": "Pollo al burro",
   "themePreviewPrimary": "Primario",
-  "themePreviewSecondary": "Secondario"
+  "themePreviewSecondary": "Secondario",
+  "nutriSheetEditedStatus": "Modificato manualmente",
+  "nutriSheetLinkedNoNutrition": "{title}: nessun dato nutrizionale",
+  "productReportMismatch": "Non corrisponde all'etichetta? Visualizza o correggi"
 }

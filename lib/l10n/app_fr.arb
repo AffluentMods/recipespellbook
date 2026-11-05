@@ -3626,5 +3626,8 @@
   "previewIngredientVanilla": "• 1 c. à c. d'extrait de vanille",
   "themePreviewRecipe": "Poulet au beurre",
   "themePreviewPrimary": "Primaire",
-  "themePreviewSecondary": "Secondaire"
+  "themePreviewSecondary": "Secondaire",
+  "nutriSheetEditedStatus": "Modifié manuellement",
+  "nutriSheetLinkedNoNutrition": "{title} : aucune donnée nutritionnelle",
+  "productReportMismatch": "Ne correspond pas à l'étiquette ? Voir ou corriger"
 }

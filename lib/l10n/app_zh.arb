@@ -4601,5 +4601,8 @@
   "previewIngredientVanilla": "• 香草精 1 茶匙",
   "themePreviewRecipe": "黄油鸡",
   "themePreviewPrimary": "主要",
-  "themePreviewSecondary": "次要"
+  "themePreviewSecondary": "次要",
+  "nutriSheetEditedStatus": "已手动编辑",
+  "nutriSheetLinkedNoNutrition": "{title}：无营养数据",
+  "productReportMismatch": "与标签不符？查看或更正"
 }

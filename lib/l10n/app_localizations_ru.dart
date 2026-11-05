@@ -11696,4 +11696,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get themePreviewSecondary => 'Вторичный';
+
+  @override
+  String get nutriSheetEditedStatus => 'Изменено вручную';
+
+  @override
+  String nutriSheetLinkedNoNutrition(String title) {
+    return '$title: нет данных о пищевой ценности';
+  }
+
+  @override
+  String get productReportMismatch => 'Не совпадает с этикеткой? Посмотреть или исправить';
 }

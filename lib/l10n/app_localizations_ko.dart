@@ -11465,4 +11465,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get themePreviewSecondary => '보조';
+
+  @override
+  String get nutriSheetEditedStatus => '직접 수정함';
+
+  @override
+  String nutriSheetLinkedNoNutrition(String title) {
+    return '$title: 영양 정보 없음';
+  }
+
+  @override
+  String get productReportMismatch => '라벨과 다른가요? 보기 또는 수정';
 }

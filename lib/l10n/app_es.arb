@@ -4128,5 +4128,8 @@
   "previewIngredientVanilla": "• 1 cdta de extracto de vainilla",
   "themePreviewRecipe": "Pollo a la mantequilla",
   "themePreviewPrimary": "Principal",
-  "themePreviewSecondary": "Secundario"
+  "themePreviewSecondary": "Secundario",
+  "nutriSheetEditedStatus": "Editado manualmente",
+  "nutriSheetLinkedNoNutrition": "{title}: sin datos nutricionales",
+  "productReportMismatch": "¿No coincide con la etiqueta? Ver o corregir"
 }

@@ -4601,5 +4601,8 @@
   "previewIngredientVanilla": "• 1 łyżeczka ekstraktu waniliowego",
   "themePreviewRecipe": "Kurczak w maśle",
   "themePreviewPrimary": "Główny",
-  "themePreviewSecondary": "Dodatkowy"
+  "themePreviewSecondary": "Dodatkowy",
+  "nutriSheetEditedStatus": "Edytowano ręcznie",
+  "nutriSheetLinkedNoNutrition": "{title}: brak danych o wartościach odżywczych",
+  "productReportMismatch": "Nie zgadza się z etykietą? Zobacz lub popraw"
 }

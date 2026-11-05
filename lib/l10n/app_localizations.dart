@@ -20436,6 +20436,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Secondary'**
   String get themePreviewSecondary;
+
+  /// No description provided for @nutriSheetEditedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually edited'**
+  String get nutriSheetEditedStatus;
+
+  /// No description provided for @nutriSheetLinkedNoNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}: no nutrition data'**
+  String nutriSheetLinkedNoNutrition(String title);
+
+  /// No description provided for @productReportMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Doesn\'t match the label? View or fix'**
+  String get productReportMismatch;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
