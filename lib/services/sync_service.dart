@@ -1025,6 +1025,14 @@ class SyncService {
           if (recipe == null) continue;
           final cookbook = await (db.select(db.cookbooks)..where((t) => t.id.equals(recipe.cookbookId)))
               .getSingleOrNull();
+          if (cookbook == null && !CollabService.instance.isCollabCookbook(recipe.cookbookId)) {
+            // Restored from the trash after its cookbook was deleted, by a
+            // version that left it there: it goes where a restore puts it now.
+            final home = await db.recipeDao.homeCookbookFor(recipe.cookbookId);
+            await (db.update(db.recipes)..where((t) => t.id.equals(id)))
+                .write(RecipesCompanion(cookbookId: Value(home), updatedAt: Value(now)));
+            continue;
+          }
           if (cookbook == null || cookbook.sharedOwnerId != null) continue; // nothing we can fix
           await (db.update(db.cookbooks)..where((t) => t.id.equals(cookbook.id)))
               .write(CookbooksCompanion(updatedAt: Value(now)));
