@@ -10,6 +10,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/planned_servings.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/recipe_title.dart';
 import '../../../utils/week_start.dart';
@@ -20,6 +21,7 @@ import '../../../theme/tokens.dart';
 import '../../widgets/app_controls.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/color_picker_dialog.dart';
+import '../../widgets/planned_servings_stepper.dart';
 import '../../widgets/recipe_cards.dart' show servingsLabel;
 import '../../widgets/recipe_image.dart';
 import '../../widgets/selection_action_bar.dart';
@@ -768,16 +770,12 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 title: Text(l10n.addWeekToShoppingList),
                 onTap: () async {
                   Navigator.pop(ctx);
-                  // Collect all recipe IDs from this week's meal plans
+                  // This week's meals with their recipes: each recipe goes on
+                  // the list scaled to the people its meals are planned for.
                   final weekEnd = addDays(_weekStart, 7);
-                  final meals = await mealPlanDao.getMealPlansInRange('', _weekStart, weekEnd);
-                  final recipeIds = meals
-                      .where((m) => m.recipeId != null)
-                      .map((m) => m.recipeId!)
-                      .toSet() // deduplicate
-                      .toList();
+                  final meals = await mealPlanDao.getMealPlansWithRecipesInRange(_weekStart, weekEnd);
 
-                  if (recipeIds.isEmpty) {
+                  if (!meals.any((m) => m.recipe != null)) {
                     if (context.mounted) {
                       AppSnackbar.info(context, l10n.noRecipesPlannedThisWeek);
                     }
@@ -788,7 +786,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                     launchShoppingListGeneratorFromMealPlan(
                       context,
                       ref,
-                      recipeIds: recipeIds,
+                      meals: meals,
                     );
                   }
                 },
@@ -1151,6 +1149,7 @@ class _CompactMealCard extends ConsumerWidget {
       context.appColors,
       _mealBlockColor(plan.mealPlan.mealType),
     );
+    final people = plannedServingsToShow(plan.mealPlan, recipe);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -1161,7 +1160,7 @@ class _CompactMealCard extends ConsumerWidget {
         child: InkWell(
           onTap: () {
             if (recipe != null) {
-              context.push('/recipe/${recipe.id}');
+              context.push(plannedRecipeLocation(recipe.id, plan.mealPlan));
             }
           },
           onLongPress: () {
@@ -1229,6 +1228,10 @@ class _CompactMealCard extends ConsumerWidget {
                     ),
                   ),
                 ),
+                if (people != null) ...[
+                  const SizedBox(width: 4),
+                  PlannedServingsBadge(people: people, color: context.appColors.accent),
+                ],
               ],
             ),
           ),
@@ -1759,6 +1762,7 @@ class _MonthChip extends StatelessWidget {
         : (plan.mealPlan.customMeal?.isNotEmpty == true
             ? plan.mealPlan.customMeal!
             : _mealBlockEmoji(plan.mealPlan.mealType));
+    final people = plannedServingsToShow(plan.mealPlan, plan.recipe);
     return Container(
       margin: const EdgeInsets.only(top: 2),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
@@ -1786,6 +1790,10 @@ class _MonthChip extends StatelessWidget {
               ),
             ),
           ),
+          if (people != null) ...[
+            const SizedBox(width: 2),
+            PlannedServingsBadge(people: people, color: c.accent, fontSize: 9.5),
+          ],
         ],
       ),
     );
@@ -1912,7 +1920,7 @@ class _DayHeading extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
     final now = DateTime.now();
     final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
-    final recipeIds = plans.where((p) => p.recipe != null).map((p) => p.recipe!.id).toSet().toList();
+    final hasRecipes = plans.any((p) => p.recipe != null);
     return Padding(
       padding: const EdgeInsets.fromLTRB(Space.xl, Space.lg, Space.sm, Space.xs),
       child: Row(
@@ -1939,9 +1947,9 @@ class _DayHeading extends ConsumerWidget {
               ],
             ),
           ),
-          if (recipeIds.isNotEmpty)
+          if (hasRecipes)
             TextButton.icon(
-              onPressed: () => launchShoppingListGeneratorFromMealPlan(context, ref, recipeIds: recipeIds),
+              onPressed: () => launchShoppingListGeneratorFromMealPlan(context, ref, meals: plans),
               icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
               label: Text(l10n.groceriesButton),
               style: TextButton.styleFrom(
@@ -2168,25 +2176,21 @@ class _DayTimeline extends ConsumerWidget {
     final endHour = maxMeal > 22 ? maxMeal : 22;
     final revealId = revealFirstMeal && byHour.isNotEmpty ? byHour[minMeal]!.first.mealPlan.id : null;
 
-    final recipeIds = plans
-        .where((p) => p.recipe != null)
-        .map((p) => p.recipe!.id)
-        .toSet()
-        .toList();
+    final hasRecipes = plans.any((p) => p.recipe != null);
     final base = DateTime(date.year, date.month, date.day);
 
     return ListView(
       key: revealFirstMeal ? ValueKey(base) : null,
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 100),
       children: [
-        if (recipeIds.isNotEmpty && showShoppingButton)
+        if (hasRecipes && showShoppingButton)
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             child: SizedBox(
               width: double.infinity,
               height: 44,
               child: OutlinedButton.icon(
-                onPressed: () => launchShoppingListGeneratorFromMealPlan(context, ref, recipeIds: recipeIds),
+                onPressed: () => launchShoppingListGeneratorFromMealPlan(context, ref, meals: plans),
                 icon: const Icon(Icons.shopping_cart_outlined, size: 18),
                 label: Text(l10n.addDayToShoppingList),
                 style: OutlinedButton.styleFrom(
@@ -2397,9 +2401,12 @@ class _MealBlock extends ConsumerWidget {
 
     final base = DateTime(date.year, date.month, date.day);
     final t = plan.mealPlan.time;
+    // Planned for a number other than the recipe's: say so instead of the
+    // recipe's own servings.
+    final people = plannedServingsToShow(plan.mealPlan, r);
     final subtitle = <String>[
       if (t != null) _clock(base, t.hour * 60 + t.minute),
-      ?servingsLabel(l10n, r?.servings),
+      if (people != null) l10n.plannedServingsBadge(people) else ?servingsLabel(l10n, r?.servings),
     ].join('  ·  ');
 
     return Padding(
@@ -2543,7 +2550,7 @@ class _MealBlock extends ConsumerWidget {
                         if (selecting) {
                           sel.toggle(plan.mealPlan.id);
                         } else {
-                          context.push('/recipe/${r.id}');
+                          context.push(plannedRecipeLocation(r.id, plan.mealPlan));
                         }
                       },
                       onLongPress: () {
@@ -2565,7 +2572,7 @@ class _MealBlock extends ConsumerWidget {
                       shape: const CircleBorder(),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
-                        onTap: () => context.push('/recipe/${r.id}'),
+                        onTap: () => context.push(plannedRecipeLocation(r.id, plan.mealPlan)),
                         child: const Padding(
                           padding: EdgeInsets.all(5),
                           child: Icon(Icons.open_in_new, color: onColor, size: 16),
@@ -2622,10 +2629,15 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
   /// header tint update live (the planner card updates via the DB stream).
   String? _cardColorKey;
 
+  /// Local mirror of how many people the meal is for (null = the recipe's own
+  /// servings), so the stepper and header update as it changes.
+  int? _servings;
+
   @override
   void initState() {
     super.initState();
     _cardColorKey = widget.plan.mealPlan.cardColor;
+    _servings = widget.plan.mealPlan.servings;
   }
 
   @override
@@ -2651,10 +2663,11 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
         base.year == now.year && base.month == now.month && base.day == now.day;
     final dateLabel = isToday ? l10n.today : DateFormat.MMMd().format(base);
 
+    final people = normalizePlannedServings(_servings, r?.servings);
     final subtitle = <String>[
       mealTypeLabel(l10n, mp.mealType),
       currentTod.format(context),
-      ?servingsLabel(l10n, r?.servings),
+      if (people != null) l10n.plannedServingsBadge(people) else ?servingsLabel(l10n, r?.servings),
     ].join(' · ');
 
     return Container(
@@ -2679,7 +2692,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
                     ? null
                     : () {
                         Navigator.pop(context);
-                        context.push('/recipe/${r.id}');
+                        context.push(plannedRecipeLocation(r.id, mp.copyWith(servings: drift.Value(people))));
                       },
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 16, 12),
@@ -2807,6 +2820,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
                   if (context.mounted) Navigator.pop(context);
                 },
               ),
+              if (r != null) _servingsRow(theme, colors, l10n, mp.id, r.servings),
               _row(
                 colors,
                 icon: Icons.swap_horiz,
@@ -2883,6 +2897,53 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
           : Text(trailing,
               style: TextStyle(color: colors.textTertiary, fontSize: 14)),
       onTap: onTap,
+    );
+  }
+
+  /// Inline "how many people" row: the label, what the recipe serves as
+  /// written, and the stepper. Each step saves at once (the planner card
+  /// updates through the database stream); the recipe itself never changes.
+  Widget _servingsRow(ThemeData theme, AppColors colors, AppLocalizations l10n,
+      String mealId, String? recipeServings) {
+    final asWritten = servingsLabel(l10n, recipeServings);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+      child: Row(
+        children: [
+          Icon(Icons.people_alt_outlined, color: colors.textTertiary),
+          const SizedBox(width: 32),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.plannedServingsHeading,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.w500),
+                ),
+                if (asWritten != null)
+                  Text(
+                    l10n.plannedServingsAsWritten(asWritten),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: colors.textTertiary, fontSize: 12.5),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          PlannedServingsStepper(
+            value: _servings,
+            recipeServings: recipeServings,
+            onChanged: (v) {
+              setState(() => _servings = v);
+              ref.read(mealPlanDaoProvider).updateMealPlanServings(
+                  mealId, normalizePlannedServings(v, recipeServings));
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -3113,6 +3174,10 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
   String _searchQuery = '';
   TimeOfDay? _selectedTime;
 
+  /// How many people the meal is for; null = whichever recipe is picked's own
+  /// servings. Starts at the household's usual number when one is set.
+  int? _servings;
+
   @override
   void initState() {
     super.initState();
@@ -3124,6 +3189,8 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
     } else {
       _selectedMealType = 'Dinner';
     }
+    final household = ref.read(settingsProvider).householdServings;
+    if (household > 0) _servings = household;
   }
 
   TimeOfDay _defaultTimeForMeal(String type) {
@@ -3237,6 +3304,28 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                   ),
                 ),
 
+                const SizedBox(height: 10),
+
+                // How many people: applies to whichever recipe is picked
+                // below; left alone it follows that recipe's own servings.
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    PlannedServingsStepper(
+                      value: _servings,
+                      recipeServings: null,
+                      onChanged: (v) => setState(() => _servings = v),
+                    ),
+                    PlannedServingsUsualAction(
+                      shown: _servings,
+                      household: ref.watch(settingsProvider.select((s) => s.householdServings)),
+                      onSave: (n) => ref.read(settingsProvider.notifier).setHouseholdServings(n),
+                    ),
+                  ],
+                ),
+
                 const SizedBox(height: 16),
 
                 // Search
@@ -3310,6 +3399,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
       mealType: drift.Value(_selectedMealType),
       recipeId: drift.Value(recipe.id),
       time: drift.Value(time),
+      servings: drift.Value(normalizePlannedServings(_servings, recipe.servings)),
     ));
 
     if (mounted) {

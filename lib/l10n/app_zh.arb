@@ -4654,5 +4654,17 @@
   "videoImportBlocked": "{platform}不允许应用读取此视频。请复制简介，然后使用“粘贴文本”。",
   "videoImportInstagramBlocked": "Instagram未公开此帖子的文案。请打开帖子，复制文案，然后使用“粘贴文本”。",
   "videoImportUnreadable": "无法读取此视频页面。请稍后再试，或复制简介后使用“粘贴文本”。",
-  "aiVideoTextIncluded": "视频文字会与提示词一起复制。请将两者粘贴到你的AI聊天中，然后把回答粘贴到下方。"
+  "aiVideoTextIncluded": "视频文字会与提示词一起复制。请将两者粘贴到你的AI聊天中，然后把回答粘贴到下方。",
+  "plannedServingsHeading": "几人份",
+  "plannedServingsPeople": "{count, plural, other{{count}人}}",
+  "plannedServingsRecipeDefault": "按食谱份量",
+  "plannedServingsAsWritten": "按食谱：{servings}",
+  "plannedServingsBadge": "{count}人份",
+  "plannedServingsSaveUsual": "设为常用人数",
+  "plannedServingsUsual": "常用人数",
+  "plannedServingsFewer": "减少人数",
+  "plannedServingsMore": "增加人数",
+  "settingsHouseholdServings": "家庭人数",
+  "settingsHouseholdServingsUnset": "按各食谱的份量",
+  "settingsHouseholdServingsHint": "计划中新增的餐食将从这个人数开始，购物清单也会相应调整。"
 }

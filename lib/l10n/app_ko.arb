@@ -4654,5 +4654,17 @@
   "videoImportBlocked": "{platform}에서 앱이 이 동영상을 읽도록 허용하지 않았습니다. 설명을 복사한 다음 텍스트 붙여넣기를 사용하세요.",
   "videoImportInstagramBlocked": "Instagram에서 이 게시물의 캡션을 공유하지 않았습니다. 게시물을 열어 캡션을 복사한 다음 텍스트 붙여넣기를 사용하세요.",
   "videoImportUnreadable": "이 동영상 페이지를 읽을 수 없습니다. 나중에 다시 시도하거나 설명을 복사해 텍스트 붙여넣기를 사용하세요.",
-  "aiVideoTextIncluded": "동영상 텍스트가 프롬프트와 함께 복사됩니다. 둘 다 AI 채팅에 붙여넣은 다음 답변을 아래에 붙여넣으세요."
+  "aiVideoTextIncluded": "동영상 텍스트가 프롬프트와 함께 복사됩니다. 둘 다 AI 채팅에 붙여넣은 다음 답변을 아래에 붙여넣으세요.",
+  "plannedServingsHeading": "몇 인분",
+  "plannedServingsPeople": "{count, plural, other{{count}명}}",
+  "plannedServingsRecipeDefault": "레시피 기준 인분",
+  "plannedServingsAsWritten": "레시피 기준: {servings}",
+  "plannedServingsBadge": "{count}인분",
+  "plannedServingsSaveUsual": "평소 인원으로 저장",
+  "plannedServingsUsual": "평소 인원",
+  "plannedServingsFewer": "인원 줄이기",
+  "plannedServingsMore": "인원 늘리기",
+  "settingsHouseholdServings": "가구 인원",
+  "settingsHouseholdServingsUnset": "각 레시피의 인분",
+  "settingsHouseholdServingsHint": "식단에 새로 추가하는 식사는 이 인원으로 시작하며, 장보기 목록도 그에 맞게 조정됩니다."
 }

@@ -4654,5 +4654,17 @@
   "videoImportBlocked": "O {platform} não deixou o app ler este vídeo. Copie a descrição e depois use Colar texto.",
   "videoImportInstagramBlocked": "O Instagram não compartilhou a legenda desta publicação. Abra a publicação, copie a legenda e depois use Colar texto.",
   "videoImportUnreadable": "Não foi possível ler a página deste vídeo. Tente mais tarde ou copie a descrição e use Colar texto.",
-  "aiVideoTextIncluded": "O texto do vídeo é copiado junto com o prompt. Cole os dois no seu chat de IA e depois cole a resposta abaixo."
+  "aiVideoTextIncluded": "O texto do vídeo é copiado junto com o prompt. Cole os dois no seu chat de IA e depois cole a resposta abaixo.",
+  "plannedServingsHeading": "Para quantas pessoas",
+  "plannedServingsPeople": "{count, plural, =1{1 pessoa} other{{count} pessoas}}",
+  "plannedServingsRecipeDefault": "Porções da receita",
+  "plannedServingsAsWritten": "Conforme a receita: {servings}",
+  "plannedServingsBadge": "Para {count}",
+  "plannedServingsSaveUsual": "Salvar como habitual",
+  "plannedServingsUsual": "O habitual",
+  "plannedServingsFewer": "Menos pessoas",
+  "plannedServingsMore": "Mais pessoas",
+  "settingsHouseholdServings": "Pessoas em casa",
+  "settingsHouseholdServingsUnset": "As porções de cada receita",
+  "settingsHouseholdServingsHint": "Novas refeições no planejador começam com esse número de pessoas, e as listas de compras se ajustam a ele."
 }

@@ -132,6 +132,10 @@ class AppSettings {
   // Planner — week start day (1=Monday, 7=Sunday, follows DateTime.weekday)
   final int weekStartDay;
 
+  // Planner: the household's usual number of people. New planned meals start
+  // here; 0 = start at each recipe's own servings.
+  final int householdServings;
+
   // Ingredient display layout
   final IngredientLayout ingredientLayout;
 
@@ -175,6 +179,7 @@ class AppSettings {
     this.showExpandedNutrition = false,
     this.textScaleFactor = 1.0,
     this.weekStartDay = 1,
+    this.householdServings = 0,
     this.ingredientLayout = IngredientLayout.inline,
     this.showSurpriseMe = true,
     this.customBgColor,
@@ -210,6 +215,7 @@ class AppSettings {
     Set<String>? enabledNutrients,
     double? textScaleFactor,
     int? weekStartDay,
+    int? householdServings,
     IngredientLayout? ingredientLayout,
     bool? showSurpriseMe,
     Color? customBgColor,
@@ -242,6 +248,7 @@ class AppSettings {
       enabledNutrients: enabledNutrients ?? this.enabledNutrients,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       weekStartDay: weekStartDay ?? this.weekStartDay,
+      householdServings: householdServings ?? this.householdServings,
       ingredientLayout: ingredientLayout ?? this.ingredientLayout,
       showSurpriseMe: showSurpriseMe ?? this.showSurpriseMe,
       customBgColor: customBgColor ?? this.customBgColor,
@@ -326,6 +333,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _recipeEditLayoutKey = 'recipe_edit_layout';
   static const _textScaleKey = 'text_scale_factor';
   static const _weekStartDayKey = 'week_start_day';
+  static const _householdServingsKey = 'household_servings';
   static const _ingredientLayoutKey = 'ingredient_layout';
   static const _showSurpriseMeKey = 'show_surprise_me';
   static const _customBgKey = 'custom_theme_bg';
@@ -454,6 +462,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
     // Load week start day (1=Monday default, 7=Sunday)
     final weekStartDay = (prefs.getInt(_weekStartDayKey) ?? 1).clamp(1, 7);
 
+    // Load the household's usual number of people (0 = each recipe's own)
+    final householdServings = (prefs.getInt(_householdServingsKey) ?? 0).clamp(0, 99);
+
     // Load ingredient layout
     final ingredientLayoutString = prefs.getString(_ingredientLayoutKey);
     final ingredientLayout = IngredientLayout.values.firstWhere(
@@ -501,6 +512,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       enabledNutrients: enabledNutrients,
       textScaleFactor: textScaleFactor,
       weekStartDay: weekStartDay,
+      householdServings: householdServings,
       ingredientLayout: ingredientLayout,
       showSurpriseMe: showSurpriseMe,
       customBgColor: customBgColor,
@@ -703,6 +715,19 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(weekStartDay: clamped);
   }
 
+  /// Planner: the household's usual number of people (null or 0 = start each
+  /// planned meal at its recipe's own servings).
+  Future<void> setHouseholdServings(int? people) async {
+    final value = (people ?? 0).clamp(0, 99);
+    final prefs = await SharedPreferences.getInstance();
+    if (value == 0) {
+      await prefs.remove(_householdServingsKey);
+    } else {
+      await prefs.setInt(_householdServingsKey, value);
+    }
+    state = state.copyWith(householdServings: value);
+  }
+
   // Legacy method for backward compatibility
   Future<void> setSeedColor(Color color) async {
     // Find closest matching theme
@@ -746,6 +771,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.remove(_allergensKey);
     await prefs.remove(_textScaleKey);
     await prefs.remove(_weekStartDayKey);
+    await prefs.remove(_householdServingsKey);
     await prefs.remove(_ingredientLayoutKey);
     await prefs.remove(_showSurpriseMeKey);
     state = AppSettings();

@@ -49,6 +49,25 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
     )).watch();
   }
 
+  /// Meals with their recipes for [start, end): [start] inclusive at
+  /// midnight, [end] exclusive at midnight. The one-shot form of
+  /// [watchMealPlansWithRecipesForRange], for "add the week to the list".
+  Future<List<MealPlanWithRecipe>> getMealPlansWithRecipesInRange(
+      DateTime start, DateTime end) {
+    final query = select(mealPlans).join([
+      leftOuterJoin(recipes, recipes.id.equalsExp(mealPlans.recipeId)),
+    ])
+      ..where(mealPlans.date.isBiggerOrEqualValue(DateTime(start.year, start.month, start.day)))
+      ..where(mealPlans.date.isSmallerThanValue(DateTime(end.year, end.month, end.day)))
+      ..orderBy([OrderingTerm(expression: mealPlans.date)]);
+    return query
+        .map((row) => MealPlanWithRecipe(
+              mealPlan: row.readTable(mealPlans),
+              recipe: row.readTableOrNull(recipes),
+            ))
+        .get();
+  }
+
   Future<void> insertMealPlan(MealPlansCompanion mealPlan) {
     return into(mealPlans).insert(mealPlan);
   }
@@ -139,6 +158,12 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
   Future<void> updateMealPlanCardColor(String id, String? cardColor) {
     return (update(mealPlans)..where((t) => t.id.equals(id)))
         .write(MealPlansCompanion(cardColor: Value(cardColor), updatedAt: Value(DateTime.now())));
+  }
+
+  /// Set how many people a meal is for. Null = as many as the recipe serves.
+  Future<void> updateMealPlanServings(String id, int? servings) {
+    return (update(mealPlans)..where((t) => t.id.equals(id)))
+        .write(MealPlansCompanion(servings: Value(servings), updatedAt: Value(DateTime.now())));
   }
 
   Stream<Map<DateTime, int>> watchMealCountsForDateRange(DateTime startDate, DateTime endDate) {

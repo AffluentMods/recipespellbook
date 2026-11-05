@@ -4654,5 +4654,17 @@
   "videoImportBlocked": "{platform} nie pozwolił aplikacji odczytać tego filmu. Skopiuj opis, a potem użyj opcji Wklej tekst.",
   "videoImportInstagramBlocked": "Instagram nie udostępnił opisu tego posta. Otwórz post, skopiuj opis, a potem użyj opcji Wklej tekst.",
   "videoImportUnreadable": "Nie udało się odczytać strony tego filmu. Spróbuj później albo skopiuj opis i użyj opcji Wklej tekst.",
-  "aiVideoTextIncluded": "Tekst filmu jest kopiowany razem z promptem. Wklej oba do czatu z AI, a potem wklej odpowiedź poniżej."
+  "aiVideoTextIncluded": "Tekst filmu jest kopiowany razem z promptem. Wklej oba do czatu z AI, a potem wklej odpowiedź poniżej.",
+  "plannedServingsHeading": "Dla ilu osób",
+  "plannedServingsPeople": "{count, plural, one{{count} osoba} few{{count} osoby} many{{count} osób} other{{count} osoby}}",
+  "plannedServingsRecipeDefault": "Porcje z przepisu",
+  "plannedServingsAsWritten": "Według przepisu: {servings}",
+  "plannedServingsBadge": "Dla {count}",
+  "plannedServingsSaveUsual": "Zapisz jako zwykłą liczbę",
+  "plannedServingsUsual": "Zwykła liczba",
+  "plannedServingsFewer": "Mniej osób",
+  "plannedServingsMore": "Więcej osób",
+  "settingsHouseholdServings": "Liczba domowników",
+  "settingsHouseholdServingsUnset": "Porcje z każdego przepisu",
+  "settingsHouseholdServingsHint": "Nowe posiłki w planerze zaczynają się od tej liczby osób, a listy zakupów dopasowują się do niej."
 }

@@ -11655,4 +11655,51 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiVideoTextIncluded => '视频文字会与提示词一起复制。请将两者粘贴到你的AI聊天中，然后把回答粘贴到下方。';
+
+  @override
+  String get plannedServingsHeading => '几人份';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count人',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => '按食谱份量';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return '按食谱：$servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return '$count人份';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => '设为常用人数';
+
+  @override
+  String get plannedServingsUsual => '常用人数';
+
+  @override
+  String get plannedServingsFewer => '减少人数';
+
+  @override
+  String get plannedServingsMore => '增加人数';
+
+  @override
+  String get settingsHouseholdServings => '家庭人数';
+
+  @override
+  String get settingsHouseholdServingsUnset => '按各食谱的份量';
+
+  @override
+  String get settingsHouseholdServingsHint => '计划中新增的餐食将从这个人数开始，购物清单也会相应调整。';
 }

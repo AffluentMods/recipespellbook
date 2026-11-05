@@ -11795,4 +11795,52 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get aiVideoTextIncluded => 'De tekst van de video wordt samen met de prompt gekopieerd. Plak beide in je AI-chat en plak het antwoord hieronder.';
+
+  @override
+  String get plannedServingsHeading => 'Voor hoeveel personen';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personen',
+      one: '1 persoon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'Porties volgens recept';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'Volgens recept: $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return 'Voor $count';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'Als standaard opslaan';
+
+  @override
+  String get plannedServingsUsual => 'Standaard';
+
+  @override
+  String get plannedServingsFewer => 'Minder personen';
+
+  @override
+  String get plannedServingsMore => 'Meer personen';
+
+  @override
+  String get settingsHouseholdServings => 'Huishoudgrootte';
+
+  @override
+  String get settingsHouseholdServingsUnset => 'De porties van elk recept';
+
+  @override
+  String get settingsHouseholdServingsHint => 'Nieuwe maaltijden in de planner beginnen bij dit aantal personen, en hun boodschappenlijsten schalen mee.';
 }

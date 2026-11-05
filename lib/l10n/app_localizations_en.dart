@@ -11795,4 +11795,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiVideoTextIncluded => 'The video’s text is copied together with the prompt. Paste both into your AI chat, then paste its answer below.';
+
+  @override
+  String get plannedServingsHeading => 'How many people';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'Recipe\'s servings';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'As written: $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return 'For $count';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'Save as our usual';
+
+  @override
+  String get plannedServingsUsual => 'Our usual';
+
+  @override
+  String get plannedServingsFewer => 'Fewer people';
+
+  @override
+  String get plannedServingsMore => 'More people';
+
+  @override
+  String get settingsHouseholdServings => 'Household size';
+
+  @override
+  String get settingsHouseholdServingsUnset => 'Each recipe\'s own servings';
+
+  @override
+  String get settingsHouseholdServingsHint => 'New meals in the planner start at this many people, and their shopping lists scale to match.';
 }

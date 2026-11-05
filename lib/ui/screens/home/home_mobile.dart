@@ -18,6 +18,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/native_file_image.dart';
+import '../../../utils/planned_servings.dart' show plannedRecipeLocation;
 import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/taxonomy_translator.dart';
@@ -851,7 +852,7 @@ class _MealRow extends StatelessWidget {
     return InkWell(
       borderRadius: Radii.mdAll,
       onTap: recipe != null
-          ? () => context.push('/recipe/${recipe.id}')
+          ? () => context.push(plannedRecipeLocation(recipe.id, plan))
           : onOpenPlanner,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: Space.xs + 2),

@@ -20754,6 +20754,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The video’s text is copied together with the prompt. Paste both into your AI chat, then paste its answer below.'**
   String get aiVideoTextIncluded;
+
+  /// No description provided for @plannedServingsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'How many people'**
+  String get plannedServingsHeading;
+
+  /// No description provided for @plannedServingsPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person} other{{count} people}}'**
+  String plannedServingsPeople(int count);
+
+  /// No description provided for @plannedServingsRecipeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe\'s servings'**
+  String get plannedServingsRecipeDefault;
+
+  /// No description provided for @plannedServingsAsWritten.
+  ///
+  /// In en, this message translates to:
+  /// **'As written: {servings}'**
+  String plannedServingsAsWritten(String servings);
+
+  /// No description provided for @plannedServingsBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'For {count}'**
+  String plannedServingsBadge(int count);
+
+  /// No description provided for @plannedServingsSaveUsual.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as our usual'**
+  String get plannedServingsSaveUsual;
+
+  /// No description provided for @plannedServingsUsual.
+  ///
+  /// In en, this message translates to:
+  /// **'Our usual'**
+  String get plannedServingsUsual;
+
+  /// No description provided for @plannedServingsFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer people'**
+  String get plannedServingsFewer;
+
+  /// No description provided for @plannedServingsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More people'**
+  String get plannedServingsMore;
+
+  /// No description provided for @settingsHouseholdServings.
+  ///
+  /// In en, this message translates to:
+  /// **'Household size'**
+  String get settingsHouseholdServings;
+
+  /// No description provided for @settingsHouseholdServingsUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Each recipe\'s own servings'**
+  String get settingsHouseholdServingsUnset;
+
+  /// No description provided for @settingsHouseholdServingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New meals in the planner start at this many people, and their shopping lists scale to match.'**
+  String get settingsHouseholdServingsHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../database/database.dart';
 import '../providers/database_provider.dart';
 import '../ui/screens/shopping/shopping_list_generator_screen.dart';
 import '../ui/widgets/app_snackbar.dart';
+import '../utils/planned_servings.dart';
 import 'ingredient_resolver_service.dart';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -56,24 +58,28 @@ Future<void> launchShoppingListGenerator(
 
 /// Launch shopping list generator from meal plan.
 /// Always goes full-screen since multiple recipes are involved.
+///
+/// Each recipe is scaled by how many people its meals are planned for
+/// (planned / recipe servings; the recipe as written when it doesn't plainly
+/// count people), and a recipe planned more than once adds up.
 Future<void> launchShoppingListGeneratorFromMealPlan(
     BuildContext context,
     WidgetRef ref, {
-      required List<String> recipeIds,
+      required List<MealPlanWithRecipe> meals,
     }) async {
   final dao = ref.read(recipeDaoProvider);
   final overlay = _showLoadingOverlay(context);
 
   try {
-    final result = await IngredientResolverService.resolveMultipleRecipes(
-      recipeIds,
+    final result = await IngredientResolverService.resolvePlannedRecipes(
+      plannedRecipesFor(meals),
       dao,
     );
 
     overlay.remove();
     if (!context.mounted) return;
 
-    _pushGeneratorScreen(context, result);
+    _pushGeneratorScreen(context, result, fromMealPlan: true);
   } catch (e) {
     overlay.remove();
     if (context.mounted) {
@@ -86,13 +92,15 @@ Future<void> launchShoppingListGeneratorFromMealPlan(
 
 void _pushGeneratorScreen(
     BuildContext context,
-    RecipeResolutionResult result,
-    ) {
+    RecipeResolutionResult result, {
+    bool fromMealPlan = false,
+    }) {
   Navigator.of(context).push(
     MaterialPageRoute(
       fullscreenDialog: true,
       builder: (context) => ShoppingListGeneratorScreen(
         resolutionResult: result,
+        fromMealPlan: fromMealPlan,
       ),
     ),
   );

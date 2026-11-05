@@ -6136,5 +6136,20 @@
   "@videoImportBlocked": {"placeholders": {"platform": {"type": "String"}}},
   "videoImportInstagramBlocked": "Instagram didn’t share this post’s caption. Open the post, copy the caption, then use Paste text.",
   "videoImportUnreadable": "Couldn’t read this video’s page. Try again later, or copy the description and use Paste text.",
-  "aiVideoTextIncluded": "The video’s text is copied together with the prompt. Paste both into your AI chat, then paste its answer below."
+  "aiVideoTextIncluded": "The video’s text is copied together with the prompt. Paste both into your AI chat, then paste its answer below.",
+  "plannedServingsHeading": "How many people",
+  "plannedServingsPeople": "{count, plural, =1{1 person} other{{count} people}}",
+  "@plannedServingsPeople": {"placeholders": {"count": {"type": "int"}}},
+  "plannedServingsRecipeDefault": "Recipe's servings",
+  "plannedServingsAsWritten": "As written: {servings}",
+  "@plannedServingsAsWritten": {"placeholders": {"servings": {"type": "String"}}},
+  "plannedServingsBadge": "For {count}",
+  "@plannedServingsBadge": {"placeholders": {"count": {"type": "int"}}},
+  "plannedServingsSaveUsual": "Save as our usual",
+  "plannedServingsUsual": "Our usual",
+  "plannedServingsFewer": "Fewer people",
+  "plannedServingsMore": "More people",
+  "settingsHouseholdServings": "Household size",
+  "settingsHouseholdServingsUnset": "Each recipe's own servings",
+  "settingsHouseholdServingsHint": "New meals in the planner start at this many people, and their shopping lists scale to match."
 }

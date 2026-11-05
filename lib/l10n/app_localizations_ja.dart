@@ -11659,4 +11659,51 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aiVideoTextIncluded => '動画のテキストはプロンプトと一緒にコピーされます。両方をAIチャットに貼り付け、その回答を下に貼り付けてください。';
+
+  @override
+  String get plannedServingsHeading => '何人分';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count人',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'レシピの分量';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'レシピ通り：$servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return '$count人分';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'いつもの人数として保存';
+
+  @override
+  String get plannedServingsUsual => 'いつもの人数';
+
+  @override
+  String get plannedServingsFewer => '人数を減らす';
+
+  @override
+  String get plannedServingsMore => '人数を増やす';
+
+  @override
+  String get settingsHouseholdServings => '世帯人数';
+
+  @override
+  String get settingsHouseholdServingsUnset => '各レシピの分量';
+
+  @override
+  String get settingsHouseholdServingsHint => '献立に追加する食事はこの人数から始まり、買い物リストもそれに合わせて調整されます。';
 }

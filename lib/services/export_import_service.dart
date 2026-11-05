@@ -269,6 +269,7 @@ class ExportImportService {
       'mealType': mp.mealType, 'customMeal': mp.customMeal,
       'recipeId': mp.recipeId, 'notes': mp.notes,
       'alertEnabled': mp.alertEnabled, 'cardColor': mp.cardColor,
+      'servings': mp.servings,
     }).toList();
   }
 
@@ -2020,6 +2021,7 @@ class ExportImportService {
           recipeId: Value(ids.recipe(mp['recipeId'] as String?)),
           notes: Value(mp['notes'] as String?),
           cardColor: Value(mp['cardColor'] as String?),
+          servings: Value((mp['servings'] as num?)?.round()),
           alertEnabled: Value(mp['alertEnabled'] as bool? ?? false),
         ));
         count++;

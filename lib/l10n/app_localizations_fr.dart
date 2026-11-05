@@ -11783,4 +11783,52 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get aiVideoTextIncluded => 'Le texte de la vidéo est copié avec le prompt. Collez les deux dans votre chat d\'IA, puis collez sa réponse ci-dessous.';
+
+  @override
+  String get plannedServingsHeading => 'Pour combien de personnes';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personnes',
+      one: '1 personne',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => 'Portions de la recette';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return 'Selon la recette : $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return 'Pour $count';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => 'Enregistrer comme habituel';
+
+  @override
+  String get plannedServingsUsual => 'Notre habitude';
+
+  @override
+  String get plannedServingsFewer => 'Moins de personnes';
+
+  @override
+  String get plannedServingsMore => 'Plus de personnes';
+
+  @override
+  String get settingsHouseholdServings => 'Taille du foyer';
+
+  @override
+  String get settingsHouseholdServingsUnset => 'Les portions de chaque recette';
+
+  @override
+  String get settingsHouseholdServingsHint => 'Les nouveaux repas du planning commencent avec ce nombre de personnes, et leurs listes de courses s\'adaptent en conséquence.';
 }

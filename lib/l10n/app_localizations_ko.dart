@@ -11687,4 +11687,51 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get aiVideoTextIncluded => '동영상 텍스트가 프롬프트와 함께 복사됩니다. 둘 다 AI 채팅에 붙여넣은 다음 답변을 아래에 붙여넣으세요.';
+
+  @override
+  String get plannedServingsHeading => '몇 인분';
+
+  @override
+  String plannedServingsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count명',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannedServingsRecipeDefault => '레시피 기준 인분';
+
+  @override
+  String plannedServingsAsWritten(String servings) {
+    return '레시피 기준: $servings';
+  }
+
+  @override
+  String plannedServingsBadge(int count) {
+    return '$count인분';
+  }
+
+  @override
+  String get plannedServingsSaveUsual => '평소 인원으로 저장';
+
+  @override
+  String get plannedServingsUsual => '평소 인원';
+
+  @override
+  String get plannedServingsFewer => '인원 줄이기';
+
+  @override
+  String get plannedServingsMore => '인원 늘리기';
+
+  @override
+  String get settingsHouseholdServings => '가구 인원';
+
+  @override
+  String get settingsHouseholdServingsUnset => '각 레시피의 인분';
+
+  @override
+  String get settingsHouseholdServingsHint => '식단에 새로 추가하는 식사는 이 인원으로 시작하며, 장보기 목록도 그에 맞게 조정됩니다.';
 }

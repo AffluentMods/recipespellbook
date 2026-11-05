@@ -3679,5 +3679,17 @@
   "videoImportBlocked": "{platform} n'a pas laissé l'application lire cette vidéo. Copiez la description, puis utilisez Coller du texte.",
   "videoImportInstagramBlocked": "Instagram n'a pas partagé la légende de cette publication. Ouvrez la publication, copiez la légende, puis utilisez Coller du texte.",
   "videoImportUnreadable": "Impossible de lire la page de cette vidéo. Réessayez plus tard, ou copiez la description et utilisez Coller du texte.",
-  "aiVideoTextIncluded": "Le texte de la vidéo est copié avec le prompt. Collez les deux dans votre chat d'IA, puis collez sa réponse ci-dessous."
+  "aiVideoTextIncluded": "Le texte de la vidéo est copié avec le prompt. Collez les deux dans votre chat d'IA, puis collez sa réponse ci-dessous.",
+  "plannedServingsHeading": "Pour combien de personnes",
+  "plannedServingsPeople": "{count, plural, =1{1 personne} other{{count} personnes}}",
+  "plannedServingsRecipeDefault": "Portions de la recette",
+  "plannedServingsAsWritten": "Selon la recette : {servings}",
+  "plannedServingsBadge": "Pour {count}",
+  "plannedServingsSaveUsual": "Enregistrer comme habituel",
+  "plannedServingsUsual": "Notre habitude",
+  "plannedServingsFewer": "Moins de personnes",
+  "plannedServingsMore": "Plus de personnes",
+  "settingsHouseholdServings": "Taille du foyer",
+  "settingsHouseholdServingsUnset": "Les portions de chaque recette",
+  "settingsHouseholdServingsHint": "Les nouveaux repas du planning commencent avec ce nombre de personnes, et leurs listes de courses s'adaptent en conséquence."
 }

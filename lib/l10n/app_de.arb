@@ -4216,5 +4216,17 @@
   "videoImportBlocked": "{platform} hat der App das Lesen dieses Videos nicht erlaubt. Kopiere die Beschreibung und nutze dann „Text einfügen“.",
   "videoImportInstagramBlocked": "Instagram hat die Bildunterschrift dieses Beitrags nicht freigegeben. Öffne den Beitrag, kopiere die Bildunterschrift und nutze dann „Text einfügen“.",
   "videoImportUnreadable": "Die Seite dieses Videos konnte nicht gelesen werden. Versuche es später erneut oder kopiere die Beschreibung und nutze „Text einfügen“.",
-  "aiVideoTextIncluded": "Der Text des Videos wird zusammen mit dem Prompt kopiert. Füge beides in deinen KI-Chat ein und füge die Antwort dann unten ein."
+  "aiVideoTextIncluded": "Der Text des Videos wird zusammen mit dem Prompt kopiert. Füge beides in deinen KI-Chat ein und füge die Antwort dann unten ein.",
+  "plannedServingsHeading": "Für wie viele Personen",
+  "plannedServingsPeople": "{count, plural, =1{1 Person} other{{count} Personen}}",
+  "plannedServingsRecipeDefault": "Portionen laut Rezept",
+  "plannedServingsAsWritten": "Laut Rezept: {servings}",
+  "plannedServingsBadge": "Für {count}",
+  "plannedServingsSaveUsual": "Als Standard speichern",
+  "plannedServingsUsual": "Unser Standard",
+  "plannedServingsFewer": "Weniger Personen",
+  "plannedServingsMore": "Mehr Personen",
+  "settingsHouseholdServings": "Haushaltsgröße",
+  "settingsHouseholdServingsUnset": "Portionen des jeweiligen Rezepts",
+  "settingsHouseholdServingsHint": "Neue Mahlzeiten im Planer beginnen mit so vielen Personen, und ihre Einkaufslisten werden passend umgerechnet."
 }

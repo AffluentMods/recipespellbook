@@ -4654,5 +4654,17 @@
   "videoImportBlocked": "{platform} не позволил приложению прочитать это видео. Скопируйте описание и используйте «Вставить текст».",
   "videoImportInstagramBlocked": "Instagram не показал подпись к этой публикации. Откройте публикацию, скопируйте подпись и используйте «Вставить текст».",
   "videoImportUnreadable": "Не удалось прочитать страницу этого видео. Попробуйте позже или скопируйте описание и используйте «Вставить текст».",
-  "aiVideoTextIncluded": "Текст видео копируется вместе с промптом. Вставьте и то и другое в чат с ИИ, а затем вставьте его ответ ниже."
+  "aiVideoTextIncluded": "Текст видео копируется вместе с промптом. Вставьте и то и другое в чат с ИИ, а затем вставьте его ответ ниже.",
+  "plannedServingsHeading": "На сколько человек",
+  "plannedServingsPeople": "{count, plural, one{{count} человек} few{{count} человека} many{{count} человек} other{{count} человека}}",
+  "plannedServingsRecipeDefault": "Порции по рецепту",
+  "plannedServingsAsWritten": "По рецепту: {servings}",
+  "plannedServingsBadge": "На {count} чел.",
+  "plannedServingsSaveUsual": "Сохранить как обычное",
+  "plannedServingsUsual": "Как обычно",
+  "plannedServingsFewer": "Меньше человек",
+  "plannedServingsMore": "Больше человек",
+  "settingsHouseholdServings": "Размер семьи",
+  "settingsHouseholdServingsUnset": "Порции каждого рецепта",
+  "settingsHouseholdServingsHint": "Новые блюда в планировщике начинаются с этого числа человек, а списки покупок пересчитываются под него."
 }

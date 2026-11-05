@@ -10,6 +10,7 @@ import '../database/sync_journal.dart';
 import '../services/auth_service.dart';
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../utils/native_file_image.dart';
+import '../utils/planned_servings.dart' show maxPlannedServings;
 import '../utils/platform_utils.dart';
 import 'collab_service.dart';
 import 'family_service.dart';
@@ -1526,6 +1527,9 @@ class SyncService {
     'recipeId': mp.recipeId,
     'notes': mp.notes,
     'cardColor': mp.cardColor,
+    // Today's server drops keys it doesn't know, so this stays on the device
+    // until the server stores it; the pull below keeps the local value then.
+    'servings': mp.servings,
     'alertEnabled': mp.alertEnabled,
     'alertSent': mp.alertSent,
     'createdAt': _iso(mp.createdAt),
@@ -2024,6 +2028,9 @@ class SyncService {
           recipeId: Value(d['recipeId'] as String?),
           notes: Value(d['notes'] as String?),
           cardColor: Value(d['cardColor'] as String?),
+          // A server (or another device's app) that doesn't carry servings
+          // must not wipe the number planned here.
+          servings: d.containsKey('servings') ? Value(_plannedServings(d['servings'])) : const Value.absent(),
           alertEnabled: Value(d['alertEnabled'] as bool? ?? false),
           alertSent: Value(d['alertSent'] as bool? ?? false),
           createdAt: Value(_parseDate(d['createdAt'])),
@@ -2133,6 +2140,13 @@ class SyncService {
     if (value is String) return DateTime.tryParse(value);
     if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
     return null;
+  }
+
+  /// A planned meal's number of people as sent: a positive whole number, or
+  /// null for anything else.
+  int? _plannedServings(dynamic value) {
+    final n = value is num ? value.round() : (value is String ? int.tryParse(value.trim()) : null);
+    return n != null && n > 0 ? n.clamp(1, maxPlannedServings) : null;
   }
 
   String _parseError(dynamic response) {

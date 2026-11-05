@@ -4654,5 +4654,17 @@
   "videoImportBlocked": "{platform}がこの動画の読み取りを許可しませんでした。説明文をコピーして「テキストを貼り付け」を使ってください。",
   "videoImportInstagramBlocked": "Instagramがこの投稿のキャプションを公開しませんでした。投稿を開いてキャプションをコピーし、「テキストを貼り付け」を使ってください。",
   "videoImportUnreadable": "この動画のページを読み取れませんでした。後でもう一度お試しいただくか、説明文をコピーして「テキストを貼り付け」を使ってください。",
-  "aiVideoTextIncluded": "動画のテキストはプロンプトと一緒にコピーされます。両方をAIチャットに貼り付け、その回答を下に貼り付けてください。"
+  "aiVideoTextIncluded": "動画のテキストはプロンプトと一緒にコピーされます。両方をAIチャットに貼り付け、その回答を下に貼り付けてください。",
+  "plannedServingsHeading": "何人分",
+  "plannedServingsPeople": "{count, plural, other{{count}人}}",
+  "plannedServingsRecipeDefault": "レシピの分量",
+  "plannedServingsAsWritten": "レシピ通り：{servings}",
+  "plannedServingsBadge": "{count}人分",
+  "plannedServingsSaveUsual": "いつもの人数として保存",
+  "plannedServingsUsual": "いつもの人数",
+  "plannedServingsFewer": "人数を減らす",
+  "plannedServingsMore": "人数を増やす",
+  "settingsHouseholdServings": "世帯人数",
+  "settingsHouseholdServingsUnset": "各レシピの分量",
+  "settingsHouseholdServingsHint": "献立に追加する食事はこの人数から始まり、買い物リストもそれに合わせて調整されます。"
 }
