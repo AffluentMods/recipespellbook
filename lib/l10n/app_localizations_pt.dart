@@ -10975,4 +10975,7 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$_temp0 Fotos que estão só na nuvem precisam de conexão com a internet. Conecte-se e faça o backup de novo para incluí-las.';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Não foi possível excluir sua conta, então nada foi excluído. Verifique sua conexão com a internet e tente de novo.';
 }

@@ -11074,4 +11074,7 @@ class AppLocalizationsPl extends AppLocalizations {
     );
     return '$_temp0 Zdjęcia, które są tylko w chmurze, wymagają połączenia z internetem. Połącz się i utwórz kopię ponownie, aby je dołączyć.';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Nie udało się usunąć konta, więc nic nie zostało usunięte. Sprawdź połączenie z internetem i spróbuj ponownie.';
 }

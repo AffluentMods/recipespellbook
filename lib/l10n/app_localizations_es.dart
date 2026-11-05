@@ -10981,4 +10981,7 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0 Las fotos que solo están en la nube necesitan conexión a internet. Conéctate y vuelve a hacer la copia para incluirlas.';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => 'No se pudo eliminar tu cuenta, así que no se ha eliminado nada. Comprueba tu conexión a internet e inténtalo de nuevo.';
 }

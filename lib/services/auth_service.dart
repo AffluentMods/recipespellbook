@@ -388,13 +388,20 @@ class AuthService {
   // ════════════════════════════════════════════
 
   /// Requests account deletion from the server, then signs out locally.
+  /// Says whether the server deleted the account.
   Future<bool> deleteAccount() async {
     if (_currentJwt == null) return false;
 
     try {
       final response = await _authRequest('DELETE', '/v1/auth/account');
       if (response.statusCode == 200 || response.statusCode == 204) {
-        await signOut();
+        // The account is gone whatever happens here: a keychain that cannot
+        // be cleared right now must not make it look as if it were not.
+        try {
+          await signOut();
+        } catch (e) {
+          debugPrint('Delete account: sign-out after deleting failed: $e');
+        }
         return true;
       }
       debugPrint('Delete account failed: ${response.statusCode}');

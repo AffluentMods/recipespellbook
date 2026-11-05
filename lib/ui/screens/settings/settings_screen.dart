@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/ui/screens/settings/pantry_screen.dart';
 import '../../../data/app_enums.dart';
+import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 // TODO: Kitchen Buddy hidden for now
@@ -944,8 +945,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     try {
       if (scope == _ResetScope.all) {
-        await AuthService.instance.deleteAccount();
-        await db.deleteAllUserData();
+        if (!await deleteAccountThenData(db)) {
+          // Offline or a server error: the account is still there, so
+          // nothing here was deleted either. Say so and let them retry.
+          if (context.mounted) {
+            Navigator.of(context, rootNavigator: true).maybePop(); // drop progress dialog
+            AppSnackbar.error(context, l10n.deleteAllDataAccountFailed);
+          }
+          return;
+        }
         settingsNotifier?.resetToDefaults();
       } else {
         await db.deleteLocalRecipeData();
@@ -1066,6 +1074,17 @@ class _TierBadge extends ConsumerWidget {
 // ════════════════════════════════════════════
 
 enum _ResetScope { local, all }
+
+/// "Delete all data": the account on the server first, then everything on
+/// this device. When there is an account and it could not be deleted
+/// (offline, a server error), nothing is deleted and this says false: wiping
+/// the device and quitting would leave the cloud account and its data
+/// behind while the app said they were gone.
+Future<bool> deleteAccountThenData(AppDatabase db) async {
+  if (AuthService.instance.isSignedIn && !await AuthService.instance.deleteAccount()) return false;
+  await db.deleteAllUserData();
+  return true;
+}
 
 /// Hands the desktop settings pane's current page to the pane navigator's
 /// root route (which is built once), so switching sections just rebuilds it.

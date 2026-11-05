@@ -4161,5 +4161,6 @@
   "communityFeedLoadMoreFailed": "无法加载更多",
   "syncNotInPlan": "你的套餐不包含云同步",
   "transferRowsLeftOut": "{count, plural, other{有 {count} 项无法保存到此设备。}}如需重试，请在一天内再次输入同一个代码。",
-  "backupPhotosLeftOut": "{count, plural, other{备份已保存，但其中缺少 {count} 张照片。}}仅存于云端的照片需要联网。请联网后重新备份，即可包含这些照片。"
+  "backupPhotosLeftOut": "{count, plural, other{备份已保存，但其中缺少 {count} 张照片。}}仅存于云端的照片需要联网。请联网后重新备份，即可包含这些照片。",
+  "deleteAllDataAccountFailed": "无法删除你的账户，因此没有删除任何内容。请检查网络连接后重试。"
 }

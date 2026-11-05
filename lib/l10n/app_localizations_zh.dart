@@ -10896,4 +10896,7 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0仅存于云端的照片需要联网。请联网后重新备份，即可包含这些照片。';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => '无法删除你的账户，因此没有删除任何内容。请检查网络连接后重试。';
 }

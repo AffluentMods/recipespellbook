@@ -11000,4 +11000,7 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0 Photos kept only in the cloud need an internet connection. Connect and make the backup again to include them.';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Your account could not be deleted, so nothing was deleted. Check your internet connection and try again.';
 }

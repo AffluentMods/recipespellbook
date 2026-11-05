@@ -5880,5 +5880,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "deleteAllDataAccountFailed": "Your account could not be deleted, so nothing was deleted. Check your internet connection and try again."
 }

@@ -10901,4 +10901,7 @@ class AppLocalizationsKo extends AppLocalizations {
     );
     return '$_temp0 클라우드에만 있는 사진은 인터넷 연결이 필요합니다. 연결한 뒤 백업을 다시 만들면 포함됩니다.';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => '계정을 삭제하지 못해 아무것도 삭제되지 않았습니다. 인터넷 연결을 확인하고 다시 시도하세요.';
 }

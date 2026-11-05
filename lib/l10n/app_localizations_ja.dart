@@ -10901,4 +10901,7 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     return '$_temp0クラウドにしかない写真にはインターネット接続が必要です。接続してからもう一度バックアップを作成すると含まれます。';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => 'アカウントを削除できなかったため、何も削除されていません。インターネット接続を確認して、もう一度お試しください。';
 }

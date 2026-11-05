@@ -10969,4 +10969,7 @@ class AppLocalizationsNl extends AppLocalizations {
     );
     return '$_temp0 Foto\'s die alleen in de cloud staan, hebben een internetverbinding nodig. Maak verbinding en maak de back-up opnieuw om ze mee te nemen.';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Je account kon niet worden verwijderd, dus er is niets verwijderd. Controleer je internetverbinding en probeer het opnieuw.';
 }

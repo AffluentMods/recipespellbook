@@ -10981,4 +10981,7 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0 Fotos, die nur in der Cloud liegen, brauchen eine Internetverbindung. Verbinde dich und erstelle das Backup erneut, um sie aufzunehmen.';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Dein Konto konnte nicht gelöscht werden, daher wurde nichts gelöscht. Prüfe deine Internetverbindung und versuche es erneut.';
 }

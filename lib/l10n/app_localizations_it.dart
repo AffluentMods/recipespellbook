@@ -10969,4 +10969,7 @@ class AppLocalizationsIt extends AppLocalizations {
     );
     return '$_temp0 Le foto che si trovano solo nel cloud richiedono una connessione a internet. Connettiti e rifai il backup per includerle.';
   }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Non è stato possibile eliminare il tuo account, quindi non è stato eliminato nulla. Controlla la connessione a internet e riprova.';
 }
