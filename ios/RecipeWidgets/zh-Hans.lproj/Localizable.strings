@@ -1,0 +1,7 @@
+/* Recipe Spellbook home screen widgets. */
+"meals.title" = "今日餐食";
+"meals.empty" = "今天没有安排";
+"meals.description" = "今天计划的餐食。轻点一项即可打开食谱。";
+"shopping.title" = "购物清单";
+"shopping.empty" = "清单是空的";
+"shopping.description" = "购物清单上还没买的东西。";

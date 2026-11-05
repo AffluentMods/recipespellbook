@@ -1,0 +1,7 @@
+/* Recipe Spellbook home screen widgets. */
+"meals.title" = "Pasti di oggi";
+"meals.empty" = "Niente in programma oggi";
+"meals.description" = "I pasti in programma oggi. Toccane uno per aprire la ricetta.";
+"shopping.title" = "Lista della spesa";
+"shopping.empty" = "La tua lista è vuota";
+"shopping.description" = "Quello che resta da comprare nella tua lista della spesa.";

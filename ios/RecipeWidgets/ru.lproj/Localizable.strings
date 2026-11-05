@@ -1,0 +1,7 @@
+/* Recipe Spellbook home screen widgets. */
+"meals.title" = "Меню на сегодня";
+"meals.empty" = "На сегодня ничего не запланировано";
+"meals.description" = "Блюда, запланированные на сегодня. Нажмите на блюдо, чтобы открыть рецепт.";
+"shopping.title" = "Список покупок";
+"shopping.empty" = "Ваш список пуст";
+"shopping.description" = "Что ещё осталось купить по вашему списку покупок.";

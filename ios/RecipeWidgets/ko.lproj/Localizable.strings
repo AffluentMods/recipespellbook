@@ -1,0 +1,7 @@
+/* Recipe Spellbook home screen widgets. */
+"meals.title" = "오늘의 식사";
+"meals.empty" = "오늘 계획된 식사가 없습니다";
+"meals.description" = "오늘 계획된 식사입니다. 탭하면 레시피가 열립니다.";
+"shopping.title" = "쇼핑 목록";
+"shopping.empty" = "목록이 비어 있습니다";
+"shopping.description" = "쇼핑 목록에서 아직 사야 할 항목입니다.";
