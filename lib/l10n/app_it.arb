@@ -3184,5 +3184,6 @@
   "communityPublishDailyLimit": "Così supereresti il limite giornaliero di caricamento foto. Riprova domani o pubblica senza foto.",
   "communityFeedLoadMoreFailed": "Impossibile caricare altri elementi",
   "syncNotInPlan": "La sincronizzazione cloud non è inclusa nel tuo piano",
-  "transferRowsLeftOut": "{count, plural, =1{1 elemento non è stato salvato su questo dispositivo.} other{{count} elementi non sono stati salvati su questo dispositivo.}} Per riprovare, inserisci di nuovo lo stesso codice entro un giorno."
+  "transferRowsLeftOut": "{count, plural, =1{1 elemento non è stato salvato su questo dispositivo.} other{{count} elementi non sono stati salvati su questo dispositivo.}} Per riprovare, inserisci di nuovo lo stesso codice entro un giorno.",
+  "backupPhotosLeftOut": "{count, plural, =1{Backup salvato, ma manca 1 foto.} other{Backup salvato, ma mancano {count} foto.}} Le foto che si trovano solo nel cloud richiedono una connessione a internet. Connettiti e rifai il backup per includerle."
 }

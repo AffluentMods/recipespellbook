@@ -10891,4 +10891,14 @@ class AppLocalizationsKo extends AppLocalizations {
     );
     return '$_temp0 다시 시도하려면 하루 안에 같은 코드를 다시 입력하세요.';
   }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '백업을 저장했지만 사진 $count장이 포함되지 않았습니다.',
+    );
+    return '$_temp0 클라우드에만 있는 사진은 인터넷 연결이 필요합니다. 연결한 뒤 백업을 다시 만들면 포함됩니다.';
+  }
 }

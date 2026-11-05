@@ -10891,4 +10891,14 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     return '$_temp0もう一度試すには、1 日以内に同じコードを再入力してください。';
   }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'バックアップを保存しましたが、$count 枚の写真が含まれていません。',
+    );
+    return '$_temp0クラウドにしかない写真にはインターネット接続が必要です。接続してからもう一度バックアップを作成すると含まれます。';
+  }
 }

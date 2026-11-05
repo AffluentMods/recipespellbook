@@ -10958,4 +10958,15 @@ class AppLocalizationsNl extends AppLocalizations {
     );
     return '$_temp0 Voer binnen een dag dezelfde code opnieuw in om het nog eens te proberen.';
   }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Back-up opgeslagen, maar er ontbreken $count foto\'s in.',
+      one: 'Back-up opgeslagen, maar er ontbreekt 1 foto in.',
+    );
+    return '$_temp0 Foto\'s die alleen in de cloud staan, hebben een internetverbinding nodig. Maak verbinding en maak de back-up opnieuw om ze mee te nemen.';
+  }
 }

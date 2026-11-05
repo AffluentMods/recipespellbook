@@ -11053,4 +11053,17 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     return '$_temp0 Чтобы попробовать ещё раз, введите тот же код в течение суток.';
   }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Резервная копия сохранена, но в ней нет $count фото.',
+      many: 'Резервная копия сохранена, но в ней нет $count фото.',
+      few: 'Резервная копия сохранена, но в ней нет $count фото.',
+      one: 'Резервная копия сохранена, но в ней нет $count фото.',
+    );
+    return '$_temp0 Для фото, которые есть только в облаке, нужно подключение к интернету. Подключитесь и создайте копию ещё раз, чтобы они вошли в неё.';
+  }
 }

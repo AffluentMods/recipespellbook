@@ -5872,5 +5872,13 @@
         "type": "int"
       }
     }
+  },
+  "backupPhotosLeftOut": "{count, plural, =1{Backup saved, but 1 photo is not in it.} other{Backup saved, but {count} photos are not in it.}} Photos kept only in the cloud need an internet connection. Connect and make the backup again to include them.",
+  "@backupPhotosLeftOut": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

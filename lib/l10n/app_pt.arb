@@ -4160,5 +4160,6 @@
   "communityPublishDailyLimit": "Isso passaria do limite diário de envio de fotos. Tente amanhã ou publique sem fotos.",
   "communityFeedLoadMoreFailed": "Não foi possível carregar mais",
   "syncNotInPlan": "Seu plano não inclui a sincronização na nuvem",
-  "transferRowsLeftOut": "{count, plural, =1{Não foi possível salvar 1 item neste dispositivo.} other{Não foi possível salvar {count} itens neste dispositivo.}} Para tentar de novo, digite o mesmo código outra vez em até um dia."
+  "transferRowsLeftOut": "{count, plural, =1{Não foi possível salvar 1 item neste dispositivo.} other{Não foi possível salvar {count} itens neste dispositivo.}} Para tentar de novo, digite o mesmo código outra vez em até um dia.",
+  "backupPhotosLeftOut": "{count, plural, =1{Backup salvo, mas 1 foto ficou de fora.} other{Backup salvo, mas {count} fotos ficaram de fora.}} Fotos que estão só na nuvem precisam de conexão com a internet. Conecte-se e faça o backup de novo para incluí-las."
 }

@@ -400,11 +400,13 @@ class ImageService {
 
   /// Download an image from a URL, compress if needed, and save locally.
   /// Returns the local file path, or null on failure. A download that takes
-  /// longer than [timeout] is abandoned.
+  /// longer than [timeout] is abandoned. The file goes into [directory], or
+  /// the app's community images folder when that is null.
   Future<String?> downloadAndSaveImage(
     String url,
     String filename, {
     Duration timeout = const Duration(seconds: 20),
+    Directory? directory,
   }) async {
     if (!supportsLocalFileSystem) return null;
 
@@ -438,8 +440,8 @@ class ImageService {
       var bytes = await _fetchImageBytes(client, uri).timeout(timeout);
       if (bytes == null) return null;
 
-      final appDir = await getApplicationDocumentsDirectory();
-      final communityDir = Directory(p.join(appDir.path, 'images', 'community'));
+      final communityDir =
+          directory ?? Directory(p.join((await getApplicationDocumentsDirectory()).path, 'images', 'community'));
       if (!await communityDir.exists()) {
         await communityDir.create(recursive: true);
       }

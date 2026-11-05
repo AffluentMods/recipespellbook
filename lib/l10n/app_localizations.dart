@@ -19518,6 +19518,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 item could not be saved on this device.} other{{count} items could not be saved on this device.}} To try once more, enter the same code again within a day.'**
   String transferRowsLeftOut(int count);
+
+  /// No description provided for @backupPhotosLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Backup saved, but 1 photo is not in it.} other{Backup saved, but {count} photos are not in it.}} Photos kept only in the cloud need an internet connection. Connect and make the backup again to include them.'**
+  String backupPhotosLeftOut(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

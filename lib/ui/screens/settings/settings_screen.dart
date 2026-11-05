@@ -611,7 +611,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           );
           if (context.mounted) {
             AppSnackbar.dismiss(context);
-            if (saved) AppSnackbar.success(context, l10n.exportSaved);
+            if (saved.done && saved.photosLeftOut > 0) {
+              AppSnackbar.warning(context, l10n.backupPhotosLeftOut(saved.photosLeftOut));
+            } else if (saved.done) {
+              AppSnackbar.success(context, l10n.exportSaved);
+            }
           }
         } catch (e) {
           if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
@@ -620,8 +624,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       onExportFullZip: (options) async {
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
+        final BackupExportResult shared;
         try {
-          await service.shareFullZipExport(
+          shared = await service.shareFullZipExport(
             options: options,
             onProgress: (status) {
               if (context.mounted) AppSnackbar.loading(context, status);
@@ -631,7 +636,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
           return;
         }
-        if (context.mounted) AppSnackbar.dismiss(context);
+        if (context.mounted) {
+          AppSnackbar.dismiss(context);
+          if (shared.done && shared.photosLeftOut > 0) {
+            AppSnackbar.warning(context, l10n.backupPhotosLeftOut(shared.photosLeftOut));
+          }
+        }
       },
       onExportCookbook: () async {
         Navigator.pop(sheetCtx);

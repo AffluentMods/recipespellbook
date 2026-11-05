@@ -4160,5 +4160,6 @@
   "communityPublishDailyLimit": "Hiermee ga je over de uploadlimiet voor foto's van vandaag. Probeer het morgen opnieuw of publiceer zonder foto's.",
   "communityFeedLoadMoreFailed": "Kon niet meer laden",
   "syncNotInPlan": "Cloudsynchronisatie zit niet in je abonnement",
-  "transferRowsLeftOut": "{count, plural, =1{1 item kon niet op dit apparaat worden opgeslagen.} other{{count} items konden niet op dit apparaat worden opgeslagen.}} Voer binnen een dag dezelfde code opnieuw in om het nog eens te proberen."
+  "transferRowsLeftOut": "{count, plural, =1{1 item kon niet op dit apparaat worden opgeslagen.} other{{count} items konden niet op dit apparaat worden opgeslagen.}} Voer binnen een dag dezelfde code opnieuw in om het nog eens te proberen.",
+  "backupPhotosLeftOut": "{count, plural, =1{Back-up opgeslagen, maar er ontbreekt 1 foto in.} other{Back-up opgeslagen, maar er ontbreken {count} foto's in.}} Foto's die alleen in de cloud staan, hebben een internetverbinding nodig. Maak verbinding en maak de back-up opnieuw om ze mee te nemen."
 }

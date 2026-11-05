@@ -11061,4 +11061,17 @@ class AppLocalizationsPl extends AppLocalizations {
     );
     return '$_temp0 Aby spróbować jeszcze raz, wpisz ten sam kod ponownie w ciągu doby.';
   }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Kopia zapasowa zapisana, ale brakuje w niej $count zdjęcia.',
+      many: 'Kopia zapasowa zapisana, ale brakuje w niej $count zdjęć.',
+      few: 'Kopia zapasowa zapisana, ale brakuje w niej $count zdjęć.',
+      one: 'Kopia zapasowa zapisana, ale brakuje w niej 1 zdjęcia.',
+    );
+    return '$_temp0 Zdjęcia, które są tylko w chmurze, wymagają połączenia z internetem. Połącz się i utwórz kopię ponownie, aby je dołączyć.';
+  }
 }

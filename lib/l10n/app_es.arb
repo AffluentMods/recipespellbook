@@ -3687,5 +3687,6 @@
   "communityPublishDailyLimit": "Esto superaría el límite diario de subida de fotos. Inténtalo mañana o publica sin fotos.",
   "communityFeedLoadMoreFailed": "No se pudieron cargar más",
   "syncNotInPlan": "Tu plan no incluye la sincronización en la nube",
-  "transferRowsLeftOut": "{count, plural, =1{No se pudo guardar 1 elemento en este dispositivo.} other{No se pudieron guardar {count} elementos en este dispositivo.}} Para volver a intentarlo, introduce el mismo código de nuevo antes de que pase un día."
+  "transferRowsLeftOut": "{count, plural, =1{No se pudo guardar 1 elemento en este dispositivo.} other{No se pudieron guardar {count} elementos en este dispositivo.}} Para volver a intentarlo, introduce el mismo código de nuevo antes de que pase un día.",
+  "backupPhotosLeftOut": "{count, plural, =1{Copia de seguridad guardada, pero falta 1 foto.} other{Copia de seguridad guardada, pero faltan {count} fotos.}} Las fotos que solo están en la nube necesitan conexión a internet. Conéctate y vuelve a hacer la copia para incluirlas."
 }

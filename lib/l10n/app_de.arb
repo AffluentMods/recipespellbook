@@ -3722,5 +3722,6 @@
   "communityPublishDailyLimit": "Damit würdest du das heutige Limit für Foto-Uploads überschreiten. Versuche es morgen erneut oder veröffentliche ohne Fotos.",
   "communityFeedLoadMoreFailed": "Weitere Einträge konnten nicht geladen werden",
   "syncNotInPlan": "Cloud-Synchronisierung ist in deinem Tarif nicht enthalten",
-  "transferRowsLeftOut": "{count, plural, =1{1 Eintrag konnte auf diesem Gerät nicht gespeichert werden.} other{{count} Einträge konnten auf diesem Gerät nicht gespeichert werden.}} Gib denselben Code innerhalb eines Tages noch einmal ein, um es erneut zu versuchen."
+  "transferRowsLeftOut": "{count, plural, =1{1 Eintrag konnte auf diesem Gerät nicht gespeichert werden.} other{{count} Einträge konnten auf diesem Gerät nicht gespeichert werden.}} Gib denselben Code innerhalb eines Tages noch einmal ein, um es erneut zu versuchen.",
+  "backupPhotosLeftOut": "{count, plural, =1{Backup gespeichert, aber 1 Foto fehlt darin.} other{Backup gespeichert, aber {count} Fotos fehlen darin.}} Fotos, die nur in der Cloud liegen, brauchen eine Internetverbindung. Verbinde dich und erstelle das Backup erneut, um sie aufzunehmen."
 }

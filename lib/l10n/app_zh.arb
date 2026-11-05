@@ -4160,5 +4160,6 @@
   "communityPublishDailyLimit": "这会超出今天的照片上传上限。请明天再试，或不带照片发布。",
   "communityFeedLoadMoreFailed": "无法加载更多",
   "syncNotInPlan": "你的套餐不包含云同步",
-  "transferRowsLeftOut": "{count, plural, other{有 {count} 项无法保存到此设备。}}如需重试，请在一天内再次输入同一个代码。"
+  "transferRowsLeftOut": "{count, plural, other{有 {count} 项无法保存到此设备。}}如需重试，请在一天内再次输入同一个代码。",
+  "backupPhotosLeftOut": "{count, plural, other{备份已保存，但其中缺少 {count} 张照片。}}仅存于云端的照片需要联网。请联网后重新备份，即可包含这些照片。"
 }

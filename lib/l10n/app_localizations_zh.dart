@@ -10886,4 +10886,14 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0如需重试，请在一天内再次输入同一个代码。';
   }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '备份已保存，但其中缺少 $count 张照片。',
+    );
+    return '$_temp0仅存于云端的照片需要联网。请联网后重新备份，即可包含这些照片。';
+  }
 }
