@@ -103,6 +103,10 @@ class SyncService {
   static const _foreignPrefix = 'sync_foreign_ids';
   static const _collabMarkPrefix = 'sync_collab_cookbook_mark';
 
+  /// Set (to when it was asked) while the next push has to send every row.
+  /// For the device, not an account: whoever syncs next sends them.
+  static const _pushAllKey = 'sync_push_all';
+
   /// Legacy key (pre-per-account). Used for migration.
   static const _legacyLastSyncKey = 'sync_last_sync_at';
 
@@ -226,6 +230,15 @@ class SyncService {
     }
     await prefs.remove(_legacyLastSyncKey);
     if (_db != null) await SyncJournal.clear(_db!);
+  }
+
+  /// Make the next sync push every row, not only those edited since the last
+  /// push. For rows that arrived here dated before that push, such as a
+  /// transfer from another device: an ordinary push would never send them.
+  /// The pull stays incremental.
+  Future<void> pushEverythingNextSync() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_pushAllKey, DateTime.now().toUtc().toIso8601String());
   }
 
   /// Ids the server says belong to someone else's shared resource (a list or
@@ -359,7 +372,8 @@ class SyncService {
     final upgraded = prefs.getBool(_key(_protocolPrefix, userId)) ?? false;
     final full = fullSync || !upgraded;
     final pullCursor = full ? null : await getLastSyncAt(userId);
-    final pushMark = full ? null : await _readDate(_pushMarkPrefix, userId);
+    final pushAllAsked = prefs.getString(_pushAllKey);
+    final pushMark = full || pushAllAsked != null ? null : await _readDate(_pushMarkPrefix, userId);
 
     _morePhotos = await _backfillImageUploads();
 
@@ -463,6 +477,8 @@ class SyncService {
       sharedSentUntil: await CollabService.instance.deletionsSentUntil(),
     );
     await prefs.setBool(_key(_protocolPrefix, userId), true);
+    // Done, unless it was asked for again while this push was on its way.
+    if (pushAllAsked != null && prefs.getString(_pushAllKey) == pushAllAsked) await prefs.remove(_pushAllKey);
 
     // Ids that turned out to belong to another account.
     final nonEmpty = {for (final e in conflicts.entries) if (e.value.isNotEmpty) e.key: e.value};

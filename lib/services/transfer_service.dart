@@ -263,6 +263,9 @@ class TransferService {
       throw TransferException(TransferFailure.notSaved, '$e');
     }
     await _forgetBundle();
+    // What arrived carries the other device's dates, mostly older than the
+    // last push here, which an ordinary sync would pass over for good.
+    if (stats.written > 0) await SyncService.instance.pushEverythingNextSync();
 
     debugPrint('[Transfer] Imported ${stats.written} entities, '
         '${stats.recipesAlreadyHere} recipes were here already');
