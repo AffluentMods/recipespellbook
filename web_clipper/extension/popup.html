@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Recipe Spellbook</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <img src="icons/icon-32.png" width="24" height="24" alt="" />
+      <span>Recipe Spellbook</span>
+    </header>
+
+    <main>
+      <p id="status" class="muted">Looking for a recipe...</p>
+      <h1 id="title" hidden></h1>
+      <p id="details" class="muted" hidden></p>
+      <button id="save" type="button" hidden>Save</button>
+      <p id="sent" hidden>
+        Opening Recipe Spellbook. If your browser asks, allow it to open the app.
+      </p>
+    </main>
+
+    <footer>
+      Nothing happens?
+      <a href="https://recipespellbook.app/download" target="_blank" rel="noopener noreferrer">Get the app for Windows or Mac</a>.
+    </footer>
+
+    <script src="lib/recipe.js"></script>
+    <script src="lib/tab.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
