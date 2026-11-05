@@ -7,6 +7,9 @@
 ///
 /// ```text
 /// recipespellbook://recipe/<id>   → /recipe/<id>   (a planned meal's recipe)
+/// recipespellbook://recipe/<id>?servings=N
+///                                 → /recipe/<id>?servings=N  (planned for N
+///                                                   people: opens scaled)
 /// recipespellbook://shopping      → /shopping      (the shopping list)
 /// recipespellbook://planner       → /planner       (a meal without a recipe, the
 ///                                                   meals widget's header)
@@ -15,6 +18,8 @@
 /// They arrive through app_links like every other `recipespellbook://` link
 /// (see `_routeForDeepLink` in lib/main.dart).
 library;
+
+import 'planned_servings.dart' show maxPlannedServings;
 
 abstract final class WidgetLinks {
   static const scheme = 'recipespellbook';
@@ -35,9 +40,15 @@ abstract final class WidgetLinks {
   /// tab instead of stacking a second copy of it.
   static const tabRoutes = {'/shopping', '/planner'};
 
-  /// Link that opens the recipe with [recipeId].
-  static Uri recipe(String recipeId) =>
-      Uri(scheme: scheme, host: _recipeHost, pathSegments: [recipeId]);
+  /// Link that opens the recipe with [recipeId], scaled to [servings] people
+  /// when the meal is planned for a number of its own (as the planner opens
+  /// it, see plannedRecipeLocation).
+  static Uri recipe(String recipeId, {int? servings}) => Uri(
+        scheme: scheme,
+        host: _recipeHost,
+        pathSegments: [recipeId],
+        queryParameters: _validServings(servings) == null ? null : {'servings': '$servings'},
+      );
 
   /// Link that opens the shopping list.
   static final Uri shopping = Uri(scheme: scheme, host: _shoppingHost);
@@ -54,7 +65,9 @@ abstract final class WidgetLinks {
         if (segments.length != 1) return null;
         final id = segments.single;
         if (!_idPattern.hasMatch(id)) return null;
-        return '/recipe/${Uri.encodeComponent(id)}';
+        final route = '/recipe/${Uri.encodeComponent(id)}';
+        final servings = _validServings(int.tryParse(uri.queryParameters['servings'] ?? ''));
+        return servings == null ? route : '$route?servings=$servings';
       case _shoppingHost:
         return segments.isEmpty ? '/shopping' : null;
       case _plannerHost:
@@ -66,4 +79,8 @@ abstract final class WidgetLinks {
 
   /// Whether [route] is a main tab (see [tabRoutes]).
   static bool isTabRoute(String route) => tabRoutes.contains(route);
+
+  /// [servings] when it is a number of people a meal can be planned for.
+  static int? _validServings(int? servings) =>
+      servings != null && servings > 0 && servings <= maxPlannedServings ? servings : null;
 }

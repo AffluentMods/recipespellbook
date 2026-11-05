@@ -225,7 +225,10 @@ abstract final class HomeWidgetSnapshot {
       'typeLabel': typeLabel,
       'time': time == null ? null : _clock(time.hour, time.minute),
       'recipeId': recipeId,
-      'link': (recipeId != null ? WidgetLinks.recipe(recipeId) : WidgetLinks.planner).toString(),
+      // Opens the recipe at the size the meal is planned for, as the planner
+      // does.
+      'link': (recipeId != null ? WidgetLinks.recipe(recipeId, servings: plan.servings) : WidgetLinks.planner)
+          .toString(),
     };
   }
 

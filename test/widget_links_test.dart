@@ -47,6 +47,24 @@ void main() {
       expect(_route('recipespellbook://SHOPPING'), '/shopping');
     });
 
+    test('a meal planned for a number of people opens its recipe scaled to it', () {
+      final link = WidgetLinks.recipe('r1', servings: 6);
+      expect(link.toString(), 'recipespellbook://recipe/r1?servings=6');
+      // The same route the planner opens (plannedRecipeLocation).
+      expect(WidgetLinks.routeFor(link), '/recipe/r1?servings=6');
+    });
+
+    test('a servings number that is no number of people is left off', () {
+      for (final servings in [null, 0, -2, 100]) {
+        expect(WidgetLinks.recipe('r1', servings: servings).toString(), 'recipespellbook://recipe/r1',
+            reason: '$servings');
+      }
+      expect(_route('recipespellbook://recipe/r1?servings=abc'), '/recipe/r1');
+      expect(_route('recipespellbook://recipe/r1?servings=0'), '/recipe/r1');
+      expect(_route('recipespellbook://recipe/r1?servings=500'), '/recipe/r1');
+      expect(_route('recipespellbook://recipe/r1?other=1'), '/recipe/r1');
+    });
+
     test('every link the widgets are given round-trips', () {
       for (final link in [WidgetLinks.recipe('r1'), WidgetLinks.shopping, WidgetLinks.planner]) {
         expect(WidgetLinks.routeFor(link), isNotNull, reason: '$link');

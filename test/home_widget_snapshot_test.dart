@@ -49,6 +49,7 @@ void main() {
     String? recipeId,
     String? name,
     String? customMeal,
+    int? servings,
   }) {
     seq++;
     return db.into(db.mealPlans).insert(MealPlansCompanion.insert(
@@ -59,6 +60,7 @@ void main() {
           recipeId: Value(recipeId),
           name: Value(name),
           customMeal: Value(customMeal),
+          servings: Value(servings),
           createdAt: Value(DateTime(2026, 11, 1, 0, seq)),
         ));
   }
@@ -171,6 +173,14 @@ void main() {
         'recipeId': 'r1',
         'link': 'recipespellbook://recipe/r1',
       });
+    });
+
+    test('a meal planned for a number of people opens its recipe scaled, as in the planner', () async {
+      await recipe('r1', 'Chili');
+      await meal(DateTime(2026, 11, 5), recipeId: 'r1', servings: 6);
+      final m = mealsOn(await snapshot(), '2026-11-05').single;
+      expect(m['recipeId'], 'r1');
+      expect(m['link'], 'recipespellbook://recipe/r1?servings=6');
     });
 
     test('in the order of the day: clock time, else the meal type slot', () async {
