@@ -2882,6 +2882,8 @@
   "shoppingTapToCreateShoppableList": "点击创建可购物清单",
   "swipeToSwitch": "滑动切换分区",
   "syncFailed": "同步失败",
+  "syncPhotosStuck": "照片无法上传",
+  "syncPhotosStuckDetail": "你的食谱已同步，但部分照片暂时无法上传。应用会自动重试。",
   "syncSuccess": "已同步：{pushed}个已推送，{pulled}个已拉取",
   "textSizePreview": "预览",
   "transferDeviceDesktop": "桌面端",

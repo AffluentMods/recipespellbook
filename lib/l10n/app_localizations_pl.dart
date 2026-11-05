@@ -7661,6 +7661,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get syncFailed => 'Synchronizacja nie powiodła się';
 
   @override
+  String get syncPhotosStuck => 'Zdjęcia się nie przesyłają';
+
+  @override
+  String get syncPhotosStuckDetail => 'Przepisy są zsynchronizowane, ale niektórych zdjęć nie można teraz przesłać. Aplikacja spróbuje ponownie automatycznie.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return 'Zsynchronizowano: $pushed wysłanych, $pulled pobranych';
   }

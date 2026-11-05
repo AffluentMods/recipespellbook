@@ -2882,6 +2882,8 @@
   "shoppingTapToCreateShoppableList": "Tik om een boodschappenlijst te maken",
   "swipeToSwitch": "Veeg om van sectie te wisselen",
   "syncFailed": "Synchronisatie mislukt",
+  "syncPhotosStuck": "Foto's worden niet geüpload",
+  "syncPhotosStuckDetail": "Je recepten zijn gesynchroniseerd, maar sommige foto's kunnen nu niet worden geüpload. Ze worden automatisch opnieuw geprobeerd.",
   "syncSuccess": "Gesynchroniseerd: {pushed} verzonden, {pulled} ontvangen",
   "textSizePreview": "Voorbeeld",
   "transferDeviceDesktop": "desktop",

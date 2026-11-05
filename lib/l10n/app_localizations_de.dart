@@ -7575,6 +7575,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get syncFailed => 'Synchronisierung fehlgeschlagen';
 
   @override
+  String get syncPhotosStuck => 'Fotos werden nicht hochgeladen';
+
+  @override
+  String get syncPhotosStuckDetail => 'Deine Rezepte sind synchronisiert, aber einige Fotos lassen sich gerade nicht hochladen. Sie werden automatisch erneut versucht.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return 'Synchronisiert: $pushed gesendet, $pulled empfangen';
   }

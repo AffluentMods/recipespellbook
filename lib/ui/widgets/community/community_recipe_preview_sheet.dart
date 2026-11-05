@@ -14,10 +14,16 @@ import '../../../utils/responsive_utils.dart';
 /// full (community handoff, preview sheet). This is the conversion point of
 /// the tab — Save is the only primary control, the full title always fits,
 /// and the ingredient list fades instead of cutting an item mid-row.
+///
+/// The sheet closes itself before [onViewCookbook] and [onExpandRecipe] run,
+/// and hands [onSaveRecipe] a way to close it. Callers must not pop it with
+/// their own context: on a phone the sheet sits on the root navigator while
+/// the Community page sits in the shell, so that pop removes the page and
+/// leaves a black screen.
 Future<void> showCommunityRecipePreview(
   BuildContext context, {
   required CommunityRecipeFeedItem recipe,
-  required Future<bool> Function() onSaveRecipe,
+  required Future<bool> Function(VoidCallback closePreview) onSaveRecipe,
   VoidCallback? onViewCookbook,
   VoidCallback? onExpandRecipe,
   bool alreadySaved = false,
@@ -38,7 +44,7 @@ Future<void> showCommunityRecipePreview(
 
 class _PreviewSheet extends StatefulWidget {
   final CommunityRecipeFeedItem recipe;
-  final Future<bool> Function() onSaveRecipe;
+  final Future<bool> Function(VoidCallback closePreview) onSaveRecipe;
   final VoidCallback? onViewCookbook;
   final VoidCallback? onExpandRecipe;
   final bool alreadySaved;
@@ -62,13 +68,24 @@ class _PreviewSheetState extends State<_PreviewSheet> {
   Future<void> _save() async {
     if (_saved || _saving) return;
     setState(() => _saving = true);
-    final ok = await widget.onSaveRecipe();
+    final ok = await widget.onSaveRecipe(_close);
     if (!mounted) return;
     setState(() {
       _saving = false;
       if (ok) _saved = true;
     });
   }
+
+  void _close() {
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  VoidCallback? _closeThen(VoidCallback? next) => next == null
+      ? null
+      : () {
+          _close();
+          next();
+        };
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +123,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 children: [
                   GestureDetector(
-                    onTap: widget.onExpandRecipe,
+                    onTap: _closeThen(widget.onExpandRecipe),
                     child: CommunityMedia(
                       publicationId: recipe.cookbook.id,
                       imagePath: recipe.imagePath,
@@ -159,7 +176,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
                     if (widget.onViewCookbook != null) ...[
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: widget.onViewCookbook,
+                          onPressed: _closeThen(widget.onViewCookbook),
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size(0, 48),
                           ),
@@ -256,7 +273,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
 
     if (widget.onViewCookbook == null) return row;
     return GestureDetector(
-      onTap: widget.onViewCookbook,
+      onTap: _closeThen(widget.onViewCookbook),
       behavior: HitTestBehavior.opaque,
       child: row,
     );

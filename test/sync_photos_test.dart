@@ -157,11 +157,14 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 200));
         expect(server.pushes, pushes);
         expect(server.pictures, 0);
+        // The recipes went up; the app says the photos did not.
+        expect(SyncService.instance.photosStuck, isTrue);
 
         server.refusesPictures = false;
         await sync();
         await until(() => server.pictures == 8);
         expect(server.pictures, 8);
+        expect(SyncService.instance.photosStuck, isFalse);
       }, () => server.client);
     });
   });

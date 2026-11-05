@@ -7575,6 +7575,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get syncFailed => 'Synchronisatie mislukt';
 
   @override
+  String get syncPhotosStuck => 'Foto\'s worden niet geüpload';
+
+  @override
+  String get syncPhotosStuckDetail => 'Je recepten zijn gesynchroniseerd, maar sommige foto\'s kunnen nu niet worden geüpload. Ze worden automatisch opnieuw geprobeerd.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return 'Gesynchroniseerd: $pushed verzonden, $pulled ontvangen';
   }

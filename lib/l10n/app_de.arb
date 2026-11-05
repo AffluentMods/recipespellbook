@@ -2444,6 +2444,8 @@
   "shoppingTapToCreateShoppableList": "Tippen, um eine Einkaufsliste zu erstellen",
   "swipeToSwitch": "Wischen, um den Bereich zu wechseln",
   "syncFailed": "Synchronisierung fehlgeschlagen",
+  "syncPhotosStuck": "Fotos werden nicht hochgeladen",
+  "syncPhotosStuckDetail": "Deine Rezepte sind synchronisiert, aber einige Fotos lassen sich gerade nicht hochladen. Sie werden automatisch erneut versucht.",
   "syncSuccess": "Synchronisiert: {pushed} gesendet, {pulled} empfangen",
   "textSizePreview": "Vorschau",
   "transferDeviceDesktop": "Desktop",

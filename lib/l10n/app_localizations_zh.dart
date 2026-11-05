@@ -7508,6 +7508,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncFailed => '同步失败';
 
   @override
+  String get syncPhotosStuck => '照片无法上传';
+
+  @override
+  String get syncPhotosStuckDetail => '你的食谱已同步，但部分照片暂时无法上传。应用会自动重试。';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return '已同步：$pushed个已推送，$pulled个已拉取';
   }

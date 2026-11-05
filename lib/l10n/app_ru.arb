@@ -2882,6 +2882,8 @@
   "shoppingTapToCreateShoppableList": "Нажмите для создания списка покупок",
   "swipeToSwitch": "Проведите для смены раздела",
   "syncFailed": "Синхронизация не удалась",
+  "syncPhotosStuck": "Фото не загружаются",
+  "syncPhotosStuckDetail": "Рецепты синхронизированы, но некоторые фото сейчас не удаётся загрузить. Приложение будет пробовать снова автоматически.",
   "syncSuccess": "Синхронизировано: {pushed} отправлено, {pulled} получено",
   "textSizePreview": "Предпросмотр",
   "transferDeviceDesktop": "компьютер",

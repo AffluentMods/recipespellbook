@@ -7513,6 +7513,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get syncFailed => '동기화 실패';
 
   @override
+  String get syncPhotosStuck => '사진을 업로드할 수 없음';
+
+  @override
+  String get syncPhotosStuckDetail => '레시피는 동기화되었지만 일부 사진을 지금 업로드할 수 없습니다. 자동으로 다시 시도합니다.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return '동기화 완료: $pushed개 푸시, $pulled개 풀';
   }

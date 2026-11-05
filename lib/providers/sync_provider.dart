@@ -23,12 +23,17 @@ class SyncState {
   final int pushedCount;
   final int pulledCount;
 
+  /// Recipes sync, but the server turns their photos down (see
+  /// [SyncService.photosStuck]).
+  final bool photosStuck;
+
   const SyncState({
     this.status = SyncStatus.idle,
     this.lastSyncAt,
     this.error,
     this.pushedCount = 0,
     this.pulledCount = 0,
+    this.photosStuck = false,
   });
 
   const SyncState.initial() : this();
@@ -43,6 +48,7 @@ class SyncState {
     String? error,
     int? pushedCount,
     int? pulledCount,
+    bool? photosStuck,
   }) =>
       SyncState(
         status: status ?? this.status,
@@ -50,6 +56,7 @@ class SyncState {
         error: error,
         pushedCount: pushedCount ?? this.pushedCount,
         pulledCount: pulledCount ?? this.pulledCount,
+        photosStuck: photosStuck ?? this.photosStuck,
       );
 }
 
@@ -189,6 +196,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
         lastSyncAt: result.syncedAt ?? DateTime.now(),
         pushedCount: result.pushedCount,
         pulledCount: result.pulledCount,
+        photosStuck: _service.photosStuck,
       );
     } else if (quiet) {
       // Background syncs don't nag about transient network trouble.

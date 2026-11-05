@@ -120,6 +120,7 @@ class SyncService {
     _db = db;
     _photoRun?.cancel();
     _morePhotos = false;
+    _photosStuck = false;
     _tableSub?.cancel();
     _tableSub = db
         .tableUpdates(TableUpdateQuery.onAllTables([
@@ -575,6 +576,12 @@ class SyncService {
   /// Photos were still waiting when the last run had sent its share.
   bool _morePhotos = false;
 
+  /// The server turned down the last photo sent, so photos are not reaching
+  /// the other devices. Clears when a photo goes up. A photo that could not be
+  /// sent (offline) leaves it as it was.
+  bool get photosStuck => _photosStuck;
+  bool _photosStuck = false;
+
   /// The next run while photos are going up.
   Timer? _photoRun;
 
@@ -645,9 +652,11 @@ class SyncService {
         // Offline, over quota, or a photo the server will not take: try
         // again next sync, with the others ahead of this one.
         _photoRefused.add(photo.key);
+        if (ImageService.instance.lastUploadRefused) _photosStuck = true;
         break;
       }
       _photoRefused.remove(photo.key);
+      _photosStuck = false;
       await photo.uploaded(result.path);
       uploaded++;
     }
