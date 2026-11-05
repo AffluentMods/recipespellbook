@@ -38,12 +38,16 @@ class _ManageShoppingCategoriesScreenState extends ConsumerState<ManageShoppingC
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.settingsShoppingCategories),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: l10n.categoriesTitle),
-            Tab(text: l10n.shoppingIngredientMappings),
-          ],
+        bottom: Responsive.capTabBar(
+          context,
+          maxWidth: Responsive.settingsGridMaxWidth,
+          tabBar: TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(text: l10n.categoriesTitle),
+              Tab(text: l10n.shoppingIngredientMappings),
+            ],
+          ),
         ),
       ),
       body: TabBarView(

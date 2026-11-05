@@ -170,12 +170,16 @@ class _CustomThemeScreenState extends ConsumerState<CustomThemeScreen>
           ),
           const SizedBox(width: 12),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(icon: Icon(primaryIcon, size: 18), text: primaryLabel),
-            Tab(icon: Icon(secondaryIcon, size: 18), text: secondaryLabel),
-          ],
+        bottom: Responsive.capTabBar(
+          context,
+          maxWidth: Responsive.settingsGridMaxWidth,
+          tabBar: TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(icon: Icon(primaryIcon, size: 18), text: primaryLabel),
+              Tab(icon: Icon(secondaryIcon, size: 18), text: secondaryLabel),
+            ],
+          ),
         ),
       ),
       body: TabBarView(
