@@ -19506,6 +19506,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load more'**
   String get communityFeedLoadMoreFailed;
+
+  /// No description provided for @syncNotInPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Sync is not included in your plan'**
+  String get syncNotInPlan;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

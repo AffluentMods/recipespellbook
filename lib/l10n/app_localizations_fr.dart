@@ -10944,4 +10944,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Impossible de charger la suite';
+
+  @override
+  String get syncNotInPlan => 'La synchronisation cloud n\'est pas incluse dans votre forfait';
 }

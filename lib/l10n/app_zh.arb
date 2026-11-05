@@ -4158,5 +4158,6 @@
   "communityPublishRateLimitWait": "{seconds, plural, other{已达到上传上限，{seconds} 秒后继续}}",
   "communityPublishServerBusy": "另一个上传仍在处理中，请几分钟后再试。",
   "communityPublishDailyLimit": "这会超出今天的照片上传上限。请明天再试，或不带照片发布。",
-  "communityFeedLoadMoreFailed": "无法加载更多"
+  "communityFeedLoadMoreFailed": "无法加载更多",
+  "syncNotInPlan": "你的套餐不包含云同步"
 }

@@ -10944,4 +10944,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Impossibile caricare altri elementi';
+
+  @override
+  String get syncNotInPlan => 'La sincronizzazione cloud non è inclusa nel tuo piano';
 }

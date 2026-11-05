@@ -4158,5 +4158,6 @@
   "communityPublishRateLimitWait": "{seconds, plural, =1{Uploadlimiet bereikt. Verder over 1 seconde} other{Uploadlimiet bereikt. Verder over {seconds} seconden}}",
   "communityPublishServerBusy": "Er wordt nog een andere upload verwerkt. Probeer het over een paar minuten opnieuw.",
   "communityPublishDailyLimit": "Hiermee ga je over de uploadlimiet voor foto's van vandaag. Probeer het morgen opnieuw of publiceer zonder foto's.",
-  "communityFeedLoadMoreFailed": "Kon niet meer laden"
+  "communityFeedLoadMoreFailed": "Kon niet meer laden",
+  "syncNotInPlan": "Cloudsynchronisatie zit niet in je abonnement"
 }

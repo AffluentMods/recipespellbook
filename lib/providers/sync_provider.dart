@@ -27,6 +27,10 @@ class SyncState {
   /// [SyncService.photosStuck]).
   final bool photosStuck;
 
+  /// The last sync failed because the account's plan has no Cloud Sync
+  /// (see [SyncResult.notEntitled]).
+  final bool notEntitled;
+
   const SyncState({
     this.status = SyncStatus.idle,
     this.lastSyncAt,
@@ -34,6 +38,7 @@ class SyncState {
     this.pushedCount = 0,
     this.pulledCount = 0,
     this.photosStuck = false,
+    this.notEntitled = false,
   });
 
   const SyncState.initial() : this();
@@ -49,6 +54,7 @@ class SyncState {
     int? pushedCount,
     int? pulledCount,
     bool? photosStuck,
+    bool notEntitled = false,
   }) =>
       SyncState(
         status: status ?? this.status,
@@ -57,6 +63,7 @@ class SyncState {
         pushedCount: pushedCount ?? this.pushedCount,
         pulledCount: pulledCount ?? this.pulledCount,
         photosStuck: photosStuck ?? this.photosStuck,
+        notEntitled: notEntitled,
       );
 }
 
@@ -198,11 +205,14 @@ class SyncNotifier extends StateNotifier<SyncState> {
         pulledCount: result.pulledCount,
         photosStuck: _service.photosStuck,
       );
-    } else if (quiet) {
+    } else if (quiet && result.offline) {
       // Background syncs don't nag about transient network trouble.
       state = state.copyWith(status: SyncStatus.idle);
     } else {
-      state = state.copyWith(status: SyncStatus.error, error: result.error);
+      // A plan without Cloud Sync, a server error, a refused push or an
+      // account switch does not go away by itself: shown even when nobody
+      // asked for this sync, until one succeeds.
+      state = state.copyWith(status: SyncStatus.error, error: result.error, notEntitled: result.notEntitled);
     }
   }
 

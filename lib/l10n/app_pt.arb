@@ -4158,5 +4158,6 @@
   "communityPublishRateLimitWait": "{seconds, plural, =1{Limite de envio atingido. Continuando em 1 segundo} other{Limite de envio atingido. Continuando em {seconds} segundos}}",
   "communityPublishServerBusy": "Outro envio ainda está sendo processado. Tente de novo em alguns minutos.",
   "communityPublishDailyLimit": "Isso passaria do limite diário de envio de fotos. Tente amanhã ou publique sem fotos.",
-  "communityFeedLoadMoreFailed": "Não foi possível carregar mais"
+  "communityFeedLoadMoreFailed": "Não foi possível carregar mais",
+  "syncNotInPlan": "Seu plano não inclui a sincronização na nuvem"
 }

@@ -5863,5 +5863,6 @@
   },
   "communityPublishServerBusy": "Another upload is still being processed. Try again in a few minutes.",
   "communityPublishDailyLimit": "This would go over today's photo upload limit. Try again tomorrow, or publish without photos.",
-  "communityFeedLoadMoreFailed": "Could not load more"
+  "communityFeedLoadMoreFailed": "Could not load more",
+  "syncNotInPlan": "Cloud Sync is not included in your plan"
 }

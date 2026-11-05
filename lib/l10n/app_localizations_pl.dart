@@ -11045,4 +11045,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Nie udało się wczytać więcej';
+
+  @override
+  String get syncNotInPlan => 'Twój plan nie obejmuje synchronizacji w chmurze';
 }

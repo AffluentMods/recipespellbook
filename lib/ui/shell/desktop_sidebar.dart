@@ -517,7 +517,7 @@ class _AccountRow extends ConsumerWidget {
     if (!signedIn) return l10n.sidebarSignInToSync;
     if (!hasCloud) return tierName;
     if (sync.isSyncing) return l10n.syncing;
-    if (sync.hasError) return l10n.syncFailed;
+    if (sync.hasError) return sync.notEntitled ? l10n.syncNotInPlan : l10n.syncFailed;
     if (sync.photosStuck) return l10n.syncPhotosStuck;
     final last = sync.lastSyncAt;
     if (last == null) return l10n.syncStatusLocal;

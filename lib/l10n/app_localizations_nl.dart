@@ -10944,4 +10944,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Kon niet meer laden';
+
+  @override
+  String get syncNotInPlan => 'Cloudsynchronisatie zit niet in je abonnement';
 }

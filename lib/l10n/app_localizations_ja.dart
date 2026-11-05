@@ -10878,4 +10878,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => '続きを読み込めませんでした';
+
+  @override
+  String get syncNotInPlan => 'ご利用のプランにはクラウド同期が含まれていません';
 }

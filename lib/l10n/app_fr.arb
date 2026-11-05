@@ -3183,5 +3183,6 @@
   "communityPublishRateLimitWait": "{seconds, plural, =1{Limite d'envoi atteinte. Reprise dans 1 seconde} other{Limite d'envoi atteinte. Reprise dans {seconds} secondes}}",
   "communityPublishServerBusy": "Un autre envoi est encore en cours de traitement. Réessayez dans quelques minutes.",
   "communityPublishDailyLimit": "Cela dépasserait la limite quotidienne d'envoi de photos. Réessayez demain ou publiez sans photos.",
-  "communityFeedLoadMoreFailed": "Impossible de charger la suite"
+  "communityFeedLoadMoreFailed": "Impossible de charger la suite",
+  "syncNotInPlan": "La synchronisation cloud n'est pas incluse dans votre forfait"
 }

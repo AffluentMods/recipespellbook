@@ -11037,4 +11037,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Не удалось загрузить ещё';
+
+  @override
+  String get syncNotInPlan => 'Облачная синхронизация не входит в ваш тариф';
 }

@@ -10878,4 +10878,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => '더 불러오지 못했습니다';
+
+  @override
+  String get syncNotInPlan => '현재 요금제에는 클라우드 동기화가 포함되어 있지 않습니다';
 }

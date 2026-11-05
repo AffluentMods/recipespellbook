@@ -10873,4 +10873,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => '无法加载更多';
+
+  @override
+  String get syncNotInPlan => '你的套餐不包含云同步';
 }

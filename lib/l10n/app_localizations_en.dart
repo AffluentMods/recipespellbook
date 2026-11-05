@@ -10975,4 +10975,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Could not load more';
+
+  @override
+  String get syncNotInPlan => 'Cloud Sync is not included in your plan';
 }

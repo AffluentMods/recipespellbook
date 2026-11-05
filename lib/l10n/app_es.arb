@@ -3685,5 +3685,6 @@
   "communityPublishRateLimitWait": "{seconds, plural, =1{Límite de subida alcanzado. Continuando en 1 segundo} other{Límite de subida alcanzado. Continuando en {seconds} segundos}}",
   "communityPublishServerBusy": "Todavía se está procesando otra subida. Inténtalo de nuevo en unos minutos.",
   "communityPublishDailyLimit": "Esto superaría el límite diario de subida de fotos. Inténtalo mañana o publica sin fotos.",
-  "communityFeedLoadMoreFailed": "No se pudieron cargar más"
+  "communityFeedLoadMoreFailed": "No se pudieron cargar más",
+  "syncNotInPlan": "Tu plan no incluye la sincronización en la nube"
 }

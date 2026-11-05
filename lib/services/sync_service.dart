@@ -26,9 +26,14 @@ class SyncResult {
   final DateTime? syncedAt;
   final String? error;
 
-  /// The account has no Cloud Sync entitlement (server said 403). Shared
-  /// cookbooks/lists still sync; the caller shouldn't surface this as an error.
+  /// The account has no Cloud Sync entitlement (server said 403). Nothing of
+  /// the user's own library was synced, so this is not a success. Shared
+  /// cookbooks/lists still sync ([pulledCount] counts what they brought).
   final bool notEntitled;
+
+  /// The server could not be reached (offline, timed out). Nothing is wrong
+  /// with the account or the data, and the next sync tries again.
+  final bool offline;
 
   const SyncResult({
     required this.success,
@@ -37,9 +42,10 @@ class SyncResult {
     this.syncedAt,
     this.error,
     this.notEntitled = false,
+    this.offline = false,
   });
 
-  const SyncResult.failure(String message, {this.notEntitled = false})
+  const SyncResult.failure(String message, {this.notEntitled = false, this.offline = false})
       : success = false,
         pushedCount = 0,
         pulledCount = 0,
@@ -329,7 +335,9 @@ class SyncService {
 
     if (!own.success) {
       if (own.notEntitled) {
-        return SyncResult(success: true, pulledCount: sharedPulled, notEntitled: true);
+        // Not a success: the user's own recipes went nowhere. What the shared
+        // cookbooks and lists brought is still counted.
+        return SyncResult(success: false, pulledCount: sharedPulled, error: own.error, notEntitled: true);
       }
       return own;
     }
@@ -559,7 +567,7 @@ class SyncService {
         msg.contains('ClientException') ||
         msg.contains('Connection refused') ||
         msg.contains('Connection reset');
-    if (isNetwork) return const SyncResult.failure('No internet connection');
+    if (isNetwork) return const SyncResult.failure('No internet connection', offline: true);
     debugPrint('[Sync] Error: $e');
     return SyncResult.failure('Sync failed: ${_friendlyError(e)}');
   }
