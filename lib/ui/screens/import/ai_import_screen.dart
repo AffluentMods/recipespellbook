@@ -356,7 +356,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
       appBar: AppBar(
         title: Text(l10n.importFromAI),
       ),
-      body: Responsive.constrainWidth(context, child: GestureDetector(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.isDesktopLayout(context) ? Responsive.kReadingMaxWidth : null, child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

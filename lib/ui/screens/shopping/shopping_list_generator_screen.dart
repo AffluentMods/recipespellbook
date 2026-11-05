@@ -242,7 +242,7 @@ class _ShoppingListGeneratorScreenState
             child: _buildStepIndicator(),
           ),
         ),
-        body: Responsive.constrainWidth(context, child: PageView(
+        body: Responsive.constrainWidth(context, maxWidth: Responsive.isDesktopLayout(context) ? Responsive.kReadingMaxWidth : null, child: PageView(
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
           children: [

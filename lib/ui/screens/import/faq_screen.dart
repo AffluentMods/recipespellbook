@@ -91,7 +91,7 @@ class _FaqScreenState extends State<FaqScreen> {
                 ),
               ],
             ),
-      body: SelectionArea(child: Responsive.constrainWidth(context, child: q.isEmpty
+      body: SelectionArea(child: Responsive.constrainWidth(context, maxWidth: Responsive.isDesktopLayout(context) ? Responsive.kReadingMaxWidth : null, child: q.isEmpty
           ? ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
               children: [

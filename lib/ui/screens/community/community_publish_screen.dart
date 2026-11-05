@@ -179,10 +179,18 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             : null,
         bottom: _isPublishing ? null : PreferredSize(
           preferredSize: const Size.fromHeight(48),
-          child: _StepIndicator(currentStep: displayStep, totalSteps: totalSteps),
+          // On desktop the steps line up with the form column below.
+          child: Responsive.isDesktopLayout(context)
+              ? Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: Responsive.kReadingMaxWidth),
+                    child: _StepIndicator(currentStep: displayStep, totalSteps: totalSteps),
+                  ),
+                )
+              : _StepIndicator(currentStep: displayStep, totalSteps: totalSteps),
         ),
       ),
-      body: Responsive.constrainWidth(context, child: _step == 1
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.isDesktopLayout(context) ? Responsive.kReadingMaxWidth : null, child: _step == 1
           ? _buildStep1CookbookSelection(theme, l10n)
           : _step == 2
           ? _buildStep2Configure(theme, l10n)
