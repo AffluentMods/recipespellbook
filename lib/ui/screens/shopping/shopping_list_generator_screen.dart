@@ -198,10 +198,7 @@ class _ShoppingListGeneratorScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.exitShoppingListGenerator),
-        content: const Text(
-          'Are you sure you wish to exit the shopping list generator? '
-              'Unsaved changes will be lost.',
-        ),
+        content: Text(l10n.listGenExitBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -300,7 +297,7 @@ class _ShoppingListGeneratorScreenState
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Choose Linked Recipes',
+                      AppLocalizations.of(context)!.listGenChooseLinked,
                       style: theme.textTheme.titleLarge
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -309,8 +306,7 @@ class _ShoppingListGeneratorScreenState
               ),
               const SizedBox(height: 8),
               Text(
-                'Some ingredients link to multiple recipes. '
-                    'Select which ones to include.',
+                AppLocalizations.of(context)!.listGenChooseLinkedBody,
                 style: theme.textTheme.bodyMedium
                     ?.copyWith(color: theme.colorScheme.outline),
               ),
@@ -391,7 +387,7 @@ class _ShoppingListGeneratorScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Select Ingredients',
+                      AppLocalizations.of(context)!.listGenSelectIngredients,
                       style: theme.textTheme.titleLarge
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -746,7 +742,7 @@ class _ShoppingListGeneratorScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Review & Add',
+                      AppLocalizations.of(context)!.listGenReviewAdd,
                       style: theme.textTheme.titleLarge
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -1062,7 +1058,7 @@ class _ConflictCard extends StatelessWidget {
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        'in ${conflict.parentRecipeName}',
+                        AppLocalizations.of(context)!.listGenInRecipe(conflict.parentRecipeName),
                         style: theme.textTheme.bodySmall
                             ?.copyWith(color: theme.colorScheme.outline),
                       ),
@@ -1073,7 +1069,7 @@ class _ConflictCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Links to ${conflict.options.length} recipes — select which to include:',
+              AppLocalizations.of(context)!.listGenLinksTo(conflict.options.length),
               style: theme.textTheme.labelMedium
                   ?.copyWith(color: theme.colorScheme.outline),
             ),
@@ -1227,7 +1223,7 @@ class _RecipeCard extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              '$selectedCount/$totalCount ingredients',
+                              AppLocalizations.of(context)!.listGenSelectedOf(selectedCount, totalCount),
                               style: theme.textTheme.bodySmall
                                   ?.copyWith(color: theme.colorScheme.outline),
                             ),
@@ -1241,7 +1237,7 @@ class _RecipeCard extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  'linked',
+                                  AppLocalizations.of(context)!.listGenLinkedBadge,
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color:
                                     theme.colorScheme.onTertiaryContainer,
@@ -1472,7 +1468,7 @@ class _IngredientRow extends ConsumerWidget {
                     ),
                     if (isPantryItem) ...[
                       const SizedBox(width: 6),
-                      _pantryBadge(theme),
+                      _pantryBadge(context, theme),
                     ],
                   ],
                 ),
@@ -1497,7 +1493,7 @@ class _IngredientRow extends ConsumerWidget {
                     ),
                     if (isPantryItem) ...[
                       const SizedBox(width: 6),
-                      _pantryBadge(theme),
+                      _pantryBadge(context, theme),
                     ],
                   ],
                 ),
@@ -1509,7 +1505,7 @@ class _IngredientRow extends ConsumerWidget {
     );
   }
 
-  Widget _pantryBadge(ThemeData theme) {
+  Widget _pantryBadge(BuildContext context, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
@@ -1517,7 +1513,7 @@ class _IngredientRow extends ConsumerWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        'pantry',
+        AppLocalizations.of(context)!.listGenPantryBadge,
         style: theme.textTheme.labelSmall?.copyWith(
           fontSize: 9,
           color: theme.colorScheme.onTertiaryContainer,
@@ -1638,7 +1634,7 @@ class _LinkedIngredientRow extends StatelessWidget {
                             size: 14, color: theme.colorScheme.primary),
                         const SizedBox(width: 4),
                         Text(
-                          'See "$linkedTitle" below',
+                          AppLocalizations.of(context)!.listGenSeeBelow(linkedTitle),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.primary,
                             decoration: TextDecoration.underline,
@@ -1699,7 +1695,7 @@ class _ListDestinationPicker extends StatelessWidget {
                     size: 18, color: context.appColors.textSecondary),
                 const SizedBox(width: 8),
                 Text(
-                  'Add to list',
+                  AppLocalizations.of(context)!.addToList,
                   style: theme.textTheme.labelLarge
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),

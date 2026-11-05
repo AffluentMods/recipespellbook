@@ -2402,16 +2402,16 @@ class _RecipeAppBar extends StatelessWidget {
   List<PopupMenuEntry<String>> _menuItems(BuildContext context, AppLocalizations l10n, bool readOnlyShared) => [
               PopupMenuItem(value: 'cook', child: Row(children: [const Icon(Icons.local_fire_department_outlined), const SizedBox(width: 12), Text(l10n.cookingMode)])),
               if (!readOnlyShared)
-                PopupMenuItem(value: 'enhance', child: Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 12), const Text('Enhance with AI')])),
+                PopupMenuItem(value: 'enhance', child: Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 12), Text(l10n.recipeEnhanceWithAi)])),
               const PopupMenuDivider(),
               PopupMenuItem(value: 'share', child: Row(children: [const Icon(Icons.share_outlined), const SizedBox(width: 12), Text(l10n.actionShare)])),
               PopupMenuItem(value: 'print', child: Row(children: [const Icon(Icons.print_outlined), const SizedBox(width: 12), Text(l10n.printRecipe)])),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
               if (!readOnlyShared)
                 PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
-              PopupMenuItem(value: 'copy_to', child: Row(children: [const Icon(Icons.book_outlined), const SizedBox(width: 12), const Text('Copy to cookbook')])),
+              PopupMenuItem(value: 'copy_to', child: Row(children: [const Icon(Icons.book_outlined), const SizedBox(width: 12), Text(l10n.copyToCookbook)])),
               if (!readOnlyShared)
-                PopupMenuItem(value: 'move_to', child: Row(children: [const Icon(Icons.drive_file_move_outlined), const SizedBox(width: 12), const Text('Move to cookbook')])),
+                PopupMenuItem(value: 'move_to', child: Row(children: [const Icon(Icons.drive_file_move_outlined), const SizedBox(width: 12), Text(l10n.moveToCookbook)])),
               PopupMenuItem(value: 'publish', child: Row(children: [const Icon(Icons.public_outlined), const SizedBox(width: 12), Text(l10n.publishToCommunity)])),
               if (!readOnlyShared) const PopupMenuDivider(),
               if (!readOnlyShared)
@@ -2574,7 +2574,7 @@ class _RecipeAppBar extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        AppSnackbar.info(context, 'Error: $e');
+        AppSnackbar.info(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -2714,7 +2714,7 @@ class _RecipeAppBar extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        AppSnackbar.error(context, 'Error: $e');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -2735,7 +2735,7 @@ class _RecipeAppBar extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        AppSnackbar.error(context, 'Error: $e');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }

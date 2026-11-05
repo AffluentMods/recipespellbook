@@ -128,11 +128,11 @@ class FontSizeSheet extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '• 2 cups all-purpose flour',
+                  AppLocalizations.of(context)!.previewIngredientFlour,
                   style: TextStyle(fontSize: 15 * scale),
                 ),
                 Text(
-                  '• 1 tsp vanilla extract',
+                  AppLocalizations.of(context)!.previewIngredientVanilla,
                   style: TextStyle(fontSize: 15 * scale),
                 ),
               ],

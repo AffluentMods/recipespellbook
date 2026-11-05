@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/subscription_provider.dart';
+import '../../services/feature_gate.dart' show SubscriptionTierL10n;
 import '../../services/revenuecat_service.dart';
 import 'app_snackbar.dart';
 
@@ -168,7 +169,7 @@ class _ProContent extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    status.tier.displayName,
+                    status.tier.localizedName(AppLocalizations.of(context)!),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 12,

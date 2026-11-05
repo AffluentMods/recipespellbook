@@ -675,7 +675,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'cal',
+                          AppLocalizations.of(context)!.nutritionCalUnit,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.outline,
                           ),
@@ -774,7 +774,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
                 ),
               ),
               const SizedBox(width: 4),
-              Text('kcal', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+              Text(AppLocalizations.of(context)!.unitKcal, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
             ],
           ),
           if (servings != null && servings > 0) ...[

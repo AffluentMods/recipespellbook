@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/ai_import_service.dart';
 import '../../widgets/app_snackbar.dart';
@@ -19,6 +20,8 @@ class RecipeEnhanceScreen extends ConsumerStatefulWidget {
 }
 
 class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
+
   final _pasteController = TextEditingController();
 
   Recipe? _recipe;
@@ -66,7 +69,7 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
     if (_recipe == null) return;
     final blob = AiImportService.buildEnhanceBlob(_recipe!, _ingredients, _steps);
     Clipboard.setData(ClipboardData(text: blob));
-    AppSnackbar.success(context, 'Copied! Paste it into ChatGPT, Claude, or any AI.');
+    AppSnackbar.success(context, _l10n.enhanceCopied);
   }
 
   void _preview() {
@@ -94,13 +97,13 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
         db: ref.read(databaseProvider),
       );
       if (mounted) {
-        AppSnackbar.success(context, 'Recipe updated.');
+        AppSnackbar.success(context, _l10n.enhanceRecipeUpdated);
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _applying = false);
-        AppSnackbar.error(context, 'Couldn\'t update the recipe: $e');
+        AppSnackbar.error(context, _l10n.enhanceUpdateFailed('$e'));
       }
     }
   }
@@ -110,11 +113,11 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Enhance with AI'),
+        title: Text(_l10n.recipeEnhanceWithAi),
         leading: _enhanced != null
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
-                tooltip: 'Back to edit',
+                tooltip: _l10n.enhanceBackToEdit,
                 onPressed: () => setState(() => _enhanced = null),
               )
             : null,
@@ -138,12 +141,12 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
           children: [
             Icon(Icons.error_outline, size: 48, color: theme.colorScheme.outline),
             const SizedBox(height: 12),
-            Text("Couldn't load this recipe.",
+            Text(_l10n.enhanceLoadFailed,
                 style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text('Go back'),
+              child: Text(_l10n.shortcutGoBack),
             ),
           ],
         ),
@@ -157,25 +160,25 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
         Text(
-          'Clean up this recipe with any AI',
+          _l10n.enhanceIntroTitle,
           style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         Text(
-          'It adds section headers, writes the exact amounts into each step, and tidies the formatting — without changing your ingredients or method. Your photos, rating, and notes are kept.',
+          _l10n.enhanceIntroBody,
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 20),
 
         _stepCard(theme,
             n: '1',
-            title: 'Copy your recipe + the instructions',
+            title: _l10n.enhanceStep1Title,
             child: SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: _copyBlob,
                 icon: const Icon(Icons.copy_rounded),
-                label: const Text('Copy recipe + prompt'),
+                label: Text(_l10n.enhanceCopyButton),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -185,15 +188,15 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
         const SizedBox(height: 12),
         _stepCard(theme,
             n: '2',
-            title: 'Paste it into ChatGPT, Claude, or any AI',
+            title: _l10n.enhanceStep2Title,
             child: Text(
-              'The AI returns updated recipe JSON. Copy that JSON.',
+              _l10n.enhanceStep2Body,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             )),
         const SizedBox(height: 12),
         _stepCard(theme,
             n: '3',
-            title: 'Paste the AI\'s JSON back here',
+            title: _l10n.enhanceStep3Title,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -231,7 +234,7 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
                   child: FilledButton.tonalIcon(
                     onPressed: _preview,
                     icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Preview changes'),
+                    label: Text(_l10n.enhancePreviewChanges),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -304,11 +307,11 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
                       style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
                 const SizedBox(height: 20),
-                _previewSectionTitle(theme, 'Ingredients'),
+                _previewSectionTitle(theme, _l10n.ingredientsTitle),
                 const SizedBox(height: 8),
                 ..._buildIngredientPreview(theme, ings),
                 const SizedBox(height: 20),
-                _previewSectionTitle(theme, 'Instructions'),
+                _previewSectionTitle(theme, _l10n.instructionsTitle),
                 const SizedBox(height: 8),
                 ..._buildStepPreview(theme, steps),
               ],
@@ -325,7 +328,7 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
                   child: OutlinedButton(
                     onPressed: _applying ? null : () => setState(() => _enhanced = null),
                     style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                    child: const Text('Discard'),
+                    child: Text(_l10n.actionDiscard),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -336,7 +339,7 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
                     icon: _applying
                         ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.check_rounded),
-                    label: const Text('Accept & update recipe'),
+                    label: Text(_l10n.enhanceAccept),
                     style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                   ),
                 ),
@@ -367,36 +370,36 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
 
     final chips = <Widget>[];
     if (addedSections > 0) {
-      chips.add(_summaryChip(theme, Icons.segment, '+$addedSections section${addedSections == 1 ? '' : 's'}',
+      chips.add(_summaryChip(theme, Icons.segment, _l10n.enhanceSectionsAdded(addedSections),
           theme.colorScheme.primary));
     }
     if (newRealIng != oldRealIng) {
       chips.add(_summaryChip(theme, Icons.warning_amber_rounded,
-          'Ingredients $oldRealIng → $newRealIng', theme.colorScheme.error));
+          _l10n.enhanceIngredientCount(oldRealIng, newRealIng), theme.colorScheme.error));
     }
     if (newRealStep != oldRealStep) {
-      chips.add(_summaryChip(theme, Icons.list_alt, 'Steps $oldRealStep → $newRealStep',
+      chips.add(_summaryChip(theme, Icons.list_alt, _l10n.enhanceStepCount(oldRealStep, newRealStep),
           theme.colorScheme.tertiary));
     }
     if (_recipe!.courseId == null && ((e['course'] as String?)?.trim().isNotEmpty ?? false)) {
-      chips.add(_summaryChip(theme, Icons.restaurant_menu, 'Course added', theme.colorScheme.primary));
+      chips.add(_summaryChip(theme, Icons.restaurant_menu, _l10n.enhanceCourseAdded, theme.colorScheme.primary));
     }
     if (_recipe!.categoryId == null && ((e['category'] as String?)?.trim().isNotEmpty ?? false)) {
-      chips.add(_summaryChip(theme, Icons.category_outlined, 'Category added', theme.colorScheme.primary));
+      chips.add(_summaryChip(theme, Icons.category_outlined, _l10n.enhanceCategoryAdded, theme.colorScheme.primary));
     }
     if (chips.isEmpty) {
-      chips.add(_summaryChip(theme, Icons.check_circle_outline, 'Formatting refined', theme.colorScheme.primary));
+      chips.add(_summaryChip(theme, Icons.check_circle_outline, _l10n.enhanceFormattingRefined, theme.colorScheme.primary));
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('What changed', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+        Text(_l10n.enhanceWhatChanged, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: chips),
         if (newRealIng != oldRealIng) ...[
           const SizedBox(height: 8),
-          Text('Heads up: the ingredient count changed — double-check nothing was dropped before accepting.',
+          Text(_l10n.enhanceIngredientCountWarning,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
         ],
       ],
@@ -427,8 +430,8 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
       ),
       child: Row(
         children: [
-          Expanded(child: _toggleSeg(theme, 'Result', !_compare, () => setState(() => _compare = false))),
-          Expanded(child: _toggleSeg(theme, 'Compare', _compare, () => setState(() => _compare = true))),
+          Expanded(child: _toggleSeg(theme, _l10n.enhanceResult, !_compare, () => setState(() => _compare = false))),
+          Expanded(child: _toggleSeg(theme, _l10n.enhanceCompare, _compare, () => setState(() => _compare = true))),
         ],
       ),
     );
@@ -484,16 +487,16 @@ class _RecipeEnhanceScreenState extends ConsumerState<RecipeEnhanceScreen> {
 
     return [
       Row(children: [
-        _legendDot(theme, Colors.green, 'Added'),
+        _legendDot(theme, Colors.green, _l10n.enhanceAdded),
         const SizedBox(width: 14),
-        _legendDot(theme, Colors.red, 'Removed'),
+        _legendDot(theme, Colors.red, _l10n.enhanceRemoved),
       ]),
       const SizedBox(height: 12),
-      _previewSectionTitle(theme, 'Ingredients'),
+      _previewSectionTitle(theme, _l10n.ingredientsTitle),
       const SizedBox(height: 8),
       ...ingDiff.map((op) => _diffRow(theme, op)),
       const SizedBox(height: 20),
-      _previewSectionTitle(theme, 'Instructions'),
+      _previewSectionTitle(theme, _l10n.instructionsTitle),
       const SizedBox(height: 8),
       ...stepDiff.map((op) => _diffRow(theme, op)),
     ];

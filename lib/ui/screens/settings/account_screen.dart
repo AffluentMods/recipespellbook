@@ -717,11 +717,11 @@ class _CommunityStatsCardState extends ConsumerState<_CommunityStatsCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _StatColumn(value: '${stats.downloads}', label: 'downloads'),
+                  _StatColumn(value: '${stats.downloads}', label: AppLocalizations.of(context)!.communityStatDownloads),
                   Container(width: 1, height: 28, color: theme.colorScheme.outlineVariant),
-                  _StatColumn(value: '${stats.followers}', label: 'followers'),
+                  _StatColumn(value: '${stats.followers}', label: AppLocalizations.of(context)!.accountStatFollowers),
                   Container(width: 1, height: 28, color: theme.colorScheme.outlineVariant),
-                  _StatColumn(value: '${stats.following}', label: 'following'),
+                  _StatColumn(value: '${stats.following}', label: AppLocalizations.of(context)!.accountStatFollowing),
                 ],
               ),
             );

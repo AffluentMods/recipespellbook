@@ -197,7 +197,7 @@ class _UncategorizedRecipesScreenState
                     child: Row(
                       children: [
                         Text(
-                          '${_selectedIds.length} of ${uncategorized.length}',
+                          AppLocalizations.of(context)!.selectedOfTotal(_selectedIds.length, uncategorized.length),
                           style: theme.textTheme.bodySmall
                               ?.copyWith(color: theme.colorScheme.outline),
                         ),

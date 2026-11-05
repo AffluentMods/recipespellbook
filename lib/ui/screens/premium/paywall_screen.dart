@@ -153,7 +153,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Sync recipes, cookbooks and more\nwith your family',
+                          l10n.paywallHeadline,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             height: 1.2,

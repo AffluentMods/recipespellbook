@@ -10908,4 +10908,558 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deleteAllDataAccountFailed => '无法删除你的账户，因此没有删除任何内容。请检查网络连接后重试。';
+
+  @override
+  String get addRecipeSheetTitle => 'Add a recipe';
+
+  @override
+  String get addRecipeSheetSubtitle => 'Paste a link from Instagram, TikTok, a website, anywhere.';
+
+  @override
+  String addRecipeSheetPlatformLink(String platform) {
+    return '$platform link';
+  }
+
+  @override
+  String get addRecipeSheetLinkHint => 'Paste a recipe link…';
+
+  @override
+  String get addRecipeSheetPasteFromClipboard => 'Paste link from clipboard';
+
+  @override
+  String get addRecipeSheetImportFromLink => 'Import recipe from link';
+
+  @override
+  String addRecipeSheetImportFrom(String platform) {
+    return 'Import from $platform';
+  }
+
+  @override
+  String get addRecipeSheetImportRecipe => 'Import recipe';
+
+  @override
+  String get addRecipeSheetOtherWay => 'or another way';
+
+  @override
+  String get addRecipeSheetPhoto => 'Photo';
+
+  @override
+  String get addRecipeSheetPasteText => 'Paste text';
+
+  @override
+  String get addRecipeSheetAi => 'AI';
+
+  @override
+  String get addRecipeSheetScan => 'Scan';
+
+  @override
+  String get addRecipeSheetHowToImport => 'How to import';
+
+  @override
+  String get addRecipeSheetTypeItIn => 'Type it in';
+
+  @override
+  String addRecipeSheetGrabbing(String platform) {
+    return 'Grabbing the recipe from $platform…';
+  }
+
+  @override
+  String get addRecipeNothingToPaste => 'Nothing to paste, copy a recipe link first.';
+
+  @override
+  String get addRecipePasteLinkFirst => 'Paste a recipe link first.';
+
+  @override
+  String get addRecipeNotALink => 'That doesn’t look like a recipe link. Paste a link starting with https://, or use “Paste text” below.';
+
+  @override
+  String get addRecipeNoRecipeInJson => 'We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.';
+
+  @override
+  String get addRecipeInvalidJson => 'That looks like recipe data, but it isn’t valid JSON. Copy the whole thing and try again.';
+
+  @override
+  String get addRecipeNoRecipeInText => 'We couldn’t find a recipe in that text. For long recipes, use “Paste text” below.';
+
+  @override
+  String get addRecipeLinkUnreachable => 'Couldn’t reach that link. Check your connection and try again.';
+
+  @override
+  String get addRecipeLinkNeedsLogin => 'That page needs a login, so we can’t read it. Try a public link.';
+
+  @override
+  String get addRecipeLinkNotFound => 'That link couldn’t be found. Double-check the URL.';
+
+  @override
+  String get addRecipeLinkUnreadable => 'We couldn’t read a recipe from that link. Try a different link, or paste the recipe text below.';
+
+  @override
+  String addRecipeAddedToShopping(String item) {
+    return 'Added to shopping list: $item';
+  }
+
+  @override
+  String addRecipeAddToShoppingFailed(String error) {
+    return 'Failed to add to shopping list: $error';
+  }
+
+  @override
+  String get paywallHeadline => 'Sync recipes, cookbooks and more\nwith your family';
+
+  @override
+  String get recipeEnhanceWithAi => 'Enhance with AI';
+
+  @override
+  String featureGateRequiresTier(String tier) {
+    return 'Requires $tier or higher';
+  }
+
+  @override
+  String featureGateUpgradeBody(String tier, String feature) {
+    return 'This feature requires $tier or higher. Upgrade to access $feature and more.';
+  }
+
+  @override
+  String get gatedFeatureCreatorPage => 'Creator Page';
+
+  @override
+  String get gatedFeatureCustomDomain => 'Custom Domain';
+
+  @override
+  String get storageLimitReachedTitle => 'Storage Limit Reached';
+
+  @override
+  String storageLimitReachedBody(String used, String limit) {
+    return 'You\'ve used $used MB of your $limit limit. Delete some photos or upgrade for more storage.';
+  }
+
+  @override
+  String get familySheetPermCanEdit => 'Can edit';
+
+  @override
+  String get familySheetPermCanEditDesc => 'Add & edit recipes';
+
+  @override
+  String get familySheetPermViewOnly => 'View only';
+
+  @override
+  String get familySheetPermViewOnlyDesc => 'Can\'t make changes';
+
+  @override
+  String get familySheetPermEditItems => 'Edit items';
+
+  @override
+  String get familySheetPermEditItemsDesc => 'Add, remove & check off';
+
+  @override
+  String get familySheetPermCheckItems => 'Check items';
+
+  @override
+  String get familySheetPermCheckItemsDesc => 'Tick items off only';
+
+  @override
+  String get familySheetCollaborateLive => 'Collaborate live';
+
+  @override
+  String get familySheetInviteViewCookbook => 'Invite people to view this cookbook';
+
+  @override
+  String get familySheetInviteEditCookbook => 'Invite people to view or edit this cookbook';
+
+  @override
+  String get familySheetCookbookNeedsPlan => 'Live cookbook collaboration needs a subscription. Sharing shopping lists is free.';
+
+  @override
+  String get familySheetPeopleWithAccess => 'People with access';
+
+  @override
+  String get familySheetInviteWithLink => 'Invite with a link';
+
+  @override
+  String get familySheetCreateInviteLink => 'Create invite link';
+
+  @override
+  String get familySheetSendCopy => 'Send a copy';
+
+  @override
+  String get familySheetSendCopySubtitle => 'A one-time snapshot they can import (expires in 24h)';
+
+  @override
+  String get familySheetInviteCopied => 'Invite link copied. Send it to anyone.';
+
+  @override
+  String get familySheetAnyoneCanJoin => 'Anyone with this link can join';
+
+  @override
+  String get enhanceCopied => 'Copied! Paste it into ChatGPT, Claude, or any AI.';
+
+  @override
+  String get enhanceRecipeUpdated => 'Recipe updated.';
+
+  @override
+  String enhanceUpdateFailed(String error) {
+    return 'Couldn\'t update the recipe: $error';
+  }
+
+  @override
+  String get enhanceBackToEdit => 'Back to edit';
+
+  @override
+  String get enhanceLoadFailed => 'Couldn\'t load this recipe.';
+
+  @override
+  String get enhanceIntroTitle => 'Clean up this recipe with any AI';
+
+  @override
+  String get enhanceIntroBody => 'It adds section headers, writes the exact amounts into each step, and tidies the formatting, without changing your ingredients or method. Your photos, rating, and notes are kept.';
+
+  @override
+  String get enhanceStep1Title => 'Copy your recipe + the instructions';
+
+  @override
+  String get enhanceCopyButton => 'Copy recipe + prompt';
+
+  @override
+  String get enhanceStep2Title => 'Paste it into ChatGPT, Claude, or any AI';
+
+  @override
+  String get enhanceStep2Body => 'The AI returns updated recipe JSON. Copy that JSON.';
+
+  @override
+  String get enhanceStep3Title => 'Paste the AI\'s JSON back here';
+
+  @override
+  String get enhancePreviewChanges => 'Preview changes';
+
+  @override
+  String get enhanceAccept => 'Accept & update recipe';
+
+  @override
+  String enhanceSectionsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count sections',
+      one: '+1 section',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String enhanceIngredientCount(int before, int after) {
+    return 'Ingredients $before → $after';
+  }
+
+  @override
+  String enhanceStepCount(int before, int after) {
+    return 'Steps $before → $after';
+  }
+
+  @override
+  String get enhanceCourseAdded => 'Course added';
+
+  @override
+  String get enhanceCategoryAdded => 'Category added';
+
+  @override
+  String get enhanceFormattingRefined => 'Formatting refined';
+
+  @override
+  String get enhanceWhatChanged => 'What changed';
+
+  @override
+  String get enhanceIngredientCountWarning => 'Heads up: the ingredient count changed. Double-check nothing was dropped before accepting.';
+
+  @override
+  String get enhanceResult => 'Result';
+
+  @override
+  String get enhanceCompare => 'Compare';
+
+  @override
+  String get enhanceAdded => 'Added';
+
+  @override
+  String get enhanceRemoved => 'Removed';
+
+  @override
+  String aiRecipesFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Recipes Found',
+      one: '1 Recipe Found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get aiCopyPromptHelp => 'Copy this prompt, paste it into any AI (ChatGPT, Claude, Gemini) along with your recipe, then paste the response below.';
+
+  @override
+  String get aiWeirdFormatTip => 'Have recipes in a weird format? Paste them into any free AI (ChatGPT, Claude, etc.) with this prompt and it\'ll convert them for you. Works with spreadsheets, emails, screenshots, and more!';
+
+  @override
+  String get aiPasteResponseTitle => 'Paste AI Response';
+
+  @override
+  String get aiTipsBody => 'Works with any AI. You can also take a photo of a recipe and paste it with the prompt. If the JSON has errors, ask the AI to fix it.';
+
+  @override
+  String get nutriSheetReviewTitle => 'Nutrition Review';
+
+  @override
+  String get nutriSheetReviewHint => 'Tap ingredients below to change their USDA match or enter values manually.';
+
+  @override
+  String nutriSheetManuallyEdited(int count) {
+    return '$count manually edited';
+  }
+
+  @override
+  String nutritionCalCount(int count) {
+    return '$count cal';
+  }
+
+  @override
+  String get nutritionCalUnit => 'cal';
+
+  @override
+  String get nutriSheetTapIngredientHint => 'Tap any ingredient to change its USDA match or enter nutrition manually.';
+
+  @override
+  String nutriSheetResultsFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results found',
+      one: '1 result found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nutriSheetCalPerServing(int count) {
+    return '$count cal per serving';
+  }
+
+  @override
+  String get nutriSheetLinkedRecipe => 'Linked Recipe';
+
+  @override
+  String nutriSheetRecipesLinked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes linked',
+      one: '1 recipe linked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nutriSheetCalTotal(int count) {
+    return '$count cal total';
+  }
+
+  @override
+  String get nutriSheetNoData => 'No nutrition data';
+
+  @override
+  String nutriSheetFromRecipe(String recipe) {
+    return 'Nutrition from $recipe';
+  }
+
+  @override
+  String get nutriSheetFromLinkedRecipe => 'Nutrition from linked recipe';
+
+  @override
+  String get nutriSheetNoDataOpenRecipe => 'No nutrition data. Open the recipe to calculate it first.';
+
+  @override
+  String get nutriSheetRecipeScale => 'Recipe scale';
+
+  @override
+  String get nutriSheetRecipeScaleHint => 'How much of the linked recipe does this ingredient use?';
+
+  @override
+  String get nutritionFactsTitle => 'Nutrition Facts';
+
+  @override
+  String get recipeEditDetailedNutrition => 'Detailed Nutrition';
+
+  @override
+  String get listGenExitBody => 'Are you sure you wish to exit the shopping list generator? Unsaved changes will be lost.';
+
+  @override
+  String get listGenChooseLinked => 'Choose Linked Recipes';
+
+  @override
+  String get listGenChooseLinkedBody => 'Some ingredients link to multiple recipes. Select which ones to include.';
+
+  @override
+  String get listGenSelectIngredients => 'Select Ingredients';
+
+  @override
+  String get listGenReviewAdd => 'Review & Add';
+
+  @override
+  String listGenInRecipe(String recipe) {
+    return 'in $recipe';
+  }
+
+  @override
+  String listGenLinksTo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Links to $count recipes. Select which to include:',
+      one: 'Links to 1 recipe. Select which to include:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String listGenSelectedOf(int selected, int total) {
+    return '$selected/$total ingredients';
+  }
+
+  @override
+  String get listGenLinkedBadge => 'linked';
+
+  @override
+  String get listGenPantryBadge => 'pantry';
+
+  @override
+  String listGenSeeBelow(String title) {
+    return 'See \"$title\" below';
+  }
+
+  @override
+  String get shoppingSharingStopped => 'Sharing stopped';
+
+  @override
+  String get shoppingStopSharingOnly => 'Stop Sharing Only';
+
+  @override
+  String get shoppingShopOnInstacart => 'Shop on Instacart';
+
+  @override
+  String shoppingNamedItemRemoved(String name) {
+    return '$name removed';
+  }
+
+  @override
+  String get exportLinkedTitle => 'Export Linked Recipes?';
+
+  @override
+  String exportLinkedBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'This recipe has $count linked recipes:',
+      one: 'This recipe has 1 linked recipe:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportLinkedQuestion => 'Would you like to include them in the export so the links are preserved when imported?';
+
+  @override
+  String exportOnlyRecipe(String title) {
+    return 'Only $title';
+  }
+
+  @override
+  String get exportLinkedAll => 'Export All';
+
+  @override
+  String get pdfLinkedRecipes => 'Linked Recipes';
+
+  @override
+  String taxonomyCourseExists(String name) {
+    return 'Course \"$name\" already exists';
+  }
+
+  @override
+  String taxonomyCategoryExists(String name) {
+    return 'Category \"$name\" already exists';
+  }
+
+  @override
+  String taxonomyCreateError(String error) {
+    return 'Error creating: $error';
+  }
+
+  @override
+  String get shareViewerLiveCollab => 'live collaboration';
+
+  @override
+  String get shareViewerAddedToLists => 'Added to your lists';
+
+  @override
+  String get cookbookPeopleTitle => 'People in this cookbook';
+
+  @override
+  String cravingMoreSteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count more steps',
+      one: '+ 1 more step',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String authSignedInAs(String name) {
+    return 'Signed in as $name';
+  }
+
+  @override
+  String get authSignedOut => 'Signed out';
+
+  @override
+  String get accountStatFollowers => 'followers';
+
+  @override
+  String get accountStatFollowing => 'following';
+
+  @override
+  String get settingsSwitchedToImported => 'Switched to imported cookbook';
+
+  @override
+  String resetFailedNothingDeleted(String error) {
+    return 'Reset failed: no data was deleted. ($error)';
+  }
+
+  @override
+  String selectedOfTotal(int selected, int total) {
+    return '$selected of $total';
+  }
+
+  @override
+  String get platformStripSemantics => 'Works with Instagram, TikTok, YouTube, Pinterest and any recipe website';
+
+  @override
+  String get previewRecipeTitle => 'Grandma\'s Famous Chocolate Cake';
+
+  @override
+  String get previewRecipeIngredients => '2 cups flour, 1 cup sugar, 3 eggs';
+
+  @override
+  String get previewIngredientFlour => '• 2 cups all-purpose flour';
+
+  @override
+  String get previewIngredientVanilla => '• 1 tsp vanilla extract';
+
+  @override
+  String get themePreviewRecipe => 'Butter Chicken';
+
+  @override
+  String get themePreviewPrimary => 'Primary';
+
+  @override
+  String get themePreviewSecondary => 'Secondary';
 }

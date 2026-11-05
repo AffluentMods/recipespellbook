@@ -139,7 +139,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '$recipeCount ${recipeCount == 1 ? 'Recipe' : 'Recipes'} Found',
+                            AppLocalizations.of(context)!.aiRecipesFound(recipeCount),
                             style: theme.textTheme.titleLarge
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
@@ -392,7 +392,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Copy this prompt, paste it into any AI (ChatGPT, Claude, Gemini) along with your recipe, then paste the response below.',
+                    AppLocalizations.of(context)!.aiCopyPromptHelp,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
@@ -478,7 +478,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Have recipes in a weird format? Paste them into any free AI (ChatGPT, Claude, etc.) with this prompt and it\'ll convert them for you \u2014 works with spreadsheets, emails, screenshots, and more!',
+                      AppLocalizations.of(context)!.aiWeirdFormatTip,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                         height: 1.4,
@@ -493,7 +493,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
 
             // ── Paste AI Response ──
             Text(
-              'Paste AI Response',
+              AppLocalizations.of(context)!.aiPasteResponseTitle,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -626,7 +626,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                     size: 16, color: theme.colorScheme.outline),
                 const SizedBox(width: 6),
                 Text(
-                  'Tips',
+                  AppLocalizations.of(context)!.aiTipsTitle,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.outline,
                     fontWeight: FontWeight.bold,
@@ -636,7 +636,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Works with any AI. You can also take a photo of a recipe and paste it with the prompt. If the JSON has errors, ask the AI to fix it.',
+              AppLocalizations.of(context)!.aiTipsBody,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -737,10 +737,10 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
                             children: [
                               _MetaChip(
                                   icon: Icons.egg_outlined,
-                                  label: '${widget.ingredientCount} ingredients'),
+                                  label: AppLocalizations.of(context)!.ingredientCount(widget.ingredientCount)),
                               _MetaChip(
                                   icon: Icons.format_list_numbered,
-                                  label: '${widget.stepCount} steps'),
+                                  label: AppLocalizations.of(context)!.stepCount(widget.stepCount)),
                               if (data['course'] != null)
                                 _MetaChip(
                                     icon: Icons.restaurant_menu,
@@ -800,15 +800,15 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
                         if (data['servings'] != null)
                           _MetaChip(
                               icon: Icons.people,
-                              label: '${data['servings']} servings'),
+                              label: AppLocalizations.of(context)!.aiServingsLabel('${data['servings']}')),
                         if (data['prepTimeMinutes'] != null)
                           _MetaChip(
                               icon: Icons.timer_outlined,
-                              label: '${data['prepTimeMinutes']}m prep'),
+                              label: AppLocalizations.of(context)!.aiPrepLabel('${data['prepTimeMinutes']}')),
                         if (data['cookTimeMinutes'] != null)
                           _MetaChip(
                               icon: Icons.local_fire_department,
-                              label: '${data['cookTimeMinutes']}m cook'),
+                              label: AppLocalizations.of(context)!.aiCookLabel('${data['cookTimeMinutes']}')),
                         // The tags the recipe will carry, its cuisine first.
                         for (final tag in (data['tags'] as List?) ?? const [])
                           _MetaChip(icon: Icons.label_outline, label: tag),
@@ -818,7 +818,7 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
 
                     // Ingredients
                     Text(
-                      'Ingredients (${widget.ingredientCount})',
+                      AppLocalizations.of(context)!.aiIngredientsCount(widget.ingredientCount),
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -853,7 +853,7 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
                     }),
                     if (ingredients.length > 8)
                       Text(
-                        '+${ingredients.length - 8} more',
+                        AppLocalizations.of(context)!.homeAndMore(ingredients.length - 8),
                         style: theme.textTheme.bodySmall
                             ?.copyWith(color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
                       ),
@@ -862,7 +862,7 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
 
                     // Steps
                     Text(
-                      'Steps (${steps.length})',
+                      AppLocalizations.of(context)!.aiStepsCount(steps.length),
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -883,7 +883,7 @@ class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
                     }),
                     if (steps.length > 3)
                       Text(
-                        '+${steps.length - 3} more steps',
+                        AppLocalizations.of(context)!.importMoreSteps(steps.length - 3),
                         style: theme.textTheme.bodySmall
                             ?.copyWith(color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
                       ),

@@ -835,7 +835,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     } catch (e) {
       if (context.mounted) {
         AppSnackbar.dismiss(context);
-        AppSnackbar.error(context, 'Error: $e');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -1203,9 +1203,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   await FamilyService.instance.revokeShare(s.id);
                 }
                 setState(() => _sharedListCounts.remove(list.id));
-                if (context.mounted) AppSnackbar.success(context, 'Sharing stopped');
+                if (context.mounted) AppSnackbar.success(context, l10n.shoppingSharingStopped);
               },
-              child: const Text('Stop Sharing Only'),
+              child: Text(l10n.shoppingStopSharingOnly),
             ),
           FilledButton(
             onPressed: () async {
@@ -2606,8 +2606,8 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
                             width: 22,
                           ),
                           const SizedBox(width: 8),
-                          const Text(
-                            'Shop on Instacart',
+                          Text(
+                            AppLocalizations.of(context)!.shoppingShopOnInstacart,
                             style: TextStyle(
                               color: Color(0xFFFAF1E5),
                               fontSize: 14,
@@ -4052,7 +4052,7 @@ class _ShoppingItemTile extends ConsumerWidget {
 
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('${parsed.name} removed'),
+            content: Text(AppLocalizations.of(context)!.shoppingNamedItemRemoved(parsed.name)),
             action: SnackBarAction(
               label: AppLocalizations.of(context)!.actionUndo,
               onPressed: () {

@@ -2260,7 +2260,7 @@ class _ExpandedNutritionInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Detailed Nutrition',
+          AppLocalizations.of(context)!.recipeEditDetailedNutrition,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -2593,7 +2593,7 @@ class _IngredientRow extends StatelessWidget {
         Row(children: [
           Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle)),
           const SizedBox(width: 12),
-          Expanded(child: TextFormField(initialValue: ingredient.text, decoration: const InputDecoration(hintText: 'e.g., 2 cups flour', isDense: true, border: OutlineInputBorder()), textCapitalization: TextCapitalization.sentences, onChanged: onChanged)),
+          Expanded(child: TextFormField(initialValue: ingredient.text, decoration: InputDecoration(hintText: AppLocalizations.of(context)!.ingredientPlaceholder, isDense: true, border: const OutlineInputBorder()), textCapitalization: TextCapitalization.sentences, onChanged: onChanged)),
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, size: 20, color: theme.colorScheme.outline),
             padding: EdgeInsets.zero,
@@ -2850,19 +2850,19 @@ class _NutritionSection extends StatelessWidget {
               Icon(Icons.local_fire_department, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
               Text(
-                '${nutrition!.calories?.toInt() ?? 0} cal',
+                AppLocalizations.of(context)!.nutritionCalCount(nutrition!.calories?.toInt() ?? 0),
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.refresh, size: 20),
                 onPressed: isCalculating ? null : onCalculate,
-                tooltip: 'Recalculate',
+                tooltip: AppLocalizations.of(context)!.nutritionRecalculate,
               ),
               IconButton(
                 icon: const Icon(Icons.close, size: 20),
                 onPressed: onClear,
-                tooltip: 'Clear',
+                tooltip: AppLocalizations.of(context)!.actionClear,
               ),
             ],
           ),
@@ -2870,11 +2870,11 @@ class _NutritionSection extends StatelessWidget {
           // Macros row
           Row(
             children: [
-              Expanded(child: _MacroChip(label: 'Protein', value: nutrition!.protein, unit: 'g', color: const Color(0xFF4CAF50), theme: theme)),
+              Expanded(child: _MacroChip(label: AppLocalizations.of(context)!.nutrientProtein, value: nutrition!.protein, unit: 'g', color: const Color(0xFF4CAF50), theme: theme)),
               const SizedBox(width: 8),
-              Expanded(child: _MacroChip(label: 'Carbs', value: nutrition!.carbohydrates, unit: 'g', color: const Color(0xFF2196F3), theme: theme)),
+              Expanded(child: _MacroChip(label: AppLocalizations.of(context)!.nutrientCarbs, value: nutrition!.carbohydrates, unit: 'g', color: const Color(0xFF2196F3), theme: theme)),
               const SizedBox(width: 8),
-              Expanded(child: _MacroChip(label: 'Fat', value: nutrition!.fat, unit: 'g', color: const Color(0xFFFF9800), theme: theme)),
+              Expanded(child: _MacroChip(label: AppLocalizations.of(context)!.nutrientFat, value: nutrition!.fat, unit: 'g', color: const Color(0xFFFF9800), theme: theme)),
             ],
           ),
         ],

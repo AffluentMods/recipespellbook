@@ -546,12 +546,12 @@ class _RecipeShareSheet extends StatelessWidget {
         builder: (ctx) {
           final theme = Theme.of(ctx);
           return AlertDialog(
-            title: const Text('Export Linked Recipes?'),
+            title: Text(AppLocalizations.of(ctx)!.exportLinkedTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('This recipe has ${linkedRecipes.length} linked recipe(s):'),
+                Text(AppLocalizations.of(ctx)!.exportLinkedBody(linkedRecipes.length)),
                 const SizedBox(height: 8),
                 Text(
                   linkedNames,
@@ -561,17 +561,17 @@ class _RecipeShareSheet extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text('Would you like to include them in the export so the links are preserved when imported?'),
+                Text(AppLocalizations.of(ctx)!.exportLinkedQuestion),
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: Text('Only ${recipe.title}'),
+                child: Text(AppLocalizations.of(ctx)!.exportOnlyRecipe(recipe.title)),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Export All'),
+                child: Text(AppLocalizations.of(ctx)!.exportLinkedAll),
               ),
             ],
           );
@@ -810,7 +810,7 @@ class _RecipeShareSheet extends StatelessWidget {
               pw.Divider(color: PdfColors.grey400, thickness: 2),
               pw.SizedBox(height: 16),
               pw.Text(
-                'Linked Recipes',
+                l10n.pdfLinkedRecipes,
                 style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 16),

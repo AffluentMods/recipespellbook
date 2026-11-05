@@ -66,12 +66,12 @@ class _AppShellState extends ConsumerState<AppShell> {
       if (isSignedIn && !wasSignedIn && next.user != null) {
         ref.read(subscriptionProvider.notifier).login(next.user!.id);
         if (mounted) {
-          AppSnackbar.success(context, 'Signed in as ${next.user!.displayName}');
+          AppSnackbar.success(context, AppLocalizations.of(context)!.authSignedInAs(next.user!.displayName));
         }
       } else if (!isSignedIn && wasSignedIn) {
         ref.read(subscriptionProvider.notifier).logout();
         if (mounted) {
-          AppSnackbar.info(context, 'Signed out');
+          AppSnackbar.info(context, AppLocalizations.of(context)!.authSignedOut);
         }
       }
 

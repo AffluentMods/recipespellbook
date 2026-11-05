@@ -209,10 +209,11 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   Future<void> _pasteUrl() async {
     HapticFeedback.selectionClick();
+    final nothingToPaste = AppLocalizations.of(context)!.addRecipeNothingToPaste;
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text?.trim();
     if (text == null || text.isEmpty) {
-      _showError('Nothing to paste, copy a recipe link first.');
+      _showError(nothingToPaste);
       return;
     }
     _urlController.text = text;
@@ -251,7 +252,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   // ========== URL IMPORT ==========
   Future<void> _importFromUrl() async {
     final raw = _urlController.text.trim();
-    if (raw.isEmpty) { _showError('Paste a recipe link first.'); return; }
+    if (raw.isEmpty) { _showError(AppLocalizations.of(context)!.addRecipePasteLinkFirst); return; }
 
     // This box is for links, but people paste recipe JSON or plain text into it.
     // Detect that and route it to the right parser instead of trying to fetch it
@@ -270,7 +271,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       if (raw.length > 40 && raw.contains(' ')) {
         return _importPastedText(raw);
       }
-      _showError('That doesn’t look like a recipe link. Paste a link starting with https://, or use “Paste text” below.');
+      _showError(AppLocalizations.of(context)!.addRecipeNotALink);
       return;
     }
 
@@ -390,7 +391,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
           .replaceFirst(RegExp(r'```\s*$'), '')
           .trim();
     }
-    const noRecipe = 'We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.';
+    final noRecipe = AppLocalizations.of(context)!.addRecipeNoRecipeInJson;
     _showLoading(AppLocalizations.of(context)!.parsingRecipe);
     try {
       // App's own export bundle?
@@ -407,7 +408,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
           final around = body.replaceAll(_links, ' ').trim();
           return around.isEmpty ? _importFromLink(url) : _importPastedText(around, link: url);
         }
-        _showError('That looks like recipe data, but it isn’t valid JSON. Copy the whole thing and try again.');
+        _showError(AppLocalizations.of(context)!.addRecipeInvalidJson);
         return;
       }
       if (OwnExport.matches(decoded)) {
@@ -444,7 +445,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         return _importFromLink(link, otherwise: recipes, sourceText: text);
       }
       if (!recipes.any(hasRecipeContent)) {
-        _showError('We couldn’t find a recipe in that text. For long recipes, use “Paste text” below.');
+        _showError(l10n.addRecipeNoRecipeInText);
         return;
       }
       _showImportPreview(recipes, sourceText: text);
@@ -460,19 +461,19 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     if (s.contains('socketexception') || s.contains('failed host lookup') ||
         s.contains('network') || s.contains('timeout') || s.contains('timed out') ||
         s.contains('connection')) {
-      return 'Couldn’t reach that link. Check your connection and try again.';
+      return l10n.addRecipeLinkUnreachable;
     }
     if (s.contains('403') || s.contains('401') || s.contains('login') ||
         s.contains('private') || s.contains('sign in')) {
-      return 'That page needs a login, so we can’t read it. Try a public link.';
+      return l10n.addRecipeLinkNeedsLogin;
     }
     if (s.contains('404') || s.contains('not found')) {
-      return 'That link couldn’t be found. Double-check the URL.';
+      return l10n.addRecipeLinkNotFound;
     }
     if (s.contains('no recipe') || s.contains('empty')) {
       return l10n.importNoRecipeAtLink;
     }
-    return 'We couldn’t read a recipe from that link. Try a different link, or paste the recipe text below.';
+    return l10n.addRecipeLinkUnreadable;
   }
 
   // ========== BARCODE / QR IMPORT ==========
@@ -539,11 +540,11 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
               sortOrder: const drift.Value(0),
             ));
             if (mounted) {
-              _showSuccess('Added to shopping list: $itemName');
+              _showSuccess(AppLocalizations.of(context)!.addRecipeAddedToShopping(itemName));
             }
           } catch (e) {
             if (mounted) {
-              _showError('Failed to add to shopping list: $e');
+              _showError(AppLocalizations.of(context)!.addRecipeAddToShoppingFailed(e.toString()));
             }
           }
         }
@@ -1099,10 +1100,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                   const SizedBox(height: 22),
 
                   // ── Header ──
-                  Text('Add a recipe', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(l10n.addRecipeSheetTitle, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Text(
-                    'Paste a link from Instagram, TikTok, a website, anywhere.',
+                    l10n.addRecipeSheetSubtitle,
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),
@@ -1140,7 +1141,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                                     alignment: Alignment.centerLeft,
                                     child: PlatformBadge(_detected!,
                                         compact: true,
-                                        labelOverride: '${platformInfo(_detected!).name} link'),
+                                        labelOverride: l10n.addRecipeSheetPlatformLink(platformInfo(_detected!).name)),
                                   ),
                                 ),
                         ),
@@ -1155,7 +1156,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                                 onSubmitted: (_) => _importFromUrl(),
                                 style: theme.textTheme.bodyLarge,
                                 decoration: InputDecoration(
-                                  hintText: 'Paste a recipe link…',
+                                  hintText: l10n.addRecipeSheetLinkHint,
                                   prefixIcon: const Icon(Icons.link_rounded),
                                   filled: true,
                                   fillColor: theme.colorScheme.surface,
@@ -1169,7 +1170,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                             const SizedBox(width: 10),
                             Semantics(
                               button: true,
-                              label: 'Paste link from clipboard',
+                              label: l10n.addRecipeSheetPasteFromClipboard,
                               child: Material(
                                 color: theme.colorScheme.secondaryContainer,
                                 borderRadius: BorderRadius.circular(16),
@@ -1191,8 +1192,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                         Semantics(
                           button: true,
                           label: _detected == null
-                              ? 'Import recipe from link'
-                              : 'Import from ${platformInfo(_detected!).name}',
+                              ? l10n.addRecipeSheetImportFromLink
+                              : l10n.addRecipeSheetImportFrom(platformInfo(_detected!).name),
                           child: SizedBox(
                             height: 56,
                             child: FilledButton.icon(
@@ -1200,8 +1201,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                               icon: const Icon(Icons.download_rounded),
                               label: Text(
                                 (_detected == null || _detected == RecipePlatform.website)
-                                    ? 'Import recipe'
-                                    : 'Import from ${platformInfo(_detected!).name}',
+                                    ? l10n.addRecipeSheetImportRecipe
+                                    : l10n.addRecipeSheetImportFrom(platformInfo(_detected!).name),
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                               ),
                               style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
@@ -1216,7 +1217,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                   // "or another way"
                   Row(children: [
                     Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Text('or another way', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Text(l10n.addRecipeSheetOtherWay, style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
                     Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
                   ]),
                   const SizedBox(height: 16),
@@ -1228,7 +1229,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                     alignment: WrapAlignment.center,
                     children: [
                       if (supportsOcr)
-                        _ImportOptionTile(icon: Icons.photo_camera_rounded, label: 'Photo', color: theme.colorScheme.tertiary, onTap: _importFromImage),
+                        _ImportOptionTile(icon: Icons.photo_camera_rounded, label: l10n.addRecipeSheetPhoto, color: theme.colorScheme.tertiary, onTap: _importFromImage),
                       // Many pages of a printed cookbook in one sitting.
                       if (supportsBookScan && canAddRecipesTo(widget.cookbookId))
                         _ImportOptionTile(icon: Icons.document_scanner_rounded, label: l10n.bookScanTile, color: theme.colorScheme.secondary, onTap: () {
@@ -1238,15 +1239,15 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                           Navigator.pop(context);
                           startBookScan(root, cookbookId: widget.cookbookId);
                         }),
-                      _ImportOptionTile(icon: Icons.notes_rounded, label: 'Paste text', color: theme.colorScheme.primary, onTap: _importFromText),
-                      _ImportOptionTile(icon: Icons.folder_open_rounded, label: 'File', color: theme.colorScheme.secondary, onTap: _importFromFile),
-                      _ImportOptionTile(icon: Icons.auto_awesome_rounded, label: 'AI', color: theme.colorScheme.tertiary, onTap: () {
+                      _ImportOptionTile(icon: Icons.notes_rounded, label: l10n.addRecipeSheetPasteText, color: theme.colorScheme.primary, onTap: _importFromText),
+                      _ImportOptionTile(icon: Icons.folder_open_rounded, label: l10n.importFile, color: theme.colorScheme.secondary, onTap: _importFromFile),
+                      _ImportOptionTile(icon: Icons.auto_awesome_rounded, label: l10n.addRecipeSheetAi, color: theme.colorScheme.tertiary, onTap: () {
                         HapticFeedback.selectionClick();
                         Navigator.pop(context);
                         Navigator.push(context, MaterialPageRoute(builder: (_) => AiImportScreen(cookbookId: widget.cookbookId)));
                       }),
                       if (supportsBarcodeScanner)
-                        _ImportOptionTile(icon: Icons.qr_code_scanner_rounded, label: 'Scan', color: theme.colorScheme.primary, onTap: _importFromBarcode),
+                        _ImportOptionTile(icon: Icons.qr_code_scanner_rounded, label: l10n.addRecipeSheetScan, color: theme.colorScheme.primary, onTap: _importFromBarcode),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -1257,7 +1258,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                       Expanded(
                         child: _MiniLink(
                           icon: Icons.help_outline_rounded,
-                          label: 'How to import',
+                          label: l10n.addRecipeSheetHowToImport,
                           onTap: () {
                             // Desktop: open the guides in-shell (sidebar stays).
                             final desktop = Responsive.isDesktopLayout(context);
@@ -1275,7 +1276,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                       Expanded(
                         child: _MiniLink(
                           icon: Icons.edit_outlined,
-                          label: 'Type it in',
+                          label: l10n.addRecipeSheetTypeItIn,
                           onTap: _createManually,
                         ),
                       ),
@@ -1307,7 +1308,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Text(
                         (_detected != null && _detected != RecipePlatform.website)
-                            ? 'Grabbing the recipe from ${platformInfo(_detected!).name}…'
+                            ? l10n.addRecipeSheetGrabbing(platformInfo(_detected!).name)
                             : (_loadingMessage ?? l10n.loadingText),
                         style: theme.textTheme.bodyMedium,
                         textAlign: TextAlign.center,

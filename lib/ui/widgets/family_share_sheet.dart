@@ -20,15 +20,15 @@ import 'sheet_chrome.dart';
 // ════════════════════════════════════════════
 
 // (value, label, description) — Google-Docs-style permission levels.
-List<(String, String, String)> _cookbookPerms(AppLocalizations l10n) => const [
-  ('edit', 'Can edit', 'Add & edit recipes'),
-  ('read', 'View only', "Can't make changes"),
+List<(String, String, String)> _cookbookPerms(AppLocalizations l10n) => [
+  ('edit', l10n.familySheetPermCanEdit, l10n.familySheetPermCanEditDesc),
+  ('read', l10n.familySheetPermViewOnly, l10n.familySheetPermViewOnlyDesc),
 ];
 
-List<(String, String, String)> _listPerms(AppLocalizations l10n) => const [
-  ('full', 'Edit items', 'Add, remove & check off'),
-  ('check', 'Check items', 'Tick items off only'),
-  ('read', 'View only', "Can't make changes"),
+List<(String, String, String)> _listPerms(AppLocalizations l10n) => [
+  ('full', l10n.familySheetPermEditItems, l10n.familySheetPermEditItemsDesc),
+  ('check', l10n.familySheetPermCheckItems, l10n.familySheetPermCheckItemsDesc),
+  ('read', l10n.familySheetPermViewOnly, l10n.familySheetPermViewOnlyDesc),
 ];
 
 /// Shows a share bottom sheet for a cookbook or shopping list.
@@ -171,13 +171,13 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
               // ━━━ LIVE COLLABORATION ━━━
               _SectionHeader(
                 icon: Icons.groups_rounded,
-                title: 'Collaborate live',
+                title: l10n.familySheetCollaborateLive,
                 // Reflect the permission the user has actually selected below,
                 // so the copy never overstates access.
                 subtitle: _isCookbook
                     ? (_collabPermission == 'read'
-                        ? 'Invite people to view this cookbook'
-                        : 'Invite people to view or edit this cookbook')
+                        ? l10n.familySheetInviteViewCookbook
+                        : l10n.familySheetInviteEditCookbook)
                     : switch (_collabPermission) {
                         'read' => l10n.shareLinkViewDesc,
                         'check' => l10n.shareLinkCheckDesc,
@@ -188,7 +188,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
 
               if (_isCookbook && !_hasFamilyTier) ...[
                 _UpgradeCard(
-                  message: 'Live cookbook collaboration needs a subscription. Sharing shopping lists is free.',
+                  message: l10n.familySheetCookbookNeedsPlan,
                   onUpgrade: () {
                     Navigator.pop(context);
                     context.push('/upgrade');
@@ -202,7 +202,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
                 if (_existingShares.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: Text('People with access', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                    child: Text(l10n.familySheetPeopleWithAccess, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
                   ),
                   ..._existingShares.map((share) => _ExistingShareTile(
                     share: share,
@@ -221,7 +221,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
                 ],
 
                 // Invite link + default permission.
-                Text('Invite with a link', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                Text(l10n.familySheetInviteWithLink, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
                 const SizedBox(height: 8),
                 _PermissionDropdown(
                   value: _collabPermission,
@@ -239,7 +239,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
                       icon: _creatingCollab
                           ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.link_rounded, size: 18),
-                      label: const Text('Create invite link'),
+                      label: Text(l10n.familySheetCreateInviteLink),
                     ),
                   ),
               ],
@@ -250,8 +250,8 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
               if (!widget.familyOnly) ...[
                 _SectionHeader(
                   icon: Icons.content_copy_rounded,
-                  title: 'Send a copy',
-                  subtitle: 'A one-time snapshot they can import (expires in 24h)',
+                  title: l10n.familySheetSendCopy,
+                  subtitle: l10n.familySheetSendCopySubtitle,
                 ),
                 const SizedBox(height: 8),
                 if (_activeLink != null) ...[
@@ -335,7 +335,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     await _loadData(); // the owner now appears in "People with access"
     if (!mounted) return;
     Clipboard.setData(ClipboardData(text: link.url));
-    AppSnackbar.success(context, 'Invite link copied — send it to anyone');
+    AppSnackbar.success(context, l10n.familySheetInviteCopied);
   }
 }
 
@@ -475,7 +475,7 @@ class _LinkCard extends StatelessWidget {
             Icon(collab ? Icons.groups_rounded : Icons.timer_outlined, size: 14, color: theme.colorScheme.outline),
             const SizedBox(width: 4),
             Text(
-              collab ? 'Anyone with this link can join' : l10n.shareLinkExpiresIn(hoursLeft),
+              collab ? l10n.familySheetAnyoneCanJoin : l10n.shareLinkExpiresIn(hoursLeft),
               style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
             ),
             const Spacer(),

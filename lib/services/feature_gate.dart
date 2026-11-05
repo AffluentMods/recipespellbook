@@ -50,6 +50,28 @@ enum GatedFeature {
   /// Check if a tier has access to this feature.
   bool isUnlockedFor(SubscriptionTier tier) =>
       tier.index >= minimumTier.index;
+
+  /// The feature's name in the user's language.
+  String localizedName(AppLocalizations l10n) => switch (this) {
+        GatedFeature.cloudSync => l10n.cloudSync,
+        GatedFeature.stepPhotos => l10n.compareStepPhotos,
+        GatedFeature.familySharing => l10n.familySharing,
+        GatedFeature.sharedLists => l10n.compareSharedLists,
+        GatedFeature.sharedCookbooks => l10n.compareSharedCookbooks,
+        GatedFeature.sharedMealPlan => l10n.compareSharedMealPlan,
+        GatedFeature.backups => l10n.compareBackups,
+        GatedFeature.creatorPage => l10n.gatedFeatureCreatorPage,
+        GatedFeature.customDomain => l10n.gatedFeatureCustomDomain,
+      };
+}
+
+/// Plan names in the user's language.
+extension SubscriptionTierL10n on SubscriptionTier {
+  String localizedName(AppLocalizations l10n) => switch (this) {
+        SubscriptionTier.free => l10n.tierFreeName,
+        SubscriptionTier.premium => l10n.tierPremiumName,
+        SubscriptionTier.family => l10n.paywallPlanFamily,
+      };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -145,14 +167,14 @@ class _DefaultLockedWidget extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            feature.displayName,
+            feature.localizedName(l10n),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Requires ${feature.minimumTier.displayName} or higher',
+            l10n.featureGateRequiresTier(feature.minimumTier.localizedName(l10n)),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.outline,
             ),
@@ -228,15 +250,15 @@ bool checkFeatureAccess(
             Icon(feature.icon, size: 48, color: Colors.amber),
             const SizedBox(height: 16),
             Text(
-              'Unlock ${feature.displayName}',
+              l10n.unlockFeature(feature.localizedName(l10n)),
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'This feature requires ${feature.minimumTier.displayName} or higher. '
-                  'Upgrade to access ${feature.displayName.toLowerCase()} and more.',
+              l10n.featureGateUpgradeBody(
+                  feature.minimumTier.localizedName(l10n), feature.localizedName(l10n)),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -305,15 +327,14 @@ bool checkStorageLimit(
             Icon(Icons.sd_storage, size: 48, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
-              'Storage Limit Reached',
+              l10n.storageLimitReachedTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'You\'ve used $usedMB MB of your ${tier.storageLabel} limit. '
-                  'Delete some photos or upgrade for more storage.',
+              l10n.storageLimitReachedBody(usedMB, tier.storageLabel),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

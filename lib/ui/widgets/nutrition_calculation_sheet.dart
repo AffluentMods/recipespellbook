@@ -535,7 +535,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
               Icon(Icons.warning_amber, color: warningColor, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Nutrition Review',
+                AppLocalizations.of(context)!.nutriSheetReviewTitle,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: warningColor,
                   fontWeight: FontWeight.bold,
@@ -555,7 +555,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
           )),
           const SizedBox(height: 8),
           Text(
-            'Tap ingredients below to change their USDA match or enter values manually.',
+            AppLocalizations.of(context)!.nutriSheetReviewHint,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.outline,
               fontStyle: FontStyle.italic,
@@ -629,7 +629,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
                   if (_editedIngredients.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '${_editedIngredients.length} manually edited',
+                      AppLocalizations.of(context)!.nutriSheetManuallyEdited(_editedIngredients.length),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w500,
@@ -681,7 +681,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        '${widget.servings} servings',
+                        AppLocalizations.of(context)!.aiServingsLabel(widget.servings),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onPrimaryContainer,
                         ),
@@ -934,7 +934,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${item.nutrition!.calories!.round()} cal',
+                    AppLocalizations.of(context)!.nutritionCalCount(item.nutrition!.calories!.round()),
                     style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
                   ),
                 ),
@@ -968,7 +968,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Tap any ingredient to change its USDA match or enter nutrition manually.',
+              AppLocalizations.of(context)!.nutriSheetTapIngredientHint,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface,
               ),
@@ -1540,7 +1540,7 @@ class _IngredientEditDialogState extends State<_IngredientEditDialog>
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              '${_results.length} results found',
+              AppLocalizations.of(context)!.nutriSheetResultsFound(_results.length),
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
           ),
@@ -1583,7 +1583,7 @@ class _IngredientEditDialogState extends State<_IngredientEditDialog>
                         ),
                       if (food.calories != null)
                         Text(
-                          '${food.calories!.round()} cal per serving',
+                          AppLocalizations.of(context)!.nutriSheetCalPerServing(food.calories!.round()),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w500,
@@ -1867,7 +1867,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Linked Recipe',
+                          AppLocalizations.of(context)!.nutriSheetLinkedRecipe,
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
@@ -1900,7 +1900,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                   // ── Recipe picker ──
                   if (hasMultipleLinks) ...[
                     Text(
-                      '${widget.allLinks.length} recipes linked',
+                      AppLocalizations.of(context)!.nutriSheetRecipesLinked(widget.allLinks.length),
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -1983,14 +1983,14 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                                             Icon(Icons.local_fire_department, size: 12, color: theme.colorScheme.outline),
                                             const SizedBox(width: 4),
                                             Text(
-                                              '${recipeNutrition.calories?.round() ?? 0} cal total',
+                                              AppLocalizations.of(context)!.nutriSheetCalTotal(recipeNutrition.calories?.round() ?? 0),
                                               style: theme.textTheme.bodySmall?.copyWith(
                                                 color: theme.colorScheme.outline,
                                               ),
                                             ),
                                           ] else
                                             Text(
-                                              'No nutrition data',
+                                              AppLocalizations.of(context)!.nutriSheetNoData,
                                               style: theme.textTheme.bodySmall?.copyWith(
                                                 color: theme.colorScheme.error,
                                               ),
@@ -2045,7 +2045,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Nutrition from ${selectedRecipe?.title ?? 'linked recipe'}',
+                                selectedRecipe?.title != null ? AppLocalizations.of(context)!.nutriSheetFromRecipe(selectedRecipe!.title) : AppLocalizations.of(context)!.nutriSheetFromLinkedRecipe,
                                 style: theme.textTheme.labelLarge?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -2085,7 +2085,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'No nutrition data. Open the recipe to calculate it first.',
+                                    AppLocalizations.of(context)!.nutriSheetNoDataOpenRecipe,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.error,
                                     ),
@@ -2102,12 +2102,12 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
 
                   // ── Scale control ──
                   Text(
-                    'Recipe scale',
+                    AppLocalizations.of(context)!.nutriSheetRecipeScale,
                     style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'How much of the linked recipe does this ingredient use?',
+                    AppLocalizations.of(context)!.nutriSheetRecipeScaleHint,
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                   ),
                   const SizedBox(height: 12),
