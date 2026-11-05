@@ -7425,6 +7425,137 @@ class AppLocalizationsRu extends AppLocalizations {
   String get publicationPushUpdate => 'Опубликовать обновление';
 
   @override
+  String get publicationChanged => 'Изменено';
+
+  @override
+  String publicationsChangedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count книги изменено после публикации',
+      many: '$count книг изменено после публикации',
+      few: '$count книги изменены после публикации',
+      one: '$count книга изменена после публикации',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllChanged => 'Обновить все изменённые';
+
+  @override
+  String publicationsUpdateAllConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Обновить $count книги?',
+      many: 'Обновить $count книг?',
+      few: 'Обновить $count книги?',
+      one: 'Обновить $count книгу?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllTitle => 'Обновление опубликованных книг';
+
+  @override
+  String publicationsUpdateAllChecking(int current, int total) {
+    return 'Поиск изменений ($current/$total)';
+  }
+
+  @override
+  String publicationsUpdateAllCurrent(int current, int total) {
+    return 'Книга $current из $total';
+  }
+
+  @override
+  String get publicationsUpdateAllStop => 'Остановить';
+
+  @override
+  String get publicationsUpdateAllStopping => 'Остановка...';
+
+  @override
+  String get publicationsUpdateAllDone => 'Обновление завершено';
+
+  @override
+  String get publicationsUpdateAllStopped => 'Обновление остановлено';
+
+  @override
+  String publicationsUpdateAllUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Обновлено $count',
+      many: 'Обновлено $count',
+      few: 'Обновлено $count',
+      one: 'Обновлена $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count уже актуальны',
+      many: '$count уже актуальны',
+      few: '$count уже актуальны',
+      one: '$count уже актуальна',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNoSource(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count не связаны с книгами на этом устройстве. Обновите их по одной кнопкой «Опубликовать обновление».',
+      many: '$count не связаны с книгами на этом устройстве. Обновите их по одной кнопкой «Опубликовать обновление».',
+      few: '$count не связаны с книгами на этом устройстве. Обновите их по одной кнопкой «Опубликовать обновление».',
+      one: '$count не связана с книгой на этом устройстве. Обновите её отдельно кнопкой «Опубликовать обновление».',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не удалось обновить $count:',
+      many: 'Не удалось обновить $count:',
+      few: 'Не удалось обновить $count:',
+      one: 'Не удалось обновить $count:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNotRun(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ещё $count не обновлены. Запустите «Обновить все изменённые» снова, чтобы закончить.',
+      many: 'Ещё $count не обновлено. Запустите «Обновить все изменённые» снова, чтобы закончить.',
+      few: 'Ещё $count не обновлены. Запустите «Обновить все изменённые» снова, чтобы закончить.',
+      one: 'Ещё $count не обновлена. Запустите «Обновить все изменённые» снова, чтобы закончить.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllRateLimited => 'Сообщество сейчас ограничивает загрузки. Попробуйте остальное позже.';
+
+  @override
+  String get publicationsUpdateAllNameNotSaved => 'Рецепты обновлены, но новое название не сохранено.';
+
+  @override
+  String get publicationsUpdateAllNothing => 'Обновлять ничего не потребовалось.';
+
+  @override
   String get publicationNotRated => 'Нет оценок';
 
   @override

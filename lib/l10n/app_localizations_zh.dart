@@ -7280,6 +7280,116 @@ class AppLocalizationsZh extends AppLocalizations {
   String get publicationPushUpdate => '发布更新';
 
   @override
+  String get publicationChanged => '已更改';
+
+  @override
+  String publicationsChangedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '发布后有 $count 本食谱集已更改',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllChanged => '更新所有已更改的';
+
+  @override
+  String publicationsUpdateAllConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '要更新 $count 本食谱集吗？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllTitle => '正在更新你发布的食谱集';
+
+  @override
+  String publicationsUpdateAllChecking(int current, int total) {
+    return '正在检查更改 ($current/$total)';
+  }
+
+  @override
+  String publicationsUpdateAllCurrent(int current, int total) {
+    return '食谱集 $current/$total';
+  }
+
+  @override
+  String get publicationsUpdateAllStop => '停止';
+
+  @override
+  String get publicationsUpdateAllStopping => '正在停止...';
+
+  @override
+  String get publicationsUpdateAllDone => '更新完成';
+
+  @override
+  String get publicationsUpdateAllStopped => '更新已停止';
+
+  @override
+  String publicationsUpdateAllUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已更新 $count 本',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 本已是最新',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNoSource(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 本未关联到此设备上的食谱集。请用“发布更新”逐一更新。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 本无法更新：',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String publicationsUpdateAllNotRun(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '另有 $count 本未更新。再次运行“更新所有已更改的”即可完成。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationsUpdateAllRateLimited => '社区目前正在限制上传。请稍后再试剩余的部分。';
+
+  @override
+  String get publicationsUpdateAllNameNotSaved => '食谱已更新，但新名称未保存。';
+
+  @override
+  String get publicationsUpdateAllNothing => '没有需要更新的内容。';
+
+  @override
   String get publicationNotRated => '暂无评分';
 
   @override
