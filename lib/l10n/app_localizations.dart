@@ -19506,6 +19506,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load more'**
   String get communityFeedLoadMoreFailed;
+
+  /// No description provided for @notifDownloadsOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me about downloads'**
+  String get notifDownloadsOffer;
+
+  /// No description provided for @notifDownloadsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll get a notification when someone downloads it.'**
+  String get notifDownloadsOn;
+
+  /// No description provided for @notifPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off for Recipe Spellbook. Turn them on in your device settings.'**
+  String get notifPermissionDenied;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

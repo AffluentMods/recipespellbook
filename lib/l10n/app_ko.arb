@@ -4158,5 +4158,8 @@
   "communityPublishRateLimitWait": "{seconds, plural, other{업로드 한도에 도달했습니다. {seconds}초 후에 계속합니다}}",
   "communityPublishServerBusy": "다른 업로드가 아직 처리 중입니다. 몇 분 후에 다시 시도하세요.",
   "communityPublishDailyLimit": "오늘의 사진 업로드 한도를 넘게 됩니다. 내일 다시 시도하거나 사진 없이 게시하세요.",
-  "communityFeedLoadMoreFailed": "더 불러오지 못했습니다"
+  "communityFeedLoadMoreFailed": "더 불러오지 못했습니다",
+  "notifDownloadsOffer": "다운로드 알림 받기",
+  "notifDownloadsOn": "누군가 다운로드하면 알림을 받게 됩니다.",
+  "notifPermissionDenied": "Recipe Spellbook 알림이 꺼져 있습니다. 기기 설정에서 켜 주세요."
 }

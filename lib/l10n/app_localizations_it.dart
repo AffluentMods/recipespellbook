@@ -10944,4 +10944,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Impossibile caricare altri elementi';
+
+  @override
+  String get notifDownloadsOffer => 'Avvisami dei download';
+
+  @override
+  String get notifDownloadsOn => 'Riceverai una notifica quando qualcuno lo scarica.';
+
+  @override
+  String get notifPermissionDenied => 'Le notifiche di Recipe Spellbook sono disattivate. Attivale nelle impostazioni del dispositivo.';
 }

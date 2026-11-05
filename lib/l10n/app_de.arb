@@ -3720,5 +3720,8 @@
   "communityPublishRateLimitWait": "{seconds, plural, =1{Upload-Limit erreicht. Weiter in 1 Sekunde} other{Upload-Limit erreicht. Weiter in {seconds} Sekunden}}",
   "communityPublishServerBusy": "Ein anderer Upload wird noch verarbeitet. Versuche es in ein paar Minuten erneut.",
   "communityPublishDailyLimit": "Damit würdest du das heutige Limit für Foto-Uploads überschreiten. Versuche es morgen erneut oder veröffentliche ohne Fotos.",
-  "communityFeedLoadMoreFailed": "Weitere Einträge konnten nicht geladen werden"
+  "communityFeedLoadMoreFailed": "Weitere Einträge konnten nicht geladen werden",
+  "notifDownloadsOffer": "Bei Downloads benachrichtigen",
+  "notifDownloadsOn": "Du bekommst eine Benachrichtigung, wenn jemand es herunterlädt.",
+  "notifPermissionDenied": "Benachrichtigungen für Recipe Spellbook sind aus. Schalte sie in den Geräteeinstellungen ein."
 }

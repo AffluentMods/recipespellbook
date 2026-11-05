@@ -26,6 +26,17 @@ class NotificationService {
 
   String? get fcmToken => _fcmToken;
 
+  /// SharedPreferences key of the "New downloads" switch: whether this
+  /// device gets a notification when someone downloads something the user
+  /// published to Community (the only notification the server sends).
+  static const communityPrefKey = 'notif_community_updates';
+
+  /// Whether community notifications are switched on for this device.
+  static Future<bool> communityNotificationsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(communityPrefKey) ?? false;
+  }
+
   // ── Android notification channels ──
 
   static const _cookingChannel = AndroidNotificationChannel(
@@ -119,6 +130,19 @@ class NotificationService {
         settings.authorizationStatus == AuthorizationStatus.provisional;
   }
 
+  /// Switch community notifications on for this device: ask for permission
+  /// (Android 13+ and iOS show a prompt) and register the device with the
+  /// server. Returns false when permission was refused.
+  Future<bool> enableCommunityNotifications() async {
+    final granted = await requestPermission();
+    if (granted) await _registerTokenWithBackend();
+    return granted;
+  }
+
+  /// Switch community notifications off for this device: the server forgets
+  /// its token, so nothing is sent here.
+  Future<void> disableCommunityNotifications() => _unregisterTokenWithBackend();
+
   // ── Token management ──
 
   Future<void> _fetchToken() async {
@@ -140,16 +164,23 @@ class NotificationService {
   }
 
   void clearAuth() {
+    // Signed out: this device should stop getting the account's notifications.
+    _unregisterTokenWithBackend();
     _authToken = null;
   }
 
-  /// Fetch FCM token and register with backend (call after login).
+  /// Fetch FCM token and register with backend (call after login), when the
+  /// user has community notifications on and the system allows them.
   Future<void> registerOnLogin(String jwt) async {
     _authToken = jwt;
     final granted = await isPermissionGranted();
-    if (granted) {
-      await _fetchToken();
+    if (!granted) return;
+    await _fetchToken();
+    if (await communityNotificationsEnabled()) {
       await _registerTokenWithBackend();
+    } else {
+      // Switched off here: make sure the server has no token to send to.
+      await _unregisterTokenWithBackend();
     }
   }
 
@@ -177,22 +208,41 @@ class NotificationService {
     }
   }
 
+  Future<void> _unregisterTokenWithBackend() async {
+    // Read both before any await: clearAuth() drops the JWT right after.
+    final token = _fcmToken;
+    final auth = _authToken;
+    if (token == null || auth == null) return;
+    try {
+      const baseUrl = String.fromEnvironment(
+        'API_URL',
+        defaultValue: 'https://api.recipespellbook.app',
+      );
+      await http.delete(
+        Uri.parse('$baseUrl/v1/notifications/unregister'),
+        headers: {
+          'Authorization': 'Bearer $auth',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'token': token}),
+      );
+      debugPrint('[FCM] Token unregistered from backend');
+    } catch (e) {
+      debugPrint('[FCM] Failed to unregister token: $e');
+    }
+  }
+
   // ── Display foreground notifications ──
 
-  void _showForegroundNotification(RemoteMessage message) {
+  Future<void> _showForegroundNotification(RemoteMessage message) async {
     final notification = message.notification;
     if (notification == null) return;
 
-    // Save to local inbox
-    _saveToInbox(
-      title: notification.title ?? 'Notification',
-      body: notification.body ?? '',
-      category: message.data['category'] as String? ?? 'community',
-      data: message.data,
-    );
-
     // Pick channel based on data payload
     final category = message.data['category'] as String? ?? 'community';
+    if (category == 'community' && !await communityNotificationsEnabled()) {
+      return; // switched off on this device
+    }
     String channelId;
     String channelName;
     switch (category) {
@@ -242,15 +292,6 @@ class NotificationService {
 
   void _handleNotificationTap(RemoteMessage message) {
     debugPrint('[FCM] Notification tapped: ${message.data}');
-    // Save to inbox (may already be saved from foreground, deduped by timestamp proximity)
-    if (message.notification != null) {
-      _saveToInbox(
-        title: message.notification!.title ?? 'Notification',
-        body: message.notification!.body ?? '',
-        category: message.data['category'] as String? ?? 'community',
-        data: message.data,
-      );
-    }
     _navigateFromData(message.data);
   }
 
@@ -290,34 +331,6 @@ class NotificationService {
         }
       default:
         break;
-    }
-  }
-
-  // ── Save to local inbox ──
-
-  Future<void> _saveToInbox({
-    required String title,
-    required String body,
-    required String category,
-    Map<String, dynamic>? data,
-  }) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getStringList('notification_inbox') ?? [];
-      final entry = jsonEncode({
-        'title': title,
-        'body': body,
-        'category': category,
-        'data': data,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'isRead': false,
-      });
-      raw.insert(0, entry);
-      // Keep max 50
-      if (raw.length > 50) raw.removeRange(50, raw.length);
-      await prefs.setStringList('notification_inbox', raw);
-    } catch (e) {
-      debugPrint('[FCM] Failed to save to inbox: $e');
     }
   }
 }

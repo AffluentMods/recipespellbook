@@ -4158,5 +4158,8 @@
   "communityPublishRateLimitWait": "{seconds, plural, other{アップロード上限に達しました。{seconds}秒後に再開します}}",
   "communityPublishServerBusy": "別のアップロードを処理中です。数分後にもう一度お試しください。",
   "communityPublishDailyLimit": "本日の写真アップロード上限を超えてしまいます。明日もう一度お試しいただくか、写真なしで公開してください。",
-  "communityFeedLoadMoreFailed": "続きを読み込めませんでした"
+  "communityFeedLoadMoreFailed": "続きを読み込めませんでした",
+  "notifDownloadsOffer": "ダウンロードを通知する",
+  "notifDownloadsOn": "誰かがダウンロードすると通知が届きます。",
+  "notifPermissionDenied": "Recipe Spellbook の通知がオフになっています。端末の設定でオンにしてください。"
 }

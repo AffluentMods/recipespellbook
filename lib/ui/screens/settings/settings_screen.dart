@@ -11,6 +11,7 @@ import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../../providers/kitchen_buddy_provider.dart';
+import '../../../utils/platform_utils.dart' show supportsFirebaseMessaging;
 import '../../../utils/responsive_utils.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
@@ -244,21 +245,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ) : null,
       ]),
 
-      // ─── NOTIFICATIONS ───
-      _section(title: l10n.settingsNotifications, icon: Icons.notifications_outlined, children: [
-        _Tile(
-          icon: Icons.notifications_outlined,
-          title: l10n.settingsNotifications,
-          subtitle: l10n.settingsNotifManagePreferences,
-          onTap: () {
-            if (Responsive.isDesktopLayout(context)) {
-              _openSettingsPanel(const NotificationSettingsScreen(), maxWidth: 600, maxHeight: 500);
-            } else {
-              context.push('/settings/notifications');
-            }
-          },
-        ),
-      ]),
+      // ─── NOTIFICATIONS ─── (push exists on Android and iOS only)
+      if (supportsFirebaseMessaging)
+        _section(title: l10n.settingsNotifications, icon: Icons.notifications_outlined, children: [
+          _Tile(
+            icon: Icons.notifications_outlined,
+            title: l10n.settingsNotifications,
+            subtitle: l10n.settingsNotifManagePreferences,
+            onTap: () {
+              if (Responsive.isDesktopLayout(context)) {
+                _openSettingsPanel(const NotificationSettingsScreen(), maxWidth: 600, maxHeight: 500);
+              } else {
+                context.push('/settings/notifications');
+              }
+            },
+          ),
+        ]),
 
       // ─── MANAGE ───
       _section(title: l10n.settingsManage, icon: Icons.tune, children: [

@@ -11045,4 +11045,13 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityFeedLoadMoreFailed => 'Nie udało się wczytać więcej';
+
+  @override
+  String get notifDownloadsOffer => 'Powiadamiaj o pobraniach';
+
+  @override
+  String get notifDownloadsOn => 'Dostaniesz powiadomienie, gdy ktoś to pobierze.';
+
+  @override
+  String get notifPermissionDenied => 'Powiadomienia Recipe Spellbook są wyłączone. Włącz je w ustawieniach urządzenia.';
 }
