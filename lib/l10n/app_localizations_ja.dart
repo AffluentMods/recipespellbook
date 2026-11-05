@@ -11606,4 +11606,57 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get webClipperGetExtension => '拡張機能を入手';
+
+  @override
+  String get videoImportFromDescription => '動画の説明文から';
+
+  @override
+  String get videoImportFromCaptions => '字幕から';
+
+  @override
+  String get videoImportCheckText => '動画のテキストから読み取りました。保存する前に材料と手順を確認してください。';
+
+  @override
+  String get videoImportNoRecipeTitle => '文字のレシピが見つかりません';
+
+  @override
+  String get videoImportNoRecipeBody => '動画の説明文に材料が書かれていません。AIインポートなら動画のテキストを読み取ってレシピにできます。';
+
+  @override
+  String get videoImportUseAi => 'AIインポートを使う';
+
+  @override
+  String get videoImportNoRecipe => 'この動画の説明文と字幕にレシピが見つかりませんでした。';
+
+  @override
+  String get videoImportUnavailable => 'この動画は非公開、削除済み、または利用できません。';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platformが現在リクエストを制限しています。数分後にもう一度お試しください。';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return '$platformに接続できませんでした。インターネット接続を確認して、もう一度お試しください。';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platformの応答に時間がかかりすぎました。もう一度お試しください。';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platformがこの動画の読み取りを許可しませんでした。説明文をコピーして「テキストを貼り付け」を使ってください。';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagramがこの投稿のキャプションを公開しませんでした。投稿を開いてキャプションをコピーし、「テキストを貼り付け」を使ってください。';
+
+  @override
+  String get videoImportUnreadable => 'この動画のページを読み取れませんでした。後でもう一度お試しいただくか、説明文をコピーして「テキストを貼り付け」を使ってください。';
+
+  @override
+  String get aiVideoTextIncluded => '動画のテキストはプロンプトと一緒にコピーされます。両方をAIチャットに貼り付け、その回答を下に貼り付けてください。';
 }

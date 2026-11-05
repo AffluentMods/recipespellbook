@@ -11730,4 +11730,57 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get webClipperGetExtension => 'Erweiterung holen';
+
+  @override
+  String get videoImportFromDescription => 'Aus der Videobeschreibung';
+
+  @override
+  String get videoImportFromCaptions => 'Aus den Untertiteln';
+
+  @override
+  String get videoImportCheckText => 'Aus dem Text des Videos gelesen. Prüfe Zutaten und Schritte, bevor du speicherst.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Kein geschriebenes Rezept gefunden';
+
+  @override
+  String get videoImportNoRecipeBody => 'Die Videobeschreibung nennt keine Zutaten. Der KI-Import kann den Text des Videos lesen und daraus ein Rezept machen.';
+
+  @override
+  String get videoImportUseAi => 'KI-Import verwenden';
+
+  @override
+  String get videoImportNoRecipe => 'In der Beschreibung und den Untertiteln dieses Videos wurde kein Rezept gefunden.';
+
+  @override
+  String get videoImportUnavailable => 'Dieses Video ist privat, wurde entfernt oder ist nicht verfügbar.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform begrenzt gerade die Anfragen. Versuche es in ein paar Minuten erneut.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return '$platform ist nicht erreichbar. Prüfe deine Internetverbindung und versuche es erneut.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform hat zu lange nicht geantwortet. Versuche es erneut.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform hat der App das Lesen dieses Videos nicht erlaubt. Kopiere die Beschreibung und nutze dann „Text einfügen“.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram hat die Bildunterschrift dieses Beitrags nicht freigegeben. Öffne den Beitrag, kopiere die Bildunterschrift und nutze dann „Text einfügen“.';
+
+  @override
+  String get videoImportUnreadable => 'Die Seite dieses Videos konnte nicht gelesen werden. Versuche es später erneut oder kopiere die Beschreibung und nutze „Text einfügen“.';
+
+  @override
+  String get aiVideoTextIncluded => 'Der Text des Videos wird zusammen mit dem Prompt kopiert. Füge beides in deinen KI-Chat ein und füge die Antwort dann unten ein.';
 }

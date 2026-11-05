@@ -11742,4 +11742,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get webClipperGetExtension => 'Get the extension';
+
+  @override
+  String get videoImportFromDescription => 'From the video description';
+
+  @override
+  String get videoImportFromCaptions => 'From the captions';
+
+  @override
+  String get videoImportCheckText => 'Read from the video’s text. Check the ingredients and steps before you save.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'No written recipe found';
+
+  @override
+  String get videoImportNoRecipeBody => 'The video’s description doesn’t list the ingredients. The AI import can read the video’s text and turn it into a recipe.';
+
+  @override
+  String get videoImportUseAi => 'Use AI import';
+
+  @override
+  String get videoImportNoRecipe => 'No recipe found in this video’s description or captions.';
+
+  @override
+  String get videoImportUnavailable => 'This video is private, removed or not available.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform is limiting requests right now. Try again in a few minutes.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Couldn’t reach $platform. Check your internet connection and try again.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform took too long to answer. Try again.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform didn’t let the app read this video. Copy the description, then use Paste text.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram didn’t share this post’s caption. Open the post, copy the caption, then use Paste text.';
+
+  @override
+  String get videoImportUnreadable => 'Couldn’t read this video’s page. Try again later, or copy the description and use Paste text.';
+
+  @override
+  String get aiVideoTextIncluded => 'The video’s text is copied together with the prompt. Paste both into your AI chat, then paste its answer below.';
 }

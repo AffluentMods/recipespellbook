@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/imported_recipe_saver.dart';
+import '../../../services/video_recipe_import.dart';
 import '../../../utils/recipe_similarity.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/taxonomy_translator.dart';
@@ -24,12 +25,17 @@ class ImportPreviewScreen extends ConsumerStatefulWidget {
   final String? sourceText;
   final String? sourceUrl;
 
+  /// Set when the recipe was read from the text of a video, to say which
+  /// text: video text is no written recipe, and the person should check it.
+  final VideoTextSource? videoTextSource;
+
   const ImportPreviewScreen({
     super.key,
     required this.recipes,
     required this.cookbookId,
     this.sourceText,
     this.sourceUrl,
+    this.videoTextSource,
   });
 
   @override
@@ -493,6 +499,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                     ),
                   ),
 
+                // ── Where in the video the recipe was read ──
+                if (widget.videoTextSource != null) _VideoTextNote(source: widget.videoTextSource!),
+
                 // ── Summary bar ──
                 _SummaryBar(
                   total: _recipes.length,
@@ -572,6 +581,72 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
             ),
         ],
       )),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Video text note
+// ═══════════════════════════════════════════════════════════════════
+
+/// Says which text of a video the recipe was read from ("From the video
+/// description"), and that it wants checking.
+class _VideoTextNote extends StatelessWidget {
+  final VideoTextSource source;
+
+  const _VideoTextNote({required this.source});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final label = switch (source) {
+      VideoTextSource.description => l10n.videoImportFromDescription,
+      VideoTextSource.captions => l10n.videoImportFromCaptions,
+    };
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Semantics(
+        container: true,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                source == VideoTextSource.captions ? Icons.closed_caption_outlined : Icons.subject_rounded,
+                size: 20,
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSecondaryContainer,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.videoImportCheckText,
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSecondaryContainer),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

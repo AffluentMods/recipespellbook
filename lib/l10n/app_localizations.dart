@@ -20664,6 +20664,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get the extension'**
   String get webClipperGetExtension;
+
+  /// No description provided for @videoImportFromDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'From the video description'**
+  String get videoImportFromDescription;
+
+  /// No description provided for @videoImportFromCaptions.
+  ///
+  /// In en, this message translates to:
+  /// **'From the captions'**
+  String get videoImportFromCaptions;
+
+  /// No description provided for @videoImportCheckText.
+  ///
+  /// In en, this message translates to:
+  /// **'Read from the video’s text. Check the ingredients and steps before you save.'**
+  String get videoImportCheckText;
+
+  /// No description provided for @videoImportNoRecipeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No written recipe found'**
+  String get videoImportNoRecipeTitle;
+
+  /// No description provided for @videoImportNoRecipeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The video’s description doesn’t list the ingredients. The AI import can read the video’s text and turn it into a recipe.'**
+  String get videoImportNoRecipeBody;
+
+  /// No description provided for @videoImportUseAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Use AI import'**
+  String get videoImportUseAi;
+
+  /// No description provided for @videoImportNoRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in this video’s description or captions.'**
+  String get videoImportNoRecipe;
+
+  /// No description provided for @videoImportUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This video is private, removed or not available.'**
+  String get videoImportUnavailable;
+
+  /// No description provided for @videoImportRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform} is limiting requests right now. Try again in a few minutes.'**
+  String videoImportRateLimited(String platform);
+
+  /// No description provided for @videoImportOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t reach {platform}. Check your internet connection and try again.'**
+  String videoImportOffline(String platform);
+
+  /// No description provided for @videoImportTimedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform} took too long to answer. Try again.'**
+  String videoImportTimedOut(String platform);
+
+  /// No description provided for @videoImportBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform} didn’t let the app read this video. Copy the description, then use Paste text.'**
+  String videoImportBlocked(String platform);
+
+  /// No description provided for @videoImportInstagramBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram didn’t share this post’s caption. Open the post, copy the caption, then use Paste text.'**
+  String get videoImportInstagramBlocked;
+
+  /// No description provided for @videoImportUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t read this video’s page. Try again later, or copy the description and use Paste text.'**
+  String get videoImportUnreadable;
+
+  /// No description provided for @aiVideoTextIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'The video’s text is copied together with the prompt. Paste both into your AI chat, then paste its answer below.'**
+  String get aiVideoTextIncluded;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

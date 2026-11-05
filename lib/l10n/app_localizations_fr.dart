@@ -11730,4 +11730,57 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get webClipperGetExtension => 'Obtenir l’extension';
+
+  @override
+  String get videoImportFromDescription => 'Extrait de la description de la vidéo';
+
+  @override
+  String get videoImportFromCaptions => 'Extrait des sous-titres';
+
+  @override
+  String get videoImportCheckText => 'Lu dans le texte de la vidéo. Vérifiez les ingrédients et les étapes avant d\'enregistrer.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Aucune recette écrite trouvée';
+
+  @override
+  String get videoImportNoRecipeBody => 'La description de la vidéo ne liste pas les ingrédients. L\'import par IA peut lire le texte de la vidéo et en faire une recette.';
+
+  @override
+  String get videoImportUseAi => 'Utiliser l\'import par IA';
+
+  @override
+  String get videoImportNoRecipe => 'Aucune recette trouvée dans la description ni dans les sous-titres de cette vidéo.';
+
+  @override
+  String get videoImportUnavailable => 'Cette vidéo est privée, supprimée ou indisponible.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform limite les requêtes en ce moment. Réessayez dans quelques minutes.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Impossible de joindre $platform. Vérifiez votre connexion Internet et réessayez.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform a mis trop de temps à répondre. Réessayez.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform n\'a pas laissé l\'application lire cette vidéo. Copiez la description, puis utilisez Coller du texte.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram n\'a pas partagé la légende de cette publication. Ouvrez la publication, copiez la légende, puis utilisez Coller du texte.';
+
+  @override
+  String get videoImportUnreadable => 'Impossible de lire la page de cette vidéo. Réessayez plus tard, ou copiez la description et utilisez Coller du texte.';
+
+  @override
+  String get aiVideoTextIncluded => 'Le texte de la vidéo est copié avec le prompt. Collez les deux dans votre chat d\'IA, puis collez sa réponse ci-dessous.';
 }

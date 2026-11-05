@@ -11886,4 +11886,57 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get webClipperGetExtension => 'Установить расширение';
+
+  @override
+  String get videoImportFromDescription => 'Из описания видео';
+
+  @override
+  String get videoImportFromCaptions => 'Из субтитров';
+
+  @override
+  String get videoImportCheckText => 'Прочитано из текста видео. Проверьте ингредиенты и шаги перед сохранением.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Записанный рецепт не найден';
+
+  @override
+  String get videoImportNoRecipeBody => 'В описании видео нет списка ингредиентов. Импорт через AI может прочитать текст видео и превратить его в рецепт.';
+
+  @override
+  String get videoImportUseAi => 'Использовать импорт через AI';
+
+  @override
+  String get videoImportNoRecipe => 'В описании и субтитрах этого видео рецепт не найден.';
+
+  @override
+  String get videoImportUnavailable => 'Это видео закрыто, удалено или недоступно.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform сейчас ограничивает запросы. Попробуйте ещё раз через несколько минут.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Не удалось подключиться к $platform. Проверьте подключение к интернету и попробуйте ещё раз.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform слишком долго не отвечает. Попробуйте ещё раз.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform не позволил приложению прочитать это видео. Скопируйте описание и используйте «Вставить текст».';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram не показал подпись к этой публикации. Откройте публикацию, скопируйте подпись и используйте «Вставить текст».';
+
+  @override
+  String get videoImportUnreadable => 'Не удалось прочитать страницу этого видео. Попробуйте позже или скопируйте описание и используйте «Вставить текст».';
+
+  @override
+  String get aiVideoTextIncluded => 'Текст видео копируется вместе с промптом. Вставьте и то и другое в чат с ИИ, а затем вставьте его ответ ниже.';
 }

@@ -4639,5 +4639,20 @@
   "webClipperStep4Title": "Controleer en sla op",
   "webClipperStep4Desc": "Laat de browser Recipe Spellbook openen, kies een kookboek en sla het recept op vanuit het voorbeeld.",
   "webClipperTip": "Werkt met de Recipe Spellbook-app voor Windows en Mac. De extensie leest een pagina alleen als je klikt en stuurt niets naar een server.",
-  "webClipperGetExtension": "Extensie downloaden"
+  "webClipperGetExtension": "Extensie downloaden",
+  "videoImportFromDescription": "Uit de videobeschrijving",
+  "videoImportFromCaptions": "Uit de ondertiteling",
+  "videoImportCheckText": "Gelezen uit de tekst van de video. Controleer de ingrediënten en stappen voordat je opslaat.",
+  "videoImportNoRecipeTitle": "Geen geschreven recept gevonden",
+  "videoImportNoRecipeBody": "De videobeschrijving noemt geen ingrediënten. De AI-import kan de tekst van de video lezen en er een recept van maken.",
+  "videoImportUseAi": "AI-import gebruiken",
+  "videoImportNoRecipe": "Geen recept gevonden in de beschrijving of ondertiteling van deze video.",
+  "videoImportUnavailable": "Deze video is privé, verwijderd of niet beschikbaar.",
+  "videoImportRateLimited": "{platform} beperkt op dit moment het aantal verzoeken. Probeer het over een paar minuten opnieuw.",
+  "videoImportOffline": "Kon {platform} niet bereiken. Controleer je internetverbinding en probeer het opnieuw.",
+  "videoImportTimedOut": "{platform} deed er te lang over om te antwoorden. Probeer het opnieuw.",
+  "videoImportBlocked": "{platform} liet de app deze video niet lezen. Kopieer de beschrijving en gebruik daarna Tekst plakken.",
+  "videoImportInstagramBlocked": "Instagram heeft het bijschrift van dit bericht niet gedeeld. Open het bericht, kopieer het bijschrift en gebruik daarna Tekst plakken.",
+  "videoImportUnreadable": "Kon de pagina van deze video niet lezen. Probeer het later opnieuw, of kopieer de beschrijving en gebruik Tekst plakken.",
+  "aiVideoTextIncluded": "De tekst van de video wordt samen met de prompt gekopieerd. Plak beide in je AI-chat en plak het antwoord hieronder."
 }

@@ -4639,5 +4639,20 @@
   "webClipperStep4Title": "Sprawdź i zapisz",
   "webClipperStep4Desc": "Pozwól przeglądarce otworzyć Recipe Spellbook, wybierz książkę kucharską i zapisz przepis z podglądu.",
   "webClipperTip": "Działa z aplikacją Recipe Spellbook dla Windows i Mac. Rozszerzenie odczytuje stronę tylko po kliknięciu i niczego nie wysyła na żaden serwer.",
-  "webClipperGetExtension": "Pobierz rozszerzenie"
+  "webClipperGetExtension": "Pobierz rozszerzenie",
+  "videoImportFromDescription": "Z opisu filmu",
+  "videoImportFromCaptions": "Z napisów",
+  "videoImportCheckText": "Odczytano z tekstu filmu. Sprawdź składniki i kroki przed zapisaniem.",
+  "videoImportNoRecipeTitle": "Nie znaleziono spisanego przepisu",
+  "videoImportNoRecipeBody": "Opis filmu nie zawiera listy składników. Import przez AI może odczytać tekst filmu i zamienić go w przepis.",
+  "videoImportUseAi": "Użyj importu przez AI",
+  "videoImportNoRecipe": "Nie znaleziono przepisu w opisie ani w napisach tego filmu.",
+  "videoImportUnavailable": "Ten film jest prywatny, usunięty lub niedostępny.",
+  "videoImportRateLimited": "{platform} ogranicza teraz liczbę zapytań. Spróbuj ponownie za kilka minut.",
+  "videoImportOffline": "Nie udało się połączyć z {platform}. Sprawdź połączenie z internetem i spróbuj ponownie.",
+  "videoImportTimedOut": "{platform} zbyt długo nie odpowiada. Spróbuj ponownie.",
+  "videoImportBlocked": "{platform} nie pozwolił aplikacji odczytać tego filmu. Skopiuj opis, a potem użyj opcji Wklej tekst.",
+  "videoImportInstagramBlocked": "Instagram nie udostępnił opisu tego posta. Otwórz post, skopiuj opis, a potem użyj opcji Wklej tekst.",
+  "videoImportUnreadable": "Nie udało się odczytać strony tego filmu. Spróbuj później albo skopiuj opis i użyj opcji Wklej tekst.",
+  "aiVideoTextIncluded": "Tekst filmu jest kopiowany razem z promptem. Wklej oba do czatu z AI, a potem wklej odpowiedź poniżej."
 }

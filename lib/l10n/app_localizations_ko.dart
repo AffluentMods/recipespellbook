@@ -11634,4 +11634,57 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get webClipperGetExtension => '확장 프로그램 받기';
+
+  @override
+  String get videoImportFromDescription => '동영상 설명에서 가져옴';
+
+  @override
+  String get videoImportFromCaptions => '자막에서 가져옴';
+
+  @override
+  String get videoImportCheckText => '동영상의 텍스트에서 읽었습니다. 저장하기 전에 재료와 단계를 확인하세요.';
+
+  @override
+  String get videoImportNoRecipeTitle => '작성된 레시피를 찾을 수 없음';
+
+  @override
+  String get videoImportNoRecipeBody => '동영상 설명에 재료가 나와 있지 않습니다. AI 가져오기로 동영상 텍스트를 읽어 레시피로 만들 수 있습니다.';
+
+  @override
+  String get videoImportUseAi => 'AI 가져오기 사용';
+
+  @override
+  String get videoImportNoRecipe => '이 동영상의 설명이나 자막에서 레시피를 찾을 수 없습니다.';
+
+  @override
+  String get videoImportUnavailable => '이 동영상은 비공개이거나 삭제되었거나 볼 수 없습니다.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform에서 지금 요청을 제한하고 있습니다. 몇 분 후에 다시 시도하세요.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return '$platform에 연결할 수 없습니다. 인터넷 연결을 확인하고 다시 시도하세요.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform의 응답이 너무 오래 걸렸습니다. 다시 시도하세요.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform에서 앱이 이 동영상을 읽도록 허용하지 않았습니다. 설명을 복사한 다음 텍스트 붙여넣기를 사용하세요.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram에서 이 게시물의 캡션을 공유하지 않았습니다. 게시물을 열어 캡션을 복사한 다음 텍스트 붙여넣기를 사용하세요.';
+
+  @override
+  String get videoImportUnreadable => '이 동영상 페이지를 읽을 수 없습니다. 나중에 다시 시도하거나 설명을 복사해 텍스트 붙여넣기를 사용하세요.';
+
+  @override
+  String get aiVideoTextIncluded => '동영상 텍스트가 프롬프트와 함께 복사됩니다. 둘 다 AI 채팅에 붙여넣은 다음 답변을 아래에 붙여넣으세요.';
 }

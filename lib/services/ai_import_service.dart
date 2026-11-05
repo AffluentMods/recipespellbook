@@ -131,16 +131,24 @@ class AiImportService {
   /// [extractRecipes] gives for the same text are saved; a link to a recipe
   /// that was left out is dropped.
   /// Returns a list of created recipe IDs.
+  /// A recipe that names no source of its own gets [sourceUrl], the page or
+  /// video the text was taken from.
   static Future<List<String>> importAllFromJson(
       String jsonString,
       AppDatabase db, {
         required String cookbookId,
         Set<int>? only,
+        String? sourceUrl,
       }) async {
     final (allRecipes, linkedBlobs) = _decodeMultipleBlobs(jsonString);
     final picked = only == null
         ? allRecipes
         : [for (var i = 0; i < allRecipes.length; i++) if (only.contains(i)) allRecipes[i]];
+    if (sourceUrl != null && sourceUrl.trim().isNotEmpty) {
+      for (final recipe in picked) {
+        if (_optString(recipe['sourceUrl']) == null) recipe['sourceUrl'] = sourceUrl.trim();
+      }
+    }
     return _saveRecipes(picked, linkedBlobs, db, cookbookId: cookbookId);
   }
 
@@ -1282,6 +1290,20 @@ Rules:
 - AMOUNTS IN STEPS: When a step uses an ingredient, include its quantity from the ingredient list inline, so the cook never has to scroll back up. Write "Combine 1/4 cup lime juice and 1/3 cup chopped cilantro" — NOT "Combine lime juice and cilantro". Distribute each ingredient's amount across the step(s) that use it (e.g. if 2 cups flour is added in two stages, say "1 cup" each time). Keep the ingredient list itself unchanged with the full amounts.
 - Output valid JSON only — no markdown, no backticks, no commentary
 ''';
+  }
+
+  /// The recipe prompt with [text] to read the recipe from, the text of a
+  /// cooking video (its description, caption or captions). [sourceUrl] is
+  /// the video, which the recipe keeps as its source.
+  static String generateRecipePromptForText(String text, {String? sourceUrl}) {
+    final source = sourceUrl == null || sourceUrl.trim().isEmpty
+        ? ''
+        : '\nSet "sourceUrl" to "${sourceUrl.trim()}".';
+    return '${generateRecipePrompt()}'
+        '\nThe text below comes from a cooking video: its description, caption or spoken captions. '
+        'Read the recipe out of it. Leave out links, sponsor messages and calls to subscribe. '
+        'Where an amount is only spoken or missing, write it as it is said, or leave "amount" null.'
+        '$source\n\nHERE IS THE TEXT OF THE VIDEO:\n$text';
   }
 
   // ══════════════════════════════════════════
