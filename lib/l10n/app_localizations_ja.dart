@@ -11558,4 +11558,52 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'ラベルと違いますか？確認・修正';
+
+  @override
+  String get clipScreenTitle => 'ブラウザからのレシピ';
+
+  @override
+  String get clipChooseCookbookTitle => 'どのレシピ本に保存しますか？';
+
+  @override
+  String get clipChooseCookbookMessage => 'ブラウザから届いたレシピの保存先となるレシピ本を選んでください。';
+
+  @override
+  String get clipNoCookbook => 'レシピを保存できるレシピ本がありません。レシピ本を作成してから、もう一度レシピを保存してください。';
+
+  @override
+  String get webClipperGuideTitle => 'ウェブクリッパー';
+
+  @override
+  String get webClipperGuideSubtitle => 'Chrome、Edge、Brave、Firefoxからワンクリックでレシピを保存';
+
+  @override
+  String get webClipperStep1Title => '拡張機能を追加';
+
+  @override
+  String get webClipperStep1Desc => 'パソコンのChrome、Edge、Brave、FirefoxにRecipe Spellbook Web Clipperをインストールします。';
+
+  @override
+  String get webClipperStep2Title => 'レシピを開く';
+
+  @override
+  String get webClipperStep2Desc => 'そのブラウザで任意のレシピページを開きます。';
+
+  @override
+  String get webClipperStep3Title => 'Saveをクリック';
+
+  @override
+  String get webClipperStep3Desc => 'ツールバーのRecipe Spellbookボタンをクリックし、Saveをクリックします。またはページを右クリックして「Save to Recipe Spellbook」を選びます。';
+
+  @override
+  String get webClipperStep4Title => '確認して保存';
+
+  @override
+  String get webClipperStep4Desc => 'ブラウザでRecipe Spellbookを開くことを許可し、レシピ本を選んでプレビューからレシピを保存します。';
+
+  @override
+  String get webClipperTip => 'WindowsとMac版のRecipe Spellbookアプリで使えます。拡張機能はクリックしたときだけページを読み取り、どのサーバーにも何も送信しません。';
+
+  @override
+  String get webClipperGetExtension => '拡張機能を入手';
 }

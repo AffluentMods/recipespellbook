@@ -5,6 +5,7 @@ import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
 import '../ui/screens/cookbooks/cookbook_isbn_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
+import '../ui/screens/import/clip_import_screen.dart';
 import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
 import '../ui/screens/more/more_screen.dart';
@@ -104,6 +105,10 @@ final router = GoRouter(
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const TransferScreen(),
     ),
+
+    // A recipe page sent from the browser extension
+    // (recipespellbook://clip?url=..., see utils/clip_request.dart).
+    clipImportRoute(parentNavigatorKey: rootNavigatorKey),
 
     // Kroger OAuth callback
     GoRoute(

@@ -6101,5 +6101,21 @@
   "nutriSheetEditedStatus": "Manually edited",
   "nutriSheetLinkedNoNutrition": "{title}: no nutrition data",
   "productReportMismatch": "Doesn't match the label? View or fix",
-  "@nutriSheetLinkedNoNutrition": {"placeholders": {"title": {"type": "String"}}}
+  "@nutriSheetLinkedNoNutrition": {"placeholders": {"title": {"type": "String"}}},
+  "clipScreenTitle": "Recipe from your browser",
+  "clipChooseCookbookTitle": "Save to which cookbook?",
+  "clipChooseCookbookMessage": "Pick the cookbook for the recipe from your browser.",
+  "clipNoCookbook": "There is no cookbook to save the recipe in. Create one, then save the recipe again.",
+  "webClipperGuideTitle": "Web Clipper",
+  "webClipperGuideSubtitle": "Save recipes from Chrome, Edge, Brave or Firefox in one click",
+  "webClipperStep1Title": "Add the extension",
+  "webClipperStep1Desc": "Install the Recipe Spellbook Web Clipper in Chrome, Edge, Brave or Firefox on your computer.",
+  "webClipperStep2Title": "Open a recipe",
+  "webClipperStep2Desc": "Go to any recipe page in that browser.",
+  "webClipperStep3Title": "Click Save",
+  "webClipperStep3Desc": "Click the Recipe Spellbook button in the toolbar, then Save. Or right-click the page and choose “Save to Recipe Spellbook”.",
+  "webClipperStep4Title": "Check and save",
+  "webClipperStep4Desc": "Let the browser open Recipe Spellbook, pick a cookbook and save the recipe from the preview.",
+  "webClipperTip": "Works with the Recipe Spellbook app for Windows and Mac. The extension reads a page only when you click it and sends nothing to any server.",
+  "webClipperGetExtension": "Get the extension"
 }

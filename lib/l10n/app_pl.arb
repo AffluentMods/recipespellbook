@@ -4623,5 +4623,21 @@
   "themePreviewSecondary": "Dodatkowy",
   "nutriSheetEditedStatus": "Edytowano ręcznie",
   "nutriSheetLinkedNoNutrition": "{title}: brak danych o wartościach odżywczych",
-  "productReportMismatch": "Nie zgadza się z etykietą? Zobacz lub popraw"
+  "productReportMismatch": "Nie zgadza się z etykietą? Zobacz lub popraw",
+  "clipScreenTitle": "Przepis z przeglądarki",
+  "clipChooseCookbookTitle": "Do której książki kucharskiej?",
+  "clipChooseCookbookMessage": "Wybierz książkę kucharską dla przepisu z przeglądarki.",
+  "clipNoCookbook": "Nie ma książki kucharskiej, w której można zapisać przepis. Utwórz ją, a potem zapisz przepis ponownie.",
+  "webClipperGuideTitle": "Web Clipper",
+  "webClipperGuideSubtitle": "Zapisuj przepisy z Chrome, Edge, Brave lub Firefox jednym kliknięciem",
+  "webClipperStep1Title": "Dodaj rozszerzenie",
+  "webClipperStep1Desc": "Zainstaluj Recipe Spellbook Web Clipper w Chrome, Edge, Brave lub Firefox na komputerze.",
+  "webClipperStep2Title": "Otwórz przepis",
+  "webClipperStep2Desc": "Przejdź w tej przeglądarce na dowolną stronę z przepisem.",
+  "webClipperStep3Title": "Kliknij Save",
+  "webClipperStep3Desc": "Kliknij przycisk Recipe Spellbook na pasku narzędzi, a potem Save. Możesz też kliknąć stronę prawym przyciskiem myszy i wybrać „Save to Recipe Spellbook”.",
+  "webClipperStep4Title": "Sprawdź i zapisz",
+  "webClipperStep4Desc": "Pozwól przeglądarce otworzyć Recipe Spellbook, wybierz książkę kucharską i zapisz przepis z podglądu.",
+  "webClipperTip": "Działa z aplikacją Recipe Spellbook dla Windows i Mac. Rozszerzenie odczytuje stronę tylko po kliknięciu i niczego nie wysyła na żaden serwer.",
+  "webClipperGetExtension": "Pobierz rozszerzenie"
 }

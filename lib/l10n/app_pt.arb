@@ -4623,5 +4623,21 @@
   "themePreviewSecondary": "Secundário",
   "nutriSheetEditedStatus": "Editado manualmente",
   "nutriSheetLinkedNoNutrition": "{title}: sem dados nutricionais",
-  "productReportMismatch": "Não confere com o rótulo? Ver ou corrigir"
+  "productReportMismatch": "Não confere com o rótulo? Ver ou corrigir",
+  "clipScreenTitle": "Receita do seu navegador",
+  "clipChooseCookbookTitle": "Salvar em qual livro de receitas?",
+  "clipChooseCookbookMessage": "Escolha o livro de receitas para a receita do seu navegador.",
+  "clipNoCookbook": "Não há nenhum livro de receitas para salvar a receita. Crie um e salve a receita novamente.",
+  "webClipperGuideTitle": "Web Clipper",
+  "webClipperGuideSubtitle": "Salve receitas do Chrome, Edge, Brave ou Firefox com um clique",
+  "webClipperStep1Title": "Adicione a extensão",
+  "webClipperStep1Desc": "Instale o Recipe Spellbook Web Clipper no Chrome, Edge, Brave ou Firefox do seu computador.",
+  "webClipperStep2Title": "Abra uma receita",
+  "webClipperStep2Desc": "Acesse qualquer página de receita nesse navegador.",
+  "webClipperStep3Title": "Clique em Save",
+  "webClipperStep3Desc": "Clique no botão do Recipe Spellbook na barra de ferramentas e depois em Save. Ou clique com o botão direito na página e escolha “Save to Recipe Spellbook”.",
+  "webClipperStep4Title": "Confira e salve",
+  "webClipperStep4Desc": "Deixe o navegador abrir o Recipe Spellbook, escolha um livro de receitas e salve a receita pela pré-visualização.",
+  "webClipperTip": "Funciona com o app Recipe Spellbook para Windows e Mac. A extensão só lê uma página quando você clica e não envia nada para nenhum servidor.",
+  "webClipperGetExtension": "Obter a extensão"
 }

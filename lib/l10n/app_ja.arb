@@ -4623,5 +4623,21 @@
   "themePreviewSecondary": "セカンダリ",
   "nutriSheetEditedStatus": "手動で編集済み",
   "nutriSheetLinkedNoNutrition": "{title}：栄養データなし",
-  "productReportMismatch": "ラベルと違いますか？確認・修正"
+  "productReportMismatch": "ラベルと違いますか？確認・修正",
+  "clipScreenTitle": "ブラウザからのレシピ",
+  "clipChooseCookbookTitle": "どのレシピ本に保存しますか？",
+  "clipChooseCookbookMessage": "ブラウザから届いたレシピの保存先となるレシピ本を選んでください。",
+  "clipNoCookbook": "レシピを保存できるレシピ本がありません。レシピ本を作成してから、もう一度レシピを保存してください。",
+  "webClipperGuideTitle": "ウェブクリッパー",
+  "webClipperGuideSubtitle": "Chrome、Edge、Brave、Firefoxからワンクリックでレシピを保存",
+  "webClipperStep1Title": "拡張機能を追加",
+  "webClipperStep1Desc": "パソコンのChrome、Edge、Brave、FirefoxにRecipe Spellbook Web Clipperをインストールします。",
+  "webClipperStep2Title": "レシピを開く",
+  "webClipperStep2Desc": "そのブラウザで任意のレシピページを開きます。",
+  "webClipperStep3Title": "Saveをクリック",
+  "webClipperStep3Desc": "ツールバーのRecipe Spellbookボタンをクリックし、Saveをクリックします。またはページを右クリックして「Save to Recipe Spellbook」を選びます。",
+  "webClipperStep4Title": "確認して保存",
+  "webClipperStep4Desc": "ブラウザでRecipe Spellbookを開くことを許可し、レシピ本を選んでプレビューからレシピを保存します。",
+  "webClipperTip": "WindowsとMac版のRecipe Spellbookアプリで使えます。拡張機能はクリックしたときだけページを読み取り、どのサーバーにも何も送信しません。",
+  "webClipperGetExtension": "拡張機能を入手"
 }

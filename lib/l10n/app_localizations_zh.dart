@@ -11554,4 +11554,52 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productReportMismatch => '与标签不符？查看或更正';
+
+  @override
+  String get clipScreenTitle => '来自浏览器的食谱';
+
+  @override
+  String get clipChooseCookbookTitle => '保存到哪本食谱书？';
+
+  @override
+  String get clipChooseCookbookMessage => '为来自浏览器的食谱选择一本食谱书。';
+
+  @override
+  String get clipNoCookbook => '没有可保存该食谱的食谱书。请先创建一本，然后再次保存食谱。';
+
+  @override
+  String get webClipperGuideTitle => '网页剪藏';
+
+  @override
+  String get webClipperGuideSubtitle => '一键保存 Chrome、Edge、Brave 或 Firefox 中的食谱';
+
+  @override
+  String get webClipperStep1Title => '添加扩展程序';
+
+  @override
+  String get webClipperStep1Desc => '在电脑上的 Chrome、Edge、Brave 或 Firefox 中安装 Recipe Spellbook Web Clipper。';
+
+  @override
+  String get webClipperStep2Title => '打开食谱';
+
+  @override
+  String get webClipperStep2Desc => '在该浏览器中打开任意食谱页面。';
+
+  @override
+  String get webClipperStep3Title => '点击 Save';
+
+  @override
+  String get webClipperStep3Desc => '点击工具栏中的 Recipe Spellbook 按钮，然后点击 Save。也可以右键点击页面并选择“Save to Recipe Spellbook”。';
+
+  @override
+  String get webClipperStep4Title => '检查并保存';
+
+  @override
+  String get webClipperStep4Desc => '允许浏览器打开 Recipe Spellbook，选择一本食谱书，然后在预览中保存食谱。';
+
+  @override
+  String get webClipperTip => '适用于 Windows 和 Mac 版 Recipe Spellbook 应用。扩展程序只会在你点击时读取页面，不会向任何服务器发送任何内容。';
+
+  @override
+  String get webClipperGetExtension => '获取扩展程序';
 }

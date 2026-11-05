@@ -11682,4 +11682,52 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Ne correspond pas à l\'étiquette ? Voir ou corriger';
+
+  @override
+  String get clipScreenTitle => 'Recette depuis votre navigateur';
+
+  @override
+  String get clipChooseCookbookTitle => 'Dans quel livre l’enregistrer ?';
+
+  @override
+  String get clipChooseCookbookMessage => 'Choisissez le livre pour la recette venue de votre navigateur.';
+
+  @override
+  String get clipNoCookbook => 'Aucun livre ne peut recevoir la recette. Créez-en un, puis enregistrez de nouveau la recette.';
+
+  @override
+  String get webClipperGuideTitle => 'Web Clipper';
+
+  @override
+  String get webClipperGuideSubtitle => 'Enregistrez des recettes depuis Chrome, Edge, Brave ou Firefox en un clic';
+
+  @override
+  String get webClipperStep1Title => 'Ajoutez l’extension';
+
+  @override
+  String get webClipperStep1Desc => 'Installez Recipe Spellbook Web Clipper dans Chrome, Edge, Brave ou Firefox sur votre ordinateur.';
+
+  @override
+  String get webClipperStep2Title => 'Ouvrez une recette';
+
+  @override
+  String get webClipperStep2Desc => 'Allez sur n’importe quelle page de recette dans ce navigateur.';
+
+  @override
+  String get webClipperStep3Title => 'Cliquez sur Save';
+
+  @override
+  String get webClipperStep3Desc => 'Cliquez sur le bouton Recipe Spellbook dans la barre d’outils, puis sur Save. Ou faites un clic droit sur la page et choisissez « Save to Recipe Spellbook ».';
+
+  @override
+  String get webClipperStep4Title => 'Vérifiez et enregistrez';
+
+  @override
+  String get webClipperStep4Desc => 'Laissez le navigateur ouvrir Recipe Spellbook, choisissez un livre et enregistrez la recette depuis l’aperçu.';
+
+  @override
+  String get webClipperTip => 'Fonctionne avec l’app Recipe Spellbook pour Windows et Mac. L’extension ne lit une page que lorsque vous cliquez et n’envoie rien à aucun serveur.';
+
+  @override
+  String get webClipperGetExtension => 'Obtenir l’extension';
 }

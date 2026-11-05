@@ -11586,4 +11586,52 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get productReportMismatch => '라벨과 다른가요? 보기 또는 수정';
+
+  @override
+  String get clipScreenTitle => '브라우저에서 가져온 레시피';
+
+  @override
+  String get clipChooseCookbookTitle => '어느 요리책에 저장할까요?';
+
+  @override
+  String get clipChooseCookbookMessage => '브라우저에서 가져온 레시피를 넣을 요리책을 선택하세요.';
+
+  @override
+  String get clipNoCookbook => '레시피를 저장할 요리책이 없습니다. 요리책을 만든 다음 레시피를 다시 저장하세요.';
+
+  @override
+  String get webClipperGuideTitle => '웹 클리퍼';
+
+  @override
+  String get webClipperGuideSubtitle => 'Chrome, Edge, Brave, Firefox에서 클릭 한 번으로 레시피 저장';
+
+  @override
+  String get webClipperStep1Title => '확장 프로그램 추가';
+
+  @override
+  String get webClipperStep1Desc => '컴퓨터의 Chrome, Edge, Brave 또는 Firefox에 Recipe Spellbook Web Clipper를 설치하세요.';
+
+  @override
+  String get webClipperStep2Title => '레시피 열기';
+
+  @override
+  String get webClipperStep2Desc => '그 브라우저에서 아무 레시피 페이지로 이동하세요.';
+
+  @override
+  String get webClipperStep3Title => 'Save 클릭';
+
+  @override
+  String get webClipperStep3Desc => '도구 모음에서 Recipe Spellbook 버튼을 클릭한 다음 Save를 클릭하세요. 또는 페이지를 마우스 오른쪽 버튼으로 클릭하고 \'Save to Recipe Spellbook\'을 선택하세요.';
+
+  @override
+  String get webClipperStep4Title => '확인 후 저장';
+
+  @override
+  String get webClipperStep4Desc => '브라우저가 Recipe Spellbook을 열도록 허용하고, 요리책을 선택한 다음 미리보기에서 레시피를 저장하세요.';
+
+  @override
+  String get webClipperTip => 'Windows 및 Mac용 Recipe Spellbook 앱에서 작동합니다. 확장 프로그램은 클릭할 때만 페이지를 읽으며 어떤 서버에도 아무것도 보내지 않습니다.';
+
+  @override
+  String get webClipperGetExtension => '확장 프로그램 받기';
 }

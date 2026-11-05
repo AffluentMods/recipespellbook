@@ -20568,6 +20568,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Doesn\'t match the label? View or fix'**
   String get productReportMismatch;
+
+  /// No description provided for @clipScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe from your browser'**
+  String get clipScreenTitle;
+
+  /// No description provided for @clipChooseCookbookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to which cookbook?'**
+  String get clipChooseCookbookTitle;
+
+  /// No description provided for @clipChooseCookbookMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the cookbook for the recipe from your browser.'**
+  String get clipChooseCookbookMessage;
+
+  /// No description provided for @clipNoCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no cookbook to save the recipe in. Create one, then save the recipe again.'**
+  String get clipNoCookbook;
+
+  /// No description provided for @webClipperGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Web Clipper'**
+  String get webClipperGuideTitle;
+
+  /// No description provided for @webClipperGuideSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save recipes from Chrome, Edge, Brave or Firefox in one click'**
+  String get webClipperGuideSubtitle;
+
+  /// No description provided for @webClipperStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the extension'**
+  String get webClipperStep1Title;
+
+  /// No description provided for @webClipperStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Install the Recipe Spellbook Web Clipper in Chrome, Edge, Brave or Firefox on your computer.'**
+  String get webClipperStep1Desc;
+
+  /// No description provided for @webClipperStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a recipe'**
+  String get webClipperStep2Title;
+
+  /// No description provided for @webClipperStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to any recipe page in that browser.'**
+  String get webClipperStep2Desc;
+
+  /// No description provided for @webClipperStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Click Save'**
+  String get webClipperStep3Title;
+
+  /// No description provided for @webClipperStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Click the Recipe Spellbook button in the toolbar, then Save. Or right-click the page and choose “Save to Recipe Spellbook”.'**
+  String get webClipperStep3Desc;
+
+  /// No description provided for @webClipperStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check and save'**
+  String get webClipperStep4Title;
+
+  /// No description provided for @webClipperStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Let the browser open Recipe Spellbook, pick a cookbook and save the recipe from the preview.'**
+  String get webClipperStep4Desc;
+
+  /// No description provided for @webClipperTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Works with the Recipe Spellbook app for Windows and Mac. The extension reads a page only when you click it and sends nothing to any server.'**
+  String get webClipperTip;
+
+  /// No description provided for @webClipperGetExtension.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the extension'**
+  String get webClipperGetExtension;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

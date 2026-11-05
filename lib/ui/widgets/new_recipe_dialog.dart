@@ -49,6 +49,27 @@ Future<void> showImportDialog(BuildContext context, String cookbookId, {bool aut
   );
 }
 
+/// Turns a failed import from a link into a plain-English message.
+String friendlyImportError(Object e, AppLocalizations l10n) {
+  final s = e.toString().toLowerCase();
+  if (s.contains('socketexception') || s.contains('failed host lookup') ||
+      s.contains('network') || s.contains('timeout') || s.contains('timed out') ||
+      s.contains('connection')) {
+    return l10n.addRecipeLinkUnreachable;
+  }
+  if (s.contains('403') || s.contains('401') || s.contains('login') ||
+      s.contains('private') || s.contains('sign in')) {
+    return l10n.addRecipeLinkNeedsLogin;
+  }
+  if (s.contains('404') || s.contains('not found')) {
+    return l10n.addRecipeLinkNotFound;
+  }
+  if (s.contains('no recipe') || s.contains('empty')) {
+    return l10n.importNoRecipeAtLink;
+  }
+  return l10n.addRecipeLinkUnreadable;
+}
+
 // ============ MODERN CHOOSER (2 options) ============
 
 class _AddRecipeChooser extends StatelessWidget {
@@ -295,7 +316,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         return;
       }
     } catch (e) {
-      failure = _friendlyImportError(e, l10n);
+      failure = friendlyImportError(e, l10n);
     }
     _hideLoading();
     if (otherwise.any(hasRecipeContent)) {
@@ -451,29 +472,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       _showImportPreview(recipes, sourceText: text);
     } catch (e) {
       _hideLoading();
-      _showError(_friendlyImportError(e, l10n));
+      _showError(friendlyImportError(e, l10n));
     }
-  }
-
-  /// Turn a raw import failure into a plain-English message.
-  String _friendlyImportError(Object e, AppLocalizations l10n) {
-    final s = e.toString().toLowerCase();
-    if (s.contains('socketexception') || s.contains('failed host lookup') ||
-        s.contains('network') || s.contains('timeout') || s.contains('timed out') ||
-        s.contains('connection')) {
-      return l10n.addRecipeLinkUnreachable;
-    }
-    if (s.contains('403') || s.contains('401') || s.contains('login') ||
-        s.contains('private') || s.contains('sign in')) {
-      return l10n.addRecipeLinkNeedsLogin;
-    }
-    if (s.contains('404') || s.contains('not found')) {
-      return l10n.addRecipeLinkNotFound;
-    }
-    if (s.contains('no recipe') || s.contains('empty')) {
-      return l10n.importNoRecipeAtLink;
-    }
-    return l10n.addRecipeLinkUnreadable;
   }
 
   // ========== BARCODE / QR IMPORT ==========

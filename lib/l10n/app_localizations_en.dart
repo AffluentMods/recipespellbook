@@ -11694,4 +11694,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Doesn\'t match the label? View or fix';
+
+  @override
+  String get clipScreenTitle => 'Recipe from your browser';
+
+  @override
+  String get clipChooseCookbookTitle => 'Save to which cookbook?';
+
+  @override
+  String get clipChooseCookbookMessage => 'Pick the cookbook for the recipe from your browser.';
+
+  @override
+  String get clipNoCookbook => 'There is no cookbook to save the recipe in. Create one, then save the recipe again.';
+
+  @override
+  String get webClipperGuideTitle => 'Web Clipper';
+
+  @override
+  String get webClipperGuideSubtitle => 'Save recipes from Chrome, Edge, Brave or Firefox in one click';
+
+  @override
+  String get webClipperStep1Title => 'Add the extension';
+
+  @override
+  String get webClipperStep1Desc => 'Install the Recipe Spellbook Web Clipper in Chrome, Edge, Brave or Firefox on your computer.';
+
+  @override
+  String get webClipperStep2Title => 'Open a recipe';
+
+  @override
+  String get webClipperStep2Desc => 'Go to any recipe page in that browser.';
+
+  @override
+  String get webClipperStep3Title => 'Click Save';
+
+  @override
+  String get webClipperStep3Desc => 'Click the Recipe Spellbook button in the toolbar, then Save. Or right-click the page and choose “Save to Recipe Spellbook”.';
+
+  @override
+  String get webClipperStep4Title => 'Check and save';
+
+  @override
+  String get webClipperStep4Desc => 'Let the browser open Recipe Spellbook, pick a cookbook and save the recipe from the preview.';
+
+  @override
+  String get webClipperTip => 'Works with the Recipe Spellbook app for Windows and Mac. The extension reads a page only when you click it and sends nothing to any server.';
+
+  @override
+  String get webClipperGetExtension => 'Get the extension';
 }

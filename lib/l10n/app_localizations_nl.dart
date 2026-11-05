@@ -11694,4 +11694,52 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Klopt het niet met het etiket? Bekijken of verbeteren';
+
+  @override
+  String get clipScreenTitle => 'Recept uit je browser';
+
+  @override
+  String get clipChooseCookbookTitle => 'In welk kookboek opslaan?';
+
+  @override
+  String get clipChooseCookbookMessage => 'Kies het kookboek voor het recept uit je browser.';
+
+  @override
+  String get clipNoCookbook => 'Er is geen kookboek om het recept in op te slaan. Maak er een aan en sla het recept daarna opnieuw op.';
+
+  @override
+  String get webClipperGuideTitle => 'Webclipper';
+
+  @override
+  String get webClipperGuideSubtitle => 'Sla recepten uit Chrome, Edge, Brave of Firefox op met één klik';
+
+  @override
+  String get webClipperStep1Title => 'Voeg de extensie toe';
+
+  @override
+  String get webClipperStep1Desc => 'Installeer de Recipe Spellbook Web Clipper in Chrome, Edge, Brave of Firefox op je computer.';
+
+  @override
+  String get webClipperStep2Title => 'Open een recept';
+
+  @override
+  String get webClipperStep2Desc => 'Ga in die browser naar een willekeurige receptpagina.';
+
+  @override
+  String get webClipperStep3Title => 'Klik op Save';
+
+  @override
+  String get webClipperStep3Desc => 'Klik op de Recipe Spellbook-knop in de werkbalk en daarna op Save. Of klik met de rechtermuisknop op de pagina en kies ‘Save to Recipe Spellbook’.';
+
+  @override
+  String get webClipperStep4Title => 'Controleer en sla op';
+
+  @override
+  String get webClipperStep4Desc => 'Laat de browser Recipe Spellbook openen, kies een kookboek en sla het recept op vanuit het voorbeeld.';
+
+  @override
+  String get webClipperTip => 'Werkt met de Recipe Spellbook-app voor Windows en Mac. De extensie leest een pagina alleen als je klikt en stuurt niets naar een server.';
+
+  @override
+  String get webClipperGetExtension => 'Extensie downloaden';
 }

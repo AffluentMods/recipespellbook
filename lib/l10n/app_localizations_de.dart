@@ -11682,4 +11682,52 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren';
+
+  @override
+  String get clipScreenTitle => 'Rezept aus deinem Browser';
+
+  @override
+  String get clipChooseCookbookTitle => 'In welches Kochbuch?';
+
+  @override
+  String get clipChooseCookbookMessage => 'Wähle das Kochbuch für das Rezept aus deinem Browser.';
+
+  @override
+  String get clipNoCookbook => 'Es gibt kein Kochbuch, in dem das Rezept gespeichert werden kann. Lege eines an und speichere das Rezept dann erneut.';
+
+  @override
+  String get webClipperGuideTitle => 'Web-Clipper';
+
+  @override
+  String get webClipperGuideSubtitle => 'Rezepte aus Chrome, Edge, Brave oder Firefox mit einem Klick speichern';
+
+  @override
+  String get webClipperStep1Title => 'Erweiterung hinzufügen';
+
+  @override
+  String get webClipperStep1Desc => 'Installiere den Recipe Spellbook Web Clipper in Chrome, Edge, Brave oder Firefox auf deinem Computer.';
+
+  @override
+  String get webClipperStep2Title => 'Rezept öffnen';
+
+  @override
+  String get webClipperStep2Desc => 'Öffne in diesem Browser eine beliebige Rezeptseite.';
+
+  @override
+  String get webClipperStep3Title => 'Auf Save klicken';
+
+  @override
+  String get webClipperStep3Desc => 'Klicke in der Symbolleiste auf die Recipe Spellbook-Schaltfläche und dann auf Save. Oder klicke mit der rechten Maustaste auf die Seite und wähle „Save to Recipe Spellbook“.';
+
+  @override
+  String get webClipperStep4Title => 'Prüfen und speichern';
+
+  @override
+  String get webClipperStep4Desc => 'Lass den Browser Recipe Spellbook öffnen, wähle ein Kochbuch und speichere das Rezept aus der Vorschau.';
+
+  @override
+  String get webClipperTip => 'Funktioniert mit der Recipe Spellbook-App für Windows und Mac. Die Erweiterung liest eine Seite nur, wenn du sie anklickst, und sendet nichts an einen Server.';
+
+  @override
+  String get webClipperGetExtension => 'Erweiterung holen';
 }

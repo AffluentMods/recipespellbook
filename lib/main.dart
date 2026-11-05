@@ -322,7 +322,8 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   //  and cold-start links opened twice.
   //  Every link shape is parsed by InviteLinkParser (utils/invite_link_parser.dart):
   //    /s/<code> share links, recipespellbook://import?code=, community links,
-  //    and /family/join/<code> family invites.
+  //    /family/join/<code> family invites, and recipespellbook://clip links
+  //    from the browser extension (web_clipper/), which open ClipImportScreen.
   StreamSubscription<Uri>? _deepLinkSub;
   String? _lastDeepLink;
   DateTime? _lastDeepLinkAt;

@@ -4185,5 +4185,21 @@
   "themePreviewSecondary": "Sekundär",
   "nutriSheetEditedStatus": "Manuell bearbeitet",
   "nutriSheetLinkedNoNutrition": "{title}: keine Nährwertangaben",
-  "productReportMismatch": "Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren"
+  "productReportMismatch": "Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren",
+  "clipScreenTitle": "Rezept aus deinem Browser",
+  "clipChooseCookbookTitle": "In welches Kochbuch?",
+  "clipChooseCookbookMessage": "Wähle das Kochbuch für das Rezept aus deinem Browser.",
+  "clipNoCookbook": "Es gibt kein Kochbuch, in dem das Rezept gespeichert werden kann. Lege eines an und speichere das Rezept dann erneut.",
+  "webClipperGuideTitle": "Web-Clipper",
+  "webClipperGuideSubtitle": "Rezepte aus Chrome, Edge, Brave oder Firefox mit einem Klick speichern",
+  "webClipperStep1Title": "Erweiterung hinzufügen",
+  "webClipperStep1Desc": "Installiere den Recipe Spellbook Web Clipper in Chrome, Edge, Brave oder Firefox auf deinem Computer.",
+  "webClipperStep2Title": "Rezept öffnen",
+  "webClipperStep2Desc": "Öffne in diesem Browser eine beliebige Rezeptseite.",
+  "webClipperStep3Title": "Auf Save klicken",
+  "webClipperStep3Desc": "Klicke in der Symbolleiste auf die Recipe Spellbook-Schaltfläche und dann auf Save. Oder klicke mit der rechten Maustaste auf die Seite und wähle „Save to Recipe Spellbook“.",
+  "webClipperStep4Title": "Prüfen und speichern",
+  "webClipperStep4Desc": "Lass den Browser Recipe Spellbook öffnen, wähle ein Kochbuch und speichere das Rezept aus der Vorschau.",
+  "webClipperTip": "Funktioniert mit der Recipe Spellbook-App für Windows und Mac. Die Erweiterung liest eine Seite nur, wenn du sie anklickst, und sendet nichts an einen Server.",
+  "webClipperGetExtension": "Erweiterung holen"
 }

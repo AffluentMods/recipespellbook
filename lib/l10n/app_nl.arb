@@ -4623,5 +4623,21 @@
   "themePreviewSecondary": "Secundair",
   "nutriSheetEditedStatus": "Handmatig bewerkt",
   "nutriSheetLinkedNoNutrition": "{title}: geen voedingswaarden",
-  "productReportMismatch": "Klopt het niet met het etiket? Bekijken of verbeteren"
+  "productReportMismatch": "Klopt het niet met het etiket? Bekijken of verbeteren",
+  "clipScreenTitle": "Recept uit je browser",
+  "clipChooseCookbookTitle": "In welk kookboek opslaan?",
+  "clipChooseCookbookMessage": "Kies het kookboek voor het recept uit je browser.",
+  "clipNoCookbook": "Er is geen kookboek om het recept in op te slaan. Maak er een aan en sla het recept daarna opnieuw op.",
+  "webClipperGuideTitle": "Webclipper",
+  "webClipperGuideSubtitle": "Sla recepten uit Chrome, Edge, Brave of Firefox op met één klik",
+  "webClipperStep1Title": "Voeg de extensie toe",
+  "webClipperStep1Desc": "Installeer de Recipe Spellbook Web Clipper in Chrome, Edge, Brave of Firefox op je computer.",
+  "webClipperStep2Title": "Open een recept",
+  "webClipperStep2Desc": "Ga in die browser naar een willekeurige receptpagina.",
+  "webClipperStep3Title": "Klik op Save",
+  "webClipperStep3Desc": "Klik op de Recipe Spellbook-knop in de werkbalk en daarna op Save. Of klik met de rechtermuisknop op de pagina en kies ‘Save to Recipe Spellbook’.",
+  "webClipperStep4Title": "Controleer en sla op",
+  "webClipperStep4Desc": "Laat de browser Recipe Spellbook openen, kies een kookboek en sla het recept op vanuit het voorbeeld.",
+  "webClipperTip": "Werkt met de Recipe Spellbook-app voor Windows en Mac. De extensie leest een pagina alleen als je klikt en stuurt niets naar een server.",
+  "webClipperGetExtension": "Extensie downloaden"
 }

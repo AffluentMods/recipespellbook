@@ -11838,4 +11838,52 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Не совпадает с этикеткой? Посмотреть или исправить';
+
+  @override
+  String get clipScreenTitle => 'Рецепт из браузера';
+
+  @override
+  String get clipChooseCookbookTitle => 'В какую книгу сохранить?';
+
+  @override
+  String get clipChooseCookbookMessage => 'Выберите кулинарную книгу для рецепта из браузера.';
+
+  @override
+  String get clipNoCookbook => 'Нет кулинарной книги, в которую можно сохранить рецепт. Создайте её, а затем сохраните рецепт ещё раз.';
+
+  @override
+  String get webClipperGuideTitle => 'Веб-клиппер';
+
+  @override
+  String get webClipperGuideSubtitle => 'Сохраняйте рецепты из Chrome, Edge, Brave или Firefox одним щелчком';
+
+  @override
+  String get webClipperStep1Title => 'Добавьте расширение';
+
+  @override
+  String get webClipperStep1Desc => 'Установите Recipe Spellbook Web Clipper в Chrome, Edge, Brave или Firefox на компьютере.';
+
+  @override
+  String get webClipperStep2Title => 'Откройте рецепт';
+
+  @override
+  String get webClipperStep2Desc => 'Перейдите в этом браузере на любую страницу с рецептом.';
+
+  @override
+  String get webClipperStep3Title => 'Нажмите Save';
+
+  @override
+  String get webClipperStep3Desc => 'Нажмите кнопку Recipe Spellbook на панели инструментов, а затем Save. Или щёлкните страницу правой кнопкой мыши и выберите «Save to Recipe Spellbook».';
+
+  @override
+  String get webClipperStep4Title => 'Проверьте и сохраните';
+
+  @override
+  String get webClipperStep4Desc => 'Разрешите браузеру открыть Recipe Spellbook, выберите кулинарную книгу и сохраните рецепт из предпросмотра.';
+
+  @override
+  String get webClipperTip => 'Работает с приложением Recipe Spellbook для Windows и Mac. Расширение читает страницу, только когда вы нажимаете на него, и ничего не отправляет ни на какой сервер.';
+
+  @override
+  String get webClipperGetExtension => 'Установить расширение';
 }

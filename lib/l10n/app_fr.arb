@@ -3648,5 +3648,21 @@
   "themePreviewSecondary": "Secondaire",
   "nutriSheetEditedStatus": "Modifié manuellement",
   "nutriSheetLinkedNoNutrition": "{title} : aucune donnée nutritionnelle",
-  "productReportMismatch": "Ne correspond pas à l'étiquette ? Voir ou corriger"
+  "productReportMismatch": "Ne correspond pas à l'étiquette ? Voir ou corriger",
+  "clipScreenTitle": "Recette depuis votre navigateur",
+  "clipChooseCookbookTitle": "Dans quel livre l’enregistrer ?",
+  "clipChooseCookbookMessage": "Choisissez le livre pour la recette venue de votre navigateur.",
+  "clipNoCookbook": "Aucun livre ne peut recevoir la recette. Créez-en un, puis enregistrez de nouveau la recette.",
+  "webClipperGuideTitle": "Web Clipper",
+  "webClipperGuideSubtitle": "Enregistrez des recettes depuis Chrome, Edge, Brave ou Firefox en un clic",
+  "webClipperStep1Title": "Ajoutez l’extension",
+  "webClipperStep1Desc": "Installez Recipe Spellbook Web Clipper dans Chrome, Edge, Brave ou Firefox sur votre ordinateur.",
+  "webClipperStep2Title": "Ouvrez une recette",
+  "webClipperStep2Desc": "Allez sur n’importe quelle page de recette dans ce navigateur.",
+  "webClipperStep3Title": "Cliquez sur Save",
+  "webClipperStep3Desc": "Cliquez sur le bouton Recipe Spellbook dans la barre d’outils, puis sur Save. Ou faites un clic droit sur la page et choisissez « Save to Recipe Spellbook ».",
+  "webClipperStep4Title": "Vérifiez et enregistrez",
+  "webClipperStep4Desc": "Laissez le navigateur ouvrir Recipe Spellbook, choisissez un livre et enregistrez la recette depuis l’aperçu.",
+  "webClipperTip": "Fonctionne avec l’app Recipe Spellbook pour Windows et Mac. L’extension ne lit une page que lorsque vous cliquez et n’envoie rien à aucun serveur.",
+  "webClipperGetExtension": "Obtenir l’extension"
 }

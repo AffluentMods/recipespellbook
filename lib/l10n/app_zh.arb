@@ -4623,5 +4623,21 @@
   "themePreviewSecondary": "次要",
   "nutriSheetEditedStatus": "已手动编辑",
   "nutriSheetLinkedNoNutrition": "{title}：无营养数据",
-  "productReportMismatch": "与标签不符？查看或更正"
+  "productReportMismatch": "与标签不符？查看或更正",
+  "clipScreenTitle": "来自浏览器的食谱",
+  "clipChooseCookbookTitle": "保存到哪本食谱书？",
+  "clipChooseCookbookMessage": "为来自浏览器的食谱选择一本食谱书。",
+  "clipNoCookbook": "没有可保存该食谱的食谱书。请先创建一本，然后再次保存食谱。",
+  "webClipperGuideTitle": "网页剪藏",
+  "webClipperGuideSubtitle": "一键保存 Chrome、Edge、Brave 或 Firefox 中的食谱",
+  "webClipperStep1Title": "添加扩展程序",
+  "webClipperStep1Desc": "在电脑上的 Chrome、Edge、Brave 或 Firefox 中安装 Recipe Spellbook Web Clipper。",
+  "webClipperStep2Title": "打开食谱",
+  "webClipperStep2Desc": "在该浏览器中打开任意食谱页面。",
+  "webClipperStep3Title": "点击 Save",
+  "webClipperStep3Desc": "点击工具栏中的 Recipe Spellbook 按钮，然后点击 Save。也可以右键点击页面并选择“Save to Recipe Spellbook”。",
+  "webClipperStep4Title": "检查并保存",
+  "webClipperStep4Desc": "允许浏览器打开 Recipe Spellbook，选择一本食谱书，然后在预览中保存食谱。",
+  "webClipperTip": "适用于 Windows 和 Mac 版 Recipe Spellbook 应用。扩展程序只会在你点击时读取页面，不会向任何服务器发送任何内容。",
+  "webClipperGetExtension": "获取扩展程序"
 }

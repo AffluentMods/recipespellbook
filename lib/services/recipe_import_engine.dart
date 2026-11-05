@@ -1572,6 +1572,33 @@ class RecipeImportEngine {
     return recipes;
   }
 
+  /// The recipe in schema.org JSON-LD that a browser read off [pageUrl] (the
+  /// web clipper sends it along when it opens the app), read the way the
+  /// JSON-LD of a fetched page is. Null when it holds no recipe with
+  /// ingredients or steps.
+  static ImportedRecipe? parseFromJsonLd(String source, {required String pageUrl}) {
+    final entries = <Map<String, dynamic>>[];
+    _collectJsonLdRecipes(_decodeJsonLd(source), entries, 0);
+    for (final entry in entries) {
+      final ImportedRecipe recipe;
+      try {
+        recipe = _recipeFromJsonLd(entry);
+      } catch (_) {
+        continue;
+      }
+      if (!_hasContent(recipe)) continue;
+      final normalized = _normalizeUrl(pageUrl);
+      final siteCourse = recipe.suggestedCourse;
+      recipe.sourceUrl = normalized;
+      recipe.imageUrl = _absoluteUrl(recipe.imageUrl, normalized);
+      _detectCourseAndCategory(recipe);
+      // A course the site names stands. The guess only fills in for none.
+      if (siteCourse != null) recipe.suggestedCourse = siteCourse;
+      return recipe;
+    }
+    return null;
+  }
+
   // ========== WEB SCRAPING ==========
 
   static bool _hasContent(ImportedRecipe? recipe) =>

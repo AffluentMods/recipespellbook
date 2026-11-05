@@ -4623,5 +4623,21 @@
   "themePreviewSecondary": "Вторичный",
   "nutriSheetEditedStatus": "Изменено вручную",
   "nutriSheetLinkedNoNutrition": "{title}: нет данных о пищевой ценности",
-  "productReportMismatch": "Не совпадает с этикеткой? Посмотреть или исправить"
+  "productReportMismatch": "Не совпадает с этикеткой? Посмотреть или исправить",
+  "clipScreenTitle": "Рецепт из браузера",
+  "clipChooseCookbookTitle": "В какую книгу сохранить?",
+  "clipChooseCookbookMessage": "Выберите кулинарную книгу для рецепта из браузера.",
+  "clipNoCookbook": "Нет кулинарной книги, в которую можно сохранить рецепт. Создайте её, а затем сохраните рецепт ещё раз.",
+  "webClipperGuideTitle": "Веб-клиппер",
+  "webClipperGuideSubtitle": "Сохраняйте рецепты из Chrome, Edge, Brave или Firefox одним щелчком",
+  "webClipperStep1Title": "Добавьте расширение",
+  "webClipperStep1Desc": "Установите Recipe Spellbook Web Clipper в Chrome, Edge, Brave или Firefox на компьютере.",
+  "webClipperStep2Title": "Откройте рецепт",
+  "webClipperStep2Desc": "Перейдите в этом браузере на любую страницу с рецептом.",
+  "webClipperStep3Title": "Нажмите Save",
+  "webClipperStep3Desc": "Нажмите кнопку Recipe Spellbook на панели инструментов, а затем Save. Или щёлкните страницу правой кнопкой мыши и выберите «Save to Recipe Spellbook».",
+  "webClipperStep4Title": "Проверьте и сохраните",
+  "webClipperStep4Desc": "Разрешите браузеру открыть Recipe Spellbook, выберите кулинарную книгу и сохраните рецепт из предпросмотра.",
+  "webClipperTip": "Работает с приложением Recipe Spellbook для Windows и Mac. Расширение читает страницу, только когда вы нажимаете на него, и ничего не отправляет ни на какой сервер.",
+  "webClipperGetExtension": "Установить расширение"
 }

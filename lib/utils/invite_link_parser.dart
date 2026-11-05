@@ -13,11 +13,24 @@
 /// https://recipespellbook.app/family/join/CODE   → family invite
 /// recipespellbook://family/join/CODE             → family invite
 /// CODE (pasted on its own)                       → bare code (ambiguous)
+/// recipespellbook://clip?url=URL[&title=T][&data=D][&z=1]
+///                                                → recipe page from the
+///                                                  browser extension
 /// ```
+///
+/// The clip link comes from the web clipper (`web_clipper/`): `url` is the
+/// page (http or https only), `title` what it is called, and `data` the
+/// schema.org Recipe JSON-LD read off the page as base64url (raw DEFLATE
+/// compressed first when `z=1`). See [ClipRequest] for the limits. Clip links
+/// only come in from the system: pasted text never parses to one.
 ///
 /// Anything else — including `recipespellbook://kroger-callback?code=…` and
 /// links to other sites — parses to null.
 library;
+
+import 'clip_request.dart';
+
+export 'clip_request.dart' show ClipRequest;
 
 /// What an invite link points at.
 enum InviteTargetKind {
@@ -35,18 +48,27 @@ enum InviteTargetKind {
   /// the caller has to resolve it (try as a share code first, then as a
   /// family code).
   bareCode,
+
+  /// A recipe page sent from the browser extension, to import.
+  clip,
 }
 
 /// The typed result of parsing an invite link.
 class InviteTarget {
   final InviteTargetKind kind;
+
+  /// The code or id; for a [InviteTargetKind.clip], the page address.
   final String value;
 
-  const InviteTarget(this.kind, this.value);
+  /// What a [InviteTargetKind.clip] link sent along.
+  final ClipRequest? clip;
+
+  const InviteTarget(this.kind, this.value, {this.clip});
   const InviteTarget.shareCode(String code) : this(InviteTargetKind.shareCode, code);
   const InviteTarget.communityId(String id) : this(InviteTargetKind.communityId, id);
   const InviteTarget.familyInviteCode(String code) : this(InviteTargetKind.familyInviteCode, code);
   const InviteTarget.bareCode(String code) : this(InviteTargetKind.bareCode, code);
+  InviteTarget.clip(ClipRequest request) : this(InviteTargetKind.clip, request.url, clip: request);
 
   /// In-app route for this target, or null for a [InviteTargetKind.bareCode]
   /// that still needs resolving.
@@ -55,14 +77,15 @@ class InviteTarget {
         InviteTargetKind.communityId => '/community/${Uri.encodeComponent(value)}',
         InviteTargetKind.familyInviteCode => '/family/join/${Uri.encodeComponent(value)}',
         InviteTargetKind.bareCode => null,
+        InviteTargetKind.clip => clip?.route,
       };
 
   @override
   bool operator ==(Object other) =>
-      other is InviteTarget && other.kind == kind && other.value == value;
+      other is InviteTarget && other.kind == kind && other.value == value && other.clip == clip;
 
   @override
-  int get hashCode => Object.hash(kind, value);
+  int get hashCode => Object.hash(kind, value, clip);
 
   @override
   String toString() => 'InviteTarget(${kind.name}, $value)';
@@ -126,7 +149,9 @@ abstract final class InviteLinkParser {
       final uri = Uri.tryParse(_trimPunctuation(m.group(0)!));
       if (uri == null) continue;
       final target = parseUri(uri);
-      if (target != null) return target;
+      // A clip link only comes from the browser extension, through the
+      // system. Pasted or shared, it is no invite.
+      if (target != null && target.kind != InviteTargetKind.clip) return target;
       sawForeignUrl = true;
     }
 
@@ -174,6 +199,9 @@ abstract final class InviteLinkParser {
           return _target(InviteTargetKind.familyInviteCode, segs[1]);
         }
         return _target(InviteTargetKind.familyInviteCode, uri.queryParameters['code']);
+      case 'clip':
+        final request = ClipRequest.fromParameters(uri.queryParameters);
+        return request == null ? null : InviteTarget.clip(request);
       case '':
         // Host-less form: recipespellbook:///s/<code>
         return _parsePath(segs);
