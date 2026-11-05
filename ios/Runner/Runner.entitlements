@@ -10,5 +10,9 @@
 	<array>
 		<string>applinks:recipespellbook.app</string>
 	</array>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.affluentlabs.recipespellbook</string>
+	</array>
 </dict>
 </plist>
