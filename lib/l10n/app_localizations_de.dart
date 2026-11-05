@@ -10965,4 +10965,32 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get notifPermissionDenied => 'Benachrichtigungen für Recipe Spellbook sind aus. Schalte sie in den Geräteeinstellungen ein.';
+
+  @override
+  String get syncNotInPlan => 'Cloud-Synchronisierung ist in deinem Tarif nicht enthalten';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge konnten auf diesem Gerät nicht gespeichert werden.',
+      one: '1 Eintrag konnte auf diesem Gerät nicht gespeichert werden.',
+    );
+    return '$_temp0 Gib denselben Code innerhalb eines Tages noch einmal ein, um es erneut zu versuchen.';
+  }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Backup gespeichert, aber $count Fotos fehlen darin.',
+      one: 'Backup gespeichert, aber 1 Foto fehlt darin.',
+    );
+    return '$_temp0 Fotos, die nur in der Cloud liegen, brauchen eine Internetverbindung. Verbinde dich und erstelle das Backup erneut, um sie aufzunehmen.';
+  }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Dein Konto konnte nicht gelöscht werden, daher wurde nichts gelöscht. Prüfe deine Internetverbindung und versuche es erneut.';
 }

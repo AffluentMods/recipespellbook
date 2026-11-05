@@ -4161,5 +4161,9 @@
   "communityFeedLoadMoreFailed": "続きを読み込めませんでした",
   "notifDownloadsOffer": "ダウンロードを通知する",
   "notifDownloadsOn": "誰かがダウンロードすると通知が届きます。",
-  "notifPermissionDenied": "Recipe Spellbook の通知がオフになっています。端末の設定でオンにしてください。"
+  "notifPermissionDenied": "Recipe Spellbook の通知がオフになっています。端末の設定でオンにしてください。",
+  "syncNotInPlan": "ご利用のプランにはクラウド同期が含まれていません",
+  "transferRowsLeftOut": "{count, plural, other{{count} 件の項目をこの端末に保存できませんでした。}}もう一度試すには、1 日以内に同じコードを再入力してください。",
+  "backupPhotosLeftOut": "{count, plural, other{バックアップを保存しましたが、{count} 枚の写真が含まれていません。}}クラウドにしかない写真にはインターネット接続が必要です。接続してからもう一度バックアップを作成すると含まれます。",
+  "deleteAllDataAccountFailed": "アカウントを削除できなかったため、何も削除されていません。インターネット接続を確認して、もう一度お試しください。"
 }

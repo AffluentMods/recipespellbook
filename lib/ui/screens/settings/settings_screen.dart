@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/ui/screens/settings/pantry_screen.dart';
 import '../../../data/app_enums.dart';
+import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 // TODO: Kitchen Buddy hidden for now
@@ -604,6 +605,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Responsive.showAdaptiveSheet(context, builder: (sheetCtx) => _ExportOptionsSheet(
       l10n: l10n,
       onSaveFullZip: (options) async {
+        // A big backup on a phone goes out through the share sheet, which
+        // needs an anchor on iPad.
+        final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
         try {
@@ -612,10 +616,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onProgress: (status) {
               if (context.mounted) AppSnackbar.loading(context, status);
             },
+            sharePositionOrigin: origin,
           );
           if (context.mounted) {
             AppSnackbar.dismiss(context);
-            if (saved) AppSnackbar.success(context, l10n.exportSaved);
+            if (saved.done && saved.photosLeftOut > 0) {
+              AppSnackbar.warning(context, l10n.backupPhotosLeftOut(saved.photosLeftOut));
+            } else if (saved.done) {
+              AppSnackbar.success(context, l10n.exportSaved);
+            }
           }
         } catch (e) {
           if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
@@ -626,9 +635,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
-        FileShareOutcome outcome;
+        final BackupExportResult shared;
         try {
-          outcome = await service.shareFullZipExport(
+          shared = await service.shareFullZipExport(
             options: options,
             onProgress: (status) {
               if (context.mounted) AppSnackbar.loading(context, status);
@@ -641,7 +650,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         }
         if (context.mounted) {
           AppSnackbar.dismiss(context);
-          if (outcome == FileShareOutcome.saved) AppSnackbar.success(context, l10n.exportSaved);
+          if (shared.done && shared.photosLeftOut > 0) {
+            AppSnackbar.warning(context, l10n.backupPhotosLeftOut(shared.photosLeftOut));
+          }
         }
       },
       onExportCookbook: () async {
@@ -969,8 +980,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     try {
       if (scope == _ResetScope.all) {
-        await AuthService.instance.deleteAccount();
-        await db.deleteAllUserData();
+        if (!await deleteAccountThenData(db)) {
+          // Offline or a server error: the account is still there, so
+          // nothing here was deleted either. Say so and let them retry.
+          if (context.mounted) {
+            Navigator.of(context, rootNavigator: true).maybePop(); // drop progress dialog
+            AppSnackbar.error(context, l10n.deleteAllDataAccountFailed);
+          }
+          return;
+        }
         settingsNotifier?.resetToDefaults();
       } else {
         await db.deleteLocalRecipeData();
@@ -1091,6 +1109,17 @@ class _TierBadge extends ConsumerWidget {
 // ════════════════════════════════════════════
 
 enum _ResetScope { local, all }
+
+/// "Delete all data": the account on the server first, then everything on
+/// this device. When there is an account and it could not be deleted
+/// (offline, a server error), nothing is deleted and this says false: wiping
+/// the device and quitting would leave the cloud account and its data
+/// behind while the app said they were gone.
+Future<bool> deleteAccountThenData(AppDatabase db) async {
+  if (AuthService.instance.isSignedIn && !await AuthService.instance.deleteAccount()) return false;
+  await db.deleteAllUserData();
+  return true;
+}
 
 /// Hands the desktop settings pane's current page to the pane navigator's
 /// root route (which is built once), so switching sections just rebuilds it.

@@ -11054,4 +11054,36 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get notifPermissionDenied => 'Powiadomienia Recipe Spellbook są wyłączone. Włącz je w ustawieniach urządzenia.';
+
+  @override
+  String get syncNotInPlan => 'Twój plan nie obejmuje synchronizacji w chmurze';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nie udało się zapisać $count elementu na tym urządzeniu.',
+      many: 'Nie udało się zapisać $count elementów na tym urządzeniu.',
+      few: 'Nie udało się zapisać $count elementów na tym urządzeniu.',
+      one: 'Nie udało się zapisać 1 elementu na tym urządzeniu.',
+    );
+    return '$_temp0 Aby spróbować jeszcze raz, wpisz ten sam kod ponownie w ciągu doby.';
+  }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Kopia zapasowa zapisana, ale brakuje w niej $count zdjęcia.',
+      many: 'Kopia zapasowa zapisana, ale brakuje w niej $count zdjęć.',
+      few: 'Kopia zapasowa zapisana, ale brakuje w niej $count zdjęć.',
+      one: 'Kopia zapasowa zapisana, ale brakuje w niej 1 zdjęcia.',
+    );
+    return '$_temp0 Zdjęcia, które są tylko w chmurze, wymagają połączenia z internetem. Połącz się i utwórz kopię ponownie, aby je dołączyć.';
+  }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Nie udało się usunąć konta, więc nic nie zostało usunięte. Sprawdź połączenie z internetem i spróbuj ponownie.';
 }

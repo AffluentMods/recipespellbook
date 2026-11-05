@@ -55,6 +55,10 @@ class TransferClaimResult {
   /// Recipes this device already had and kept as they were.
   final int recipesAlreadyHere;
 
+  /// Rows of the transfer that could not be read or saved here. When there
+  /// are any, the download is kept, so the same code can be tried again.
+  final int rowsLeftOut;
+
   const TransferClaimResult({
     required this.data,
     this.authToken,
@@ -64,6 +68,7 @@ class TransferClaimResult {
     this.avatarUrl,
     this.importedCount = 0,
     this.recipesAlreadyHere = 0,
+    this.rowsLeftOut = 0,
   });
 }
 
@@ -262,10 +267,15 @@ class TransferService {
       // The bundle stays on the device, so the same code can be tried again.
       throw TransferException(TransferFailure.notSaved, '$e');
     }
-    await _forgetBundle();
+    // Rows that did not make it in: the bundle stays for another try with
+    // the same code, which keeps what arrived and adds nothing twice.
+    if (stats.failed == 0) await _forgetBundle();
+    // What arrived carries the other device's dates, mostly older than the
+    // last push here, which an ordinary sync would pass over for good.
+    if (stats.written > 0) await SyncService.instance.pushEverythingNextSync();
 
     debugPrint('[Transfer] Imported ${stats.written} entities, '
-        '${stats.recipesAlreadyHere} recipes were here already');
+        '${stats.recipesAlreadyHere} recipes were here already, ${stats.failed} left out');
 
     return TransferClaimResult(
       data: data,
@@ -276,6 +286,7 @@ class TransferService {
       avatarUrl: _text(bundle['avatarUrl']),
       importedCount: stats.written,
       recipesAlreadyHere: stats.recipesAlreadyHere,
+      rowsLeftOut: stats.failed,
     );
   }
 
@@ -686,6 +697,7 @@ class TransferService {
         await db.into(table).insertOnConflictUpdate(theirs);
         stats.written++;
       } catch (e) {
+        stats.failed++;
         debugPrint('[Transfer] Left out a ${table.actualTableName} row: $e');
       }
     }
@@ -698,7 +710,10 @@ class TransferService {
       try {
         final d = row as Map<String, dynamic>;
         final id = d['id'] as String;
-        if (!_plainId(id)) continue;
+        if (!_plainId(id)) {
+          stats.failed++;
+          continue;
+        }
         final theirs = _toCookbookCompanion(d);
         final local = mine[id];
         final asSeeded = _seededCookbooks[id];
@@ -726,6 +741,7 @@ class TransferService {
         }
         if (arrived) stats.written++;
       } catch (e) {
+        stats.failed++;
         debugPrint('[Transfer] Left out a cookbook: $e');
       }
     }
@@ -754,6 +770,7 @@ class TransferService {
       if (row is Map<String, dynamic> && _canBeStored(row)) {
         incoming[row['id'] as String] = row;
       } else {
+        stats.failed++;
         debugPrint('[Transfer] Left out a recipe that could not be read');
       }
     }
@@ -799,6 +816,7 @@ class TransferService {
         taken.add(plan.targetId);
         plans[id] = plan;
       } catch (e) {
+        stats.failed++;
         debugPrint('[Transfer] Left out a recipe that could not be read: $e');
       }
     }
@@ -824,6 +842,7 @@ class TransferService {
             stats.recipesAlreadyHere++;
         }
       } catch (e) {
+        stats.failed++;
         debugPrint('[Transfer] Left out a recipe that could not be stored: $e');
       }
     }
@@ -1779,6 +1798,9 @@ class _ImportStats {
 
   /// Recipes this device already had and kept.
   int recipesAlreadyHere = 0;
+
+  /// Rows of the bundle that could not be read or stored, and were left out.
+  int failed = 0;
 }
 
 /// What happens to a recipe from the other device.

@@ -4161,5 +4161,9 @@
   "communityFeedLoadMoreFailed": "Kon niet meer laden",
   "notifDownloadsOffer": "Meld me downloads",
   "notifDownloadsOn": "Je krijgt een melding als iemand het downloadt.",
-  "notifPermissionDenied": "Meldingen voor Recipe Spellbook staan uit. Zet ze aan in de instellingen van je apparaat."
+  "notifPermissionDenied": "Meldingen voor Recipe Spellbook staan uit. Zet ze aan in de instellingen van je apparaat.",
+  "syncNotInPlan": "Cloudsynchronisatie zit niet in je abonnement",
+  "transferRowsLeftOut": "{count, plural, =1{1 item kon niet op dit apparaat worden opgeslagen.} other{{count} items konden niet op dit apparaat worden opgeslagen.}} Voer binnen een dag dezelfde code opnieuw in om het nog eens te proberen.",
+  "backupPhotosLeftOut": "{count, plural, =1{Back-up opgeslagen, maar er ontbreekt 1 foto in.} other{Back-up opgeslagen, maar er ontbreken {count} foto's in.}} Foto's die alleen in de cloud staan, hebben een internetverbinding nodig. Maak verbinding en maak de back-up opnieuw om ze mee te nemen.",
+  "deleteAllDataAccountFailed": "Je account kon niet worden verwijderd, dus er is niets verwijderd. Controleer je internetverbinding en probeer het opnieuw."
 }

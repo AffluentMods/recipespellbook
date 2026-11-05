@@ -10887,4 +10887,30 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notifPermissionDenied => 'Recipe Spellbook 알림이 꺼져 있습니다. 기기 설정에서 켜 주세요.';
+
+  @override
+  String get syncNotInPlan => '현재 요금제에는 클라우드 동기화가 포함되어 있지 않습니다';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목을 이 기기에 저장하지 못했습니다.',
+    );
+    return '$_temp0 다시 시도하려면 하루 안에 같은 코드를 다시 입력하세요.';
+  }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '백업을 저장했지만 사진 $count장이 포함되지 않았습니다.',
+    );
+    return '$_temp0 클라우드에만 있는 사진은 인터넷 연결이 필요합니다. 연결한 뒤 백업을 다시 만들면 포함됩니다.';
+  }
+
+  @override
+  String get deleteAllDataAccountFailed => '계정을 삭제하지 못해 아무것도 삭제되지 않았습니다. 인터넷 연결을 확인하고 다시 시도하세요.';
 }

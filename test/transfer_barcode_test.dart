@@ -82,14 +82,17 @@ void main() {
         ],
       });
 
-      await receive(server, phone, code);
+      final result = await receive(server, phone, code);
 
       expect(mine.readAsStringSync(), 'MY OWN PHOTO');
-      // An id that reads like a path does not get into the library at all.
+      // An id that reads like a path does not get into the library at all,
+      // and the receiver is told how many rows stayed out.
       expect(await phone.liveTitles(), ['Brownies']);
       expect(await phone.cookbookNames(), ['My Recipes', 'Shared recipes']);
-      // What did arrive has its photos, each named after its own bytes.
-      final written = filesUnder(phone.home).keys.where((name) => name != 'docs/recipe_images/my_cover.jpg');
+      expect(result.rowsLeftOut, 7);
+      // What did arrive has its photos, each named after its own bytes. The
+      // transfer itself is kept in the app's own folder for another try.
+      final written = filesUnder(phone.docs).keys.map((name) => 'docs/$name').where((name) => name != 'docs/recipe_images/my_cover.jpg');
       expect(written, hasLength(3));
       expect(written, everyElement(matches(RegExp(r'^docs/images/transferred/[0-9a-f]{40}\.jpg$'))));
       final brownies = await phone.recipeTitled('Brownies');
@@ -1709,9 +1712,10 @@ void main() {
         ],
       });
 
-      await receive(server, receiver, code);
+      final result = await receive(server, receiver, code);
 
       expect(await receiver.liveTitles(), ['Brownies, again']);
+      expect(result.rowsLeftOut, 8);
       expect((await receiver.ingredientsOf('recipe_ok')).map((i) => i.name), ['chocolate']);
       // Nothing of a recipe that could not be stored whole stays behind.
       final db = receiver.db;

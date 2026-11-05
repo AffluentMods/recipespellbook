@@ -19524,6 +19524,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications are off for Recipe Spellbook. Turn them on in your device settings.'**
   String get notifPermissionDenied;
+
+  /// No description provided for @syncNotInPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Sync is not included in your plan'**
+  String get syncNotInPlan;
+
+  /// No description provided for @transferRowsLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item could not be saved on this device.} other{{count} items could not be saved on this device.}} To try once more, enter the same code again within a day.'**
+  String transferRowsLeftOut(int count);
+
+  /// No description provided for @backupPhotosLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Backup saved, but 1 photo is not in it.} other{Backup saved, but {count} photos are not in it.}} Photos kept only in the cloud need an internet connection. Connect and make the backup again to include them.'**
+  String backupPhotosLeftOut(int count);
+
+  /// No description provided for @deleteAllDataAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account could not be deleted, so nothing was deleted. Check your internet connection and try again.'**
+  String get deleteAllDataAccountFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

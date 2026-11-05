@@ -11046,4 +11046,36 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notifPermissionDenied => 'Уведомления Recipe Spellbook выключены. Включите их в настройках устройства.';
+
+  @override
+  String get syncNotInPlan => 'Облачная синхронизация не входит в ваш тариф';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не удалось сохранить $count элемента на этом устройстве.',
+      many: 'Не удалось сохранить $count элементов на этом устройстве.',
+      few: 'Не удалось сохранить $count элемента на этом устройстве.',
+      one: 'Не удалось сохранить $count элемент на этом устройстве.',
+    );
+    return '$_temp0 Чтобы попробовать ещё раз, введите тот же код в течение суток.';
+  }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Резервная копия сохранена, но в ней нет $count фото.',
+      many: 'Резервная копия сохранена, но в ней нет $count фото.',
+      few: 'Резервная копия сохранена, но в ней нет $count фото.',
+      one: 'Резервная копия сохранена, но в ней нет $count фото.',
+    );
+    return '$_temp0 Для фото, которые есть только в облаке, нужно подключение к интернету. Подключитесь и создайте копию ещё раз, чтобы они вошли в неё.';
+  }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Не удалось удалить аккаунт, поэтому ничего не удалено. Проверьте подключение к интернету и попробуйте ещё раз.';
 }

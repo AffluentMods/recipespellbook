@@ -3186,5 +3186,9 @@
   "communityFeedLoadMoreFailed": "Impossible de charger la suite",
   "notifDownloadsOffer": "M'avertir des téléchargements",
   "notifDownloadsOn": "Vous recevrez une notification quand quelqu'un le téléchargera.",
-  "notifPermissionDenied": "Les notifications de Recipe Spellbook sont désactivées. Activez-les dans les réglages de l'appareil."
+  "notifPermissionDenied": "Les notifications de Recipe Spellbook sont désactivées. Activez-les dans les réglages de l'appareil.",
+  "syncNotInPlan": "La synchronisation cloud n'est pas incluse dans votre forfait",
+  "transferRowsLeftOut": "{count, plural, =1{1 élément n'a pas pu être enregistré sur cet appareil.} other{{count} éléments n'ont pas pu être enregistrés sur cet appareil.}} Pour réessayer, saisissez à nouveau le même code dans les 24 heures.",
+  "backupPhotosLeftOut": "{count, plural, =1{Sauvegarde enregistrée, mais 1 photo n'y figure pas.} other{Sauvegarde enregistrée, mais {count} photos n'y figurent pas.}} Les photos qui ne sont que dans le cloud nécessitent une connexion internet. Connectez-vous et refaites la sauvegarde pour les inclure.",
+  "deleteAllDataAccountFailed": "Votre compte n'a pas pu être supprimé, donc rien n'a été supprimé. Vérifiez votre connexion internet et réessayez."
 }

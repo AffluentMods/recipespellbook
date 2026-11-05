@@ -37,7 +37,19 @@ class CollabService {
   /// change, so permission-gated UI updates promptly.
   final ValueNotifier<int> revision = ValueNotifier(0);
 
-  bool _syncing = false;
+  /// Rows edited within this window before the last push are sent again.
+  /// Drift keeps timestamps in whole seconds while the push cursor has
+  /// milliseconds, so an edit in the same second as a push looked older than
+  /// it and never went out. Duplicates are harmless (same as
+  /// SyncService's overlap).
+  static const _pushOverlap = Duration(seconds: 3);
+
+  // One cycle at a time. A call that arrives mid-cycle (an edit made while a
+  // push was in flight) queues exactly one more cycle, shared by every caller
+  // that comes in meanwhile, instead of being dropped.
+  Future<void>? _running;
+  Future<void>? _queued;
+  bool _queuedFullPull = false;
   Set<String> _collabListIds = {};
   Map<String, String> _permissions = {}; // listId → my permission
 
@@ -203,21 +215,41 @@ class CollabService {
   /// Sync right after joining a list. The pull cursor only fetches rows changed
   /// since our last pull, and a list we just joined may not have changed in a
   /// while — so a normal cycle would never deliver it ("Joined!" but nothing
-  /// shows up). This waits for any in-flight cycle (it would advance the
-  /// cursor past us) and then pulls every collaborative list from scratch.
-  Future<void> syncAfterJoin() async {
-    for (var i = 0; _syncing && i < 50; i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-    }
-    await syncNow(fullPull: true);
+  /// shows up). A cycle in flight would advance the cursor past us, so this
+  /// one runs after it and pulls every collaborative list from scratch.
+  Future<void> syncAfterJoin() => syncNow(fullPull: true);
+
+  /// Shared-list item deletions made up to this device time have been sent
+  /// through this channel; later ones have not (null: none have). The next
+  /// push looks back from its cursor by [_pushOverlap], so this does too.
+  Future<DateTime?> deletionsSentUntil() async {
+    final raw = (await SharedPreferences.getInstance()).getString(_pushCursorKey);
+    return (raw != null ? DateTime.tryParse(raw) : null)?.subtract(_pushOverlap);
   }
 
-  /// One push+pull cycle. Safe to call frequently (guarded + no-ops when idle).
+  /// One push+pull cycle. Safe to call frequently: a call while a cycle runs
+  /// gets one more cycle after it, and it no-ops when signed out.
   /// [fullPull] ignores the pull cursor and fetches everything.
-  Future<void> syncNow({bool fullPull = false}) async {
+  Future<void> syncNow({bool fullPull = false}) {
+    if (_running == null) return _start(fullPull);
+    _queuedFullPull |= fullPull;
+    return _queued ??= _running!.then((_) {
+      final full = _queuedFullPull;
+      _queued = null;
+      _queuedFullPull = false;
+      return _start(full);
+    });
+  }
+
+  Future<void> _start(bool fullPull) {
+    final run = _syncOnce(fullPull).whenComplete(() => _running = null);
+    _running = run;
+    return run;
+  }
+
+  Future<void> _syncOnce(bool fullPull) async {
     final db = _db;
-    if (_syncing || db == null || !AuthService.instance.isSignedIn) return;
-    _syncing = true;
+    if (db == null || !AuthService.instance.isSignedIn) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       // server time → pull `since`
@@ -234,15 +266,17 @@ class CollabService {
       // ── Gather local changes to push (device-time diff since last push) ──
       final pushLists = <Map<String, dynamic>>[];
       final pushItems = <Map<String, dynamic>>[];
-      bool changedLocally(DateTime updatedAt) => lastPush == null || updatedAt.isAfter(lastPush);
+      final since = lastPush?.subtract(_pushOverlap);
+      bool changedLocally(DateTime updatedAt) => since == null || updatedAt.isAfter(since);
       // Items deleted locally since the last push. Deleted rows are gone from
       // the table, so they come from the sync journal (which remembers each
-      // item's list) and go out as soft-deletes.
+      // item's list) and go out as soft-deletes. The main sync keeps these
+      // entries until this push has sent them (see SyncJournal.acknowledge).
       for (final del in await SyncJournal.pendingDeletions(db)) {
         if (del.entity != SyncJournal.shoppingListItems) continue;
         final listId = del.parentId;
         if (listId == null || !_collabListIds.contains(listId)) continue;
-        if (lastPush != null && !del.at.isAfter(lastPush)) continue;
+        if (since != null && !del.at.isAfter(since)) continue;
         pushItems.add({'id': del.id, 'listId': listId, 'updatedAt': _iso(del.at), 'deletedAt': _iso(del.at)});
       }
 
@@ -292,8 +326,6 @@ class CollabService {
       }
     } catch (e) {
       debugPrint('[Collab] syncNow: $e');
-    } finally {
-      _syncing = false;
     }
   }
 
@@ -305,12 +337,19 @@ class CollabService {
     // Keep a local row if it was edited during/after this sync started (an
     // unpushed edit) — it'll be pushed next cycle and win there. Everything else
     // takes the server's copy. This uses only device time, never the server's.
+    // A row's time is stored in whole seconds, so one edited in the second the
+    // sync started counts as unpushed: it goes out again next cycle.
+    final pushSecond = DateTime.fromMillisecondsSinceEpoch(pushStart.millisecondsSinceEpoch ~/ 1000 * 1000);
+    bool unpushed(DateTime updatedAt) => !updatedAt.isBefore(pushSecond);
+    // A row taken from the server is dated before the overlap the next push
+    // looks back over, so it is not sent back up as if edited here.
+    final applied = pushStart.subtract(_pushOverlap + const Duration(seconds: 1));
     await SyncService.instance.runAsRemote(() => db.transaction(() async {
       for (final raw in lists) {
         final l = raw as Map;
         final id = l['id'] as String;
         final existing = await (db.select(db.shoppingLists)..where((t) => t.id.equals(id))).getSingleOrNull();
-        if (existing != null && existing.updatedAt.isAfter(pushStart)) continue; // unpushed local edit
+        if (existing != null && unpushed(existing.updatedAt)) continue; // unpushed local edit
         if (l['deletedAt'] != null) {
           if (existing != null) {
             await (db.delete(db.shoppingListItems)..where((t) => t.listId.equals(id))).go();
@@ -322,7 +361,7 @@ class CollabService {
           id: id,
           name: (l['name'] as String?) ?? 'Shopping List',
           color: Value(l['color'] as String?),
-          updatedAt: Value(pushStart),
+          updatedAt: Value(applied),
         ));
       }
 
@@ -330,7 +369,7 @@ class CollabService {
         final it = raw as Map;
         final id = it['id'] as String;
         final existing = await (db.select(db.shoppingListItems)..where((t) => t.id.equals(id))).getSingleOrNull();
-        if (existing != null && existing.updatedAt.isAfter(pushStart)) continue; // unpushed local edit
+        if (existing != null && unpushed(existing.updatedAt)) continue; // unpushed local edit
         if (it['deletedAt'] != null) {
           if (existing != null) await (db.delete(db.shoppingListItems)..where((t) => t.id.equals(id))).go();
           continue;
@@ -349,9 +388,9 @@ class CollabService {
           isChecked: Value(it['isChecked'] as bool? ?? false),
           note: Value(it['note'] as String?),
           sortOrder: Value((it['sortOrder'] as num?)?.toInt() ?? 0),
-          // Local updatedAt = "touched this device this cycle" (device time), so
-          // a server-applied row isn't re-pushed next cycle as a fake local edit.
-          updatedAt: Value(pushStart),
+          // Device time, before the next push's overlap, so a server-applied
+          // row isn't re-pushed next cycle as a fake local edit.
+          updatedAt: Value(applied),
         ));
       }
     }));

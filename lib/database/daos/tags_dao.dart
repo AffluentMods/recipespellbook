@@ -66,6 +66,17 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
     return query.watch().map((rows) => rows.map((row) => row.readTable(tags)).toList());
   }
 
+  /// Ids of the recipes that carry every one of [tagIds], from one query,
+  /// updated as tags are added to or taken off recipes.
+  Stream<Set<String>> watchRecipeIdsWithAllTags(Set<String> tagIds) {
+    final matched = recipeTags.tagId.count(distinct: true);
+    final query = selectOnly(recipeTags)
+      ..addColumns([recipeTags.recipeId])
+      ..where(recipeTags.tagId.isIn(tagIds))
+      ..groupBy([recipeTags.recipeId], having: matched.equals(tagIds.length));
+    return query.watch().map((rows) => {for (final row in rows) row.read(recipeTags.recipeId)!});
+  }
+
   /// Add a tag to a recipe
   Future<void> addTagToRecipe(String recipeId, String tagId) async {
     await into(recipeTags).insert(

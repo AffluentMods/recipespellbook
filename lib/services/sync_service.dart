@@ -26,9 +26,14 @@ class SyncResult {
   final DateTime? syncedAt;
   final String? error;
 
-  /// The account has no Cloud Sync entitlement (server said 403). Shared
-  /// cookbooks/lists still sync; the caller shouldn't surface this as an error.
+  /// The account has no Cloud Sync entitlement (server said 403). Nothing of
+  /// the user's own library was synced, so this is not a success. Shared
+  /// cookbooks/lists still sync ([pulledCount] counts what they brought).
   final bool notEntitled;
+
+  /// The server could not be reached (offline, timed out). Nothing is wrong
+  /// with the account or the data, and the next sync tries again.
+  final bool offline;
 
   const SyncResult({
     required this.success,
@@ -37,9 +42,10 @@ class SyncResult {
     this.syncedAt,
     this.error,
     this.notEntitled = false,
+    this.offline = false,
   });
 
-  const SyncResult.failure(String message, {this.notEntitled = false})
+  const SyncResult.failure(String message, {this.notEntitled = false, this.offline = false})
       : success = false,
         pushedCount = 0,
         pulledCount = 0,
@@ -96,6 +102,10 @@ class SyncService {
   static const _protocolPrefix = 'sync_protocol_v2';
   static const _foreignPrefix = 'sync_foreign_ids';
   static const _collabMarkPrefix = 'sync_collab_cookbook_mark';
+
+  /// Set (to when it was asked) while the next push has to send every row.
+  /// For the device, not an account: whoever syncs next sends them.
+  static const _pushAllKey = 'sync_push_all';
 
   /// Legacy key (pre-per-account). Used for migration.
   static const _legacyLastSyncKey = 'sync_last_sync_at';
@@ -222,6 +232,15 @@ class SyncService {
     if (_db != null) await SyncJournal.clear(_db!);
   }
 
+  /// Make the next sync push every row, not only those edited since the last
+  /// push. For rows that arrived here dated before that push, such as a
+  /// transfer from another device: an ordinary push would never send them.
+  /// The pull stays incremental.
+  Future<void> pushEverythingNextSync() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_pushAllKey, DateTime.now().toUtc().toIso8601String());
+  }
+
   /// Ids the server says belong to someone else's shared resource (a list or
   /// cookbook this user collaborates on). They're never pushed via /sync.
   Future<Map<String, Set<String>>> _foreignIds(String userId) async {
@@ -329,7 +348,9 @@ class SyncService {
 
     if (!own.success) {
       if (own.notEntitled) {
-        return SyncResult(success: true, pulledCount: sharedPulled, notEntitled: true);
+        // Not a success: the user's own recipes went nowhere. What the shared
+        // cookbooks and lists brought is still counted.
+        return SyncResult(success: false, pulledCount: sharedPulled, error: own.error, notEntitled: true);
       }
       return own;
     }
@@ -351,7 +372,8 @@ class SyncService {
     final upgraded = prefs.getBool(_key(_protocolPrefix, userId)) ?? false;
     final full = fullSync || !upgraded;
     final pullCursor = full ? null : await getLastSyncAt(userId);
-    final pushMark = full ? null : await _readDate(_pushMarkPrefix, userId);
+    final pushAllAsked = prefs.getString(_pushAllKey);
+    final pushMark = full || pushAllAsked != null ? null : await _readDate(_pushMarkPrefix, userId);
 
     _morePhotos = await _backfillImageUploads();
 
@@ -448,8 +470,15 @@ class SyncService {
     final cursor = cursorRaw != null ? DateTime.tryParse(cursorRaw) : null;
     if (cursor != null) await _saveDate(_lastSyncKeyPrefix, userId, cursor);
     await _saveDate(_pushMarkPrefix, userId, collectStart);
-    await SyncJournal.acknowledge(db, collectStart);
+    await SyncJournal.acknowledge(
+      db,
+      collectStart,
+      sharedLists: CollabService.instance.collabListIds,
+      sharedSentUntil: await CollabService.instance.deletionsSentUntil(),
+    );
     await prefs.setBool(_key(_protocolPrefix, userId), true);
+    // Done, unless it was asked for again while this push was on its way.
+    if (pushAllAsked != null && prefs.getString(_pushAllKey) == pushAllAsked) await prefs.remove(_pushAllKey);
 
     // Ids that turned out to belong to another account.
     final nonEmpty = {for (final e in conflicts.entries) if (e.value.isNotEmpty) e.key: e.value};
@@ -559,7 +588,7 @@ class SyncService {
         msg.contains('ClientException') ||
         msg.contains('Connection refused') ||
         msg.contains('Connection reset');
-    if (isNetwork) return const SyncResult.failure('No internet connection');
+    if (isNetwork) return const SyncResult.failure('No internet connection', offline: true);
     debugPrint('[Sync] Error: $e');
     return SyncResult.failure('Sync failed: ${_friendlyError(e)}');
   }
@@ -996,6 +1025,14 @@ class SyncService {
           if (recipe == null) continue;
           final cookbook = await (db.select(db.cookbooks)..where((t) => t.id.equals(recipe.cookbookId)))
               .getSingleOrNull();
+          if (cookbook == null && !CollabService.instance.isCollabCookbook(recipe.cookbookId)) {
+            // Restored from the trash after its cookbook was deleted, by a
+            // version that left it there: it goes where a restore puts it now.
+            final home = await db.recipeDao.homeCookbookFor(recipe.cookbookId);
+            await (db.update(db.recipes)..where((t) => t.id.equals(id)))
+                .write(RecipesCompanion(cookbookId: Value(home), updatedAt: Value(now)));
+            continue;
+          }
           if (cookbook == null || cookbook.sharedOwnerId != null) continue; // nothing we can fix
           await (db.update(db.cookbooks)..where((t) => t.id.equals(cookbook.id)))
               .write(CookbooksCompanion(updatedAt: Value(now)));

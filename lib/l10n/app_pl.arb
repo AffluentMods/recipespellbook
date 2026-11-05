@@ -4161,5 +4161,9 @@
   "communityFeedLoadMoreFailed": "Nie udało się wczytać więcej",
   "notifDownloadsOffer": "Powiadamiaj o pobraniach",
   "notifDownloadsOn": "Dostaniesz powiadomienie, gdy ktoś to pobierze.",
-  "notifPermissionDenied": "Powiadomienia Recipe Spellbook są wyłączone. Włącz je w ustawieniach urządzenia."
+  "notifPermissionDenied": "Powiadomienia Recipe Spellbook są wyłączone. Włącz je w ustawieniach urządzenia.",
+  "syncNotInPlan": "Twój plan nie obejmuje synchronizacji w chmurze",
+  "transferRowsLeftOut": "{count, plural, =1{Nie udało się zapisać 1 elementu na tym urządzeniu.} few{Nie udało się zapisać {count} elementów na tym urządzeniu.} many{Nie udało się zapisać {count} elementów na tym urządzeniu.} other{Nie udało się zapisać {count} elementu na tym urządzeniu.}} Aby spróbować jeszcze raz, wpisz ten sam kod ponownie w ciągu doby.",
+  "backupPhotosLeftOut": "{count, plural, =1{Kopia zapasowa zapisana, ale brakuje w niej 1 zdjęcia.} few{Kopia zapasowa zapisana, ale brakuje w niej {count} zdjęć.} many{Kopia zapasowa zapisana, ale brakuje w niej {count} zdjęć.} other{Kopia zapasowa zapisana, ale brakuje w niej {count} zdjęcia.}} Zdjęcia, które są tylko w chmurze, wymagają połączenia z internetem. Połącz się i utwórz kopię ponownie, aby je dołączyć.",
+  "deleteAllDataAccountFailed": "Nie udało się usunąć konta, więc nic nie zostało usunięte. Sprawdź połączenie z internetem i spróbuj ponownie."
 }

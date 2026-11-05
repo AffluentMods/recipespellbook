@@ -10882,4 +10882,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notifPermissionDenied => 'Recipe Spellbook 的通知已关闭。请在设备设置中开启。';
+
+  @override
+  String get syncNotInPlan => '你的套餐不包含云同步';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 项无法保存到此设备。',
+    );
+    return '$_temp0如需重试，请在一天内再次输入同一个代码。';
+  }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '备份已保存，但其中缺少 $count 张照片。',
+    );
+    return '$_temp0仅存于云端的照片需要联网。请联网后重新备份，即可包含这些照片。';
+  }
+
+  @override
+  String get deleteAllDataAccountFailed => '无法删除你的账户，因此没有删除任何内容。请检查网络连接后重试。';
 }

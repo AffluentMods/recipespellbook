@@ -304,13 +304,42 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
     ));
   }
 
-  /// Restore a recipe from trash
-  Future<int> restoreRecipe(String recipeId) {
-    return (update(recipes)..where((r) => r.id.equals(recipeId)))
-        .write(RecipesCompanion(
-      deletedAt: const Value(null),
-      updatedAt: Value(DateTime.now()),
-    ));
+  /// Restore a recipe from trash. Deleting a cookbook sends its recipes to
+  /// the trash and the cookbook itself is gone; a recipe restored into it
+  /// would show in no cookbook and the server would turn it down. Such a
+  /// recipe goes into another cookbook of the user's (see [homeCookbookFor]).
+  Future<int> restoreRecipe(String recipeId) => transaction(() async {
+        final recipe = await (select(recipes)..where((r) => r.id.equals(recipeId))).getSingleOrNull();
+        if (recipe == null) return 0;
+        final home = await homeCookbookFor(recipe.cookbookId);
+        return (update(recipes)..where((r) => r.id.equals(recipeId))).write(RecipesCompanion(
+          cookbookId: home == recipe.cookbookId ? const Value.absent() : Value(home),
+          deletedAt: const Value(null),
+          updatedAt: Value(DateTime.now()),
+        ));
+      });
+
+  /// [cookbookId] while that cookbook is still here; otherwise the user's
+  /// own cookbook made first (the one every install starts with, unless it
+  /// was deleted), or a new "My Recipes" when none is left.
+  Future<String> homeCookbookFor(String cookbookId) async {
+    final cookbooks = attachedDatabase.cookbooks;
+    final here = await (attachedDatabase.select(cookbooks)
+          ..where((c) => c.id.equals(cookbookId) & c.deletedAt.isNull()))
+        .getSingleOrNull();
+    if (here != null) return here.id;
+    final own = await (attachedDatabase.select(cookbooks)
+          ..where((c) => c.deletedAt.isNull() & c.sharedOwnerId.isNull())
+          ..orderBy([(c) => OrderingTerm.asc(c.createdAt), (c) => OrderingTerm.asc(c.rowId)])
+          ..limit(1))
+        .getSingleOrNull();
+    if (own != null) return own.id;
+    final now = DateTime.now();
+    final id = 'cookbook_${now.millisecondsSinceEpoch}';
+    await attachedDatabase.into(cookbooks).insert(
+          CookbooksCompanion.insert(id: id, name: 'My Recipes', createdAt: Value(now), updatedAt: Value(now)),
+        );
+    return id;
   }
 
   /// Permanently delete a recipe and ALL related data (in a transaction).

@@ -104,7 +104,8 @@ class ExportImportService {
   /// [embedImages] — when true (default), images are base64-embedded in
   /// the JSON (standalone .json exports). The streamed zip export passes
   /// false and gets `localImagePath` fields instead, so image bytes are
-  /// never held in memory.
+  /// never held in memory, and `cloudImagePath` (the copy in the cloud) for
+  /// a photo this device has no file of.
   Future<Map<String, dynamic>> exportSelective(ExportOptions options, {bool embedImages = true}) async {
     final data = <String, dynamic>{
       'version': 2,
@@ -153,7 +154,7 @@ class ExportImportService {
         // Cookbook covers were missing from exports entirely — restores
         // lost them. Same embed-vs-path split as recipe images.
         if (embedImages) 'imageBase64': await _encodeImage(cb.imagePath)
-        else 'localImagePath': cb.imagePath,
+        else ...{'localImagePath': cb.imagePath, 'cloudImagePath': _cloudCopy(cb.imagePath, cb.imageServerPath)},
         'recipes': await _exportRecipesForCookbook(cb.id, embedImages: embedImages),
       });
     }
@@ -196,7 +197,7 @@ class ExportImportService {
           'instruction': s.instruction, 'durationMinutes': s.durationMinutes,
           if (s.notes != null) 'notes': s.notes,
           if (embedImages) 'imageBase64': await _encodeImage(s.imagePath)
-          else 'localImagePath': s.imagePath,
+          else ...{'localImagePath': s.imagePath, 'cloudImagePath': _cloudCopy(s.imagePath, s.imageServerPath)},
         });
       }
 
@@ -218,7 +219,7 @@ class ExportImportService {
         'createdAt': recipe.createdAt.toIso8601String(),
         'lastViewedAt': recipe.lastViewedAt?.toIso8601String(),
         if (embedImages) 'imageBase64': await _encodeImage(recipe.imagePath)
-        else 'localImagePath': recipe.imagePath,
+        else ...{'localImagePath': recipe.imagePath, 'cloudImagePath': _cloudCopy(recipe.imagePath, recipe.imageServerPath)},
         'tagIds': tagAssocs.map((t) => t.tagId).toList(),
         'ingredients': ingredients.map((i) => {
           'id': i.id, 'sortOrder': i.sortOrder, 'amount': i.amount,
@@ -488,7 +489,12 @@ class ExportImportService {
   /// (base64 JSON + decoded image bytes + final zip). On a 256MB Java
   /// heap that's a crash for big libraries; this version's peak is one
   /// image at a time. Use everywhere except web (no file system there).
-  Future<void> exportFullZipToPath(
+  ///
+  /// A photo this device has no file of (it came from another device
+  /// through the cloud) is fetched from the cloud into a temporary folder
+  /// and goes in like any other. Returns how many photos the backup could
+  /// not take: ones that could not be fetched (offline, signed out) or read.
+  Future<int> exportFullZipToPath(
     String outPath, {
     ExportOptions options = const ExportOptions.all(),
     void Function(String status)? onProgress,
@@ -502,13 +508,20 @@ class ExportImportService {
     // (local file → zip entry) pairs to stream in afterwards.
     final imageFiles = <MapEntry<String, String>>[]; // local → zip path
     final addedImages = <String>{};
+    // Photos only in the cloud: where each one goes in the zip, and the rows
+    // that show it.
+    final inCloud = <String, ({String zipPath, List<Map<String, dynamic>> holders})>{};
 
     void collectImage(Map<String, dynamic> holder, String? localPath, String zipPath) {
+      final cloudPath = holder.remove('cloudImagePath') as String?;
       if (_isFileHere(localPath) && File(localPath!).existsSync()) {
         holder['imagePath'] = zipPath;
         if (addedImages.add(zipPath)) {
           imageFiles.add(MapEntry(localPath, zipPath));
         }
+      } else if (cloudPath != null) {
+        holder['imagePath'] = inCloud.putIfAbsent(cloudPath, () => (zipPath: zipPath, holders: [])).zipPath;
+        inCloud[cloudPath]!.holders.add(holder);
       } else {
         holder['imagePath'] = null;
       }
@@ -530,6 +543,28 @@ class ExportImportService {
         for (final stepData in steps) {
           final s = stepData as Map<String, dynamic>;
           collectImage(s, s.remove('localImagePath') as String?, 'images/recipes/${recipeId}_step_${s['sortOrder']}.jpg');
+        }
+      }
+    }
+
+    // Fetch the photos only in the cloud before data.json is written: one
+    // that cannot be fetched is left out of it as well.
+    var notFetched = 0;
+    Directory? fetchedDir;
+    if (inCloud.isNotEmpty) {
+      onProgress?.call('Downloading ${inCloud.length} photos...');
+      fetchedDir = Directory(p.join(
+          (await getTemporaryDirectory()).path, 'backup_photos_${DateTime.now().microsecondsSinceEpoch}'));
+      final fetched = await _fetchCloudPhotos(inCloud.keys.toList(), fetchedDir);
+      for (final (i, entry) in inCloud.entries.indexed) {
+        final file = fetched[i];
+        if (file != null && addedImages.add(entry.value.zipPath)) {
+          imageFiles.add(MapEntry(file, entry.value.zipPath));
+        } else if (file == null) {
+          notFetched++;
+          for (final holder in entry.value.holders) {
+            holder['imagePath'] = null;
+          }
         }
       }
     }
@@ -574,12 +609,45 @@ class ExportImportService {
     }
 
     onProgress?.call('Writing backup file (${imageFiles.length} images)...');
-    await compute(_zipWriteWorker, _ZipWriteArgs(
-      outPath: outPath,
-      textFiles: textFiles,
-      // MapEntry isn't isolate-friendly; flatten to plain string pairs.
-      imagePairs: [for (final e in imageFiles) [e.key, e.value]],
-    ));
+    try {
+      final written = await compute(_zipWriteWorker, _ZipWriteArgs(
+        outPath: outPath,
+        textFiles: textFiles,
+        // MapEntry isn't isolate-friendly; flatten to plain string pairs.
+        imagePairs: [for (final e in imageFiles) [e.key, e.value]],
+      ));
+      return notFetched + imageFiles.length - written;
+    } finally {
+      if (fetchedDir != null) await _discardFolder(fetchedDir);
+    }
+  }
+
+  /// Fetches the photos at these cloud paths into [dir], a few at a time.
+  /// The result lines up with [cloudPaths]; null is a photo that could not
+  /// be fetched.
+  Future<List<String?>> _fetchCloudPhotos(List<String> cloudPaths, Directory dir) async {
+    final results = List<String?>.filled(cloudPaths.length, null);
+    var next = 0;
+    Future<void> worker() async {
+      while (next < cloudPaths.length) {
+        final i = next++;
+        final url = await ImageService.instance.getImageUrl(cloudPaths[i]);
+        if (url == null) continue;
+        results[i] = await ImageService.instance
+            .downloadAndSaveImage(url, 'photo_$i${p.extension(cloudPaths[i])}', directory: dir);
+      }
+    }
+
+    await Future.wait([for (var w = 0; w < 4 && w < cloudPaths.length; w++) worker()]);
+    return results;
+  }
+
+  Future<void> _discardFolder(Directory dir) async {
+    try {
+      if (await dir.exists()) await dir.delete(recursive: true);
+    } catch (e) {
+      debugPrint('[Export] Could not remove ${dir.path}: $e');
+    }
   }
 
   String get _exportFilename {
@@ -588,10 +656,29 @@ class ExportImportService {
     return 'RecipeSpellbook_Export_$dateStr.zip';
   }
 
+  /// Largest backup handed to the file picker on a phone. file_picker takes
+  /// the file there as bytes only (Android's storage framework, iOS's
+  /// document picker), which puts the whole zip in memory more than once on
+  /// its way across. A larger one goes to the share sheet, which reads the
+  /// file from disk ("Save to Files", Drive and the like).
+  @visibleForTesting
+  static int saveInMemoryLimit = 64 * 1024 * 1024;
+
+  /// The folder a backup is written to before it is saved or shared, emptied
+  /// of the backups earlier runs left there. A shared one cannot be deleted
+  /// right away: the app it went to may still be reading it.
+  Future<Directory> _backupTempDir() async {
+    final dir = Directory(p.join((await getTemporaryDirectory()).path, 'backup'));
+    await _discardFolder(dir);
+    await dir.create(recursive: true);
+    return dir;
+  }
+
   /// Save the full zip export to a file via file picker.
-  Future<bool> saveFullZipExport({
+  Future<BackupExportResult> saveFullZipExport({
     ExportOptions options = const ExportOptions.all(),
     void Function(String status)? onProgress,
+    Rect? sharePositionOrigin,
   }) async {
     final filename = _exportFilename;
 
@@ -605,7 +692,7 @@ class ExportImportService {
         allowedExtensions: ['zip'],
         bytes: zipBytes,
       );
-      return result != null;
+      return BackupExportResult(done: result != null);
     }
 
     if (isDesktop) {
@@ -616,61 +703,87 @@ class ExportImportService {
         type: FileType.custom,
         allowedExtensions: ['zip'],
       );
-      if (result == null) return false;
-      await exportFullZipToPath(result, options: options, onProgress: onProgress);
+      if (result == null) return const BackupExportResult(done: false);
+      final leftOut = await exportFullZipToPath(result, options: options, onProgress: onProgress);
       await BackupReminderService.markBackupDone();
-      return true;
+      return BackupExportResult(done: true, photosLeftOut: leftOut);
     }
 
-    // Mobile saveFile requires bytes (SAF). Stream the zip to temp first
-    // so peak memory is the finished zip ONCE — not the 3× of the old
-    // in-memory pipeline (base64 JSON + decoded images + zip bytes).
-    final dir = await getTemporaryDirectory();
-    final tmpPath = p.join(dir.path, filename);
-    await exportFullZipToPath(tmpPath, options: options, onProgress: onProgress);
-    final zipBytes = await File(tmpPath).readAsBytes();
-    final result = await FilePicker.platform.saveFile(
-      dialogTitle: 'Save full backup',
-      fileName: filename,
-      type: FileType.custom,
-      allowedExtensions: ['zip'],
-      bytes: zipBytes,
-    );
-    if (result != null) {
-      await BackupReminderService.markBackupDone();
-      return true;
+    // Mobile saveFile requires bytes (SAF). Stream the zip to temp first,
+    // then hand it over as bytes when it is small enough, else by path
+    // through the share sheet. The temp file is not kept either way.
+    final tmp = File(p.join((await _backupTempDir()).path, filename));
+    var shared = false;
+    try {
+      final leftOut = await exportFullZipToPath(tmp.path, options: options, onProgress: onProgress);
+      final bool done;
+      if (await tmp.length() > saveInMemoryLimit) {
+        shared = true;
+        done = await _shareZip(tmp, sharePositionOrigin);
+      } else {
+        final result = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save full backup',
+          fileName: filename,
+          type: FileType.custom,
+          allowedExtensions: ['zip'],
+          bytes: await tmp.readAsBytes(),
+        );
+        done = result != null;
+      }
+      if (done) await BackupReminderService.markBackupDone();
+      return BackupExportResult(done: done, photosLeftOut: leftOut);
+    } finally {
+      // A shared file may still be read by the app it went to; the next
+      // backup clears it out (see _backupTempDir).
+      if (!shared) await _discard(tmp);
     }
-    return false;
   }
 
   /// Share the full zip export (Save as where files cannot be shared).
-  Future<FileShareOutcome> shareFullZipExport({
+  Future<BackupExportResult> shareFullZipExport({
     ExportOptions options = const ExportOptions.all(),
     void Function(String status)? onProgress,
     Rect? sharePositionOrigin,
   }) async {
     final filename = _exportFilename;
 
+    final bool done;
+    var leftOut = 0;
     if (isWeb) {
       final zipBytes = await exportFullZip(options: options, onProgress: onProgress);
-      await SharePlus.instance.share(ShareParams(
+      final result = await SharePlus.instance.share(ShareParams(
         files: [XFile.fromData(zipBytes, name: filename, mimeType: 'application/zip')],
         subject: 'Recipe Spellbook Full Backup',
       ));
-      await BackupReminderService.markBackupDone();
-      return FileShareOutcome.shared;
+      done = result.status != ShareResultStatus.dismissed;
+    } else {
+      // Fully streamed: zip is written to temp on disk and shared by
+      // path — the archive never exists in memory at all.
+      final file = File(p.join((await _backupTempDir()).path, filename));
+      leftOut = await exportFullZipToPath(file.path, options: options, onProgress: onProgress);
+      done = await _shareZip(file, sharePositionOrigin);
     }
-    // Fully streamed: zip is written to temp on disk and shared by
-    // path — the archive never exists in memory at all.
-    final dir = await getTemporaryDirectory();
-    final file = File(p.join(dir.path, filename));
-    await exportFullZipToPath(file.path, options: options, onProgress: onProgress);
-    final outcome = await shareOrSaveFile(file.path,
-        subject: 'Recipe Spellbook Full Backup', sharePositionOrigin: sharePositionOrigin);
-    if (outcome != FileShareOutcome.cancelled) {
-      await BackupReminderService.markBackupDone();
+    // A share sheet closed without choosing anything is no backup.
+    if (done) await BackupReminderService.markBackupDone();
+    return BackupExportResult(done: done, photosLeftOut: leftOut);
+  }
+
+  /// Opens the share sheet with the backup [file]. Says whether it went
+  /// somewhere: only a sheet the user closed without choosing counts as no,
+  /// and where the platform cannot tell, it counts as shared.
+  /// Where files cannot be shared (Linux) this offers Save as instead.
+  Future<bool> _shareZip(File file, Rect? sharePositionOrigin) async {
+    if (!supportsFileSharing) {
+      final outcome = await shareOrSaveFile(file.path,
+          subject: 'Recipe Spellbook Full Backup', sharePositionOrigin: sharePositionOrigin);
+      return outcome != FileShareOutcome.cancelled;
     }
-    return outcome;
+    final result = await SharePlus.instance.share(ShareParams(
+      files: [XFile(file.path, mimeType: 'application/zip')],
+      subject: 'Recipe Spellbook Full Backup',
+      sharePositionOrigin: sharePositionOrigin,
+    ));
+    return result.status != ShareResultStatus.dismissed;
   }
 
   /// Convert a recipe map to schema.org Recipe JSON-LD format.
@@ -2068,6 +2181,11 @@ class ExportImportService {
   /// backup or a shared cookbook.
   static bool _isFileHere(String? path) => path != null && path.isNotEmpty && !ImageService.isServerPath(path);
 
+  /// The photo's copy in the cloud ("account/file name"), for a backup to
+  /// fetch when this device has no file of it.
+  static String? _cloudCopy(String? path, String? serverPath) =>
+      ImageService.isServerPath(serverPath) ? serverPath : (ImageService.isServerPath(path) ? path : null);
+
   Future<void> _discard(File file) async {
     try {
       if (await file.exists()) await file.delete();
@@ -2238,6 +2356,18 @@ class ImportResult {
     this.recipesImported = 0,
     this.importedCookbookId,
   });
+}
+
+/// What saving or sharing a full backup came to.
+class BackupExportResult {
+  const BackupExportResult({required this.done, this.photosLeftOut = 0});
+
+  /// Saved, or sent through the share sheet. False when the user backed out.
+  final bool done;
+
+  /// Photos the backup holds no copy of: ones only in the cloud that could
+  /// not be fetched (offline, signed out), or files that could not be read.
+  final int photosLeftOut;
 }
 
 class ImportPreview {

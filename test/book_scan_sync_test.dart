@@ -467,6 +467,13 @@ void main() {
       expect(result.success, isTrue, reason: result.error);
     }
 
+    /// A sync on a plan without Cloud Sync: the shared cookbook goes, and
+    /// the sync says the account's own recipes did not.
+    Future<void> sharedSync() async {
+      final result = await SyncService.instance.sync();
+      expect((result.success, result.notEntitled), (false, true), reason: result.error);
+    }
+
     test('go up although many older recipes have a picture that is no longer on the device', () async {
       await http.runWithClient(() async {
         signIn(db, cloudSync: true);
@@ -591,7 +598,7 @@ void main() {
 
         // Six pictures go up with the first sync and all eight recipes are
         // pushed.
-        await sync();
+        await sharedSync();
         expect(server.pictures, 6);
         expect(server.shared, hasLength(8));
         expect(await withPicture(), 8);
@@ -599,12 +606,12 @@ void main() {
         // The other two go up, but this time the push fails. The server's
         // copy of those two still has no picture.
         server.sharedPushFails = true;
-        await sync();
+        await sharedSync();
         expect(server.pictures, 8);
         expect(await withPicture(), 8);
 
         server.sharedPushFails = false;
-        await sync();
+        await sharedSync();
         expect(await withPicture(), 8);
         expect(server.shared.values.where((r) => r['imagePath'] != null), hasLength(8));
         expect(CollabService.instance.dirtyCookbookRecipeIds, isEmpty);

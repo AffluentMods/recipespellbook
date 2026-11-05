@@ -5866,5 +5866,11 @@
   "communityFeedLoadMoreFailed": "Could not load more",
   "notifDownloadsOffer": "Notify me about downloads",
   "notifDownloadsOn": "You'll get a notification when someone downloads it.",
-  "notifPermissionDenied": "Notifications are off for Recipe Spellbook. Turn them on in your device settings."
+  "notifPermissionDenied": "Notifications are off for Recipe Spellbook. Turn them on in your device settings.",
+  "syncNotInPlan": "Cloud Sync is not included in your plan",
+  "transferRowsLeftOut": "{count, plural, =1{1 item could not be saved on this device.} other{{count} items could not be saved on this device.}} To try once more, enter the same code again within a day.",
+  "@transferRowsLeftOut": {"placeholders": {"count": {"type": "int"}}},
+  "backupPhotosLeftOut": "{count, plural, =1{Backup saved, but 1 photo is not in it.} other{Backup saved, but {count} photos are not in it.}} Photos kept only in the cloud need an internet connection. Connect and make the backup again to include them.",
+  "@backupPhotosLeftOut": {"placeholders": {"count": {"type": "int"}}},
+  "deleteAllDataAccountFailed": "Your account could not be deleted, so nothing was deleted. Check your internet connection and try again."
 }

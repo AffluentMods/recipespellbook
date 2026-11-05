@@ -10984,4 +10984,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifPermissionDenied => 'Notifications are off for Recipe Spellbook. Turn them on in your device settings.';
+
+  @override
+  String get syncNotInPlan => 'Cloud Sync is not included in your plan';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items could not be saved on this device.',
+      one: '1 item could not be saved on this device.',
+    );
+    return '$_temp0 To try once more, enter the same code again within a day.';
+  }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Backup saved, but $count photos are not in it.',
+      one: 'Backup saved, but 1 photo is not in it.',
+    );
+    return '$_temp0 Photos kept only in the cloud need an internet connection. Connect and make the backup again to include them.';
+  }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Your account could not be deleted, so nothing was deleted. Check your internet connection and try again.';
 }

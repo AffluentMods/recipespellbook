@@ -10953,4 +10953,32 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get notifPermissionDenied => 'Meldingen voor Recipe Spellbook staan uit. Zet ze aan in de instellingen van je apparaat.';
+
+  @override
+  String get syncNotInPlan => 'Cloudsynchronisatie zit niet in je abonnement';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items konden niet op dit apparaat worden opgeslagen.',
+      one: '1 item kon niet op dit apparaat worden opgeslagen.',
+    );
+    return '$_temp0 Voer binnen een dag dezelfde code opnieuw in om het nog eens te proberen.';
+  }
+
+  @override
+  String backupPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Back-up opgeslagen, maar er ontbreken $count foto\'s in.',
+      one: 'Back-up opgeslagen, maar er ontbreekt 1 foto in.',
+    );
+    return '$_temp0 Foto\'s die alleen in de cloud staan, hebben een internetverbinding nodig. Maak verbinding en maak de back-up opnieuw om ze mee te nemen.';
+  }
+
+  @override
+  String get deleteAllDataAccountFailed => 'Je account kon niet worden verwijderd, dus er is niets verwijderd. Controleer je internetverbinding en probeer het opnieuw.';
 }
