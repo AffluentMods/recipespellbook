@@ -11999,4 +11999,101 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get settingsHouseholdServingsHint => 'Nowe posiłki w planerze zaczynają się od tej liczby osób, a listy zakupów dopasowują się do niej.';
+
+  @override
+  String get cookbookUpdateAvailable => 'Dostępna aktualizacja';
+
+  @override
+  String get cookbookUpdateBannerBody => 'Twórca zmienił tę książkę kucharską od czasu jej pobrania.';
+
+  @override
+  String get cookbookUpdateReview => 'Przejrzyj';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return 'Zaktualizuj „$name”';
+  }
+
+  @override
+  String get cookbookUpdateChecking => 'Sprawdzanie zmian…';
+
+  @override
+  String get cookbookUpdateLoadFailed => 'Nie udało się wczytać aktualizacji. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get cookbookUpdateUpToDate => 'Ta książka kucharska jest już aktualna.';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nowego przepisu',
+      many: '$count nowych przepisów',
+      few: '$count nowe przepisy',
+      one: '1 nowy przepis',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count zmienionego przepisu',
+      many: '$count zmienionych przepisów',
+      few: '$count zmienione przepisy',
+      one: '1 zmieniony przepis',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count przepisu usuniętego przez twórcę',
+      many: '$count przepisów usuniętych przez twórcę',
+      few: '$count przepisy usunięte przez twórcę',
+      one: '1 przepis usunięty przez twórcę',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => 'Nowy tytuł lub opis od twórcy';
+
+  @override
+  String get cookbookUpdateWillUpdate => 'Zostanie zaktualizowany do nowej wersji';
+
+  @override
+  String get cookbookUpdateYoursDiffers => 'Twoja kopia ma własne zmiany';
+
+  @override
+  String get cookbookUpdateKeepMine => 'Zachowaj moją';
+
+  @override
+  String get cookbookUpdateUseNew => 'Użyj nowej wersji';
+
+  @override
+  String get cookbookUpdateRemovedHint => 'Zaznacz te, które mają trafić do kosza. Pozostałe zostaną w Twojej książce kucharskiej.';
+
+  @override
+  String get cookbookUpdateApply => 'Zaktualizuj książkę';
+
+  @override
+  String get cookbookUpdateSkip => 'Pomiń tę aktualizację';
+
+  @override
+  String get cookbookUpdateApplying => 'Aktualizowanie książki kucharskiej…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return 'Książka „$name” jest aktualna';
+  }
+
+  @override
+  String get cookbookUpdateFailed => 'Nie udało się zapisać aktualizacji. W Twojej książce kucharskiej nic się nie zmieniło.';
 }

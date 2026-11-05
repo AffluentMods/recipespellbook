@@ -68,7 +68,7 @@ void main() {
     addTearDown(db.close);
     final meals = await (db.select(db.mealPlans)..orderBy([(m) => OrderingTerm(expression: m.id)])).get();
 
-    expect(await userVersion(db), 12);
+    expect(await userVersion(db), db.schemaVersion);
     expect(await mealPlanColumns(db), contains('servings'));
     expect(meals.map((m) => m.id), ['leftovers', 'monday']);
 
@@ -104,7 +104,7 @@ void main() {
     final db = AppDatabase.forTesting(NativeDatabase(file));
     addTearDown(db.close);
     expect((await db.select(db.mealPlans).get()), hasLength(2));
-    expect(await userVersion(db), 12);
+    expect(await userVersion(db), db.schemaVersion);
     expect((await mealPlanColumns(db)).where((c) => c == 'servings'), hasLength(1));
   });
 
@@ -113,6 +113,6 @@ void main() {
     addTearDown(db.close);
     await db.select(db.cookbooks).get();
     expect(await mealPlanColumns(db), contains('servings'));
-    expect(db.schemaVersion, 12);
+    expect(db.schemaVersion, greaterThanOrEqualTo(12));
   });
 }

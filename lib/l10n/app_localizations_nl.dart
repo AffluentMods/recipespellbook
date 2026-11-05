@@ -11843,4 +11843,95 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get settingsHouseholdServingsHint => 'Nieuwe maaltijden in de planner beginnen bij dit aantal personen, en hun boodschappenlijsten schalen mee.';
+
+  @override
+  String get cookbookUpdateAvailable => 'Update beschikbaar';
+
+  @override
+  String get cookbookUpdateBannerBody => 'De maker heeft dit kookboek gewijzigd sinds je het hebt gedownload.';
+
+  @override
+  String get cookbookUpdateReview => 'Bekijken';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return '“$name” bijwerken';
+  }
+
+  @override
+  String get cookbookUpdateChecking => 'Wijzigingen controleren…';
+
+  @override
+  String get cookbookUpdateLoadFailed => 'De update kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get cookbookUpdateUpToDate => 'Dit kookboek is al bijgewerkt.';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nieuwe recepten',
+      one: '1 nieuw recept',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count gewijzigde recepten',
+      one: '1 gewijzigd recept',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten verwijderd door de maker',
+      one: '1 recept verwijderd door de maker',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => 'Nieuwe titel of beschrijving van de maker';
+
+  @override
+  String get cookbookUpdateWillUpdate => 'Wordt bijgewerkt naar de nieuwe versie';
+
+  @override
+  String get cookbookUpdateYoursDiffers => 'Jouw kopie heeft eigen wijzigingen';
+
+  @override
+  String get cookbookUpdateKeepMine => 'Mijne houden';
+
+  @override
+  String get cookbookUpdateUseNew => 'Nieuwe versie gebruiken';
+
+  @override
+  String get cookbookUpdateRemovedHint => 'Vink aan welke naar de prullenbak moeten. De rest blijft in je kookboek.';
+
+  @override
+  String get cookbookUpdateApply => 'Kookboek bijwerken';
+
+  @override
+  String get cookbookUpdateSkip => 'Deze update overslaan';
+
+  @override
+  String get cookbookUpdateApplying => 'Kookboek wordt bijgewerkt…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '“$name” is bijgewerkt';
+  }
+
+  @override
+  String get cookbookUpdateFailed => 'De update kon niet worden opgeslagen. Er is niets in je kookboek veranderd.';
 }

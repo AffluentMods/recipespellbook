@@ -108,6 +108,10 @@ class CommunityDetail {
   final CommunityPublisher publisher;
   final List<CommunityRecipe> recipes;
 
+  /// The content version these recipes are at (goes up when the publisher
+  /// updates the cookbook). Null from a server older than versions.
+  final int? version;
+
   const CommunityDetail({
     required this.id, required this.title, this.description, this.imagePath,
     required this.recipeCount, required this.downloadCount,
@@ -116,6 +120,7 @@ class CommunityDetail {
     this.tags,
     this.kind = 'cookbook',
     required this.createdAt, required this.publisher, required this.recipes,
+    this.version,
   });
 
   factory CommunityDetail.fromJson(Map<String, dynamic> json) => CommunityDetail(
@@ -134,6 +139,7 @@ class CommunityDetail {
     createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
     publisher: CommunityPublisher.fromJson(json['publisher'] as Map<String, dynamic>),
     recipes: (json['recipes'] as List?)?.map((r) => CommunityRecipe.fromJson(r as Map<String, dynamic>)).toList() ?? [],
+    version: (json['version'] as num?)?.toInt(),
   );
 
   List<String> get tagList =>
@@ -151,6 +157,25 @@ class CommunityDetail {
       return '~${(totalImageBytes / 1024).toStringAsFixed(0)} KB';
     }
     return '~${(totalImageBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+}
+
+/// Where one publication's content stands, from POST /v1/community/versions.
+class CommunityVersion {
+  final int version;
+  final String? publisherId;
+  final DateTime? contentUpdatedAt;
+
+  const CommunityVersion({required this.version, this.publisherId, this.contentUpdatedAt});
+
+  static CommunityVersion? fromJson(Map<String, dynamic> json) {
+    final version = (json['version'] as num?)?.toInt();
+    if (version == null) return null;
+    return CommunityVersion(
+      version: version,
+      publisherId: json['publisherId'] as String?,
+      contentUpdatedAt: DateTime.tryParse(json['contentUpdatedAt'] as String? ?? ''),
+    );
   }
 }
 
@@ -928,13 +953,46 @@ class CommunityService {
           'recipeCount': (data['recipes'] as List?)?.length ?? 0,
           'downloadCount': 0, // not returned from download endpoint
           'createdAt': DateTime.now().toIso8601String(),
-          'publisher': data['publisher'] ?? {'id': '', 'name': 'Unknown'},
+          'publisher': data['publisher'] ?? {'id': data['publisherId'] ?? '', 'name': 'Unknown'},
         });
       }
     } catch (e) {
       debugPrint('[Community] download: $e');
     }
     return null;
+  }
+
+  /// Most ids the server takes in one [getVersions] request.
+  static const versionsChunk = 200;
+
+  /// The current content version of each of [publicationIds], from
+  /// POST /v1/community/versions (200 ids per request). A publication that
+  /// was removed, unpublished or is under review is left out. Null when the
+  /// server can't be reached or doesn't have the endpoint yet (404): the
+  /// caller just tries again another time.
+  Future<Map<String, CommunityVersion>?> getVersions(List<String> publicationIds) async {
+    final ids = publicationIds.toSet().toList();
+    final out = <String, CommunityVersion>{};
+    try {
+      for (var start = 0; start < ids.length; start += versionsChunk) {
+        final chunk = ids.sublist(start, (start + versionsChunk).clamp(0, ids.length));
+        final r = await _auth.post('/v1/community/versions', {'ids': chunk});
+        if (r.statusCode != 200) {
+          debugPrint('[Community] getVersions: HTTP ${r.statusCode}');
+          return null;
+        }
+        final versions = (jsonDecode(r.body) as Map<String, dynamic>)['versions'];
+        if (versions is! Map) return null;
+        versions.forEach((id, value) {
+          final v = value is Map ? CommunityVersion.fromJson(value.cast<String, dynamic>()) : null;
+          if (id is String && v != null) out[id] = v;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Community] getVersions: $e');
+      return null;
+    }
+    return out;
   }
 
   /// Track download of a single community recipe.
@@ -1096,6 +1154,25 @@ class CommunityService {
       debugPrint('[Community] lookupPublishSource: $e');
     }
     return null;
+  }
+
+  /// Every local cookbook this device published from. Updates from the
+  /// Community never touch these: their owner publishes them.
+  static Future<Set<String>> publishSourceCookbookIds() async {
+    final ids = <String>{};
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_publishSourceKey);
+      if (raw == null) return ids;
+      for (final entry in (jsonDecode(raw) as Map<String, dynamic>).values) {
+        if (entry is Map && entry['kind'] == 'cookbook' && entry['sourceId'] is String) {
+          ids.add(entry['sourceId'] as String);
+        }
+      }
+    } catch (e) {
+      debugPrint('[Community] publishSourceCookbookIds: $e');
+    }
+    return ids;
   }
 
   /// Forgets everything this device kept about [publicationId]: its

@@ -11702,4 +11702,92 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsHouseholdServingsHint => '计划中新增的餐食将从这个人数开始，购物清单也会相应调整。';
+
+  @override
+  String get cookbookUpdateAvailable => '有可用更新';
+
+  @override
+  String get cookbookUpdateBannerBody => '你下载后，创作者修改了这本食谱书。';
+
+  @override
+  String get cookbookUpdateReview => '查看';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return '更新“$name”';
+  }
+
+  @override
+  String get cookbookUpdateChecking => '正在检查有哪些变化…';
+
+  @override
+  String get cookbookUpdateLoadFailed => '无法加载更新。请检查网络连接后重试。';
+
+  @override
+  String get cookbookUpdateUpToDate => '这本食谱书已是最新。';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个新食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个已修改的食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '创作者删除了 $count 个食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => '创作者的新标题或简介';
+
+  @override
+  String get cookbookUpdateWillUpdate => '将更新为新版本';
+
+  @override
+  String get cookbookUpdateYoursDiffers => '你的副本有自己的修改';
+
+  @override
+  String get cookbookUpdateKeepMine => '保留我的';
+
+  @override
+  String get cookbookUpdateUseNew => '使用新版本';
+
+  @override
+  String get cookbookUpdateRemovedHint => '勾选要移到回收站的食谱。其余的会留在你的食谱书中。';
+
+  @override
+  String get cookbookUpdateApply => '更新食谱书';
+
+  @override
+  String get cookbookUpdateSkip => '跳过此更新';
+
+  @override
+  String get cookbookUpdateApplying => '正在更新食谱书…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '“$name”已是最新';
+  }
+
+  @override
+  String get cookbookUpdateFailed => '无法保存更新。你的食谱书没有任何改动。';
 }

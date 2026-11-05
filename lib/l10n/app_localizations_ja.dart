@@ -11706,4 +11706,92 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settingsHouseholdServingsHint => '献立に追加する食事はこの人数から始まり、買い物リストもそれに合わせて調整されます。';
+
+  @override
+  String get cookbookUpdateAvailable => '更新があります';
+
+  @override
+  String get cookbookUpdateBannerBody => 'ダウンロードした後に、クリエイターがこのレシピ本を変更しました。';
+
+  @override
+  String get cookbookUpdateReview => '確認する';
+
+  @override
+  String cookbookUpdateSheetTitle(String name) {
+    return '「$name」を更新';
+  }
+
+  @override
+  String get cookbookUpdateChecking => '変更点を確認しています…';
+
+  @override
+  String get cookbookUpdateLoadFailed => '更新を読み込めませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String get cookbookUpdateUpToDate => 'このレシピ本はすでに最新です。';
+
+  @override
+  String cookbookUpdateNewRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '新しいレシピ $count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateChangedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '変更されたレシピ $count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookUpdateRemovedRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'クリエイターが削除したレシピ $count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookUpdateNewDetails => 'クリエイターによる新しいタイトルまたは説明';
+
+  @override
+  String get cookbookUpdateWillUpdate => '新しいバージョンに更新されます';
+
+  @override
+  String get cookbookUpdateYoursDiffers => 'あなたのコピーには独自の変更があります';
+
+  @override
+  String get cookbookUpdateKeepMine => '自分のものを残す';
+
+  @override
+  String get cookbookUpdateUseNew => '新しいバージョンを使う';
+
+  @override
+  String get cookbookUpdateRemovedHint => 'ゴミ箱に移すものにチェックを入れてください。それ以外はレシピ本に残ります。';
+
+  @override
+  String get cookbookUpdateApply => 'レシピ本を更新';
+
+  @override
+  String get cookbookUpdateSkip => '今回の更新をスキップ';
+
+  @override
+  String get cookbookUpdateApplying => 'レシピ本を更新しています…';
+
+  @override
+  String cookbookUpdateDone(String name) {
+    return '「$name」は最新です';
+  }
+
+  @override
+  String get cookbookUpdateFailed => '更新を保存できませんでした。レシピ本は変更されていません。';
 }

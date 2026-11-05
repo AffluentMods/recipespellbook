@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 
 import 'recipe_screen.dart';
+import '../cookbooks/cookbook_update_sheet.dart';
 import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/daos/tags_dao.dart';
 import '../../../database/database.dart';
@@ -722,6 +723,25 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
               );
 
     if (!twoPane) {
+      // The whole cookbook (not a course or category of it): say when its
+      // Community creator has an update for it.
+      final updateFor = widget.courseId == null && widget.categoryId == null
+          ? (ref.watch(cookbooksProvider).valueOrNull ?? const <Cookbook>[])
+              .where((b) => b.id == cookbookId && hasCommunityUpdate(b))
+              .firstOrNull
+          : null;
+      Widget withUpdate(Widget child) => updateFor == null
+          ? child
+          : Column(
+              children: [
+                CookbookUpdateBanner(
+                  cookbook: updateFor,
+                  padding: const EdgeInsets.fromLTRB(Space.xl, 0, Space.xl, Space.sm),
+                ),
+                Expanded(child: child),
+              ],
+            );
+
       // ── Browse: full-width grid (or list) under a page header ──
       return Scaffold(
         backgroundColor: c.surface,
@@ -733,7 +753,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             ?newButton,
           ],
         ),
-        body: keys(_recipesBody(recipeStream, tagsDao, cookbookId, (recipes) {
+        body: withUpdate(keys(_recipesBody(recipeStream, tagsDao, cookbookId, (recipes) {
           if (_viewSize == _ViewSize.small) {
             return Responsive.constrainScrollable(
               maxWidth: 880,
@@ -763,7 +783,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             onToggleFavorite: (r) =>
                 ref.read(recipeDaoProvider).toggleFavorite(r.id, !r.isFavorite),
           );
-        })),
+        }))),
       );
     }
 
