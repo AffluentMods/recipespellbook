@@ -62,6 +62,10 @@ enum VideoImportFailure {
 
   /// The site answered with something the app cannot read.
   unreadable,
+
+  /// A short link that turned out to lead to a page that is not a video.
+  /// The link is better read by the web importer.
+  notAVideo,
 }
 
 /// A video import that failed, with the reason and the site it was on.
@@ -599,10 +603,12 @@ class VideoRecipeImporter {
       _checkStatus(status, platform);
       final found = VideoLink.parse(current.toString());
       if (found != null && found.platform == platform && !found.isShortLink) return found;
+      // A page that is not a video, such as a photo post. The web importer
+      // can still read it.
+      if (current.path.length > 1) throw const VideoImportException(VideoImportFailure.notAVideo, platform);
       break;
     }
-    // The link led somewhere other than a video: TikTok sends dead short
-    // links to its home page.
+    // TikTok sends dead short links to its home page.
     throw const VideoImportException(VideoImportFailure.unavailable, platform);
   }
 

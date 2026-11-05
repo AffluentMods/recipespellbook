@@ -620,7 +620,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     // A cooking video shared from YouTube, TikTok or Instagram: the recipe is
     // in the text that comes with it.
     final video = VideoLink.parse(finalUrl);
-    if (video != null) return _importSharedVideo(nav, video, cookbookId, l10n);
+    if (video != null && await _importSharedVideo(nav, video, cookbookId, l10n)) return;
 
     try {
       final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
@@ -659,8 +659,9 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   /// Reads the recipe of a shared video link and opens the preview, or
   /// offers the AI import when the video's text holds no recipe the text
   /// importer can find. The loading dialog is up when this is called, and
-  /// closed here.
-  Future<void> _importSharedVideo(
+  /// closed here. Returns false, with the dialog still up, for a short link
+  /// that turned out not to lead to a video: that is read as any page.
+  Future<bool> _importSharedVideo(
     NavigatorState nav,
     VideoLink video,
     String cookbookId,
@@ -671,6 +672,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     try {
       result = await VideoRecipeImporter().import(video);
     } on VideoImportException catch (e) {
+      if (e.failure == VideoImportFailure.notAVideo) return false;
       failure = videoImportErrorMessage(l10n, e);
     } catch (e) {
       debugPrint('[Import] Shared video import failed: $e');
@@ -693,12 +695,12 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
           ),
         ),
       );
-      return;
+      return true;
     }
     final ctx = nav.context;
     if (found != null && found.hasTextForAi) {
       if (ctx.mounted && await askForVideoAiImport(ctx)) nav.push(videoAiImportRoute(found, cookbookId));
-      return;
+      return true;
     }
     if (ctx.mounted) {
       ScaffoldMessenger.of(ctx).showSnackBar(
@@ -708,6 +710,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
         ),
       );
     }
+    return true;
   }
 
   /// Extracts the first URL from shared text.

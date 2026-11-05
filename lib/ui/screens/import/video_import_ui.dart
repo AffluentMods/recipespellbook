@@ -28,6 +28,7 @@ String videoImportErrorMessage(AppLocalizations l10n, VideoImportException error
           ? l10n.videoImportInstagramBlocked
           : l10n.videoImportBlocked(site);
     case VideoImportFailure.unreadable:
+    case VideoImportFailure.notAVideo:
       return l10n.videoImportUnreadable;
   }
 }

@@ -295,6 +295,12 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     // comes with it.
     final video = VideoLink.parse(url);
     if (video != null) return _importFromVideo(video, otherwise: otherwise, sourceText: sourceText);
+    return _importFromWebPage(url, otherwise: otherwise, sourceText: sourceText);
+  }
+
+  /// [_importFromLink] for a link that is not a video.
+  Future<void> _importFromWebPage(String url, {List<ImportedRecipe> otherwise = const [], String? sourceText}) async {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     var failure = l10n.importNoRecipeAtLink;
     _showLoading(l10n.importProgress);
@@ -328,11 +334,13 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     _showLoading(l10n.importProgress);
     VideoImportResult? result;
     String? failure;
+    var notAVideo = false;
     try {
       result = await VideoRecipeImporter(cancellation: cancellation).import(video);
     } on VideoImportCancelled {
       // Stopped with Cancel, or the sheet was closed.
     } on VideoImportException catch (e) {
+      notAVideo = e.failure == VideoImportFailure.notAVideo;
       failure = videoImportErrorMessage(l10n, e);
     } catch (e) {
       debugPrint('[Import] Video import failed: $e');
@@ -342,6 +350,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     }
     if (cancellation.isCancelled || !mounted) return;
     _hideLoading();
+    // A short link to something else than a video: read as any page.
+    if (notAVideo) return _importFromWebPage(video.url, otherwise: otherwise, sourceText: sourceText);
 
     final recipe = result?.recipe;
     if (result != null && recipe != null && hasRecipeContent(recipe)) {
