@@ -70,8 +70,9 @@ bool get supportsShareHandler => isMobile;
 /// Desktop/web use backend-based subscription validation.
 bool get supportsRevenueCatSdk => isMobile;
 
-/// Apple Sign-In — iOS and macOS only.
-bool get supportsAppleSignIn => isIOS || isMacOS;
+/// Apple Sign-In: iOS only. The macOS build is ad-hoc signed without the
+/// Sign in with Apple entitlement, so the flow cannot complete there.
+bool get supportsAppleSignIn => isIOS;
 
 /// Native splash screen — mobile and desktop, not web.
 bool get supportsNativeSplash => !kIsWeb;

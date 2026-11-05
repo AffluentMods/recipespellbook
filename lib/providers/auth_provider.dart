@@ -261,6 +261,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 //  HELPER: Check if Apple Sign-In is available
 // ════════════════════════════════════════════
 
-/// Apple Sign-In is only available on iOS 13+ and macOS 10.15+.
-/// On Android/web/Windows, only show Google.
+/// Apple Sign-In is only offered on iOS (see [supportsAppleSignIn]).
+/// Everywhere else, only show Google.
 bool get isAppleSignInAvailable => supportsAppleSignIn;
