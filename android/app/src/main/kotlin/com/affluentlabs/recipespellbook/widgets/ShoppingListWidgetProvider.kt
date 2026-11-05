@@ -67,6 +67,7 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
             R.id.widget_title,
             shopping.listName ?: shopping.title ?: context.getString(R.string.widget_shopping_title),
         )
+        WidgetUi.fitHeader(views, R.id.widget_icon, R.id.widget_title, widthDp)
         views.setOnClickPendingIntent(android.R.id.background, WidgetUi.open(context, shopping.link))
 
         if (shopping.unchecked > 0) {
@@ -95,11 +96,12 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
             listed = shopping.items.size,
             total = shopping.unchecked,
         )
-        val narrow = widthDp < WidgetUi.NARROW_DP
+        // Amounts only where the name still has room next to them.
+        val showDetail = widthDp >= DETAIL_MIN_WIDTH_DP
         for (item in shopping.items.take(shown)) {
             val row = RemoteViews(context.packageName, R.layout.widget_shopping_row)
             row.setTextViewText(R.id.item_name, item.name)
-            if (item.detail != null && !narrow) {
+            if (item.detail != null && showDetail) {
                 row.setTextViewText(R.id.item_detail, item.detail)
                 row.setViewVisibility(R.id.item_detail, View.VISIBLE)
             } else {
@@ -123,5 +125,7 @@ class ShoppingListWidgetProvider : AppWidgetProvider() {
     private companion object {
         // widget_shopping_row.xml: 24dp tall, no gap.
         const val ROW_DP = 24f
+
+        const val DETAIL_MIN_WIDTH_DP = 180f
     }
 }

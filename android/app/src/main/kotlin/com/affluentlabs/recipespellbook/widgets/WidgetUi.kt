@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.util.SizeF
+import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import com.affluentlabs.recipespellbook.MainActivity
@@ -111,6 +112,16 @@ internal object WidgetUi {
     private const val DEFAULT_WIDTH_DP = 180f
     private const val DEFAULT_HEIGHT_DP = 110f
 
-    /** Narrower than this, rows drop their secondary column. */
-    const val NARROW_DP = 200f
+    /** Narrower than this (2 cells on small phones), the heading is compacted. */
+    private const val COMPACT_HEADER_DP = 160f
+
+    /**
+     * On a narrow widget the heading drops its icon and uses a smaller title,
+     * so a name like "Shopping list" still fits next to the count.
+     */
+    fun fitHeader(views: RemoteViews, iconId: Int, titleId: Int, widthDp: Float) {
+        val compact = widthDp < COMPACT_HEADER_DP
+        views.setViewVisibility(iconId, if (compact) android.view.View.GONE else android.view.View.VISIBLE)
+        views.setTextViewTextSize(titleId, TypedValue.COMPLEX_UNIT_SP, if (compact) 13f else 15f)
+    }
 }

@@ -76,6 +76,7 @@ class TodaysMealsWidgetProvider : AppWidgetProvider() {
     private fun render(context: Context, meals: WidgetSnapshot.Meals, widthDp: Float, heightDp: Float): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.widget_todays_meals)
         views.setTextViewText(R.id.widget_title, meals.title ?: context.getString(R.string.widget_meals_title))
+        WidgetUi.fitHeader(views, R.id.widget_icon, R.id.widget_title, widthDp)
         // The heading and any empty space open the planner.
         views.setOnClickPendingIntent(android.R.id.background, WidgetUi.open(context, meals.link))
 
@@ -102,11 +103,12 @@ class TodaysMealsWidgetProvider : AppWidgetProvider() {
             listed = meals.items.size,
             total = meals.total,
         )
-        val narrow = widthDp < WidgetUi.NARROW_DP
+        // The meal type pill only where the title still has room next to it.
+        val showType = widthDp >= TYPE_MIN_WIDTH_DP
         for (meal in meals.items.take(shown)) {
             val row = RemoteViews(context.packageName, R.layout.widget_meal_row)
             row.setTextViewText(R.id.meal_title, meal.title)
-            if (meal.typeLabel != null && !narrow) {
+            if (meal.typeLabel != null && showType) {
                 row.setTextViewText(R.id.meal_type, meal.typeLabel)
                 row.setViewVisibility(R.id.meal_type, View.VISIBLE)
             } else {
@@ -161,5 +163,7 @@ class TodaysMealsWidgetProvider : AppWidgetProvider() {
 
         // widget_meal_row.xml: 30dp tall with 3dp above it.
         const val ROW_DP = 33f
+
+        const val TYPE_MIN_WIDTH_DP = 260f
     }
 }
