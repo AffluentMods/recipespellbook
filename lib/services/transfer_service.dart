@@ -1512,6 +1512,8 @@ class TransferService {
         // A bundle from before the colour travelled must not clear the one
         // a meal has here.
         cardColor: d.containsKey('cardColor') ? Value(d['cardColor'] as String?) : const Value.absent(),
+        // Likewise a bundle from before planned servings.
+        servings: d.containsKey('servings') ? Value((d['servings'] as num?)?.round()) : const Value.absent(),
         alertEnabled: Value(d['alertEnabled'] as bool? ?? false),
         alertSent: Value(d['alertSent'] as bool? ?? false),
         createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
@@ -1636,6 +1638,7 @@ class TransferService {
     'id': mp.id, 'date': _iso(mp.date), 'time': _iso(mp.time),
     'name': mp.name, 'mealType': mp.mealType, 'customMeal': mp.customMeal,
     'recipeId': mp.recipeId, 'notes': mp.notes, 'cardColor': mp.cardColor,
+    'servings': mp.servings,
     'alertEnabled': mp.alertEnabled, 'alertSent': mp.alertSent,
     'createdAt': _iso(mp.createdAt), 'updatedAt': _iso(mp.updatedAt),
   };

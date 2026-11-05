@@ -77,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
 
   // Accessors for DAOs
@@ -234,8 +234,26 @@ class AppDatabase extends _$AppDatabase {
             'ALTER TABLE steps ADD COLUMN image_server_path TEXT',
           );
         }
+        if (from < 12) {
+          await _addPlannedServings(m);
+        }
       },
     );
+  }
+
+  /// Schema 12: how many people a planned meal is for (nullable: as many as
+  /// the recipe serves). Existing meals keep null and so read exactly as
+  /// before. Checks the table first, so the step stands on its own whatever
+  /// state an older database is in and is safe to run twice.
+  Future<void> _addPlannedServings(Migrator m) async {
+    final columns = await customSelect("PRAGMA table_info('meal_plans')").get();
+    if (columns.isEmpty) {
+      // No planner table at all: make the current one, servings included.
+      await m.createTable(mealPlans);
+      return;
+    }
+    if (columns.any((c) => c.read<String>('name') == 'servings')) return;
+    await customStatement('ALTER TABLE meal_plans ADD COLUMN servings INTEGER');
   }
 
   /// Re-seed default recipe links after schema migration (v1 → v2)

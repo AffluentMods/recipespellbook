@@ -25,6 +25,11 @@ class MealPlans extends Table {
   ///   'custom:0xAARRGGBB'   – a literal colour the user picked
   TextColumn get cardColor => text().nullable()();
 
+  /// How many people this meal is planned for. Null = as many as the recipe
+  /// says it serves. The recipe itself is never changed: the planner, the
+  /// shopping list and the recipe page scale by planned / recipe servings.
+  IntColumn get servings => integer().nullable()();
+
   BoolColumn get alertEnabled => boolean().withDefault(const Constant(false))();
   BoolColumn get alertSent => boolean().withDefault(const Constant(false))();
 

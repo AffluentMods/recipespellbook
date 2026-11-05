@@ -5075,6 +5075,12 @@ class $MealPlansTable extends MealPlans
   late final GeneratedColumn<String> cardColor = GeneratedColumn<String>(
       'card_color', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _servingsMeta =
+      const VerificationMeta('servings');
+  @override
+  late final GeneratedColumn<int> servings = GeneratedColumn<int>(
+      'servings', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _alertEnabledMeta =
       const VerificationMeta('alertEnabled');
   @override
@@ -5128,6 +5134,7 @@ class $MealPlansTable extends MealPlans
         recipeId,
         notes,
         cardColor,
+        servings,
         alertEnabled,
         alertSent,
         createdAt,
@@ -5185,6 +5192,10 @@ class $MealPlansTable extends MealPlans
       context.handle(_cardColorMeta,
           cardColor.isAcceptableOrUnknown(data['card_color']!, _cardColorMeta));
     }
+    if (data.containsKey('servings')) {
+      context.handle(_servingsMeta,
+          servings.isAcceptableOrUnknown(data['servings']!, _servingsMeta));
+    }
     if (data.containsKey('alert_enabled')) {
       context.handle(
           _alertEnabledMeta,
@@ -5234,6 +5245,8 @@ class $MealPlansTable extends MealPlans
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
       cardColor: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}card_color']),
+      servings: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}servings']),
       alertEnabled: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}alert_enabled'])!,
       alertSent: attachedDatabase.typeMapping
@@ -5270,6 +5283,11 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
   ///   'rot:<deg>'           – theme accent rotated <deg>° on the colour wheel
   ///   'custom:0xAARRGGBB'   – a literal colour the user picked
   final String? cardColor;
+
+  /// How many people this meal is planned for. Null = as many as the recipe
+  /// says it serves. The recipe itself is never changed: the planner, the
+  /// shopping list and the recipe page scale by planned / recipe servings.
+  final int? servings;
   final bool alertEnabled;
   final bool alertSent;
   final DateTime createdAt;
@@ -5285,6 +5303,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
       this.recipeId,
       this.notes,
       this.cardColor,
+      this.servings,
       required this.alertEnabled,
       required this.alertSent,
       required this.createdAt,
@@ -5314,6 +5333,9 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
     if (!nullToAbsent || cardColor != null) {
       map['card_color'] = Variable<String>(cardColor);
     }
+    if (!nullToAbsent || servings != null) {
+      map['servings'] = Variable<int>(servings);
+    }
     map['alert_enabled'] = Variable<bool>(alertEnabled);
     map['alert_sent'] = Variable<bool>(alertSent);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -5342,6 +5364,9 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
       cardColor: cardColor == null && nullToAbsent
           ? const Value.absent()
           : Value(cardColor),
+      servings: servings == null && nullToAbsent
+          ? const Value.absent()
+          : Value(servings),
       alertEnabled: Value(alertEnabled),
       alertSent: Value(alertSent),
       createdAt: Value(createdAt),
@@ -5365,6 +5390,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
       recipeId: serializer.fromJson<String?>(json['recipeId']),
       notes: serializer.fromJson<String?>(json['notes']),
       cardColor: serializer.fromJson<String?>(json['cardColor']),
+      servings: serializer.fromJson<int?>(json['servings']),
       alertEnabled: serializer.fromJson<bool>(json['alertEnabled']),
       alertSent: serializer.fromJson<bool>(json['alertSent']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -5385,6 +5411,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
       'recipeId': serializer.toJson<String?>(recipeId),
       'notes': serializer.toJson<String?>(notes),
       'cardColor': serializer.toJson<String?>(cardColor),
+      'servings': serializer.toJson<int?>(servings),
       'alertEnabled': serializer.toJson<bool>(alertEnabled),
       'alertSent': serializer.toJson<bool>(alertSent),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -5403,6 +5430,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
           Value<String?> recipeId = const Value.absent(),
           Value<String?> notes = const Value.absent(),
           Value<String?> cardColor = const Value.absent(),
+          Value<int?> servings = const Value.absent(),
           bool? alertEnabled,
           bool? alertSent,
           DateTime? createdAt,
@@ -5418,6 +5446,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
         recipeId: recipeId.present ? recipeId.value : this.recipeId,
         notes: notes.present ? notes.value : this.notes,
         cardColor: cardColor.present ? cardColor.value : this.cardColor,
+        servings: servings.present ? servings.value : this.servings,
         alertEnabled: alertEnabled ?? this.alertEnabled,
         alertSent: alertSent ?? this.alertSent,
         createdAt: createdAt ?? this.createdAt,
@@ -5436,6 +5465,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
       recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
       notes: data.notes.present ? data.notes.value : this.notes,
       cardColor: data.cardColor.present ? data.cardColor.value : this.cardColor,
+      servings: data.servings.present ? data.servings.value : this.servings,
       alertEnabled: data.alertEnabled.present
           ? data.alertEnabled.value
           : this.alertEnabled,
@@ -5458,6 +5488,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
           ..write('recipeId: $recipeId, ')
           ..write('notes: $notes, ')
           ..write('cardColor: $cardColor, ')
+          ..write('servings: $servings, ')
           ..write('alertEnabled: $alertEnabled, ')
           ..write('alertSent: $alertSent, ')
           ..write('createdAt: $createdAt, ')
@@ -5478,6 +5509,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
       recipeId,
       notes,
       cardColor,
+      servings,
       alertEnabled,
       alertSent,
       createdAt,
@@ -5496,6 +5528,7 @@ class MealPlan extends DataClass implements Insertable<MealPlan> {
           other.recipeId == this.recipeId &&
           other.notes == this.notes &&
           other.cardColor == this.cardColor &&
+          other.servings == this.servings &&
           other.alertEnabled == this.alertEnabled &&
           other.alertSent == this.alertSent &&
           other.createdAt == this.createdAt &&
@@ -5513,6 +5546,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
   final Value<String?> recipeId;
   final Value<String?> notes;
   final Value<String?> cardColor;
+  final Value<int?> servings;
   final Value<bool> alertEnabled;
   final Value<bool> alertSent;
   final Value<DateTime> createdAt;
@@ -5529,6 +5563,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
     this.recipeId = const Value.absent(),
     this.notes = const Value.absent(),
     this.cardColor = const Value.absent(),
+    this.servings = const Value.absent(),
     this.alertEnabled = const Value.absent(),
     this.alertSent = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -5546,6 +5581,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
     this.recipeId = const Value.absent(),
     this.notes = const Value.absent(),
     this.cardColor = const Value.absent(),
+    this.servings = const Value.absent(),
     this.alertEnabled = const Value.absent(),
     this.alertSent = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -5564,6 +5600,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
     Expression<String>? recipeId,
     Expression<String>? notes,
     Expression<String>? cardColor,
+    Expression<int>? servings,
     Expression<bool>? alertEnabled,
     Expression<bool>? alertSent,
     Expression<DateTime>? createdAt,
@@ -5581,6 +5618,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
       if (recipeId != null) 'recipe_id': recipeId,
       if (notes != null) 'notes': notes,
       if (cardColor != null) 'card_color': cardColor,
+      if (servings != null) 'servings': servings,
       if (alertEnabled != null) 'alert_enabled': alertEnabled,
       if (alertSent != null) 'alert_sent': alertSent,
       if (createdAt != null) 'created_at': createdAt,
@@ -5600,6 +5638,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
       Value<String?>? recipeId,
       Value<String?>? notes,
       Value<String?>? cardColor,
+      Value<int?>? servings,
       Value<bool>? alertEnabled,
       Value<bool>? alertSent,
       Value<DateTime>? createdAt,
@@ -5616,6 +5655,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
       recipeId: recipeId ?? this.recipeId,
       notes: notes ?? this.notes,
       cardColor: cardColor ?? this.cardColor,
+      servings: servings ?? this.servings,
       alertEnabled: alertEnabled ?? this.alertEnabled,
       alertSent: alertSent ?? this.alertSent,
       createdAt: createdAt ?? this.createdAt,
@@ -5655,6 +5695,9 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
     if (cardColor.present) {
       map['card_color'] = Variable<String>(cardColor.value);
     }
+    if (servings.present) {
+      map['servings'] = Variable<int>(servings.value);
+    }
     if (alertEnabled.present) {
       map['alert_enabled'] = Variable<bool>(alertEnabled.value);
     }
@@ -5688,6 +5731,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlan> {
           ..write('recipeId: $recipeId, ')
           ..write('notes: $notes, ')
           ..write('cardColor: $cardColor, ')
+          ..write('servings: $servings, ')
           ..write('alertEnabled: $alertEnabled, ')
           ..write('alertSent: $alertSent, ')
           ..write('createdAt: $createdAt, ')
@@ -10195,6 +10239,7 @@ typedef $$MealPlansTableCreateCompanionBuilder = MealPlansCompanion Function({
   Value<String?> recipeId,
   Value<String?> notes,
   Value<String?> cardColor,
+  Value<int?> servings,
   Value<bool> alertEnabled,
   Value<bool> alertSent,
   Value<DateTime> createdAt,
@@ -10212,6 +10257,7 @@ typedef $$MealPlansTableUpdateCompanionBuilder = MealPlansCompanion Function({
   Value<String?> recipeId,
   Value<String?> notes,
   Value<String?> cardColor,
+  Value<int?> servings,
   Value<bool> alertEnabled,
   Value<bool> alertSent,
   Value<DateTime> createdAt,
@@ -10246,6 +10292,7 @@ class $$MealPlansTableTableManager extends RootTableManager<
             Value<String?> recipeId = const Value.absent(),
             Value<String?> notes = const Value.absent(),
             Value<String?> cardColor = const Value.absent(),
+            Value<int?> servings = const Value.absent(),
             Value<bool> alertEnabled = const Value.absent(),
             Value<bool> alertSent = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -10263,6 +10310,7 @@ class $$MealPlansTableTableManager extends RootTableManager<
             recipeId: recipeId,
             notes: notes,
             cardColor: cardColor,
+            servings: servings,
             alertEnabled: alertEnabled,
             alertSent: alertSent,
             createdAt: createdAt,
@@ -10280,6 +10328,7 @@ class $$MealPlansTableTableManager extends RootTableManager<
             Value<String?> recipeId = const Value.absent(),
             Value<String?> notes = const Value.absent(),
             Value<String?> cardColor = const Value.absent(),
+            Value<int?> servings = const Value.absent(),
             Value<bool> alertEnabled = const Value.absent(),
             Value<bool> alertSent = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -10297,6 +10346,7 @@ class $$MealPlansTableTableManager extends RootTableManager<
             recipeId: recipeId,
             notes: notes,
             cardColor: cardColor,
+            servings: servings,
             alertEnabled: alertEnabled,
             alertSent: alertSent,
             createdAt: createdAt,
@@ -10352,6 +10402,11 @@ class $$MealPlansTableFilterComposer
 
   ColumnFilters<String> get cardColor => $state.composableBuilder(
       column: $state.table.cardColor,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get servings => $state.composableBuilder(
+      column: $state.table.servings,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -10426,6 +10481,11 @@ class $$MealPlansTableOrderingComposer
 
   ColumnOrderings<String> get cardColor => $state.composableBuilder(
       column: $state.table.cardColor,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get servings => $state.composableBuilder(
+      column: $state.table.servings,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
