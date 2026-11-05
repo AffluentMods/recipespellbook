@@ -246,8 +246,12 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+        // A form-width column on desktop instead of fields across the window.
+        child: Responsive.constrainScrollable(
+          maxWidth: Responsive.desktopCap(context, Responsive.settingsListMaxWidth),
+          minHorizontal: 0,
+          builder: (_, pad) => ListView(
+          padding: pad + const EdgeInsets.all(16),
           children: [
             // Cover image
             Center(
@@ -362,6 +366,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
               ),
             ],
           ],
+        ),
         ),
       ),
     );

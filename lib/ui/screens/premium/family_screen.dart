@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_invite_sheet.dart';
 import '../../widgets/join_with_link_dialog.dart';
@@ -61,7 +62,10 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
-        child: Column(
+        // Desktop: the two buttons at a button width, not across the window.
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: Responsive.desktopCap(context, 440)),
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.family_restroom, size: 72, color: theme.colorScheme.primary.withValues(alpha: 0.3)),
@@ -93,6 +97,7 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -109,8 +114,12 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
     final seatsLeft = info.maxMembers - info.members.length;
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
+      // A settings-width column on desktop; the list still scrolls edge to edge.
+      child: Responsive.constrainScrollable(
+        maxWidth: Responsive.desktopCap(context, Responsive.settingsListMaxWidth),
+        minHorizontal: 0,
+        builder: (_, pad) => ListView(
+        padding: pad + const EdgeInsets.all(16),
         children: [
           // ── Header ──
           Card(
@@ -363,6 +372,7 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
             ),
           const SizedBox(height: 32),
         ],
+      ),
       ),
     );
   }
