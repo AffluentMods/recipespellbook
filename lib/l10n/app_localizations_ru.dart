@@ -12104,4 +12104,245 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get widgetShoppingListDescription => 'Что ещё осталось купить по вашему списку покупок.';
+
+  @override
+  String get pantryCookTitle => 'Что можно приготовить?';
+
+  @override
+  String get pantryCookHomeEmpty => 'Добавь продукты из кладовой и узнай, какие рецепты можно приготовить';
+
+  @override
+  String get pantryCookHomeSetUp => 'Добавить продукты';
+
+  @override
+  String get pantryCookHomeOpen => 'Смотреть рецепты';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count можно приготовить сразу',
+      many: '$count можно приготовить сразу',
+      few: '$count можно приготовить сразу',
+      one: '$count можно приготовить сразу',
+      zero: 'Пока ничего не готово',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В $count рецепта не хватает 1 или 2 продуктов',
+      many: 'В $count рецептах не хватает 1 или 2 продуктов',
+      few: 'В $count рецептах не хватает 1 или 2 продуктов',
+      one: 'В $count рецепте не хватает 1 или 2 продуктов',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count продукта в кладовой',
+      many: '$count продуктов в кладовой',
+      few: '$count продукта в кладовой',
+      one: '$count продукт в кладовой',
+      zero: 'Кладовая пуста',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Используются в $count рецепта',
+      many: 'Используются в $count рецептах',
+      few: 'Используются в $count рецептах',
+      one: 'Используются в $count рецепте',
+      zero: 'Пока ни один рецепт их не использует',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => 'Изменить кладовую';
+
+  @override
+  String get pantryCookEmptyTitle => 'Что у тебя в кладовой?';
+
+  @override
+  String get pantryCookEmptyBody => 'Добавь продукты, которые есть под рукой, и узнай, какие рецепты можно приготовить прямо сейчас и чего не хватает для остальных.';
+
+  @override
+  String get pantryCookFilterAll => 'Все';
+
+  @override
+  String get pantryCookFilterReady => 'Можно сразу';
+
+  @override
+  String get pantryCookFilterFew => 'Не хватает 1 или 2';
+
+  @override
+  String get pantryCookAllCourses => 'Все блюда';
+
+  @override
+  String get pantryCookAllCookbooks => 'Все кулинарные книги';
+
+  @override
+  String get pantryCookNoResults => 'Пока ни один рецепт не использует твою кладовую';
+
+  @override
+  String get pantryCookNoResultsHint => 'Добавь ещё несколько продуктов, которые у тебя есть, чтобы увидеть здесь рецепты.';
+
+  @override
+  String get pantryCookNoFilterResults => 'Нет рецептов по этим фильтрам';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$covered из $total есть в кладовой';
+  }
+
+  @override
+  String get pantryCookMissingLabel => 'Не хватает:';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return 'Есть $item? Нажми, чтобы добавить в кладовую';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return 'ещё $count';
+  }
+
+  @override
+  String get pantryCookAddMissing => 'Добавить недостающее';
+
+  @override
+  String get pantryCookAddMissingTooltip => 'Добавить недостающее в список покупок';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return 'Добавлено в кладовую: $item';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => 'Недавно куплено';
+
+  @override
+  String get pantryCookAddAll => 'Добавить всё';
+
+  @override
+  String get pantryCookAlwaysHave => 'Всегда есть';
+
+  @override
+  String get pantryCookAlwaysHaveHint => 'Не учитываются ни в одном рецепте, поэтому никогда не отмечаются как недостающие.';
+
+  @override
+  String get pantryCookAddBasicHint => 'Добавить базовый продукт';
+
+  @override
+  String get pantryCookPaletteSubtitle => 'Рецепты из того, что у тебя есть';
+
+  @override
+  String get pantryCookSeeRecipes => 'Посмотреть, что можно приготовить';
+
+  @override
+  String get dinnerTitle => 'Что на ужин?';
+
+  @override
+  String get dinnerShowOthers => 'Показать другие';
+
+  @override
+  String get dinnerPlannerSuggestions => 'Идеи';
+
+  @override
+  String get dinnerReasonAllInPantry => 'Всё есть в кладовой';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Любимое, не готовилось $weeks недели',
+      many: 'Любимое, не готовилось $weeks недель',
+      few: 'Любимое, не готовилось $weeks недели',
+      one: 'Любимое, не готовилось $weeks неделю',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => 'Одно из любимых';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Купить всего $count продукта',
+      many: 'Купить всего $count продуктов',
+      few: 'Купить всего $count продукта',
+      one: 'Купить всего $count продукт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return 'Быстро: $minutes мин';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Готовилось $weeks недели назад',
+      many: 'Готовилось $weeks недель назад',
+      few: 'Готовилось $weeks недели назад',
+      one: 'Готовилось $weeks неделю назад',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Не открывалось $weeks недели',
+      many: 'Не открывалось $weeks недель',
+      few: 'Не открывалось $weeks недели',
+      one: 'Не открывалось $weeks неделю',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: 'Оценка: $stars звезды',
+      many: 'Оценка: $stars звёзд',
+      few: 'Оценка: $stars звезды',
+      one: 'Оценка: $stars звезда',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => 'Ещё не пробовали';
+
+  @override
+  String get dinnerReasonFromLibrary => 'Из твоих кулинарных книг';
 }

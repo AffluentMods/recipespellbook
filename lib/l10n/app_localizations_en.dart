@@ -11952,4 +11952,227 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get widgetShoppingListDescription => 'What is left to buy on your shopping list.';
+
+  @override
+  String get pantryCookTitle => 'What can I make?';
+
+  @override
+  String get pantryCookHomeEmpty => 'Add what\'s in your pantry and see which recipes you can cook';
+
+  @override
+  String get pantryCookHomeSetUp => 'Add items';
+
+  @override
+  String get pantryCookHomeOpen => 'See recipes';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ready now',
+      one: '1 ready now',
+      zero: 'None ready yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count missing 1 or 2 things',
+      one: '1 missing 1 or 2 things',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items in your pantry',
+      one: '1 item in your pantry',
+      zero: 'Your pantry is empty',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes use them',
+      one: '1 recipe uses them',
+      zero: 'No recipes use them yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => 'Edit pantry';
+
+  @override
+  String get pantryCookEmptyTitle => 'What\'s in your pantry?';
+
+  @override
+  String get pantryCookEmptyBody => 'Add what you have on hand and see which of your recipes you can cook right now, and what is missing for the rest.';
+
+  @override
+  String get pantryCookFilterAll => 'All';
+
+  @override
+  String get pantryCookFilterReady => 'Ready now';
+
+  @override
+  String get pantryCookFilterFew => 'Missing 1 to 2';
+
+  @override
+  String get pantryCookAllCourses => 'All courses';
+
+  @override
+  String get pantryCookAllCookbooks => 'All cookbooks';
+
+  @override
+  String get pantryCookNoResults => 'Nothing uses your pantry yet';
+
+  @override
+  String get pantryCookNoResultsHint => 'Add a few more things you have to see recipes here.';
+
+  @override
+  String get pantryCookNoFilterResults => 'No recipes match these filters';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$covered of $total in your pantry';
+  }
+
+  @override
+  String get pantryCookMissingLabel => 'Missing:';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return 'Have $item? Tap to add it to your pantry';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get pantryCookAddMissing => 'Add missing';
+
+  @override
+  String get pantryCookAddMissingTooltip => 'Add missing to shopping list';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return 'Added $item to your pantry';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => 'Recently bought';
+
+  @override
+  String get pantryCookAddAll => 'Add all';
+
+  @override
+  String get pantryCookAlwaysHave => 'Always have';
+
+  @override
+  String get pantryCookAlwaysHaveHint => 'Left out of every recipe, so they never show as missing.';
+
+  @override
+  String get pantryCookAddBasicHint => 'Add a basic';
+
+  @override
+  String get pantryCookPaletteSubtitle => 'Recipes you can cook with what you have';
+
+  @override
+  String get pantryCookSeeRecipes => 'See what you can make';
+
+  @override
+  String get dinnerTitle => 'What\'s for dinner?';
+
+  @override
+  String get dinnerShowOthers => 'Show others';
+
+  @override
+  String get dinnerPlannerSuggestions => 'Suggestions';
+
+  @override
+  String get dinnerReasonAllInPantry => 'All in your pantry';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'A favorite you haven\'t made in $weeks weeks',
+      one: 'A favorite you haven\'t made in 1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => 'One of your favorites';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Just $count things to buy',
+      one: 'Just 1 thing to buy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return 'Quick: $minutes min';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Last made $weeks weeks ago',
+      one: 'Last made 1 week ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Not opened in $weeks weeks',
+      one: 'Not opened in 1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: 'Rated $stars stars',
+      one: 'Rated 1 star',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => 'Not tried yet';
+
+  @override
+  String get dinnerReasonFromLibrary => 'From your cookbooks';
 }

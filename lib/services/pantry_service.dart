@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Simple pantry service.
@@ -6,34 +7,76 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Stores a set of ingredient names the user always has on hand.
 /// When the shopping list generator builds ingredient lists,
 /// items matching pantry entries are unchecked by default.
+///
+/// Also keeps the "always have" basics (water, salt, pepper unless the user
+/// changes them): "What can I make?" leaves those out of a recipe's count
+/// altogether instead of counting them as in the pantry.
 class PantryService {
   static const _key = 'pantry_items';
+  static const _basicsKey = 'pantry_basics';
 
   static PantryService? _instance;
   static PantryService get instance => _instance ??= PantryService._();
   PantryService._();
 
+  /// Forget what was loaded so the next call reads storage again (tests set
+  /// new mock preferences between cases).
+  @visibleForTesting
+  static void resetForTesting() => _instance = null;
+
+  /// The basics a new pantry starts with.
+  static const defaultBasics = ['water', 'salt', 'black pepper'];
+
   Set<String> _items = {};
+  Set<String> _basics = {...defaultBasics};
   bool _loaded = false;
 
   Future<void> _ensureLoaded() async {
     if (_loaded) return;
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_key);
-    if (json != null) {
-      try {
-        final list = (jsonDecode(json) as List).cast<String>();
-        _items = list.map((s) => s.toLowerCase().trim()).toSet();
-      } catch (_) {
-        _items = {};
-      }
-    }
+    _items = _decode(prefs.getString(_key)) ?? {};
+    _basics = _decode(prefs.getString(_basicsKey)) ?? {...defaultBasics};
     _loaded = true;
+  }
+
+  static Set<String>? _decode(String? json) {
+    if (json == null) return null;
+    try {
+      final list = (jsonDecode(json) as List).cast<String>();
+      return list.map((s) => s.toLowerCase().trim()).where((s) => s.isNotEmpty).toSet();
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> _save() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, jsonEncode(_items.toList()..sort()));
+  }
+
+  Future<void> _saveBasics() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_basicsKey, jsonEncode(_basics.toList()..sort()));
+  }
+
+  /// The always-have basics (sorted).
+  Future<List<String>> getBasics() async {
+    await _ensureLoaded();
+    return _basics.toList()..sort();
+  }
+
+  Future<void> addBasic(String name) async {
+    await _ensureLoaded();
+    final normalized = name.toLowerCase().trim();
+    if (normalized.isEmpty) return;
+    _basics.add(normalized);
+    await _saveBasics();
+  }
+
+  Future<void> removeBasic(String name) async {
+    await _ensureLoaded();
+    _basics.remove(name.toLowerCase().trim());
+    await _saveBasics();
   }
 
   /// Get all pantry items (sorted).

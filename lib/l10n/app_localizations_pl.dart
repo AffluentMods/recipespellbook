@@ -12114,4 +12114,245 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get widgetShoppingListDescription => 'Co jeszcze zostało do kupienia z Twojej listy zakupów.';
+
+  @override
+  String get pantryCookTitle => 'Co mogę ugotować?';
+
+  @override
+  String get pantryCookHomeEmpty => 'Dodaj to, co masz w spiżarni, i zobacz, które przepisy możesz ugotować';
+
+  @override
+  String get pantryCookHomeSetUp => 'Dodaj produkty';
+
+  @override
+  String get pantryCookHomeOpen => 'Zobacz przepisy';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count gotowego od razu',
+      many: '$count gotowych od razu',
+      few: '$count gotowe od razu',
+      one: '1 gotowy od razu',
+      zero: 'Nic jeszcze nie jest gotowe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'W $count brakuje 1 lub 2 rzeczy',
+      many: 'W $count brakuje 1 lub 2 rzeczy',
+      few: 'W $count brakuje 1 lub 2 rzeczy',
+      one: 'W 1 brakuje 1 lub 2 rzeczy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produktu w spiżarni',
+      many: '$count produktów w spiżarni',
+      few: '$count produkty w spiżarni',
+      one: '1 produkt w spiżarni',
+      zero: 'Twoja spiżarnia jest pusta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Używa ich $count przepisu',
+      many: 'Używa ich $count przepisów',
+      few: 'Używają ich $count przepisy',
+      one: 'Używa ich 1 przepis',
+      zero: 'Żaden przepis ich jeszcze nie używa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => 'Edytuj spiżarnię';
+
+  @override
+  String get pantryCookEmptyTitle => 'Co masz w spiżarni?';
+
+  @override
+  String get pantryCookEmptyBody => 'Dodaj to, co masz pod ręką, i zobacz, które przepisy możesz ugotować od razu i czego brakuje do pozostałych.';
+
+  @override
+  String get pantryCookFilterAll => 'Wszystkie';
+
+  @override
+  String get pantryCookFilterReady => 'Gotowe od razu';
+
+  @override
+  String get pantryCookFilterFew => 'Brakuje 1 do 2';
+
+  @override
+  String get pantryCookAllCourses => 'Wszystkie dania';
+
+  @override
+  String get pantryCookAllCookbooks => 'Wszystkie książki kucharskie';
+
+  @override
+  String get pantryCookNoResults => 'Żaden przepis nie korzysta jeszcze ze spiżarni';
+
+  @override
+  String get pantryCookNoResultsHint => 'Dodaj jeszcze kilka rzeczy, które masz, aby zobaczyć tu przepisy.';
+
+  @override
+  String get pantryCookNoFilterResults => 'Brak przepisów pasujących do tych filtrów';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$covered z $total w spiżarni';
+  }
+
+  @override
+  String get pantryCookMissingLabel => 'Brakuje:';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return 'Masz $item? Dotknij, aby dodać do spiżarni';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return '+$count więcej';
+  }
+
+  @override
+  String get pantryCookAddMissing => 'Dodaj brakujące';
+
+  @override
+  String get pantryCookAddMissingTooltip => 'Dodaj brakujące do listy zakupów';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return 'Dodano $item do spiżarni';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => 'Ostatnio kupione';
+
+  @override
+  String get pantryCookAddAll => 'Dodaj wszystko';
+
+  @override
+  String get pantryCookAlwaysHave => 'Zawsze w domu';
+
+  @override
+  String get pantryCookAlwaysHaveHint => 'Nie liczą się w żadnym przepisie, więc nigdy nie są oznaczane jako brakujące.';
+
+  @override
+  String get pantryCookAddBasicHint => 'Dodaj podstawowy produkt';
+
+  @override
+  String get pantryCookPaletteSubtitle => 'Przepisy, które ugotujesz z tego, co masz';
+
+  @override
+  String get pantryCookSeeRecipes => 'Zobacz, co możesz ugotować';
+
+  @override
+  String get dinnerTitle => 'Co na kolację?';
+
+  @override
+  String get dinnerShowOthers => 'Pokaż inne';
+
+  @override
+  String get dinnerPlannerSuggestions => 'Propozycje';
+
+  @override
+  String get dinnerReasonAllInPantry => 'Wszystko jest w spiżarni';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Ulubiony, nierobiony od $weeks tygodnia',
+      many: 'Ulubiony, nierobiony od $weeks tygodni',
+      few: 'Ulubiony, nierobiony od $weeks tygodni',
+      one: 'Ulubiony, nierobiony od 1 tygodnia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => 'Jeden z ulubionych';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Do kupienia tylko $count rzeczy',
+      many: 'Do kupienia tylko $count rzeczy',
+      few: 'Do kupienia tylko $count rzeczy',
+      one: 'Do kupienia tylko 1 rzecz',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return 'Szybko: $minutes min';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Ostatnio robiony $weeks tygodnia temu',
+      many: 'Ostatnio robiony $weeks tygodni temu',
+      few: 'Ostatnio robiony $weeks tygodnie temu',
+      one: 'Ostatnio robiony tydzień temu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Nieotwierany od $weeks tygodnia',
+      many: 'Nieotwierany od $weeks tygodni',
+      few: 'Nieotwierany od $weeks tygodni',
+      one: 'Nieotwierany od tygodnia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: 'Ocena: $stars gwiazdki',
+      many: 'Ocena: $stars gwiazdek',
+      few: 'Ocena: $stars gwiazdki',
+      one: 'Ocena: 1 gwiazdka',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => 'Jeszcze nie wypróbowany';
+
+  @override
+  String get dinnerReasonFromLibrary => 'Z twoich książek kucharskich';
 }

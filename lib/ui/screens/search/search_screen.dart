@@ -7,6 +7,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/recipe_similarity.dart';
 import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/text_normalize.dart';
@@ -133,7 +134,7 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
   final seen = <String>{};
   return [
     for (final s in ranked)
-      if (seen.add('${foldAccents(s.recipe.title.trim())}\n${(ingredientNames[s.recipe.id] ?? const []).join('\n')}'))
+      if (seen.add(RecipeSimilarity.copyKey(s.recipe.title, ingredientNames[s.recipe.id] ?? const [])))
         s.recipe,
   ];
 });

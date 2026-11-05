@@ -20988,6 +20988,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What is left to buy on your shopping list.'**
   String get widgetShoppingListDescription;
+
+  /// Title of the page that ranks recipes by what is in the pantry, and of its Home card.
+  ///
+  /// In en, this message translates to:
+  /// **'What can I make?'**
+  String get pantryCookTitle;
+
+  /// No description provided for @pantryCookHomeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add what\'s in your pantry and see which recipes you can cook'**
+  String get pantryCookHomeEmpty;
+
+  /// No description provided for @pantryCookHomeSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items'**
+  String get pantryCookHomeSetUp;
+
+  /// No description provided for @pantryCookHomeOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'See recipes'**
+  String get pantryCookHomeOpen;
+
+  /// Home card: how many recipes can be cooked with nothing to buy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{None ready yet} =1{1 ready now} other{{count} ready now}}'**
+  String pantryCookHomeReady(int count);
+
+  /// Home card: how many recipes need only one or two things bought.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 missing 1 or 2 things} other{{count} missing 1 or 2 things}}'**
+  String pantryCookHomeFew(int count);
+
+  /// No description provided for @pantryCookItemsInPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Your pantry is empty} =1{1 item in your pantry} other{{count} items in your pantry}}'**
+  String pantryCookItemsInPantry(int count);
+
+  /// No description provided for @pantryCookRecipesUsing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No recipes use them yet} =1{1 recipe uses them} other{{count} recipes use them}}'**
+  String pantryCookRecipesUsing(int count);
+
+  /// No description provided for @pantryCookEditPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pantry'**
+  String get pantryCookEditPantry;
+
+  /// No description provided for @pantryCookEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s in your pantry?'**
+  String get pantryCookEmptyTitle;
+
+  /// No description provided for @pantryCookEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add what you have on hand and see which of your recipes you can cook right now, and what is missing for the rest.'**
+  String get pantryCookEmptyBody;
+
+  /// No description provided for @pantryCookFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get pantryCookFilterAll;
+
+  /// No description provided for @pantryCookFilterReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready now'**
+  String get pantryCookFilterReady;
+
+  /// No description provided for @pantryCookFilterFew.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing 1 to 2'**
+  String get pantryCookFilterFew;
+
+  /// No description provided for @pantryCookAllCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'All courses'**
+  String get pantryCookAllCourses;
+
+  /// No description provided for @pantryCookAllCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'All cookbooks'**
+  String get pantryCookAllCookbooks;
+
+  /// No description provided for @pantryCookNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing uses your pantry yet'**
+  String get pantryCookNoResults;
+
+  /// No description provided for @pantryCookNoResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few more things you have to see recipes here.'**
+  String get pantryCookNoResultsHint;
+
+  /// No description provided for @pantryCookNoFilterResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes match these filters'**
+  String get pantryCookNoFilterResults;
+
+  /// How many of a recipe's ingredients are in the pantry.
+  ///
+  /// In en, this message translates to:
+  /// **'{covered} of {total} in your pantry'**
+  String pantryCookCovered(int covered, int total);
+
+  /// Label before the list of ingredients a recipe still needs.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing:'**
+  String get pantryCookMissingLabel;
+
+  /// Tooltip on a missing ingredient: tapping it adds it to the pantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Have {item}? Tap to add it to your pantry'**
+  String pantryCookHaveIt(String item);
+
+  /// No description provided for @pantryCookMoreMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String pantryCookMoreMissing(int count);
+
+  /// No description provided for @pantryCookAddMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add missing'**
+  String get pantryCookAddMissing;
+
+  /// No description provided for @pantryCookAddMissingTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add missing to shopping list'**
+  String get pantryCookAddMissingTooltip;
+
+  /// No description provided for @pantryCookAddedToPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {item} to your pantry'**
+  String pantryCookAddedToPantry(String item);
+
+  /// No description provided for @pantryCookRecentlyBought.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently bought'**
+  String get pantryCookRecentlyBought;
+
+  /// No description provided for @pantryCookAddAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Add all'**
+  String get pantryCookAddAll;
+
+  /// Section for basics like water, salt and pepper that never count as missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Always have'**
+  String get pantryCookAlwaysHave;
+
+  /// No description provided for @pantryCookAlwaysHaveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Left out of every recipe, so they never show as missing.'**
+  String get pantryCookAlwaysHaveHint;
+
+  /// No description provided for @pantryCookAddBasicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a basic'**
+  String get pantryCookAddBasicHint;
+
+  /// No description provided for @pantryCookPaletteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes you can cook with what you have'**
+  String get pantryCookPaletteSubtitle;
+
+  /// No description provided for @pantryCookSeeRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'See what you can make'**
+  String get pantryCookSeeRecipes;
+
+  /// Heading of the dinner suggestions on Home.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s for dinner?'**
+  String get dinnerTitle;
+
+  /// No description provided for @dinnerShowOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show others'**
+  String get dinnerShowOthers;
+
+  /// No description provided for @dinnerPlannerSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get dinnerPlannerSuggestions;
+
+  /// No description provided for @dinnerReasonAllInPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'All in your pantry'**
+  String get dinnerReasonAllInPantry;
+
+  /// Why a recipe is suggested: a favorite last made this many weeks ago.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks, plural, =1{A favorite you haven\'t made in 1 week} other{A favorite you haven\'t made in {weeks} weeks}}'**
+  String dinnerReasonFavouriteWeeks(int weeks);
+
+  /// No description provided for @dinnerReasonFavourite.
+  ///
+  /// In en, this message translates to:
+  /// **'One of your favorites'**
+  String get dinnerReasonFavourite;
+
+  /// Why a recipe is suggested: only this many ingredients need buying.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Just 1 thing to buy} other{Just {count} things to buy}}'**
+  String dinnerReasonMissing(int count);
+
+  /// Why a recipe is suggested: it takes this many minutes in total.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick: {minutes} min'**
+  String dinnerReasonQuick(int minutes);
+
+  /// No description provided for @dinnerReasonLastMade.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks, plural, =1{Last made 1 week ago} other{Last made {weeks} weeks ago}}'**
+  String dinnerReasonLastMade(int weeks);
+
+  /// No description provided for @dinnerReasonNotOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks, plural, =1{Not opened in 1 week} other{Not opened in {weeks} weeks}}'**
+  String dinnerReasonNotOpened(int weeks);
+
+  /// No description provided for @dinnerReasonRated.
+  ///
+  /// In en, this message translates to:
+  /// **'{stars, plural, =1{Rated 1 star} other{Rated {stars} stars}}'**
+  String dinnerReasonRated(int stars);
+
+  /// No description provided for @dinnerReasonNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tried yet'**
+  String get dinnerReasonNew;
+
+  /// No description provided for @dinnerReasonFromLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'From your cookbooks'**
+  String get dinnerReasonFromLibrary;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

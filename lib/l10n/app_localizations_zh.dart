@@ -11808,4 +11808,218 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get widgetShoppingListDescription => '购物清单上还没买的东西。';
+
+  @override
+  String get pantryCookTitle => '我能做什么？';
+
+  @override
+  String get pantryCookHomeEmpty => '添加储藏室里的食材，看看能做哪些食谱';
+
+  @override
+  String get pantryCookHomeSetUp => '添加食材';
+
+  @override
+  String get pantryCookHomeOpen => '查看食谱';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个可直接做',
+      zero: '暂时没有可直接做的',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个只差 1 到 2 样',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '储藏室里有 $count 样',
+      zero: '储藏室是空的',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱用到它们',
+      zero: '还没有食谱用到它们',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => '编辑储藏室';
+
+  @override
+  String get pantryCookEmptyTitle => '储藏室里有什么？';
+
+  @override
+  String get pantryCookEmptyBody => '添加手头已有的食材，看看现在就能做哪些食谱，其他食谱还缺什么。';
+
+  @override
+  String get pantryCookFilterAll => '全部';
+
+  @override
+  String get pantryCookFilterReady => '可直接做';
+
+  @override
+  String get pantryCookFilterFew => '缺 1 到 2 样';
+
+  @override
+  String get pantryCookAllCourses => '所有菜品类型';
+
+  @override
+  String get pantryCookAllCookbooks => '所有食谱书';
+
+  @override
+  String get pantryCookNoResults => '还没有食谱用到储藏室里的食材';
+
+  @override
+  String get pantryCookNoResultsHint => '再添加几样已有的食材，这里就会显示食谱。';
+
+  @override
+  String get pantryCookNoFilterResults => '没有符合这些筛选条件的食谱';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$total 样中有 $covered 样在储藏室';
+  }
+
+  @override
+  String get pantryCookMissingLabel => '缺少：';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return '有$item吗？点按即可加入储藏室';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return '还有 $count 样';
+  }
+
+  @override
+  String get pantryCookAddMissing => '添加缺少的';
+
+  @override
+  String get pantryCookAddMissingTooltip => '把缺少的加入购物清单';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return '已将$item加入储藏室';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => '最近购买';
+
+  @override
+  String get pantryCookAddAll => '全部添加';
+
+  @override
+  String get pantryCookAlwaysHave => '常备';
+
+  @override
+  String get pantryCookAlwaysHaveHint => '不计入任何食谱，因此不会显示为缺少。';
+
+  @override
+  String get pantryCookAddBasicHint => '添加常备食材';
+
+  @override
+  String get pantryCookPaletteSubtitle => '用现有食材能做的食谱';
+
+  @override
+  String get pantryCookSeeRecipes => '看看能做什么';
+
+  @override
+  String get dinnerTitle => '晚餐吃什么？';
+
+  @override
+  String get dinnerShowOthers => '换一批';
+
+  @override
+  String get dinnerPlannerSuggestions => '推荐';
+
+  @override
+  String get dinnerReasonAllInPantry => '食材都在储藏室';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '收藏的菜，已 $weeks 周没做',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => '你收藏的菜';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '只需买 $count 样',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return '快手：$minutes 分钟';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '上次做是 $weeks 周前',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '已 $weeks 周没打开',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: '评分 $stars 星',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => '还没试过';
+
+  @override
+  String get dinnerReasonFromLibrary => '来自你的食谱书';
 }

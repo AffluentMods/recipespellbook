@@ -74,6 +74,13 @@ class RecipeSimilarity {
   /// Jaccard similarity between two sets of tokens (0-1).
   static double tokenSimilarity(Set<String> a, Set<String> b) => _jaccard(a, b);
 
+  /// The same title with the same ingredient names (in order) is the same
+  /// recipe, such as a sub-recipe copied into each cookbook that uses it. A
+  /// copy someone changed is a recipe of its own. Recipes with equal keys are
+  /// shown once in search and in "What can I make?".
+  static String copyKey(String title, Iterable<String> ingredientNames) =>
+      '${foldAccents(title.trim())}\n${ingredientNames.map(foldAccents).join('\n')}';
+
   /// Jaccard similarity between two sets: |A ∩ B| / |A ∪ B|.
   static double _jaccard(Set<String> a, Set<String> b) {
     if (a.isEmpty && b.isEmpty) return 0;

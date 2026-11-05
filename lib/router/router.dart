@@ -24,6 +24,8 @@ import '../ui/screens/recipe/uncategorized_recipes_screen.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../ui/screens/kitchen_buddy/kitchen_buddy_screen.dart';
 // import '../ui/screens/kitchen_buddy/buddy_naming_screen.dart';
+import '../ui/screens/pantry_cooking/pantry_cooking_screen.dart';
+import '../ui/screens/pantry_cooking/pantry_cooking_widgets.dart' show pantryCookingPath;
 import '../ui/screens/search/search_screen.dart';
 import '../ui/screens/settings/about_screen.dart';
 import '../ui/screens/settings/allergy_settings_screen.dart';
@@ -295,6 +297,13 @@ final router = GoRouter(
           builder: (context, state) => SearchScreen(
             initialQuery: state.uri.queryParameters['q'],
           ),
+        ),
+
+        // ── What can I make? Recipes ranked by the pantry (sidebar visible) ──
+        GoRoute(
+          path: pantryCookingPath,
+          name: 'pantry-cooking',
+          builder: (context, state) => const PantryCookingScreen(),
         ),
 
         // ── Help & import guides (in-shell so the desktop sidebar stays) ──

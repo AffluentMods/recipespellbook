@@ -23,6 +23,7 @@ import '../widgets/join_with_link_dialog.dart';
 import '../widgets/keycap.dart';
 import '../widgets/placeholder_image.dart';
 import '../widgets/recipe_image.dart' show FileExistsCache;
+import '../screens/pantry_cooking/pantry_cooking_widgets.dart' show pantryCookingPath;
 import 'shell_navigation.dart';
 import '../../services/feature_gate.dart' show SubscriptionTierL10n;
 
@@ -55,6 +56,11 @@ class DesktopSidebar extends ConsumerWidget {
         .valueOrNull
         ?.length;
     final cookbookCount = ref.watch(cookbooksProvider).valueOrNull?.length;
+    // "What can I make?" is a page, not a numbered destination: light its row
+    // instead of the section the user came from.
+    final onPantryCooking =
+        GoRouter.maybeOf(context)?.routerDelegate.currentConfiguration.uri.path ==
+            pantryCookingPath;
 
     Widget row(ShellDestination d, {int? count, bool emphasizeCount = false}) {
       final shortcut = d.shortcutLabel == null
@@ -66,7 +72,7 @@ class DesktopSidebar extends ConsumerWidget {
           icon: d.icon,
           selectedIcon: d.selectedIcon,
           label: d.label(l10n),
-          selected: selected == d,
+          selected: !onPantryCooking && selected == d,
           iconOnly: collapsed,
           tooltip: withShortcut(d.label(l10n), shortcut),
           trailing: (count != null && count > 0)
@@ -134,6 +140,18 @@ class DesktopSidebar extends ConsumerWidget {
                         ShellDestination.shopping,
                         count: shoppingCount,
                         emphasizeCount: true,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 1),
+                        child: NavRow(
+                          icon: Icons.kitchen_outlined,
+                          selectedIcon: Icons.kitchen_rounded,
+                          label: l10n.pantryCookTitle,
+                          selected: onPantryCooking,
+                          iconOnly: collapsed,
+                          tooltip: l10n.pantryCookTitle,
+                          onTap: () => guardedGo(ref, pantryCookingPath),
+                        ),
                       ),
                       group(l10n.sidebarDiscover),
                       row(ShellDestination.community),

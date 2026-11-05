@@ -11812,4 +11812,218 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get widgetShoppingListDescription => '買い物リストでまだ買っていないものです。';
+
+  @override
+  String get pantryCookTitle => '何が作れる？';
+
+  @override
+  String get pantryCookHomeEmpty => 'パントリーにあるものを追加して、作れるレシピを見つけましょう';
+
+  @override
+  String get pantryCookHomeSetUp => '食材を追加';
+
+  @override
+  String get pantryCookHomeOpen => 'レシピを見る';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件すぐ作れます',
+      zero: 'すぐ作れるレシピはまだありません',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'あと1〜2品で作れるのは$count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'パントリーに$count品',
+      zero: 'パントリーは空です',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のレシピで使えます',
+      zero: '使えるレシピはまだありません',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => 'パントリーを編集';
+
+  @override
+  String get pantryCookEmptyTitle => 'パントリーには何がありますか？';
+
+  @override
+  String get pantryCookEmptyBody => '手元にある食材を追加すると、今すぐ作れるレシピと、ほかのレシピに足りないものがわかります。';
+
+  @override
+  String get pantryCookFilterAll => 'すべて';
+
+  @override
+  String get pantryCookFilterReady => 'すぐ作れる';
+
+  @override
+  String get pantryCookFilterFew => 'あと1〜2品';
+
+  @override
+  String get pantryCookAllCourses => 'すべてのコース';
+
+  @override
+  String get pantryCookAllCookbooks => 'すべてのレシピ本';
+
+  @override
+  String get pantryCookNoResults => 'パントリーの食材を使うレシピはまだありません';
+
+  @override
+  String get pantryCookNoResultsHint => '手元にあるものをもう少し追加すると、ここにレシピが表示されます。';
+
+  @override
+  String get pantryCookNoFilterResults => 'この条件に合うレシピはありません';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$total品中$covered品がパントリーにあります';
+  }
+
+  @override
+  String get pantryCookMissingLabel => '不足:';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return '$itemはありますか？タップしてパントリーに追加';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return 'ほか$count品';
+  }
+
+  @override
+  String get pantryCookAddMissing => '不足分を追加';
+
+  @override
+  String get pantryCookAddMissingTooltip => '不足分を買い物リストに追加';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return '$itemをパントリーに追加しました';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => '最近買ったもの';
+
+  @override
+  String get pantryCookAddAll => 'すべて追加';
+
+  @override
+  String get pantryCookAlwaysHave => '常備品';
+
+  @override
+  String get pantryCookAlwaysHaveHint => 'どのレシピでも数えないので、不足として表示されません。';
+
+  @override
+  String get pantryCookAddBasicHint => '常備品を追加';
+
+  @override
+  String get pantryCookPaletteSubtitle => '手元の食材で作れるレシピ';
+
+  @override
+  String get pantryCookSeeRecipes => '作れるものを見る';
+
+  @override
+  String get dinnerTitle => '今日の夕食は何にする？';
+
+  @override
+  String get dinnerShowOthers => 'ほかの候補';
+
+  @override
+  String get dinnerPlannerSuggestions => 'おすすめ';
+
+  @override
+  String get dinnerReasonAllInPantry => '材料はすべてパントリーに';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks週間作っていないお気に入り',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => 'お気に入りのひとつ';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '買うのは$count品だけ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return '時短: $minutes分';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '最後に作ったのは$weeks週間前',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks週間開いていません',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: '評価: 星$starsつ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => 'まだ作っていません';
+
+  @override
+  String get dinnerReasonFromLibrary => 'あなたのレシピ本から';
 }

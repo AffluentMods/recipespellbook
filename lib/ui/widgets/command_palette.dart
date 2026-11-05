@@ -12,6 +12,8 @@ import '../../providers/settings_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/tokens.dart';
 import '../../utils/recipe_title.dart';
+import '../screens/pantry_cooking/pantry_cooking_screen.dart' show showPantrySheet;
+import '../screens/pantry_cooking/pantry_cooking_widgets.dart' show pantryCookingPath;
 import '../shell/shell_navigation.dart';
 import 'join_with_link_dialog.dart';
 import 'keycap.dart';
@@ -205,6 +207,28 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
         run: () {
           _close();
           showJoinWithLinkDialog(_navContext);
+        },
+      ),
+      _PaletteItem(
+        icon: Icons.kitchen_outlined,
+        label: l10n.pantryCookTitle,
+        subtitle: l10n.pantryCookPaletteSubtitle,
+        section: _Section.actions,
+        keywords: 'pantry cook make have ingredients fridge dinner leftovers',
+        run: () {
+          _close();
+          guardedGo(ref, pantryCookingPath);
+        },
+      ),
+      _PaletteItem(
+        icon: Icons.inventory_2_outlined,
+        label: l10n.myPantry,
+        subtitle: l10n.itemsAlwaysOnHand,
+        section: _Section.actions,
+        keywords: 'pantry staples basics stock always have',
+        run: () {
+          _close();
+          showPantrySheet(_navContext);
         },
       ),
       _PaletteItem(

@@ -26,6 +26,7 @@ import '../../widgets/recipe_cards.dart' show servingsLabel;
 import '../../widgets/recipe_image.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/sheet_chrome.dart';
+import '../pantry_cooking/pantry_cooking_widgets.dart' show DinnerSuggestionsSection;
 
 // ============ PROVIDERS ============
 
@@ -3367,10 +3368,43 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                   );
                 }
 
+                // Deciding dinner: a few suggestions for this day above the
+                // full list, each with the reason it was picked.
+                final suggest = _searchQuery.isEmpty && _selectedMealType == 'Dinner';
+                final lead = suggest ? 1 : 0;
                 return ListView.builder(
-                  itemCount: recipes.length,
+                  itemCount: recipes.length + lead,
                   itemBuilder: (context, index) {
-                    final recipe = recipes[index];
+                    if (index < lead) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 12, bottom: 4),
+                        child: DinnerSuggestionsSection(
+                          day: DateTime(widget.date.year, widget.date.month, widget.date.day),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          tileWidth: 148,
+                          headerBuilder: (context, onShuffle) => Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 8, 6),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    l10n.dinnerPlannerSuggestions,
+                                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: onShuffle,
+                                  style: TextButton.styleFrom(foregroundColor: context.appColors.accent),
+                                  child: Text(l10n.dinnerShowOthers),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onPick: (s) => _addRecipeToMealPlan(s.recipe.recipe),
+                        ),
+                      );
+                    }
+                    final recipe = recipes[index - lead];
                     return _RecipeSelectTile(
                       recipe: recipe,
                       onTap: () => _addRecipeToMealPlan(recipe),
