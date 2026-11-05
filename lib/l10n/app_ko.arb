@@ -4623,5 +4623,20 @@
   "themePreviewSecondary": "보조",
   "nutriSheetEditedStatus": "직접 수정함",
   "nutriSheetLinkedNoNutrition": "{title}: 영양 정보 없음",
-  "productReportMismatch": "라벨과 다른가요? 보기 또는 수정"
+  "productReportMismatch": "라벨과 다른가요? 보기 또는 수정",
+  "videoImportFromDescription": "동영상 설명에서 가져옴",
+  "videoImportFromCaptions": "자막에서 가져옴",
+  "videoImportCheckText": "동영상의 텍스트에서 읽었습니다. 저장하기 전에 재료와 단계를 확인하세요.",
+  "videoImportNoRecipeTitle": "작성된 레시피를 찾을 수 없음",
+  "videoImportNoRecipeBody": "동영상 설명에 재료가 나와 있지 않습니다. AI 가져오기로 동영상 텍스트를 읽어 레시피로 만들 수 있습니다.",
+  "videoImportUseAi": "AI 가져오기 사용",
+  "videoImportNoRecipe": "이 동영상의 설명이나 자막에서 레시피를 찾을 수 없습니다.",
+  "videoImportUnavailable": "이 동영상은 비공개이거나 삭제되었거나 볼 수 없습니다.",
+  "videoImportRateLimited": "{platform}에서 지금 요청을 제한하고 있습니다. 몇 분 후에 다시 시도하세요.",
+  "videoImportOffline": "{platform}에 연결할 수 없습니다. 인터넷 연결을 확인하고 다시 시도하세요.",
+  "videoImportTimedOut": "{platform}의 응답이 너무 오래 걸렸습니다. 다시 시도하세요.",
+  "videoImportBlocked": "{platform}에서 앱이 이 동영상을 읽도록 허용하지 않았습니다. 설명을 복사한 다음 텍스트 붙여넣기를 사용하세요.",
+  "videoImportInstagramBlocked": "Instagram에서 이 게시물의 캡션을 공유하지 않았습니다. 게시물을 열어 캡션을 복사한 다음 텍스트 붙여넣기를 사용하세요.",
+  "videoImportUnreadable": "이 동영상 페이지를 읽을 수 없습니다. 나중에 다시 시도하거나 설명을 복사해 텍스트 붙여넣기를 사용하세요.",
+  "aiVideoTextIncluded": "동영상 텍스트가 프롬프트와 함께 복사됩니다. 둘 다 AI 채팅에 붙여넣은 다음 답변을 아래에 붙여넣으세요."
 }

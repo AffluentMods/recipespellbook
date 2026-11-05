@@ -11688,4 +11688,57 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Non corrisponde all\'etichetta? Visualizza o correggi';
+
+  @override
+  String get videoImportFromDescription => 'Dalla descrizione del video';
+
+  @override
+  String get videoImportFromCaptions => 'Dai sottotitoli';
+
+  @override
+  String get videoImportCheckText => 'Letto dal testo del video. Controlla ingredienti e passaggi prima di salvare.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Nessuna ricetta scritta trovata';
+
+  @override
+  String get videoImportNoRecipeBody => 'La descrizione del video non elenca gli ingredienti. L\'importazione con IA può leggere il testo del video e trasformarlo in una ricetta.';
+
+  @override
+  String get videoImportUseAi => 'Usa l\'importazione con IA';
+
+  @override
+  String get videoImportNoRecipe => 'Nessuna ricetta trovata nella descrizione o nei sottotitoli di questo video.';
+
+  @override
+  String get videoImportUnavailable => 'Questo video è privato, è stato rimosso o non è disponibile.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform sta limitando le richieste in questo momento. Riprova tra qualche minuto.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Impossibile raggiungere $platform. Controlla la connessione a Internet e riprova.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform ha impiegato troppo tempo a rispondere. Riprova.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform non ha permesso all\'app di leggere questo video. Copia la descrizione, poi usa Incolla testo.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram non ha condiviso la didascalia di questo post. Apri il post, copia la didascalia, poi usa Incolla testo.';
+
+  @override
+  String get videoImportUnreadable => 'Impossibile leggere la pagina di questo video. Riprova più tardi, oppure copia la descrizione e usa Incolla testo.';
+
+  @override
+  String get aiVideoTextIncluded => 'Il testo del video viene copiato insieme al prompt. Incolla entrambi nella chat della tua IA, poi incolla la risposta qui sotto.';
 }

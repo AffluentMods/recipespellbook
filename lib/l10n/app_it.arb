@@ -3647,5 +3647,20 @@
   "themePreviewSecondary": "Secondario",
   "nutriSheetEditedStatus": "Modificato manualmente",
   "nutriSheetLinkedNoNutrition": "{title}: nessun dato nutrizionale",
-  "productReportMismatch": "Non corrisponde all'etichetta? Visualizza o correggi"
+  "productReportMismatch": "Non corrisponde all'etichetta? Visualizza o correggi",
+  "videoImportFromDescription": "Dalla descrizione del video",
+  "videoImportFromCaptions": "Dai sottotitoli",
+  "videoImportCheckText": "Letto dal testo del video. Controlla ingredienti e passaggi prima di salvare.",
+  "videoImportNoRecipeTitle": "Nessuna ricetta scritta trovata",
+  "videoImportNoRecipeBody": "La descrizione del video non elenca gli ingredienti. L'importazione con IA può leggere il testo del video e trasformarlo in una ricetta.",
+  "videoImportUseAi": "Usa l'importazione con IA",
+  "videoImportNoRecipe": "Nessuna ricetta trovata nella descrizione o nei sottotitoli di questo video.",
+  "videoImportUnavailable": "Questo video è privato, è stato rimosso o non è disponibile.",
+  "videoImportRateLimited": "{platform} sta limitando le richieste in questo momento. Riprova tra qualche minuto.",
+  "videoImportOffline": "Impossibile raggiungere {platform}. Controlla la connessione a Internet e riprova.",
+  "videoImportTimedOut": "{platform} ha impiegato troppo tempo a rispondere. Riprova.",
+  "videoImportBlocked": "{platform} non ha permesso all'app di leggere questo video. Copia la descrizione, poi usa Incolla testo.",
+  "videoImportInstagramBlocked": "Instagram non ha condiviso la didascalia di questo post. Apri il post, copia la didascalia, poi usa Incolla testo.",
+  "videoImportUnreadable": "Impossibile leggere la pagina di questo video. Riprova più tardi, oppure copia la descrizione e usa Incolla testo.",
+  "aiVideoTextIncluded": "Il testo del video viene copiato insieme al prompt. Incolla entrambi nella chat della tua IA, poi incolla la risposta qui sotto."
 }

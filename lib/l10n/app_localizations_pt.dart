@@ -11669,4 +11669,57 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Não confere com o rótulo? Ver ou corrigir';
+
+  @override
+  String get videoImportFromDescription => 'Da descrição do vídeo';
+
+  @override
+  String get videoImportFromCaptions => 'Das legendas do vídeo';
+
+  @override
+  String get videoImportCheckText => 'Lido do texto do vídeo. Confira os ingredientes e os passos antes de salvar.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Nenhuma receita escrita encontrada';
+
+  @override
+  String get videoImportNoRecipeBody => 'A descrição do vídeo não lista os ingredientes. A importação com IA pode ler o texto do vídeo e transformá-lo em uma receita.';
+
+  @override
+  String get videoImportUseAi => 'Usar importação com IA';
+
+  @override
+  String get videoImportNoRecipe => 'Nenhuma receita encontrada na descrição ou nas legendas deste vídeo.';
+
+  @override
+  String get videoImportUnavailable => 'Este vídeo é privado, foi removido ou não está disponível.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return 'O $platform está limitando as solicitações agora. Tente de novo em alguns minutos.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Não foi possível acessar o $platform. Verifique sua conexão com a internet e tente de novo.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return 'O $platform demorou demais para responder. Tente de novo.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return 'O $platform não deixou o app ler este vídeo. Copie a descrição e depois use Colar texto.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'O Instagram não compartilhou a legenda desta publicação. Abra a publicação, copie a legenda e depois use Colar texto.';
+
+  @override
+  String get videoImportUnreadable => 'Não foi possível ler a página deste vídeo. Tente mais tarde ou copie a descrição e use Colar texto.';
+
+  @override
+  String get aiVideoTextIncluded => 'O texto do vídeo é copiado junto com o prompt. Cole os dois no seu chat de IA e depois cole a resposta abaixo.';
 }

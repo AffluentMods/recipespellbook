@@ -4623,5 +4623,20 @@
   "themePreviewSecondary": "セカンダリ",
   "nutriSheetEditedStatus": "手動で編集済み",
   "nutriSheetLinkedNoNutrition": "{title}：栄養データなし",
-  "productReportMismatch": "ラベルと違いますか？確認・修正"
+  "productReportMismatch": "ラベルと違いますか？確認・修正",
+  "videoImportFromDescription": "動画の説明文から",
+  "videoImportFromCaptions": "字幕から",
+  "videoImportCheckText": "動画のテキストから読み取りました。保存する前に材料と手順を確認してください。",
+  "videoImportNoRecipeTitle": "文字のレシピが見つかりません",
+  "videoImportNoRecipeBody": "動画の説明文に材料が書かれていません。AIインポートなら動画のテキストを読み取ってレシピにできます。",
+  "videoImportUseAi": "AIインポートを使う",
+  "videoImportNoRecipe": "この動画の説明文と字幕にレシピが見つかりませんでした。",
+  "videoImportUnavailable": "この動画は非公開、削除済み、または利用できません。",
+  "videoImportRateLimited": "{platform}が現在リクエストを制限しています。数分後にもう一度お試しください。",
+  "videoImportOffline": "{platform}に接続できませんでした。インターネット接続を確認して、もう一度お試しください。",
+  "videoImportTimedOut": "{platform}の応答に時間がかかりすぎました。もう一度お試しください。",
+  "videoImportBlocked": "{platform}がこの動画の読み取りを許可しませんでした。説明文をコピーして「テキストを貼り付け」を使ってください。",
+  "videoImportInstagramBlocked": "Instagramがこの投稿のキャプションを公開しませんでした。投稿を開いてキャプションをコピーし、「テキストを貼り付け」を使ってください。",
+  "videoImportUnreadable": "この動画のページを読み取れませんでした。後でもう一度お試しいただくか、説明文をコピーして「テキストを貼り付け」を使ってください。",
+  "aiVideoTextIncluded": "動画のテキストはプロンプトと一緒にコピーされます。両方をAIチャットに貼り付け、その回答を下に貼り付けてください。"
 }

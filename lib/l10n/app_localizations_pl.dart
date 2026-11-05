@@ -11848,4 +11848,57 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Nie zgadza się z etykietą? Zobacz lub popraw';
+
+  @override
+  String get videoImportFromDescription => 'Z opisu filmu';
+
+  @override
+  String get videoImportFromCaptions => 'Z napisów';
+
+  @override
+  String get videoImportCheckText => 'Odczytano z tekstu filmu. Sprawdź składniki i kroki przed zapisaniem.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Nie znaleziono spisanego przepisu';
+
+  @override
+  String get videoImportNoRecipeBody => 'Opis filmu nie zawiera listy składników. Import przez AI może odczytać tekst filmu i zamienić go w przepis.';
+
+  @override
+  String get videoImportUseAi => 'Użyj importu przez AI';
+
+  @override
+  String get videoImportNoRecipe => 'Nie znaleziono przepisu w opisie ani w napisach tego filmu.';
+
+  @override
+  String get videoImportUnavailable => 'Ten film jest prywatny, usunięty lub niedostępny.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform ogranicza teraz liczbę zapytań. Spróbuj ponownie za kilka minut.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Nie udało się połączyć z $platform. Sprawdź połączenie z internetem i spróbuj ponownie.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform zbyt długo nie odpowiada. Spróbuj ponownie.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform nie pozwolił aplikacji odczytać tego filmu. Skopiuj opis, a potem użyj opcji Wklej tekst.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram nie udostępnił opisu tego posta. Otwórz post, skopiuj opis, a potem użyj opcji Wklej tekst.';
+
+  @override
+  String get videoImportUnreadable => 'Nie udało się odczytać strony tego filmu. Spróbuj później albo skopiuj opis i użyj opcji Wklej tekst.';
+
+  @override
+  String get aiVideoTextIncluded => 'Tekst filmu jest kopiowany razem z promptem. Wklej oba do czatu z AI, a potem wklej odpowiedź poniżej.';
 }

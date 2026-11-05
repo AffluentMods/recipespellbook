@@ -20,10 +20,12 @@ import '../../services/recipe_file_importers/import_support.dart';
 import '../../providers/database_provider.dart';
 import '../../services/ocr_service.dart';
 import '../../services/recipe_import_engine.dart';
+import '../../services/video_recipe_import.dart';
 import '../screens/book_scan/book_scan_entry.dart';
 import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_guides_screen.dart';
 import '../screens/import/import_preview_screen.dart';
+import '../screens/import/video_import_ui.dart';
 import 'app_snackbar.dart';
 import 'platform_brand.dart';
 import '../../services/barcode_scanner_service.dart';
@@ -190,6 +192,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   String? _loadingMessage;
   RecipePlatform? _detected; // live platform detected from the pasted link
 
+  /// Stops the video import that is running, from the Cancel button or when
+  /// the sheet goes away.
+  ImportCancellation? _videoImport;
+
   @override
   void initState() {
     super.initState();
@@ -222,6 +228,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   @override
   void dispose() {
+    _videoImport?.cancel();
     _urlController.removeListener(_onUrlChanged);
     _urlController.dispose();
     super.dispose();
@@ -284,6 +291,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   /// around the link was read as: it is offered when the link gives nothing.
   Future<void> _importFromLink(String url, {List<ImportedRecipe> otherwise = const [], String? sourceText}) async {
     if (!mounted) return;
+    // A cooking video is no recipe page: its recipe is in the text that
+    // comes with it.
+    final video = VideoLink.parse(url);
+    if (video != null) return _importFromVideo(video, otherwise: otherwise, sourceText: sourceText);
     final l10n = AppLocalizations.of(context)!;
     var failure = l10n.importNoRecipeAtLink;
     _showLoading(l10n.importProgress);
@@ -303,6 +314,62 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     } else {
       _showError(failure);
     }
+  }
+
+  /// Reads the recipe of a YouTube, TikTok or Instagram video from its
+  /// description or caption. When that text holds no recipe the text
+  /// importer can find, the AI import is offered with it. [otherwise] is
+  /// what the text pasted around the link was read as, offered first.
+  Future<void> _importFromVideo(VideoLink video, {List<ImportedRecipe> otherwise = const [], String? sourceText}) async {
+    final l10n = AppLocalizations.of(context)!;
+    final cancellation = ImportCancellation();
+    _videoImport?.cancel();
+    _videoImport = cancellation;
+    _showLoading(l10n.importProgress);
+    VideoImportResult? result;
+    String? failure;
+    try {
+      result = await VideoRecipeImporter(cancellation: cancellation).import(video);
+    } on VideoImportCancelled {
+      // Stopped with Cancel, or the sheet was closed.
+    } on VideoImportException catch (e) {
+      failure = videoImportErrorMessage(l10n, e);
+    } catch (e) {
+      debugPrint('[Import] Video import failed: $e');
+      failure = l10n.videoImportUnreadable;
+    } finally {
+      if (identical(_videoImport, cancellation)) _videoImport = null;
+    }
+    if (cancellation.isCancelled || !mounted) return;
+    _hideLoading();
+
+    final recipe = result?.recipe;
+    if (result != null && recipe != null && hasRecipeContent(recipe)) {
+      _showImportPreview([recipe], sourceUrl: result.video.link.url, videoTextSource: result.source);
+      return;
+    }
+    if (otherwise.any(hasRecipeContent)) {
+      _showImportPreview(otherwise, sourceText: sourceText);
+      return;
+    }
+    if (result == null || !result.hasTextForAi) {
+      _showError(failure ?? l10n.videoImportNoRecipe);
+      return;
+    }
+    if (!await askForVideoAiImport(context) || !mounted) return;
+    // Only while this sheet is still on top, as for the preview.
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    final navigator = Navigator.of(context);
+    navigator.pop();
+    navigator.push(videoAiImportRoute(result, widget.cookbookId));
+  }
+
+  void _cancelVideoImport() {
+    final running = _videoImport;
+    if (running == null) return;
+    running.cancel();
+    _videoImport = null;
+    _hideLoading();
   }
 
   // A link ends where something comes that no address holds: a space, a
@@ -1056,7 +1123,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     _showImportPreview(recipes, sourceText: 'Recipe Spellbook export (${recipes.length} recipes)');
   }
 
-  void _showImportPreview(List<ImportedRecipe> recipes, {String? sourceUrl, String? sourceText}) {
+  void _showImportPreview(List<ImportedRecipe> recipes, {String? sourceUrl, String? sourceText, VideoTextSource? videoTextSource}) {
     // Only while this sheet is still on top: if it was swiped away while the
     // import finished, pop would close the page under it instead (a blank
     // screen on phones).
@@ -1071,6 +1138,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
           cookbookId: widget.cookbookId,
           sourceUrl: sourceUrl,
           sourceText: sourceText,
+          videoTextSource: videoTextSource,
         ),
       ),
     );
@@ -1314,6 +1382,12 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                         textAlign: TextAlign.center,
                       ),
                     ),
+                    // A video site can be slow to answer. Its import can be
+                    // stopped rather than waited out.
+                    if (_videoImport != null) ...[
+                      const SizedBox(height: 16),
+                      TextButton(onPressed: _cancelVideoImport, child: Text(l10n.cancel)),
+                    ],
                   ],
                 ),
               ),

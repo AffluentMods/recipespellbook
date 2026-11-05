@@ -3648,5 +3648,20 @@
   "themePreviewSecondary": "Secondaire",
   "nutriSheetEditedStatus": "Modifié manuellement",
   "nutriSheetLinkedNoNutrition": "{title} : aucune donnée nutritionnelle",
-  "productReportMismatch": "Ne correspond pas à l'étiquette ? Voir ou corriger"
+  "productReportMismatch": "Ne correspond pas à l'étiquette ? Voir ou corriger",
+  "videoImportFromDescription": "Extrait de la description de la vidéo",
+  "videoImportFromCaptions": "Extrait des sous-titres",
+  "videoImportCheckText": "Lu dans le texte de la vidéo. Vérifiez les ingrédients et les étapes avant d'enregistrer.",
+  "videoImportNoRecipeTitle": "Aucune recette écrite trouvée",
+  "videoImportNoRecipeBody": "La description de la vidéo ne liste pas les ingrédients. L'import par IA peut lire le texte de la vidéo et en faire une recette.",
+  "videoImportUseAi": "Utiliser l'import par IA",
+  "videoImportNoRecipe": "Aucune recette trouvée dans la description ni dans les sous-titres de cette vidéo.",
+  "videoImportUnavailable": "Cette vidéo est privée, supprimée ou indisponible.",
+  "videoImportRateLimited": "{platform} limite les requêtes en ce moment. Réessayez dans quelques minutes.",
+  "videoImportOffline": "Impossible de joindre {platform}. Vérifiez votre connexion Internet et réessayez.",
+  "videoImportTimedOut": "{platform} a mis trop de temps à répondre. Réessayez.",
+  "videoImportBlocked": "{platform} n'a pas laissé l'application lire cette vidéo. Copiez la description, puis utilisez Coller du texte.",
+  "videoImportInstagramBlocked": "Instagram n'a pas partagé la légende de cette publication. Ouvrez la publication, copiez la légende, puis utilisez Coller du texte.",
+  "videoImportUnreadable": "Impossible de lire la page de cette vidéo. Réessayez plus tard, ou copiez la description et utilisez Coller du texte.",
+  "aiVideoTextIncluded": "Le texte de la vidéo est copié avec le prompt. Collez les deux dans votre chat d'IA, puis collez sa réponse ci-dessous."
 }

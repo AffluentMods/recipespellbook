@@ -11694,4 +11694,57 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Klopt het niet met het etiket? Bekijken of verbeteren';
+
+  @override
+  String get videoImportFromDescription => 'Uit de videobeschrijving';
+
+  @override
+  String get videoImportFromCaptions => 'Uit de ondertiteling';
+
+  @override
+  String get videoImportCheckText => 'Gelezen uit de tekst van de video. Controleer de ingrediënten en stappen voordat je opslaat.';
+
+  @override
+  String get videoImportNoRecipeTitle => 'Geen geschreven recept gevonden';
+
+  @override
+  String get videoImportNoRecipeBody => 'De videobeschrijving noemt geen ingrediënten. De AI-import kan de tekst van de video lezen en er een recept van maken.';
+
+  @override
+  String get videoImportUseAi => 'AI-import gebruiken';
+
+  @override
+  String get videoImportNoRecipe => 'Geen recept gevonden in de beschrijving of ondertiteling van deze video.';
+
+  @override
+  String get videoImportUnavailable => 'Deze video is privé, verwijderd of niet beschikbaar.';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform beperkt op dit moment het aantal verzoeken. Probeer het over een paar minuten opnieuw.';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return 'Kon $platform niet bereiken. Controleer je internetverbinding en probeer het opnieuw.';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform deed er te lang over om te antwoorden. Probeer het opnieuw.';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform liet de app deze video niet lezen. Kopieer de beschrijving en gebruik daarna Tekst plakken.';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram heeft het bijschrift van dit bericht niet gedeeld. Open het bericht, kopieer het bijschrift en gebruik daarna Tekst plakken.';
+
+  @override
+  String get videoImportUnreadable => 'Kon de pagina van deze video niet lezen. Probeer het later opnieuw, of kopieer de beschrijving en gebruik Tekst plakken.';
+
+  @override
+  String get aiVideoTextIncluded => 'De tekst van de video wordt samen met de prompt gekopieerd. Plak beide in je AI-chat en plak het antwoord hieronder.';
 }

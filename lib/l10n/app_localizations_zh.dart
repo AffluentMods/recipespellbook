@@ -11554,4 +11554,57 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productReportMismatch => '与标签不符？查看或更正';
+
+  @override
+  String get videoImportFromDescription => '来自视频简介';
+
+  @override
+  String get videoImportFromCaptions => '来自字幕';
+
+  @override
+  String get videoImportCheckText => '从视频文字中读取。保存前请检查食材和步骤。';
+
+  @override
+  String get videoImportNoRecipeTitle => '未找到文字版食谱';
+
+  @override
+  String get videoImportNoRecipeBody => '视频简介中没有列出食材。AI导入可以读取视频文字并将其整理成食谱。';
+
+  @override
+  String get videoImportUseAi => '使用AI导入';
+
+  @override
+  String get videoImportNoRecipe => '未在此视频的简介或字幕中找到食谱。';
+
+  @override
+  String get videoImportUnavailable => '此视频为私密、已删除或无法访问。';
+
+  @override
+  String videoImportRateLimited(String platform) {
+    return '$platform目前正在限制请求。请几分钟后再试。';
+  }
+
+  @override
+  String videoImportOffline(String platform) {
+    return '无法连接$platform。请检查网络连接后重试。';
+  }
+
+  @override
+  String videoImportTimedOut(String platform) {
+    return '$platform响应时间过长。请重试。';
+  }
+
+  @override
+  String videoImportBlocked(String platform) {
+    return '$platform不允许应用读取此视频。请复制简介，然后使用“粘贴文本”。';
+  }
+
+  @override
+  String get videoImportInstagramBlocked => 'Instagram未公开此帖子的文案。请打开帖子，复制文案，然后使用“粘贴文本”。';
+
+  @override
+  String get videoImportUnreadable => '无法读取此视频页面。请稍后再试，或复制简介后使用“粘贴文本”。';
+
+  @override
+  String get aiVideoTextIncluded => '视频文字会与提示词一起复制。请将两者粘贴到你的AI聊天中，然后把回答粘贴到下方。';
 }

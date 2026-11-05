@@ -27,12 +27,14 @@ import 'services/ingredient_suggestion_service.dart';
 import 'services/notification_service.dart';
 import 'services/ocr_service.dart';
 import 'services/recipe_import_engine.dart';
+import 'services/video_recipe_import.dart';
 import 'services/desktop_window_service.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
 import 'services/collab_service.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
+import 'ui/screens/import/video_import_ui.dart';
 import 'ui/widgets/app_shortcuts.dart';
 
 /// Scroll behaviour: touch, stylus and trackpad drag-scroll everywhere. A
@@ -615,6 +617,11 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       ),
     );
 
+    // A cooking video shared from YouTube, TikTok or Instagram: the recipe is
+    // in the text that comes with it.
+    final video = VideoLink.parse(finalUrl);
+    if (video != null) return _importSharedVideo(nav, video, cookbookId, l10n);
+
     try {
       final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
 
@@ -646,6 +653,60 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
           ),
         );
       }
+    }
+  }
+
+  /// Reads the recipe of a shared video link and opens the preview, or
+  /// offers the AI import when the video's text holds no recipe the text
+  /// importer can find. The loading dialog is up when this is called, and
+  /// closed here.
+  Future<void> _importSharedVideo(
+    NavigatorState nav,
+    VideoLink video,
+    String cookbookId,
+    AppLocalizations l10n,
+  ) async {
+    VideoImportResult? result;
+    String? failure;
+    try {
+      result = await VideoRecipeImporter().import(video);
+    } on VideoImportException catch (e) {
+      failure = videoImportErrorMessage(l10n, e);
+    } catch (e) {
+      debugPrint('[Import] Shared video import failed: $e');
+      failure = l10n.videoImportUnreadable;
+    }
+    // The loading dialog.
+    if (nav.canPop()) nav.pop();
+
+    final found = result;
+    final recipe = found?.recipe;
+    if (found != null && recipe != null) {
+      nav.push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => ImportPreviewScreen(
+            recipes: [recipe],
+            cookbookId: cookbookId,
+            sourceUrl: found.video.link.url,
+            videoTextSource: found.source,
+          ),
+        ),
+      );
+      return;
+    }
+    final ctx = nav.context;
+    if (found != null && found.hasTextForAi) {
+      if (ctx.mounted && await askForVideoAiImport(ctx)) nav.push(videoAiImportRoute(found, cookbookId));
+      return;
+    }
+    if (ctx.mounted) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(failure ?? l10n.videoImportNoRecipe),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

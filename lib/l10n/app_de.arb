@@ -4185,5 +4185,20 @@
   "themePreviewSecondary": "Sekundär",
   "nutriSheetEditedStatus": "Manuell bearbeitet",
   "nutriSheetLinkedNoNutrition": "{title}: keine Nährwertangaben",
-  "productReportMismatch": "Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren"
+  "productReportMismatch": "Stimmt nicht mit dem Etikett überein? Ansehen oder korrigieren",
+  "videoImportFromDescription": "Aus der Videobeschreibung",
+  "videoImportFromCaptions": "Aus den Untertiteln",
+  "videoImportCheckText": "Aus dem Text des Videos gelesen. Prüfe Zutaten und Schritte, bevor du speicherst.",
+  "videoImportNoRecipeTitle": "Kein geschriebenes Rezept gefunden",
+  "videoImportNoRecipeBody": "Die Videobeschreibung nennt keine Zutaten. Der KI-Import kann den Text des Videos lesen und daraus ein Rezept machen.",
+  "videoImportUseAi": "KI-Import verwenden",
+  "videoImportNoRecipe": "In der Beschreibung und den Untertiteln dieses Videos wurde kein Rezept gefunden.",
+  "videoImportUnavailable": "Dieses Video ist privat, wurde entfernt oder ist nicht verfügbar.",
+  "videoImportRateLimited": "{platform} begrenzt gerade die Anfragen. Versuche es in ein paar Minuten erneut.",
+  "videoImportOffline": "{platform} ist nicht erreichbar. Prüfe deine Internetverbindung und versuche es erneut.",
+  "videoImportTimedOut": "{platform} hat zu lange nicht geantwortet. Versuche es erneut.",
+  "videoImportBlocked": "{platform} hat der App das Lesen dieses Videos nicht erlaubt. Kopiere die Beschreibung und nutze dann „Text einfügen“.",
+  "videoImportInstagramBlocked": "Instagram hat die Bildunterschrift dieses Beitrags nicht freigegeben. Öffne den Beitrag, kopiere die Bildunterschrift und nutze dann „Text einfügen“.",
+  "videoImportUnreadable": "Die Seite dieses Videos konnte nicht gelesen werden. Versuche es später erneut oder kopiere die Beschreibung und nutze „Text einfügen“.",
+  "aiVideoTextIncluded": "Der Text des Videos wird zusammen mit dem Prompt kopiert. Füge beides in deinen KI-Chat ein und füge die Antwort dann unten ein."
 }
