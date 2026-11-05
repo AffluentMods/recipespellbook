@@ -4,16 +4,27 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/feedback_service.dart';
+import '../../../utils/platform_utils.dart';
 import '../../../utils/responsive_utils.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
+
+  /// Where "Rate the App" writes a review: the store this build comes from.
+  /// Null where there is no store listing to rate (macOS, Linux, web).
+  static String? get _reviewUrl {
+    if (isAndroid) return 'https://play.google.com/store/apps/details?id=com.affluentlabs.recipespellbook';
+    if (isIOS) return 'https://apps.apple.com/app/id6759309654?action=write-review';
+    if (isWindows) return 'ms-windows-store://review/?ProductId=9N8882PR02J3';
+    return null;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final appVersion = ref.watch(appVersionProvider).valueOrNull ?? '...';
+    final reviewUrl = _reviewUrl;
 
     return Scaffold(
       appBar: AppBar(
@@ -143,13 +154,15 @@ class AboutScreen extends ConsumerWidget {
                     if (context.mounted) await _launchUrl(uri.toString(), context);
                   },
                 ),
-                _divider(theme),
-                _AboutTile(
-                  icon: Icons.star_outline,
-                  title: l10n.aboutRateApp,
-                  subtitle: l10n.aboutRateAppSub,
-                  onTap: () => _launchUrl('https://play.google.com/store/apps/details?id=com.affluentlabs.recipespellbook', context),
-                ),
+                if (reviewUrl != null) ...[
+                  _divider(theme),
+                  _AboutTile(
+                    icon: Icons.star_outline,
+                    title: l10n.aboutRateApp,
+                    subtitle: l10n.aboutRateAppSub,
+                    onTap: () => _launchUrl(reviewUrl, context),
+                  ),
+                ],
               ],
             ),
 

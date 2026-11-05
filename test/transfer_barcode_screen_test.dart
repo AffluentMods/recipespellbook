@@ -4,6 +4,7 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -106,6 +107,21 @@ void main() {
       expect(find.text('Shopping lists'), findsOneWidget);
       expect(find.text('App settings'), findsNothing);
       expect(find.textContaining('Account sign-in'), findsNothing);
+    });
+
+    testWidgets('a computer, with no camera to scan with, leads with the code', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+      await _open(tester, size: const Size(1280, 860));
+      final subtitle = find.text('Enter a code or scan QR from the sending device').evaluate().length;
+      await tester.tap(find.text('Receive on desktop'));
+      await tester.pumpAndSettle();
+      final scanCard = find.text('Scan QR Code').evaluate().length;
+      final codeEntry = find.text('Enter transfer code').evaluate().length;
+      debugDefaultTargetPlatformOverride = null;
+
+      expect(subtitle, 0);
+      expect(scanCard, 0);
+      expect(codeEntry, 1);
     });
   });
 
