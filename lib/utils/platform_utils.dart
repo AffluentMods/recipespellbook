@@ -63,6 +63,10 @@ bool get supportsImagePicker => isMobile;
 /// mobile_scanner (barcode/QR) — mobile only.
 bool get supportsBarcodeScanner => isMobile;
 
+/// speech_to_text (cooking-mode voice control). The plugin has no Linux
+/// implementation, and the app leaves it off on web.
+bool get supportsSpeechRecognition => !kIsWeb && !isLinux;
+
 /// Sharing files through the system share sheet. share_plus on Linux only
 /// opens a mail link and throws for files; offer Save as there instead.
 bool get supportsFileSharing => !isLinux;
