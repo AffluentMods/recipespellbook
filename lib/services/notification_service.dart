@@ -311,7 +311,8 @@ class NotificationService {
     if (context == null) return;
 
     final category = data['category'] as String?;
-    final resourceId = data['resourceId'] as String?;
+    // Community download pushes carry the cookbook as publicationId.
+    final resourceId = (data['resourceId'] ?? data['publicationId']) as String?;
 
     switch (category) {
       case 'cooking':
