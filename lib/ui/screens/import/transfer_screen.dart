@@ -54,6 +54,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   bool _receiveSuccess = false;
   int _importedCount = 0;
   int _alreadyHere = 0;
+  int _rowsLeftOut = 0;
   bool _didRestoreAuth = false;
 
   @override
@@ -149,7 +150,8 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           _ModeCard(
             icon: Icons.download_rounded,
             title: l10n.transferReceiveOn(_currentDevice(l10n)),
-            subtitle: l10n.transferReceiveSubtitle,
+            // "or scan QR" only where there is a camera to scan with.
+            subtitle: supportsCamera ? l10n.transferReceiveSubtitle : l10n.transferEnterCode,
             color: theme.colorScheme.tertiary,
             theme: theme,
             onTap: () => setState(() => _step = 2),
@@ -472,6 +474,12 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center),
               ],
+              if (_rowsLeftOut > 0) ...[
+                const SizedBox(height: 8),
+                Text(l10n.transferRowsLeftOut(_rowsLeftOut),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error),
+                    textAlign: TextAlign.center),
+              ],
               if (_didRestoreAuth) ...[
                 const SizedBox(height: 8),
                 Row(
@@ -498,47 +506,51 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
       child: Column(
         children: [
           const SizedBox(height: 16),
-          // At least this tall. With large text the two lines need more, and
-          // a fixed height pushed them out of the box.
-          ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: double.infinity, minHeight: 160),
-            child: Material(
-              color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(16),
-              child: InkWell(
+          // Scanning needs a camera. Without one (desktop, web) the card only
+          // said "mobile only", so the code entry leads there instead.
+          if (supportsCamera) ...[
+            // At least this tall. With large text the two lines need more, and
+            // a fixed height pushed them out of the box.
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: double.infinity, minHeight: 160),
+              child: Material(
+                color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(16),
-                onTap: _scanQR,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 12),
-                    Icon(Icons.qr_code_scanner, size: 56, color: theme.colorScheme.primary),
-                    const SizedBox(height: 12),
-                    Text(l10n.transferScanQr,
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 4),
-                    Text(l10n.transferScanQrDesc,
-                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 12),
-                  ],
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: _scanQR,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 12),
+                      Icon(Icons.qr_code_scanner, size: 56, color: theme.colorScheme.primary),
+                      const SizedBox(height: 12),
+                      Text(l10n.transferScanQr,
+                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center),
+                      const SizedBox(height: 4),
+                      Text(l10n.transferScanQrDesc,
+                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                          textAlign: TextAlign.center),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(l10n.transferOr, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline, letterSpacing: 1.5)),
-              ),
-              Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
-            ],
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(l10n.transferOr, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline, letterSpacing: 1.5)),
+                ),
+                Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
           Text(l10n.transferEnterCode, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           TextField(
@@ -686,6 +698,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           _receiveSuccess = true;
           _importedCount = result.importedCount;
           _alreadyHere = result.recipesAlreadyHere;
+          _rowsLeftOut = result.rowsLeftOut;
           _didRestoreAuth = didAuth;
         });
       }

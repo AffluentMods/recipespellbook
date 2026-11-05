@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../../../database/daos/tags_dao.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/database_provider.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/community_publish_pipeline.dart';
 import '../../../services/community_service.dart';
+import '../../../services/community_update_all.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
@@ -16,14 +21,14 @@ import '../../widgets/community_tag_picker.dart';
 //  MY PUBLICATIONS — Manage published cookbooks
 // ════════════════════════════════════════════
 
-class CommunityMyPublicationsScreen extends StatefulWidget {
+class CommunityMyPublicationsScreen extends ConsumerStatefulWidget {
   const CommunityMyPublicationsScreen({super.key});
 
   @override
-  State<CommunityMyPublicationsScreen> createState() => _CommunityMyPublicationsScreenState();
+  ConsumerState<CommunityMyPublicationsScreen> createState() => _CommunityMyPublicationsScreenState();
 }
 
-class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsScreen> {
+class _CommunityMyPublicationsScreenState extends ConsumerState<CommunityMyPublicationsScreen> {
   final _community = CommunityService.instance;
   final _scrollController = ScrollController();
 
@@ -31,17 +36,32 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
   bool _fabVisible = true;
   List<MyPublication> _pubs = [];
 
+  // Changed since published: filled in one publication at a time after
+  // each load. A newer check (or an Update all) makes an older one stop.
+  final Map<String, PublicationChange> _changes = {};
+  int _checkGeneration = 0;
+  bool _checking = false;
+  int _checked = 0;
+  int _checkTotal = 0;
+
+  // The finished Update all this screen already reloaded for.
+  UpdateAllSummary? _reloadedFor;
+
   @override
   void initState() {
     super.initState();
+    _reloadedFor = updateAllProgressNotifier.value?.summary;
     _load();
     publishProgressNotifier.addListener(_onProgressChange);
+    updateAllProgressNotifier.addListener(_onUpdateAllChange);
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _checkGeneration++;
     publishProgressNotifier.removeListener(_onProgressChange);
+    updateAllProgressNotifier.removeListener(_onUpdateAllChange);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -65,10 +85,126 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     if (mounted) setState(() {});
   }
 
+  void _onUpdateAllChange() {
+    // Reload once a run is over: the updated ones are no longer changed.
+    final summary = updateAllProgressNotifier.value?.summary;
+    if (summary != null && !identical(summary, _reloadedFor)) {
+      _reloadedFor = summary;
+      _changes.clear(); // stale now; checked again after the reload
+      _load();
+    }
+    if (mounted) setState(() {});
+  }
+
   Future<void> _load() async {
     setState(() => _loading = true);
     final pubs = await _community.getMyPublications();
-    if (mounted) setState(() { _pubs = pubs; _loading = false; });
+    if (!mounted) return;
+    setState(() { _pubs = pubs; _loading = false; });
+    _checkChanges();
+  }
+
+  CommunityPublicationUpdater _updater() {
+    final recipeDao = ref.read(recipeDaoProvider);
+    return CommunityPublicationUpdater(
+      recipeDao: recipeDao,
+      cookbookDao: ref.read(cookbookDaoProvider),
+      pipeline: CommunityPublishPipeline(
+        recipeDao: recipeDao,
+        tagsDao: TagsDao(ref.read(databaseProvider)),
+      ),
+    );
+  }
+
+  /// Compares each cookbook publication with its local cookbook, one at a
+  /// time, and marks the ones that changed since they were published.
+  Future<void> _checkChanges() async {
+    final generation = ++_checkGeneration;
+    // A running Update all checks for itself; this runs again when it ends.
+    if (activeUpdateAll != null) return;
+    final pubs = _pubs.where((p) => !p.isSingleRecipe).toList();
+    final ids = _pubs.map((p) => p.id).toSet();
+    final updater = _updater();
+    setState(() {
+      _changes.removeWhere((id, _) => !ids.contains(id));
+      _checking = pubs.isNotEmpty;
+      _checked = 0;
+      _checkTotal = pubs.length;
+    });
+    for (final pub in pubs) {
+      PublicationChange? change;
+      try {
+        change = (await updater.check(pub)).change;
+      } catch (e) {
+        debugPrint('[Community] Change check failed for ${pub.id}: $e');
+      }
+      if (!mounted || generation != _checkGeneration) return;
+      setState(() {
+        if (change != null) _changes[pub.id] = change;
+        _checked++;
+      });
+    }
+    if (mounted && generation == _checkGeneration) setState(() => _checking = false);
+  }
+
+  int get _changedCount =>
+      _pubs.where((p) => _changes[p.id] == PublicationChange.changed).length;
+
+  /// "Update all changed": every changed cookbook publication whose
+  /// cookbook is on this device, one after another, without the publish
+  /// screen. Progress and the summary show at the top of this screen.
+  Future<void> _updateAllChanged() async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.publicationsUpdateAllConfirmTitle(_changedCount)),
+        content: Text(l10n.communityRepublishRecipesBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.communityRepublishRecipesAction),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted || activeUpdateAll != null) return;
+
+    final control = UpdateAllControl();
+    activeUpdateAll = control;
+    _checkGeneration++; // the run checks again itself
+    setState(() => _checking = false);
+    final updater = _updater();
+    final pubs = List<MyPublication>.of(_pubs);
+    updateAllProgressNotifier.value = const UpdateAllProgress(checking: true);
+
+    UpdateAllSummary summary;
+    try {
+      summary = await updater.updateAll(
+        pubs,
+        l10n: l10n,
+        control: control,
+        onProgress: (p) => updateAllProgressNotifier.value = p.copyWith(stopping: control.stopRequested),
+      );
+    } catch (e) {
+      debugPrint('[Community] Update all failed: $e');
+      summary = UpdateAllSummary(stopped: true, stopReason: l10n.communityUnknownError);
+    } finally {
+      activeUpdateAll = null;
+    }
+    updateAllProgressNotifier.value = UpdateAllProgress(summary: summary);
+  }
+
+  void _stopUpdateAll() {
+    activeUpdateAll?.stop();
+    final current = updateAllProgressNotifier.value;
+    if (current != null && !current.finished) {
+      updateAllProgressNotifier.value = current.copyWith(stopping: true);
+    }
   }
 
   Future<void> _unpublish(String publicationId) async {
@@ -258,6 +394,10 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     final progress = publishProgressNotifier.value;
 
     final isUploading = progress != null && progress.status != 'done' && progress.status != 'error';
+    final updateAll = updateAllProgressNotifier.value;
+    final updatingAll = activeUpdateAll != null;
+    final busy = isUploading || updatingAll;
+    final changedCount = _changedCount;
 
     // Desktop: "Publish" is a header action, not a floating button.
     final desktop = Responsive.isDesktopLayout(context);
@@ -269,7 +409,7 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: FilledButton.icon(
-                onPressed: isUploading ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
+                onPressed: busy ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
                 icon: Icon(isUploading ? Icons.hourglass_top : Icons.publish, size: 18),
                 label: Text(isUploading ? l10n.communityUploading : l10n.communityPublish),
               ),
@@ -278,11 +418,11 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
       ),
       floatingActionButton: _fabVisible && !desktop
           ? FloatingActionButton.extended(
-              onPressed: isUploading ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
+              onPressed: busy ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
               icon: Icon(isUploading ? Icons.hourglass_top : Icons.publish),
               label: Text(isUploading ? l10n.communityUploading : l10n.communityPublish),
-              backgroundColor: isUploading ? theme.colorScheme.surfaceContainerHighest : null,
-              foregroundColor: isUploading ? theme.colorScheme.outline : null,
+              backgroundColor: busy ? theme.colorScheme.surfaceContainerHighest : null,
+              foregroundColor: busy ? theme.colorScheme.outline : null,
             )
           : null,
       body: Responsive.constrainWidth(context, child: _loading
@@ -292,6 +432,23 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
           // Active upload progress banner
           if (progress != null && progress.status != 'done' && progress.status != 'error')
             _UploadProgressBanner(progress: progress),
+
+          // Update all: its progress or summary, else the offer to run it.
+          if (updateAll != null)
+            _UpdateAllPanel(
+              progress: updateAll,
+              onStop: _stopUpdateAll,
+              onClose: () => updateAllProgressNotifier.value = null,
+            )
+          else if (changedCount > 0)
+            _UpdateAllBar(
+              count: changedCount,
+              // Ready once every publication was looked at, so the count
+              // the confirmation shows is the whole of it.
+              onPressed: busy || _checking ? null : _updateAllChanged,
+            )
+          else if (_checking && _checkTotal > 1)
+            _CheckingLine(checked: _checked, total: _checkTotal),
 
           Expanded(
             child: _pubs.isEmpty
@@ -335,9 +492,10 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
                   if (i < _pubs.length) {
                     return _PublicationCard(
                       pub: _pubs[i],
+                      changed: _changes[_pubs[i].id] == PublicationChange.changed,
                       onUnpublish: () => _confirmUnpublish(_pubs[i]),
                       onEdit: () => _editPublication(_pubs[i]),
-                      onRepublish: () => _republish(_pubs[i]),
+                      onRepublish: updatingAll ? null : () => _republish(_pubs[i]),
                     );
                   }
                   // "Publish another" nudge
@@ -451,13 +609,19 @@ class _PublicationCard extends StatelessWidget {
   final MyPublication pub;
   final VoidCallback onUnpublish;
   final VoidCallback onEdit;
+
+  /// Null while an Update all runs (the button shows, disabled).
   final VoidCallback? onRepublish;
+
+  /// The local cookbook changed since this was published.
+  final bool changed;
 
   const _PublicationCard({
     required this.pub,
     required this.onUnpublish,
     required this.onEdit,
     this.onRepublish,
+    this.changed = false,
   });
 
   @override
@@ -537,11 +701,23 @@ class _PublicationCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
 
-                // Subtitle: last-updated relative time. No fake draft-diff —
-                // the app does not track pending local changes.
-                Text(
-                  l10n.publicationUpdatedAgo(timeago.format(pub.createdAt)),
-                  style: TextStyle(fontSize: 12, color: colors.textTertiary),
+                // Subtitle: last-updated relative time, and a marker when the
+                // local cookbook changed since it was published.
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        l10n.publicationUpdatedAgo(timeago.format(pub.createdAt)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, color: colors.textTertiary),
+                      ),
+                    ),
+                    if (changed) ...[
+                      const SizedBox(width: 8),
+                      const _ChangedChip(),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 12),
 
@@ -569,7 +745,7 @@ class _PublicationCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (onRepublish != null) ...[
+                    ...[
                       const SizedBox(width: 10),
                       Expanded(
                         child: SizedBox(
@@ -760,6 +936,322 @@ class _StateChip extends StatelessWidget {
                   color: text, letterSpacing: 0.3)),
         ],
       ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  CHANGED SINCE PUBLISHED
+// ════════════════════════════════════════════
+
+/// Small marker on a row whose local cookbook changed since it was published.
+/// Neutral like the pending chip; the accent dot ties it to Push update.
+class _ChangedChip extends StatelessWidget {
+  const _ChangedChip();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: colors.surfaceHigh,
+        border: Border.all(color: colors.outline.withValues(alpha: 0.4)),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 6, height: 6,
+              decoration: BoxDecoration(color: colors.accent, shape: BoxShape.circle)),
+          const SizedBox(width: 5),
+          Text(
+            l10n.publicationChanged,
+            style: TextStyle(fontSize: 11, height: 1.4, fontWeight: FontWeight.w600, color: colors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shown while the publications are compared with their cookbooks.
+class _CheckingLine extends StatelessWidget {
+  final int checked;
+  final int total;
+  const _CheckingLine({required this.checked, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 14, height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2, color: colors.textTertiary),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              l10n.publicationsUpdateAllChecking(checked, total),
+              style: TextStyle(fontSize: 12, color: colors.textTertiary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "N cookbooks changed" with the Update all changed button. One row on
+/// desktop; the button goes full width under the text on a phone.
+class _UpdateAllBar extends StatelessWidget {
+  final int count;
+  final VoidCallback? onPressed;
+  const _UpdateAllBar({required this.count, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final desktop = Responsive.isDesktopLayout(context);
+
+    final text = Row(
+      children: [
+        Icon(Icons.edit_note, size: 20, color: colors.accent),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            l10n.publicationsChangedCount(count),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: colors.textPrimary),
+          ),
+        ),
+      ],
+    );
+    final button = FilledButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(Icons.cloud_upload_outlined, size: 18),
+      label: Text(l10n.publicationsUpdateAllChanged),
+      style: FilledButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.surfaceRaised,
+        border: Border.all(color: colors.outline.withValues(alpha: 0.35)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: desktop
+          ? Row(
+              children: [
+                Expanded(child: text),
+                const SizedBox(width: 12),
+                SizedBox(height: 40, child: button),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                text,
+                const SizedBox(height: 10),
+                SizedBox(height: 44, child: button),
+              ],
+            ),
+    );
+  }
+}
+
+/// An Update all in progress (cookbook n of N, its photos, Stop), or how it
+/// went once it is over (Close).
+class _UpdateAllPanel extends StatelessWidget {
+  final UpdateAllProgress progress;
+  final VoidCallback onStop;
+  final VoidCallback onClose;
+  const _UpdateAllPanel({required this.progress, required this.onStop, required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.surfaceRaised,
+        border: Border.all(color: colors.outline.withValues(alpha: 0.35)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: progress.finished ? _summary(context) : _running(context),
+    );
+  }
+
+  Widget _running(BuildContext context) {
+    final colors = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final publish = progress.publish;
+
+    String? step;
+    if (publish != null) {
+      if (publish.waitSeconds > 0) {
+        step = l10n.communityPublishRateLimitWait(publish.waitSeconds);
+      } else {
+        switch (publish.status) {
+          case 'uploading':
+            step = publish.totalImages > 0
+                ? l10n.communityPublishUploading(publish.uploadedImages, publish.totalImages)
+                : l10n.communityPublishPreparing;
+          case 'publishing':
+          case 'done':
+            step = l10n.communityPublishPublishing;
+          case 'error':
+            step = publish.errorMessage;
+          default:
+            step = l10n.communityPublishPreparing;
+        }
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: SizedBox(
+                width: 18, height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: colors.accent),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.publicationsUpdateAllTitle,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: colors.textPrimary),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    progress.checking
+                        ? l10n.publicationsUpdateAllChecking(progress.current, progress.total)
+                        : l10n.publicationsUpdateAllCurrent(progress.current, progress.total),
+                    style: TextStyle(fontSize: 12, color: colors.textSecondary),
+                  ),
+                  if (!progress.checking && progress.title != null)
+                    Text(
+                      progress.title!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: colors.textPrimary),
+                    ),
+                  if (step != null)
+                    Text(step, style: TextStyle(fontSize: 12, color: colors.textTertiary)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: progress.stopping ? null : onStop,
+              style: TextButton.styleFrom(foregroundColor: colors.destructive),
+              child: Text(progress.stopping ? l10n.publicationsUpdateAllStopping : l10n.publicationsUpdateAllStop),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(value: progress.fraction, minHeight: 4),
+        ),
+      ],
+    );
+  }
+
+  Widget _summary(BuildContext context) {
+    final colors = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final s = progress.summary!;
+    final lineStyle = TextStyle(fontSize: 13, color: colors.textSecondary);
+    final nothingToDo = s.updated.isEmpty && s.failed.isEmpty && s.notRun.isEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Icon(
+              s.stopped || s.stopReason != null ? Icons.info_outline : Icons.check_circle_outline,
+              size: 20,
+              color: s.failed.isEmpty ? colors.accent : colors.destructive,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                s.stopped || s.stopReason != null ? l10n.publicationsUpdateAllStopped : l10n.publicationsUpdateAllDone,
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: colors.textPrimary),
+              ),
+            ),
+            TextButton(onPressed: onClose, child: Text(l10n.actionClose)),
+          ],
+        ),
+        if (s.stopReason != null) ...[
+          const SizedBox(height: 4),
+          Text(s.stopReason!, style: TextStyle(fontSize: 13, color: colors.destructive)),
+        ],
+        const SizedBox(height: 6),
+        if (s.updated.isNotEmpty) Text(l10n.publicationsUpdateAllUpdated(s.updated.length), style: lineStyle),
+        if (s.unchanged > 0) Text(l10n.publicationsUpdateAllUnchanged(s.unchanged), style: lineStyle),
+        if (nothingToDo && !s.stopped) Text(l10n.publicationsUpdateAllNothing, style: lineStyle),
+        if (s.noSource > 0) ...[
+          const SizedBox(height: 4),
+          Text(l10n.publicationsUpdateAllNoSource(s.noSource), style: lineStyle),
+        ],
+        if (s.failed.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            l10n.publicationsUpdateAllFailed(s.failed.length),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: colors.destructive),
+          ),
+          const SizedBox(height: 2),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 160),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final f in s.failed)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Text.rich(
+                        TextSpan(children: [
+                          TextSpan(
+                            text: f.title,
+                            style: TextStyle(fontWeight: FontWeight.w600, color: colors.textPrimary),
+                          ),
+                          TextSpan(text: '\n${f.reason}'),
+                        ]),
+                        style: lineStyle,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        if (s.notRun.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(l10n.publicationsUpdateAllNotRun(s.notRun.length), style: lineStyle),
+        ],
+      ],
     );
   }
 }

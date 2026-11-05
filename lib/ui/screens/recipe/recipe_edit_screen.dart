@@ -37,6 +37,7 @@ import '../../../services/sync_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../providers/navigation_guard_provider.dart';
+import '../../shell/shell_navigation.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
 
@@ -1291,142 +1292,111 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
       final nutritionJson = _nutrition != null && _nutrition!.isNotEmpty ? jsonEncode(_nutrition!.toJson()) : null;
 
-      if (_isEditing) {
-        final recipe = RecipesCompanion(
-          title: drift.Value(_titleController.text.trim()),
-          description: drift.Value(_descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim()),
-          servings: drift.Value(_servingsController.text.trim().isEmpty ? null : _servingsController.text.trim()),
-          prepTimeMinutes: drift.Value(prepTime),
-          cookTimeMinutes: drift.Value(cookTime),
-          sourceUrl: drift.Value(_sourceUrlController.text.trim().isEmpty ? null : _sourceUrlController.text.trim()),
-          imagePath: drift.Value(finalImagePath),
-          // Only touch the cloud copy when the image actually changed;
-          // otherwise keep whatever imageServerPath the row already has.
-          imageServerPath: imageChanged
-              ? drift.Value(serverImagePath)
-              : const drift.Value.absent(),
-          courseId: drift.Value(_selectedCourseId),
-          categoryId: drift.Value(_selectedCategoryId),
-          rating: drift.Value(_rating),
-          notes: drift.Value(_notesController.text.trim().isEmpty ? null : _notesController.text.trim()),
-          nutritionJson: drift.Value(nutritionJson),
-          updatedAt: drift.Value(DateTime.now()),
-        );
-        await recipeDao.updateRecipeFields(widget.recipeId!, recipe);
-
-        // Save ingredients. Reuse each row's STABLE id (loaded from the DB, or
-        // minted when the row was added) rather than a position-derived one, so
-        // recipe_links keyed on the ingredient id survive edits, reorders and
-        // header insert/remove. A position id (recipeId_ing_$i) silently broke
-        // every linked ingredient whenever the list shifted. Fall back to a
-        // collision-proof id only for empty/duplicate carried ids.
-        await recipeDao.deleteIngredientsForRecipe(widget.recipeId!);
-        final usedIngIds = <String>{};
-        for (var i = 0; i < _ingredients.length; i++) {
-          if (_ingredients[i].text.trim().isNotEmpty) {
-            var ingId = _ingredients[i].id;
-            if (ingId.isEmpty || usedIngIds.contains(ingId)) {
-              ingId = '${widget.recipeId}_ing_${i}_${DateTime.now().microsecondsSinceEpoch}';
-            }
-            usedIngIds.add(ingId);
-            if (_ingredients[i].isHeader) {
-              // Save header as ingredient with __header__ marker
-              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: ingId, recipeId: widget.recipeId!, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
-            } else {
-              final parsed = _parseIngredient(_ingredients[i].text);
-              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: ingId, recipeId: widget.recipeId!, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
-            }
+      // Ingredients. Reuse each row's STABLE id (loaded from the DB, or
+      // minted when the row was added) rather than a position-derived one, so
+      // recipe_links keyed on the ingredient id survive edits, reorders and
+      // header insert/remove. A position id (recipeId_ing_$i) silently broke
+      // every linked ingredient whenever the list shifted. Fall back to a
+      // collision-proof id only for empty/duplicate carried ids.
+      final ingredientRows = <IngredientsCompanion>[];
+      final usedIngIds = <String>{};
+      for (var i = 0; i < _ingredients.length; i++) {
+        if (_ingredients[i].text.trim().isNotEmpty) {
+          var ingId = _ingredients[i].id;
+          if (ingId.isEmpty || usedIngIds.contains(ingId)) {
+            ingId = '${recipeId}_ing_${i}_${DateTime.now().microsecondsSinceEpoch}';
           }
-        }
-
-        // Save steps with images
-        await recipeDao.deleteStepsForRecipe(widget.recipeId!);
-        for (var i = 0; i < _steps.length; i++) {
-          final step = _steps[i];
-          if (step.instruction.trim().isNotEmpty) {
-            // Copy step image to permanent location if it's a temp file
-            String? stepImagePath = step.imagePath;
-            if (stepImagePath != null && !stepImagePath.contains('images/steps')) {
-              stepImagePath = await _copyStepImage(stepImagePath, widget.recipeId!, i);
-            }
-            final stepServerPath = await _stepServerPathFor(stepImagePath);
-            await recipeDao.insertStep(StepsCompanion.insert(
-              id: '${widget.recipeId}_step_$i',
-              recipeId: widget.recipeId!,
-              sortOrder: i,
-              instruction: step.instruction.trim(),
-              durationMinutes: const drift.Value(null),
-              imagePath: drift.Value(stepImagePath),
-              imageServerPath: drift.Value(stepServerPath),
-              notes: drift.Value(step.isHeader ? '__header__' : null),
-            ));
-          }
-        }
-      } else {
-        final cookbookId = widget.cookbookId ?? 'starter';
-
-        await recipeDao.insertRecipe(RecipesCompanion.insert(
-          id: recipeId,
-          cookbookId: cookbookId,
-          title: _titleController.text.trim(),
-          description: drift.Value(_descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim()),
-          servings: drift.Value(_servingsController.text.trim().isEmpty ? null : _servingsController.text.trim()),
-          prepTimeMinutes: drift.Value(prepTime),
-          cookTimeMinutes: drift.Value(cookTime),
-          sourceUrl: drift.Value(_sourceUrlController.text.trim().isEmpty ? null : _sourceUrlController.text.trim()),
-          imagePath: drift.Value(finalImagePath),
-          imageServerPath: drift.Value(serverImagePath),
-          courseId: drift.Value(_selectedCourseId),
-          categoryId: drift.Value(_selectedCategoryId),
-          rating: drift.Value(_rating),
-          notes: drift.Value(_notesController.text.trim().isEmpty ? null : _notesController.text.trim()),
-          nutritionJson: drift.Value(nutritionJson),
-          lastViewedAt: drift.Value(DateTime.now()),
-        ));
-
-        // Save ingredients with stable ids (so links added later stay valid).
-        final usedIngIds = <String>{};
-        for (var i = 0; i < _ingredients.length; i++) {
-          if (_ingredients[i].text.trim().isNotEmpty) {
-            var ingId = _ingredients[i].id;
-            if (ingId.isEmpty || usedIngIds.contains(ingId)) {
-              ingId = '${recipeId}_ing_${i}_${DateTime.now().microsecondsSinceEpoch}';
-            }
-            usedIngIds.add(ingId);
-            if (_ingredients[i].isHeader) {
-              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: ingId, recipeId: recipeId, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
-            } else {
-              final parsed = _parseIngredient(_ingredients[i].text);
-              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: ingId, recipeId: recipeId, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
-            }
-          }
-        }
-
-        // Save steps with images
-        for (var i = 0; i < _steps.length; i++) {
-          final step = _steps[i];
-          if (step.instruction.trim().isNotEmpty) {
-            // Copy step image to permanent location
-            String? stepImagePath = step.imagePath;
-            if (stepImagePath != null) {
-              stepImagePath = await _copyStepImage(stepImagePath, recipeId, i);
-            }
-            final stepServerPath = await _stepServerPathFor(stepImagePath);
-            await recipeDao.insertStep(StepsCompanion.insert(
-              id: '${recipeId}_step_$i',
-              recipeId: recipeId,
-              sortOrder: i,
-              instruction: step.instruction.trim(),
-              durationMinutes: const drift.Value(null),
-              imagePath: drift.Value(stepImagePath),
-              imageServerPath: drift.Value(stepServerPath),
-              notes: drift.Value(step.isHeader ? '__header__' : null),
-            ));
+          usedIngIds.add(ingId);
+          if (_ingredients[i].isHeader) {
+            // Save header as ingredient with __header__ marker
+            ingredientRows.add(IngredientsCompanion.insert(id: ingId, recipeId: recipeId, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
+          } else {
+            final parsed = _parseIngredient(_ingredients[i].text);
+            ingredientRows.add(IngredientsCompanion.insert(id: ingId, recipeId: recipeId, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
           }
         }
       }
 
-      await tagsDao.setTagsForRecipe(recipeId, _selectedTagIds);
+      // Steps with images. Their photos are copied into the app's folder and
+      // uploaded BEFORE anything is written: the old steps used to be deleted
+      // first, so a slow or failed upload left the recipe without them.
+      final stepRows = <StepsCompanion>[];
+      for (var i = 0; i < _steps.length; i++) {
+        final step = _steps[i];
+        if (step.instruction.trim().isNotEmpty) {
+          // Copy step image to permanent location if it's a temp file
+          String? stepImagePath = step.imagePath;
+          if (stepImagePath != null && (!_isEditing || !stepImagePath.contains('images/steps'))) {
+            stepImagePath = await _copyStepImage(stepImagePath, recipeId, i);
+          }
+          final stepServerPath = await _stepServerPathFor(stepImagePath);
+          stepRows.add(StepsCompanion.insert(
+            id: '${recipeId}_step_$i',
+            recipeId: recipeId,
+            sortOrder: i,
+            instruction: step.instruction.trim(),
+            durationMinutes: const drift.Value(null),
+            imagePath: drift.Value(stepImagePath),
+            imageServerPath: drift.Value(stepServerPath),
+            notes: drift.Value(step.isHeader ? '__header__' : null),
+          ));
+        }
+      }
+
+      // The recipe and everything under it go in together or not at all.
+      await recipeDao.transaction(() async {
+        if (_isEditing) {
+          final recipe = RecipesCompanion(
+            title: drift.Value(_titleController.text.trim()),
+            description: drift.Value(_descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim()),
+            servings: drift.Value(_servingsController.text.trim().isEmpty ? null : _servingsController.text.trim()),
+            prepTimeMinutes: drift.Value(prepTime),
+            cookTimeMinutes: drift.Value(cookTime),
+            sourceUrl: drift.Value(_sourceUrlController.text.trim().isEmpty ? null : _sourceUrlController.text.trim()),
+            imagePath: drift.Value(finalImagePath),
+            // Only touch the cloud copy when the image actually changed;
+            // otherwise keep whatever imageServerPath the row already has.
+            imageServerPath: imageChanged
+                ? drift.Value(serverImagePath)
+                : const drift.Value.absent(),
+            courseId: drift.Value(_selectedCourseId),
+            categoryId: drift.Value(_selectedCategoryId),
+            rating: drift.Value(_rating),
+            notes: drift.Value(_notesController.text.trim().isEmpty ? null : _notesController.text.trim()),
+            nutritionJson: drift.Value(nutritionJson),
+            updatedAt: drift.Value(DateTime.now()),
+          );
+          await recipeDao.updateRecipeFields(recipeId, recipe);
+          await recipeDao.deleteIngredientsForRecipe(recipeId);
+          await recipeDao.deleteStepsForRecipe(recipeId);
+        } else {
+          await recipeDao.insertRecipe(RecipesCompanion.insert(
+            id: recipeId,
+            cookbookId: widget.cookbookId ?? 'starter',
+            title: _titleController.text.trim(),
+            description: drift.Value(_descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim()),
+            servings: drift.Value(_servingsController.text.trim().isEmpty ? null : _servingsController.text.trim()),
+            prepTimeMinutes: drift.Value(prepTime),
+            cookTimeMinutes: drift.Value(cookTime),
+            sourceUrl: drift.Value(_sourceUrlController.text.trim().isEmpty ? null : _sourceUrlController.text.trim()),
+            imagePath: drift.Value(finalImagePath),
+            imageServerPath: drift.Value(serverImagePath),
+            courseId: drift.Value(_selectedCourseId),
+            categoryId: drift.Value(_selectedCategoryId),
+            rating: drift.Value(_rating),
+            notes: drift.Value(_notesController.text.trim().isEmpty ? null : _notesController.text.trim()),
+            nutritionJson: drift.Value(nutritionJson),
+            lastViewedAt: drift.Value(DateTime.now()),
+          ));
+        }
+        for (final row in ingredientRows) {
+          await recipeDao.insertIngredient(row);
+        }
+        for (final row in stepRows) {
+          await recipeDao.insertStep(row);
+        }
+        await tagsDao.setTagsForRecipe(recipeId, _selectedTagIds);
+      });
 
       // If this recipe lives in a shared cookbook I can edit, flag it so the
       // next sync pushes the change to the owner + other members, then kick a
@@ -1471,14 +1441,26 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         // app-level overlay, so it stays visible on the screen revealed by the
         // pop. Showing it afterwards via rootNavigatorKey.currentContext threw
         // "No Overlay found" — that context's overlay is a descendant.
+        //
+        // View pushes, so back from the recipe returns to the page under the
+        // editor. A `go` left the recipe as the only page in the shell, and its
+        // back button then emptied it (a blank window on desktop). Skip it when
+        // that recipe is already showing (it was edited from its own page).
         AppSnackbar.successWithAction(
           context,
           message,
           actionLabel: l10n.actionView,
-          onAction: () => router.go('/recipe/$savedRecipeId'),
+          onAction: () {
+            if (router.state.uri.path != '/recipe/$savedRecipeId') {
+              router.push('/recipe/$savedRecipeId');
+            }
+          },
         );
 
-        context.pop(true);
+        // Opened where there is nothing under it (a web refresh), show the
+        // recipe instead: a throwing pop read as a failed save, and saving
+        // again made a second copy.
+        popOrGo(context, '/recipe/$savedRecipeId', true);
 
         // TODO: Kitchen Buddy hidden for now
         // if (!_isEditing) {
@@ -2278,7 +2260,7 @@ class _ExpandedNutritionInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Detailed Nutrition',
+          AppLocalizations.of(context)!.recipeEditDetailedNutrition,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -2611,7 +2593,7 @@ class _IngredientRow extends StatelessWidget {
         Row(children: [
           Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle)),
           const SizedBox(width: 12),
-          Expanded(child: TextFormField(initialValue: ingredient.text, decoration: const InputDecoration(hintText: 'e.g., 2 cups flour', isDense: true, border: OutlineInputBorder()), textCapitalization: TextCapitalization.sentences, onChanged: onChanged)),
+          Expanded(child: TextFormField(initialValue: ingredient.text, decoration: InputDecoration(hintText: AppLocalizations.of(context)!.ingredientPlaceholder, isDense: true, border: const OutlineInputBorder()), textCapitalization: TextCapitalization.sentences, onChanged: onChanged)),
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, size: 20, color: theme.colorScheme.outline),
             padding: EdgeInsets.zero,
@@ -2868,19 +2850,19 @@ class _NutritionSection extends StatelessWidget {
               Icon(Icons.local_fire_department, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
               Text(
-                '${nutrition!.calories?.toInt() ?? 0} cal',
+                AppLocalizations.of(context)!.nutritionCalCount(nutrition!.calories?.toInt() ?? 0),
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.refresh, size: 20),
                 onPressed: isCalculating ? null : onCalculate,
-                tooltip: 'Recalculate',
+                tooltip: AppLocalizations.of(context)!.nutritionRecalculate,
               ),
               IconButton(
                 icon: const Icon(Icons.close, size: 20),
                 onPressed: onClear,
-                tooltip: 'Clear',
+                tooltip: AppLocalizations.of(context)!.actionClear,
               ),
             ],
           ),
@@ -2888,11 +2870,11 @@ class _NutritionSection extends StatelessWidget {
           // Macros row
           Row(
             children: [
-              Expanded(child: _MacroChip(label: 'Protein', value: nutrition!.protein, unit: 'g', color: const Color(0xFF4CAF50), theme: theme)),
+              Expanded(child: _MacroChip(label: AppLocalizations.of(context)!.nutrientProtein, value: nutrition!.protein, unit: 'g', color: const Color(0xFF4CAF50), theme: theme)),
               const SizedBox(width: 8),
-              Expanded(child: _MacroChip(label: 'Carbs', value: nutrition!.carbohydrates, unit: 'g', color: const Color(0xFF2196F3), theme: theme)),
+              Expanded(child: _MacroChip(label: AppLocalizations.of(context)!.nutrientCarbs, value: nutrition!.carbohydrates, unit: 'g', color: const Color(0xFF2196F3), theme: theme)),
               const SizedBox(width: 8),
-              Expanded(child: _MacroChip(label: 'Fat', value: nutrition!.fat, unit: 'g', color: const Color(0xFFFF9800), theme: theme)),
+              Expanded(child: _MacroChip(label: AppLocalizations.of(context)!.nutrientFat, value: nutrition!.fat, unit: 'g', color: const Color(0xFFFF9800), theme: theme)),
             ],
           ),
         ],

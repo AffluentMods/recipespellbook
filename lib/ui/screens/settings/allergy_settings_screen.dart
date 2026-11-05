@@ -196,23 +196,27 @@ class _AllergySettingsScreenState extends ConsumerState<AllergySettingsScreen>
                 ],
               ),
           ],
-          bottom: TabBar(
-            controller: _tabController,
-            onTap: (_) => setState(() {}),
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.warning_amber),
-                text: l10n.allergyMyAllergies,
-              ),
-              Tab(
-                icon: Badge(
-                  isLabelVisible: dismissedCount > 0,
-                  label: Text('$dismissedCount'),
-                  child: const Icon(Icons.visibility_off),
+          bottom: Responsive.capTabBar(
+            context,
+            maxWidth: Responsive.settingsGridMaxWidth,
+            tabBar: TabBar(
+              controller: _tabController,
+              onTap: (_) => setState(() {}),
+              tabs: [
+                Tab(
+                  icon: const Icon(Icons.warning_amber),
+                  text: l10n.allergyMyAllergies,
                 ),
-                text: l10n.allergyDisabledTab,
-              ),
-            ],
+                Tab(
+                  icon: Badge(
+                    isLabelVisible: dismissedCount > 0,
+                    label: Text('$dismissedCount'),
+                    child: const Icon(Icons.visibility_off),
+                  ),
+                  text: l10n.allergyDisabledTab,
+                ),
+              ],
+            ),
           ),
         ),
         body: TabBarView(

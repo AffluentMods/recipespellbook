@@ -379,8 +379,8 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
               ]),
               const SizedBox(height: 4),
               Text(
-                '${items.length} item${items.length == 1 ? '' : 's'}'
-                '${isCollab ? ' · live collaboration' : ''}',
+                '${AppLocalizations.of(context)!.shoppingItems(items.length)}'
+                '${isCollab ? ' · ${AppLocalizations.of(context)!.shareViewerLiveCollab}' : ''}',
                 style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
               ),
               const SizedBox(height: 16),
@@ -473,11 +473,11 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
         ));
       }
       if (mounted) {
-        AppSnackbar.success(context, 'Added to your lists');
+        AppSnackbar.success(context, AppLocalizations.of(context)!.shareViewerAddedToLists);
         context.go('/shopping');
       }
     } catch (e) {
-      if (mounted) AppSnackbar.error(context, 'Import failed: $e');
+      if (mounted) AppSnackbar.error(context, AppLocalizations.of(context)!.importFailed('$e'));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

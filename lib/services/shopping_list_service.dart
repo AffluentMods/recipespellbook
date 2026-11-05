@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui' show Rect;
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
 import 'package:drift/drift.dart';
@@ -6,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../database/database.dart';
+import 'share_file.dart';
 
 class ShoppingListService {
   final AppDatabase db;
@@ -135,8 +137,9 @@ class ShoppingListService {
     return buffer.toString();
   }
 
-  /// Share list as file via OS share sheet
-  Future<void> shareAsFile(String listId, {String format = 'json'}) async {
+  /// Share list as file via OS share sheet (Save as where files cannot be
+  /// shared). [sharePositionOrigin] anchors the iPad / macOS popover.
+  Future<FileShareOutcome> shareAsFile(String listId, {String format = 'json', Rect? sharePositionOrigin}) async {
     final dir = await getTemporaryDirectory();
 
     String content;
@@ -160,16 +163,18 @@ class ShoppingListService {
     final file = File(p.join(dir.path, filename));
     await file.writeAsString(content);
 
-    await SharePlus.instance.share(ShareParams(
-      files: [XFile(file.path)],
-      subject: 'Shopping List',
-    ));
+    return shareOrSaveFile(file.path,
+        subject: 'Shopping List', sharePositionOrigin: sharePositionOrigin);
   }
 
   /// Share list as plain text via OS share sheet
-  Future<void> shareAsText(String listId) async {
+  Future<void> shareAsText(String listId, {Rect? sharePositionOrigin}) async {
     final text = await exportAsText(listId);
-    await SharePlus.instance.share(ShareParams(text: text, subject: 'Shopping List'));
+    await SharePlus.instance.share(ShareParams(
+      text: text,
+      subject: 'Shopping List',
+      sharePositionOrigin: sharePositionOrigin,
+    ));
   }
 
   /// Import list from JSON (exported by another Recipe Spellbook user)

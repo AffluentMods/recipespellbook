@@ -976,7 +976,7 @@ class NutritionCard extends StatelessWidget {
                 Icon(Icons.local_fire_department, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Nutrition Facts',
+                  AppLocalizations.of(context)!.nutritionFactsTitle,
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -1154,7 +1154,7 @@ class NutritionBadge extends StatelessWidget {
           const Icon(Icons.local_fire_department, size: 14, color: Colors.orange),
           const SizedBox(width: 4),
           Text(
-            '${nutrition.calories.round()} cal',
+            AppLocalizations.of(context)!.nutritionCalCount(nutrition.calories.round()),
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,

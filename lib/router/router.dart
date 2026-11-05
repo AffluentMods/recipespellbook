@@ -33,14 +33,11 @@ import '../ui/screens/settings/manage_courses_screen.dart';
 import '../ui/screens/settings/manage_shopping_categories_screen.dart';
 import '../ui/screens/settings/manage_tags_screen.dart';
 import '../ui/screens/settings/nutrition_settings_screen.dart';
-import '../ui/screens/settings/placeholder_settings_screen.dart';
 import '../ui/screens/settings/quick_access_settings_screen.dart';
-import '../ui/screens/settings/recipe_layout_settings_screen.dart';
 import '../ui/screens/settings/ingredient_layout_settings_screen.dart';
 import '../ui/screens/settings/notification_settings_screen.dart';
 import '../ui/screens/settings/account_screen.dart';
 import '../ui/screens/settings/settings_screen.dart';
-import '../ui/screens/notifications/notifications_screen.dart';
 import '../ui/screens/community/community_screen.dart';
 import '../ui/screens/community/community_detail_screen.dart';
 import '../ui/screens/community/community_publish_screen.dart';
@@ -118,14 +115,6 @@ final router = GoRouter(
         final error = state.uri.queryParameters['error'];
         return KrogerCallbackScreen(authCode: code, error: error);
       },
-    ),
-
-    // Notifications (fullscreen overlay)
-    GoRoute(
-      path: '/notifications',
-      name: 'notifications',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const NotificationsScreen(),
     ),
 
     // ═══════════════════════════════════════════════════════
@@ -439,11 +428,6 @@ final router = GoRouter(
           builder: (context, state) => const AllergySettingsScreen(),
         ),
         GoRoute(
-          path: '/settings/recipe-layout',
-          name: 'recipe-layout',
-          builder: (context, state) => const RecipeLayoutSettingsScreen(),
-        ),
-        GoRoute(
           path: '/settings/ingredient-layout',
           name: 'ingredient-layout',
           builder: (context, state) => const IngredientLayoutSettingsScreen(),
@@ -457,11 +441,6 @@ final router = GoRouter(
           path: '/settings/quick-access',
           name: 'quick-access-settings',
           builder: (context, state) => const QuickAccessSettingsScreen(),
-        ),
-        GoRoute(
-          path: '/settings/placeholders',
-          name: 'placeholders',
-          builder: (context, state) => const PlaceholderSettingsScreen(),
         ),
         GoRoute(
           path: '/settings/courses',

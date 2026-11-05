@@ -363,20 +363,20 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
     try {
       if (widget.type == _TaxonomyType.course) {
         if (await customDao.customCourseNameExists(cookbookId, name)) {
-          if (mounted) AppSnackbar.info(context, 'Course "$name" already exists');
+          if (mounted) AppSnackbar.info(context, AppLocalizations.of(context)!.taxonomyCourseExists(name));
           return;
         }
         await customDao.insertCustomCourse(CustomCoursesCompanion.insert(id: id, cookbookId: cookbookId, name: name.trim(), emoji: Value(emoji)));
       } else {
         if (await customDao.customCategoryNameExists(cookbookId, name)) {
-          if (mounted) AppSnackbar.info(context, 'Category "$name" already exists');
+          if (mounted) AppSnackbar.info(context, AppLocalizations.of(context)!.taxonomyCategoryExists(name));
           return;
         }
         await customDao.insertCustomCategory(CustomCategoriesCompanion.insert(id: id, cookbookId: cookbookId, name: name.trim(), emoji: Value(emoji)));
       }
       if (mounted) Navigator.of(context).pop(id);
     } catch (e) {
-      if (mounted) AppSnackbar.info(context, 'Error creating: $e');
+      if (mounted) AppSnackbar.info(context, AppLocalizations.of(context)!.taxonomyCreateError('$e'));
     }
   }
 
@@ -560,7 +560,7 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
 
     try {
       if (await customDao.customCategoryNameExists(cookbookId, name)) {
-        if (mounted) AppSnackbar.info(context, 'Category "$name" already exists');
+        if (mounted) AppSnackbar.info(context, AppLocalizations.of(context)!.taxonomyCategoryExists(name));
         return;
       }
       await customDao.insertCustomCategory(CustomCategoriesCompanion.insert(id: id, cookbookId: cookbookId, name: name.trim(), emoji: Value(emoji)));
@@ -568,7 +568,7 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
       _searchController.clear();
       await _loadItems();
     } catch (e) {
-      if (mounted) AppSnackbar.info(context, 'Error creating: $e');
+      if (mounted) AppSnackbar.info(context, AppLocalizations.of(context)!.taxonomyCreateError('$e'));
     }
   }
 

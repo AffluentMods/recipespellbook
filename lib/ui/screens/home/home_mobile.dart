@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/collab_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/quick_access_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
@@ -1168,41 +1169,6 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-typedef _JumpItem = ({Recipe recipe, bool pinned});
-
-/// "Jump back in": pinned recipes, then recently viewed — the Quick Access
-/// sources, honouring its settings.
-final _jumpBackInProvider = FutureProvider.autoDispose
-    .family<List<_JumpItem>, String>((ref, cookbookId) async {
-      ref.watch(recipesInCookbookProvider(cookbookId));
-      final (showPinned, showHistory, historyCount) = ref.watch(
-        settingsProvider.select(
-          (s) => (
-            s.quickAccessShowPinned,
-            s.quickAccessShowHistory,
-            s.quickAccessHistoryCount,
-          ),
-        ),
-      );
-      final dao = ref.watch(recipeDaoProvider);
-      final items = <_JumpItem>[];
-      final seen = <String>{};
-      if (showPinned) {
-        for (final r in await dao.getPinnedRecipes(cookbookId)) {
-          if (seen.add(r.id)) items.add((recipe: r, pinned: true));
-        }
-      }
-      if (showHistory) {
-        final recent = await dao
-            .watchRecentlyViewed(cookbookId, limit: historyCount)
-            .first;
-        for (final r in recent) {
-          if (seen.add(r.id)) items.add((recipe: r, pinned: false));
-        }
-      }
-      return items;
-    });
-
 class _JumpBackInRow extends ConsumerWidget {
   final String cookbookId;
   final double side;
@@ -1217,15 +1183,15 @@ class _JumpBackInRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final items =
-        ref.watch(_jumpBackInProvider(cookbookId)).valueOrNull ??
-        const <_JumpItem>[];
+        ref.watch(jumpBackInProvider(cookbookId)).valueOrNull ??
+        const <QuickAccessItem>[];
     if (items.isEmpty) return const SizedBox.shrink();
     return _RecipeCarousel(
       title: l10n.homeJumpBackIn,
       recipes: [for (final i in items) i.recipe],
       pinnedIds: {
         for (final i in items)
-          if (i.pinned) i.recipe.id,
+          if (i.source == QuickAccessSource.pinned) i.recipe.id,
       },
       side: side,
       wide: wide,

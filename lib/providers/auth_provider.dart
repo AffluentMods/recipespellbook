@@ -223,6 +223,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return false;
   }
 
+  /// Take the account as re-read from the server (see
+  /// [AuthService.refreshCurrentUser]), for example a new tier after a
+  /// Stripe checkout.
+  void applyRefreshedUser(AuthUser user) {
+    if (!state.isSignedIn || state.user?.id != user.id) return;
+    state = state.copyWith(user: user);
+  }
+
   /// Clear any auth error (e.g. after user dismisses error dialog).
   void clearError() {
     state = state.copyWith(error: null);
@@ -261,6 +269,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 //  HELPER: Check if Apple Sign-In is available
 // ════════════════════════════════════════════
 
-/// Apple Sign-In is only available on iOS 13+ and macOS 10.15+.
-/// On Android/web/Windows, only show Google.
+/// Apple Sign-In is only offered on iOS (see [supportsAppleSignIn]).
+/// Everywhere else, only show Google.
 bool get isAppleSignInAvailable => supportsAppleSignIn;

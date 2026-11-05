@@ -179,6 +179,27 @@ void main() {
       expect(sheetMessage(tester), isNull);
       expect(find.text('Add a recipe'), findsOneWidget);
     });
+
+    testWidgets('a sheet swiped away while the file is read leaves the page under it', (tester) async {
+      final db = await openDb(tester);
+      filePicker.file = BrowserFile('pancakes.json', utf8.encode(_pancakesJson));
+      await openSheet(tester, db);
+      await tapTile(tester, 'File');
+      // Away before the import is through, so the sheet is still on its way
+      // out when the preview would take its place. Closing it then closed the
+      // page under it instead: a blank screen on a phone.
+      Navigator.of(tester.element(find.text('File'))).pop();
+      for (var i = 0; i < 30; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 5)));
+        await tester.pump();
+      }
+      expect(tester.takeException(), isNull);
+      expect(previewOpen(), isFalse);
+      expect(find.text('open'), findsOneWidget);
+      await settle(tester);
+      expect(find.text('Add a recipe'), findsNothing);
+      expect(find.text('open'), findsOneWidget);
+    });
   });
 
   group('what holds no recipe is not offered as one', () {

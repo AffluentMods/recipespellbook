@@ -19,11 +19,11 @@ Future<void> _launchExternalUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
-      AppSnackbar.error(context, 'Could not open $url');
+      AppSnackbar.error(context, AppLocalizations.of(context)!.menuDrawerCouldNotOpenUrl(url));
     }
   } catch (e) {
     if (context.mounted) {
-      AppSnackbar.error(context, 'Could not open link: $e');
+      AppSnackbar.error(context, AppLocalizations.of(context)!.menuDrawerCouldNotOpenLink('$e'));
     }
   }
 }
@@ -32,11 +32,11 @@ Future<void> _launchMailto(BuildContext context, Uri uri) async {
   try {
     final launched = await launchUrl(uri);
     if (!launched && context.mounted) {
-      AppSnackbar.error(context, 'Could not open email client');
+      AppSnackbar.error(context, AppLocalizations.of(context)!.menuDrawerCouldNotOpenEmail);
     }
   } catch (e) {
     if (context.mounted) {
-      AppSnackbar.error(context, 'Could not open email: $e');
+      AppSnackbar.error(context, AppLocalizations.of(context)!.menuDrawerCouldNotOpenEmailError('$e'));
     }
   }
 }

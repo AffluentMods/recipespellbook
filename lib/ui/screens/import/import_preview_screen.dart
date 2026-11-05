@@ -475,7 +475,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
             ),
         ],
       ),
-      body: _recipes.isEmpty ? const _NothingToImport() : Responsive.constrainWidth(context, child: Stack(
+      body: _recipes.isEmpty ? const _NothingToImport() : Responsive.constrainWidth(context, maxWidth: Responsive.isDesktopLayout(context) ? Responsive.kReadingMaxWidth : null, child: Stack(
         children: [
           // While the import runs only the overlay is there to use, for the
           // keyboard and a screen reader as much as for a tap.

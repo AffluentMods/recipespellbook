@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../../providers/sync_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
 import '../../../services/grocery_service.dart';
@@ -716,11 +717,11 @@ class _CommunityStatsCardState extends ConsumerState<_CommunityStatsCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _StatColumn(value: '${stats.downloads}', label: 'downloads'),
+                  _StatColumn(value: '${stats.downloads}', label: AppLocalizations.of(context)!.communityStatDownloads),
                   Container(width: 1, height: 28, color: theme.colorScheme.outlineVariant),
-                  _StatColumn(value: '${stats.followers}', label: 'followers'),
+                  _StatColumn(value: '${stats.followers}', label: AppLocalizations.of(context)!.accountStatFollowers),
                   Container(width: 1, height: 28, color: theme.colorScheme.outlineVariant),
-                  _StatColumn(value: '${stats.following}', label: 'following'),
+                  _StatColumn(value: '${stats.following}', label: AppLocalizations.of(context)!.accountStatFollowing),
                 ],
               ),
             );
@@ -927,25 +928,29 @@ class _SubscriptionCard extends ConsumerWidget {
 //  CLOUD SYNC CARD
 // ════════════════════════════════════════════
 
-class _CloudSyncCard extends StatefulWidget {
+class _CloudSyncCard extends ConsumerStatefulWidget {
   const _CloudSyncCard();
 
   @override
-  State<_CloudSyncCard> createState() => _CloudSyncCardState();
+  ConsumerState<_CloudSyncCard> createState() => _CloudSyncCardState();
 }
 
-class _CloudSyncCardState extends State<_CloudSyncCard> {
+class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
   bool _syncing = false;
 
   Future<void> _doSync() async {
     if (_syncing) return;
     setState(() => _syncing = true);
-    final result = await SyncService.instance.sync();
+    // Through the provider, so that what the sidebar and this card show
+    // follows the outcome.
+    final result = await ref.read(syncProvider.notifier).sync();
     if (!mounted) return;
     setState(() => _syncing = false);
     final l10n = AppLocalizations.of(context)!;
     if (result.success) {
       AppSnackbar.success(context, l10n.syncSuccess(result.pushedCount, result.pulledCount));
+    } else if (result.notEntitled) {
+      AppSnackbar.error(context, l10n.syncNotInPlan);
     } else {
       AppSnackbar.error(context, result.error ?? l10n.syncFailed);
     }
@@ -955,6 +960,11 @@ class _CloudSyncCardState extends State<_CloudSyncCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    // A background sync that failed for a reason that does not go away by
+    // itself (see SyncNotifier) shows here too: phones have no sidebar.
+    final sync = ref.watch(syncProvider);
+    final failed = !_syncing && sync.hasError;
+    final warn = failed || (!_syncing && SyncService.instance.photosStuck);
 
     return _CardSection(
       title: l10n.accountCloudSync,
@@ -969,13 +979,13 @@ class _CloudSyncCardState extends State<_CloudSyncCard> {
           subtitle: Text(
             _syncing
                 ? l10n.syncing
-                : SyncService.instance.photosStuck
-                    ? l10n.syncPhotosStuckDetail
-                    : l10n.syncDescription,
+                : failed
+                    ? (sync.notEntitled ? l10n.syncNotInPlan : l10n.syncFailed)
+                    : SyncService.instance.photosStuck
+                        ? l10n.syncPhotosStuckDetail
+                        : l10n.syncDescription,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: !_syncing && SyncService.instance.photosStuck
-                  ? theme.colorScheme.error
-                  : theme.colorScheme.outline,
+              color: warn ? theme.colorScheme.error : theme.colorScheme.outline,
             ),
           ),
           trailing: _syncing
@@ -1218,14 +1228,13 @@ class _DangerZoneCard extends ConsumerWidget {
       title: l10n.dangerZoneSection,
       icon: Icons.warning_amber_rounded,
       children: [
-        // Sign out (no confirmation)
+        // Sign out (no confirmation). Stay on this page: it switches to the
+        // signed-out view. Popping it left a blank window on desktop, where
+        // it is the only page (sidebar) or the settings pane's root.
         ListTile(
           leading: Icon(Icons.logout, color: theme.colorScheme.outline),
           title: Text(l10n.signOut),
-          onTap: () {
-            ref.read(authProvider.notifier).signOut();
-            if (context.mounted) Navigator.pop(context);
-          },
+          onTap: () => ref.read(authProvider.notifier).signOut(),
         ),
 
         // Delete account (type-DELETE confirmation)
@@ -1278,12 +1287,10 @@ class _DangerZoneCard extends ConsumerWidget {
                       ? () async {
                           Navigator.pop(ctx);
                           final success = await ref.read(authProvider.notifier).deleteAccount();
-                          if (context.mounted) {
-                            if (success) {
-                              Navigator.pop(context);
-                            } else {
-                              AppSnackbar.info(context, l10n.deleteAccountFailed);
-                            }
+                          // On success the page switches to the signed-out
+                          // view (no pop, as for sign out).
+                          if (!success && context.mounted) {
+                            AppSnackbar.info(context, l10n.deleteAccountFailed);
                           }
                         }
                       : null,

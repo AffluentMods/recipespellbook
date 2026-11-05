@@ -102,6 +102,38 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
 
+    final ingredientsSection = <Widget>[
+      _SectionHeader(
+        icon: Icons.shopping_basket_outlined,
+        title: l10n.communityIngredientCount(recipe.ingredients.where((i) => i.notes != '__header__').length),
+      ),
+      const SizedBox(height: 8),
+      ...recipe.ingredients.map((ing) => _IngredientRow(ingredient: ing)),
+    ];
+    final stepsSection = <Widget>[
+      _SectionHeader(
+        icon: Icons.format_list_numbered,
+        title: l10n.communityStepCount(recipe.steps.where((s) => s.notes != '__header__').length),
+      ),
+      const SizedBox(height: 12),
+      ...(() {
+        final widgets = <Widget>[];
+        var n = 0;
+        for (final step in recipe.steps) {
+          if (step.notes == '__header__') {
+            widgets.add(_StepSectionHeader(title: step.instruction));
+          } else {
+            n += 1;
+            widgets.add(_StepCard(step: step, stepNumber: n, publicationId: publicationId));
+          }
+        }
+        return widgets;
+      })(),
+    ];
+    final twoColumns = Responsive.isDesktopLayout(context) &&
+        recipe.ingredients.isNotEmpty &&
+        recipe.steps.isNotEmpty;
+
     return Scaffold(
       body: Responsive.constrainWidth(context, child: CustomScrollView(
         slivers: [
@@ -240,38 +272,42 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
 
                   const SizedBox(height: 24),
 
-                  // ── Ingredients ──
-                  if (recipe.ingredients.isNotEmpty) ...[
-                    _SectionHeader(
-                      icon: Icons.shopping_basket_outlined,
-                      title: l10n.communityIngredientCount(recipe.ingredients.where((i) => i.notes != '__header__').length),
+                  // Desktop: ingredients beside the steps, as on a recipe's
+                  // own page, instead of one narrow list down a wide window.
+                  if (twoColumns) ...[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: ingredientsSection,
+                          ),
+                        ),
+                        const SizedBox(width: 32),
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: stepsSection,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    ...recipe.ingredients.map((ing) => _IngredientRow(ingredient: ing)),
-                    const SizedBox(height: 24),
-                  ],
-
-                  // ── Steps ──
-                  if (recipe.steps.isNotEmpty) ...[
-                    _SectionHeader(
-                      icon: Icons.format_list_numbered,
-                      title: l10n.communityStepCount(recipe.steps.where((s) => s.notes != '__header__').length),
-                    ),
-                    const SizedBox(height: 12),
-                    ...(() {
-                      final widgets = <Widget>[];
-                      var n = 0;
-                      for (final step in recipe.steps) {
-                        if (step.notes == '__header__') {
-                          widgets.add(_StepSectionHeader(title: step.instruction));
-                        } else {
-                          n += 1;
-                          widgets.add(_StepCard(step: step, stepNumber: n, publicationId: publicationId));
-                        }
-                      }
-                      return widgets;
-                    })(),
                     const SizedBox(height: 16),
+                  ] else ...[
+                    // ── Ingredients ──
+                    if (recipe.ingredients.isNotEmpty) ...[
+                      ...ingredientsSection,
+                      const SizedBox(height: 24),
+                    ],
+
+                    // ── Steps ──
+                    if (recipe.steps.isNotEmpty) ...[
+                      ...stepsSection,
+                      const SizedBox(height: 16),
+                    ],
                   ],
 
                   // ── Notes ──

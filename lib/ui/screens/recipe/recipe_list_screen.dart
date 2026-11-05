@@ -439,19 +439,20 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     );
   }
 
-  Future<List<Recipe>> _filterByTags(List<Recipe> recipes, TagsDao tagsDao) async {
-    if (_selectedTagIds.isEmpty) return recipes;
+  /// The recipes that carry ALL selected tags, as one query. Made again only
+  /// when the selection changes: a stream made in build would start over (and
+  /// show a spinner) on every rebuild, and asking recipe by recipe ran a
+  /// query per recipe each time.
+  Stream<Set<String>>? _taggedIds;
+  String? _taggedIdsFor;
 
-    final filteredRecipes = <Recipe>[];
-    for (final recipe in recipes) {
-      final recipeTags = await tagsDao.getTagsForRecipe(recipe.id);
-      final recipeTagIds = recipeTags.map((t) => t.id).toSet();
-      // Recipe must have ALL selected tags
-      if (_selectedTagIds.every((tagId) => recipeTagIds.contains(tagId))) {
-        filteredRecipes.add(recipe);
-      }
+  Stream<Set<String>> _recipesWithSelectedTags(TagsDao tagsDao) {
+    final key = (_selectedTagIds.toList()..sort()).join('\n');
+    if (_taggedIds == null || key != _taggedIdsFor) {
+      _taggedIdsFor = key;
+      _taggedIds = tagsDao.watchRecipeIdsWithAllTags({..._selectedTagIds});
     }
-    return filteredRecipes;
+    return _taggedIds!;
   }
 
   /// Navigate to recipe — either inline (two-pane) or full-screen (single pane)
@@ -589,13 +590,14 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           return builder(sorted);
         }
         if (_selectedTagIds.isNotEmpty) {
-          return FutureBuilder<List<Recipe>>(
-            future: _filterByTags(recipes, tagsDao),
+          return StreamBuilder<Set<String>>(
+            stream: _recipesWithSelectedTags(tagsDao),
             builder: (context, tagSnapshot) {
               if (!tagSnapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              return finish(tagSnapshot.data!);
+              final tagged = tagSnapshot.data!;
+              return finish(recipes.where((r) => tagged.contains(r.id)).toList());
             },
           );
         }

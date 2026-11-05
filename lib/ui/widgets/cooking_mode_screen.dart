@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -14,6 +13,7 @@ import 'package:recipespellbook/providers/database_provider.dart';
 
 import '../../../ui/widgets/nutrition_widgets.dart';
 import '../../ui/widgets/font_size_control.dart';
+import '../../utils/platform_utils.dart' show supportsSpeechRecognition;
 import '../../utils/responsive_utils.dart';
 import '../../utils/ingredient_utils.dart'
     show scaleInstructionText, scaledIngredientLabel;
@@ -103,7 +103,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   // ── Voice control ────────────────────────────────────────────────
 
   Future<void> _toggleVoice() async {
-    if (kIsWeb) {
+    if (!supportsSpeechRecognition) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.cookModeVoiceUnavailable)),
       );
@@ -347,9 +347,10 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
     return Scaffold(
       backgroundColor: context.appColors.surface,
       // Voice control toggle floats above the bottom bar so the user
-      // can find it without leaving the recipe view. Hidden on web.
+      // can find it without leaving the recipe view. Hidden where speech
+      // recognition is unavailable (web, Linux).
       // Desktop layouts: the voice toggle lives in the top bar instead.
-      floatingActionButton: (kIsWeb || Responsive.isDesktopLayout(context)) ? null : FloatingActionButton(
+      floatingActionButton: (!supportsSpeechRecognition || Responsive.isDesktopLayout(context)) ? null : FloatingActionButton(
         backgroundColor: _voiceListening ? context.appColors.accent : context.appColors.surfaceHigh,
         foregroundColor: Colors.white,
         onPressed: _toggleVoice,
@@ -364,7 +365,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
             _TopBar(
               recipeName: _recipe!.title,
               voiceListening: _voiceListening,
-              onToggleVoice: (!kIsWeb && Responsive.isDesktopLayout(context)) ? _toggleVoice : null,
+              onToggleVoice: (supportsSpeechRecognition && Responsive.isDesktopLayout(context)) ? _toggleVoice : null,
               showIngredients: _showIngredients,
               hasNutrition: _nutrition?.hasAnyData ?? false,
               showNutrition: _showNutrition,

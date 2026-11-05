@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 
 /// Metadata for a printed book, resolved from its ISBN.
 class BookInfo {
@@ -47,9 +48,19 @@ class BookInfo {
 class IsbnLookupService {
   static const isbnTag = 'ISBN';
 
-  static const Map<String, String> _headers = {
-    'User-Agent': 'RecipeSpellbook/1.6 (support@recipespellbook.app)',
-  };
+  /// Open Library asks for a descriptive User-Agent. The version is the
+  /// running app's (it used to be typed in and went stale).
+  static Future<Map<String, String>>? _headersFuture;
+  static Future<Map<String, String>> _headers() => _headersFuture ??= () async {
+        var app = 'RecipeSpellbook';
+        try {
+          final info = await PackageInfo.fromPlatform().timeout(const Duration(seconds: 2));
+          app = '$app/${info.version}';
+        } catch (_) {
+          // Without the version the request is still welcome.
+        }
+        return {'User-Agent': '$app (support@recipespellbook.app)'};
+      }();
 
   /// Strips spaces/dashes and validates an ISBN-10 or ISBN-13 checksum.
   /// Returns the ISBN-13 form, or null if [raw] isn't a valid ISBN.
@@ -114,7 +125,7 @@ class IsbnLookupService {
     try {
       final uri = Uri.parse(
           'https://openlibrary.org/api/books?bibkeys=ISBN:$isbn13&format=json&jscmd=data');
-      final res = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 10));
+      final res = await http.get(uri, headers: await _headers()).timeout(const Duration(seconds: 10));
       if (res.statusCode != 200) return null;
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       final data = body['ISBN:$isbn13'] as Map<String, dynamic>?;
@@ -151,7 +162,7 @@ class IsbnLookupService {
   static Future<BookInfo?> _googleBooks(String isbn13) async {
     try {
       final uri = Uri.parse('https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn13');
-      final res = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 10));
+      final res = await http.get(uri, headers: await _headers()).timeout(const Duration(seconds: 10));
       if (res.statusCode != 200) return null;
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       final items = body['items'] as List?;

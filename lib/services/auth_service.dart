@@ -115,6 +115,10 @@ class AuthService {
   final _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    // The macOS app is ad-hoc signed with no keychain-access-groups
+    // entitlement, so the data protection keychain (the plugin default)
+    // refuses every write with -34018. The login keychain works there.
+    mOptions: MacOsOptions(useDataProtectionKeyChain: false),
   );
 
   /// Base URL for the main Node.js API.
@@ -164,6 +168,25 @@ class AuthService {
       debugPrint('[Auth] verifySubscription: $e');
       return null;
     }
+  }
+
+  /// Re-read this account from the server (/v1/auth/me), so a tier bought
+  /// elsewhere (a Stripe checkout opened from the desktop app) shows up
+  /// without a restart. Returns null when signed out or when the server could
+  /// not confirm the account.
+  Future<AuthUser?> refreshCurrentUser() async {
+    final jwt = _currentJwt;
+    if (jwt == null || _currentUser == null) return null;
+    final result = await _refreshUser(jwt);
+    final user = result.user;
+    if (user == null) return null;
+    _currentUser = user;
+    try {
+      await _saveUser(user);
+    } catch (e) {
+      debugPrint('[Auth] refreshCurrentUser: could not persist user: $e');
+    }
+    return user;
   }
 
   /// Test hook: act as [user] with [jwt] without going through a provider.
@@ -388,13 +411,20 @@ class AuthService {
   // ════════════════════════════════════════════
 
   /// Requests account deletion from the server, then signs out locally.
+  /// Says whether the server deleted the account.
   Future<bool> deleteAccount() async {
     if (_currentJwt == null) return false;
 
     try {
       final response = await _authRequest('DELETE', '/v1/auth/account');
       if (response.statusCode == 200 || response.statusCode == 204) {
-        await signOut();
+        // The account is gone whatever happens here: a keychain that cannot
+        // be cleared right now must not make it look as if it were not.
+        try {
+          await signOut();
+        } catch (e) {
+          debugPrint('Delete account: sign-out after deleting failed: $e');
+        }
         return true;
       }
       debugPrint('Delete account failed: ${response.statusCode}');

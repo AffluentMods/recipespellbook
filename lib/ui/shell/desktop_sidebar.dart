@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../utils/share_origin.dart';
 
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
@@ -23,6 +24,7 @@ import '../widgets/keycap.dart';
 import '../widgets/placeholder_image.dart';
 import '../widgets/recipe_image.dart' show FileExistsCache;
 import 'shell_navigation.dart';
+import '../../services/feature_gate.dart' show SubscriptionTierL10n;
 
 /// The desktop sidebar: cookbook switcher, search, the Library / Plan /
 /// Discover sections, and Help / Settings / account at the foot. Collapses to
@@ -517,7 +519,7 @@ class _AccountRow extends ConsumerWidget {
     if (!signedIn) return l10n.sidebarSignInToSync;
     if (!hasCloud) return tierName;
     if (sync.isSyncing) return l10n.syncing;
-    if (sync.hasError) return l10n.syncFailed;
+    if (sync.hasError) return sync.notEntitled ? l10n.syncNotInPlan : l10n.syncFailed;
     if (sync.photosStuck) return l10n.syncPhotosStuck;
     final last = sync.lastSyncAt;
     if (last == null) return l10n.syncStatusLocal;
@@ -547,7 +549,7 @@ class _AccountRow extends ConsumerWidget {
       sync,
       signedIn,
       sub.tier.hasCloudSync,
-      sub.tier.displayName,
+      sub.tier.localizedName(l10n),
     );
 
     final avatarUrl = user?.avatarUrl;
@@ -715,7 +717,11 @@ class _AccountMenu extends ConsumerWidget {
           ),
           style: _menuItemStyle(c),
           onPressed: () => SharePlus.instance.share(
-            ShareParams(text: l10n.menuShareMessage, subject: l10n.appTitle),
+            ShareParams(
+              text: l10n.menuShareMessage,
+              subject: l10n.appTitle,
+              sharePositionOrigin: shareOrigin(context),
+            ),
           ),
           child: Text(l10n.inviteFriends),
         ),

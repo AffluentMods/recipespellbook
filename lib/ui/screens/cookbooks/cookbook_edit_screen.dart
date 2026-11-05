@@ -3,7 +3,6 @@ import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../../../utils/native_file_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../utils/platform_utils.dart';
 import 'package:path/path.dart' as p;
@@ -13,6 +12,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../shell/shell_navigation.dart';
 import '../../widgets/app_snackbar.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
@@ -35,6 +35,9 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   Cookbook? _cookbook;
+  // Set once a new cookbook is stored, so another Save updates it instead of
+  // creating a duplicate.
+  String? _createdId;
 
   bool get _isEditing => widget.cookbookId != null && widget.cookbookId != 'new';
 
@@ -123,10 +126,11 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
 
     try {
       final dao = ref.read(cookbookDaoProvider);
+      final existingId = _isEditing ? widget.cookbookId! : _createdId;
 
-      if (_isEditing) {
+      if (existingId != null) {
         await dao.updateCookbook(
-          widget.cookbookId!,
+          existingId,
           _nameController.text.trim(),
           _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
           _imagePath,
@@ -139,20 +143,19 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
           description: drift.Value(_descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim()),
           imagePath: drift.Value(_imagePath),
         ));
+        _createdId = id;
         // TODO: Kitchen Buddy hidden for now
         // KitchenBuddyIntegration.onCookbookPublished(ref);
       }
 
-      if (mounted) {
-        context.pop(true); // Return true to indicate success
-      }
+      // Return true to indicate success. Opened with `go` (the sidebar's New
+      // cookbook) there is nothing to pop: show the cookbooks instead. Save
+      // stays disabled while the page leaves.
+      if (mounted) popOrGo(context, '/cookbooks', true);
     } catch (e) {
       if (mounted) {
-        AppSnackbar.info(context, '${AppLocalizations.of(context)!.errorGeneric}: $e');
-      }
-    } finally {
-      if (mounted) {
         setState(() => _isSaving = false);
+        AppSnackbar.info(context, '${AppLocalizations.of(context)!.errorGeneric}: $e');
       }
     }
   }
@@ -202,7 +205,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
     if (confirmed == true) {
       await dao.deleteCookbook(widget.cookbookId!);
       if (mounted) {
-        context.pop(true);
+        popOrGo(context, '/cookbooks', true);
       }
     }
   }
@@ -243,8 +246,12 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+        // A form-width column on desktop instead of fields across the window.
+        child: Responsive.constrainScrollable(
+          maxWidth: Responsive.desktopCap(context, Responsive.settingsListMaxWidth),
+          minHorizontal: 0,
+          builder: (_, pad) => ListView(
+          padding: pad + const EdgeInsets.all(16),
           children: [
             // Cover image
             Center(
@@ -359,6 +366,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
               ),
             ],
           ],
+        ),
         ),
       ),
     );

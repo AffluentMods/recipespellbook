@@ -18,6 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../data/ingredient_images.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/share_origin.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
@@ -27,6 +28,7 @@ import '../../../providers/cookbook_provider.dart';
 import '../import/import_preview_screen.dart';
 import '../../../services/grocery_service.dart';
 import '../../../services/ingredient_suggestion_service.dart';
+import '../../../services/share_file.dart';
 import '../../../services/shopping_list_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
@@ -781,6 +783,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               title: Text(l10n.shareAsText),
               subtitle: Text(l10n.shareAsTextDescription),
               onTap: () async {
+                final origin = shareOrigin(ctx);
                 Navigator.pop(ctx);
                 final shoppingDao = ref.read(shoppingDaoProvider);
                 final items = await shoppingDao.getItemsForList(id);
@@ -790,7 +793,11 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   final check = item.isChecked ? '☑' : '☐';
                   buffer.writeln('$check ${item.name}');
                 }
-                await SharePlus.instance.share(ShareParams(text: buffer.toString(), subject: name));
+                await SharePlus.instance.share(ShareParams(
+                  text: buffer.toString(),
+                  subject: name,
+                  sharePositionOrigin: origin,
+                ));
               },
             ),
 
@@ -828,7 +835,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     } catch (e) {
       if (context.mounted) {
         AppSnackbar.dismiss(context);
-        AppSnackbar.error(context, 'Error: $e');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -880,7 +887,11 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 const SizedBox(width: 12),
                 Expanded(child: FilledButton.icon(
                   onPressed: () {
-                    SharePlus.instance.share(ShareParams(text: link.url, subject: 'Shared from Recipe Spellbook'));
+                    SharePlus.instance.share(ShareParams(
+                      text: link.url,
+                      subject: 'Shared from Recipe Spellbook',
+                      sharePositionOrigin: shareOrigin(ctx),
+                    ));
                   },
                   icon: const Icon(Icons.share, size: 18),
                   label: Text(l10n.actionShare),
@@ -1192,9 +1203,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   await FamilyService.instance.revokeShare(s.id);
                 }
                 setState(() => _sharedListCounts.remove(list.id));
-                if (context.mounted) AppSnackbar.success(context, 'Sharing stopped');
+                if (context.mounted) AppSnackbar.success(context, l10n.shoppingSharingStopped);
               },
-              child: const Text('Stop Sharing Only'),
+              child: Text(l10n.shoppingStopSharingOnly),
             ),
           FilledButton(
             onPressed: () async {
@@ -1442,8 +1453,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 title: Text(l10n.exportBackupFile),
                 subtitle: Text(l10n.exportBackupFileSubtitle),
                 onTap: () {
+                  final origin = shareOrigin(ctx);
                   Navigator.pop(ctx);
-                  _exportAs('json');
+                  _exportAs('json', origin);
                 },
               ),
               ListTile(
@@ -1458,8 +1470,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 title: Text(l10n.exportFormattedList),
                 subtitle: Text(l10n.exportFormattedListSubtitle),
                 onTap: () {
+                  final origin = shareOrigin(ctx);
                   Navigator.pop(ctx);
-                  _exportAs('md');
+                  _exportAs('md', origin);
                 },
               ),
               ListTile(
@@ -1474,8 +1487,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 title: Text(l10n.exportPlainText),
                 subtitle: Text(l10n.exportPlainTextSubtitle),
                 onTap: () {
+                  final origin = shareOrigin(ctx);
                   Navigator.pop(ctx);
-                  _exportAs('txt');
+                  _exportAs('txt', origin);
                 },
               ),
               const SizedBox(height: 16),
@@ -1486,11 +1500,15 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     );
   }
 
-  Future<void> _exportAs(String format) async {
+  Future<void> _exportAs(String format, Rect origin) async {
     try {
       final shoppingDao = ref.read(shoppingDaoProvider);
       final service = ShoppingListService(shoppingDao.attachedDatabase);
-      await service.shareAsFile(_currentListId, format: format);
+      final outcome = await service.shareAsFile(_currentListId,
+          format: format, sharePositionOrigin: origin);
+      if (outcome == FileShareOutcome.saved && mounted) {
+        AppSnackbar.success(context, AppLocalizations.of(context)!.successSaved);
+      }
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
@@ -2052,6 +2070,7 @@ class _OrderOnlineButton extends StatelessWidget {
       builder: (ctx) => _OrderOnlineSheet(
         itemNames: itemNames,
         itemCount: items.length,
+        pageContext: context,
       ),
     );
   }
@@ -2061,7 +2080,12 @@ class _OrderOnlineButton extends StatelessWidget {
 class _OrderOnlineSheet extends StatefulWidget {
   final List<String> itemNames;
   final int itemCount;
-  const _OrderOnlineSheet({required this.itemNames, required this.itemCount});
+
+  /// The page that opened the sheet, for the message shown once the store
+  /// opens: the sheet is closed (and unmounted) by then.
+  final BuildContext pageContext;
+
+  const _OrderOnlineSheet({required this.itemNames, required this.itemCount, required this.pageContext});
 
   @override
   State<_OrderOnlineSheet> createState() => _OrderOnlineSheetState();
@@ -2180,6 +2204,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
   }
 
   Future<void> _handleProvider(GroceryProvider provider) async {
+    final page = widget.pageContext;
     Navigator.pop(context);
 
     final configured = _configured[provider] ?? false;
@@ -2200,10 +2225,10 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
       } else {
         await GroceryService.openStore(provider);
       }
-      if (mounted) {
+      if (page.mounted) {
         final name = _providerData[provider]?.name ?? 'store';
-        final l10n = AppLocalizations.of(context)!;
-        AppSnackbar.info(context, l10n.shoppingListCopiedOpening(name));
+        final l10n = AppLocalizations.of(page)!;
+        AppSnackbar.info(page, l10n.shoppingListCopiedOpening(name));
       }
     }
   }
@@ -2581,8 +2606,8 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
                             width: 22,
                           ),
                           const SizedBox(width: 8),
-                          const Text(
-                            'Shop on Instacart',
+                          Text(
+                            AppLocalizations.of(context)!.shoppingShopOnInstacart,
                             style: TextStyle(
                               color: Color(0xFFFAF1E5),
                               fontSize: 14,
@@ -3291,12 +3316,18 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     }
     if (image == null) return;
 
+    // The spinner goes on the root navigator and this screen sits in the
+    // shell's, so Navigator.pop(context) closed the screen and left the
+    // spinner up. Keep its route and remove exactly that.
+    DialogRoute<void>? spinner;
     if (mounted) {
-      showDialog(
+      spinner = DialogRoute<void>(
         context: context,
         barrierDismissible: false,
+        barrierColor: Colors.black54,
         builder: (_) => const Center(child: CircularProgressIndicator()),
       );
+      Navigator.of(context, rootNavigator: true).push(spinner);
     }
 
     try {
@@ -3305,7 +3336,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       final recognized = await recognizer.processImage(inputImage);
       await recognizer.close();
 
-      if (mounted) Navigator.pop(context);
+      if (spinner != null && spinner.isActive) spinner.navigator?.removeRoute(spinner);
 
       final text = recognized.text;
       if (text.trim().isEmpty) {
@@ -3317,7 +3348,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
 
       _showOcrPreview(text);
     } catch (e) {
-      if (mounted) Navigator.pop(context);
+      if (spinner != null && spinner.isActive) spinner.navigator?.removeRoute(spinner);
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         AppSnackbar.info(context, l10n.shoppingErrorReadingImage(e.toString()));
@@ -4021,7 +4052,7 @@ class _ShoppingItemTile extends ConsumerWidget {
 
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('${parsed.name} removed'),
+            content: Text(AppLocalizations.of(context)!.shoppingNamedItemRemoved(parsed.name)),
             action: SnackBarAction(
               label: AppLocalizations.of(context)!.actionUndo,
               onPressed: () {

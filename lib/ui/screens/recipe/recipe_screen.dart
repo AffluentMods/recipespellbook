@@ -30,6 +30,7 @@ import '../../../theme/tokens.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../utils/recipe_title.dart';
+import '../../shell/shell_navigation.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
 import '../../widgets/app_controls.dart';
 import '../../widgets/app_snackbar.dart';
@@ -212,7 +213,13 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     final dao = ref.read(recipeDaoProvider);
     final recipe = await dao.getRecipeById(widget.recipeId);
     if (recipe == null) {
-      if (mounted) context.pop();
+      // In a list's detail pane, close the pane rather than the list page.
+      if (!mounted) return;
+      if (widget.isDetailPane) {
+        widget.onClose?.call();
+      } else {
+        popOrGo(context, '/');
+      }
       return;
     }
 
@@ -2239,6 +2246,16 @@ class _RecipeAppBar extends StatelessWidget {
     this.currentScale = 1.0,
   });
 
+  /// Close the recipe. A list's detail pane closes itself; a full page pops,
+  /// or goes home when it is the only page in the shell (opened with `go`).
+  void _leave(BuildContext context) {
+    if (isDetailPane) {
+      onClose?.call();
+    } else {
+      popOrGo(context, '/');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -2268,18 +2285,18 @@ class _RecipeAppBar extends StatelessWidget {
           ? IconButton(
               icon: const Icon(Icons.close, color: Colors.white),
               tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-              onPressed: onClose ?? () => Navigator.of(context).pop(),
+              onPressed: () => _leave(context),
             )
           : Responsive.isDesktopLayout(context)
               ? IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => _leave(context),
                 )
               : Container(
                   margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-                  child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: MaterialLocalizations.of(context).backButtonTooltip, onPressed: () => Navigator.of(context).pop()),
+                  child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: MaterialLocalizations.of(context).backButtonTooltip, onPressed: () => _leave(context)),
                 ),
       flexibleSpace: LayoutBuilder(builder: (context, constraints) {
         // Collapse progress: 0 = fully expanded, 1 = fully collapsed. Fade the
@@ -2385,16 +2402,16 @@ class _RecipeAppBar extends StatelessWidget {
   List<PopupMenuEntry<String>> _menuItems(BuildContext context, AppLocalizations l10n, bool readOnlyShared) => [
               PopupMenuItem(value: 'cook', child: Row(children: [const Icon(Icons.local_fire_department_outlined), const SizedBox(width: 12), Text(l10n.cookingMode)])),
               if (!readOnlyShared)
-                PopupMenuItem(value: 'enhance', child: Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 12), const Text('Enhance with AI')])),
+                PopupMenuItem(value: 'enhance', child: Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 12), Text(l10n.recipeEnhanceWithAi)])),
               const PopupMenuDivider(),
               PopupMenuItem(value: 'share', child: Row(children: [const Icon(Icons.share_outlined), const SizedBox(width: 12), Text(l10n.actionShare)])),
               PopupMenuItem(value: 'print', child: Row(children: [const Icon(Icons.print_outlined), const SizedBox(width: 12), Text(l10n.printRecipe)])),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
               if (!readOnlyShared)
                 PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
-              PopupMenuItem(value: 'copy_to', child: Row(children: [const Icon(Icons.book_outlined), const SizedBox(width: 12), const Text('Copy to cookbook')])),
+              PopupMenuItem(value: 'copy_to', child: Row(children: [const Icon(Icons.book_outlined), const SizedBox(width: 12), Text(l10n.copyToCookbook)])),
               if (!readOnlyShared)
-                PopupMenuItem(value: 'move_to', child: Row(children: [const Icon(Icons.drive_file_move_outlined), const SizedBox(width: 12), const Text('Move to cookbook')])),
+                PopupMenuItem(value: 'move_to', child: Row(children: [const Icon(Icons.drive_file_move_outlined), const SizedBox(width: 12), Text(l10n.moveToCookbook)])),
               PopupMenuItem(value: 'publish', child: Row(children: [const Icon(Icons.public_outlined), const SizedBox(width: 12), Text(l10n.publishToCommunity)])),
               if (!readOnlyShared) const PopupMenuDivider(),
               if (!readOnlyShared)
@@ -2453,7 +2470,7 @@ class _RecipeAppBar extends StatelessWidget {
                     icon: Icons.arrow_back_rounded,
                     tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                     fold: fold,
-                    onPressed: () => Navigator.of(context).maybePop(),
+                    onPressed: () => _leave(context),
                   ),
                   const SizedBox(width: Space.sm),
                   Expanded(
@@ -2557,7 +2574,7 @@ class _RecipeAppBar extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        AppSnackbar.info(context, 'Error: $e');
+        AppSnackbar.info(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -2697,7 +2714,7 @@ class _RecipeAppBar extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        AppSnackbar.error(context, 'Error: $e');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -2718,7 +2735,7 @@ class _RecipeAppBar extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        AppSnackbar.error(context, 'Error: $e');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -2763,7 +2780,9 @@ class _RecipeAppBar extends StatelessWidget {
       await dao.moveToTrash(recipe.id);
       _propagateShared(recipe.id, recipe.cookbookId);
       if (context.mounted) {
-        context.pop();
+        // Leave before the snackbar: a plain pop threw "nothing to pop" on a
+        // recipe opened with `go`, so the Undo snackbar never showed.
+        _leave(context);
         // Soft-delete + 5s undo. moveToTrash sets `deletedAt` rather
         // than dropping the row, so restoreRecipe is a one-liner.
         AppSnackbar.successWithAction(
@@ -2795,7 +2814,7 @@ class _RecipeAppBar extends StatelessWidget {
       _propagateShared(id, recipe.cookbookId);
     }
     if (context.mounted) {
-      context.pop();
+      _leave(context);
       AppSnackbar.successWithAction(
         context,
         deletedIds.length == 1

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../utils/share_origin.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
@@ -12,6 +13,7 @@ import '../../../providers/subscription_provider.dart';
 import '../../../router/router.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
+import '../../../services/feature_gate.dart' show SubscriptionTierL10n;
 import '../../../services/revenuecat_service.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
@@ -168,6 +170,7 @@ class MoreScreen extends ConsumerWidget {
                     ShareParams(
                       text: l10n.menuShareMessage,
                       subject: l10n.appTitle,
+                      sharePositionOrigin: shareOrigin(context),
                     ),
                   ),
                 ),
@@ -564,7 +567,7 @@ class _PlanRow extends ConsumerWidget {
         TouchRow(
           icon: Icons.workspace_premium_outlined,
           iconColor: c.accent,
-          title: status.tier.displayName,
+          title: status.tier.localizedName(l10n),
           subtitle: l10n.manageSubscription,
           chevron: false,
           onTap: () => showSubscriptionSheet(context, ref, status),
@@ -611,7 +614,7 @@ void showSubscriptionSheet(
               ),
               const SizedBox(height: Space.xs),
               Text(
-                status.tier.displayName,
+                status.tier.localizedName(l10n),
                 style: TextStyle(color: c.textTertiary),
               ),
               const SizedBox(height: Space.md),

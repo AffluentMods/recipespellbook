@@ -139,6 +139,16 @@ class CommunityPhotoUploadReport {
 
   final bool cancelled;
 
+  /// Of [failed], the photos whose last try was turned away by a rate limit.
+  final List<String> rateLimited;
+
+  /// Every photo now on the server by its [CommunityUploadedPhotos] key,
+  /// with its server path and size, for remembering what a publication uses.
+  final Map<String, ({String serverPath, int bytes})> photoKeys;
+
+  /// How many photos were already on the server and were not sent again.
+  final int reused;
+
   const CommunityPhotoUploadReport({
     required this.uploaded,
     required this.bytesSent,
@@ -146,6 +156,9 @@ class CommunityPhotoUploadReport {
     required this.failed,
     required this.storeKeys,
     required this.cancelled,
+    this.rateLimited = const [],
+    this.photoKeys = const {},
+    this.reused = 0,
   });
 }
 
@@ -169,18 +182,24 @@ class CommunityPhotoUploader {
   /// Save the store every this many new uploads, so a relaunch loses little.
   static const _saveEvery = 10;
 
+  /// [reuse] holds photos a publication already uses (see `PublishedPhotos`),
+  /// by store key: an unchanged one is not sent again.
   Future<CommunityPhotoUploadReport> run(
     List<String> paths, {
     required PublishRunToken token,
     required CommunityUploadedPhotos store,
+    Map<String, ({String serverPath, int bytes})> reuse = const {},
     void Function(CommunityPhotoUploadProgress)? onProgress,
   }) async {
     final uploaded = <String, String>{};
     final rejected = <String>[];
     final failed = <String>[];
+    final rateLimited = <String>[];
     final storeKeys = <String>[];
+    final photoKeys = <String, ({String serverPath, int bytes})>{};
     var bytesSent = 0;
     var unsaved = 0;
+    var reused = 0;
 
     void progress(int done, {int waitSeconds = 0}) => onProgress?.call(CommunityPhotoUploadProgress(
           done: done,
@@ -198,6 +217,16 @@ class CommunityPhotoUploader {
         uploaded[path] = known.serverPath;
         bytesSent += known.bytes;
         storeKeys.add(key!);
+        photoKeys[key] = (serverPath: known.serverPath, bytes: known.bytes);
+        progress(i + 1);
+        continue;
+      }
+      final inUse = key == null ? null : reuse[key];
+      if (inUse != null) {
+        uploaded[path] = inUse.serverPath;
+        bytesSent += inUse.bytes;
+        photoKeys[key!] = inUse;
+        reused++;
         progress(i + 1);
         continue;
       }
@@ -233,6 +262,7 @@ class CommunityPhotoUploader {
         if (key != null) {
           store.put(key, result.path, outcome.bytesSent);
           storeKeys.add(key);
+          photoKeys[key] = (serverPath: result.path, bytes: outcome.bytesSent);
           if (++unsaved >= _saveEvery) {
             unsaved = 0;
             await store.save();
@@ -245,6 +275,7 @@ class CommunityPhotoUploader {
       } else {
         debugPrint('[Publish] Image failed after $maxAttempts attempts');
         failed.add(path);
+        if (outcome?.failure == CommunityUploadFailure.rateLimited) rateLimited.add(path);
       }
       progress(i + 1);
     }
@@ -257,6 +288,9 @@ class CommunityPhotoUploader {
       failed: failed,
       storeKeys: storeKeys,
       cancelled: token.cancelled,
+      rateLimited: rateLimited,
+      photoKeys: photoKeys,
+      reused: reused,
     );
   }
 }

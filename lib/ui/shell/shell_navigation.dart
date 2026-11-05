@@ -226,6 +226,17 @@ Future<void> guardedGo(WidgetRef ref, String location) async {
   ctx.go(location);
 }
 
+/// Leave a page that closes itself (back, delete, save). A page opened with
+/// `go` (the sidebar, the palette, a snackbar link) is the only page in the
+/// shell, and popping it leaves a blank window, so go to [fallback] instead.
+void popOrGo<T extends Object?>(BuildContext context, String fallback, [T? result]) {
+  if (context.canPop()) {
+    context.pop(result);
+  } else {
+    context.go(fallback);
+  }
+}
+
 // ── Sidebar collapse (⌘/Ctrl+B), persisted ──
 
 class SidebarCollapsedNotifier extends StateNotifier<bool> {

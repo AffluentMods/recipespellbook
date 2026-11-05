@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../utils/share_origin.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
@@ -579,7 +580,7 @@ class _CookbookGrid extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         AppSnackbar.dismiss(context);
-        AppSnackbar.error(context, 'Error: $e');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -631,7 +632,11 @@ class _CookbookGrid extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(child: FilledButton.icon(
                   onPressed: () {
-                    SharePlus.instance.share(ShareParams(text: link.url, subject: 'Shared from Recipe Spellbook'));
+                    SharePlus.instance.share(ShareParams(
+                      text: link.url,
+                      subject: 'Shared from Recipe Spellbook',
+                      sharePositionOrigin: shareOrigin(ctx),
+                    ));
                   },
                   icon: const Icon(Icons.share, size: 18),
                   label: Text(l10n.actionShare),
@@ -831,7 +836,7 @@ void _showCookbookMembers(BuildContext context, Cookbook cookbook, List<_Cookboo
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: Text('People in this cookbook',
+            child: Text(AppLocalizations.of(ctx)!.cookbookPeopleTitle,
                 style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: ctx.appColors.textTertiary)),
           ),
           for (final m in members)

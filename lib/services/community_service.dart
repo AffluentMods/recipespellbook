@@ -392,12 +392,16 @@ class MyPublication {
   final bool isRemoved;
   final DateTime createdAt;
 
+  /// When the server last changed it, if the server says (older API
+  /// versions only send [createdAt]).
+  final DateTime? updatedAt;
+
   const MyPublication({
     required this.id, required this.title, this.description, this.imagePath,
     required this.recipeCount, required this.downloadCount,
     this.imageCount = 0, this.averageRating = 0, this.ratingCount = 0,
     this.tags, this.kind = 'cookbook', this.status = 'published',
-    required this.isRemoved, required this.createdAt,
+    required this.isRemoved, required this.createdAt, this.updatedAt,
   });
 
   factory MyPublication.fromJson(Map<String, dynamic> json) => MyPublication(
@@ -415,6 +419,7 @@ class MyPublication {
     status: json['status'] as String? ?? 'published',
     isRemoved: json['isRemoved'] as bool? ?? false,
     createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? ''),
   );
 
   bool get isSingleRecipe => kind == 'recipe';
@@ -998,6 +1003,25 @@ class CommunityService {
     int? totalImageBytes,
     String? imagePath,
   }) async {
+    final result = await replacePublicationRecipesResult(
+      publicationId,
+      recipes: recipes,
+      imageCount: imageCount,
+      totalImageBytes: totalImageBytes,
+      imagePath: imagePath,
+    );
+    return result.ok;
+  }
+
+  /// [replacePublicationRecipes], also telling a rate limit (429) apart:
+  /// [retryAfter] is then how long until the server takes requests again.
+  Future<({bool ok, Duration? retryAfter})> replacePublicationRecipesResult(
+    String publicationId, {
+    required List<Map<String, dynamic>> recipes,
+    int? imageCount,
+    int? totalImageBytes,
+    String? imagePath,
+  }) async {
     try {
       final r = await _auth.put('/v1/community/$publicationId/recipes', {
         'recipes': recipes,
@@ -1005,11 +1029,18 @@ class CommunityService {
         if (totalImageBytes != null) 'totalImageBytes': totalImageBytes,
         if (imagePath != null) 'imagePath': imagePath,
       }, timeout: publishTimeout);
-      return r.statusCode == 200;
+      if (r.statusCode == 200) return (ok: true, retryAfter: null);
+      if (r.statusCode == 429) {
+        // Retry-After, else the standard RateLimit-Reset, else a minute.
+        final seconds = int.tryParse(r.headers['retry-after']?.trim() ?? '') ??
+            int.tryParse(r.headers['ratelimit-reset']?.trim() ?? '') ??
+            60;
+        return (ok: false, retryAfter: Duration(seconds: seconds.clamp(1, 3600)));
+      }
     } catch (e) {
       debugPrint('[Community] replacePublicationRecipes: $e');
     }
-    return false;
+    return (ok: false, retryAfter: null);
   }
 
   // ────────────────────────────────────
@@ -1067,18 +1098,23 @@ class CommunityService {
     return null;
   }
 
+  /// Forgets everything this device kept about [publicationId]: its
+  /// source, what was last sent ([PublishSnapshot]) and its photos.
   static Future<void> removePublishSource(String publicationId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_publishSourceKey);
-      if (raw == null) return;
-      final map = jsonDecode(raw) as Map<String, dynamic>;
-      if (map.remove(publicationId) != null) {
-        await prefs.setString(_publishSourceKey, jsonEncode(map));
+      if (raw != null) {
+        final map = jsonDecode(raw) as Map<String, dynamic>;
+        if (map.remove(publicationId) != null) {
+          await prefs.setString(_publishSourceKey, jsonEncode(map));
+        }
       }
     } catch (e) {
       debugPrint('[Community] removePublishSource: $e');
     }
+    await PublishSnapshot.remove(publicationId);
+    await PublishedPhotos.remove(publicationId);
   }
 
   // ────────────────────────────────────
@@ -1354,5 +1390,162 @@ class CommunityService {
     try {
       return jsonDecode(response.body)['error'] ?? 'Unknown error';
     } catch (_) { return 'Request failed'; }
+  }
+}
+
+// ════════════════════════════════════════════
+//  WHAT WAS LAST SENT (local-only)
+// ════════════════════════════════════════════
+
+/// What this device last sent to a cookbook publication, so My Publications
+/// can tell whether the local cookbook changed since. Saved after a publish
+/// or an update goes through; kept in SharedPreferences as
+/// { publicationId: { h, n, img, o, x, t } }.
+class PublishSnapshot {
+  static const prefsKey = 'communityPublishSnapshots';
+
+  /// Fingerprint of the recipes, photos and cover that were sent
+  /// (`PreparedPublish.contentHash`).
+  final String hash;
+
+  /// The cookbook's name at that time.
+  final String? name;
+
+  /// Whether photos were included.
+  final bool includeImages;
+
+  /// Sub-recipes from other cookbooks that were offered, and the ones of
+  /// those that went in. A sub-recipe linked later is new and goes in, as
+  /// the publish sheet would have it.
+  final List<String> externalRecipeIds;
+  final List<String> includedExternalIds;
+
+  final DateTime at;
+
+  const PublishSnapshot({
+    required this.hash,
+    required this.name,
+    required this.includeImages,
+    this.externalRecipeIds = const [],
+    this.includedExternalIds = const [],
+    required this.at,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'h': hash,
+        if (name != null) 'n': name,
+        'img': includeImages,
+        if (externalRecipeIds.isNotEmpty) 'o': externalRecipeIds,
+        if (includedExternalIds.isNotEmpty) 'x': includedExternalIds,
+        't': at.millisecondsSinceEpoch,
+      };
+
+  static PublishSnapshot? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final hash = json['h'];
+    if (hash is! String || hash.isEmpty) return null;
+    List<String> ids(Object? v) => v is List ? v.whereType<String>().toList() : const [];
+    return PublishSnapshot(
+      hash: hash,
+      name: json['n'] as String?,
+      includeImages: json['img'] as bool? ?? true,
+      externalRecipeIds: ids(json['o']),
+      includedExternalIds: ids(json['x']),
+      at: DateTime.fromMillisecondsSinceEpoch((json['t'] as num?)?.toInt() ?? 0),
+    );
+  }
+
+  static Future<PublishSnapshot?> lookup(String publicationId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(prefsKey);
+      if (raw == null) return null;
+      return fromJson((jsonDecode(raw) as Map<String, dynamic>)[publicationId]);
+    } catch (e) {
+      debugPrint('[Community] PublishSnapshot.lookup: $e');
+      return null;
+    }
+  }
+
+  static Future<void> save(String publicationId, PublishSnapshot snapshot) async {
+    if (publicationId.isEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // No await between the read and the write, so two saves can't lose
+      // each other's entry.
+      final raw = prefs.getString(prefsKey);
+      final map = raw != null ? (jsonDecode(raw) as Map<String, dynamic>) : <String, dynamic>{};
+      map[publicationId] = snapshot.toJson();
+      await prefs.setString(prefsKey, jsonEncode(map));
+    } catch (e) {
+      debugPrint('[Community] PublishSnapshot.save: $e');
+    }
+  }
+
+  static Future<void> remove(String publicationId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(prefsKey);
+      if (raw == null) return;
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      if (map.remove(publicationId) != null) {
+        await prefs.setString(prefsKey, jsonEncode(map));
+      }
+    } catch (e) {
+      debugPrint('[Community] PublishSnapshot.remove: $e');
+    }
+  }
+}
+
+/// The photos a publication's last publish or update from this device
+/// used, by the same key as `CommunityUploadedPhotos` (account, path, size,
+/// modified time), to their server path and size. The next update of that
+/// publication reuses them instead of sending them again: the live
+/// publication still points at them, so the server keeps them. Replaced
+/// after every update; one SharedPreferences entry per publication.
+class PublishedPhotos {
+  static const prefsKeyPrefix = 'communityPublishedPhotos:';
+
+  static Future<Map<String, ({String serverPath, int bytes})>> load(String publicationId) async {
+    final photos = <String, ({String serverPath, int bytes})>{};
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('$prefsKeyPrefix$publicationId');
+      if (raw == null) return photos;
+      (jsonDecode(raw) as Map<String, dynamic>).forEach((key, value) {
+        final serverPath = value is Map ? value['p'] : null;
+        if (serverPath is String && serverPath.isNotEmpty) {
+          photos[key] = (serverPath: serverPath, bytes: ((value as Map)['b'] as num?)?.toInt() ?? 0);
+        }
+      });
+    } catch (e) {
+      debugPrint('[Community] PublishedPhotos.load: $e');
+    }
+    return photos;
+  }
+
+  static Future<void> save(String publicationId, Map<String, ({String serverPath, int bytes})> photos) async {
+    if (publicationId.isEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (photos.isEmpty) {
+        await prefs.remove('$prefsKeyPrefix$publicationId');
+        return;
+      }
+      await prefs.setString('$prefsKeyPrefix$publicationId', jsonEncode({
+        for (final e in photos.entries) e.key: {'p': e.value.serverPath, 'b': e.value.bytes},
+      }));
+    } catch (e) {
+      debugPrint('[Community] PublishedPhotos.save: $e');
+    }
+  }
+
+  static Future<void> remove(String publicationId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('$prefsKeyPrefix$publicationId');
+    } catch (e) {
+      debugPrint('[Community] PublishedPhotos.remove: $e');
+    }
   }
 }

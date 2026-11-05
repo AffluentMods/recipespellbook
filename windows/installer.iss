@@ -118,6 +118,15 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Comment: "Every r
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
 Filename: "{#AppURL}/changelog"; Description: "{cm:WhatsNew}"; Flags: postinstall shellexec skipifsilent unchecked
 
+[Registry]
+; recipespellbook:// links (the website's "Open in app" buttons) open the app. HKA is HKLM for an
+; install for everyone and HKCU for one just for this user; uninstall removes the whole key. A link
+; clicked while the app is open goes to that window (windows\runner\main.cpp).
+Root: HKA; Subkey: "Software\Classes\recipespellbook"; ValueType: string; ValueName: ""; ValueData: "URL:{#AppName}"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\recipespellbook"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\recipespellbook\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#AppExe},0"
+Root: HKA; Subkey: "Software\Classes\recipespellbook\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#AppExe}"" ""%1"""
+
 [UninstallDelete]
 Type: dirifempty; Name: "{app}"
 

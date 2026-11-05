@@ -7,11 +7,14 @@ import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/ui/screens/settings/pantry_screen.dart';
 import '../../../data/app_enums.dart';
+import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../../providers/kitchen_buddy_provider.dart';
+import '../../../utils/platform_utils.dart' show isDesktop, supportsFileSharing, supportsFirebaseMessaging;
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/share_origin.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/avatar_url.dart';
@@ -23,6 +26,7 @@ import '../../../providers/subscription_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/export_import_service.dart';
+import '../../../services/share_file.dart';
 import '../../../services/family_service.dart';
 import '../../../services/onboarding_service.dart';
 import '../../../services/sync_service.dart';
@@ -244,21 +248,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ) : null,
       ]),
 
-      // ─── NOTIFICATIONS ───
-      _section(title: l10n.settingsNotifications, icon: Icons.notifications_outlined, children: [
-        _Tile(
-          icon: Icons.notifications_outlined,
-          title: l10n.settingsNotifications,
-          subtitle: l10n.settingsNotifManagePreferences,
-          onTap: () {
-            if (Responsive.isDesktopLayout(context)) {
-              _openSettingsPanel(const NotificationSettingsScreen(), maxWidth: 600, maxHeight: 500);
-            } else {
-              context.push('/settings/notifications');
-            }
-          },
-        ),
-      ]),
+      // ─── NOTIFICATIONS ─── (push exists on Android and iOS only)
+      if (supportsFirebaseMessaging)
+        _section(title: l10n.settingsNotifications, icon: Icons.notifications_outlined, children: [
+          _Tile(
+            icon: Icons.notifications_outlined,
+            title: l10n.settingsNotifications,
+            subtitle: l10n.settingsNotifManagePreferences,
+            onTap: () {
+              if (Responsive.isDesktopLayout(context)) {
+                _openSettingsPanel(const NotificationSettingsScreen(), maxWidth: 600, maxHeight: 500);
+              } else {
+                context.push('/settings/notifications');
+              }
+            },
+          ),
+        ]),
 
       // ─── MANAGE ───
       _section(title: l10n.settingsManage, icon: Icons.tune, children: [
@@ -600,6 +605,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Responsive.showAdaptiveSheet(context, builder: (sheetCtx) => _ExportOptionsSheet(
       l10n: l10n,
       onSaveFullZip: (options) async {
+        // A big backup on a phone goes out through the share sheet, which
+        // needs an anchor on iPad.
+        final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
         try {
@@ -608,57 +616,90 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onProgress: (status) {
               if (context.mounted) AppSnackbar.loading(context, status);
             },
+            sharePositionOrigin: origin,
           );
           if (context.mounted) {
             AppSnackbar.dismiss(context);
-            if (saved) AppSnackbar.success(context, l10n.exportSaved);
+            if (saved.done && saved.photosLeftOut > 0) {
+              AppSnackbar.warning(context, l10n.backupPhotosLeftOut(saved.photosLeftOut));
+            } else if (saved.done) {
+              AppSnackbar.success(context, l10n.exportSaved);
+            }
           }
         } catch (e) {
           if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
         }
       },
-      onExportFullZip: (options) async {
+      // Linux cannot share files: "Save to device" is the way out there.
+      onExportFullZip: !supportsFileSharing ? null : (options) async {
+        final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
+        final BackupExportResult shared;
         try {
-          await service.shareFullZipExport(
+          shared = await service.shareFullZipExport(
             options: options,
             onProgress: (status) {
               if (context.mounted) AppSnackbar.loading(context, status);
             },
+            sharePositionOrigin: origin,
           );
         } catch (e) {
           if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
           return;
         }
-        if (context.mounted) AppSnackbar.dismiss(context);
+        if (context.mounted) {
+          AppSnackbar.dismiss(context);
+          if (shared.done && shared.photosLeftOut > 0) {
+            AppSnackbar.warning(context, l10n.backupPhotosLeftOut(shared.photosLeftOut));
+          }
+        }
       },
       onExportCookbook: () async {
+        final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
-        try {
-          final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
-          final data = await service.exportCookbook(cookbookId);
-          await service.shareExport(data, 'cookbook_export.json');
-        } catch (e) {
-          if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
-          return;
-        }
-        if (context.mounted) AppSnackbar.dismiss(context);
+        final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
+        await _shareOrSaveJson(context, () => service.exportCookbook(cookbookId),
+            service: service, filename: 'cookbook_export.json', origin: origin);
       },
       onExportSelective: (options) async {
+        final origin = shareOrigin(sheetCtx);
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
-        try {
-          final data = await service.exportSelective(options);
-          await service.shareExport(data, 'recipe_spellbook_backup.json');
-        } catch (e) {
-          if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
-          return;
-        }
-        if (context.mounted) AppSnackbar.dismiss(context);
+        await _shareOrSaveJson(context, () => service.exportSelective(options),
+            service: service, filename: 'recipe_spellbook_backup.json', origin: origin);
       },
     ));
+  }
+
+  /// A JSON export: a Save as dialog on desktop, the share sheet on phones
+  /// and tablets. Assumes the "Exporting" snackbar is showing.
+  Future<void> _shareOrSaveJson(
+    BuildContext context,
+    Future<Map<String, dynamic>> Function() build, {
+    required ExportImportService service,
+    required String filename,
+    Rect? origin,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    var saved = false;
+    try {
+      final data = await build();
+      if (isDesktop) {
+        saved = await service.saveExport(data, filename);
+      } else {
+        saved = await service.shareExport(data, filename, sharePositionOrigin: origin) ==
+            FileShareOutcome.saved;
+      }
+    } catch (e) {
+      if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
+      return;
+    }
+    if (context.mounted) {
+      AppSnackbar.dismiss(context);
+      if (saved) AppSnackbar.success(context, l10n.successSaved);
+    }
   }
 
   void _showImportOptions(BuildContext context, WidgetRef ref) {
@@ -690,7 +731,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   if (result.importedCookbookId != null) {
                     ref.read(selectedCookbookIdProvider.notifier).state = result.importedCookbookId;
                     context.go('/');
-                    AppSnackbar.success(context, '${result.message}\nSwitched to imported cookbook');
+                    AppSnackbar.success(context, '${result.message}\n${AppLocalizations.of(context)!.settingsSwitchedToImported}');
                   } else {
                     AppSnackbar.success(context, result.message);
                   }
@@ -909,11 +950,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ? ref.read(settingsProvider.notifier)
         : null;
 
-    // Show a simple loading overlay so the user knows it's working
+    // Show a simple loading overlay so the user knows it's working. Keep its
+    // route: PopScope(canPop: false) refuses maybePop(), so the error path
+    // removes the route itself.
+    DialogRoute<void>? progress;
     if (context.mounted) {
-      showDialog(
+      progress = DialogRoute<void>(
         context: context,
         barrierDismissible: false,
+        barrierColor: Colors.black54,
         builder: (_) => PopScope(
           canPop: false,
           child: Center(
@@ -930,12 +975,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
       );
+      Navigator.of(context, rootNavigator: true).push(progress);
     }
 
     try {
       if (scope == _ResetScope.all) {
-        await AuthService.instance.deleteAccount();
-        await db.deleteAllUserData();
+        if (!await deleteAccountThenData(db)) {
+          // Offline or a server error: the account is still there, so
+          // nothing here was deleted either. Say so and let them retry.
+          if (context.mounted) {
+            Navigator.of(context, rootNavigator: true).maybePop(); // drop progress dialog
+            AppSnackbar.error(context, l10n.deleteAllDataAccountFailed);
+          }
+          return;
+        }
         settingsNotifier?.resetToDefaults();
       } else {
         await db.deleteLocalRecipeData();
@@ -946,9 +999,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // BACK and nothing was deleted. Don't force-close as if it
       // succeeded; tell the user and bail so they can retry/report.
       debugPrint('Reset error: $e');
+      if (progress != null && progress.isActive) progress.navigator?.removeRoute(progress); // drop progress dialog
       if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).maybePop(); // drop progress dialog
-        AppSnackbar.error(context, 'Reset failed — no data was deleted. ($e)');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.resetFailedNothingDeleted('$e'));
       }
       return;
     }
@@ -1056,6 +1109,17 @@ class _TierBadge extends ConsumerWidget {
 // ════════════════════════════════════════════
 
 enum _ResetScope { local, all }
+
+/// "Delete all data": the account on the server first, then everything on
+/// this device. When there is an account and it could not be deleted
+/// (offline, a server error), nothing is deleted and this says false: wiping
+/// the device and quitting would leave the cloud account and its data
+/// behind while the app said they were gone.
+Future<bool> deleteAccountThenData(AppDatabase db) async {
+  if (AuthService.instance.isSignedIn && !await AuthService.instance.deleteAccount()) return false;
+  await db.deleteAllUserData();
+  return true;
+}
 
 /// Hands the desktop settings pane's current page to the pane navigator's
 /// root route (which is built once), so switching sections just rebuilds it.
@@ -1268,9 +1332,9 @@ class _TextScaleTile extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(l10n.textSizePreview, style: TextStyle(fontSize: 12 * temp, color: theme.colorScheme.outline)),
               const SizedBox(height: 4),
-              Text('Grandma\'s Famous Chocolate Cake', style: TextStyle(fontSize: 16 * temp, fontWeight: FontWeight.bold)),
+              Text(l10n.previewRecipeTitle, style: TextStyle(fontSize: 16 * temp, fontWeight: FontWeight.bold)),
               const SizedBox(height: 2),
-              Text('2 cups flour, 1 cup sugar, 3 eggs', style: TextStyle(fontSize: 14 * temp, color: theme.colorScheme.onSurfaceVariant)),
+              Text(l10n.previewRecipeIngredients, style: TextStyle(fontSize: 14 * temp, color: theme.colorScheme.onSurfaceVariant)),
             ]),
           ),
           const SizedBox(height: 24),

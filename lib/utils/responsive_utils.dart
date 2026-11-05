@@ -118,6 +118,33 @@ class Responsive {
   static const double settingsListMaxWidth = 760; // main list + simple forms
   static const double settingsGridMaxWidth = 820; // screens with 2-col grids/chips
 
+  /// [maxWidth] on desktop-class windows, unbounded below that. For pages
+  /// whose phone and tablet layouts must stay exactly as they are: pass it to
+  /// [constrainScrollable] (with `minHorizontal: 0`) or a ConstrainedBox.
+  static double desktopCap(BuildContext context, double maxWidth) =>
+      isDesktopLayout(context) ? maxWidth : double.infinity;
+
+  /// An AppBar tab strip held to the page's content column on desktop, so the
+  /// tabs sit over the content instead of at the far edges of the window.
+  /// Phones and tablets get [tabBar] untouched.
+  static PreferredSizeWidget capTabBar(
+    BuildContext context, {
+    required TabBar tabBar,
+    required double maxWidth,
+  }) {
+    if (!isDesktopLayout(context)) return tabBar;
+    return PreferredSize(
+      preferredSize: tabBar.preferredSize,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: tabBar,
+        ),
+      ),
+    );
+  }
+
   /// Logical px reserved by the expanded desktop sidebar. Only a fallback: the
   /// shell publishes the real content width via [ShellMetrics].
   static const double kSidebarWidth = 244;
