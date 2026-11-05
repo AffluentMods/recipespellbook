@@ -106,9 +106,28 @@ class SyncJournal {
 
   /// Drop entries the server has acknowledged. Entries written after
   /// [pushedAt] (edits made while the push was in flight) are kept.
-  static Future<void> acknowledge(DatabaseConnectionUser db, DateTime pushedAt) async {
+  ///
+  /// Deleted items of the shared lists [sharedLists] also go out through the
+  /// shared-list push, which reads them from here. Those deleted after
+  /// [sharedSentUntil] (when that push last ran, null for never) have not
+  /// gone that way yet and are kept for it.
+  static Future<void> acknowledge(
+    DatabaseConnectionUser db,
+    DateTime pushedAt, {
+    Set<String> sharedLists = const {},
+    DateTime? sharedSentUntil,
+  }) async {
     final ms = pushedAt.millisecondsSinceEpoch;
-    await db.customStatement('DELETE FROM sync_tombstones WHERE deleted_at <= ?', [ms]);
+    if (sharedLists.isEmpty) {
+      await db.customStatement('DELETE FROM sync_tombstones WHERE deleted_at <= ?', [ms]);
+    } else {
+      final lists = List.filled(sharedLists.length, '?').join(', ');
+      await db.customStatement(
+        'DELETE FROM sync_tombstones WHERE deleted_at <= ? '
+        'AND NOT (entity = ? AND parent_id IN ($lists) AND deleted_at > ?)',
+        [ms, shoppingListItems, ...sharedLists, sharedSentUntil?.millisecondsSinceEpoch ?? -1],
+      );
+    }
     await db.customStatement('DELETE FROM sync_touched WHERE touched_at <= ?', [ms]);
   }
 

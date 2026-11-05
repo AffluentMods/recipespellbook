@@ -456,7 +456,12 @@ class SyncService {
     final cursor = cursorRaw != null ? DateTime.tryParse(cursorRaw) : null;
     if (cursor != null) await _saveDate(_lastSyncKeyPrefix, userId, cursor);
     await _saveDate(_pushMarkPrefix, userId, collectStart);
-    await SyncJournal.acknowledge(db, collectStart);
+    await SyncJournal.acknowledge(
+      db,
+      collectStart,
+      sharedLists: CollabService.instance.collabListIds,
+      sharedSentUntil: await CollabService.instance.deletionsSentUntil(),
+    );
     await prefs.setBool(_key(_protocolPrefix, userId), true);
 
     // Ids that turned out to belong to another account.
