@@ -731,7 +731,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   if (result.importedCookbookId != null) {
                     ref.read(selectedCookbookIdProvider.notifier).state = result.importedCookbookId;
                     context.go('/');
-                    AppSnackbar.success(context, '${result.message}\nSwitched to imported cookbook');
+                    AppSnackbar.success(context, '${result.message}\n${AppLocalizations.of(context)!.settingsSwitchedToImported}');
                   } else {
                     AppSnackbar.success(context, result.message);
                   }
@@ -1001,7 +1001,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       debugPrint('Reset error: $e');
       if (progress != null && progress.isActive) progress.navigator?.removeRoute(progress); // drop progress dialog
       if (context.mounted) {
-        AppSnackbar.error(context, 'Reset failed — no data was deleted. ($e)');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.resetFailedNothingDeleted('$e'));
       }
       return;
     }
@@ -1332,9 +1332,9 @@ class _TextScaleTile extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(l10n.textSizePreview, style: TextStyle(fontSize: 12 * temp, color: theme.colorScheme.outline)),
               const SizedBox(height: 4),
-              Text('Grandma\'s Famous Chocolate Cake', style: TextStyle(fontSize: 16 * temp, fontWeight: FontWeight.bold)),
+              Text(l10n.previewRecipeTitle, style: TextStyle(fontSize: 16 * temp, fontWeight: FontWeight.bold)),
               const SizedBox(height: 2),
-              Text('2 cups flour, 1 cup sugar, 3 eggs', style: TextStyle(fontSize: 14 * temp, color: theme.colorScheme.onSurfaceVariant)),
+              Text(l10n.previewRecipeIngredients, style: TextStyle(fontSize: 14 * temp, color: theme.colorScheme.onSurfaceVariant)),
             ]),
           ),
           const SizedBox(height: 24),

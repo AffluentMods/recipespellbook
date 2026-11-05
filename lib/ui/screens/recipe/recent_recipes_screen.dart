@@ -75,7 +75,7 @@ class RecentRecipesScreen extends ConsumerWidget {
       ),
       body: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(AppLocalizations.of(context)!.errorWithMessage('$e'))),
         data: (recipes) {
           if (recipes.isEmpty) {
             return EmptyState(

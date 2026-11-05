@@ -580,7 +580,7 @@ class _CookbookGrid extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         AppSnackbar.dismiss(context);
-        AppSnackbar.error(context, 'Error: $e');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.errorWithMessage('$e'));
       }
     }
   }
@@ -836,7 +836,7 @@ void _showCookbookMembers(BuildContext context, Cookbook cookbook, List<_Cookboo
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: Text('People in this cookbook',
+            child: Text(AppLocalizations.of(ctx)!.cookbookPeopleTitle,
                 style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: ctx.appColors.textTertiary)),
           ),
           for (final m in members)

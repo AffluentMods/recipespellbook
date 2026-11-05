@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Colorful macronutrient donut: a segmented ring (carbs / fat / protein by
 /// calorie share) with the calorie count in the center and a per-macro
@@ -62,7 +63,7 @@ class MacroRing extends StatelessWidget {
                     ),
               ),
               Text(
-                'cal',
+                AppLocalizations.of(context)!.nutritionCalUnit,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: Theme.of(context).colorScheme.outline,
                     ),
@@ -86,9 +87,9 @@ class MacroRing extends StatelessWidget {
     );
 
     final stats = [
-      _MacroStat(color: carbColor, pct: carbsPct, grams: carbs, label: 'Carbs'),
-      _MacroStat(color: fatColor, pct: fatPct, grams: fat, label: 'Fat'),
-      _MacroStat(color: proteinColor, pct: proteinPct, grams: protein, label: 'Protein'),
+      _MacroStat(color: carbColor, pct: carbsPct, grams: carbs, label: AppLocalizations.of(context)!.nutrientCarbs),
+      _MacroStat(color: fatColor, pct: fatPct, grams: fat, label: AppLocalizations.of(context)!.nutrientFat),
+      _MacroStat(color: proteinColor, pct: proteinPct, grams: protein, label: AppLocalizations.of(context)!.nutrientProtein),
     ];
 
     return LayoutBuilder(

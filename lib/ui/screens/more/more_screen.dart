@@ -13,6 +13,7 @@ import '../../../providers/subscription_provider.dart';
 import '../../../router/router.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
+import '../../../services/feature_gate.dart' show SubscriptionTierL10n;
 import '../../../services/revenuecat_service.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
@@ -566,7 +567,7 @@ class _PlanRow extends ConsumerWidget {
         TouchRow(
           icon: Icons.workspace_premium_outlined,
           iconColor: c.accent,
-          title: status.tier.displayName,
+          title: status.tier.localizedName(l10n),
           subtitle: l10n.manageSubscription,
           chevron: false,
           onTap: () => showSubscriptionSheet(context, ref, status),
@@ -613,7 +614,7 @@ void showSubscriptionSheet(
               ),
               const SizedBox(height: Space.xs),
               Text(
-                status.tier.displayName,
+                status.tier.localizedName(l10n),
                 style: TextStyle(color: c.textTertiary),
               ),
               const SizedBox(height: Space.md),

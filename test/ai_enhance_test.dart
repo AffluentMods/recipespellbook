@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:recipespellbook/database/database.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/providers/database_provider.dart';
 import 'package:recipespellbook/services/ai_import_service.dart';
 import 'package:recipespellbook/ui/screens/recipe/recipe_enhance_screen.dart';
@@ -671,6 +672,8 @@ void main() {
       await tester.pumpWidget(ProviderScope(
         overrides: [databaseProvider.overrideWithValue(db!)],
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
             builder: (context) => Scaffold(
               body: Center(

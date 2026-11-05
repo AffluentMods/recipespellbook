@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Where a recipe link came from. Used to show friendly, brand-accurate
 /// visuals on the import screen ("Instagram link detected") and the import
@@ -257,7 +258,7 @@ class PlatformLogoStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Works with Instagram, TikTok, YouTube, Pinterest and any recipe website',
+      label: AppLocalizations.of(context)!.platformStripSemantics,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

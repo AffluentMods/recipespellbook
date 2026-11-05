@@ -540,16 +540,16 @@ class _PreviewCard extends StatelessWidget {
                     Expanded(child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Butter Chicken', style: TextStyle(color: palette.onSurface, fontWeight: FontWeight.w600, fontSize: 14)),
+                        Text(AppLocalizations.of(context)!.themePreviewRecipe, style: TextStyle(color: palette.onSurface, fontWeight: FontWeight.w600, fontSize: 14)),
                         const SizedBox(height: 3),
                         Row(children: [
                           Icon(Icons.timer_outlined, size: 12, color: palette.onSurface.withValues(alpha: 0.5)),
                           const SizedBox(width: 3),
-                          Text('45 min', style: TextStyle(color: palette.onSurface.withValues(alpha: 0.5), fontSize: 11)),
+                          Text(AppLocalizations.of(context)!.durationMinutes(45), style: TextStyle(color: palette.onSurface.withValues(alpha: 0.5), fontSize: 11)),
                           const SizedBox(width: 10),
                           Icon(Icons.people_outline_rounded, size: 12, color: palette.onSurface.withValues(alpha: 0.5)),
                           const SizedBox(width: 3),
-                          Text('4 servings', style: TextStyle(color: palette.onSurface.withValues(alpha: 0.5), fontSize: 11)),
+                          Text(AppLocalizations.of(context)!.countServings(4), style: TextStyle(color: palette.onSurface.withValues(alpha: 0.5), fontSize: 11)),
                         ]),
                       ],
                     )),
@@ -571,7 +571,7 @@ class _PreviewCard extends StatelessWidget {
                   Expanded(child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(color: palette.primary, borderRadius: BorderRadius.circular(10)),
-                    child: Center(child: Text('Primary',
+                    child: Center(child: Text(AppLocalizations.of(context)!.themePreviewPrimary,
                         style: TextStyle(color: palette.onPrimary, fontWeight: FontWeight.w600, fontSize: 12))),
                   )),
                   const SizedBox(width: 8),
@@ -581,7 +581,7 @@ class _PreviewCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: palette.primary.withValues(alpha: 0.5)),
                     ),
-                    child: Center(child: Text('Secondary',
+                    child: Center(child: Text(AppLocalizations.of(context)!.themePreviewSecondary,
                         style: TextStyle(color: palette.primary, fontWeight: FontWeight.w600, fontSize: 12))),
                   )),
                   const SizedBox(width: 8),

@@ -1103,7 +1103,7 @@ class _ResultCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 6, 16, 0),
               child: Text(
-                '+ ${result.totalIngredients - result.ingredientNames.length} more',
+                AppLocalizations.of(context)!.communityMoreIngredients(result.totalIngredients - result.ingredientNames.length),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: context.appColors.accent, fontWeight: FontWeight.w600,
                 ),
@@ -1165,7 +1165,7 @@ class _ResultCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(48, 6, 16, 0),
               child: Text(
-                '+ ${result.totalSteps - result.stepTexts.length} more steps',
+                AppLocalizations.of(context)!.cravingMoreSteps(result.totalSteps - result.stepTexts.length),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: context.appColors.accent, fontWeight: FontWeight.w600,
                 ),

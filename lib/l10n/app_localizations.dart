@@ -694,7 +694,7 @@ abstract class AppLocalizations {
   /// No description provided for @isbnScanBookDetected.
   ///
   /// In en, this message translates to:
-  /// **'That\'s a book barcode — opening the cookbook scanner.'**
+  /// **'That\'s a book barcode. Opening the cookbook scanner.'**
   String get isbnScanBookDetected;
 
   /// No description provided for @isbnCameraUnavailable.
@@ -8068,7 +8068,7 @@ abstract class AppLocalizations {
   /// No description provided for @allDataDesc.
   ///
   /// In en, this message translates to:
-  /// **'Permanently deletes EVERYTHING — local data, cloud data, and your account. Complete fresh start.'**
+  /// **'Permanently deletes EVERYTHING: local data, cloud data, and your account. Complete fresh start.'**
   String get allDataDesc;
 
   /// No description provided for @allDataWarningTitle.
@@ -8116,7 +8116,7 @@ abstract class AppLocalizations {
   /// No description provided for @localNoCloudWarning.
   ///
   /// In en, this message translates to:
-  /// **'You don\'t have Cloud Sync — there is no backup to recover from'**
+  /// **'You don\'t have Cloud Sync, so there is no backup to recover from'**
   String get localNoCloudWarning;
 
   /// No description provided for @permanentDeleteWarning.
@@ -8680,13 +8680,13 @@ abstract class AppLocalizations {
   /// No description provided for @cancelledAccessUntil.
   ///
   /// In en, this message translates to:
-  /// **'Cancelled — access until {date}'**
+  /// **'Cancelled: access until {date}'**
   String cancelledAccessUntil(String date);
 
   /// No description provided for @lifetimeNeverExpires.
   ///
   /// In en, this message translates to:
-  /// **'Lifetime — never expires'**
+  /// **'Lifetime: never expires'**
   String get lifetimeNeverExpires;
 
   /// No description provided for @renewsDate.
@@ -9724,7 +9724,7 @@ abstract class AppLocalizations {
   /// No description provided for @featureCloudStorageLimited.
   ///
   /// In en, this message translates to:
-  /// **'Cloud storage — Limited'**
+  /// **'Cloud storage: Limited'**
   String get featureCloudStorageLimited;
 
   /// No description provided for @featureFamilySharing5.
@@ -10510,13 +10510,13 @@ abstract class AppLocalizations {
   /// No description provided for @ingredientLayoutInline.
   ///
   /// In en, this message translates to:
-  /// **'Inline — 1 tsp butter'**
+  /// **'Inline: 1 tsp butter'**
   String get ingredientLayoutInline;
 
   /// No description provided for @ingredientLayoutColumnar.
   ///
   /// In en, this message translates to:
-  /// **'Columnar — amounts aligned'**
+  /// **'Columnar: amounts aligned'**
   String get ingredientLayoutColumnar;
 
   /// No description provided for @settingsIngredientLayoutDescription.
@@ -11182,7 +11182,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportFormattedListSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'With checkboxes — great for notes apps'**
+  /// **'With checkboxes, great for notes apps'**
   String get exportFormattedListSubtitle;
 
   /// No description provided for @exportPlainText.
@@ -11194,7 +11194,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportPlainTextSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Simple list — paste anywhere'**
+  /// **'Simple list, paste anywhere'**
   String get exportPlainTextSubtitle;
 
   /// No description provided for @importFromBackupFile.
@@ -13540,7 +13540,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideQuickTipText.
   ///
   /// In en, this message translates to:
-  /// **'The fastest way? Copy any recipe link and share it to Recipe Spellbook — works from almost any app.'**
+  /// **'The fastest way? Copy any recipe link and share it to Recipe Spellbook. It works from almost any app.'**
   String get importGuideQuickTipText;
 
   /// No description provided for @importGuideWebButton.
@@ -13870,7 +13870,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideYoutubeStep3Tip.
   ///
   /// In en, this message translates to:
-  /// **'Many YouTube creators put the full recipe in the video description — this makes extraction more accurate.'**
+  /// **'Many YouTube creators put the full recipe in the video description, which makes extraction more accurate.'**
   String get importGuideYoutubeStep3Tip;
 
   /// No description provided for @importGuideYoutubeStep4Title.
@@ -14092,7 +14092,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuidePhotoStep4Desc.
   ///
   /// In en, this message translates to:
-  /// **'Check the extracted recipe. OCR occasionally misreads characters — \"1/2\" might become \"1l2\". Fix any errors and save.'**
+  /// **'Check the extracted recipe. OCR occasionally misreads characters: \"1/2\" might become \"1l2\". Fix any errors and save.'**
   String get importGuidePhotoStep4Desc;
 
   /// No description provided for @importGuidePhotoStep4Tip.
@@ -14212,7 +14212,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideTextStep3Tip.
   ///
   /// In en, this message translates to:
-  /// **'This works even with unformatted text — the AI is smart about parsing ingredient amounts and step instructions.'**
+  /// **'This works even with unformatted text. The AI is smart about parsing ingredient amounts and step instructions.'**
   String get importGuideTextStep3Tip;
 
   /// No description provided for @importGuideTextStep4Title.
@@ -14680,7 +14680,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqWhatAreSublinkedAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.'**
+  /// **'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it, no searching needed.'**
   String get faqWhatAreSublinkedAnswer;
 
   /// No description provided for @faqMacroCalcTitle.
@@ -14716,7 +14716,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqMacroCalcStep2Desc.
   ///
   /// In en, this message translates to:
-  /// **'Scroll to the bottom of the recipe. If no nutrition data exists yet, you\'ll see an empty state — tap it to start the calculator.'**
+  /// **'Scroll to the bottom of the recipe. If no nutrition data exists yet, you\'ll see an empty state. Tap it to start the calculator.'**
   String get faqMacroCalcStep2Desc;
 
   /// No description provided for @faqMacroCalcStep3Title.
@@ -14824,7 +14824,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqWhatIsMacroCalcAnswer.
   ///
   /// In en, this message translates to:
-  /// **'The Macro Calculator automatically estimates the nutritional content of your recipes by matching each ingredient to the USDA food database. It calculates calories, protein, carbs, fat, fiber, sugar, sodium, and more — all per serving. You can find it in the Nutrition section of any recipe.'**
+  /// **'The Macro Calculator automatically estimates the nutritional content of your recipes by matching each ingredient to the USDA food database. It calculates calories, protein, carbs, fat, fiber, sugar, sodium, and more, all per serving. You can find it in the Nutrition section of any recipe.'**
   String get faqWhatIsMacroCalcAnswer;
 
   /// No description provided for @faqImportFailedTitle.
@@ -14842,7 +14842,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqImportFailedAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.'**
+  /// **'Imports can fail for a few reasons:\n\n• The website may block automated access. Try copying the recipe text and using Text Import instead.\n• The link may have expired or be private. Make sure it’s a public link.\n• Some sites use formats that are harder to parse. Try the AI import as an alternative.\n• Check your internet connection and try again.'**
   String get faqImportFailedAnswer;
 
   /// No description provided for @faqDeviceTransferTitle.
@@ -15838,7 +15838,7 @@ abstract class AppLocalizations {
   /// No description provided for @subscriptionCancelledUntil.
   ///
   /// In en, this message translates to:
-  /// **'Cancelled — access until {date}'**
+  /// **'Cancelled: access until {date}'**
   String subscriptionCancelledUntil(String date);
 
   /// No description provided for @subscriptionRenews.
@@ -15856,7 +15856,7 @@ abstract class AppLocalizations {
   /// No description provided for @subscriptionLifetime.
   ///
   /// In en, this message translates to:
-  /// **'Lifetime — never expires'**
+  /// **'Lifetime: never expires'**
   String get subscriptionLifetime;
 
   /// No description provided for @subscriptionManage.
@@ -16762,7 +16762,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallGetPlan.
   ///
   /// In en, this message translates to:
-  /// **'Get {planName} — {planPrice}'**
+  /// **'Get {planName}: {planPrice}'**
   String paywallGetPlan(String planName, String planPrice);
 
   /// No description provided for @paywallRestorePurchases.
@@ -16798,7 +16798,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallPurchaseNotDetected.
   ///
   /// In en, this message translates to:
-  /// **'Purchase not detected yet — try refreshing again.'**
+  /// **'Purchase not detected yet. Try refreshing again.'**
   String get paywallPurchaseNotDetected;
 
   /// No description provided for @paywallWebComingSoon.
@@ -17410,19 +17410,19 @@ abstract class AppLocalizations {
   /// No description provided for @viewPlansPrice.
   ///
   /// In en, this message translates to:
-  /// **'View Plans — \$6.99'**
+  /// **'View Plans: \$6.99'**
   String get viewPlansPrice;
 
   /// No description provided for @premiumActive.
   ///
   /// In en, this message translates to:
-  /// **'Premium — Active'**
+  /// **'Premium: Active'**
   String get premiumActive;
 
   /// No description provided for @familyActive.
   ///
   /// In en, this message translates to:
-  /// **'Family — Active'**
+  /// **'Family: Active'**
   String get familyActive;
 
   /// No description provided for @cloudSyncEnabled.
@@ -17656,7 +17656,7 @@ abstract class AppLocalizations {
   /// No description provided for @cravingCategoryHint.
   ///
   /// In en, this message translates to:
-  /// **'Optional — skip if you\'re open to anything'**
+  /// **'Optional, skip if you\'re open to anything'**
   String get cravingCategoryHint;
 
   /// No description provided for @cravingCategoryNarrowHint.
@@ -17854,7 +17854,7 @@ abstract class AppLocalizations {
   /// No description provided for @cravingSourceBothTitle.
   ///
   /// In en, this message translates to:
-  /// **'Both — surprise me'**
+  /// **'Both: surprise me'**
   String get cravingSourceBothTitle;
 
   /// No description provided for @cravingSourceBothSubtitle.
@@ -18424,7 +18424,7 @@ abstract class AppLocalizations {
   /// No description provided for @subRecipeSheetSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{This recipe links 1 sub-recipe} other{This recipe links {count} sub-recipes}} — uncheck any you don\'t want to include.'**
+  /// **'{count, plural, =1{This recipe links 1 sub-recipe} other{This recipe links {count} sub-recipes}}. Uncheck any you don\'t want to include.'**
   String subRecipeSheetSubtitle(int count);
 
   /// No description provided for @subRecipeUsedInOthers.
@@ -18472,7 +18472,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupReminderNever.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to keep your recipes synced — or back up manually.'**
+  /// **'Sign in to keep your recipes synced, or back up manually.'**
   String get backupReminderNever;
 
   /// No description provided for @backupReminderAction.
@@ -18628,7 +18628,7 @@ abstract class AppLocalizations {
   /// No description provided for @publishSingleRecipeBody.
   ///
   /// In en, this message translates to:
-  /// **'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.'**
+  /// **'Share this recipe to the community feed. Updates won\'t sync, so re-publish to push changes.'**
   String get publishSingleRecipeBody;
 
   /// No description provided for @publishSingleRecipeAction.
@@ -18802,7 +18802,7 @@ abstract class AppLocalizations {
   /// No description provided for @importNothingSaved.
   ///
   /// In en, this message translates to:
-  /// **'Import failed — nothing was saved. Please try again.'**
+  /// **'Import failed: nothing was saved. Please try again.'**
   String get importNothingSaved;
 
   /// No description provided for @unsavedChangesBody.
@@ -19198,7 +19198,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareViewerOwnItem.
   ///
   /// In en, this message translates to:
-  /// **'This is yours — you already have it.'**
+  /// **'This is yours. You already have it.'**
   String get shareViewerOwnItem;
 
   /// No description provided for @shareViewerJoinNeedsSubscription.
@@ -19548,6 +19548,894 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your account could not be deleted, so nothing was deleted. Check your internet connection and try again.'**
   String get deleteAllDataAccountFailed;
+
+  /// No description provided for @addRecipeSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a recipe'**
+  String get addRecipeSheetTitle;
+
+  /// No description provided for @addRecipeSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a link from Instagram, TikTok, a website, anywhere.'**
+  String get addRecipeSheetSubtitle;
+
+  /// Chip shown above the link field when a pasted link is recognised, e.g. 'Instagram link'.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform} link'**
+  String addRecipeSheetPlatformLink(String platform);
+
+  /// No description provided for @addRecipeSheetLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a recipe link…'**
+  String get addRecipeSheetLinkHint;
+
+  /// No description provided for @addRecipeSheetPasteFromClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste link from clipboard'**
+  String get addRecipeSheetPasteFromClipboard;
+
+  /// No description provided for @addRecipeSheetImportFromLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Import recipe from link'**
+  String get addRecipeSheetImportFromLink;
+
+  /// Main button when the pasted link is from a known platform, e.g. 'Import from TikTok'.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from {platform}'**
+  String addRecipeSheetImportFrom(String platform);
+
+  /// No description provided for @addRecipeSheetImportRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Import recipe'**
+  String get addRecipeSheetImportRecipe;
+
+  /// Divider label above the other ways to add a recipe (photo, text, file, AI, scan).
+  ///
+  /// In en, this message translates to:
+  /// **'or another way'**
+  String get addRecipeSheetOtherWay;
+
+  /// No description provided for @addRecipeSheetPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get addRecipeSheetPhoto;
+
+  /// No description provided for @addRecipeSheetPasteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste text'**
+  String get addRecipeSheetPasteText;
+
+  /// No description provided for @addRecipeSheetAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get addRecipeSheetAi;
+
+  /// Tile that opens the barcode/QR scanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get addRecipeSheetScan;
+
+  /// No description provided for @addRecipeSheetHowToImport.
+  ///
+  /// In en, this message translates to:
+  /// **'How to import'**
+  String get addRecipeSheetHowToImport;
+
+  /// Link that opens an empty recipe to type in by hand.
+  ///
+  /// In en, this message translates to:
+  /// **'Type it in'**
+  String get addRecipeSheetTypeItIn;
+
+  /// No description provided for @addRecipeSheetGrabbing.
+  ///
+  /// In en, this message translates to:
+  /// **'Grabbing the recipe from {platform}…'**
+  String addRecipeSheetGrabbing(String platform);
+
+  /// No description provided for @addRecipeNothingToPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to paste, copy a recipe link first.'**
+  String get addRecipeNothingToPaste;
+
+  /// No description provided for @addRecipePasteLinkFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a recipe link first.'**
+  String get addRecipePasteLinkFirst;
+
+  /// No description provided for @addRecipeNotALink.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn’t look like a recipe link. Paste a link starting with https://, or use “Paste text” below.'**
+  String get addRecipeNotALink;
+
+  /// No description provided for @addRecipeNoRecipeInJson.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.'**
+  String get addRecipeNoRecipeInJson;
+
+  /// No description provided for @addRecipeInvalidJson.
+  ///
+  /// In en, this message translates to:
+  /// **'That looks like recipe data, but it isn’t valid JSON. Copy the whole thing and try again.'**
+  String get addRecipeInvalidJson;
+
+  /// No description provided for @addRecipeNoRecipeInText.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t find a recipe in that text. For long recipes, use “Paste text” below.'**
+  String get addRecipeNoRecipeInText;
+
+  /// No description provided for @addRecipeLinkUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t reach that link. Check your connection and try again.'**
+  String get addRecipeLinkUnreachable;
+
+  /// No description provided for @addRecipeLinkNeedsLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'That page needs a login, so we can’t read it. Try a public link.'**
+  String get addRecipeLinkNeedsLogin;
+
+  /// No description provided for @addRecipeLinkNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'That link couldn’t be found. Double-check the URL.'**
+  String get addRecipeLinkNotFound;
+
+  /// No description provided for @addRecipeLinkUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t read a recipe from that link. Try a different link, or paste the recipe text below.'**
+  String get addRecipeLinkUnreadable;
+
+  /// No description provided for @addRecipeAddedToShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to shopping list: {item}'**
+  String addRecipeAddedToShopping(String item);
+
+  /// No description provided for @addRecipeAddToShoppingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add to shopping list: {error}'**
+  String addRecipeAddToShoppingFailed(String error);
+
+  /// Paywall headline. The line break keeps it on two balanced lines.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync recipes, cookbooks and more\nwith your family'**
+  String get paywallHeadline;
+
+  /// No description provided for @recipeEnhanceWithAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhance with AI'**
+  String get recipeEnhanceWithAi;
+
+  /// Under a locked feature. {tier} is a plan name: Free, Premium or Family.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires {tier} or higher'**
+  String featureGateRequiresTier(String tier);
+
+  /// {tier} is a plan name (Premium, Family); {feature} is a feature name such as Cloud Sync.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature requires {tier} or higher. Upgrade to access {feature} and more.'**
+  String featureGateUpgradeBody(String tier, String feature);
+
+  /// No description provided for @gatedFeatureCreatorPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator Page'**
+  String get gatedFeatureCreatorPage;
+
+  /// No description provided for @gatedFeatureCustomDomain.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Domain'**
+  String get gatedFeatureCustomDomain;
+
+  /// No description provided for @storageLimitReachedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Limit Reached'**
+  String get storageLimitReachedTitle;
+
+  /// {used} is a number of megabytes like 48.5; {limit} is a size like 50 MB.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used {used} MB of your {limit} limit. Delete some photos or upgrade for more storage.'**
+  String storageLimitReachedBody(String used, String limit);
+
+  /// No description provided for @familySheetPermCanEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Can edit'**
+  String get familySheetPermCanEdit;
+
+  /// No description provided for @familySheetPermCanEditDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add & edit recipes'**
+  String get familySheetPermCanEditDesc;
+
+  /// No description provided for @familySheetPermViewOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'View only'**
+  String get familySheetPermViewOnly;
+
+  /// No description provided for @familySheetPermViewOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t make changes'**
+  String get familySheetPermViewOnlyDesc;
+
+  /// No description provided for @familySheetPermEditItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit items'**
+  String get familySheetPermEditItems;
+
+  /// No description provided for @familySheetPermEditItemsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add, remove & check off'**
+  String get familySheetPermEditItemsDesc;
+
+  /// No description provided for @familySheetPermCheckItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Check items'**
+  String get familySheetPermCheckItems;
+
+  /// No description provided for @familySheetPermCheckItemsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick items off only'**
+  String get familySheetPermCheckItemsDesc;
+
+  /// No description provided for @familySheetCollaborateLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborate live'**
+  String get familySheetCollaborateLive;
+
+  /// No description provided for @familySheetInviteViewCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite people to view this cookbook'**
+  String get familySheetInviteViewCookbook;
+
+  /// No description provided for @familySheetInviteEditCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite people to view or edit this cookbook'**
+  String get familySheetInviteEditCookbook;
+
+  /// No description provided for @familySheetCookbookNeedsPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Live cookbook collaboration needs a subscription. Sharing shopping lists is free.'**
+  String get familySheetCookbookNeedsPlan;
+
+  /// No description provided for @familySheetPeopleWithAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'People with access'**
+  String get familySheetPeopleWithAccess;
+
+  /// No description provided for @familySheetInviteWithLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite with a link'**
+  String get familySheetInviteWithLink;
+
+  /// No description provided for @familySheetCreateInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Create invite link'**
+  String get familySheetCreateInviteLink;
+
+  /// No description provided for @familySheetSendCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a copy'**
+  String get familySheetSendCopy;
+
+  /// No description provided for @familySheetSendCopySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A one-time snapshot they can import (expires in 24h)'**
+  String get familySheetSendCopySubtitle;
+
+  /// No description provided for @familySheetInviteCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link copied. Send it to anyone.'**
+  String get familySheetInviteCopied;
+
+  /// No description provided for @familySheetAnyoneCanJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with this link can join'**
+  String get familySheetAnyoneCanJoin;
+
+  /// No description provided for @enhanceCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied! Paste it into ChatGPT, Claude, or any AI.'**
+  String get enhanceCopied;
+
+  /// No description provided for @enhanceRecipeUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe updated.'**
+  String get enhanceRecipeUpdated;
+
+  /// No description provided for @enhanceUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the recipe: {error}'**
+  String enhanceUpdateFailed(String error);
+
+  /// No description provided for @enhanceBackToEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to edit'**
+  String get enhanceBackToEdit;
+
+  /// No description provided for @enhanceLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this recipe.'**
+  String get enhanceLoadFailed;
+
+  /// No description provided for @enhanceIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean up this recipe with any AI'**
+  String get enhanceIntroTitle;
+
+  /// No description provided for @enhanceIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It adds section headers, writes the exact amounts into each step, and tidies the formatting, without changing your ingredients or method. Your photos, rating, and notes are kept.'**
+  String get enhanceIntroBody;
+
+  /// No description provided for @enhanceStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy your recipe + the instructions'**
+  String get enhanceStep1Title;
+
+  /// No description provided for @enhanceCopyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy recipe + prompt'**
+  String get enhanceCopyButton;
+
+  /// No description provided for @enhanceStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste it into ChatGPT, Claude, or any AI'**
+  String get enhanceStep2Title;
+
+  /// No description provided for @enhanceStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI returns updated recipe JSON. Copy that JSON.'**
+  String get enhanceStep2Body;
+
+  /// No description provided for @enhanceStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the AI\'s JSON back here'**
+  String get enhanceStep3Title;
+
+  /// No description provided for @enhancePreviewChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview changes'**
+  String get enhancePreviewChanges;
+
+  /// No description provided for @enhanceAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept & update recipe'**
+  String get enhanceAccept;
+
+  /// No description provided for @enhanceSectionsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 section} other{+{count} sections}}'**
+  String enhanceSectionsAdded(int count);
+
+  /// Ingredient count before and after the AI edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients {before} → {after}'**
+  String enhanceIngredientCount(int before, int after);
+
+  /// Step count before and after the AI edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps {before} → {after}'**
+  String enhanceStepCount(int before, int after);
+
+  /// No description provided for @enhanceCourseAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Course added'**
+  String get enhanceCourseAdded;
+
+  /// No description provided for @enhanceCategoryAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Category added'**
+  String get enhanceCategoryAdded;
+
+  /// No description provided for @enhanceFormattingRefined.
+  ///
+  /// In en, this message translates to:
+  /// **'Formatting refined'**
+  String get enhanceFormattingRefined;
+
+  /// No description provided for @enhanceWhatChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'What changed'**
+  String get enhanceWhatChanged;
+
+  /// No description provided for @enhanceIngredientCountWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Heads up: the ingredient count changed. Double-check nothing was dropped before accepting.'**
+  String get enhanceIngredientCountWarning;
+
+  /// No description provided for @enhanceResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get enhanceResult;
+
+  /// No description provided for @enhanceCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get enhanceCompare;
+
+  /// No description provided for @enhanceAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get enhanceAdded;
+
+  /// No description provided for @enhanceRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get enhanceRemoved;
+
+  /// No description provided for @aiRecipesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Recipe Found} other{{count} Recipes Found}}'**
+  String aiRecipesFound(int count);
+
+  /// No description provided for @aiCopyPromptHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy this prompt, paste it into any AI (ChatGPT, Claude, Gemini) along with your recipe, then paste the response below.'**
+  String get aiCopyPromptHelp;
+
+  /// No description provided for @aiWeirdFormatTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Have recipes in a weird format? Paste them into any free AI (ChatGPT, Claude, etc.) with this prompt and it\'ll convert them for you. Works with spreadsheets, emails, screenshots, and more!'**
+  String get aiWeirdFormatTip;
+
+  /// No description provided for @aiPasteResponseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste AI Response'**
+  String get aiPasteResponseTitle;
+
+  /// No description provided for @aiTipsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Works with any AI. You can also take a photo of a recipe and paste it with the prompt. If the JSON has errors, ask the AI to fix it.'**
+  String get aiTipsBody;
+
+  /// No description provided for @nutriSheetReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition Review'**
+  String get nutriSheetReviewTitle;
+
+  /// No description provided for @nutriSheetReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap ingredients below to change their USDA match or enter values manually.'**
+  String get nutriSheetReviewHint;
+
+  /// Number of ingredients whose nutrition was edited by hand.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} manually edited'**
+  String nutriSheetManuallyEdited(int count);
+
+  /// Calories, short form, e.g. '250 cal'.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cal'**
+  String nutritionCalCount(int count);
+
+  /// Short unit label shown under a calorie number.
+  ///
+  /// In en, this message translates to:
+  /// **'cal'**
+  String get nutritionCalUnit;
+
+  /// No description provided for @nutriSheetTapIngredientHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any ingredient to change its USDA match or enter nutrition manually.'**
+  String get nutriSheetTapIngredientHint;
+
+  /// No description provided for @nutriSheetResultsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result found} other{{count} results found}}'**
+  String nutriSheetResultsFound(int count);
+
+  /// No description provided for @nutriSheetCalPerServing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cal per serving'**
+  String nutriSheetCalPerServing(int count);
+
+  /// No description provided for @nutriSheetLinkedRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked Recipe'**
+  String get nutriSheetLinkedRecipe;
+
+  /// No description provided for @nutriSheetRecipesLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe linked} other{{count} recipes linked}}'**
+  String nutriSheetRecipesLinked(int count);
+
+  /// No description provided for @nutriSheetCalTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cal total'**
+  String nutriSheetCalTotal(int count);
+
+  /// No description provided for @nutriSheetNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No nutrition data'**
+  String get nutriSheetNoData;
+
+  /// No description provided for @nutriSheetFromRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition from {recipe}'**
+  String nutriSheetFromRecipe(String recipe);
+
+  /// No description provided for @nutriSheetFromLinkedRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition from linked recipe'**
+  String get nutriSheetFromLinkedRecipe;
+
+  /// No description provided for @nutriSheetNoDataOpenRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'No nutrition data. Open the recipe to calculate it first.'**
+  String get nutriSheetNoDataOpenRecipe;
+
+  /// No description provided for @nutriSheetRecipeScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe scale'**
+  String get nutriSheetRecipeScale;
+
+  /// No description provided for @nutriSheetRecipeScaleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How much of the linked recipe does this ingredient use?'**
+  String get nutriSheetRecipeScaleHint;
+
+  /// No description provided for @nutritionFactsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition Facts'**
+  String get nutritionFactsTitle;
+
+  /// No description provided for @recipeEditDetailedNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed Nutrition'**
+  String get recipeEditDetailedNutrition;
+
+  /// No description provided for @listGenExitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you wish to exit the shopping list generator? Unsaved changes will be lost.'**
+  String get listGenExitBody;
+
+  /// No description provided for @listGenChooseLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Linked Recipes'**
+  String get listGenChooseLinked;
+
+  /// No description provided for @listGenChooseLinkedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Some ingredients link to multiple recipes. Select which ones to include.'**
+  String get listGenChooseLinkedBody;
+
+  /// No description provided for @listGenSelectIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Ingredients'**
+  String get listGenSelectIngredients;
+
+  /// No description provided for @listGenReviewAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & Add'**
+  String get listGenReviewAdd;
+
+  /// Under an ingredient: the recipe it belongs to.
+  ///
+  /// In en, this message translates to:
+  /// **'in {recipe}'**
+  String listGenInRecipe(String recipe);
+
+  /// No description provided for @listGenLinksTo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Links to 1 recipe. Select which to include:} other{Links to {count} recipes. Select which to include:}}'**
+  String listGenLinksTo(int count);
+
+  /// No description provided for @listGenSelectedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected}/{total} ingredients'**
+  String listGenSelectedOf(int selected, int total);
+
+  /// Small badge on an ingredient that links to another recipe.
+  ///
+  /// In en, this message translates to:
+  /// **'linked'**
+  String get listGenLinkedBadge;
+
+  /// Small badge on an ingredient that is already in the pantry.
+  ///
+  /// In en, this message translates to:
+  /// **'pantry'**
+  String get listGenPantryBadge;
+
+  /// No description provided for @listGenSeeBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'See \"{title}\" below'**
+  String listGenSeeBelow(String title);
+
+  /// No description provided for @shoppingSharingStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing stopped'**
+  String get shoppingSharingStopped;
+
+  /// No description provided for @shoppingStopSharingOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Sharing Only'**
+  String get shoppingStopSharingOnly;
+
+  /// No description provided for @shoppingShopOnInstacart.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop on Instacart'**
+  String get shoppingShopOnInstacart;
+
+  /// No description provided for @shoppingNamedItemRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed'**
+  String shoppingNamedItemRemoved(String name);
+
+  /// No description provided for @exportLinkedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Linked Recipes?'**
+  String get exportLinkedTitle;
+
+  /// No description provided for @exportLinkedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This recipe has 1 linked recipe:} other{This recipe has {count} linked recipes:}}'**
+  String exportLinkedBody(int count);
+
+  /// No description provided for @exportLinkedQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to include them in the export so the links are preserved when imported?'**
+  String get exportLinkedQuestion;
+
+  /// No description provided for @exportOnlyRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {title}'**
+  String exportOnlyRecipe(String title);
+
+  /// No description provided for @exportLinkedAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Export All'**
+  String get exportLinkedAll;
+
+  /// No description provided for @pdfLinkedRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked Recipes'**
+  String get pdfLinkedRecipes;
+
+  /// No description provided for @taxonomyCourseExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Course \"{name}\" already exists'**
+  String taxonomyCourseExists(String name);
+
+  /// No description provided for @taxonomyCategoryExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Category \"{name}\" already exists'**
+  String taxonomyCategoryExists(String name);
+
+  /// No description provided for @taxonomyCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error creating: {error}'**
+  String taxonomyCreateError(String error);
+
+  /// Appended after the item count, e.g. '5 items · live collaboration'.
+  ///
+  /// In en, this message translates to:
+  /// **'live collaboration'**
+  String get shareViewerLiveCollab;
+
+  /// No description provided for @shareViewerAddedToLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your lists'**
+  String get shareViewerAddedToLists;
+
+  /// No description provided for @cookbookPeopleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'People in this cookbook'**
+  String get cookbookPeopleTitle;
+
+  /// No description provided for @cravingMoreSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+ 1 more step} other{+ {count} more steps}}'**
+  String cravingMoreSteps(int count);
+
+  /// No description provided for @authSignedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {name}'**
+  String authSignedInAs(String name);
+
+  /// No description provided for @authSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out'**
+  String get authSignedOut;
+
+  /// No description provided for @accountStatFollowers.
+  ///
+  /// In en, this message translates to:
+  /// **'followers'**
+  String get accountStatFollowers;
+
+  /// No description provided for @accountStatFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'following'**
+  String get accountStatFollowing;
+
+  /// No description provided for @settingsSwitchedToImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to imported cookbook'**
+  String get settingsSwitchedToImported;
+
+  /// No description provided for @resetFailedNothingDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset failed: no data was deleted. ({error})'**
+  String resetFailedNothingDeleted(String error);
+
+  /// No description provided for @selectedOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} of {total}'**
+  String selectedOfTotal(int selected, int total);
+
+  /// No description provided for @platformStripSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Works with Instagram, TikTok, YouTube, Pinterest and any recipe website'**
+  String get platformStripSemantics;
+
+  /// Sample recipe title in the text size preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Grandma\'s Famous Chocolate Cake'**
+  String get previewRecipeTitle;
+
+  /// Sample ingredients in the text size preview.
+  ///
+  /// In en, this message translates to:
+  /// **'2 cups flour, 1 cup sugar, 3 eggs'**
+  String get previewRecipeIngredients;
+
+  /// Sample ingredient line in the font size preview.
+  ///
+  /// In en, this message translates to:
+  /// **'• 2 cups all-purpose flour'**
+  String get previewIngredientFlour;
+
+  /// Sample ingredient line in the font size preview.
+  ///
+  /// In en, this message translates to:
+  /// **'• 1 tsp vanilla extract'**
+  String get previewIngredientVanilla;
+
+  /// Sample recipe name in the custom theme preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Butter Chicken'**
+  String get themePreviewRecipe;
+
+  /// Sample primary button in the custom theme preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get themePreviewPrimary;
+
+  /// Sample secondary button in the custom theme preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary'**
+  String get themePreviewSecondary;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

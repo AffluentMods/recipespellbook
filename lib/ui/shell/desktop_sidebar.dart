@@ -24,6 +24,7 @@ import '../widgets/keycap.dart';
 import '../widgets/placeholder_image.dart';
 import '../widgets/recipe_image.dart' show FileExistsCache;
 import 'shell_navigation.dart';
+import '../../services/feature_gate.dart' show SubscriptionTierL10n;
 
 /// The desktop sidebar: cookbook switcher, search, the Library / Plan /
 /// Discover sections, and Help / Settings / account at the foot. Collapses to
@@ -548,7 +549,7 @@ class _AccountRow extends ConsumerWidget {
       sync,
       signedIn,
       sub.tier.hasCloudSync,
-      sub.tier.displayName,
+      sub.tier.localizedName(l10n),
     );
 
     final avatarUrl = user?.avatarUrl;
