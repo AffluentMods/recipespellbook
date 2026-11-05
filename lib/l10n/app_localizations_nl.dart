@@ -11694,4 +11694,227 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get productReportMismatch => 'Klopt het niet met het etiket? Bekijken of verbeteren';
+
+  @override
+  String get pantryCookTitle => 'Wat kan ik maken?';
+
+  @override
+  String get pantryCookHomeEmpty => 'Voeg toe wat je in je voorraadkast hebt en zie welke recepten je kunt koken';
+
+  @override
+  String get pantryCookHomeSetUp => 'Items toevoegen';
+
+  @override
+  String get pantryCookHomeOpen => 'Recepten bekijken';
+
+  @override
+  String pantryCookHomeReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count direct te maken',
+      one: '1 direct te maken',
+      zero: 'Nog niets direct te maken',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookHomeFew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count missen nog 1 of 2 dingen',
+      one: '1 mist nog 1 of 2 dingen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookItemsInPantry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items in je voorraadkast',
+      one: '1 item in je voorraadkast',
+      zero: 'Je voorraadkast is leeg',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookRecipesUsing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten gebruiken ze',
+      one: '1 recept gebruikt ze',
+      zero: 'Nog geen recepten gebruiken ze',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCookEditPantry => 'Voorraadkast bewerken';
+
+  @override
+  String get pantryCookEmptyTitle => 'Wat zit er in je voorraadkast?';
+
+  @override
+  String get pantryCookEmptyBody => 'Voeg toe wat je in huis hebt en zie welke van je recepten je nu kunt koken en wat je voor de rest nog mist.';
+
+  @override
+  String get pantryCookFilterAll => 'Alle';
+
+  @override
+  String get pantryCookFilterReady => 'Direct te maken';
+
+  @override
+  String get pantryCookFilterFew => '1 tot 2 missen';
+
+  @override
+  String get pantryCookAllCourses => 'Alle gangen';
+
+  @override
+  String get pantryCookAllCookbooks => 'Alle kookboeken';
+
+  @override
+  String get pantryCookNoResults => 'Nog geen recepten gebruiken je voorraadkast';
+
+  @override
+  String get pantryCookNoResultsHint => 'Voeg nog een paar dingen toe die je hebt om hier recepten te zien.';
+
+  @override
+  String get pantryCookNoFilterResults => 'Geen recepten voor deze filters';
+
+  @override
+  String pantryCookCovered(int covered, int total) {
+    return '$covered van $total in je voorraadkast';
+  }
+
+  @override
+  String get pantryCookMissingLabel => 'Mist:';
+
+  @override
+  String pantryCookHaveIt(String item) {
+    return 'Heb je $item? Tik om het aan je voorraadkast toe te voegen';
+  }
+
+  @override
+  String pantryCookMoreMissing(int count) {
+    return '+$count meer';
+  }
+
+  @override
+  String get pantryCookAddMissing => 'Ontbrekende toevoegen';
+
+  @override
+  String get pantryCookAddMissingTooltip => 'Ontbrekende op de boodschappenlijst zetten';
+
+  @override
+  String pantryCookAddedToPantry(String item) {
+    return '$item toegevoegd aan je voorraadkast';
+  }
+
+  @override
+  String get pantryCookRecentlyBought => 'Onlangs gekocht';
+
+  @override
+  String get pantryCookAddAll => 'Alles toevoegen';
+
+  @override
+  String get pantryCookAlwaysHave => 'Altijd in huis';
+
+  @override
+  String get pantryCookAlwaysHaveHint => 'Tellen in geen enkel recept mee, dus ze ontbreken nooit.';
+
+  @override
+  String get pantryCookAddBasicHint => 'Basisproduct toevoegen';
+
+  @override
+  String get pantryCookPaletteSubtitle => 'Recepten die je kunt koken met wat je hebt';
+
+  @override
+  String get pantryCookSeeRecipes => 'Bekijk wat je kunt maken';
+
+  @override
+  String get dinnerTitle => 'Wat eten we vanavond?';
+
+  @override
+  String get dinnerShowOthers => 'Andere tonen';
+
+  @override
+  String get dinnerPlannerSuggestions => 'Suggesties';
+
+  @override
+  String get dinnerReasonAllInPantry => 'Alles in je voorraadkast';
+
+  @override
+  String dinnerReasonFavouriteWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: 'Een favoriet die je al $weeks weken niet hebt gemaakt',
+      one: 'Een favoriet die je al 1 week niet hebt gemaakt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonFavourite => 'Een van je favorieten';
+
+  @override
+  String dinnerReasonMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nog maar $count dingen te kopen',
+      one: 'Nog maar 1 ding te kopen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonQuick(int minutes) {
+    return 'Snel: $minutes min';
+  }
+
+  @override
+  String dinnerReasonLastMade(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks weken geleden voor het laatst gemaakt',
+      one: '1 week geleden voor het laatst gemaakt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonNotOpened(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks weken niet geopend',
+      one: '1 week niet geopend',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dinnerReasonRated(int stars) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stars,
+      locale: localeName,
+      other: 'Beoordeeld met $stars sterren',
+      one: 'Beoordeeld met 1 ster',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dinnerReasonNew => 'Nog niet geprobeerd';
+
+  @override
+  String get dinnerReasonFromLibrary => 'Uit je kookboeken';
 }
