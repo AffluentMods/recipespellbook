@@ -165,7 +165,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recipeFieldSource => '来源';
 
   @override
-  String get recipeFieldCourse => '课程';
+  String get recipeFieldCourse => '菜品类型';
 
   @override
   String get recipeFieldCategory => '类别';
@@ -846,16 +846,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsMeasurementsMetric => '公制（毫升、克）';
 
   @override
-  String get settingsKitchenBuddy => 'RPG模式';
+  String get settingsKitchenBuddy => '厨房小伙伴';
 
   @override
-  String get settingsKitchenBuddySubtitle => '启用奇幻风格文字和图像';
+  String get settingsKitchenBuddySubtitle => '可以用金币换装的可爱小厨师伙伴';
 
   @override
   String get settingsRecipes => '食谱';
 
   @override
-  String get settingsManageCourses => '管理课程';
+  String get settingsManageCourses => '管理菜品类型';
 
   @override
   String get settingsManageCategories => '管理类别';
@@ -1147,13 +1147,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cookingFinish => '完成';
 
   @override
-  String get taxonomyAddCourse => '添加课程';
+  String get taxonomyAddCourse => '添加菜品类型';
 
   @override
-  String get taxonomyEditCourse => '编辑课程';
+  String get taxonomyEditCourse => '编辑菜品类型';
 
   @override
-  String get taxonomyDeleteCourse => '删除课程？';
+  String get taxonomyDeleteCourse => '删除菜品类型？';
 
   @override
   String get taxonomyAddCategory => '添加类别';
@@ -1177,7 +1177,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taxonomyDefaultsRestored => '自定义项目已删除，默认已恢复';
 
   @override
-  String get taxonomyCourseName => '课程名称';
+  String get taxonomyCourseName => '菜品类型名称';
 
   @override
   String get taxonomyCourseNameHint => '例如：早午餐、开胃菜';
@@ -1193,7 +1193,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String taxonomyDeleteCourseMessage(String name) {
-    return '删除\"$name\"？此课程的食谱将变为未分类。';
+    return '删除\"$name\"？此菜品类型的食谱将变为未分类。';
   }
 
   @override
@@ -1219,13 +1219,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get browseCourses => '课程';
+  String get browseCourses => '菜品类型';
 
   @override
   String get browseCategories => '类别';
 
   @override
-  String get browseNoCourse => '无课程';
+  String get browseNoCourse => '无菜品类型';
 
   @override
   String get browseUncategorized => '未分类';
@@ -1984,28 +1984,28 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get importRecipe => 'Import Recipe';
+  String get importRecipe => '导入食谱';
 
   @override
-  String get importFile => 'File';
+  String get importFile => '文件';
 
   @override
-  String get importImage => 'Image';
+  String get importImage => '图片';
 
   @override
-  String get importPaste => 'Paste';
+  String get importPaste => '粘贴';
 
   @override
-  String get importPasteUrl => 'Paste recipe URL';
+  String get importPasteUrl => '粘贴食谱网址';
 
   @override
   String get importOr => 'OR';
 
   @override
-  String get importSupportsFormats => 'Supports Paprika, Mela, JSON, ZIP exports';
+  String get importSupportsFormats => '支持 Paprika、Mela、JSON、ZIP 导出文件';
 
   @override
-  String get importFromSocialMedia => 'Import your recipes from any social media platform or website.';
+  String get importFromSocialMedia => '从任何社交媒体平台或网站导入你的食谱。';
 
   @override
   String get tagsTitle => '标签';
@@ -2101,7 +2101,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagGrill => '烧烤';
 
   @override
-  String get tagBBQ => 'BBQ';
+  String get tagBBQ => '烧烤';
 
   @override
   String get tagHoliday => '节日';
@@ -2149,7 +2149,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsQuickAccessSubtitle => '配置快速访问';
 
   @override
-  String get settingsManageCoursesSubtitle => '添加、编辑或删除课程';
+  String get settingsManageCoursesSubtitle => '添加、编辑或删除菜品类型';
 
   @override
   String get settingsManageCategoriesSubtitle => '添加、编辑或删除类别';
@@ -2236,7 +2236,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get coursesTitle => '课程';
+  String get coursesTitle => '菜品类型';
 
   @override
   String get categoriesTitle => '类别';
@@ -2350,13 +2350,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get photoChooseGallery => '从相册选择';
 
   @override
-  String get importFirstRecipe => 'Import First';
+  String get importFirstRecipe => '导入第一个';
 
   @override
-  String get importAllRecipes => 'Import All';
+  String get importAllRecipes => '全部导入';
 
   @override
-  String get parseRecipe => 'Parse Recipe';
+  String get parseRecipe => '解析食谱';
 
   @override
   String get shareRecipe => '分享食谱';
@@ -2405,10 +2405,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get selectNone => '取消选择';
 
   @override
-  String get viewPlanner => 'View Planner';
+  String get viewPlanner => '查看计划';
 
   @override
-  String get planNow => 'Plan Now';
+  String get planNow => '立即计划';
 
   @override
   String get loadingText => '加载中...';
@@ -2536,25 +2536,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get seeAll => '查看全部';
 
   @override
-  String get imagePlaceholders => 'Image Placeholders';
+  String get imagePlaceholders => '默认图片';
 
   @override
-  String get imagePlaceholdersSubtitle => 'Choose what shows when images are missing';
+  String get imagePlaceholdersSubtitle => '选择没有图片时显示的内容';
 
   @override
-  String get homeScreenSection => 'Home Screen';
+  String get homeScreenSection => '首页';
 
   @override
-  String get quickAccessSubtitle => 'Configure what appears in Quick Access';
+  String get quickAccessSubtitle => '设置快速访问中显示的内容';
 
   @override
-  String get manageCoursesSubtitle => 'Add, edit, or remove courses';
+  String get manageCoursesSubtitle => '添加、编辑或删除菜品类型';
 
   @override
-  String get manageCategoriesSubtitle => 'Add, edit, or remove categories';
+  String get manageCategoriesSubtitle => '添加、编辑或删除类别';
 
   @override
-  String get shoppingCategoriesSubtitle => 'Organize items by aisle';
+  String get shoppingCategoriesSubtitle => '按货架区域整理商品';
 
   @override
   String get syncSection => '同步';
@@ -2699,7 +2699,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get defaultImages => '默认图片';
 
   @override
-  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
+  String get defaultImagesDescription => '食谱和食谱书的默认应用插图';
 
   @override
   String get themeBased => '基于主题';
@@ -2732,7 +2732,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get newShoppingList => '新建购物清单';
 
   @override
-  String get listNameHint => 'List name';
+  String get listNameHint => '清单名称';
 
   @override
   String get recipeLayoutSetting => '布局';
@@ -2893,7 +2893,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shoppingListEmptyHint => '添加商品或从食谱导入';
 
   @override
-  String get settingsKitchenBuddyActive => '召唤魔法文字...';
+  String get settingsKitchenBuddyActive => '你的厨房小伙伴已准备好下厨！';
 
   @override
   String get shoppingCheckAll => '全部勾选';
@@ -3043,7 +3043,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nutritionUncertain => '确认匹配';
 
   @override
-  String get nutritionNotFound => '无匹配 — 点击搜索';
+  String get nutritionNotFound => '无匹配，点击搜索';
 
   @override
   String get nutritionRecalculate => '重新计算';
@@ -3329,7 +3329,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagsColorLabel => '颜色';
 
   @override
-  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
+  String get settingsKitchenBuddyEnabled => '赚取金币，给你的小伙伴换装！';
 
   @override
   String get settingsRecipeLayoutSubtitle => '自定义食谱显示';
@@ -3685,31 +3685,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shoppingAddHint => '按回车键添加，然后输入下一个';
 
   @override
-  String get categoryDeli => 'Deli';
+  String get categoryDeli => '熟食';
 
   @override
-  String get categoryBreakfast => 'Breakfast & Cereal';
+  String get categoryBreakfast => '早餐和麦片';
 
   @override
-  String get categoryCanned => 'Canned Goods & Soups';
+  String get categoryCanned => '罐头和汤品';
 
   @override
-  String get categoryCondiments => 'Condiments, Sauces & Spices';
+  String get categoryCondiments => '调味品、酱料和香料';
 
   @override
-  String get categoryAlcohol => 'Beer, Wine & Spirits';
+  String get categoryAlcohol => '啤酒、葡萄酒和烈酒';
 
   @override
-  String get categoryBaby => 'Baby';
+  String get categoryBaby => '母婴用品';
 
   @override
-  String get categoryBeauty => 'Beauty & Personal Care';
+  String get categoryBeauty => '美容和个人护理';
 
   @override
-  String get categoryHousehold => 'Housewares';
+  String get categoryHousehold => '家居用品';
 
   @override
-  String get categoryPet => 'Pet';
+  String get categoryPet => '宠物用品';
 
   @override
   String importFromPlatform(String platform) {
@@ -4446,7 +4446,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get allData => '所有数据';
 
   @override
-  String get allDataDesc => '本地数据和设置 — 完全重置';
+  String get allDataDesc => '永久删除所有内容：本地数据、云端数据和你的账户。彻底从头开始。';
 
   @override
   String get allDataWarningTitle => '这将删除所有内容';
@@ -4470,7 +4470,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get allDataNoUndo => '我理解此操作无法撤销';
 
   @override
-  String get localNoCloudWarning => '你没有 Cloud Sync - 没有可恢复的备份';
+  String get localNoCloudWarning => '你没有使用云端同步，因此没有可恢复的备份';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -4610,7 +4610,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menuShareSubtitle => '邀请朋友和家人一起烹饪！';
 
   @override
-  String get menuShareMessage => '来看看Recipe Spellbook——最棒的食谱应用！https://recipespellbook.app/get';
+  String get menuShareMessage => '来看看 Recipe Spellbook，最棒的食谱应用！https://recipespellbook.app/get';
 
   @override
   String get signIn => '登录';
@@ -4761,11 +4761,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String cancelledAccessUntil(String date) {
-    return '已取消 — 访问至$date';
+    return '已取消：可访问至 $date';
   }
 
   @override
-  String get lifetimeNeverExpires => '终身 — 永不过期';
+  String get lifetimeNeverExpires => '终身：永不过期';
 
   @override
   String renewsDate(String date) {
@@ -4819,13 +4819,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayBadge => '今天';
 
   @override
-  String get noCourseAssigned => '无课程';
+  String get noCourseAssigned => '未设置菜品类型';
 
   @override
   String get uncategorized => '未分类';
 
   @override
-  String get allRecipesHaveCourse => '所有食谱都已设置课程！';
+  String get allRecipesHaveCourse => '所有食谱都已设置菜品类型！';
 
   @override
   String get allRecipesCategorized => '所有食谱都已分类！';
@@ -4839,7 +4839,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get tapToAssignCourse => '点击分配课程';
+  String get tapToAssignCourse => '点击设置菜品类型';
 
   @override
   String get tapToAssignCategory => '点击分配类别';
@@ -4865,7 +4865,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get setCourse => '设置课程';
+  String get setCourse => '设置菜品类型';
 
   @override
   String get setCategory => '设置类别';
@@ -4877,7 +4877,7 @@ class AppLocalizationsZh extends AppLocalizations {
       locale: localeName,
       other: '$count个食谱',
     );
-    return '已为$_temp0设置课程';
+    return '已为$_temp0设置菜品类型';
   }
 
   @override
@@ -4901,7 +4901,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get bulkCourse => '课程';
+  String get bulkCourse => '菜品类型';
 
   @override
   String get bulkCategory => '类别';
@@ -5055,7 +5055,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get payOnceKeepForever => '一次付费，永久使用';
 
   @override
-  String get cloudSyncFreeTrial => 'Try free for 1 week';
+  String get cloudSyncFreeTrial => '免费试用 1 周';
 
   @override
   String get cloudSyncFeature => '云端同步';
@@ -5241,7 +5241,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menuImport => '导入';
 
   @override
-  String get menuKitchenBuddyMode => 'RPG模式';
+  String get menuKitchenBuddyMode => '厨房小伙伴';
 
   @override
   String get menuSocial => '社交';
@@ -5285,10 +5285,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rating => '评分';
 
   @override
-  String get usUnits => 'cups, tablespoons, ounces, °F';
+  String get usUnits => '杯、汤匙、盎司、°F';
 
   @override
-  String get metricUnits => 'milliliters, grams, °C';
+  String get metricUnits => '毫升、克、°C';
 
   @override
   String selectedCount(int count) {
@@ -5302,7 +5302,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String courseSetForRecipes(int count) {
-    return '已为$count个食谱设置课程';
+    return '已为$count个食谱设置菜品类型';
   }
 
   @override
@@ -5389,13 +5389,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featurePhotosOnSteps => '步骤照片';
 
   @override
-  String get featureCloudStorageLimited => 'Cloud storage — Limited';
+  String get featureCloudStorageLimited => '云存储：有限';
 
   @override
   String get featureFamilySharing5 => '家庭共享（5人）';
 
   @override
-  String get featureCloudStorage => 'Cloud storage';
+  String get featureCloudStorage => '云存储';
 
   @override
   String get featureSharedLists => '共享购物清单';
@@ -5407,7 +5407,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featureSharedMealPlan => '共享餐食计划';
 
   @override
-  String get featureAutoBackups => 'Automatic backups';
+  String get featureAutoBackups => '自动备份';
 
   @override
   String get featureFamilySharing10 => '家庭共享（10人）';
@@ -5518,7 +5518,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ingredientPreview => '食材预览';
 
   @override
-  String get resetToDefault => 'Reset to Default';
+  String get resetToDefault => '恢复默认';
 
   @override
   String get learnMore => '了解更多';
@@ -5679,10 +5679,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsNotifAchievementsSubtitle => '成就解锁和里程碑提醒';
 
   @override
-  String get settingsNotifBuddy => '任务提醒';
+  String get settingsNotifBuddy => '小伙伴提醒';
 
   @override
-  String get settingsNotifBuddySubtitle => '每日任务重置和经验值提醒';
+  String get settingsNotifBuddySubtitle => '厨房小伙伴的连续登录和金币奖励';
 
   @override
   String get settingsNotifManagePreferences => '管理通知偏好设置';
@@ -5817,16 +5817,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mealTypeAppetizer => '开胃菜';
 
   @override
-  String get allergenContains => 'Contains';
+  String get allergenContains => '含有';
 
   @override
   String get settingsIngredientLayout => '食材布局';
 
   @override
-  String get ingredientLayoutInline => '内联 — 黄油1茶匙';
+  String get ingredientLayoutInline => '内联：黄油1茶匙';
 
   @override
-  String get ingredientLayoutColumnar => '列式 — 对齐用量';
+  String get ingredientLayoutColumnar => '列式：用量对齐';
 
   @override
   String get settingsIngredientLayoutDescription => '选择食材用量和名称的显示方式。';
@@ -5910,7 +5910,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get exportCategories => '自定义类别';
 
   @override
-  String get exportCourses => '自定义课程';
+  String get exportCourses => '自定义菜品类型';
 
   @override
   String get createRecipeManually => '或手动创建食谱';
@@ -5964,7 +5964,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transferReady => '准备传输';
 
   @override
-  String get transferCodeExpires => '此代码将在15分钟后过期';
+  String get transferCodeExpires => '此代码将在 1 小时后过期';
 
   @override
   String transferCodeExpiresAt(String time) {
@@ -6095,16 +6095,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAdvanced => '高级设置';
 
   @override
-  String get settingsAdvancedSubtitle => '标签、课程、分类等';
+  String get settingsAdvancedSubtitle => '标签、菜品类型、分类等';
 
   @override
-  String get settingsRestoreDefaults => 'Restore Default Recipes';
+  String get settingsRestoreDefaults => '恢复默认食谱';
 
   @override
-  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+  String get settingsRestoreDefaultsSubtitle => '重新添加 10 个入门食谱';
 
   @override
-  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+  String get settingsRestoreDefaultsConfirm => '将 10 个入门食谱添加到你的食谱书？现有食谱不受影响。';
 
   @override
   String get settingsDeleteData => '删除数据';
@@ -6182,13 +6182,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get exportFormattedList => '格式化清单';
 
   @override
-  String get exportFormattedListSubtitle => '带复选框——适合笔记应用';
+  String get exportFormattedListSubtitle => '带复选框，适合笔记应用';
 
   @override
   String get exportPlainText => '纯文本';
 
   @override
-  String get exportPlainTextSubtitle => '简单列表——可粘贴到任何地方';
+  String get exportPlainTextSubtitle => '简单列表，可粘贴到任何地方';
 
   @override
   String get importFromBackupFile => '从备份文件';
@@ -6236,7 +6236,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mealPlanThisWeekend => '本周末';
 
   @override
-  String get menuKitchenBuddy => 'RPG资料';
+  String get menuKitchenBuddy => '厨房小伙伴';
 
   @override
   String get menuTools => '工具';
@@ -6314,74 +6314,74 @@ class AppLocalizationsZh extends AppLocalizations {
   String get upgradeToProUnlock => '升级到Pro版解锁';
 
   @override
-  String get kitchenBuddyTitle => 'Kitchen Buddy';
+  String get kitchenBuddyTitle => '厨房小伙伴';
 
   @override
-  String get kitchenBuddyCloset => 'Closet';
+  String get kitchenBuddyCloset => '衣橱';
 
   @override
-  String get kitchenBuddyShop => 'Shop';
+  String get kitchenBuddyShop => '商店';
 
   @override
-  String get kitchenBuddyAchievements => 'Achievements';
+  String get kitchenBuddyAchievements => '成就';
 
   @override
   String kitchenBuddyStreakDays(int count) {
-    return '$count day streak';
+    return '连续 $count 天';
   }
 
   @override
-  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
+  String get kitchenBuddyClosetEmpty => '还没有物品！去商店看看吧。';
 
   @override
-  String get kitchenBuddyShopOwnEverything => 'You own everything!';
+  String get kitchenBuddyShopOwnEverything => '你已拥有全部物品！';
 
   @override
-  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
+  String get kitchenBuddyShopCheckBack => '有新物品上架时再来看看吧。';
 
   @override
   String kitchenBuddyConfirmPurchase(String itemName) {
-    return 'Buy $itemName?';
+    return '购买 $itemName？';
   }
 
   @override
   String kitchenBuddyCostSummary(int price) {
-    return 'This will cost 🪙 $price Spice Coins.';
+    return '需要花费 🪙 $price 香料币。';
   }
 
   @override
-  String get kitchenBuddyBuy => 'Buy';
+  String get kitchenBuddyBuy => '购买';
 
   @override
   String kitchenBuddyPurchaseSuccess(String itemName) {
-    return 'Purchased $itemName!';
+    return '已购买 $itemName！';
   }
 
   @override
-  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
+  String get kitchenBuddyNotEnoughCoins => '金币不足';
 
   @override
   String kitchenBuddyRequires(String achievementName) {
-    return 'Requires: $achievementName';
+    return '需要：$achievementName';
   }
 
   @override
-  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
+  String get kitchenBuddyNamingTitle => '给你的小伙伴起个名字';
 
   @override
-  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
+  String get kitchenBuddyIntroTitle => '来认识你的厨房小伙伴吧！';
 
   @override
-  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
+  String get kitchenBuddyIntroDescription => '这位小厨师将成为你的厨房伙伴。\n做菜赚金币，给它换装吧！';
 
   @override
-  String get kitchenBuddyNameLabel => 'Buddy Name';
+  String get kitchenBuddyNameLabel => '小伙伴名字';
 
   @override
-  String get kitchenBuddyNameHint => 'Enter a name...';
+  String get kitchenBuddyNameHint => '输入名字…';
 
   @override
-  String get kitchenBuddyCreate => 'Create Buddy';
+  String get kitchenBuddyCreate => '创建小伙伴';
 
   @override
   String get settingsNoMatchingSettings => '没有匹配的设置';
@@ -6513,7 +6513,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityNoCookbooksToPublish => '没有可发布的食谱书';
 
   @override
-  String get communityPublishInfo => '食谱书至少需要5个食谱才能发布。你的食谱将作为快照分享,,更新不会同步。';
+  String get communityPublishInfo => '食谱书至少需要 5 个食谱才能发布。你的食谱将作为快照分享，更新不会同步。';
 
   @override
   String get communitySelectCookbook => '选择要发布的食谱书';
@@ -6832,7 +6832,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get publishButton => '发布';
 
   @override
-  String get selectCourse => '选择课程';
+  String get selectCourse => '选择菜品类型';
 
   @override
   String get selectCategory => '选择分类';
@@ -6846,7 +6846,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get addAsNewCourse => '添加为新课程';
+  String get addAsNewCourse => '添加为新菜品类型';
 
   @override
   String get addAsNewCategory => '添加为新分类';
@@ -7031,7 +7031,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get integrationsChecking => '检查中...';
 
   @override
-  String get integrationsConnectedManage => '已连接 - 点击管理';
+  String get integrationsConnectedManage => '已连接，点击管理';
 
   @override
   String get integrationsNotConnected => '未连接';
@@ -7142,13 +7142,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingBlankCookbook => '从空白食谱开始';
 
   @override
-  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+  String get onboardingBlankConfirmTitle => '从零开始？';
 
   @override
-  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+  String get onboardingBlankConfirmBody => '你随时可以稍后在设置中添加入门食谱。';
 
   @override
-  String get onboardingBlankConfirmYes => 'Yes, start empty';
+  String get onboardingBlankConfirmYes => '是的，从空白开始';
 
   @override
   String get onboardingSpellbookAwaits => '你的魔法书在等你';
@@ -7558,7 +7558,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuideQuickTipLabel => '快速提示';
 
   @override
-  String get importGuideQuickTipText => '最快的方法？复制任何食谱链接并分享到Recipe Spellbook——几乎适用于任何应用。';
+  String get importGuideQuickTipText => '最快的方法？复制任何食谱链接并分享到 Recipe Spellbook。几乎任何应用都适用。';
 
   @override
   String get importGuideWebButton => '网页';
@@ -7725,7 +7725,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuideYoutubeStep3Desc => '点击\"复制链接\"或在分享面板中找到Recipe Spellbook。';
 
   @override
-  String get importGuideYoutubeStep3Tip => '许多YouTube创作者会在视频描述中放完整食谱——这使提取更准确。';
+  String get importGuideYoutubeStep3Tip => '许多 YouTube 创作者会在视频描述中放上完整食谱，这样提取会更准确。';
 
   @override
   String get importGuideYoutubeStep4Title => '粘贴并导入';
@@ -7800,7 +7800,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuideWebsiteStep5Title => '查看并保存';
 
   @override
-  String get importGuideWebsiteStep5Desc => '食谱会立即提取——标题、食材、步骤、烹饪时间甚至照片。查看并保存。';
+  String get importGuideWebsiteStep5Desc => '检查提取的食谱，然后点击“导入”保存到你的食谱书。';
 
   @override
   String get importGuideWebsiteStep5Tip => '支持10,000+个食谱网站。如果提取失败，请尝试\"从文本\"方法。';
@@ -7836,7 +7836,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuidePhotoStep4Title => '查看并修正错误';
 
   @override
-  String get importGuidePhotoStep4Desc => '检查提取的食谱。OCR偶尔会误读字符——\"1/2\"可能变成\"1l2\"。修正错误并保存。';
+  String get importGuidePhotoStep4Desc => '检查提取的食谱。OCR 偶尔会误读字符：“1/2”可能变成“1l2”。修正错误后保存。';
 
   @override
   String get importGuidePhotoStep4Tip => '手写食谱也可以，但打印文字效果最佳。';
@@ -7896,7 +7896,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuideTextStep3Desc => '将复制的文本粘贴到文本框中。AI会自动分离标题、食材和步骤。';
 
   @override
-  String get importGuideTextStep3Tip => '即使是未格式化的文本也可以——AI能智能解析食材用量和步骤说明。';
+  String get importGuideTextStep3Tip => '即使是未格式化的文本也可以。AI 能智能解析食材用量和步骤说明。';
 
   @override
   String get importGuideTextStep4Title => '查看并保存';
@@ -8132,7 +8132,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get faqWhatAreSublinkedSubtitle => '将相关食谱连接在一起';
 
   @override
-  String get faqWhatAreSublinkedAnswer => '子链接食谱可以将相关食谱连接在一起。例如，玛格丽特披萨食谱可以链接到您的披萨面团食谱。查看主食谱时，您可以点击链接的食谱直接跳转 — 无需搜索。';
+  String get faqWhatAreSublinkedAnswer => '子链接食谱可以将相关食谱连接在一起。例如，玛格丽特披萨食谱可以链接到您的披萨面团食谱。查看主食谱时，您可以点击链接的食谱直接跳转，无需搜索。';
 
   @override
   String get faqMacroCalcTitle => '如何使用宏量营养素计算器';
@@ -8204,7 +8204,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get faqWhatIsMacroCalcSubtitle => '食谱自动营养估算';
 
   @override
-  String get faqWhatIsMacroCalcAnswer => '宏量营养素计算器通过将每种食材与USDA食品数据库进行匹配，自动估算食谱的营养成分。它计算卡路里、蛋白质、碳水化合物、脂肪、膳食纤维、糖、钠等——全部按每份计算。您可以在任何食谱的营养部分找到它。';
+  String get faqWhatIsMacroCalcAnswer => '宏量营养素计算器通过将每种食材与USDA食品数据库进行匹配，自动估算食谱的营养成分。它计算卡路里、蛋白质、碳水化合物、脂肪、膳食纤维、糖、钠等，全部按每份计算。您可以在任何食谱的营养部分找到它。';
 
   @override
   String get faqImportFailedTitle => '为什么导入失败了？';
@@ -8213,7 +8213,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get faqImportFailedSubtitle => '常见原因和解决方法';
 
   @override
-  String get faqImportFailedAnswer => '导入失败可能有以下原因：\n\n• 网站可能阻止了自动访问 — 尝试复制食谱文本并使用文本导入。\n• 链接可能已过期或为私密链接 — 请确保是公开链接。\n• 某些网站使用难以解析的格式 — 尝试使用AI导入作为替代方案。\n• 检查您的网络连接并重试。';
+  String get faqImportFailedAnswer => '导入失败可能有以下原因：\n\n• 网站可能阻止了自动访问。尝试复制食谱文本并使用文本导入。\n• 链接可能已过期或为私密链接。请确保是公开链接。\n• 某些网站使用难以解析的格式。尝试使用AI导入作为替代方案。\n• 检查您的网络连接并重试。';
 
   @override
   String get faqDeviceTransferTitle => '可以从其他设备导入吗？';
@@ -8459,13 +8459,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hintShoppingListGen => '一键将食谱配料添加到购物清单。';
 
   @override
-  String get hintRecipeNotes => '给任何食谱添加个人笔记——技巧、修改或回忆。';
+  String get hintRecipeNotes => '给任何食谱添加个人笔记：技巧、修改或回忆。';
 
   @override
   String get hintCookbookOrganization => '创建多个食谱本，按主题或场合整理你的食谱。';
 
   @override
-  String get hintTagSystem => '为食谱添加标签以便筛选——创建自定义标签如“快手”、“收藏”等。';
+  String get hintTagSystem => '为食谱添加标签以便筛选，可创建“快手”“收藏”等自定义标签。';
 
   @override
   String get allergyMyAllergies => '我的过敏';
@@ -8748,7 +8748,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String subscriptionCancelledUntil(String date) {
-    return '已取消 — 可使用至$date';
+    return '已取消：可使用至 $date';
   }
 
   @override
@@ -8758,7 +8758,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subscriptionPlan => '方案';
 
   @override
-  String get subscriptionLifetime => '终身 — 永不过期';
+  String get subscriptionLifetime => '终身：永不过期';
 
   @override
   String get subscriptionManage => '管理订阅';
@@ -8837,10 +8837,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSystemLanguage => '系统';
 
   @override
-  String get tierFamily => 'FAMILY';
+  String get tierFamily => '家庭';
 
   @override
-  String get tierCreator => 'CREATOR';
+  String get tierCreator => '创作者';
 
   @override
   String get tierFreeName => '免费';
@@ -9151,7 +9151,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityViewCookbook => '查看食谱书';
 
   @override
-  String get communityPublishInProgress => '正在发布中 - 请先取消上传';
+  String get communityPublishInProgress => '正在发布，请先取消上传';
 
   @override
   String get communityUnknownError => '未知错误';
@@ -9254,7 +9254,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return '选择 $planName — $planPrice';
+    return '选择 $planName：$planPrice';
   }
 
   @override
@@ -9273,7 +9273,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get paywallYoureAllSet => '一切就绪！';
 
   @override
-  String get paywallPurchaseNotDetected => '尚未检测到购买 - 请再次刷新试试。';
+  String get paywallPurchaseNotDetected => '尚未检测到购买，请再刷新一次试试。';
 
   @override
   String get paywallWebComingSoon => '网页端购买即将上线';
@@ -9605,13 +9605,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get oneTimePurchaseDesc => '一次性购买 · 永久拥有 · 无订阅';
 
   @override
-  String get viewPlansPrice => '查看方案 — \$6.99';
+  String get viewPlansPrice => '查看方案：\$6.99';
 
   @override
-  String get premiumActive => '高级版 - 已激活';
+  String get premiumActive => '高级版：已激活';
 
   @override
-  String get familyActive => '家庭版 - 已激活';
+  String get familyActive => '家庭版：已激活';
 
   @override
   String get cloudSyncEnabled => '云同步已启用';
@@ -9734,7 +9734,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get cravingCategoryHint => '可选 - 什么都行就跳过吧';
+  String get cravingCategoryHint => '可选，什么都行就跳过吧';
 
   @override
   String get cravingCategoryNarrowHint => '缩小范围或跳过';
@@ -9833,7 +9833,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cravingSourceCommunitySubtitle => '来自社区';
 
   @override
-  String get cravingSourceBothTitle => '都来点 - 给我惊喜';
+  String get cravingSourceBothTitle => '都来点：给我惊喜';
 
   @override
   String get cravingSourceBothSubtitle => '你的食谱和社区食谱混合';
@@ -10165,7 +10165,7 @@ class AppLocalizationsZh extends AppLocalizations {
       other: '此食谱关联了 $count 个子食谱',
       one: '此食谱关联了 1 个子食谱',
     );
-    return '$_temp0 — 取消勾选你不想包含的项。';
+    return '$_temp0。取消勾选你不想包含的项。';
   }
 
   @override
@@ -10214,7 +10214,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get backupReminderNever => '登录以保持食谱同步 — 或手动备份。';
+  String get backupReminderNever => '登录以保持食谱同步，或手动备份。';
 
   @override
   String get backupReminderAction => '登录';
@@ -10300,7 +10300,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get publishSingleRecipeTitle => '发布食谱';
 
   @override
-  String get publishSingleRecipeBody => '将此食谱分享到社区动态。更新不会自动同步 — 重新发布以推送更改。';
+  String get publishSingleRecipeBody => '将此食谱分享到社区动态。更新不会自动同步，需要重新发布才能推送更改。';
 
   @override
   String get publishSingleRecipeAction => '发布';
@@ -10434,7 +10434,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityRepublishSourceMissing => '在此设备上找不到原始食谱。请从该食谱重新发布，以分享更新后的版本。';
 
   @override
-  String get importNothingSaved => '导入失败 — 未保存任何内容。请重试。';
+  String get importNothingSaved => '导入失败，未保存任何内容。请重试。';
 
   @override
   String get unsavedChangesBody => '你有未保存的更改。要不保存就离开吗？';

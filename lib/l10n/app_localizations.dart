@@ -694,7 +694,7 @@ abstract class AppLocalizations {
   /// No description provided for @isbnScanBookDetected.
   ///
   /// In en, this message translates to:
-  /// **'That\'s a book barcode — opening the cookbook scanner.'**
+  /// **'That\'s a book barcode. Opening the cookbook scanner.'**
   String get isbnScanBookDetected;
 
   /// No description provided for @isbnCameraUnavailable.
@@ -8068,7 +8068,7 @@ abstract class AppLocalizations {
   /// No description provided for @allDataDesc.
   ///
   /// In en, this message translates to:
-  /// **'Permanently deletes EVERYTHING — local data, cloud data, and your account. Complete fresh start.'**
+  /// **'Permanently deletes EVERYTHING: local data, cloud data, and your account. Complete fresh start.'**
   String get allDataDesc;
 
   /// No description provided for @allDataWarningTitle.
@@ -8116,7 +8116,7 @@ abstract class AppLocalizations {
   /// No description provided for @localNoCloudWarning.
   ///
   /// In en, this message translates to:
-  /// **'You don\'t have Cloud Sync — there is no backup to recover from'**
+  /// **'You don\'t have Cloud Sync, so there is no backup to recover from'**
   String get localNoCloudWarning;
 
   /// No description provided for @permanentDeleteWarning.
@@ -8680,13 +8680,13 @@ abstract class AppLocalizations {
   /// No description provided for @cancelledAccessUntil.
   ///
   /// In en, this message translates to:
-  /// **'Cancelled — access until {date}'**
+  /// **'Cancelled: access until {date}'**
   String cancelledAccessUntil(String date);
 
   /// No description provided for @lifetimeNeverExpires.
   ///
   /// In en, this message translates to:
-  /// **'Lifetime — never expires'**
+  /// **'Lifetime: never expires'**
   String get lifetimeNeverExpires;
 
   /// No description provided for @renewsDate.
@@ -9724,7 +9724,7 @@ abstract class AppLocalizations {
   /// No description provided for @featureCloudStorageLimited.
   ///
   /// In en, this message translates to:
-  /// **'Cloud storage — Limited'**
+  /// **'Cloud storage: Limited'**
   String get featureCloudStorageLimited;
 
   /// No description provided for @featureFamilySharing5.
@@ -10510,13 +10510,13 @@ abstract class AppLocalizations {
   /// No description provided for @ingredientLayoutInline.
   ///
   /// In en, this message translates to:
-  /// **'Inline — 1 tsp butter'**
+  /// **'Inline: 1 tsp butter'**
   String get ingredientLayoutInline;
 
   /// No description provided for @ingredientLayoutColumnar.
   ///
   /// In en, this message translates to:
-  /// **'Columnar — amounts aligned'**
+  /// **'Columnar: amounts aligned'**
   String get ingredientLayoutColumnar;
 
   /// No description provided for @settingsIngredientLayoutDescription.
@@ -11182,7 +11182,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportFormattedListSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'With checkboxes — great for notes apps'**
+  /// **'With checkboxes, great for notes apps'**
   String get exportFormattedListSubtitle;
 
   /// No description provided for @exportPlainText.
@@ -11194,7 +11194,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportPlainTextSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Simple list — paste anywhere'**
+  /// **'Simple list, paste anywhere'**
   String get exportPlainTextSubtitle;
 
   /// No description provided for @importFromBackupFile.
@@ -13540,7 +13540,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideQuickTipText.
   ///
   /// In en, this message translates to:
-  /// **'The fastest way? Copy any recipe link and share it to Recipe Spellbook — works from almost any app.'**
+  /// **'The fastest way? Copy any recipe link and share it to Recipe Spellbook. It works from almost any app.'**
   String get importGuideQuickTipText;
 
   /// No description provided for @importGuideWebButton.
@@ -13870,7 +13870,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideYoutubeStep3Tip.
   ///
   /// In en, this message translates to:
-  /// **'Many YouTube creators put the full recipe in the video description — this makes extraction more accurate.'**
+  /// **'Many YouTube creators put the full recipe in the video description, which makes extraction more accurate.'**
   String get importGuideYoutubeStep3Tip;
 
   /// No description provided for @importGuideYoutubeStep4Title.
@@ -14092,7 +14092,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuidePhotoStep4Desc.
   ///
   /// In en, this message translates to:
-  /// **'Check the extracted recipe. OCR occasionally misreads characters — \"1/2\" might become \"1l2\". Fix any errors and save.'**
+  /// **'Check the extracted recipe. OCR occasionally misreads characters: \"1/2\" might become \"1l2\". Fix any errors and save.'**
   String get importGuidePhotoStep4Desc;
 
   /// No description provided for @importGuidePhotoStep4Tip.
@@ -14212,7 +14212,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideTextStep3Tip.
   ///
   /// In en, this message translates to:
-  /// **'This works even with unformatted text — the AI is smart about parsing ingredient amounts and step instructions.'**
+  /// **'This works even with unformatted text. The AI is smart about parsing ingredient amounts and step instructions.'**
   String get importGuideTextStep3Tip;
 
   /// No description provided for @importGuideTextStep4Title.
@@ -14680,7 +14680,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqWhatAreSublinkedAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.'**
+  /// **'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it, no searching needed.'**
   String get faqWhatAreSublinkedAnswer;
 
   /// No description provided for @faqMacroCalcTitle.
@@ -14716,7 +14716,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqMacroCalcStep2Desc.
   ///
   /// In en, this message translates to:
-  /// **'Scroll to the bottom of the recipe. If no nutrition data exists yet, you\'ll see an empty state — tap it to start the calculator.'**
+  /// **'Scroll to the bottom of the recipe. If no nutrition data exists yet, you\'ll see an empty state. Tap it to start the calculator.'**
   String get faqMacroCalcStep2Desc;
 
   /// No description provided for @faqMacroCalcStep3Title.
@@ -14824,7 +14824,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqWhatIsMacroCalcAnswer.
   ///
   /// In en, this message translates to:
-  /// **'The Macro Calculator automatically estimates the nutritional content of your recipes by matching each ingredient to the USDA food database. It calculates calories, protein, carbs, fat, fiber, sugar, sodium, and more — all per serving. You can find it in the Nutrition section of any recipe.'**
+  /// **'The Macro Calculator automatically estimates the nutritional content of your recipes by matching each ingredient to the USDA food database. It calculates calories, protein, carbs, fat, fiber, sugar, sodium, and more, all per serving. You can find it in the Nutrition section of any recipe.'**
   String get faqWhatIsMacroCalcAnswer;
 
   /// No description provided for @faqImportFailedTitle.
@@ -14842,7 +14842,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqImportFailedAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.'**
+  /// **'Imports can fail for a few reasons:\n\n• The website may block automated access. Try copying the recipe text and using Text Import instead.\n• The link may have expired or be private. Make sure it’s a public link.\n• Some sites use formats that are harder to parse. Try the AI import as an alternative.\n• Check your internet connection and try again.'**
   String get faqImportFailedAnswer;
 
   /// No description provided for @faqDeviceTransferTitle.
@@ -15838,7 +15838,7 @@ abstract class AppLocalizations {
   /// No description provided for @subscriptionCancelledUntil.
   ///
   /// In en, this message translates to:
-  /// **'Cancelled — access until {date}'**
+  /// **'Cancelled: access until {date}'**
   String subscriptionCancelledUntil(String date);
 
   /// No description provided for @subscriptionRenews.
@@ -15856,7 +15856,7 @@ abstract class AppLocalizations {
   /// No description provided for @subscriptionLifetime.
   ///
   /// In en, this message translates to:
-  /// **'Lifetime — never expires'**
+  /// **'Lifetime: never expires'**
   String get subscriptionLifetime;
 
   /// No description provided for @subscriptionManage.
@@ -16762,7 +16762,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallGetPlan.
   ///
   /// In en, this message translates to:
-  /// **'Get {planName} — {planPrice}'**
+  /// **'Get {planName}: {planPrice}'**
   String paywallGetPlan(String planName, String planPrice);
 
   /// No description provided for @paywallRestorePurchases.
@@ -16798,7 +16798,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallPurchaseNotDetected.
   ///
   /// In en, this message translates to:
-  /// **'Purchase not detected yet — try refreshing again.'**
+  /// **'Purchase not detected yet. Try refreshing again.'**
   String get paywallPurchaseNotDetected;
 
   /// No description provided for @paywallWebComingSoon.
@@ -17410,19 +17410,19 @@ abstract class AppLocalizations {
   /// No description provided for @viewPlansPrice.
   ///
   /// In en, this message translates to:
-  /// **'View Plans — \$6.99'**
+  /// **'View Plans: \$6.99'**
   String get viewPlansPrice;
 
   /// No description provided for @premiumActive.
   ///
   /// In en, this message translates to:
-  /// **'Premium — Active'**
+  /// **'Premium: Active'**
   String get premiumActive;
 
   /// No description provided for @familyActive.
   ///
   /// In en, this message translates to:
-  /// **'Family — Active'**
+  /// **'Family: Active'**
   String get familyActive;
 
   /// No description provided for @cloudSyncEnabled.
@@ -17656,7 +17656,7 @@ abstract class AppLocalizations {
   /// No description provided for @cravingCategoryHint.
   ///
   /// In en, this message translates to:
-  /// **'Optional — skip if you\'re open to anything'**
+  /// **'Optional, skip if you\'re open to anything'**
   String get cravingCategoryHint;
 
   /// No description provided for @cravingCategoryNarrowHint.
@@ -17854,7 +17854,7 @@ abstract class AppLocalizations {
   /// No description provided for @cravingSourceBothTitle.
   ///
   /// In en, this message translates to:
-  /// **'Both — surprise me'**
+  /// **'Both: surprise me'**
   String get cravingSourceBothTitle;
 
   /// No description provided for @cravingSourceBothSubtitle.
@@ -18424,7 +18424,7 @@ abstract class AppLocalizations {
   /// No description provided for @subRecipeSheetSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{This recipe links 1 sub-recipe} other{This recipe links {count} sub-recipes}} — uncheck any you don\'t want to include.'**
+  /// **'{count, plural, =1{This recipe links 1 sub-recipe} other{This recipe links {count} sub-recipes}}. Uncheck any you don\'t want to include.'**
   String subRecipeSheetSubtitle(int count);
 
   /// No description provided for @subRecipeUsedInOthers.
@@ -18472,7 +18472,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupReminderNever.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to keep your recipes synced — or back up manually.'**
+  /// **'Sign in to keep your recipes synced, or back up manually.'**
   String get backupReminderNever;
 
   /// No description provided for @backupReminderAction.
@@ -18628,7 +18628,7 @@ abstract class AppLocalizations {
   /// No description provided for @publishSingleRecipeBody.
   ///
   /// In en, this message translates to:
-  /// **'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.'**
+  /// **'Share this recipe to the community feed. Updates won\'t sync, so re-publish to push changes.'**
   String get publishSingleRecipeBody;
 
   /// No description provided for @publishSingleRecipeAction.
@@ -18802,7 +18802,7 @@ abstract class AppLocalizations {
   /// No description provided for @importNothingSaved.
   ///
   /// In en, this message translates to:
-  /// **'Import failed — nothing was saved. Please try again.'**
+  /// **'Import failed: nothing was saved. Please try again.'**
   String get importNothingSaved;
 
   /// No description provided for @unsavedChangesBody.
@@ -19198,7 +19198,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareViewerOwnItem.
   ///
   /// In en, this message translates to:
-  /// **'This is yours — you already have it.'**
+  /// **'This is yours. You already have it.'**
   String get shareViewerOwnItem;
 
   /// No description provided for @shareViewerJoinNeedsSubscription.

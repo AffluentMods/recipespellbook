@@ -315,7 +315,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get isbnScanBookDetected => 'That\'s a book barcode — opening the cookbook scanner.';
+  String get isbnScanBookDetected => 'That\'s a book barcode. Opening the cookbook scanner.';
 
   @override
   String get isbnCameraUnavailable => 'Camera unavailable. You can still type the ISBN below.';
@@ -4503,7 +4503,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allData => 'All Data';
 
   @override
-  String get allDataDesc => 'Permanently deletes EVERYTHING — local data, cloud data, and your account. Complete fresh start.';
+  String get allDataDesc => 'Permanently deletes EVERYTHING: local data, cloud data, and your account. Complete fresh start.';
 
   @override
   String get allDataWarningTitle => 'This will delete everything';
@@ -4527,7 +4527,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allDataNoUndo => 'I understand this action cannot be undone';
 
   @override
-  String get localNoCloudWarning => 'You don\'t have Cloud Sync — there is no backup to recover from';
+  String get localNoCloudWarning => 'You don\'t have Cloud Sync, so there is no backup to recover from';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -4818,11 +4818,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cancelledAccessUntil(String date) {
-    return 'Cancelled — access until $date';
+    return 'Cancelled: access until $date';
   }
 
   @override
-  String get lifetimeNeverExpires => 'Lifetime — never expires';
+  String get lifetimeNeverExpires => 'Lifetime: never expires';
 
   @override
   String renewsDate(String date) {
@@ -5457,7 +5457,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featurePhotosOnSteps => 'Photos on steps';
 
   @override
-  String get featureCloudStorageLimited => 'Cloud storage — Limited';
+  String get featureCloudStorageLimited => 'Cloud storage: Limited';
 
   @override
   String get featureFamilySharing5 => 'Family sharing (5 members)';
@@ -5912,10 +5912,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsIngredientLayout => 'Ingredient Layout';
 
   @override
-  String get ingredientLayoutInline => 'Inline — 1 tsp butter';
+  String get ingredientLayoutInline => 'Inline: 1 tsp butter';
 
   @override
-  String get ingredientLayoutColumnar => 'Columnar — amounts aligned';
+  String get ingredientLayoutColumnar => 'Columnar: amounts aligned';
 
   @override
   String get settingsIngredientLayoutDescription => 'Choose how ingredient amounts and names are displayed in recipes, shopping lists, and print.';
@@ -6274,13 +6274,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportFormattedList => 'Formatted list';
 
   @override
-  String get exportFormattedListSubtitle => 'With checkboxes — great for notes apps';
+  String get exportFormattedListSubtitle => 'With checkboxes, great for notes apps';
 
   @override
   String get exportPlainText => 'Plain text';
 
   @override
-  String get exportPlainTextSubtitle => 'Simple list — paste anywhere';
+  String get exportPlainTextSubtitle => 'Simple list, paste anywhere';
 
   @override
   String get importFromBackupFile => 'From backup file';
@@ -7660,7 +7660,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importGuideQuickTipLabel => 'Quick tip';
 
   @override
-  String get importGuideQuickTipText => 'The fastest way? Copy any recipe link and share it to Recipe Spellbook — works from almost any app.';
+  String get importGuideQuickTipText => 'The fastest way? Copy any recipe link and share it to Recipe Spellbook. It works from almost any app.';
 
   @override
   String get importGuideWebButton => 'Web';
@@ -7827,7 +7827,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importGuideYoutubeStep3Desc => 'Tap \"Copy link\" or find Recipe Spellbook in the share sheet.';
 
   @override
-  String get importGuideYoutubeStep3Tip => 'Many YouTube creators put the full recipe in the video description — this makes extraction more accurate.';
+  String get importGuideYoutubeStep3Tip => 'Many YouTube creators put the full recipe in the video description, which makes extraction more accurate.';
 
   @override
   String get importGuideYoutubeStep4Title => 'Preview & import';
@@ -7938,7 +7938,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importGuidePhotoStep4Title => 'Review & fix any errors';
 
   @override
-  String get importGuidePhotoStep4Desc => 'Check the extracted recipe. OCR occasionally misreads characters — \"1/2\" might become \"1l2\". Fix any errors and save.';
+  String get importGuidePhotoStep4Desc => 'Check the extracted recipe. OCR occasionally misreads characters: \"1/2\" might become \"1l2\". Fix any errors and save.';
 
   @override
   String get importGuidePhotoStep4Tip => 'Handwritten recipes work too, but printed text gives the best results.';
@@ -7998,7 +7998,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importGuideTextStep3Desc => 'Paste the copied text into the text field. The AI will automatically separate the title, ingredients, and steps.';
 
   @override
-  String get importGuideTextStep3Tip => 'This works even with unformatted text — the AI is smart about parsing ingredient amounts and step instructions.';
+  String get importGuideTextStep3Tip => 'This works even with unformatted text. The AI is smart about parsing ingredient amounts and step instructions.';
 
   @override
   String get importGuideTextStep4Title => 'Review & save';
@@ -8234,7 +8234,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get faqWhatAreSublinkedSubtitle => 'Connect related recipes together';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.';
+  String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it, no searching needed.';
 
   @override
   String get faqMacroCalcTitle => 'How to use the Macro Calculator';
@@ -8252,7 +8252,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get faqMacroCalcStep2Title => 'Find the Nutrition section';
 
   @override
-  String get faqMacroCalcStep2Desc => 'Scroll to the bottom of the recipe. If no nutrition data exists yet, you\'ll see an empty state — tap it to start the calculator.';
+  String get faqMacroCalcStep2Desc => 'Scroll to the bottom of the recipe. If no nutrition data exists yet, you\'ll see an empty state. Tap it to start the calculator.';
 
   @override
   String get faqMacroCalcStep3Title => 'View the calculator';
@@ -8306,7 +8306,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get faqWhatIsMacroCalcSubtitle => 'Automatic nutrition estimation for recipes';
 
   @override
-  String get faqWhatIsMacroCalcAnswer => 'The Macro Calculator automatically estimates the nutritional content of your recipes by matching each ingredient to the USDA food database. It calculates calories, protein, carbs, fat, fiber, sugar, sodium, and more — all per serving. You can find it in the Nutrition section of any recipe.';
+  String get faqWhatIsMacroCalcAnswer => 'The Macro Calculator automatically estimates the nutritional content of your recipes by matching each ingredient to the USDA food database. It calculates calories, protein, carbs, fat, fiber, sugar, sodium, and more, all per serving. You can find it in the Nutrition section of any recipe.';
 
   @override
   String get faqImportFailedTitle => 'Why did my import fail?';
@@ -8315,7 +8315,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get faqImportFailedSubtitle => 'Common reasons and fixes';
 
   @override
-  String get faqImportFailedAnswer => 'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.';
+  String get faqImportFailedAnswer => 'Imports can fail for a few reasons:\n\n• The website may block automated access. Try copying the recipe text and using Text Import instead.\n• The link may have expired or be private. Make sure it’s a public link.\n• Some sites use formats that are harder to parse. Try the AI import as an alternative.\n• Check your internet connection and try again.';
 
   @override
   String get faqDeviceTransferTitle => 'Can I import from other devices?';
@@ -8856,7 +8856,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscriptionCancelledUntil(String date) {
-    return 'Cancelled — access until $date';
+    return 'Cancelled: access until $date';
   }
 
   @override
@@ -8866,7 +8866,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionPlan => 'Plan';
 
   @override
-  String get subscriptionLifetime => 'Lifetime — never expires';
+  String get subscriptionLifetime => 'Lifetime: never expires';
 
   @override
   String get subscriptionManage => 'Manage subscription';
@@ -9362,7 +9362,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return 'Get $planName — $planPrice';
+    return 'Get $planName: $planPrice';
   }
 
   @override
@@ -9381,7 +9381,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallYoureAllSet => 'You\'re all set!';
 
   @override
-  String get paywallPurchaseNotDetected => 'Purchase not detected yet — try refreshing again.';
+  String get paywallPurchaseNotDetected => 'Purchase not detected yet. Try refreshing again.';
 
   @override
   String get paywallWebComingSoon => 'Web Purchases Coming Soon';
@@ -9719,13 +9719,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get oneTimePurchaseDesc => 'One-time purchase · yours forever · no subscription';
 
   @override
-  String get viewPlansPrice => 'View Plans — \$6.99';
+  String get viewPlansPrice => 'View Plans: \$6.99';
 
   @override
-  String get premiumActive => 'Premium — Active';
+  String get premiumActive => 'Premium: Active';
 
   @override
-  String get familyActive => 'Family — Active';
+  String get familyActive => 'Family: Active';
 
   @override
   String get cloudSyncEnabled => 'Cloud sync enabled';
@@ -9848,7 +9848,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get cravingCategoryHint => 'Optional — skip if you\'re open to anything';
+  String get cravingCategoryHint => 'Optional, skip if you\'re open to anything';
 
   @override
   String get cravingCategoryNarrowHint => 'Narrow it down or skip ahead';
@@ -9947,7 +9947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cravingSourceCommunitySubtitle => 'From the community';
 
   @override
-  String get cravingSourceBothTitle => 'Both — surprise me';
+  String get cravingSourceBothTitle => 'Both: surprise me';
 
   @override
   String get cravingSourceBothSubtitle => 'Mix of yours and community';
@@ -10279,7 +10279,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: 'This recipe links $count sub-recipes',
       one: 'This recipe links 1 sub-recipe',
     );
-    return '$_temp0 — uncheck any you don\'t want to include.';
+    return '$_temp0. Uncheck any you don\'t want to include.';
   }
 
   @override
@@ -10328,7 +10328,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get backupReminderNever => 'Sign in to keep your recipes synced — or back up manually.';
+  String get backupReminderNever => 'Sign in to keep your recipes synced, or back up manually.';
 
   @override
   String get backupReminderAction => 'Sign in';
@@ -10414,7 +10414,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publishSingleRecipeTitle => 'Publish recipe';
 
   @override
-  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.';
+  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync, so re-publish to push changes.';
 
   @override
   String get publishSingleRecipeAction => 'Publish';
@@ -10553,7 +10553,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityRepublishSourceMissing => 'Couldn\'t find the original recipe on this device. Publish it again from the recipe to share an updated version.';
 
   @override
-  String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
+  String get importNothingSaved => 'Import failed: nothing was saved. Please try again.';
 
   @override
   String get unsavedChangesBody => 'You have unsaved changes. Leave without saving?';
@@ -10755,7 +10755,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareViewerJoinedCookbook => 'Joined! It\'s in your cookbooks.';
 
   @override
-  String get shareViewerOwnItem => 'This is yours — you already have it.';
+  String get shareViewerOwnItem => 'This is yours. You already have it.';
 
   @override
   String get shareViewerJoinNeedsSubscription => 'Collaborating on cookbooks needs a subscription.';

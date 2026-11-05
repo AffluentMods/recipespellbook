@@ -846,10 +846,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsMeasurementsMetric => 'メートル（ml、g）';
 
   @override
-  String get settingsKitchenBuddy => 'RPGモード';
+  String get settingsKitchenBuddy => 'キッチンバディ';
 
   @override
-  String get settingsKitchenBuddySubtitle => 'ファンタジースタイルのテキストと画像を有効にする';
+  String get settingsKitchenBuddySubtitle => 'コインで着せ替えできる、かわいいシェフの相棒';
 
   @override
   String get settingsRecipes => 'レシピ';
@@ -885,7 +885,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsImportFromAppsSubtitle => 'Paprika、Crouton、Melaなど';
 
   @override
-  String get settingsAbout => 'About';
+  String get settingsAbout => 'アプリについて';
 
   @override
   String settingsVersion(String version) {
@@ -1984,28 +1984,28 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get importRecipe => 'Import Recipe';
+  String get importRecipe => 'レシピをインポート';
 
   @override
-  String get importFile => 'File';
+  String get importFile => 'ファイル';
 
   @override
-  String get importImage => 'Image';
+  String get importImage => '画像';
 
   @override
-  String get importPaste => 'Paste';
+  String get importPaste => '貼り付け';
 
   @override
-  String get importPasteUrl => 'Paste recipe URL';
+  String get importPasteUrl => 'レシピのURLを貼り付け';
 
   @override
   String get importOr => 'OR';
 
   @override
-  String get importSupportsFormats => 'Supports Paprika, Mela, JSON, ZIP exports';
+  String get importSupportsFormats => 'Paprika、Mela、JSON、ZIP形式のエクスポートに対応';
 
   @override
-  String get importFromSocialMedia => 'Import your recipes from any social media platform or website.';
+  String get importFromSocialMedia => 'SNSやウェブサイトからレシピをインポートできます。';
 
   @override
   String get tagsTitle => 'タグ';
@@ -2350,13 +2350,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get photoChooseGallery => 'ギャラリーから選択';
 
   @override
-  String get importFirstRecipe => 'Import First';
+  String get importFirstRecipe => '最初のレシピをインポート';
 
   @override
-  String get importAllRecipes => 'Import All';
+  String get importAllRecipes => 'すべてインポート';
 
   @override
-  String get parseRecipe => 'Parse Recipe';
+  String get parseRecipe => 'レシピを解析';
 
   @override
   String get shareRecipe => 'レシピを共有';
@@ -2405,10 +2405,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get selectNone => '選択解除';
 
   @override
-  String get viewPlanner => 'View Planner';
+  String get viewPlanner => 'プランナーを見る';
 
   @override
-  String get planNow => 'Plan Now';
+  String get planNow => '今すぐ計画';
 
   @override
   String get loadingText => '読み込み中...';
@@ -2536,25 +2536,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get seeAll => 'すべて見る';
 
   @override
-  String get imagePlaceholders => 'Image Placeholders';
+  String get imagePlaceholders => 'デフォルト画像';
 
   @override
-  String get imagePlaceholdersSubtitle => 'Choose what shows when images are missing';
+  String get imagePlaceholdersSubtitle => '画像がないときに表示するものを選択';
 
   @override
-  String get homeScreenSection => 'Home Screen';
+  String get homeScreenSection => 'ホーム画面';
 
   @override
-  String get quickAccessSubtitle => 'Configure what appears in Quick Access';
+  String get quickAccessSubtitle => 'クイックアクセスに表示する内容を設定';
 
   @override
-  String get manageCoursesSubtitle => 'Add, edit, or remove courses';
+  String get manageCoursesSubtitle => 'コースの追加、編集、削除';
 
   @override
-  String get manageCategoriesSubtitle => 'Add, edit, or remove categories';
+  String get manageCategoriesSubtitle => 'カテゴリの追加、編集、削除';
 
   @override
-  String get shoppingCategoriesSubtitle => 'Organize items by aisle';
+  String get shoppingCategoriesSubtitle => '売り場ごとにアイテムを整理';
 
   @override
   String get syncSection => '同期';
@@ -2699,7 +2699,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get defaultImages => 'デフォルト画像';
 
   @override
-  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
+  String get defaultImagesDescription => 'レシピとレシピ本のデフォルト画像';
 
   @override
   String get themeBased => 'テーマベース';
@@ -2732,7 +2732,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get newShoppingList => '新しい買い物リスト';
 
   @override
-  String get listNameHint => 'List name';
+  String get listNameHint => 'リスト名';
 
   @override
   String get recipeLayoutSetting => 'レイアウト';
@@ -2893,7 +2893,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shoppingListEmptyHint => '商品を追加するかレシピからインポートしてください';
 
   @override
-  String get settingsKitchenBuddyActive => '魔法のテキストを召喚中...';
+  String get settingsKitchenBuddyActive => 'キッチンバディは料理の準備ができています！';
 
   @override
   String get shoppingCheckAll => 'すべてチェック';
@@ -3043,7 +3043,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get nutritionUncertain => '照合を確認';
 
   @override
-  String get nutritionNotFound => '照合なし — タップして検索';
+  String get nutritionNotFound => '照合なし：タップして検索';
 
   @override
   String get nutritionRecalculate => '再計算';
@@ -3329,7 +3329,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tagsColorLabel => 'カラー';
 
   @override
-  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
+  String get settingsKitchenBuddyEnabled => 'コインを集めて相棒を着せ替えしよう！';
 
   @override
   String get settingsRecipeLayoutSubtitle => 'レシピ表示のカスタマイズ';
@@ -3544,7 +3544,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get allergenSalicylates => 'サリチル酸塩';
 
   @override
-  String get allergenMsg => 'MSG';
+  String get allergenMsg => 'うま味調味料（MSG）';
 
   @override
   String get allergenRedMeat => '赤身肉（アルファガル）';
@@ -3685,31 +3685,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shoppingAddHint => 'Enterで追加、次を入力';
 
   @override
-  String get categoryDeli => 'Deli';
+  String get categoryDeli => '惣菜・デリ';
 
   @override
-  String get categoryBreakfast => 'Breakfast & Cereal';
+  String get categoryBreakfast => '朝食・シリアル';
 
   @override
-  String get categoryCanned => 'Canned Goods & Soups';
+  String get categoryCanned => '缶詰・スープ';
 
   @override
-  String get categoryCondiments => 'Condiments, Sauces & Spices';
+  String get categoryCondiments => '調味料・ソース・スパイス';
 
   @override
-  String get categoryAlcohol => 'Beer, Wine & Spirits';
+  String get categoryAlcohol => 'ビール・ワイン・酒類';
 
   @override
-  String get categoryBaby => 'Baby';
+  String get categoryBaby => 'ベビー用品';
 
   @override
-  String get categoryBeauty => 'Beauty & Personal Care';
+  String get categoryBeauty => '美容・パーソナルケア';
 
   @override
-  String get categoryHousehold => 'Housewares';
+  String get categoryHousehold => '日用品';
 
   @override
-  String get categoryPet => 'Pet';
+  String get categoryPet => 'ペット用品';
 
   @override
   String importFromPlatform(String platform) {
@@ -4451,7 +4451,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get allData => 'すべてのデータ';
 
   @override
-  String get allDataDesc => 'ローカルデータと設定 — 完全リセット';
+  String get allDataDesc => 'ローカルデータ、クラウドデータ、アカウントを含むすべてを完全に削除します。まっさらな状態からやり直します。';
 
   @override
   String get allDataWarningTitle => 'すべてが削除されます';
@@ -4475,7 +4475,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get allDataNoUndo => 'この操作は取り消せないことを理解しています';
 
   @override
-  String get localNoCloudWarning => 'クラウド同期がありません — バックアップはありません';
+  String get localNoCloudWarning => 'クラウド同期を利用していないため、復元できるバックアップはありません';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -4615,7 +4615,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get menuShareSubtitle => '友だちや家族を一緒に料理に招待しましょう！';
 
   @override
-  String get menuShareMessage => 'Recipe Spellbookをチェックしてください - 最高のレシピアプリです！ https://recipespellbook.app/get';
+  String get menuShareMessage => 'Recipe Spellbookをぜひチェックしてみてください。最高のレシピアプリです！ https://recipespellbook.app/get';
 
   @override
   String get signIn => 'サインイン';
@@ -4766,11 +4766,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String cancelledAccessUntil(String date) {
-    return 'キャンセル済み — $dateまでアクセス可';
+    return 'キャンセル済み：$dateまでアクセス可';
   }
 
   @override
-  String get lifetimeNeverExpires => 'ライフタイム — 期限なし';
+  String get lifetimeNeverExpires => 'ライフタイム：期限なし';
 
   @override
   String renewsDate(String date) {
@@ -5060,7 +5060,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get payOnceKeepForever => '一度払えばずっと使える';
 
   @override
-  String get cloudSyncFreeTrial => 'Try free for 1 week';
+  String get cloudSyncFreeTrial => '1週間無料でお試し';
 
   @override
   String get cloudSyncFeature => 'Cloud Sync';
@@ -5246,7 +5246,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get menuImport => 'インポート';
 
   @override
-  String get menuKitchenBuddyMode => 'RPGモード';
+  String get menuKitchenBuddyMode => 'キッチンバディ';
 
   @override
   String get menuSocial => 'ソーシャル';
@@ -5290,10 +5290,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get rating => '評価';
 
   @override
-  String get usUnits => 'cups, tablespoons, ounces, °F';
+  String get usUnits => 'カップ、大さじ、オンス、°F';
 
   @override
-  String get metricUnits => 'milliliters, grams, °C';
+  String get metricUnits => 'ミリリットル、グラム、°C';
 
   @override
   String selectedCount(int count) {
@@ -5394,13 +5394,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featurePhotosOnSteps => 'ステップに写真';
 
   @override
-  String get featureCloudStorageLimited => 'Cloud storage — Limited';
+  String get featureCloudStorageLimited => 'クラウドストレージ：制限あり';
 
   @override
   String get featureFamilySharing5 => 'ファミリー共有（5名）';
 
   @override
-  String get featureCloudStorage => 'Cloud storage';
+  String get featureCloudStorage => 'クラウドストレージ';
 
   @override
   String get featureSharedLists => '共有買い物リスト';
@@ -5412,7 +5412,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featureSharedMealPlan => '共有食事プラン';
 
   @override
-  String get featureAutoBackups => 'Automatic backups';
+  String get featureAutoBackups => '自動バックアップ';
 
   @override
   String get featureFamilySharing10 => 'ファミリー共有（10名）';
@@ -5523,7 +5523,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ingredientPreview => '材料プレビュー';
 
   @override
-  String get resetToDefault => 'Reset to Default';
+  String get resetToDefault => 'デフォルトに戻す';
 
   @override
   String get learnMore => '詳細を見る';
@@ -5684,10 +5684,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsNotifAchievementsSubtitle => '実績解除とマイルストーンアラート';
 
   @override
-  String get settingsNotifBuddy => 'クエストリマインダー';
+  String get settingsNotifBuddy => 'バディのリマインダー';
 
   @override
-  String get settingsNotifBuddySubtitle => 'デイリークエストリセットとXPリマインダー';
+  String get settingsNotifBuddySubtitle => 'キッチンバディの連続ログインとコインボーナス';
 
   @override
   String get settingsNotifManagePreferences => '通知設定を管理';
@@ -5822,16 +5822,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mealTypeAppetizer => '前菜';
 
   @override
-  String get allergenContains => 'Contains';
+  String get allergenContains => '含有';
 
   @override
   String get settingsIngredientLayout => '材料レイアウト';
 
   @override
-  String get ingredientLayoutInline => 'インライン — 小さじ1バター';
+  String get ingredientLayoutInline => 'インライン：小さじ1バター';
 
   @override
-  String get ingredientLayoutColumnar => 'カラム — 量を揃える';
+  String get ingredientLayoutColumnar => 'カラム：量を揃える';
 
   @override
   String get settingsIngredientLayoutDescription => '材料の量と名前の表示方法を選択。';
@@ -5969,7 +5969,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get transferReady => '転送の準備ができました';
 
   @override
-  String get transferCodeExpires => 'このコードは15分で期限切れになります';
+  String get transferCodeExpires => 'このコードの有効期限は1時間です';
 
   @override
   String transferCodeExpiresAt(String time) {
@@ -6103,13 +6103,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsAdvancedSubtitle => 'タグ、コース、カテゴリなど';
 
   @override
-  String get settingsRestoreDefaults => 'Restore Default Recipes';
+  String get settingsRestoreDefaults => 'スターターレシピを復元';
 
   @override
-  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+  String get settingsRestoreDefaultsSubtitle => '10件のスターターレシピを再追加';
 
   @override
-  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+  String get settingsRestoreDefaultsConfirm => '10件のスターターレシピをレシピ本に追加しますか？既存のレシピには影響しません。';
 
   @override
   String get settingsDeleteData => 'データを削除';
@@ -6157,7 +6157,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get nutritionApplyRecalculate => '適用して再計算';
 
   @override
-  String get calAbbrev => 'Cal';
+  String get calAbbrev => 'kcal';
 
   @override
   String get nutritionServingSizeHint => '例：1カップ、100g';
@@ -6187,13 +6187,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get exportFormattedList => 'フォーマット付きリスト';
 
   @override
-  String get exportFormattedListSubtitle => 'チェックボックス付き — メモアプリに最適';
+  String get exportFormattedListSubtitle => 'チェックボックス付き、メモアプリに最適';
 
   @override
   String get exportPlainText => 'プレーンテキスト';
 
   @override
-  String get exportPlainTextSubtitle => 'シンプルなリスト — どこにでも貼り付け可';
+  String get exportPlainTextSubtitle => 'シンプルなリスト、どこにでも貼り付け可';
 
   @override
   String get importFromBackupFile => 'バックアップファイルから';
@@ -6241,7 +6241,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mealPlanThisWeekend => '今週末';
 
   @override
-  String get menuKitchenBuddy => 'RPGプロフィール';
+  String get menuKitchenBuddy => 'キッチンバディ';
 
   @override
   String get menuTools => 'ツール';
@@ -6319,74 +6319,74 @@ class AppLocalizationsJa extends AppLocalizations {
   String get upgradeToProUnlock => 'Proにアップグレードしてアンロック';
 
   @override
-  String get kitchenBuddyTitle => 'Kitchen Buddy';
+  String get kitchenBuddyTitle => 'キッチンバディ';
 
   @override
-  String get kitchenBuddyCloset => 'Closet';
+  String get kitchenBuddyCloset => 'クローゼット';
 
   @override
-  String get kitchenBuddyShop => 'Shop';
+  String get kitchenBuddyShop => 'ショップ';
 
   @override
-  String get kitchenBuddyAchievements => 'Achievements';
+  String get kitchenBuddyAchievements => '実績';
 
   @override
   String kitchenBuddyStreakDays(int count) {
-    return '$count day streak';
+    return '$count日連続';
   }
 
   @override
-  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
+  String get kitchenBuddyClosetEmpty => 'まだアイテムがありません！ショップをのぞいてみましょう。';
 
   @override
-  String get kitchenBuddyShopOwnEverything => 'You own everything!';
+  String get kitchenBuddyShopOwnEverything => 'すべてのアイテムを持っています！';
 
   @override
-  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
+  String get kitchenBuddyShopCheckBack => '新しいアイテムが追加されたら、また見に来てください。';
 
   @override
   String kitchenBuddyConfirmPurchase(String itemName) {
-    return 'Buy $itemName?';
+    return '$itemNameを購入しますか？';
   }
 
   @override
   String kitchenBuddyCostSummary(int price) {
-    return 'This will cost 🪙 $price Spice Coins.';
+    return '🪙 $priceスパイスコインを使います。';
   }
 
   @override
-  String get kitchenBuddyBuy => 'Buy';
+  String get kitchenBuddyBuy => '購入';
 
   @override
   String kitchenBuddyPurchaseSuccess(String itemName) {
-    return 'Purchased $itemName!';
+    return '$itemNameを購入しました！';
   }
 
   @override
-  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
+  String get kitchenBuddyNotEnoughCoins => 'コインが足りません';
 
   @override
   String kitchenBuddyRequires(String achievementName) {
-    return 'Requires: $achievementName';
+    return '必要な実績：$achievementName';
   }
 
   @override
-  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
+  String get kitchenBuddyNamingTitle => '相棒に名前をつけよう';
 
   @override
-  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
+  String get kitchenBuddyIntroTitle => 'キッチンバディに会いましょう！';
 
   @override
-  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
+  String get kitchenBuddyIntroDescription => 'この小さなシェフが、あなたのキッチンの相棒です。\nレシピを作ってコインを集め、着せ替えしましょう！';
 
   @override
-  String get kitchenBuddyNameLabel => 'Buddy Name';
+  String get kitchenBuddyNameLabel => '相棒の名前';
 
   @override
-  String get kitchenBuddyNameHint => 'Enter a name...';
+  String get kitchenBuddyNameHint => '名前を入力…';
 
   @override
-  String get kitchenBuddyCreate => 'Create Buddy';
+  String get kitchenBuddyCreate => '相棒を作成';
 
   @override
   String get settingsNoMatchingSettings => '一致する設定がありません';
@@ -7036,7 +7036,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get integrationsChecking => '確認中...';
 
   @override
-  String get integrationsConnectedManage => '接続済み - タップして管理';
+  String get integrationsConnectedManage => '接続済み：タップして管理';
 
   @override
   String get integrationsNotConnected => '未接続';
@@ -7147,13 +7147,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingBlankCookbook => '空のクックブックで始める';
 
   @override
-  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+  String get onboardingBlankConfirmTitle => '空の状態で始めますか？';
 
   @override
-  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+  String get onboardingBlankConfirmBody => 'スターターレシピは、あとで設定からいつでも追加できます。';
 
   @override
-  String get onboardingBlankConfirmYes => 'Yes, start empty';
+  String get onboardingBlankConfirmYes => 'はい、空の状態で始めます';
 
   @override
   String get onboardingSpellbookAwaits => 'あなたの魔法書が待っています';
@@ -7563,10 +7563,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importGuideQuickTipLabel => 'ヒント';
 
   @override
-  String get importGuideQuickTipText => '最も簡単な方法は、レシピリンクをコピーしてRecipe Spellbookに共有すること — ほぼすべてのアプリで使えます。';
+  String get importGuideQuickTipText => 'いちばん早い方法は？レシピのリンクをコピーして、Recipe Spellbookに共有することです。ほぼすべてのアプリで使えます。';
 
   @override
-  String get importGuideWebButton => 'Web';
+  String get importGuideWebButton => 'ウェブ';
 
   @override
   String get importGuideFollowInBrowser => 'ブラウザで手順を確認';
@@ -7730,7 +7730,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importGuideYoutubeStep3Desc => '「リンクをコピー」をタップするか、共有シートからRecipe Spellbookを見つけてください。';
 
   @override
-  String get importGuideYoutubeStep3Tip => '多くのYouTubeクリエイターは動画の説明にレシピ全文を掲載しています — これにより抽出の精度が上がります。';
+  String get importGuideYoutubeStep3Tip => '多くのYouTubeクリエイターは、動画の説明にレシピ全文を掲載しています。そのため、より正確に抽出できます。';
 
   @override
   String get importGuideYoutubeStep4Title => '貼り付けてインポート';
@@ -7805,7 +7805,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importGuideWebsiteStep5Title => '確認して保存';
 
   @override
-  String get importGuideWebsiteStep5Desc => 'レシピが即座に抽出されます — タイトル、材料、手順、調理時間、写真まで。確認して保存。';
+  String get importGuideWebsiteStep5Desc => '抽出されたレシピを確認し、「インポート」をタップしてレシピ本に保存します。';
 
   @override
   String get importGuideWebsiteStep5Tip => '10,000以上のレシピサイトに対応。抽出に失敗した場合は「テキストから」の方法をお試しください。';
@@ -7841,7 +7841,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importGuidePhotoStep4Title => '確認してエラーを修正';
 
   @override
-  String get importGuidePhotoStep4Desc => '抽出されたレシピを確認します。OCRは時々文字を誤読します — 「1/2」が「1l2」になることも。エラーを修正して保存。';
+  String get importGuidePhotoStep4Desc => '抽出されたレシピを確認します。OCRは時々文字を誤読します。たとえば「1/2」が「1l2」になることがあります。エラーを修正して保存。';
 
   @override
   String get importGuidePhotoStep4Tip => '手書きのレシピも対応していますが、印刷されたテキストが最良の結果を得られます。';
@@ -7901,7 +7901,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importGuideTextStep3Desc => 'コピーしたテキストをテキストフィールドに貼り付けます。AIが自動的にタイトル、材料、手順を分離します。';
 
   @override
-  String get importGuideTextStep3Tip => 'フォーマットされていないテキストでも動作します — AIは材料の量や手順の指示を賢く解析します。';
+  String get importGuideTextStep3Tip => 'フォーマットされていないテキストでも動作します。AIが材料の量や手順を賢く解析します。';
 
   @override
   String get importGuideTextStep4Title => '確認して保存';
@@ -8137,7 +8137,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get faqWhatAreSublinkedSubtitle => '関連レシピを繋げる';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'サブリンクレシピを使うと、関連するレシピ同士をリンクできます。例えば、マルゲリータピザのレシピからピザ生地のレシピにリンクできます。メインレシピを表示中にリンクされたレシピをタップすると、すぐに移動できます — 検索不要です。';
+  String get faqWhatAreSublinkedAnswer => 'サブリンクレシピを使うと、関連するレシピ同士をリンクできます。例えば、マルゲリータピザのレシピからピザ生地のレシピにリンクできます。メインレシピを表示中にリンクされたレシピをタップすると、すぐに移動できます。検索は不要です。';
 
   @override
   String get faqMacroCalcTitle => 'マクロ計算機の使い方';
@@ -8218,7 +8218,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get faqImportFailedSubtitle => '一般的な原因と解決方法';
 
   @override
-  String get faqImportFailedAnswer => 'インポートが失敗する理由はいくつかあります：\n\n• ウェブサイトが自動アクセスをブロックしている可能性があります — レシピのテキストをコピーして、テキストインポートをお試しください。\n• リンクが期限切れまたは非公開の可能性があります — 公開リンクであることを確認してください。\n• 一部のサイトは解析が難しい形式を使用しています — 代替としてAIインポートをお試しください。\n• インターネット接続を確認して、再度お試しください。';
+  String get faqImportFailedAnswer => 'インポートが失敗する理由はいくつかあります：\n\n• ウェブサイトが自動アクセスをブロックしている可能性があります。レシピのテキストをコピーして、テキストインポートをお試しください。\n• リンクが期限切れまたは非公開の可能性があります。公開リンクであることを確認してください。\n• 一部のサイトは解析が難しい形式を使用しています。代替としてAIインポートをお試しください。\n• インターネット接続を確認して、再度お試しください。';
 
   @override
   String get faqDeviceTransferTitle => '他のデバイスからインポートできますか？';
@@ -8464,13 +8464,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get hintShoppingListGen => 'ワンタップでレシピの材料を買い物リストに追加。';
 
   @override
-  String get hintRecipeNotes => 'レシピに個人メモを追加 — コツ、アレンジ、思い出など。';
+  String get hintRecipeNotes => 'レシピに個人メモを追加：コツ、アレンジ、思い出など。';
 
   @override
   String get hintCookbookOrganization => '複数のレシピブックを作成して、テーマや場面ごとにレシピを整理。';
 
   @override
-  String get hintTagSystem => 'レシピにタグ付けして簡単フィルタリング —「時短」「お気に入り」などのカスタムタグを作成。';
+  String get hintTagSystem => 'レシピにタグ付けして簡単フィルタリング。「時短」「お気に入り」などのカスタムタグを作成できます。';
 
   @override
   String get allergyMyAllergies => '私のアレルギー';
@@ -8753,7 +8753,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String subscriptionCancelledUntil(String date) {
-    return 'キャンセル済み — $dateまでアクセス可能';
+    return 'キャンセル済み：$dateまでアクセス可能';
   }
 
   @override
@@ -8763,7 +8763,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get subscriptionPlan => 'プラン';
 
   @override
-  String get subscriptionLifetime => '永久 — 期限なし';
+  String get subscriptionLifetime => '永久：期限なし';
 
   @override
   String get subscriptionManage => 'サブスクリプション管理';
@@ -8842,10 +8842,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsSystemLanguage => 'システム';
 
   @override
-  String get tierFamily => 'FAMILY';
+  String get tierFamily => 'ファミリー';
 
   @override
-  String get tierCreator => 'CREATOR';
+  String get tierCreator => 'クリエイター';
 
   @override
   String get tierFreeName => '無料';
@@ -8892,7 +8892,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get nutrientCal => 'Cal';
+  String get nutrientCal => 'カロリー';
 
   @override
   String get nutrientSugar => '糖質';
@@ -9259,7 +9259,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return '$planNameを取得 — $planPrice';
+    return '$planNameを取得：$planPrice';
   }
 
   @override
@@ -9278,7 +9278,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallYoureAllSet => '準備完了！';
 
   @override
-  String get paywallPurchaseNotDetected => '購入がまだ検出されていません — もう一度更新してください。';
+  String get paywallPurchaseNotDetected => '購入がまだ検出されていません。もう一度更新してください。';
 
   @override
   String get paywallWebComingSoon => 'Web購入は近日公開';
@@ -9610,13 +9610,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get oneTimePurchaseDesc => '一回払い · 永久にあなたのもの · サブスクなし';
 
   @override
-  String get viewPlansPrice => 'プランを見る — \$6.99';
+  String get viewPlansPrice => 'プランを見る：\$6.99';
 
   @override
-  String get premiumActive => 'プレミアム — 有効';
+  String get premiumActive => 'プレミアム：有効';
 
   @override
-  String get familyActive => 'ファミリー — 有効';
+  String get familyActive => 'ファミリー：有効';
 
   @override
   String get cloudSyncEnabled => 'クラウド同期が有効';
@@ -9739,7 +9739,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get cravingCategoryHint => '任意 — 何でもOKならスキップ';
+  String get cravingCategoryHint => '任意。何でもOKならスキップ';
 
   @override
   String get cravingCategoryNarrowHint => '絞り込むかスキップ';
@@ -9838,7 +9838,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cravingSourceCommunitySubtitle => 'コミュニティから';
 
   @override
-  String get cravingSourceBothTitle => '両方 — おまかせ';
+  String get cravingSourceBothTitle => '両方：おまかせ';
 
   @override
   String get cravingSourceBothSubtitle => 'あなたのとコミュニティのミックス';
@@ -10168,9 +10168,8 @@ class AppLocalizationsJa extends AppLocalizations {
       count,
       locale: localeName,
       other: 'このレシピは$count件のサブレシピにリンクしています',
-      one: 'このレシピは1件のサブレシピにリンクしています',
     );
-    return '$_temp0 — 含めたくないものはチェックを外してください。';
+    return '$_temp0。含めたくないものはチェックを外してください。';
   }
 
   @override
@@ -10305,7 +10304,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get publishSingleRecipeTitle => 'レシピを公開';
 
   @override
-  String get publishSingleRecipeBody => 'このレシピをコミュニティフィードに共有します。更新は同期されません — 変更を反映するには再公開してください。';
+  String get publishSingleRecipeBody => 'このレシピをコミュニティフィードに共有します。更新は同期されないため、変更を反映するには再公開してください。';
 
   @override
   String get publishSingleRecipeAction => '公開';
@@ -10439,7 +10438,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get communityRepublishSourceMissing => 'このデバイスで元のレシピが見つかりませんでした。更新版を共有するには、レシピから再度公開してください。';
 
   @override
-  String get importNothingSaved => 'インポートに失敗しました — 何も保存されませんでした。もう一度お試しください。';
+  String get importNothingSaved => 'インポートに失敗しました。何も保存されていません。もう一度お試しください。';
 
   @override
   String get unsavedChangesBody => '保存していない変更があります。保存せずに移動しますか？';

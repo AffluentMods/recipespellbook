@@ -862,10 +862,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsMeasurementsMetric => 'Métrico (ml, g)';
 
   @override
-  String get settingsKitchenBuddy => 'Modo RPG';
+  String get settingsKitchenBuddy => 'Kitchen Buddy';
 
   @override
-  String get settingsKitchenBuddySubtitle => 'Habilitar texto e imágenes de fantasía';
+  String get settingsKitchenBuddySubtitle => 'Un pequeño chef que puedes vestir con monedas';
 
   @override
   String get settingsRecipes => 'Recetas';
@@ -2735,7 +2735,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get defaultImages => 'Imágenes Predeterminadas';
 
   @override
-  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
+  String get defaultImagesDescription => 'Ilustraciones predeterminadas de la app para recetas y recetarios';
 
   @override
   String get themeBased => 'Basado en Tema';
@@ -2893,7 +2893,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resetScopeCloud => 'datos en la nube';
 
   @override
-  String get resetScopeAll => 'todos los datos y ajustes';
+  String get resetScopeAll => 'todos los datos, la sincronización en la nube y tu cuenta';
 
   @override
   String get resetEverything => 'Restablecer Todo';
@@ -2929,7 +2929,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shoppingListEmptyHint => 'Añade artículos o importa desde recetas';
 
   @override
-  String get settingsKitchenBuddyActive => 'Conjurando texto mágico...';
+  String get settingsKitchenBuddyActive => '¡Tu Kitchen Buddy está listo para cocinar!';
 
   @override
   String get shoppingCheckAll => 'Marcar todo';
@@ -3079,7 +3079,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nutritionUncertain => 'verificar coincidencia';
 
   @override
-  String get nutritionNotFound => 'Sin coincidencia - toca para buscar';
+  String get nutritionNotFound => 'Sin coincidencias. Toca para buscar';
 
   @override
   String get nutritionRecalculate => 'Recalcular';
@@ -3365,7 +3365,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tagsColorLabel => 'Color';
 
   @override
-  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
+  String get settingsKitchenBuddyEnabled => '¡Gana monedas y viste a tu compañero!';
 
   @override
   String get settingsRecipeLayoutSubtitle => 'Personalizar cómo se muestran las recetas';
@@ -3786,7 +3786,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get helpSyncing => 'Sincronización';
 
   @override
-  String get helpSyncingDesc => '¡La sincronización en la nube llegará pronto! Tus recetas se sincronizarán en todos tus dispositivos.';
+  String get helpSyncingDesc => 'Con Premium, tus recetas, recetarios y fotos se sincronizan automáticamente en todos tus dispositivos.';
 
   @override
   String get helpContactUs => 'Contáctanos';
@@ -4491,13 +4491,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get localData => 'Datos locales';
 
   @override
-  String get localDataDesc => 'Recetas, recetarios, planes de comidas, listas de compras en este dispositivo';
+  String get localDataDesc => 'Elimina recetas, recetarios, planes de comidas y listas de compras solo en este dispositivo. Los datos en la nube se mantienen intactos y se volverán a sincronizar.';
 
   @override
   String get allData => 'Todos los datos';
 
   @override
-  String get allDataDesc => 'Datos locales y configuración — comenzar de nuevo';
+  String get allDataDesc => 'Elimina permanentemente TODO: datos locales, datos en la nube y tu cuenta. Empiezas totalmente de cero.';
 
   @override
   String get allDataWarningTitle => 'Esto eliminará todo';
@@ -4521,7 +4521,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get allDataNoUndo => 'Entiendo que esta acción no se puede deshacer';
 
   @override
-  String get localNoCloudWarning => 'No tienes Cloud Sync — no hay respaldo del cual recuperar';
+  String get localNoCloudWarning => 'No tienes Cloud Sync, así que no hay copia de seguridad de la cual recuperar';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -4661,7 +4661,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuShareSubtitle => '¡Invita a tus amigos y familiares a cocinar juntos!';
 
   @override
-  String get menuShareMessage => '¡Mira Recipe Spellbook — la mejor app de recetas! https://recipespellbook.app/get';
+  String get menuShareMessage => '¡Mira Recipe Spellbook, la mejor app de recetas! https://recipespellbook.app/get';
 
   @override
   String get signIn => 'Iniciar sesión';
@@ -4812,11 +4812,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String cancelledAccessUntil(String date) {
-    return 'Cancelada — acceso hasta $date';
+    return 'Cancelada: acceso hasta $date';
   }
 
   @override
-  String get lifetimeNeverExpires => 'Vitalicia — nunca expira';
+  String get lifetimeNeverExpires => 'Vitalicia: nunca expira';
 
   @override
   String renewsDate(String date) {
@@ -5057,7 +5057,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String aiPrepLabel(String minutes) {
-    return '${minutes}m prep';
+    return '$minutes min de prep.';
   }
 
   @override
@@ -5111,7 +5111,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get payOnceKeepForever => 'Paga una vez, quédate para siempre';
 
   @override
-  String get cloudSyncFreeTrial => 'Try free for 1 week';
+  String get cloudSyncFreeTrial => 'Prueba gratis durante 1 semana';
 
   @override
   String get cloudSyncFeature => 'Sincronización en la Nube';
@@ -5274,7 +5274,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String printPrep(int minutes) {
-    return 'Prep: $minutes min';
+    return 'Preparación: $minutes min';
   }
 
   @override
@@ -5297,7 +5297,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuImport => 'IMPORTAR';
 
   @override
-  String get menuKitchenBuddyMode => 'MODO RPG';
+  String get menuKitchenBuddyMode => 'KITCHEN BUDDY';
 
   @override
   String get menuSocial => 'SOCIAL';
@@ -5445,13 +5445,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get featurePhotosOnSteps => 'Fotos en los pasos';
 
   @override
-  String get featureCloudStorageLimited => 'Cloud storage — Limited';
+  String get featureCloudStorageLimited => 'Almacenamiento en la nube: limitado';
 
   @override
   String get featureFamilySharing5 => 'Compartir en familia (5 miembros)';
 
   @override
-  String get featureCloudStorage => 'Cloud storage';
+  String get featureCloudStorage => 'Almacenamiento en la nube';
 
   @override
   String get featureSharedLists => 'Listas de compras compartidas';
@@ -5463,7 +5463,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get featureSharedMealPlan => 'Planificación de comidas compartida';
 
   @override
-  String get featureAutoBackups => 'Automatic backups';
+  String get featureAutoBackups => 'Copias de seguridad automáticas';
 
   @override
   String get featureFamilySharing10 => 'Compartir en familia (10 miembros)';
@@ -5900,10 +5900,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsIngredientLayout => 'Diseño de ingredientes';
 
   @override
-  String get ingredientLayoutInline => 'En línea — 1 cdta mantequilla';
+  String get ingredientLayoutInline => 'En línea: 1 cdta mantequilla';
 
   @override
-  String get ingredientLayoutColumnar => 'Columnas — cantidades alineadas';
+  String get ingredientLayoutColumnar => 'Columnas: cantidades alineadas';
 
   @override
   String get settingsIngredientLayoutDescription => 'Elige cómo se muestran las cantidades y los nombres de los ingredientes en recetas, listas de compras e impresión.';
@@ -6041,7 +6041,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get transferReady => 'Listo para transferir';
 
   @override
-  String get transferCodeExpires => 'Este código expira en 15 minutos';
+  String get transferCodeExpires => 'Este código expira en 1 hora';
 
   @override
   String transferCodeExpiresAt(String time) {
@@ -6142,7 +6142,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get transferPointCamera => 'Apunta al código QR del dispositivo emisor';
 
   @override
-  String get labelPrepMin => 'Prep (min)';
+  String get labelPrepMin => 'Preparación (min)';
 
   @override
   String get labelCookMin => 'Cocción (min)';
@@ -6178,13 +6178,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsAdvancedSubtitle => 'Etiquetas, platos, categorías y más';
 
   @override
-  String get settingsRestoreDefaults => 'Restore Default Recipes';
+  String get settingsRestoreDefaults => 'Restaurar recetas predeterminadas';
 
   @override
-  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+  String get settingsRestoreDefaultsSubtitle => 'Vuelve a agregar las 10 recetas iniciales';
 
   @override
-  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+  String get settingsRestoreDefaultsConfirm => '¿Agregar 10 recetas iniciales a tu recetario? Las recetas que ya tienes no se verán afectadas.';
 
   @override
   String get settingsDeleteData => 'Eliminar Datos';
@@ -6262,13 +6262,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get exportFormattedList => 'Lista formateada';
 
   @override
-  String get exportFormattedListSubtitle => 'Con casillas — ideal para apps de notas';
+  String get exportFormattedListSubtitle => 'Con casillas, ideal para apps de notas';
 
   @override
   String get exportPlainText => 'Texto plano';
 
   @override
-  String get exportPlainTextSubtitle => 'Lista simple — pegar en cualquier lugar';
+  String get exportPlainTextSubtitle => 'Lista simple, para pegar en cualquier lugar';
 
   @override
   String get importFromBackupFile => 'Desde archivo de respaldo';
@@ -6316,7 +6316,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mealPlanThisWeekend => 'Este Fin de Semana';
 
   @override
-  String get menuKitchenBuddy => 'Perfil RPG';
+  String get menuKitchenBuddy => 'Kitchen Buddy';
 
   @override
   String get menuTools => 'Herramientas';
@@ -6397,71 +6397,71 @@ class AppLocalizationsEs extends AppLocalizations {
   String get kitchenBuddyTitle => 'Kitchen Buddy';
 
   @override
-  String get kitchenBuddyCloset => 'Closet';
+  String get kitchenBuddyCloset => 'Armario';
 
   @override
-  String get kitchenBuddyShop => 'Shop';
+  String get kitchenBuddyShop => 'Tienda';
 
   @override
-  String get kitchenBuddyAchievements => 'Achievements';
+  String get kitchenBuddyAchievements => 'Logros';
 
   @override
   String kitchenBuddyStreakDays(int count) {
-    return '$count day streak';
+    return 'Días seguidos: $count';
   }
 
   @override
-  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
+  String get kitchenBuddyClosetEmpty => '¡Aún no tienes artículos! Visita la Tienda para empezar.';
 
   @override
-  String get kitchenBuddyShopOwnEverything => 'You own everything!';
+  String get kitchenBuddyShopOwnEverything => '¡Ya lo tienes todo!';
 
   @override
-  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
+  String get kitchenBuddyShopCheckBack => 'Vuelve cuando se agreguen artículos nuevos.';
 
   @override
   String kitchenBuddyConfirmPurchase(String itemName) {
-    return 'Buy $itemName?';
+    return '¿Comprar $itemName?';
   }
 
   @override
   String kitchenBuddyCostSummary(int price) {
-    return 'This will cost 🪙 $price Spice Coins.';
+    return 'Esto cuesta 🪙 $price Spice Coins.';
   }
 
   @override
-  String get kitchenBuddyBuy => 'Buy';
+  String get kitchenBuddyBuy => 'Comprar';
 
   @override
   String kitchenBuddyPurchaseSuccess(String itemName) {
-    return 'Purchased $itemName!';
+    return '¡Compraste $itemName!';
   }
 
   @override
-  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
+  String get kitchenBuddyNotEnoughCoins => 'No tienes suficientes monedas';
 
   @override
   String kitchenBuddyRequires(String achievementName) {
-    return 'Requires: $achievementName';
+    return 'Requiere: $achievementName';
   }
 
   @override
-  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
+  String get kitchenBuddyNamingTitle => 'Ponle nombre a tu compañero';
 
   @override
-  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
+  String get kitchenBuddyIntroTitle => '¡Conoce a tu Kitchen Buddy!';
 
   @override
-  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
+  String get kitchenBuddyIntroDescription => 'Este pequeño chef será tu compañero en la cocina.\n¡Cocina recetas y gana monedas para vestirlo!';
 
   @override
-  String get kitchenBuddyNameLabel => 'Buddy Name';
+  String get kitchenBuddyNameLabel => 'Nombre del compañero';
 
   @override
-  String get kitchenBuddyNameHint => 'Enter a name...';
+  String get kitchenBuddyNameHint => 'Escribe un nombre...';
 
   @override
-  String get kitchenBuddyCreate => 'Create Buddy';
+  String get kitchenBuddyCreate => 'Crear compañero';
 
   @override
   String get settingsNoMatchingSettings => 'No hay ajustes que coincidan';
@@ -6710,7 +6710,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String communityPrepTime(int minutes) {
-    return '${minutes}m prep';
+    return '$minutes min de prep.';
   }
 
   @override
@@ -6741,7 +6741,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get hintServingsExample => 'ej., 4';
 
   @override
-  String get prepMin => 'Prep (min)';
+  String get prepMin => 'Preparación (min)';
 
   @override
   String get cookMin => 'Cocción (min)';
@@ -6957,7 +6957,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get minutesPrepSuffix => 'm prep';
+  String get minutesPrepSuffix => ' min de prep.';
 
   @override
   String get minutesCookSuffix => 'm cocción';
@@ -7111,7 +7111,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get integrationsChecking => 'Verificando...';
 
   @override
-  String get integrationsConnectedManage => 'Conectado - Toca para gestionar';
+  String get integrationsConnectedManage => 'Conectado. Toca para gestionar';
 
   @override
   String get integrationsNotConnected => 'No conectado';
@@ -7222,13 +7222,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingBlankCookbook => 'Comenzar con un libro vacío';
 
   @override
-  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+  String get onboardingBlankConfirmTitle => '¿Empezar sin nada?';
 
   @override
-  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+  String get onboardingBlankConfirmBody => 'Siempre puedes agregar las recetas iniciales más tarde desde Ajustes.';
 
   @override
-  String get onboardingBlankConfirmYes => 'Yes, start empty';
+  String get onboardingBlankConfirmYes => 'Sí, empezar vacío';
 
   @override
   String get onboardingSpellbookAwaits => 'Tu libro de hechizos te espera';
@@ -7641,7 +7641,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importGuideQuickTipLabel => 'Consejo rápido';
 
   @override
-  String get importGuideQuickTipText => '¿La forma más rápida? Copia cualquier enlace de receta y compártelo a Recipe Spellbook — funciona con casi cualquier app.';
+  String get importGuideQuickTipText => '¿La forma más rápida? Copia cualquier enlace de receta y compártelo con Recipe Spellbook. Funciona desde casi cualquier app.';
 
   @override
   String get importGuideWebButton => 'Web';
@@ -7808,7 +7808,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importGuideYoutubeStep3Desc => 'Toca \"Copiar enlace\" o busca Recipe Spellbook en la hoja de compartir.';
 
   @override
-  String get importGuideYoutubeStep3Tip => 'Muchos creadores de YouTube ponen la receta completa en la descripción del video — esto hace la extracción más precisa.';
+  String get importGuideYoutubeStep3Tip => 'Muchos creadores de YouTube ponen la receta completa en la descripción del video, lo que hace que la extracción sea más precisa.';
 
   @override
   String get importGuideYoutubeStep4Title => 'Pega e importa';
@@ -7883,7 +7883,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importGuideWebsiteStep5Title => 'Revisa y guarda';
 
   @override
-  String get importGuideWebsiteStep5Desc => 'La receta se extrae al instante — título, ingredientes, pasos, tiempos de cocción e incluso la foto. Revisa y guarda.';
+  String get importGuideWebsiteStep5Desc => 'Revisa la receta extraída y toca Importar para guardarla en tu recetario.';
 
   @override
   String get importGuideWebsiteStep5Tip => 'Funciona con más de 10,000 sitios de recetas. Si la extracción falla, prueba el método \"Desde Texto\".';
@@ -7919,7 +7919,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importGuidePhotoStep4Title => 'Revisa y corrige errores';
 
   @override
-  String get importGuidePhotoStep4Desc => 'Revisa la receta extraída. El OCR ocasionalmente puede confundir caracteres — \"1/2\" podría convertirse en \"1l2\". Corrige cualquier error y guarda.';
+  String get importGuidePhotoStep4Desc => 'Revisa la receta extraída. El OCR a veces confunde caracteres: \"1/2\" podría convertirse en \"1l2\". Corrige cualquier error y guarda.';
 
   @override
   String get importGuidePhotoStep4Tip => 'Las recetas escritas a mano también funcionan, pero el texto impreso da los mejores resultados.';
@@ -7979,7 +7979,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importGuideTextStep3Desc => 'Pega el texto copiado en el campo de texto. La IA separará automáticamente el título, ingredientes y pasos.';
 
   @override
-  String get importGuideTextStep3Tip => 'Funciona incluso con texto sin formato — la IA es inteligente para analizar cantidades de ingredientes e instrucciones de pasos.';
+  String get importGuideTextStep3Tip => 'Funciona incluso con texto sin formato. La IA interpreta bien las cantidades de los ingredientes y las instrucciones de los pasos.';
 
   @override
   String get importGuideTextStep4Title => 'Revisa y guarda';
@@ -8287,7 +8287,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get faqWhatIsMacroCalcSubtitle => 'Estimación nutricional automática para recetas';
 
   @override
-  String get faqWhatIsMacroCalcAnswer => 'La Calculadora de Macros estima automáticamente el contenido nutricional de tus recetas comparando cada ingrediente con la base de datos de alimentos USDA. Calcula calorías, proteínas, carbohidratos, grasas, fibra, azúcar, sodio y más — todo por porción. La encuentras en la sección de Nutrición de cualquier receta.';
+  String get faqWhatIsMacroCalcAnswer => 'La Calculadora de Macros estima automáticamente el contenido nutricional de tus recetas comparando cada ingrediente con la base de datos de alimentos USDA. Calcula calorías, proteínas, carbohidratos, grasas, fibra, azúcar, sodio y más, todo por porción. La encuentras en la sección de Nutrición de cualquier receta.';
 
   @override
   String get faqImportFailedTitle => '¿Por qué falló mi importación?';
@@ -8296,7 +8296,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get faqImportFailedSubtitle => 'Razones comunes y soluciones';
 
   @override
-  String get faqImportFailedAnswer => 'Las importaciones pueden fallar por varias razones:\n\n• El sitio web puede bloquear el acceso automático — intenta copiar el texto de la receta y usa la importación de texto.\n• El enlace puede haber expirado o ser privado — asegúrate de que sea público.\n• Algunos sitios usan formatos difíciles de leer — prueba la importación con IA.\n• Verifica tu conexión a internet e inténtalo de nuevo.';
+  String get faqImportFailedAnswer => 'Las importaciones pueden fallar por varias razones:\n\n• El sitio web puede bloquear el acceso automático. Intenta copiar el texto de la receta y usar la importación de texto.\n• El enlace puede haber expirado o ser privado. Asegúrate de que sea un enlace público.\n• Algunos sitios usan formatos más difíciles de leer. Prueba la importación con IA como alternativa.\n• Revisa tu conexión a internet e inténtalo de nuevo.';
 
   @override
   String get faqDeviceTransferTitle => '¿Puedo importar desde otros dispositivos?';
@@ -8700,7 +8700,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String nutritionKcalTotal(int count) {
-    return '$count kcal total';
+    return '$count kcal en total';
   }
 
   @override
@@ -8837,7 +8837,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String subscriptionCancelledUntil(String date) {
-    return 'Cancelada — acceso hasta $date';
+    return 'Cancelada: acceso hasta $date';
   }
 
   @override
@@ -8847,7 +8847,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get subscriptionPlan => 'Plan';
 
   @override
-  String get subscriptionLifetime => 'De por vida — nunca expira';
+  String get subscriptionLifetime => 'De por vida: nunca expira';
 
   @override
   String get subscriptionManage => 'Gestionar suscripción';
@@ -8926,7 +8926,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsSystemLanguage => 'Sistema';
 
   @override
-  String get tierFamily => 'FAMILY';
+  String get tierFamily => 'FAMILIAR';
 
   @override
   String get tierCreator => 'CREATOR';
@@ -9343,7 +9343,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return 'Obtener $planName — $planPrice';
+    return 'Obtener $planName: $planPrice';
   }
 
   @override
@@ -9362,7 +9362,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywallYoureAllSet => '¡Todo listo!';
 
   @override
-  String get paywallPurchaseNotDetected => 'Compra no detectada aún — intenta actualizar de nuevo.';
+  String get paywallPurchaseNotDetected => 'Aún no se detecta la compra. Intenta actualizar de nuevo.';
 
   @override
   String get paywallWebComingSoon => 'Compras web próximamente';
@@ -9700,13 +9700,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get oneTimePurchaseDesc => 'Compra única · tuyo para siempre · sin suscripción';
 
   @override
-  String get viewPlansPrice => 'Ver planes — \$6.99';
+  String get viewPlansPrice => 'Ver planes: \$6.99';
 
   @override
-  String get premiumActive => 'Premium — Activo';
+  String get premiumActive => 'Premium: activo';
 
   @override
-  String get familyActive => 'Familiar — Activo';
+  String get familyActive => 'Familiar: activo';
 
   @override
   String get cloudSyncEnabled => 'Sincronización en la nube activada';
@@ -9829,7 +9829,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get cravingCategoryHint => 'Opcional — omite si estás abierto a todo';
+  String get cravingCategoryHint => 'Opcional, omítelo si te apetece cualquier cosa';
 
   @override
   String get cravingCategoryNarrowHint => 'Acota o salta adelante';
@@ -9883,7 +9883,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cravingCatSalad => 'Ensalada';
 
   @override
-  String get cravingCatSnack => 'Snack';
+  String get cravingCatSnack => 'Tentempié';
 
   @override
   String get cravingCatMainDish => 'Plato principal';
@@ -9928,7 +9928,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cravingSourceCommunitySubtitle => 'De la comunidad';
 
   @override
-  String get cravingSourceBothTitle => 'Ambos — sorpréndeme';
+  String get cravingSourceBothTitle => 'Ambos: sorpréndeme';
 
   @override
   String get cravingSourceBothSubtitle => 'Mezcla de las tuyas y de la comunidad';
@@ -10260,7 +10260,7 @@ class AppLocalizationsEs extends AppLocalizations {
       other: 'Esta receta enlaza $count sub-recetas',
       one: 'Esta receta enlaza 1 sub-receta',
     );
-    return '$_temp0 — desmarca las que no quieras incluir.';
+    return '$_temp0. Desmarca las que no quieras incluir.';
   }
 
   @override
@@ -10395,7 +10395,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get publishSingleRecipeTitle => 'Publicar receta';
 
   @override
-  String get publishSingleRecipeBody => 'Comparte esta receta en el feed de la comunidad. Las actualizaciones no se sincronizan — vuelve a publicar para enviar los cambios.';
+  String get publishSingleRecipeBody => 'Comparte esta receta en el feed de la comunidad. Las actualizaciones no se sincronizan, así que vuelve a publicar para enviar los cambios.';
 
   @override
   String get publishSingleRecipeAction => 'Publicar';
@@ -10534,7 +10534,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get communityRepublishSourceMissing => 'No se encontró la receta original en este dispositivo. Publícala de nuevo desde la receta para compartir una versión actualizada.';
 
   @override
-  String get importNothingSaved => 'La importación falló — no se guardó nada. Inténtalo de nuevo.';
+  String get importNothingSaved => 'La importación falló: no se guardó nada. Inténtalo de nuevo.';
 
   @override
   String get unsavedChangesBody => 'Tienes cambios sin guardar. ¿Salir sin guardar?';
@@ -10617,7 +10617,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paletteCool => 'Fría';
 
   @override
-  String get paletteMono => 'Mono';
+  String get paletteMono => 'Monocromática';
 
   @override
   String get plannerMonth => 'Mes';

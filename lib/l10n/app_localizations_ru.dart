@@ -2084,28 +2084,28 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get importRecipe => 'Import Recipe';
+  String get importRecipe => 'Импорт рецепта';
 
   @override
-  String get importFile => 'File';
+  String get importFile => 'Файл';
 
   @override
-  String get importImage => 'Image';
+  String get importImage => 'Изображение';
 
   @override
-  String get importPaste => 'Paste';
+  String get importPaste => 'Вставить';
 
   @override
-  String get importPasteUrl => 'Paste recipe URL';
+  String get importPasteUrl => 'Вставьте URL рецепта';
 
   @override
   String get importOr => 'OR';
 
   @override
-  String get importSupportsFormats => 'Supports Paprika, Mela, JSON, ZIP exports';
+  String get importSupportsFormats => 'Поддерживается экспорт из Paprika, Mela, а также JSON и ZIP';
 
   @override
-  String get importFromSocialMedia => 'Import your recipes from any social media platform or website.';
+  String get importFromSocialMedia => 'Импортируйте рецепты из любой соцсети или с любого сайта.';
 
   @override
   String get tagsTitle => 'Теги';
@@ -2450,13 +2450,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get photoChooseGallery => 'Выбрать из галереи';
 
   @override
-  String get importFirstRecipe => 'Import First';
+  String get importFirstRecipe => 'Импортировать первый';
 
   @override
-  String get importAllRecipes => 'Import All';
+  String get importAllRecipes => 'Импортировать все';
 
   @override
-  String get parseRecipe => 'Parse Recipe';
+  String get parseRecipe => 'Распознать рецепт';
 
   @override
   String get shareRecipe => 'Поделиться рецептом';
@@ -2505,10 +2505,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get selectNone => 'Снять выбор';
 
   @override
-  String get viewPlanner => 'View Planner';
+  String get viewPlanner => 'Открыть планировщик';
 
   @override
-  String get planNow => 'Plan Now';
+  String get planNow => 'Запланировать';
 
   @override
   String get loadingText => 'Загрузка...';
@@ -2636,25 +2636,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get seeAll => 'Смотреть всё';
 
   @override
-  String get imagePlaceholders => 'Image Placeholders';
+  String get imagePlaceholders => 'Заглушки изображений';
 
   @override
-  String get imagePlaceholdersSubtitle => 'Choose what shows when images are missing';
+  String get imagePlaceholdersSubtitle => 'Выберите, что показывать, если нет изображения';
 
   @override
-  String get homeScreenSection => 'Home Screen';
+  String get homeScreenSection => 'Главный экран';
 
   @override
-  String get quickAccessSubtitle => 'Configure what appears in Quick Access';
+  String get quickAccessSubtitle => 'Настройте, что показывать в быстром доступе';
 
   @override
-  String get manageCoursesSubtitle => 'Add, edit, or remove courses';
+  String get manageCoursesSubtitle => 'Добавить, изменить или удалить типы блюд';
 
   @override
-  String get manageCategoriesSubtitle => 'Add, edit, or remove categories';
+  String get manageCategoriesSubtitle => 'Добавить, изменить или удалить категории';
 
   @override
-  String get shoppingCategoriesSubtitle => 'Organize items by aisle';
+  String get shoppingCategoriesSubtitle => 'Распределите товары по отделам магазина';
 
   @override
   String get syncSection => 'Синхронизация';
@@ -2799,7 +2799,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get defaultImages => 'Изображения по умолчанию';
 
   @override
-  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
+  String get defaultImagesDescription => 'Стандартные изображения приложения для рецептов и книг';
 
   @override
   String get themeBased => 'На основе темы';
@@ -2832,7 +2832,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get newShoppingList => 'Новый список покупок';
 
   @override
-  String get listNameHint => 'List name';
+  String get listNameHint => 'Название списка';
 
   @override
   String get recipeLayoutSetting => 'Макет';
@@ -3143,7 +3143,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get nutritionUncertain => 'проверить сопоставление';
 
   @override
-  String get nutritionNotFound => 'Нет сопоставления — нажмите для поиска';
+  String get nutritionNotFound => 'Совпадений нет. Нажмите для поиска';
 
   @override
   String get nutritionRecalculate => 'Пересчитать';
@@ -3429,7 +3429,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tagsColorLabel => 'Цвет';
 
   @override
-  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
+  String get settingsKitchenBuddyEnabled => 'Зарабатывайте монеты и наряжайте своего друга!';
 
   @override
   String get settingsRecipeLayoutSubtitle => 'Настроить отображение рецептов';
@@ -3788,31 +3788,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shoppingAddHint => 'Нажмите Enter для добавления, затем введите следующий';
 
   @override
-  String get categoryDeli => 'Deli';
+  String get categoryDeli => 'Кулинария';
 
   @override
-  String get categoryBreakfast => 'Breakfast & Cereal';
+  String get categoryBreakfast => 'Завтраки и хлопья';
 
   @override
-  String get categoryCanned => 'Canned Goods & Soups';
+  String get categoryCanned => 'Консервы и супы';
 
   @override
-  String get categoryCondiments => 'Condiments, Sauces & Spices';
+  String get categoryCondiments => 'Соусы, приправы и специи';
 
   @override
-  String get categoryAlcohol => 'Beer, Wine & Spirits';
+  String get categoryAlcohol => 'Пиво, вино и крепкие напитки';
 
   @override
-  String get categoryBaby => 'Baby';
+  String get categoryBaby => 'Детские товары';
 
   @override
-  String get categoryBeauty => 'Beauty & Personal Care';
+  String get categoryBeauty => 'Красота и гигиена';
 
   @override
-  String get categoryHousehold => 'Housewares';
+  String get categoryHousehold => 'Товары для дома';
 
   @override
-  String get categoryPet => 'Pet';
+  String get categoryPet => 'Товары для животных';
 
   @override
   String importFromPlatform(String platform) {
@@ -4573,7 +4573,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get allData => 'Все данные';
 
   @override
-  String get allDataDesc => 'Локальные данные и настройки — полный сброс';
+  String get allDataDesc => 'Навсегда удаляет ВСЁ: локальные данные, облачные данные и ваш аккаунт. Полностью с чистого листа.';
 
   @override
   String get allDataWarningTitle => 'Будет удалено всё';
@@ -4597,7 +4597,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get allDataNoUndo => 'Я понимаю, что это действие нельзя отменить';
 
   @override
-  String get localNoCloudWarning => 'У тебя нет Cloud Sync — нет резервной копии для восстановления';
+  String get localNoCloudWarning => 'У тебя нет Cloud Sync, поэтому нет резервной копии для восстановления';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -4737,7 +4737,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuShareSubtitle => 'Пригласите друзей и семью готовить вместе!';
 
   @override
-  String get menuShareMessage => 'Попробуйте Recipe Spellbook — лучшее приложение для рецептов! https://recipespellbook.app/get';
+  String get menuShareMessage => 'Попробуйте Recipe Spellbook, лучшее приложение для рецептов! https://recipespellbook.app/get';
 
   @override
   String get signIn => 'Войти';
@@ -4888,11 +4888,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String cancelledAccessUntil(String date) {
-    return 'Отменено — доступ до $date';
+    return 'Отменено: доступ до $date';
   }
 
   @override
-  String get lifetimeNeverExpires => 'Пожизненная — никогда не истекает';
+  String get lifetimeNeverExpires => 'Пожизненная: никогда не истекает';
 
   @override
   String renewsDate(String date) {
@@ -5199,7 +5199,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get payOnceKeepForever => 'Заплатите один раз, пользуйтесь всегда';
 
   @override
-  String get cloudSyncFreeTrial => 'Try free for 1 week';
+  String get cloudSyncFreeTrial => 'Попробуйте бесплатно 1 неделю';
 
   @override
   String get cloudSyncFeature => 'Cloud Sync';
@@ -5429,10 +5429,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get rating => 'Рейтинг';
 
   @override
-  String get usUnits => 'cups, tablespoons, ounces, °F';
+  String get usUnits => 'стаканы, столовые ложки, унции, °F';
 
   @override
-  String get metricUnits => 'milliliters, grams, °C';
+  String get metricUnits => 'миллилитры, граммы, °C';
 
   @override
   String selectedCount(int count) {
@@ -5533,13 +5533,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get featurePhotosOnSteps => 'Фото к шагам';
 
   @override
-  String get featureCloudStorageLimited => 'Cloud storage — Limited';
+  String get featureCloudStorageLimited => 'Облачное хранилище: ограничено';
 
   @override
   String get featureFamilySharing5 => 'Семейный доступ (5 человек)';
 
   @override
-  String get featureCloudStorage => 'Cloud storage';
+  String get featureCloudStorage => 'Облачное хранилище';
 
   @override
   String get featureSharedLists => 'Общие списки покупок';
@@ -5551,7 +5551,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get featureSharedMealPlan => 'Общий план питания';
 
   @override
-  String get featureAutoBackups => 'Automatic backups';
+  String get featureAutoBackups => 'Автоматические резервные копии';
 
   @override
   String get featureFamilySharing10 => 'Семейный доступ (10 человек)';
@@ -5662,7 +5662,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ingredientPreview => 'Предпросмотр ингредиентов';
 
   @override
-  String get resetToDefault => 'Reset to Default';
+  String get resetToDefault => 'Вернуть по умолчанию';
 
   @override
   String get learnMore => 'Узнать больше';
@@ -5994,16 +5994,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mealTypeAppetizer => 'Закуска';
 
   @override
-  String get allergenContains => 'Contains';
+  String get allergenContains => 'Содержит';
 
   @override
   String get settingsIngredientLayout => 'Макет ингредиентов';
 
   @override
-  String get ingredientLayoutInline => 'В строку — 1 ч. л. масла';
+  String get ingredientLayoutInline => 'В строку: 1 ч. л. масла';
 
   @override
-  String get ingredientLayoutColumnar => 'Колонки — выровненные количества';
+  String get ingredientLayoutColumnar => 'Колонки: количества выровнены';
 
   @override
   String get settingsIngredientLayoutDescription => 'Выберите как отображаются количества и названия ингредиентов.';
@@ -6284,13 +6284,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsAdvancedSubtitle => 'Теги, блюда, категории и другое';
 
   @override
-  String get settingsRestoreDefaults => 'Restore Default Recipes';
+  String get settingsRestoreDefaults => 'Восстановить стандартные рецепты';
 
   @override
-  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+  String get settingsRestoreDefaultsSubtitle => 'Снова добавить 10 стартовых рецептов';
 
   @override
-  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+  String get settingsRestoreDefaultsConfirm => 'Добавить 10 стартовых рецептов в вашу книгу? Существующие рецепты не изменятся.';
 
   @override
   String get settingsDeleteData => 'Удалить данные';
@@ -6338,7 +6338,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get nutritionApplyRecalculate => 'Применить и пересчитать';
 
   @override
-  String get calAbbrev => 'Ккал';
+  String get calAbbrev => 'ккал';
 
   @override
   String get nutritionServingSizeHint => 'напр. 1 стакан, 100г';
@@ -6368,13 +6368,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get exportFormattedList => 'Форматированный список';
 
   @override
-  String get exportFormattedListSubtitle => 'С галочками — отлично для заметок';
+  String get exportFormattedListSubtitle => 'С галочками, удобно для заметок';
 
   @override
   String get exportPlainText => 'Простой текст';
 
   @override
-  String get exportPlainTextSubtitle => 'Простой список — вставьте куда угодно';
+  String get exportPlainTextSubtitle => 'Простой список, вставьте куда угодно';
 
   @override
   String get importFromBackupFile => 'Из файла резервной копии';
@@ -6500,74 +6500,74 @@ class AppLocalizationsRu extends AppLocalizations {
   String get upgradeToProUnlock => 'Перейдите на Pro для разблокировки';
 
   @override
-  String get kitchenBuddyTitle => 'Kitchen Buddy';
+  String get kitchenBuddyTitle => 'Кухонный друг';
 
   @override
-  String get kitchenBuddyCloset => 'Closet';
+  String get kitchenBuddyCloset => 'Гардероб';
 
   @override
-  String get kitchenBuddyShop => 'Shop';
+  String get kitchenBuddyShop => 'Магазин';
 
   @override
-  String get kitchenBuddyAchievements => 'Achievements';
+  String get kitchenBuddyAchievements => 'Достижения';
 
   @override
   String kitchenBuddyStreakDays(int count) {
-    return '$count day streak';
+    return 'Дней подряд: $count';
   }
 
   @override
-  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
+  String get kitchenBuddyClosetEmpty => 'Пока ничего нет! Загляните в магазин, чтобы начать.';
 
   @override
-  String get kitchenBuddyShopOwnEverything => 'You own everything!';
+  String get kitchenBuddyShopOwnEverything => 'У вас уже есть всё!';
 
   @override
-  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
+  String get kitchenBuddyShopCheckBack => 'Загляните позже, когда появятся новые вещи.';
 
   @override
   String kitchenBuddyConfirmPurchase(String itemName) {
-    return 'Buy $itemName?';
+    return 'Купить $itemName?';
   }
 
   @override
   String kitchenBuddyCostSummary(int price) {
-    return 'This will cost 🪙 $price Spice Coins.';
+    return 'Стоимость в пряных монетах: 🪙 $price.';
   }
 
   @override
-  String get kitchenBuddyBuy => 'Buy';
+  String get kitchenBuddyBuy => 'Купить';
 
   @override
   String kitchenBuddyPurchaseSuccess(String itemName) {
-    return 'Purchased $itemName!';
+    return 'Куплено: $itemName!';
   }
 
   @override
-  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
+  String get kitchenBuddyNotEnoughCoins => 'Недостаточно монет';
 
   @override
   String kitchenBuddyRequires(String achievementName) {
-    return 'Requires: $achievementName';
+    return 'Требуется: $achievementName';
   }
 
   @override
-  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
+  String get kitchenBuddyNamingTitle => 'Назовите своего друга';
 
   @override
-  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
+  String get kitchenBuddyIntroTitle => 'Знакомьтесь, ваш кухонный друг!';
 
   @override
-  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
+  String get kitchenBuddyIntroDescription => 'Этот маленький шеф станет вашим спутником на кухне.\nГотовьте по рецептам и зарабатывайте монеты, чтобы его наряжать!';
 
   @override
-  String get kitchenBuddyNameLabel => 'Buddy Name';
+  String get kitchenBuddyNameLabel => 'Имя друга';
 
   @override
-  String get kitchenBuddyNameHint => 'Enter a name...';
+  String get kitchenBuddyNameHint => 'Введите имя...';
 
   @override
-  String get kitchenBuddyCreate => 'Create Buddy';
+  String get kitchenBuddyCreate => 'Создать друга';
 
   @override
   String get settingsNoMatchingSettings => 'Нет подходящих настроек';
@@ -7221,7 +7221,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get integrationsChecking => 'Проверка...';
 
   @override
-  String get integrationsConnectedManage => 'Подключено – Нажмите для управления';
+  String get integrationsConnectedManage => 'Подключено. Нажмите для управления';
 
   @override
   String get integrationsNotConnected => 'Не подключено';
@@ -7332,13 +7332,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingBlankCookbook => 'Начать с пустой книги рецептов';
 
   @override
-  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+  String get onboardingBlankConfirmTitle => 'Начать с нуля?';
 
   @override
-  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+  String get onboardingBlankConfirmBody => 'Стартовые рецепты всегда можно добавить позже в настройках.';
 
   @override
-  String get onboardingBlankConfirmYes => 'Yes, start empty';
+  String get onboardingBlankConfirmYes => 'Да, начать с пустой';
 
   @override
   String get onboardingSpellbookAwaits => 'Ваша книга заклинаний ждёт';
@@ -7757,10 +7757,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuideQuickTipLabel => 'Быстрый совет';
 
   @override
-  String get importGuideQuickTipText => 'Самый быстрый способ? Скопируйте любую ссылку на рецепт и поделитесь ею в Recipe Spellbook — работает почти из любого приложения.';
+  String get importGuideQuickTipText => 'Самый быстрый способ? Скопируйте любую ссылку на рецепт и поделитесь ею в Recipe Spellbook. Это работает почти из любого приложения.';
 
   @override
-  String get importGuideWebButton => 'Web';
+  String get importGuideWebButton => 'Сайт';
 
   @override
   String get importGuideFollowInBrowser => 'Следуйте в браузере';
@@ -7924,7 +7924,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuideYoutubeStep3Desc => 'Нажмите \"Копировать ссылку\" или найдите Recipe Spellbook в меню отправки.';
 
   @override
-  String get importGuideYoutubeStep3Tip => 'Многие создатели YouTube размещают полный рецепт в описании видео — это повышает точность извлечения.';
+  String get importGuideYoutubeStep3Tip => 'Многие авторы на YouTube размещают полный рецепт в описании видео, поэтому извлечение получается точнее.';
 
   @override
   String get importGuideYoutubeStep4Title => 'Вставьте и импортируйте';
@@ -7999,7 +7999,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuideWebsiteStep5Title => 'Проверьте и сохраните';
 
   @override
-  String get importGuideWebsiteStep5Desc => 'Рецепт извлекается мгновенно — название, ингредиенты, шаги, время готовки и даже фото. Проверьте и сохраните.';
+  String get importGuideWebsiteStep5Desc => 'Проверьте извлечённый рецепт и нажмите «Импортировать», чтобы сохранить его в кулинарную книгу.';
 
   @override
   String get importGuideWebsiteStep5Tip => 'Работает с более чем 10 000 сайтов рецептов. Если извлечение не удастся, попробуйте метод \"Из текста\".';
@@ -8035,7 +8035,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuidePhotoStep4Title => 'Проверьте и исправьте ошибки';
 
   @override
-  String get importGuidePhotoStep4Desc => 'Проверьте извлечённый рецепт. OCR иногда ошибается — \"1/2\" может стать \"1l2\". Исправьте ошибки и сохраните.';
+  String get importGuidePhotoStep4Desc => 'Проверьте извлечённый рецепт. OCR иногда ошибается: \"1/2\" может стать \"1l2\". Исправьте ошибки и сохраните.';
 
   @override
   String get importGuidePhotoStep4Tip => 'Рукописные рецепты тоже работают, но печатный текст даёт лучшие результаты.';
@@ -8095,7 +8095,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuideTextStep3Desc => 'Вставьте скопированный текст в текстовое поле. AI автоматически разделит название, ингредиенты и шаги.';
 
   @override
-  String get importGuideTextStep3Tip => 'Работает даже с неформатированным текстом — AI отлично распознаёт количества ингредиентов и инструкции шагов.';
+  String get importGuideTextStep3Tip => 'Работает даже с неформатированным текстом. AI отлично распознаёт количества ингредиентов и инструкции шагов.';
 
   @override
   String get importGuideTextStep4Title => 'Проверьте и сохраните';
@@ -8331,7 +8331,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get faqWhatAreSublinkedSubtitle => 'Соедините связанные рецепты вместе';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'Связанные рецепты позволяют соединять связанные рецепты вместе. Например, рецепт пиццы «Маргарита» может ссылаться на ваш рецепт теста для пиццы. При просмотре основного рецепта вы можете нажать на связанный рецепт, чтобы сразу перейти к нему — без поиска.';
+  String get faqWhatAreSublinkedAnswer => 'Связанные рецепты позволяют соединять связанные рецепты вместе. Например, рецепт пиццы «Маргарита» может ссылаться на ваш рецепт теста для пиццы. При просмотре основного рецепта вы можете нажать на связанный рецепт, чтобы сразу перейти к нему без поиска.';
 
   @override
   String get faqMacroCalcTitle => 'Как использовать Калькулятор макросов';
@@ -8403,7 +8403,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get faqWhatIsMacroCalcSubtitle => 'Автоматическая оценка пищевой ценности рецептов';
 
   @override
-  String get faqWhatIsMacroCalcAnswer => 'Калькулятор макросов автоматически оценивает пищевую ценность ваших рецептов, сопоставляя каждый ингредиент с базой данных продуктов USDA. Он рассчитывает калории, белки, углеводы, жиры, клетчатку, сахар, натрий и другое — всё на порцию. Найти его можно в разделе Питание любого рецепта.';
+  String get faqWhatIsMacroCalcAnswer => 'Калькулятор макросов автоматически оценивает пищевую ценность ваших рецептов, сопоставляя каждый ингредиент с базой данных продуктов USDA. Он рассчитывает калории, белки, углеводы, жиры, клетчатку, сахар, натрий и другое, всё на порцию. Найти его можно в разделе Питание любого рецепта.';
 
   @override
   String get faqImportFailedTitle => 'Почему мой импорт не удался?';
@@ -8412,7 +8412,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get faqImportFailedSubtitle => 'Распространённые причины и решения';
 
   @override
-  String get faqImportFailedAnswer => 'Импорт может не удаться по нескольким причинам:\n\n• Сайт может блокировать автоматический доступ — попробуйте скопировать текст рецепта и использовать текстовый импорт.\n• Ссылка могла устареть или быть приватной — убедитесь, что это публичная ссылка.\n• Некоторые сайты используют форматы, которые сложнее обработать — попробуйте импорт через ИИ как альтернативу.\n• Проверьте подключение к интернету и попробуйте снова.';
+  String get faqImportFailedAnswer => 'Импорт может не удаться по нескольким причинам:\n\n• Сайт может блокировать автоматический доступ. Попробуйте скопировать текст рецепта и использовать текстовый импорт.\n• Ссылка могла устареть или быть приватной. Убедитесь, что это публичная ссылка.\n• Некоторые сайты используют форматы, которые сложнее обработать. Попробуйте импорт через ИИ как альтернативу.\n• Проверьте подключение к интернету и попробуйте снова.';
 
   @override
   String get faqDeviceTransferTitle => 'Можно ли импортировать с других устройств?';
@@ -8658,13 +8658,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get hintShoppingListGen => 'Добавьте ингредиенты рецепта в список покупок одним нажатием.';
 
   @override
-  String get hintRecipeNotes => 'Добавляйте личные заметки к рецептам — советы, изменения или воспоминания.';
+  String get hintRecipeNotes => 'Добавляйте к рецептам личные заметки: советы, изменения или воспоминания.';
 
   @override
   String get hintCookbookOrganization => 'Создавайте несколько кулинарных книг для организации рецептов по теме или случаю.';
 
   @override
-  String get hintTagSystem => 'Помечайте рецепты тегами для простой фильтрации — создавайте свои теги: «Быстрый», «Любимый» и др.';
+  String get hintTagSystem => 'Помечайте рецепты тегами для простой фильтрации. Создавайте свои теги: «Быстрый», «Любимый» и др.';
 
   @override
   String get allergyMyAllergies => 'Мои аллергии';
@@ -8947,7 +8947,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String subscriptionCancelledUntil(String date) {
-    return 'Отменена — доступ до $date';
+    return 'Отменена: доступ до $date';
   }
 
   @override
@@ -8957,7 +8957,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get subscriptionPlan => 'Тариф';
 
   @override
-  String get subscriptionLifetime => 'Пожизненная — без срока действия';
+  String get subscriptionLifetime => 'Пожизненная: без срока действия';
 
   @override
   String get subscriptionManage => 'Управление подпиской';
@@ -9036,10 +9036,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSystemLanguage => 'Системный';
 
   @override
-  String get tierFamily => 'FAMILY';
+  String get tierFamily => 'Семейный';
 
   @override
-  String get tierCreator => 'CREATOR';
+  String get tierCreator => 'Создатель';
 
   @override
   String get tierFreeName => 'Бесплатный';
@@ -9086,7 +9086,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get nutrientCal => 'Кал';
+  String get nutrientCal => 'ккал';
 
   @override
   String get nutrientSugar => 'Сахар';
@@ -9453,7 +9453,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return 'Выбрать $planName — $planPrice';
+    return 'Выбрать $planName: $planPrice';
   }
 
   @override
@@ -9472,13 +9472,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallYoureAllSet => 'Всё готово!';
 
   @override
-  String get paywallPurchaseNotDetected => 'Покупка пока не обнаружена — попробуй обновить ещё раз.';
+  String get paywallPurchaseNotDetected => 'Покупка пока не обнаружена. Попробуй обновить ещё раз.';
 
   @override
   String get paywallWebComingSoon => 'Покупки через веб скоро';
 
   @override
-  String get paywallWebMessage => 'А пока обнови через Android или iOS — синхронизация работает везде.';
+  String get paywallWebMessage => 'А пока обнови через Android или iOS, и синхронизация заработает везде.';
 
   @override
   String get paywallFreeLabel => 'Бесплатно';
@@ -9804,13 +9804,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get oneTimePurchaseDesc => 'Разовая покупка · навсегда · без подписки';
 
   @override
-  String get viewPlansPrice => 'Тарифы — \$6.99';
+  String get viewPlansPrice => 'Тарифы: \$6.99';
 
   @override
-  String get premiumActive => 'Премиум — Активен';
+  String get premiumActive => 'Премиум: активен';
 
   @override
-  String get familyActive => 'Семейный — Активен';
+  String get familyActive => 'Семейный: активен';
 
   @override
   String get cloudSyncEnabled => 'Облачная синхронизация включена';
@@ -9933,7 +9933,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get cravingCategoryHint => 'Необязательно — пропусти, если открыт ко всему';
+  String get cravingCategoryHint => 'Необязательно. Пропусти, если открыт ко всему';
 
   @override
   String get cravingCategoryNarrowHint => 'Сузь выбор или пропусти';
@@ -10032,7 +10032,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cravingSourceCommunitySubtitle => 'Из сообщества';
 
   @override
-  String get cravingSourceBothTitle => 'Оба — удиви меня';
+  String get cravingSourceBothTitle => 'Оба: удиви меня';
 
   @override
   String get cravingSourceBothSubtitle => 'Твои рецепты и рецепты сообщества';
@@ -10165,7 +10165,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallPriceAnchor => 'Большинство приложений с рецептами берут \$5–10/мес. Это не тот случай.';
 
   @override
-  String get paywallTrustLine => 'Плати один раз — пользуйся всегда.';
+  String get paywallTrustLine => 'Плати один раз, пользуйся всегда.';
 
   @override
   String get paywallPrivacyPolicy => 'Политика конфиденциальности';
@@ -10257,10 +10257,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get sortAToZ => 'А — Я';
+  String get sortAToZ => 'От А до Я';
 
   @override
-  String get sortZToA => 'Я — А';
+  String get sortZToA => 'От Я до А';
 
   @override
   String get sortNewest => 'Новые';
@@ -10366,7 +10366,7 @@ class AppLocalizationsRu extends AppLocalizations {
       few: 'Этот рецепт ссылается на $count суб-рецепта',
       one: 'Этот рецепт ссылается на 1 суб-рецепт',
     );
-    return '$_temp0 — снимите отметку с тех, которые не нужно включать.';
+    return '$_temp0. Снимите отметку с тех, которые не нужно включать.';
   }
 
   @override
@@ -10421,7 +10421,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get backupReminderNever => 'Войдите, чтобы синхронизировать рецепты, — или сделайте резервную копию вручную.';
+  String get backupReminderNever => 'Войдите, чтобы синхронизировать рецепты, или сделайте резервную копию вручную.';
 
   @override
   String get backupReminderAction => 'Войти';
@@ -10509,7 +10509,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get publishSingleRecipeTitle => 'Опубликовать рецепт';
 
   @override
-  String get publishSingleRecipeBody => 'Поделитесь этим рецептом в ленте сообщества. Обновления не синхронизируются — опубликуйте заново, чтобы отправить изменения.';
+  String get publishSingleRecipeBody => 'Поделитесь этим рецептом в ленте сообщества. Обновления не синхронизируются, поэтому опубликуйте заново, чтобы отправить изменения.';
 
   @override
   String get publishSingleRecipeAction => 'Опубликовать';
@@ -10662,7 +10662,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get communityRepublishSourceMissing => 'Не удалось найти исходный рецепт на этом устройстве. Опубликуйте его снова из рецепта, чтобы поделиться обновлённой версией.';
 
   @override
-  String get importNothingSaved => 'Импорт не удался — ничего не сохранено. Попробуйте ещё раз.';
+  String get importNothingSaved => 'Импорт не удался: ничего не сохранено. Попробуйте ещё раз.';
 
   @override
   String get unsavedChangesBody => 'У вас есть несохранённые изменения. Выйти без сохранения?';

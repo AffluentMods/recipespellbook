@@ -2020,28 +2020,28 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get importRecipe => 'Import Recipe';
+  String get importRecipe => 'Recept importeren';
 
   @override
-  String get importFile => 'File';
+  String get importFile => 'Bestand';
 
   @override
-  String get importImage => 'Image';
+  String get importImage => 'Afbeelding';
 
   @override
-  String get importPaste => 'Paste';
+  String get importPaste => 'Plakken';
 
   @override
-  String get importPasteUrl => 'Paste recipe URL';
+  String get importPasteUrl => 'Recept-URL plakken';
 
   @override
   String get importOr => 'OR';
 
   @override
-  String get importSupportsFormats => 'Supports Paprika, Mela, JSON, ZIP exports';
+  String get importSupportsFormats => 'Ondersteunt exports van Paprika, Mela, JSON en ZIP';
 
   @override
-  String get importFromSocialMedia => 'Import your recipes from any social media platform or website.';
+  String get importFromSocialMedia => 'Importeer je recepten van elk sociaal medium of elke website.';
 
   @override
   String get tagsTitle => 'Labels';
@@ -2386,13 +2386,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get photoChooseGallery => 'Kiezen uit galerij';
 
   @override
-  String get importFirstRecipe => 'Import First';
+  String get importFirstRecipe => 'Eerste importeren';
 
   @override
-  String get importAllRecipes => 'Import All';
+  String get importAllRecipes => 'Alles importeren';
 
   @override
-  String get parseRecipe => 'Parse Recipe';
+  String get parseRecipe => 'Recept verwerken';
 
   @override
   String get shareRecipe => 'Recept delen';
@@ -2407,7 +2407,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String sharePrep(int minutes) {
-    return 'Prep: $minutes min';
+    return 'Voorbereiding: $minutes min';
   }
 
   @override
@@ -2441,10 +2441,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get selectNone => 'Niets selecteren';
 
   @override
-  String get viewPlanner => 'View Planner';
+  String get viewPlanner => 'Planner bekijken';
 
   @override
-  String get planNow => 'Plan Now';
+  String get planNow => 'Nu plannen';
 
   @override
   String get loadingText => 'Laden...';
@@ -2530,7 +2530,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String addedItemsToList(int count) {
-    return '$count items toegevoegd aan lijst';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items toegevoegd aan je boodschappenlijst',
+      one: '1 item toegevoegd aan je boodschappenlijst',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2572,25 +2578,25 @@ class AppLocalizationsNl extends AppLocalizations {
   String get seeAll => 'Alles bekijken';
 
   @override
-  String get imagePlaceholders => 'Image Placeholders';
+  String get imagePlaceholders => 'Vervangende afbeeldingen';
 
   @override
-  String get imagePlaceholdersSubtitle => 'Choose what shows when images are missing';
+  String get imagePlaceholdersSubtitle => 'Kies wat er wordt getoond als een afbeelding ontbreekt';
 
   @override
-  String get homeScreenSection => 'Home Screen';
+  String get homeScreenSection => 'Startscherm';
 
   @override
-  String get quickAccessSubtitle => 'Configure what appears in Quick Access';
+  String get quickAccessSubtitle => 'Stel in wat er in Snelle toegang verschijnt';
 
   @override
-  String get manageCoursesSubtitle => 'Add, edit, or remove courses';
+  String get manageCoursesSubtitle => 'Gangen toevoegen, bewerken of verwijderen';
 
   @override
-  String get manageCategoriesSubtitle => 'Add, edit, or remove categories';
+  String get manageCategoriesSubtitle => 'Categorieën toevoegen, bewerken of verwijderen';
 
   @override
-  String get shoppingCategoriesSubtitle => 'Organize items by aisle';
+  String get shoppingCategoriesSubtitle => 'Items ordenen per gangpad';
 
   @override
   String get syncSection => 'Synchronisatie';
@@ -2735,7 +2741,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get defaultImages => 'Standaardafbeeldingen';
 
   @override
-  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
+  String get defaultImagesDescription => 'Standaardafbeeldingen van de app voor recepten en kookboeken';
 
   @override
   String get themeBased => 'Op thema gebaseerd';
@@ -2768,7 +2774,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get newShoppingList => 'Nieuwe boodschappenlijst';
 
   @override
-  String get listNameHint => 'List name';
+  String get listNameHint => 'Lijstnaam';
 
   @override
   String get recipeLayoutSetting => 'Indeling';
@@ -3079,7 +3085,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get nutritionUncertain => 'koppeling controleren';
 
   @override
-  String get nutritionNotFound => 'Geen koppeling — tik om te zoeken';
+  String get nutritionNotFound => 'Geen koppeling gevonden, tik om te zoeken';
 
   @override
   String get nutritionRecalculate => 'Herberekenen';
@@ -3365,7 +3371,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get tagsColorLabel => 'Kleur';
 
   @override
-  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
+  String get settingsKitchenBuddyEnabled => 'Verdien munten en kleed je buddy aan!';
 
   @override
   String get settingsRecipeLayoutSubtitle => 'Receptweergave aanpassen';
@@ -3722,31 +3728,31 @@ class AppLocalizationsNl extends AppLocalizations {
   String get shoppingAddHint => 'Druk op Enter om toe te voegen, typ dan het volgende';
 
   @override
-  String get categoryDeli => 'Deli';
+  String get categoryDeli => 'Delicatessen';
 
   @override
-  String get categoryBreakfast => 'Breakfast & Cereal';
+  String get categoryBreakfast => 'Ontbijt & granen';
 
   @override
-  String get categoryCanned => 'Canned Goods & Soups';
+  String get categoryCanned => 'Conserven & soepen';
 
   @override
-  String get categoryCondiments => 'Condiments, Sauces & Spices';
+  String get categoryCondiments => 'Sauzen, smaakmakers & kruiden';
 
   @override
-  String get categoryAlcohol => 'Beer, Wine & Spirits';
+  String get categoryAlcohol => 'Bier, wijn & sterke drank';
 
   @override
   String get categoryBaby => 'Baby';
 
   @override
-  String get categoryBeauty => 'Beauty & Personal Care';
+  String get categoryBeauty => 'Verzorging & beauty';
 
   @override
-  String get categoryHousehold => 'Housewares';
+  String get categoryHousehold => 'Huishoudartikelen';
 
   @override
-  String get categoryPet => 'Pet';
+  String get categoryPet => 'Huisdieren';
 
   @override
   String importFromPlatform(String platform) {
@@ -3786,7 +3792,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get helpSyncing => 'Synchronisatie';
 
   @override
-  String get helpSyncingDesc => 'Cloud sync komt binnenkort!';
+  String get helpSyncingDesc => 'Met Premium worden je recepten, kookboeken en foto\'s automatisch gesynchroniseerd op al je apparaten.';
 
   @override
   String get helpContactUs => 'Neem contact op';
@@ -4497,7 +4503,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get allData => 'Alle gegevens';
 
   @override
-  String get allDataDesc => 'Lokale gegevens en instellingen — volledige reset';
+  String get allDataDesc => 'Verwijdert ALLES permanent: lokale gegevens, cloudgegevens en je account. Een volledig nieuwe start.';
 
   @override
   String get allDataWarningTitle => 'Dit verwijdert alles';
@@ -4521,7 +4527,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get allDataNoUndo => 'Ik begrijp dat deze actie niet ongedaan kan worden gemaakt';
 
   @override
-  String get localNoCloudWarning => 'Je hebt geen Cloud Sync — er is geen back-up om van te herstellen';
+  String get localNoCloudWarning => 'Je hebt geen Cloud Sync, dus er is geen back-up om van te herstellen';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -4812,11 +4818,11 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String cancelledAccessUntil(String date) {
-    return 'Geannuleerd — toegang tot $date';
+    return 'Geannuleerd: toegang tot $date';
   }
 
   @override
-  String get lifetimeNeverExpires => 'Levenslang — verloopt nooit';
+  String get lifetimeNeverExpires => 'Levenslang: verloopt nooit';
 
   @override
   String renewsDate(String date) {
@@ -5111,7 +5117,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get payOnceKeepForever => 'Eén keer betalen, voor altijd behouden';
 
   @override
-  String get cloudSyncFreeTrial => 'Try free for 1 week';
+  String get cloudSyncFreeTrial => '1 week gratis proberen';
 
   @override
   String get cloudSyncFeature => 'Cloud Sync';
@@ -5250,7 +5256,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String reviewAndAddItems(int count) {
-    return 'Bekijken en toevoegen ($count items)';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bekijken en toevoegen ($count items)',
+      one: 'Bekijken en toevoegen (1 item)',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -5274,7 +5286,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String printPrep(int minutes) {
-    return 'Prep: $minutes min';
+    return 'Voorbereiding: $minutes min';
   }
 
   @override
@@ -5341,10 +5353,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get rating => 'Beoordeling';
 
   @override
-  String get usUnits => 'cups, tablespoons, ounces, °F';
+  String get usUnits => 'cups, eetlepels, ounces, °F';
 
   @override
-  String get metricUnits => 'milliliters, grams, °C';
+  String get metricUnits => 'milliliters, grammen, °C';
 
   @override
   String selectedCount(int count) {
@@ -5445,13 +5457,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get featurePhotosOnSteps => 'Foto\'s bij stappen';
 
   @override
-  String get featureCloudStorageLimited => 'Cloud storage — Limited';
+  String get featureCloudStorageLimited => 'Cloudopslag: beperkt';
 
   @override
   String get featureFamilySharing5 => 'Gezinsdeling (5 leden)';
 
   @override
-  String get featureCloudStorage => 'Cloud storage';
+  String get featureCloudStorage => 'Cloudopslag';
 
   @override
   String get featureSharedLists => 'Gedeelde boodschappenlijsten';
@@ -5463,7 +5475,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get featureSharedMealPlan => 'Gedeeld maaltijdplan';
 
   @override
-  String get featureAutoBackups => 'Automatic backups';
+  String get featureAutoBackups => 'Automatische back-ups';
 
   @override
   String get featureFamilySharing10 => 'Gezinsdeling (10 leden)';
@@ -5547,7 +5559,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get printLabelNotes => 'Notities';
 
   @override
-  String get printLabelPrep => 'Prep';
+  String get printLabelPrep => 'Voorbereiding';
 
   @override
   String get printLabelCook => 'Kooktijd';
@@ -5574,7 +5586,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get ingredientPreview => 'Ingrediëntenvoorbeeld';
 
   @override
-  String get resetToDefault => 'Reset to Default';
+  String get resetToDefault => 'Standaard herstellen';
 
   @override
   String get learnMore => 'Meer informatie';
@@ -5894,16 +5906,16 @@ class AppLocalizationsNl extends AppLocalizations {
   String get mealTypeAppetizer => 'Voorgerecht';
 
   @override
-  String get allergenContains => 'Contains';
+  String get allergenContains => 'Bevat';
 
   @override
   String get settingsIngredientLayout => 'Ingrediëntenindeling';
 
   @override
-  String get ingredientLayoutInline => 'Inline — 1 tl boter';
+  String get ingredientLayoutInline => 'Inline: 1 tl boter';
 
   @override
-  String get ingredientLayoutColumnar => 'Kolommen — hoeveelheden uitgelijnd';
+  String get ingredientLayoutColumnar => 'Kolommen: hoeveelheden uitgelijnd';
 
   @override
   String get settingsIngredientLayoutDescription => 'Kies hoe hoeveelheden en ingrediëntnamen worden weergegeven.';
@@ -6041,7 +6053,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get transferReady => 'Klaar voor overdracht';
 
   @override
-  String get transferCodeExpires => 'Deze code verloopt over 15 minuten';
+  String get transferCodeExpires => 'Deze code verloopt over 1 uur';
 
   @override
   String transferCodeExpiresAt(String time) {
@@ -6142,7 +6154,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get transferPointCamera => 'Richt op de QR-code van het verzendende apparaat';
 
   @override
-  String get labelPrepMin => 'Prep (min)';
+  String get labelPrepMin => 'Voorb. (min)';
 
   @override
   String get labelCookMin => 'Koken (min)';
@@ -6178,13 +6190,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsAdvancedSubtitle => 'Labels, gangen, categorieën & meer';
 
   @override
-  String get settingsRestoreDefaults => 'Restore Default Recipes';
+  String get settingsRestoreDefaults => 'Standaardrecepten herstellen';
 
   @override
-  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+  String get settingsRestoreDefaultsSubtitle => 'De 10 startrecepten opnieuw toevoegen';
 
   @override
-  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+  String get settingsRestoreDefaultsConfirm => '10 startrecepten aan je kookboek toevoegen? Bestaande recepten blijven ongewijzigd.';
 
   @override
   String get settingsDeleteData => 'Gegevens verwijderen';
@@ -6262,13 +6274,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get exportFormattedList => 'Opgemaakte lijst';
 
   @override
-  String get exportFormattedListSubtitle => 'Met selectievakjes — ideaal voor notitie-apps';
+  String get exportFormattedListSubtitle => 'Met selectievakjes, ideaal voor notitie-apps';
 
   @override
   String get exportPlainText => 'Platte tekst';
 
   @override
-  String get exportPlainTextSubtitle => 'Eenvoudige lijst — overal plakken';
+  String get exportPlainTextSubtitle => 'Eenvoudige lijst, overal te plakken';
 
   @override
   String get importFromBackupFile => 'Van back-upbestand';
@@ -6397,71 +6409,71 @@ class AppLocalizationsNl extends AppLocalizations {
   String get kitchenBuddyTitle => 'Kitchen Buddy';
 
   @override
-  String get kitchenBuddyCloset => 'Closet';
+  String get kitchenBuddyCloset => 'Kledingkast';
 
   @override
-  String get kitchenBuddyShop => 'Shop';
+  String get kitchenBuddyShop => 'Winkel';
 
   @override
-  String get kitchenBuddyAchievements => 'Achievements';
+  String get kitchenBuddyAchievements => 'Prestaties';
 
   @override
   String kitchenBuddyStreakDays(int count) {
-    return '$count day streak';
+    return 'Dagenreeks: $count';
   }
 
   @override
-  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
+  String get kitchenBuddyClosetEmpty => 'Nog geen items! Ga naar de Winkel om te beginnen.';
 
   @override
-  String get kitchenBuddyShopOwnEverything => 'You own everything!';
+  String get kitchenBuddyShopOwnEverything => 'Je hebt alles al!';
 
   @override
-  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
+  String get kitchenBuddyShopCheckBack => 'Kom terug als er nieuwe items zijn.';
 
   @override
   String kitchenBuddyConfirmPurchase(String itemName) {
-    return 'Buy $itemName?';
+    return '$itemName kopen?';
   }
 
   @override
   String kitchenBuddyCostSummary(int price) {
-    return 'This will cost 🪙 $price Spice Coins.';
+    return 'Dit kost 🪙 $price Spice Coins.';
   }
 
   @override
-  String get kitchenBuddyBuy => 'Buy';
+  String get kitchenBuddyBuy => 'Kopen';
 
   @override
   String kitchenBuddyPurchaseSuccess(String itemName) {
-    return 'Purchased $itemName!';
+    return '$itemName gekocht!';
   }
 
   @override
-  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
+  String get kitchenBuddyNotEnoughCoins => 'Niet genoeg munten';
 
   @override
   String kitchenBuddyRequires(String achievementName) {
-    return 'Requires: $achievementName';
+    return 'Vereist: $achievementName';
   }
 
   @override
-  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
+  String get kitchenBuddyNamingTitle => 'Geef je buddy een naam';
 
   @override
-  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
+  String get kitchenBuddyIntroTitle => 'Maak kennis met je Kitchen Buddy!';
 
   @override
-  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
+  String get kitchenBuddyIntroDescription => 'Deze kleine kok wordt je maatje in de keuken.\nKook recepten en verdien munten om hem aan te kleden!';
 
   @override
-  String get kitchenBuddyNameLabel => 'Buddy Name';
+  String get kitchenBuddyNameLabel => 'Naam van je buddy';
 
   @override
-  String get kitchenBuddyNameHint => 'Enter a name...';
+  String get kitchenBuddyNameHint => 'Voer een naam in...';
 
   @override
-  String get kitchenBuddyCreate => 'Create Buddy';
+  String get kitchenBuddyCreate => 'Buddy maken';
 
   @override
   String get settingsNoMatchingSettings => 'Geen overeenkomende instellingen';
@@ -6710,7 +6722,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String communityPrepTime(int minutes) {
-    return '${minutes}m prep';
+    return '$minutes min voorb.';
   }
 
   @override
@@ -6741,7 +6753,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get hintServingsExample => 'bijv. 4';
 
   @override
-  String get prepMin => 'Prep (min)';
+  String get prepMin => 'Voorb. (min)';
 
   @override
   String get cookMin => 'Koken (min)';
@@ -6957,7 +6969,7 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get minutesPrepSuffix => 'm prep';
+  String get minutesPrepSuffix => ' min voorb.';
 
   @override
   String get minutesCookSuffix => 'm koken';
@@ -7111,7 +7123,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get integrationsChecking => 'Controleren...';
 
   @override
-  String get integrationsConnectedManage => 'Verbonden – Tik om te beheren';
+  String get integrationsConnectedManage => 'Verbonden: tik om te beheren';
 
   @override
   String get integrationsNotConnected => 'Niet verbonden';
@@ -7222,13 +7234,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onboardingBlankCookbook => 'Begin met een leeg kookboek';
 
   @override
-  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+  String get onboardingBlankConfirmTitle => 'Leeg beginnen?';
 
   @override
-  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+  String get onboardingBlankConfirmBody => 'Je kunt de startrecepten later altijd toevoegen via Instellingen.';
 
   @override
-  String get onboardingBlankConfirmYes => 'Yes, start empty';
+  String get onboardingBlankConfirmYes => 'Ja, leeg beginnen';
 
   @override
   String get onboardingSpellbookAwaits => 'Je spreukenboek wacht';
@@ -7604,7 +7616,14 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String transferImportedSuccess(int count) {
-    return '$count items succesvol geïmporteerd.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items succesvol geïmporteerd.',
+      one: '1 item succesvol geïmporteerd.',
+      zero: 'Er is niets nieuws geïmporteerd.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -7641,7 +7660,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideQuickTipLabel => 'Snelle tip';
 
   @override
-  String get importGuideQuickTipText => 'De snelste manier? Kopieer een receptlink en deel het met Recipe Spellbook — werkt vanuit bijna elke app.';
+  String get importGuideQuickTipText => 'De snelste manier? Kopieer een receptlink en deel die met Recipe Spellbook. Het werkt vanuit bijna elke app.';
 
   @override
   String get importGuideWebButton => 'Web';
@@ -7733,16 +7752,16 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideInstagramStep3Tip => 'Op Android kun je ook de link kopiëren en in de app plakken.';
 
   @override
-  String get importGuideInstagramStep4Title => 'Het geëxtraheerde recept bekijken';
+  String get importGuideInstagramStep4Title => 'Recipe Spellbook zoeken';
 
   @override
-  String get importGuideInstagramStep4Desc => 'Onze AI leest het bijschrift, hashtags en tekst in de afbeelding om je recept samen te stellen. Controleer ingrediënten en stappen en sla op.';
+  String get importGuideInstagramStep4Desc => 'Tik op Meer om al je apps te zien en tik dan op Recipe Spellbook.';
 
   @override
-  String get importGuideInstagramStep5Title => 'Kookboek kiezen & opslaan';
+  String get importGuideInstagramStep5Title => 'Voorbeeld & importeren';
 
   @override
-  String get importGuideInstagramStep5Desc => 'Kies in welk kookboek je wilt opslaan, voeg labels toe en tik op Opslaan. Klaar!';
+  String get importGuideInstagramStep5Desc => 'Bekijk de receptgegevens en tik op Importeren om het in je kookboek op te slaan.';
 
   @override
   String get importGuideTiktokTitle => 'TikTok';
@@ -7772,16 +7791,16 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideTiktokStep3Tip => '\"Link kopiëren\" is vaak de betrouwbaarste methode voor TikTok.';
 
   @override
-  String get importGuideTiktokStep4Title => 'Link plakken in Recipe Spellbook';
+  String get importGuideTiktokStep4Title => 'Recipe Spellbook zoeken';
 
   @override
-  String get importGuideTiktokStep4Desc => 'Open Recipe Spellbook, tik op +, kies \"Van website/link\" en plak de TikTok-URL.';
+  String get importGuideTiktokStep4Desc => 'Tik op Meer om al je apps te zien en tik dan op Recipe Spellbook.';
 
   @override
-  String get importGuideTiktokStep5Title => 'Bekijken & opslaan';
+  String get importGuideTiktokStep5Title => 'Voorbeeld & importeren';
 
   @override
-  String get importGuideTiktokStep5Desc => 'De AI haalt het recept uit de videobeschrijving en reacties. Bekijk en sla op in je kookboek.';
+  String get importGuideTiktokStep5Desc => 'Bekijk de receptgegevens en tik op Importeren om het in je kookboek op te slaan.';
 
   @override
   String get importGuideYoutubeTitle => 'YouTube';
@@ -7808,13 +7827,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideYoutubeStep3Desc => 'Tik op \"Link kopiëren\" of zoek Recipe Spellbook in het deelmenu.';
 
   @override
-  String get importGuideYoutubeStep3Tip => 'Veel YouTube-creators zetten het volledige recept in de videobeschrijving — dit maakt extractie nauwkeuriger.';
+  String get importGuideYoutubeStep3Tip => 'Veel YouTube-creators zetten het volledige recept in de videobeschrijving. Daardoor wordt de extractie nauwkeuriger.';
 
   @override
-  String get importGuideYoutubeStep4Title => 'Plakken & importeren';
+  String get importGuideYoutubeStep4Title => 'Voorbeeld & importeren';
 
   @override
-  String get importGuideYoutubeStep4Desc => 'Tik in Recipe Spellbook op + > \"Van website/link\" en plak. De AI leest de videobeschrijving voor ingrediënten en stappen.';
+  String get importGuideYoutubeStep4Desc => 'Bekijk het geëxtraheerde recept en tik op Importeren om het in je kookboek op te slaan.';
 
   @override
   String get importGuidePinterestTitle => 'Pinterest';
@@ -7838,16 +7857,16 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuidePinterestStep2Tip => 'Als de pin geen bronlink heeft, probeer dan de deelmethode hieronder.';
 
   @override
-  String get importGuidePinterestStep3Title => 'Website-URL kopiëren';
+  String get importGuidePinterestStep3Title => 'Delen naar Recipe Spellbook';
 
   @override
-  String get importGuidePinterestStep3Desc => 'Zodra de receptwebsite in je browser is geopend, kopieer de URL uit de adresbalk.';
+  String get importGuidePinterestStep3Desc => 'Tik op de deelknop en kies Recipe Spellbook in de lijst met apps.';
 
   @override
-  String get importGuidePinterestStep4Title => 'Importeren in Recipe Spellbook';
+  String get importGuidePinterestStep4Title => 'Voorbeeld & importeren';
 
   @override
-  String get importGuidePinterestStep4Desc => 'Tik op + > \"Van website/link\", plak de URL en het recept wordt automatisch geëxtraheerd.';
+  String get importGuidePinterestStep4Desc => 'Bekijk de receptgegevens en tik op Importeren om het in je kookboek op te slaan.';
 
   @override
   String get importGuideWebsiteTitle => 'Elke receptwebsite';
@@ -7868,22 +7887,22 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideWebsiteStep2Desc => 'Tik op de adresbalk en kopieer de volledige URL naar het recept.';
 
   @override
-  String get importGuideWebsiteStep3Title => 'Tik op + in Recipe Spellbook';
+  String get importGuideWebsiteStep3Title => 'Tik op de deelknop';
 
   @override
-  String get importGuideWebsiteStep3Desc => 'Open de app en tik op de + knop om een nieuw recept toe te voegen.';
+  String get importGuideWebsiteStep3Desc => 'Tik op de deel- of Meer-knop van de browser om de deelopties te zien.';
 
   @override
-  String get importGuideWebsiteStep4Title => 'Kies \"Van website/link\"';
+  String get importGuideWebsiteStep4Title => 'Kies Recipe Spellbook';
 
   @override
-  String get importGuideWebsiteStep4Desc => 'Selecteer de website-importoptie en plak je gekopieerde URL.';
+  String get importGuideWebsiteStep4Desc => 'Zoek Recipe Spellbook in de lijst met apps en tik erop.';
 
   @override
-  String get importGuideWebsiteStep5Title => 'Bekijken & opslaan';
+  String get importGuideWebsiteStep5Title => 'Voorbeeld & importeren';
 
   @override
-  String get importGuideWebsiteStep5Desc => 'Het recept wordt direct geëxtraheerd — titel, ingrediënten, stappen, kooktijden en zelfs de foto. Bekijk en sla op.';
+  String get importGuideWebsiteStep5Desc => 'Bekijk het geëxtraheerde recept en tik op Importeren om het in je kookboek op te slaan.';
 
   @override
   String get importGuideWebsiteStep5Tip => 'Werkt met meer dan 10.000 receptsites. Als extractie mislukt, probeer dan de \"Van tekst\"-methode.';
@@ -7910,16 +7929,16 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuidePhotoStep2Desc => 'Open Recipe Spellbook, tik op + en kies \"Van foto\". Selecteer de foto uit je galerij of maak een nieuwe.';
 
   @override
-  String get importGuidePhotoStep3Title => 'AI scant de tekst';
+  String get importGuidePhotoStep3Title => 'Kies je afbeelding';
 
   @override
-  String get importGuidePhotoStep3Desc => 'OCR-technologie leest de tekst in je foto en AI scheidt intelligent de titel, ingrediënten en instructies.';
+  String get importGuidePhotoStep3Desc => 'Kies de receptafbeelding uit je galerij.';
 
   @override
   String get importGuidePhotoStep4Title => 'Bekijken & fouten corrigeren';
 
   @override
-  String get importGuidePhotoStep4Desc => 'Controleer het geëxtraheerde recept. OCR leest soms tekens verkeerd — \"1/2\" kan \"1l2\" worden. Corrigeer fouten en sla op.';
+  String get importGuidePhotoStep4Desc => 'Controleer het geëxtraheerde recept. OCR leest soms tekens verkeerd: \"1/2\" kan \"1l2\" worden. Corrigeer fouten en sla op.';
 
   @override
   String get importGuidePhotoStep4Tip => 'Handgeschreven recepten werken ook, maar gedrukte tekst geeft de beste resultaten.';
@@ -7979,7 +7998,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideTextStep3Desc => 'Plak de gekopieerde tekst in het tekstveld. De AI scheidt automatisch de titel, ingrediënten en stappen.';
 
   @override
-  String get importGuideTextStep3Tip => 'Dit werkt zelfs met onopgemaakte tekst — de AI is slim in het herkennen van hoeveelheden en stapinstructies.';
+  String get importGuideTextStep3Tip => 'Dit werkt zelfs met onopgemaakte tekst. De AI herkent slim hoeveelheden en stapinstructies.';
 
   @override
   String get importGuideTextStep4Title => 'Bekijken & opslaan';
@@ -7988,7 +8007,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideTextStep4Desc => 'Controleer het verwerkte recept, pas aan en sla op.';
 
   @override
-  String get importGuideAiTitle => 'AI (ChatGPT, Claude, etc.)';
+  String get importGuideAiTitle => 'AI (ChatGPT, Claude, enz.)';
 
   @override
   String get importGuideAiSubtitle => 'Genereer recepten met AI en importeer ze direct';
@@ -8045,10 +8064,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideOtherAppsStep2Desc => 'Sla het geëxporteerde bestand op of zet het over naar je telefoon via e-mail, cloudopslag of een andere methode.';
 
   @override
-  String get importGuideOtherAppsStep3Title => 'Importeren via Instellingen';
+  String get importGuideOtherAppsStep3Title => 'Het bestand importeren';
 
   @override
-  String get importGuideOtherAppsStep3Desc => 'Ga in Recipe Spellbook naar Instellingen > Gegevens > Importeren en selecteer het geëxporteerde bestand. De app verwerkt JSON, HTML en gangbare receptformaten.';
+  String get importGuideOtherAppsStep3Desc => 'Open in Recipe Spellbook het hoofdmenu en tik op Recept toevoegen → Importeren → Bestand. Kies dan het geëxporteerde bestand. De app verwerkt JSON, HTML en gangbare receptformaten.';
 
   @override
   String get importGuideOtherAppsStep4Title => 'Je recepten controleren';
@@ -8072,7 +8091,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideDeviceTransferStep2Title => 'Overdrachtscode ophalen';
 
   @override
-  String get importGuideDeviceTransferStep2Desc => 'Een 6-tekencode wordt gegenereerd. Deze code is 15 minuten geldig.';
+  String get importGuideDeviceTransferStep2Desc => 'Er wordt een code van 6 tekens gemaakt. Deze code is 1 uur geldig.';
 
   @override
   String get importGuideDeviceTransferStep3Title => 'Code invoeren op NIEUW apparaat';
@@ -8215,7 +8234,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get faqWhatAreSublinkedSubtitle => 'Verbind gerelateerde recepten met elkaar';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'Gekoppelde recepten laten je gerelateerde recepten aan elkaar verbinden. Zo kan een Margherita Pizza-recept bijvoorbeeld linken naar je Pizzadeeg-recept. Bij het bekijken van het hoofdrecept kun je op het gekoppelde recept tikken om er direct naartoe te gaan — geen zoeken nodig.';
+  String get faqWhatAreSublinkedAnswer => 'Gekoppelde recepten laten je gerelateerde recepten aan elkaar verbinden. Zo kan een Margherita Pizza-recept bijvoorbeeld linken naar je Pizzadeeg-recept. Bij het bekijken van het hoofdrecept kun je op het gekoppelde recept tikken om er direct naartoe te gaan, zonder te zoeken.';
 
   @override
   String get faqMacroCalcTitle => 'Hoe gebruik je de Macro Calculator';
@@ -8287,7 +8306,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get faqWhatIsMacroCalcSubtitle => 'Automatische voedingsschatting voor recepten';
 
   @override
-  String get faqWhatIsMacroCalcAnswer => 'De Macro Calculator schat automatisch de voedingswaarde van je recepten door elk ingrediënt te koppelen aan de USDA-voedingsdatabase. Het berekent calorieën, eiwitten, koolhydraten, vetten, vezels, suiker, natrium en meer — alles per portie. Je vindt het in het gedeelte Voedingswaarden van elk recept.';
+  String get faqWhatIsMacroCalcAnswer => 'De Macro Calculator schat automatisch de voedingswaarde van je recepten door elk ingrediënt te koppelen aan de USDA-voedingsdatabase. Het berekent calorieën, eiwitten, koolhydraten, vetten, vezels, suiker, natrium en meer, alles per portie. Je vindt het in het gedeelte Voedingswaarden van elk recept.';
 
   @override
   String get faqImportFailedTitle => 'Waarom is mijn import mislukt?';
@@ -8296,7 +8315,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get faqImportFailedSubtitle => 'Veelvoorkomende oorzaken en oplossingen';
 
   @override
-  String get faqImportFailedAnswer => 'Imports kunnen om verschillende redenen mislukken:\n\n• De website blokkeert mogelijk geautomatiseerde toegang — probeer de recepttekst te kopiëren en gebruik in plaats daarvan Tekstimport.\n• De link is mogelijk verlopen of privé — zorg ervoor dat het een openbare link is.\n• Sommige sites gebruiken formaten die moeilijker te verwerken zijn — probeer de AI-import als alternatief.\n• Controleer je internetverbinding en probeer het opnieuw.';
+  String get faqImportFailedAnswer => 'Imports kunnen om verschillende redenen mislukken:\n\n• De website blokkeert mogelijk geautomatiseerde toegang. Kopieer de recepttekst en gebruik in plaats daarvan Tekstimport.\n• De link is mogelijk verlopen of privé. Zorg ervoor dat het een openbare link is.\n• Sommige sites gebruiken formaten die moeilijker te verwerken zijn. Probeer als alternatief de AI-import.\n• Controleer je internetverbinding en probeer het opnieuw.';
 
   @override
   String get faqDeviceTransferTitle => 'Kan ik importeren vanaf andere apparaten?';
@@ -8385,7 +8404,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String communityStepCount(int count) {
-    return '$count stappen';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stappen',
+      one: '1 stap',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -8453,7 +8478,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get communityPublishPublishing => 'Publiceren naar community...';
 
   @override
-  String get communityPublishBackground => 'Je kunt dit scherm verlaten – het publiceren gaat door op de achtergrond.';
+  String get communityPublishBackground => 'Je kunt verder kijken terwijl het publiceren doorgaat.\nHoud de app open: als je van app wisselt, kunnen uploads mislukken.';
 
   @override
   String get communityPublishDone => 'Gepubliceerd!';
@@ -8542,13 +8567,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get hintShoppingListGen => 'Voeg receptingrediënten met één tik toe aan je boodschappenlijst.';
 
   @override
-  String get hintRecipeNotes => 'Voeg persoonlijke notities toe aan elk recept — tips, aanpassingen of herinneringen.';
+  String get hintRecipeNotes => 'Voeg persoonlijke notities toe aan elk recept: tips, aanpassingen of herinneringen.';
 
   @override
   String get hintCookbookOrganization => 'Maak meerdere kookboeken om je recepten te ordenen op thema of gelegenheid.';
 
   @override
-  String get hintTagSystem => 'Tag recepten voor eenvoudig filteren — maak aangepaste tags zoals \'Snel\', \'Favoriet\', enz.';
+  String get hintTagSystem => 'Tag recepten om makkelijk te filteren. Maak eigen tags zoals \'Snel\', \'Favoriet\', enz.';
 
   @override
   String get allergyMyAllergies => 'Mijn Allergieën';
@@ -8831,7 +8856,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String subscriptionCancelledUntil(String date) {
-    return 'Geannuleerd — toegang tot $date';
+    return 'Geannuleerd: toegang tot $date';
   }
 
   @override
@@ -8841,7 +8866,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get subscriptionPlan => 'Abonnement';
 
   @override
-  String get subscriptionLifetime => 'Levenslang — verloopt nooit';
+  String get subscriptionLifetime => 'Levenslang: verloopt nooit';
 
   @override
   String get subscriptionManage => 'Abonnement beheren';
@@ -9306,7 +9331,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cannotFollowSelf => 'Je kunt jezelf niet volgen';
 
   @override
-  String get paywallUpgradeTitle => 'Upgrade Recipe Spellbook';
+  String get paywallUpgradeTitle => 'Recipe Spellbook upgraden';
 
   @override
   String get paywallSubtitle => 'Je recepten op elk apparaat.\nVoor altijd.';
@@ -9337,7 +9362,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return '$planName kiezen — $planPrice';
+    return '$planName kiezen: $planPrice';
   }
 
   @override
@@ -9356,7 +9381,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get paywallYoureAllSet => 'Je bent helemaal klaar!';
 
   @override
-  String get paywallPurchaseNotDetected => 'Aankoop nog niet gedetecteerd — probeer opnieuw te vernieuwen.';
+  String get paywallPurchaseNotDetected => 'Aankoop nog niet gedetecteerd. Probeer opnieuw te vernieuwen.';
 
   @override
   String get paywallWebComingSoon => 'Webaankopen binnenkort beschikbaar';
@@ -9629,7 +9654,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String trashPermanentlyDeleteConfirm(int count) {
-    return '$count recepten permanent verwijderen? Dit kan niet ongedaan worden gemaakt.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'recepten',
+      one: 'recept',
+    );
+    return '$count $_temp0 permanent verwijderen? Dit kan niet ongedaan worden gemaakt.';
   }
 
   @override
@@ -9688,13 +9719,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get oneTimePurchaseDesc => 'Eenmalige aankoop · voor altijd van jou · geen abonnement';
 
   @override
-  String get viewPlansPrice => 'Plannen bekijken — \$6.99';
+  String get viewPlansPrice => 'Plannen bekijken: \$ 6,99';
 
   @override
-  String get premiumActive => 'Premium — Actief';
+  String get premiumActive => 'Premium: actief';
 
   @override
-  String get familyActive => 'Familie — Actief';
+  String get familyActive => 'Familie: actief';
 
   @override
   String get cloudSyncEnabled => 'Cloudsynchronisatie ingeschakeld';
@@ -9817,7 +9848,7 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get cravingCategoryHint => 'Optioneel — sla over als je voor alles openstaat';
+  String get cravingCategoryHint => 'Optioneel, sla over als je voor alles openstaat';
 
   @override
   String get cravingCategoryNarrowHint => 'Verfijn of sla over';
@@ -9916,7 +9947,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cravingSourceCommunitySubtitle => 'Van de community';
 
   @override
-  String get cravingSourceBothTitle => 'Beide — verras me';
+  String get cravingSourceBothTitle => 'Beide: verras me';
 
   @override
   String get cravingSourceBothSubtitle => 'Mix van jouw recepten en community';
@@ -10248,7 +10279,7 @@ class AppLocalizationsNl extends AppLocalizations {
       other: 'Dit recept koppelt $count subrecepten',
       one: 'Dit recept koppelt 1 subrecept',
     );
-    return '$_temp0 — vink uit wat je niet wilt opnemen.';
+    return '$_temp0. Vink uit wat je niet wilt opnemen.';
   }
 
   @override
@@ -10297,7 +10328,7 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get backupReminderNever => 'Meld je aan om je recepten gesynchroniseerd te houden — of maak handmatig een back-up.';
+  String get backupReminderNever => 'Meld je aan om je recepten gesynchroniseerd te houden, of maak handmatig een back-up.';
 
   @override
   String get backupReminderAction => 'Aanmelden';
@@ -10383,7 +10414,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get publishSingleRecipeTitle => 'Recept publiceren';
 
   @override
-  String get publishSingleRecipeBody => 'Deel dit recept met de communityfeed. Updates worden niet gesynchroniseerd — publiceer opnieuw om wijzigingen door te voeren.';
+  String get publishSingleRecipeBody => 'Deel dit recept in de communityfeed. Updates worden niet gesynchroniseerd, dus publiceer opnieuw om wijzigingen door te voeren.';
 
   @override
   String get publishSingleRecipeAction => 'Publiceren';
@@ -10522,7 +10553,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get communityRepublishSourceMissing => 'Het originele recept is niet gevonden op dit apparaat. Publiceer het opnieuw vanuit het recept om een bijgewerkte versie te delen.';
 
   @override
-  String get importNothingSaved => 'Importeren mislukt — er is niets opgeslagen. Probeer het opnieuw.';
+  String get importNothingSaved => 'Importeren mislukt: er is niets opgeslagen. Probeer het opnieuw.';
 
   @override
   String get unsavedChangesBody => 'Je hebt niet-opgeslagen wijzigingen. Weggaan zonder op te slaan?';

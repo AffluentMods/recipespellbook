@@ -1992,28 +1992,28 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get importRecipe => 'Import Recipe';
+  String get importRecipe => '레시피 가져오기';
 
   @override
-  String get importFile => 'File';
+  String get importFile => '파일';
 
   @override
-  String get importImage => 'Image';
+  String get importImage => '이미지';
 
   @override
-  String get importPaste => 'Paste';
+  String get importPaste => '붙여넣기';
 
   @override
-  String get importPasteUrl => 'Paste recipe URL';
+  String get importPasteUrl => '레시피 URL 붙여넣기';
 
   @override
   String get importOr => 'OR';
 
   @override
-  String get importSupportsFormats => 'Supports Paprika, Mela, JSON, ZIP exports';
+  String get importSupportsFormats => 'Paprika, Mela, JSON, ZIP 내보내기 파일 지원';
 
   @override
-  String get importFromSocialMedia => 'Import your recipes from any social media platform or website.';
+  String get importFromSocialMedia => '소셜 미디어나 웹사이트에서 레시피를 가져오세요.';
 
   @override
   String get tagsTitle => '태그';
@@ -2358,13 +2358,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get photoChooseGallery => '갤러리에서 선택';
 
   @override
-  String get importFirstRecipe => 'Import First';
+  String get importFirstRecipe => '첫 번째 가져오기';
 
   @override
-  String get importAllRecipes => 'Import All';
+  String get importAllRecipes => '모두 가져오기';
 
   @override
-  String get parseRecipe => 'Parse Recipe';
+  String get parseRecipe => '레시피 분석';
 
   @override
   String get shareRecipe => '레시피 공유';
@@ -2413,10 +2413,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get selectNone => '선택 해제';
 
   @override
-  String get viewPlanner => 'View Planner';
+  String get viewPlanner => '플래너 보기';
 
   @override
-  String get planNow => 'Plan Now';
+  String get planNow => '지금 계획하기';
 
   @override
   String get loadingText => '로딩 중...';
@@ -2544,25 +2544,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get seeAll => '모두 보기';
 
   @override
-  String get imagePlaceholders => 'Image Placeholders';
+  String get imagePlaceholders => '기본 이미지';
 
   @override
-  String get imagePlaceholdersSubtitle => 'Choose what shows when images are missing';
+  String get imagePlaceholdersSubtitle => '이미지가 없을 때 표시할 항목 선택';
 
   @override
-  String get homeScreenSection => 'Home Screen';
+  String get homeScreenSection => '홈 화면';
 
   @override
-  String get quickAccessSubtitle => 'Configure what appears in Quick Access';
+  String get quickAccessSubtitle => '빠른 접근에 표시할 항목 설정';
 
   @override
-  String get manageCoursesSubtitle => 'Add, edit, or remove courses';
+  String get manageCoursesSubtitle => '코스 추가, 편집 또는 삭제';
 
   @override
-  String get manageCategoriesSubtitle => 'Add, edit, or remove categories';
+  String get manageCategoriesSubtitle => '카테고리 추가, 편집 또는 삭제';
 
   @override
-  String get shoppingCategoriesSubtitle => 'Organize items by aisle';
+  String get shoppingCategoriesSubtitle => '매장 코너별로 항목 정리';
 
   @override
   String get syncSection => '동기화';
@@ -2707,7 +2707,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get defaultImages => '기본 이미지';
 
   @override
-  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
+  String get defaultImagesDescription => '레시피와 요리책의 기본 앱 이미지';
 
   @override
   String get themeBased => '테마 기반';
@@ -2740,7 +2740,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get newShoppingList => '새 쇼핑 목록';
 
   @override
-  String get listNameHint => 'List name';
+  String get listNameHint => '목록 이름';
 
   @override
   String get recipeLayoutSetting => '레이아웃';
@@ -3051,7 +3051,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutritionUncertain => '매칭 확인';
 
   @override
-  String get nutritionNotFound => '매칭 없음 — 탭하여 검색';
+  String get nutritionNotFound => '일치하는 항목 없음. 탭하여 검색';
 
   @override
   String get nutritionRecalculate => '재계산';
@@ -3337,7 +3337,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tagsColorLabel => '색상';
 
   @override
-  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
+  String get settingsKitchenBuddyEnabled => '코인을 모아 버디를 꾸며 보세요!';
 
   @override
   String get settingsRecipeLayoutSubtitle => '레시피 표시 사용자 지정';
@@ -3693,31 +3693,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shoppingAddHint => 'Enter를 눌러 추가, 다음 항목 입력';
 
   @override
-  String get categoryDeli => 'Deli';
+  String get categoryDeli => '델리';
 
   @override
-  String get categoryBreakfast => 'Breakfast & Cereal';
+  String get categoryBreakfast => '아침 식사 및 시리얼';
 
   @override
-  String get categoryCanned => 'Canned Goods & Soups';
+  String get categoryCanned => '통조림 및 수프';
 
   @override
-  String get categoryCondiments => 'Condiments, Sauces & Spices';
+  String get categoryCondiments => '조미료, 소스 및 향신료';
 
   @override
-  String get categoryAlcohol => 'Beer, Wine & Spirits';
+  String get categoryAlcohol => '맥주, 와인 및 주류';
 
   @override
-  String get categoryBaby => 'Baby';
+  String get categoryBaby => '유아용품';
 
   @override
-  String get categoryBeauty => 'Beauty & Personal Care';
+  String get categoryBeauty => '뷰티 및 개인 위생';
 
   @override
-  String get categoryHousehold => 'Housewares';
+  String get categoryHousehold => '생활용품';
 
   @override
-  String get categoryPet => 'Pet';
+  String get categoryPet => '반려동물';
 
   @override
   String importFromPlatform(String platform) {
@@ -4461,7 +4461,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get allData => '모든 데이터';
 
   @override
-  String get allDataDesc => '로컬 데이터 및 설정 — 전체 초기화';
+  String get allDataDesc => '로컬 데이터, 클라우드 데이터, 계정까지 모든 것을 영구적으로 삭제합니다. 완전히 처음부터 다시 시작합니다.';
 
   @override
   String get allDataWarningTitle => '모든 것이 삭제됩니다';
@@ -4485,7 +4485,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get allDataNoUndo => '이 작업은 되돌릴 수 없다는 것을 이해합니다';
 
   @override
-  String get localNoCloudWarning => 'Cloud Sync가 없습니다 — 복구할 백업이 없습니다';
+  String get localNoCloudWarning => 'Cloud Sync가 없어 복구할 백업이 없습니다';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -4776,11 +4776,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String cancelledAccessUntil(String date) {
-    return '취소됨 — $date까지 접근 가능';
+    return '취소됨: $date까지 이용 가능';
   }
 
   @override
-  String get lifetimeNeverExpires => '평생 — 만료 없음';
+  String get lifetimeNeverExpires => '평생: 만료 없음';
 
   @override
   String renewsDate(String date) {
@@ -5070,7 +5070,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get payOnceKeepForever => '한 번 결제, 영원히 사용';
 
   @override
-  String get cloudSyncFreeTrial => 'Try free for 1 week';
+  String get cloudSyncFreeTrial => '1주일 무료 체험';
 
   @override
   String get cloudSyncFeature => 'Cloud Sync';
@@ -5300,10 +5300,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rating => '평점';
 
   @override
-  String get usUnits => 'cups, tablespoons, ounces, °F';
+  String get usUnits => '컵, 큰술, 온스, °F';
 
   @override
-  String get metricUnits => 'milliliters, grams, °C';
+  String get metricUnits => '밀리리터, 그램, °C';
 
   @override
   String selectedCount(int count) {
@@ -5404,13 +5404,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get featurePhotosOnSteps => '단계별 사진';
 
   @override
-  String get featureCloudStorageLimited => 'Cloud storage — Limited';
+  String get featureCloudStorageLimited => '클라우드 저장공간: 제한됨';
 
   @override
   String get featureFamilySharing5 => '가족 공유 (5명)';
 
   @override
-  String get featureCloudStorage => 'Cloud storage';
+  String get featureCloudStorage => '클라우드 저장공간';
 
   @override
   String get featureSharedLists => '공유 쇼핑 목록';
@@ -5422,7 +5422,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get featureSharedMealPlan => '공유 식사 계획';
 
   @override
-  String get featureAutoBackups => 'Automatic backups';
+  String get featureAutoBackups => '자동 백업';
 
   @override
   String get featureFamilySharing10 => '가족 공유 (10명)';
@@ -5533,7 +5533,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ingredientPreview => '재료 미리보기';
 
   @override
-  String get resetToDefault => 'Reset to Default';
+  String get resetToDefault => '기본값으로 재설정';
 
   @override
   String get learnMore => '자세히 알아보기';
@@ -5833,16 +5833,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mealTypeAppetizer => '전채';
 
   @override
-  String get allergenContains => 'Contains';
+  String get allergenContains => '함유';
 
   @override
   String get settingsIngredientLayout => '재료 레이아웃';
 
   @override
-  String get ingredientLayoutInline => '인라인 — 버터 1작은술';
+  String get ingredientLayoutInline => '인라인: 버터 1작은술';
 
   @override
-  String get ingredientLayoutColumnar => '컬럼 — 양 정렬';
+  String get ingredientLayoutColumnar => '컬럼: 분량 정렬';
 
   @override
   String get settingsIngredientLayoutDescription => '재료의 양과 이름 표시 방법 선택.';
@@ -6117,13 +6117,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAdvancedSubtitle => '태그, 코스, 카테고리 등';
 
   @override
-  String get settingsRestoreDefaults => 'Restore Default Recipes';
+  String get settingsRestoreDefaults => '기본 레시피 복원';
 
   @override
-  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+  String get settingsRestoreDefaultsSubtitle => '스타터 레시피 10개 다시 추가';
 
   @override
-  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+  String get settingsRestoreDefaultsConfirm => '요리책에 스타터 레시피 10개를 추가할까요? 기존 레시피는 영향을 받지 않습니다.';
 
   @override
   String get settingsDeleteData => '데이터 삭제';
@@ -6171,7 +6171,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutritionApplyRecalculate => '적용 및 재계산';
 
   @override
-  String get calAbbrev => 'Cal';
+  String get calAbbrev => 'kcal';
 
   @override
   String get nutritionServingSizeHint => '예: 1컵, 100g';
@@ -6201,13 +6201,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get exportFormattedList => '서식 있는 목록';
 
   @override
-  String get exportFormattedListSubtitle => '체크박스 포함 — 메모 앱에 적합';
+  String get exportFormattedListSubtitle => '체크박스 포함, 메모 앱에 적합';
 
   @override
   String get exportPlainText => '일반 텍스트';
 
   @override
-  String get exportPlainTextSubtitle => '간단한 목록 — 어디든 붙여넣기';
+  String get exportPlainTextSubtitle => '간단한 목록, 어디든 붙여넣기';
 
   @override
   String get importFromBackupFile => '백업 파일에서';
@@ -6333,74 +6333,74 @@ class AppLocalizationsKo extends AppLocalizations {
   String get upgradeToProUnlock => 'Pro로 업그레이드하여 잠금 해제';
 
   @override
-  String get kitchenBuddyTitle => 'Kitchen Buddy';
+  String get kitchenBuddyTitle => '키친 버디';
 
   @override
-  String get kitchenBuddyCloset => 'Closet';
+  String get kitchenBuddyCloset => '옷장';
 
   @override
-  String get kitchenBuddyShop => 'Shop';
+  String get kitchenBuddyShop => '상점';
 
   @override
-  String get kitchenBuddyAchievements => 'Achievements';
+  String get kitchenBuddyAchievements => '업적';
 
   @override
   String kitchenBuddyStreakDays(int count) {
-    return '$count day streak';
+    return '$count일 연속';
   }
 
   @override
-  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
+  String get kitchenBuddyClosetEmpty => '아직 아이템이 없습니다! 상점에 들러 시작해 보세요.';
 
   @override
-  String get kitchenBuddyShopOwnEverything => 'You own everything!';
+  String get kitchenBuddyShopOwnEverything => '모든 아이템을 가지고 있습니다!';
 
   @override
-  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
+  String get kitchenBuddyShopCheckBack => '새 아이템이 추가되면 다시 확인해 보세요.';
 
   @override
   String kitchenBuddyConfirmPurchase(String itemName) {
-    return 'Buy $itemName?';
+    return '$itemName을(를) 구매할까요?';
   }
 
   @override
   String kitchenBuddyCostSummary(int price) {
-    return 'This will cost 🪙 $price Spice Coins.';
+    return '🪙 $price 스파이스 코인이 필요합니다.';
   }
 
   @override
-  String get kitchenBuddyBuy => 'Buy';
+  String get kitchenBuddyBuy => '구매';
 
   @override
   String kitchenBuddyPurchaseSuccess(String itemName) {
-    return 'Purchased $itemName!';
+    return '$itemName을(를) 구매했습니다!';
   }
 
   @override
-  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
+  String get kitchenBuddyNotEnoughCoins => '코인이 부족합니다';
 
   @override
   String kitchenBuddyRequires(String achievementName) {
-    return 'Requires: $achievementName';
+    return '필요 조건: $achievementName';
   }
 
   @override
-  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
+  String get kitchenBuddyNamingTitle => '버디 이름 짓기';
 
   @override
-  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
+  String get kitchenBuddyIntroTitle => '키친 버디를 만나 보세요!';
 
   @override
-  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
+  String get kitchenBuddyIntroDescription => '이 작은 셰프가 주방의 친구가 되어 줍니다.\n레시피로 요리하고 코인을 모아 버디를 꾸며 보세요!';
 
   @override
-  String get kitchenBuddyNameLabel => 'Buddy Name';
+  String get kitchenBuddyNameLabel => '버디 이름';
 
   @override
-  String get kitchenBuddyNameHint => 'Enter a name...';
+  String get kitchenBuddyNameHint => '이름 입력...';
 
   @override
-  String get kitchenBuddyCreate => 'Create Buddy';
+  String get kitchenBuddyCreate => '버디 만들기';
 
   @override
   String get settingsNoMatchingSettings => '일치하는 설정이 없습니다';
@@ -7161,13 +7161,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingBlankCookbook => '빈 요리책으로 시작';
 
   @override
-  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+  String get onboardingBlankConfirmTitle => '빈 상태로 시작할까요?';
 
   @override
-  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+  String get onboardingBlankConfirmBody => '스타터 레시피는 나중에 언제든 설정에서 추가할 수 있습니다.';
 
   @override
-  String get onboardingBlankConfirmYes => 'Yes, start empty';
+  String get onboardingBlankConfirmYes => '네, 빈 상태로 시작';
 
   @override
   String get onboardingSpellbookAwaits => '당신의 마법서가 기다리고 있어요';
@@ -7577,10 +7577,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuideQuickTipLabel => '빠른 팁';
 
   @override
-  String get importGuideQuickTipText => '가장 빠른 방법은 레시피 링크를 복사하여 Recipe Spellbook으로 공유하는 것입니다 — 거의 모든 앱에서 작동합니다.';
+  String get importGuideQuickTipText => '가장 빠른 방법은 레시피 링크를 복사하여 Recipe Spellbook으로 공유하는 것입니다. 거의 모든 앱에서 작동합니다.';
 
   @override
-  String get importGuideWebButton => 'Web';
+  String get importGuideWebButton => '웹';
 
   @override
   String get importGuideFollowInBrowser => '브라우저에서 따라하기';
@@ -7744,7 +7744,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuideYoutubeStep3Desc => '\"링크 복사\"를 탭하거나 공유 시트에서 Recipe Spellbook을 찾으세요.';
 
   @override
-  String get importGuideYoutubeStep3Tip => '많은 YouTube 크리에이터가 동영상 설명에 전체 레시피를 올립니다 — 이로 인해 추출 정확도가 높아집니다.';
+  String get importGuideYoutubeStep3Tip => '많은 YouTube 크리에이터가 동영상 설명에 전체 레시피를 올려 두기 때문에 추출이 더 정확해집니다.';
 
   @override
   String get importGuideYoutubeStep4Title => '붙여넣기 및 가져오기';
@@ -7819,7 +7819,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuideWebsiteStep5Title => '검토 및 저장';
 
   @override
-  String get importGuideWebsiteStep5Desc => '레시피가 즉시 추출됩니다 — 제목, 재료, 단계, 조리 시간, 사진까지. 검토하고 저장하세요.';
+  String get importGuideWebsiteStep5Desc => '추출된 레시피를 검토하고 가져오기를 탭하여 요리책에 저장하세요.';
 
   @override
   String get importGuideWebsiteStep5Tip => '10,000개 이상의 레시피 사이트에서 작동합니다. 추출에 실패하면 \"텍스트에서\" 방법을 시도하세요.';
@@ -7855,7 +7855,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuidePhotoStep4Title => '검토 및 오류 수정';
 
   @override
-  String get importGuidePhotoStep4Desc => '추출된 레시피를 확인하세요. OCR은 가끔 문자를 잘못 읽습니다 — \"1/2\"가 \"1l2\"가 될 수 있습니다. 오류를 수정하고 저장하세요.';
+  String get importGuidePhotoStep4Desc => '추출된 레시피를 확인하세요. OCR이 가끔 문자를 잘못 읽어 \"1/2\"가 \"1l2\"가 될 수 있습니다. 오류를 수정하고 저장하세요.';
 
   @override
   String get importGuidePhotoStep4Tip => '손으로 쓴 레시피도 지원하지만 인쇄된 텍스트가 최상의 결과를 얻습니다.';
@@ -7915,7 +7915,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuideTextStep3Desc => '복사한 텍스트를 텍스트 필드에 붙여넣으세요. AI가 자동으로 제목, 재료, 단계를 분리합니다.';
 
   @override
-  String get importGuideTextStep3Tip => '형식이 없는 텍스트에서도 작동합니다 — AI가 재료 양과 조리법 지시를 스마트하게 파싱합니다.';
+  String get importGuideTextStep3Tip => '형식이 없는 텍스트에서도 작동합니다. AI가 재료 양과 조리 단계를 똑똑하게 분석합니다.';
 
   @override
   String get importGuideTextStep4Title => '검토 및 저장';
@@ -8151,7 +8151,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get faqWhatAreSublinkedSubtitle => '관련 레시피를 서로 연결';
 
   @override
-  String get faqWhatAreSublinkedAnswer => '서브링크 레시피를 사용하면 관련 레시피를 서로 연결할 수 있습니다. 예를 들어, 마르게리타 피자 레시피에서 피자 도우 레시피로 연결할 수 있습니다. 메인 레시피를 볼 때 연결된 레시피를 탭하면 바로 이동할 수 있습니다 — 검색이 필요 없습니다.';
+  String get faqWhatAreSublinkedAnswer => '서브링크 레시피를 사용하면 관련 레시피를 서로 연결할 수 있습니다. 예를 들어, 마르게리타 피자 레시피에서 피자 도우 레시피로 연결할 수 있습니다. 메인 레시피를 볼 때 연결된 레시피를 탭하면 검색할 필요 없이 바로 이동할 수 있습니다.';
 
   @override
   String get faqMacroCalcTitle => '매크로 계산기 사용법';
@@ -8232,7 +8232,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get faqImportFailedSubtitle => '일반적인 원인과 해결 방법';
 
   @override
-  String get faqImportFailedAnswer => '가져오기가 실패하는 이유는 여러 가지입니다:\n\n• 웹사이트가 자동 접근을 차단할 수 있습니다 — 레시피 텍스트를 복사하여 텍스트 가져오기를 사용해 보세요.\n• 링크가 만료되었거나 비공개일 수 있습니다 — 공개 링크인지 확인하세요.\n• 일부 사이트는 파싱하기 어려운 형식을 사용합니다 — AI 가져오기를 대안으로 사용해 보세요.\n• 인터넷 연결을 확인하고 다시 시도하세요.';
+  String get faqImportFailedAnswer => '가져오기가 실패하는 이유는 여러 가지입니다:\n\n• 웹사이트가 자동 접근을 차단할 수 있습니다. 레시피 텍스트를 복사하여 텍스트 가져오기를 사용해 보세요.\n• 링크가 만료되었거나 비공개일 수 있습니다. 공개 링크인지 확인하세요.\n• 일부 사이트는 분석하기 어려운 형식을 사용합니다. 대안으로 AI 가져오기를 사용해 보세요.\n• 인터넷 연결을 확인하고 다시 시도하세요.';
 
   @override
   String get faqDeviceTransferTitle => '다른 기기에서 가져올 수 있나요?';
@@ -8478,13 +8478,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get hintShoppingListGen => '한 번의 탭으로 레시피 재료를 장보기 목록에 추가하세요.';
 
   @override
-  String get hintRecipeNotes => '모든 레시피에 개인 메모를 추가하세요 — 팁, 변형, 추억 등.';
+  String get hintRecipeNotes => '모든 레시피에 팁, 변형, 추억 등 개인 메모를 추가하세요.';
 
   @override
   String get hintCookbookOrganization => '여러 요리책을 만들어 테마나 행사별로 레시피를 정리하세요.';
 
   @override
-  String get hintTagSystem => '레시피에 태그를 붙여 쉽게 필터링하세요 — \'간편\', \'즐겨찾기\' 등 사용자 지정 태그를 만들어보세요.';
+  String get hintTagSystem => '레시피에 태그를 붙여 쉽게 필터링하세요. \'간편\', \'즐겨찾기\' 등 나만의 태그를 만들어 보세요.';
 
   @override
   String get allergyMyAllergies => '내 알레르기';
@@ -8767,7 +8767,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String subscriptionCancelledUntil(String date) {
-    return '취소됨 — $date까지 이용 가능';
+    return '취소됨: $date까지 이용 가능';
   }
 
   @override
@@ -8777,7 +8777,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subscriptionPlan => '플랜';
 
   @override
-  String get subscriptionLifetime => '평생 — 만료 없음';
+  String get subscriptionLifetime => '평생: 만료 없음';
 
   @override
   String get subscriptionManage => '구독 관리';
@@ -8856,10 +8856,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsSystemLanguage => '시스템';
 
   @override
-  String get tierFamily => 'FAMILY';
+  String get tierFamily => '패밀리';
 
   @override
-  String get tierCreator => 'CREATOR';
+  String get tierCreator => '크리에이터';
 
   @override
   String get tierFreeName => '무료';
@@ -8906,7 +8906,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nutrientCal => 'Cal';
+  String get nutrientCal => 'kcal';
 
   @override
   String get nutrientSugar => '당류';
@@ -9273,7 +9273,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return '$planName 구매 — $planPrice';
+    return '$planName 구매: $planPrice';
   }
 
   @override
@@ -9292,7 +9292,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallYoureAllSet => '모두 준비되었습니다!';
 
   @override
-  String get paywallPurchaseNotDetected => '아직 구매가 감지되지 않았습니다 — 다시 새로고침해 보세요.';
+  String get paywallPurchaseNotDetected => '아직 구매가 감지되지 않았습니다. 다시 새로고침해 보세요.';
 
   @override
   String get paywallWebComingSoon => '웹 구매 곧 출시';
@@ -9624,13 +9624,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get oneTimePurchaseDesc => '일회성 구매 · 영원히 소유 · 구독 없음';
 
   @override
-  String get viewPlansPrice => '플랜 보기 — \$6.99';
+  String get viewPlansPrice => '플랜 보기: \$6.99';
 
   @override
-  String get premiumActive => '프리미엄 — 활성';
+  String get premiumActive => '프리미엄: 활성';
 
   @override
-  String get familyActive => '패밀리 — 활성';
+  String get familyActive => '패밀리: 활성';
 
   @override
   String get cloudSyncEnabled => '클라우드 동기화 활성화됨';
@@ -9753,7 +9753,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get cravingCategoryHint => '선택 사항 — 아무거나 괜찮으면 건너뛰세요';
+  String get cravingCategoryHint => '선택 사항입니다. 아무거나 괜찮으면 건너뛰세요';
 
   @override
   String get cravingCategoryNarrowHint => '범위를 좁히거나 건너뛰세요';
@@ -9852,7 +9852,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cravingSourceCommunitySubtitle => '커뮤니티에서';
 
   @override
-  String get cravingSourceBothTitle => '둘 다 — 서프라이즈';
+  String get cravingSourceBothTitle => '둘 다: 서프라이즈';
 
   @override
   String get cravingSourceBothSubtitle => '내 레시피와 커뮤니티 혼합';
@@ -10184,7 +10184,7 @@ class AppLocalizationsKo extends AppLocalizations {
       other: '이 레시피는 하위 레시피 $count개와 연결되어 있습니다',
       one: '이 레시피는 하위 레시피 1개와 연결되어 있습니다',
     );
-    return '$_temp0 — 포함하지 않을 항목은 선택 해제하세요.';
+    return '$_temp0. 포함하지 않을 항목은 선택 해제하세요.';
   }
 
   @override
@@ -10458,7 +10458,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get communityRepublishSourceMissing => '이 기기에서 원본 레시피를 찾을 수 없습니다. 업데이트된 버전을 공유하려면 해당 레시피에서 다시 게시하세요.';
 
   @override
-  String get importNothingSaved => '가져오기 실패 — 아무것도 저장되지 않았습니다. 다시 시도해 주세요.';
+  String get importNothingSaved => '가져오기 실패: 아무것도 저장되지 않았습니다. 다시 시도해 주세요.';
 
   @override
   String get unsavedChangesBody => '저장하지 않은 변경 사항이 있습니다. 저장하지 않고 나갈까요?';
