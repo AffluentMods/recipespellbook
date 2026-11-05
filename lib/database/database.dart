@@ -242,18 +242,20 @@ class AppDatabase extends _$AppDatabase {
           // from, the version it is based on, a newer version waiting, and
           // the per-recipe fingerprints that keep the user's edits safe.
           // All nullable: existing cookbooks simply have no source.
-          await customStatement(
-            'ALTER TABLE cookbooks ADD COLUMN community_source_id TEXT',
-          );
-          await customStatement(
-            'ALTER TABLE cookbooks ADD COLUMN community_source_version INTEGER',
-          );
-          await customStatement(
-            'ALTER TABLE cookbooks ADD COLUMN community_update_version INTEGER',
-          );
-          await customStatement(
-            'ALTER TABLE cookbooks ADD COLUMN community_manifest TEXT',
-          );
+          // Checks each column first, so the step is safe to run twice.
+          final have = (await customSelect('PRAGMA table_info(cookbooks)').get())
+              .map((r) => r.read<String>('name'))
+              .toSet();
+          for (final column in const [
+            'community_source_id TEXT',
+            'community_source_version INTEGER',
+            'community_update_version INTEGER',
+            'community_manifest TEXT',
+          ]) {
+            if (!have.contains(column.split(' ').first)) {
+              await customStatement('ALTER TABLE cookbooks ADD COLUMN $column');
+            }
+          }
         }
       },
     );
