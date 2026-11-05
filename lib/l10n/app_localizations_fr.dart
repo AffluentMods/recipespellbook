@@ -10947,4 +10947,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncNotInPlan => 'La synchronisation cloud n\'est pas incluse dans votre forfait';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éléments n\'ont pas pu être enregistrés sur cet appareil.',
+      one: '1 élément n\'a pas pu être enregistré sur cet appareil.',
+    );
+    return '$_temp0 Pour réessayer, saisissez à nouveau le même code dans les 24 heures.';
+  }
 }

@@ -11040,4 +11040,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get syncNotInPlan => 'Облачная синхронизация не входит в ваш тариф';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не удалось сохранить $count элемента на этом устройстве.',
+      many: 'Не удалось сохранить $count элементов на этом устройстве.',
+      few: 'Не удалось сохранить $count элемента на этом устройстве.',
+      one: 'Не удалось сохранить $count элемент на этом устройстве.',
+    );
+    return '$_temp0 Чтобы попробовать ещё раз, введите тот же код в течение суток.';
+  }
 }

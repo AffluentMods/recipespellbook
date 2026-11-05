@@ -4159,5 +4159,6 @@
   "communityPublishServerBusy": "Inne przesyłanie jest jeszcze przetwarzane. Spróbuj ponownie za kilka minut.",
   "communityPublishDailyLimit": "To przekroczyłoby dzisiejszy limit przesyłania zdjęć. Spróbuj jutro albo opublikuj bez zdjęć.",
   "communityFeedLoadMoreFailed": "Nie udało się wczytać więcej",
-  "syncNotInPlan": "Twój plan nie obejmuje synchronizacji w chmurze"
+  "syncNotInPlan": "Twój plan nie obejmuje synchronizacji w chmurze",
+  "transferRowsLeftOut": "{count, plural, =1{Nie udało się zapisać 1 elementu na tym urządzeniu.} few{Nie udało się zapisać {count} elementów na tym urządzeniu.} many{Nie udało się zapisać {count} elementów na tym urządzeniu.} other{Nie udało się zapisać {count} elementu na tym urządzeniu.}} Aby spróbować jeszcze raz, wpisz ten sam kod ponownie w ciągu doby."
 }

@@ -4159,5 +4159,6 @@
   "communityPublishServerBusy": "另一个上传仍在处理中，请几分钟后再试。",
   "communityPublishDailyLimit": "这会超出今天的照片上传上限。请明天再试，或不带照片发布。",
   "communityFeedLoadMoreFailed": "无法加载更多",
-  "syncNotInPlan": "你的套餐不包含云同步"
+  "syncNotInPlan": "你的套餐不包含云同步",
+  "transferRowsLeftOut": "{count, plural, other{有 {count} 项无法保存到此设备。}}如需重试，请在一天内再次输入同一个代码。"
 }

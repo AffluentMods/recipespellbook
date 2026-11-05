@@ -10876,4 +10876,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get syncNotInPlan => '你的套餐不包含云同步';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 项无法保存到此设备。',
+    );
+    return '$_temp0如需重试，请在一天内再次输入同一个代码。';
+  }
 }

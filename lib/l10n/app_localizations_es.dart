@@ -10959,4 +10959,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get syncNotInPlan => 'Tu plan no incluye la sincronización en la nube';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'No se pudieron guardar $count elementos en este dispositivo.',
+      one: 'No se pudo guardar 1 elemento en este dispositivo.',
+    );
+    return '$_temp0 Para volver a intentarlo, introduce el mismo código de nuevo antes de que pase un día.';
+  }
 }

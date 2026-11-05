@@ -4159,5 +4159,6 @@
   "communityPublishServerBusy": "Er wordt nog een andere upload verwerkt. Probeer het over een paar minuten opnieuw.",
   "communityPublishDailyLimit": "Hiermee ga je over de uploadlimiet voor foto's van vandaag. Probeer het morgen opnieuw of publiceer zonder foto's.",
   "communityFeedLoadMoreFailed": "Kon niet meer laden",
-  "syncNotInPlan": "Cloudsynchronisatie zit niet in je abonnement"
+  "syncNotInPlan": "Cloudsynchronisatie zit niet in je abonnement",
+  "transferRowsLeftOut": "{count, plural, =1{1 item kon niet op dit apparaat worden opgeslagen.} other{{count} items konden niet op dit apparaat worden opgeslagen.}} Voer binnen een dag dezelfde code opnieuw in om het nog eens te proberen."
 }

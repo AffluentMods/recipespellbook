@@ -10881,4 +10881,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get syncNotInPlan => 'ご利用のプランにはクラウド同期が含まれていません';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件の項目をこの端末に保存できませんでした。',
+    );
+    return '$_temp0もう一度試すには、1 日以内に同じコードを再入力してください。';
+  }
 }

@@ -10881,4 +10881,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get syncNotInPlan => '현재 요금제에는 클라우드 동기화가 포함되어 있지 않습니다';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목을 이 기기에 저장하지 못했습니다.',
+    );
+    return '$_temp0 다시 시도하려면 하루 안에 같은 코드를 다시 입력하세요.';
+  }
 }

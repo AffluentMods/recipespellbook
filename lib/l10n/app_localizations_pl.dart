@@ -11048,4 +11048,17 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get syncNotInPlan => 'Twój plan nie obejmuje synchronizacji w chmurze';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nie udało się zapisać $count elementu na tym urządzeniu.',
+      many: 'Nie udało się zapisać $count elementów na tym urządzeniu.',
+      few: 'Nie udało się zapisać $count elementów na tym urządzeniu.',
+      one: 'Nie udało się zapisać 1 elementu na tym urządzeniu.',
+    );
+    return '$_temp0 Aby spróbować jeszcze raz, wpisz ten sam kod ponownie w ciągu doby.';
+  }
 }

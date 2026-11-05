@@ -19512,6 +19512,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cloud Sync is not included in your plan'**
   String get syncNotInPlan;
+
+  /// No description provided for @transferRowsLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item could not be saved on this device.} other{{count} items could not be saved on this device.}} To try once more, enter the same code again within a day.'**
+  String transferRowsLeftOut(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

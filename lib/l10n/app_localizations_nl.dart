@@ -10947,4 +10947,15 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get syncNotInPlan => 'Cloudsynchronisatie zit niet in je abonnement';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items konden niet op dit apparaat worden opgeslagen.',
+      one: '1 item kon niet op dit apparaat worden opgeslagen.',
+    );
+    return '$_temp0 Voer binnen een dag dezelfde code opnieuw in om het nog eens te proberen.';
+  }
 }

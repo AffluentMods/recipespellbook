@@ -3686,5 +3686,6 @@
   "communityPublishServerBusy": "Todavía se está procesando otra subida. Inténtalo de nuevo en unos minutos.",
   "communityPublishDailyLimit": "Esto superaría el límite diario de subida de fotos. Inténtalo mañana o publica sin fotos.",
   "communityFeedLoadMoreFailed": "No se pudieron cargar más",
-  "syncNotInPlan": "Tu plan no incluye la sincronización en la nube"
+  "syncNotInPlan": "Tu plan no incluye la sincronización en la nube",
+  "transferRowsLeftOut": "{count, plural, =1{No se pudo guardar 1 elemento en este dispositivo.} other{No se pudieron guardar {count} elementos en este dispositivo.}} Para volver a intentarlo, introduce el mismo código de nuevo antes de que pase un día."
 }

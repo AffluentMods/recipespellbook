@@ -5864,5 +5864,13 @@
   "communityPublishServerBusy": "Another upload is still being processed. Try again in a few minutes.",
   "communityPublishDailyLimit": "This would go over today's photo upload limit. Try again tomorrow, or publish without photos.",
   "communityFeedLoadMoreFailed": "Could not load more",
-  "syncNotInPlan": "Cloud Sync is not included in your plan"
+  "syncNotInPlan": "Cloud Sync is not included in your plan",
+  "transferRowsLeftOut": "{count, plural, =1{1 item could not be saved on this device.} other{{count} items could not be saved on this device.}} To try once more, enter the same code again within a day.",
+  "@transferRowsLeftOut": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

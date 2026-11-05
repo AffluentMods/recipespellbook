@@ -54,6 +54,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   bool _receiveSuccess = false;
   int _importedCount = 0;
   int _alreadyHere = 0;
+  int _rowsLeftOut = 0;
   bool _didRestoreAuth = false;
 
   @override
@@ -472,6 +473,12 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center),
               ],
+              if (_rowsLeftOut > 0) ...[
+                const SizedBox(height: 8),
+                Text(l10n.transferRowsLeftOut(_rowsLeftOut),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error),
+                    textAlign: TextAlign.center),
+              ],
               if (_didRestoreAuth) ...[
                 const SizedBox(height: 8),
                 Row(
@@ -686,6 +693,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           _receiveSuccess = true;
           _importedCount = result.importedCount;
           _alreadyHere = result.recipesAlreadyHere;
+          _rowsLeftOut = result.rowsLeftOut;
           _didRestoreAuth = didAuth;
         });
       }

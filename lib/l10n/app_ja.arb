@@ -4159,5 +4159,6 @@
   "communityPublishServerBusy": "別のアップロードを処理中です。数分後にもう一度お試しください。",
   "communityPublishDailyLimit": "本日の写真アップロード上限を超えてしまいます。明日もう一度お試しいただくか、写真なしで公開してください。",
   "communityFeedLoadMoreFailed": "続きを読み込めませんでした",
-  "syncNotInPlan": "ご利用のプランにはクラウド同期が含まれていません"
+  "syncNotInPlan": "ご利用のプランにはクラウド同期が含まれていません",
+  "transferRowsLeftOut": "{count, plural, other{{count} 件の項目をこの端末に保存できませんでした。}}もう一度試すには、1 日以内に同じコードを再入力してください。"
 }

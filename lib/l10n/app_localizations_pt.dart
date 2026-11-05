@@ -10953,4 +10953,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get syncNotInPlan => 'Seu plano não inclui a sincronização na nuvem';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Não foi possível salvar $count itens neste dispositivo.',
+      one: 'Não foi possível salvar 1 item neste dispositivo.',
+    );
+    return '$_temp0 Para tentar de novo, digite o mesmo código outra vez em até um dia.';
+  }
 }

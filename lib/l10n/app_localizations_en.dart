@@ -10978,4 +10978,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncNotInPlan => 'Cloud Sync is not included in your plan';
+
+  @override
+  String transferRowsLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items could not be saved on this device.',
+      one: '1 item could not be saved on this device.',
+    );
+    return '$_temp0 To try once more, enter the same code again within a day.';
+  }
 }
