@@ -244,22 +244,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cookbookAdd => 'Nuevo Recetario';
 
   @override
-  String get isbnScreenTitle => 'Add a cookbook by barcode';
+  String get isbnScreenTitle => 'Agregar un recetario por código de barras';
 
   @override
-  String get isbnAddFromBarcode => 'Scan a cookbook barcode';
+  String get isbnAddFromBarcode => 'Escanear el código de barras de un recetario';
 
   @override
-  String get isbnAddFromBarcodeSubtitle => 'Add a printed cookbook from its ISBN';
+  String get isbnAddFromBarcodeSubtitle => 'Agrega un recetario impreso a partir de su ISBN';
 
   @override
-  String get isbnCreateBlank => 'Create a new cookbook';
+  String get isbnCreateBlank => 'Crear un recetario nuevo';
 
   @override
-  String get isbnCreateBlankSubtitle => 'Start an empty collection';
+  String get isbnCreateBlankSubtitle => 'Empieza una colección vacía';
 
   @override
-  String get isbnPointCamera => 'Point your camera at the barcode on the back cover';
+  String get isbnPointCamera => 'Apunta la cámara al código de barras de la contraportada';
 
   @override
   String get isbnTypeLabel => 'ISBN';
@@ -268,124 +268,124 @@ class AppLocalizationsEs extends AppLocalizations {
   String get isbnTypeHint => '978-0-00-000000-0';
 
   @override
-  String get isbnTypeHelp => 'Or type the ISBN printed above the barcode';
+  String get isbnTypeHelp => 'O escribe el ISBN impreso sobre el código de barras';
 
   @override
-  String get isbnLookUp => 'Look up';
+  String get isbnLookUp => 'Buscar';
 
   @override
-  String get isbnInvalid => 'That doesn\'t look like a valid ISBN. Check the 10 or 13 digits and try again.';
+  String get isbnInvalid => 'Eso no parece un ISBN válido. Revisa los 10 o 13 dígitos e inténtalo de nuevo.';
 
   @override
-  String get isbnLookingUp => 'Looking up the book…';
+  String get isbnLookingUp => 'Buscando el libro…';
 
   @override
-  String get isbnNotFound => 'We couldn\'t find this book in the catalogues. Fill in the details and we\'ll add it anyway.';
+  String get isbnNotFound => 'No encontramos este libro en los catálogos. Completa los datos y lo agregaremos de todos modos.';
 
   @override
-  String get isbnTitleLabel => 'Title';
+  String get isbnTitleLabel => 'Título';
 
   @override
-  String get isbnAuthorLabel => 'Author';
+  String get isbnAuthorLabel => 'Autor';
 
   @override
-  String get isbnAddToLibrary => 'Add to my cookbooks';
+  String get isbnAddToLibrary => 'Agregar a mis recetarios';
 
   @override
-  String get isbnScanAnother => 'Scan another book';
+  String get isbnScanAnother => 'Escanear otro libro';
 
   @override
-  String get isbnAlreadyAdded => 'This book is already in your cookbooks.';
+  String get isbnAlreadyAdded => 'Este libro ya está en tus recetarios.';
 
   @override
-  String get isbnOpenCookbook => 'Open cookbook';
+  String get isbnOpenCookbook => 'Abrir recetario';
 
   @override
-  String get isbnAddedTitle => 'Added to your cookbooks';
+  String get isbnAddedTitle => 'Agregado a tus recetarios';
 
   @override
-  String get isbnAddedBody => 'Now add the recipes you cook from it.';
+  String get isbnAddedBody => 'Ahora agrega las recetas que cocinas de este libro.';
 
   @override
-  String get isbnAddRecipes => 'Add recipes from this book';
+  String get isbnAddRecipes => 'Agregar recetas de este libro';
 
   @override
   String isbnPages(int count) {
-    return '$count pages';
+    return '$count páginas';
   }
 
   @override
-  String get isbnScanBookDetected => 'That\'s a book barcode — opening the cookbook scanner.';
+  String get isbnScanBookDetected => 'Es el código de barras de un libro. Abriendo el escáner de recetarios.';
 
   @override
-  String get isbnCameraUnavailable => 'Camera unavailable. You can still type the ISBN below.';
+  String get isbnCameraUnavailable => 'Cámara no disponible. Aún puedes escribir el ISBN abajo.';
 
   @override
-  String get bookScanAction => 'Scan pages';
+  String get bookScanAction => 'Escanear páginas';
 
   @override
-  String get bookScanFromBook => 'Scan pages from this book';
+  String get bookScanFromBook => 'Escanear páginas de este libro';
 
   @override
-  String get bookScanIntroTitle => 'Scan pages from this book';
+  String get bookScanIntroTitle => 'Escanear páginas de este libro';
 
   @override
   String bookScanIntroBody(String book) {
-    return 'Photograph the recipe pages one after another. They are read on this device and each recipe is filed under $book.';
+    return 'Fotografía las páginas de recetas una tras otra. Se leen en este dispositivo y cada receta se guarda en $book.';
   }
 
   @override
-  String get bookScanTipLightTitle => 'Flat page, good light';
+  String get bookScanTipLightTitle => 'Página plana, buena luz';
 
   @override
-  String get bookScanTipLightBody => 'Shadows and curled pages are harder to read.';
+  String get bookScanTipLightBody => 'Las sombras y las páginas curvadas son más difíciles de leer.';
 
   @override
-  String get bookScanTipOrderTitle => 'One page after another';
+  String get bookScanTipOrderTitle => 'Una página tras otra';
 
   @override
-  String get bookScanTipOrderBody => 'A recipe that runs onto the next page is joined up for you.';
+  String get bookScanTipOrderBody => 'Si una receta continúa en la página siguiente, se une automáticamente.';
 
   @override
-  String get bookScanTipPagesTitle => 'Page numbers are kept';
+  String get bookScanTipPagesTitle => 'Se conservan los números de página';
 
   @override
-  String get bookScanTipPagesBody => 'Each recipe is saved with the page it came from.';
+  String get bookScanTipPagesBody => 'Cada receta se guarda con la página de la que salió.';
 
   @override
-  String get bookScanStart => 'Start scanning';
+  String get bookScanStart => 'Empezar a escanear';
 
   @override
-  String get bookScanChoosePhotos => 'Choose photos instead';
+  String get bookScanChoosePhotos => 'O elige fotos';
 
   @override
-  String get bookScanChoosePhotosShort => 'Choose photos';
+  String get bookScanChoosePhotosShort => 'Elegir fotos';
 
   @override
-  String get bookScanTile => 'Book pages';
+  String get bookScanTile => 'Páginas de libro';
 
   @override
-  String get bookScanMoreSubtitle => 'Turn printed cookbook pages into recipes';
+  String get bookScanMoreSubtitle => 'Convierte páginas de recetarios impresos en recetas';
 
   @override
-  String get bookScanPrivacy => 'Pages are read on this device. Nothing is uploaded.';
+  String get bookScanPrivacy => 'Las páginas se leen en este dispositivo. No se sube nada.';
 
   @override
-  String get bookScanPrivacySynced => 'Pages are read on this device. The recipes you add are synced with their pictures.';
+  String get bookScanPrivacySynced => 'Las páginas se leen en este dispositivo. Las recetas que agregues se sincronizan con sus fotos.';
 
   @override
-  String get bookScanCameraDenied => 'Camera access is off for Recipe Spellbook. Turn it on in Settings, or choose photos you already took.';
+  String get bookScanCameraDenied => 'El acceso a la cámara está desactivado para Recipe Spellbook. Actívalo en Ajustes o elige fotos que ya tomaste.';
 
   @override
-  String get bookScanScannerFailed => 'The scanner could not be opened. You can still choose photos you already took.';
+  String get bookScanScannerFailed => 'No se pudo abrir el escáner. Aún puedes elegir fotos que ya tomaste.';
 
   @override
   String bookScanLostPages(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'An earlier scan was interrupted. Its $count pages are still on this device.',
-      one: 'An earlier scan was interrupted. Its page is still on this device.',
+      other: 'Un escaneo anterior se interrumpió. Sus $count páginas siguen en este dispositivo.',
+      one: 'Un escaneo anterior se interrumpió. Su página sigue en este dispositivo.',
     );
     return '$_temp0';
   }
@@ -395,34 +395,34 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Read $count pages',
-      one: 'Read 1 page',
+      other: 'Leer $count páginas',
+      one: 'Leer 1 página',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanReadOnly => 'You can only view this cookbook, so recipes cannot be added to it.';
+  String get bookScanReadOnly => 'Solo puedes ver este recetario, así que no se le pueden agregar recetas.';
 
   @override
-  String get bookScanReadingTitle => 'Reading your pages';
+  String get bookScanReadingTitle => 'Leyendo tus páginas';
 
   @override
   String bookScanReadingProgress(int current, int total) {
-    return 'Page $current of $total';
+    return 'Página $current de $total';
   }
 
   @override
-  String get bookScanFindingRecipes => 'Finding the recipes';
+  String get bookScanFindingRecipes => 'Buscando las recetas';
 
   @override
   String bookScanFound(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Found $count recipes',
-      one: 'Found 1 recipe',
-      zero: 'No recipes found',
+      other: 'Se encontraron $count recetas',
+      one: 'Se encontró 1 receta',
+      zero: 'No se encontraron recetas',
     );
     return '$_temp0';
   }
@@ -432,58 +432,58 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count pages',
-      one: '1 page',
+      other: '$count páginas',
+      one: '1 página',
     );
     return '$_temp0';
   }
 
   @override
   String bookScanPage(String page) {
-    return 'p. $page';
+    return 'pág. $page';
   }
 
   @override
   String bookScanPages(String pages) {
-    return 'pp. $pages';
+    return 'págs. $pages';
   }
 
   @override
   String bookScanSource(String book, String page) {
-    return '$book, p. $page';
+    return '$book, pág. $page';
   }
 
   @override
   String bookScanSourcePages(String book, String pages) {
-    return '$book, pp. $pages';
+    return '$book, págs. $pages';
   }
 
   @override
-  String get bookScanNoPageNumbers => 'No page numbers found';
+  String get bookScanNoPageNumbers => 'No se encontraron números de página';
 
   @override
-  String get bookScanSetPageNumbers => 'Set page numbers';
+  String get bookScanSetPageNumbers => 'Indicar números de página';
 
   @override
-  String get bookScanChangePageNumbers => 'Page numbers';
+  String get bookScanChangePageNumbers => 'Números de página';
 
   @override
-  String get bookScanPageNumbersTitle => 'Page numbers';
+  String get bookScanPageNumbersTitle => 'Números de página';
 
   @override
-  String get bookScanFirstPageLabel => 'First page';
+  String get bookScanFirstPageLabel => 'Primera página';
 
   @override
-  String get bookScanFirstPageHelp => 'The number printed on the first page you scanned. The rest follow in order.';
+  String get bookScanFirstPageHelp => 'El número impreso en la primera página que escaneaste. Las demás siguen en orden.';
 
   @override
   String bookScanIngredientCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ingredients',
-      one: '1 ingredient',
-      zero: 'No ingredients',
+      other: '$count ingredientes',
+      one: '1 ingrediente',
+      zero: 'Sin ingredientes',
     );
     return '$_temp0';
   }
@@ -493,63 +493,63 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count steps',
-      one: '1 step',
-      zero: 'No steps',
+      other: '$count pasos',
+      one: '1 paso',
+      zero: 'Sin pasos',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanIssueTitle => 'Needs a title';
+  String get bookScanIssueTitle => 'Falta el título';
 
   @override
-  String get bookScanIssueIngredients => 'No ingredients found';
+  String get bookScanIssueIngredients => 'No se encontraron ingredientes';
 
   @override
-  String get bookScanIssueSteps => 'No steps found';
+  String get bookScanIssueSteps => 'No se encontraron pasos';
 
   @override
-  String get bookScanDuplicate => 'Already in this book';
+  String get bookScanDuplicate => 'Ya está en este libro';
 
   @override
-  String get bookScanUntitled => 'Untitled recipe';
+  String get bookScanUntitled => 'Receta sin título';
 
   @override
-  String get bookScanMergeNext => 'Merge with next';
+  String get bookScanMergeNext => 'Unir con la siguiente';
 
   @override
-  String get bookScanSplit => 'Split in two';
+  String get bookScanSplit => 'Dividir en dos';
 
   @override
-  String get bookScanDiscarded => 'Recipe discarded';
+  String get bookScanDiscarded => 'Receta descartada';
 
   @override
-  String get bookScanMerged => 'Recipes merged';
+  String get bookScanMerged => 'Recetas unidas';
 
   @override
-  String get bookScanSplitHelp => 'Tap the line where the second recipe starts.';
+  String get bookScanSplitHelp => 'Toca la línea donde empieza la segunda receta.';
 
   @override
-  String get bookScanSplitEditedNote => 'Both halves are read again from the page, so your edits to this recipe will be replaced.';
+  String get bookScanSplitEditedNote => 'Las dos mitades se vuelven a leer de la página, así que se reemplazarán los cambios que hiciste en esta receta.';
 
   @override
-  String get bookScanSplitFailed => 'That line cannot start a second recipe.';
+  String get bookScanSplitFailed => 'Esa línea no puede ser el inicio de una segunda receta.';
 
   @override
   String bookScanAddAll(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Add $count recipes',
-      one: 'Add 1 recipe',
+      other: 'Agregar $count recetas',
+      one: 'Agregar 1 receta',
     );
     return '$_temp0';
   }
 
   @override
   String bookScanAdding(int current, int total) {
-    return 'Adding $current of $total';
+    return 'Agregando $current de $total';
   }
 
   @override
@@ -557,8 +557,8 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Added $count recipes to $book',
-      one: 'Added 1 recipe to $book',
+      other: 'Se agregaron $count recetas a $book',
+      one: 'Se agregó 1 receta a $book',
     );
     return '$_temp0';
   }
@@ -568,70 +568,70 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recipes could not be added',
-      one: '1 recipe could not be added',
+      other: 'No se pudieron agregar $count recetas',
+      one: 'No se pudo agregar 1 receta',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanChooseCookbookTitle => 'Choose a cookbook';
+  String get bookScanChooseCookbookTitle => 'Elige un recetario';
 
   @override
-  String get bookScanChooseCookbook => 'Choose the cookbook the scanned recipes should go to.';
+  String get bookScanChooseCookbook => 'Elige el recetario al que deben ir las recetas escaneadas.';
 
   @override
-  String get bookScanNoCookbook => 'There is no cookbook that recipes can be added to.';
+  String get bookScanNoCookbook => 'No hay ningún recetario al que se puedan agregar recetas.';
 
   @override
   String bookScanCookbookGoneChoose(String book) {
-    return '$book is no longer on this device. Choose the cookbook these recipes should go to.';
+    return '$book ya no está en este dispositivo. Elige el recetario al que deben ir estas recetas.';
   }
 
   @override
   String bookScanCookbookGone(String book) {
-    return '$book is no longer on this device, and there is no other cookbook to add these recipes to.';
+    return '$book ya no está en este dispositivo y no hay otro recetario al que agregar estas recetas.';
   }
 
   @override
-  String get bookScanMore => 'Scan more pages';
+  String get bookScanMore => 'Escanear más páginas';
 
   @override
-  String get bookScanEmptyTitle => 'No recipes found';
+  String get bookScanEmptyTitle => 'No se encontraron recetas';
 
   @override
-  String get bookScanEmptyBody => 'The pages were read, but none of them looked like a recipe. Try again with the whole page in the photo.';
+  String get bookScanEmptyBody => 'Las páginas se leyeron, pero ninguna parecía una receta. Inténtalo de nuevo con la página completa en la foto.';
 
   @override
-  String get bookScanNothingReadTitle => 'Nothing could be read';
+  String get bookScanNothingReadTitle => 'No se pudo leer nada';
 
   @override
   String bookScanNothingReadBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'None of the $count pages could be read. Try again in good light, with the whole page in the photo.',
-      one: 'The page could not be read. Try again in good light, with the whole page in the photo.',
+      other: 'No se pudo leer ninguna de las $count páginas. Inténtalo de nuevo con buena luz y la página completa en la foto.',
+      one: 'No se pudo leer la página. Inténtalo de nuevo con buena luz y la página completa en la foto.',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanNothingLeftTitle => 'Nothing left to add';
+  String get bookScanNothingLeftTitle => 'No queda nada por agregar';
 
   @override
-  String get bookScanNothingLeftBody => 'Every recipe that was found has been added or discarded. Scan more pages, or go back.';
+  String get bookScanNothingLeftBody => 'Todas las recetas encontradas se agregaron o se descartaron. Escanea más páginas o vuelve atrás.';
 
   @override
-  String get bookScanTryAgain => 'Scan again';
+  String get bookScanTryAgain => 'Escanear de nuevo';
 
   @override
   String bookScanUnreadPages(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count pages could not be read. Scan them again to add what is missing.',
-      one: '1 page could not be read. Scan it again to add what is missing.',
+      other: 'No se pudieron leer $count páginas. Escanéalas de nuevo para agregar lo que falta.',
+      one: 'No se pudo leer 1 página. Escanéala de nuevo para agregar lo que falta.',
     );
     return '$_temp0';
   }
@@ -641,57 +641,57 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Photos $photos could not be read. Scan those pages again to add what is missing.',
-      one: 'Photo $photos could not be read. Scan that page again to add what is missing.',
+      other: 'No se pudieron leer las fotos $photos. Escanea esas páginas de nuevo para agregar lo que falta.',
+      one: 'No se pudo leer la foto $photos. Escanea esa página de nuevo para agregar lo que falta.',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanDiscardTitle => 'Discard this scan?';
+  String get bookScanDiscardTitle => '¿Descartar este escaneo?';
 
   @override
   String bookScanDiscardBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'The $count recipes that were found will not be added.',
-      one: 'The recipe that was found will not be added.',
+      other: 'Las $count recetas encontradas no se agregarán.',
+      one: 'La receta encontrada no se agregará.',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanKeepReviewing => 'Keep reviewing';
+  String get bookScanKeepReviewing => 'Seguir revisando';
 
   @override
-  String get bookScanEditTitle => 'Edit recipe';
+  String get bookScanEditTitle => 'Editar receta';
 
   @override
-  String get bookScanFieldPage => 'Page';
+  String get bookScanFieldPage => 'Página';
 
   @override
-  String get bookScanFieldSteps => 'Steps';
+  String get bookScanFieldSteps => 'Pasos';
 
   @override
-  String get bookScanIngredientsHelp => 'One per line. End a line with a colon to make it a heading.';
+  String get bookScanIngredientsHelp => 'Uno por línea. Termina una línea con dos puntos para convertirla en un encabezado.';
 
   @override
-  String get bookScanStepsHelp => 'One step per line.';
+  String get bookScanStepsHelp => 'Un paso por línea.';
 
   @override
-  String get bookScanViewPage => 'View the page';
+  String get bookScanViewPage => 'Ver la página';
 
   @override
   String bookScanPageOf(int current, int total) {
-    return 'Page $current of $total';
+    return 'Página $current de $total';
   }
 
   @override
-  String get bookScanOptions => 'More options';
+  String get bookScanOptions => 'Más opciones';
 
   @override
-  String get recipeSourceOpen => 'Open the source';
+  String get recipeSourceOpen => 'Abrir la fuente';
 
   @override
   String get cookbookEdit => 'Editar Recetario';
@@ -826,7 +826,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get shoppingSharedLabel => 'Shared';
+  String get shoppingSharedLabel => 'Compartida';
 
   @override
   String get settingsTitle => 'Ajustes';
@@ -3798,7 +3798,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navCommunity => 'Comunidad';
 
   @override
-  String get navMore => 'More';
+  String get navMore => 'Más';
 
   @override
   String get navComingSoon => 'Próximamente';
@@ -3807,7 +3807,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get keyCtrl => 'Ctrl';
 
   @override
-  String get keyShift => 'Shift';
+  String get keyShift => 'Mayús';
 
   @override
   String get keyAlt => 'Alt';
@@ -3816,248 +3816,248 @@ class AppLocalizationsEs extends AppLocalizations {
   String get keyEsc => 'Esc';
 
   @override
-  String get keyEnter => 'Enter';
+  String get keyEnter => 'Intro';
 
   @override
-  String get keyDelete => 'Del';
+  String get keyDelete => 'Supr';
 
   @override
-  String get keySpace => 'Space';
+  String get keySpace => 'Espacio';
 
   @override
-  String get sidebarLibrary => 'Library';
+  String get sidebarLibrary => 'Biblioteca';
 
   @override
-  String get sidebarPlan => 'Plan';
+  String get sidebarPlan => 'Planificación';
 
   @override
-  String get sidebarDiscover => 'Discover';
+  String get sidebarDiscover => 'Descubrir';
 
   @override
-  String get sidebarAllRecipes => 'All recipes';
+  String get sidebarAllRecipes => 'Todas las recetas';
 
   @override
-  String get sidebarCollapse => 'Collapse sidebar';
+  String get sidebarCollapse => 'Contraer barra lateral';
 
   @override
-  String get sidebarExpand => 'Expand sidebar';
+  String get sidebarExpand => 'Expandir barra lateral';
 
   @override
-  String get sidebarSwitchCookbook => 'Switch cookbook';
+  String get sidebarSwitchCookbook => 'Cambiar de recetario';
 
   @override
-  String get sidebarManageCookbooks => 'Manage cookbooks';
+  String get sidebarManageCookbooks => 'Gestionar recetarios';
 
   @override
-  String get sidebarSignInToSync => 'Sign in to sync';
+  String get sidebarSignInToSync => 'Inicia sesión para sincronizar';
 
   @override
-  String get syncStatusJustNow => 'Synced just now';
+  String get syncStatusJustNow => 'Sincronizado hace un momento';
 
   @override
   String syncStatusMinutes(int minutes) {
-    return 'Synced $minutes min ago';
+    return 'Sincronizado hace $minutes min';
   }
 
   @override
   String syncStatusHours(int hours) {
-    return 'Synced $hours h ago';
+    return 'Sincronizado hace $hours h';
   }
 
   @override
-  String get syncStatusLocal => 'Saved on this device';
+  String get syncStatusLocal => 'Guardado en este dispositivo';
 
   @override
-  String get paletteHint => 'Search recipes and commands…';
+  String get paletteHint => 'Buscar recetas y comandos…';
 
   @override
-  String get paletteSectionRecent => 'Recent';
+  String get paletteSectionRecent => 'Recientes';
 
   @override
-  String get paletteSectionGoTo => 'Go to';
+  String get paletteSectionGoTo => 'Ir a';
 
   @override
-  String get paletteSectionActions => 'Actions';
+  String get paletteSectionActions => 'Acciones';
 
   @override
-  String get paletteSectionRecipes => 'Recipes';
+  String get paletteSectionRecipes => 'Recetas';
 
   @override
-  String get paletteImportSubtitle => 'From a link, photo, or file';
+  String get paletteImportSubtitle => 'Desde un enlace, una foto o un archivo';
 
   @override
-  String get paletteAdvancedSearch => 'Search with filters';
+  String get paletteAdvancedSearch => 'Buscar con filtros';
 
   @override
-  String get paletteToggleTheme => 'Toggle light / dark';
+  String get paletteToggleTheme => 'Cambiar entre claro y oscuro';
 
   @override
-  String get paletteAppearance => 'Appearance';
+  String get paletteAppearance => 'Apariencia';
 
   @override
   String paletteSearchAll(String query) {
-    return 'Search all recipes for “$query”';
+    return 'Buscar “$query” en todas las recetas';
   }
 
   @override
-  String get paletteNoMatches => 'No matches';
+  String get paletteNoMatches => 'Sin resultados';
 
   @override
-  String get paletteNavigateHint => 'Navigate';
+  String get paletteNavigateHint => 'Navegar';
 
   @override
-  String get paletteOpenHint => 'Open';
+  String get paletteOpenHint => 'Abrir';
 
   @override
-  String get shortcutsTitle => 'Keyboard shortcuts';
+  String get shortcutsTitle => 'Atajos de teclado';
 
   @override
   String get shortcutsGeneral => 'General';
 
   @override
-  String get shortcutsNavigation => 'Navigation';
+  String get shortcutsNavigation => 'Navegación';
 
   @override
-  String get shortcutsRecipes => 'Recipes';
+  String get shortcutsRecipes => 'Recetas';
 
   @override
-  String get shortcutsShopping => 'Shopping';
+  String get shortcutsShopping => 'Compras';
 
   @override
   String get shortcutsEditor => 'Editor';
 
   @override
-  String get shortcutCommandPalette => 'Command palette';
+  String get shortcutCommandPalette => 'Paleta de comandos';
 
   @override
-  String get shortcutNewRecipe => 'New recipe';
+  String get shortcutNewRecipe => 'Nueva receta';
 
   @override
-  String get shortcutToggleSidebar => 'Toggle sidebar';
+  String get shortcutToggleSidebar => 'Mostrar u ocultar la barra lateral';
 
   @override
-  String get shortcutGoBack => 'Go back';
+  String get shortcutGoBack => 'Volver';
 
   @override
-  String get shortcutDismiss => 'Dismiss';
+  String get shortcutDismiss => 'Cerrar';
 
   @override
-  String get shortcutMoveSelection => 'Move selection';
+  String get shortcutMoveSelection => 'Mover la selección';
 
   @override
-  String get shortcutOpenRecipe => 'Open recipe';
+  String get shortcutOpenRecipe => 'Abrir receta';
 
   @override
-  String get shortcutAddToSelection => 'Add to selection';
+  String get shortcutAddToSelection => 'Agregar a la selección';
 
   @override
-  String get shortcutRangeSelect => 'Select a range';
+  String get shortcutRangeSelect => 'Seleccionar un rango';
 
   @override
-  String get shortcutClick => 'Click';
+  String get shortcutClick => 'Clic';
 
   @override
-  String get shortcutTrash => 'Move to trash';
+  String get shortcutTrash => 'Mover a la papelera';
 
   @override
-  String get shortcutAddItem => 'Add item';
+  String get shortcutAddItem => 'Agregar artículo';
 
   @override
-  String get shortcutToggleItem => 'Check off item';
+  String get shortcutToggleItem => 'Marcar artículo';
 
   @override
-  String get shortcutSaveRecipe => 'Save recipe';
+  String get shortcutSaveRecipe => 'Guardar receta';
 
   @override
-  String get windowMinimize => 'Minimize';
+  String get windowMinimize => 'Minimizar';
 
   @override
-  String get windowMaximize => 'Maximize';
+  String get windowMaximize => 'Maximizar';
 
   @override
-  String get windowRestore => 'Restore';
+  String get windowRestore => 'Restaurar';
 
   @override
-  String get windowClose => 'Close';
+  String get windowClose => 'Cerrar';
 
   @override
   String selectionCount(int count) {
-    return '$count selected';
+    return 'Seleccionados: $count';
   }
 
   @override
-  String get selectionClear => 'Clear selection';
+  String get selectionClear => 'Quitar selección';
 
   @override
-  String get selectAction => 'Select';
+  String get selectAction => 'Seleccionar';
 
   @override
-  String get homeGreetingMorning => 'Good morning';
+  String get homeGreetingMorning => 'Buenos días';
 
   @override
-  String get homeGreetingAfternoon => 'Good afternoon';
+  String get homeGreetingAfternoon => 'Buenas tardes';
 
   @override
-  String get homeGreetingEvening => 'Good evening';
+  String get homeGreetingEvening => 'Buenas noches';
 
   @override
-  String get homeNextSevenDays => 'Next 7 days';
+  String get homeNextSevenDays => 'Próximos 7 días';
 
   @override
-  String get homeOpenList => 'Open list';
+  String get homeOpenList => 'Abrir lista';
 
   @override
-  String get homeAllCaughtUp => 'All caught up';
+  String get homeAllCaughtUp => 'Todo listo';
 
   @override
   String homeToBuy(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items to buy',
-      one: '1 item to buy',
+      other: '$count artículos por comprar',
+      one: '1 artículo por comprar',
     );
     return '$_temp0';
   }
 
   @override
   String homeAndMore(int count) {
-    return '+$count more';
+    return '+$count más';
   }
 
   @override
-  String get homeNothingPlanned => 'Nothing planned';
+  String get homeNothingPlanned => 'Nada planificado';
 
   @override
-  String get homePlanAMeal => 'Plan a meal';
+  String get homePlanAMeal => 'Planificar una comida';
 
   @override
-  String get homeJumpBackIn => 'Jump back in';
+  String get homeJumpBackIn => 'Continúa donde lo dejaste';
 
   @override
   String shoppingAddNamed(String name) {
-    return 'Add “$name”';
+    return 'Agregar “$name”';
   }
 
   @override
-  String get shoppingUncheck => 'Put back on the list';
+  String get shoppingUncheck => 'Devolver a la lista';
 
   @override
   String cookbooksCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count cookbooks',
-      one: '1 cookbook',
+      other: '$count recetarios',
+      one: '1 recetario',
     );
     return '$_temp0';
   }
 
   @override
-  String get detailChooseRecipe => 'Choose a recipe';
+  String get detailChooseRecipe => 'Elige una receta';
 
   @override
-  String get detailChooseRecipeHint => 'Pick one from the list to read it here.';
+  String get detailChooseRecipeHint => 'Elige una de la lista para leerla aquí.';
 
   @override
   String get mealPlanButton => 'Plan de Comidas';
@@ -4354,10 +4354,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get manualEntryHint => 'Puedes ingresar el nombre del producto manualmente.';
 
   @override
-  String get productLookupFailed => 'Could Not Look Up Product';
+  String get productLookupFailed => 'No se pudo buscar el producto';
 
   @override
-  String get productLookupFailedHint => 'The product database did not answer. Check your connection and try again, or enter the product name yourself.';
+  String get productLookupFailedHint => 'La base de datos de productos no respondió. Revisa tu conexión e inténtalo de nuevo, o escribe tú el nombre del producto.';
 
   @override
   String get scanAgain => 'Escanear de nuevo';
@@ -5014,14 +5014,14 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recipes imported into $cookbook.',
-      one: 'Recipe imported into $cookbook.',
+      other: '$count recetas importadas en $cookbook.',
+      one: 'Receta importada en $cookbook.',
     );
     return '$_temp0';
   }
 
   @override
-  String get aiNoCookbook => 'There is no cookbook to import into. Add a cookbook first.';
+  String get aiNoCookbook => 'No hay ningún recetario donde importar. Agrega un recetario primero.';
 
   @override
   String get aiPreviewImport => 'Vista previa e Importar';
@@ -5670,22 +5670,22 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count meals removed',
-      one: '1 meal removed',
+      other: '$count comidas eliminadas',
+      one: '1 comida eliminada',
     );
     return '$_temp0';
   }
 
   @override
   String plannerMealsMoved(String date) {
-    return 'Moved to $date';
+    return 'Movido al $date';
   }
 
   @override
-  String get plannerChangeMealType => 'Change meal type';
+  String get plannerChangeMealType => 'Cambiar tipo de comida';
 
   @override
-  String get plannerMoveToDate => 'Move to date';
+  String get plannerMoveToDate => 'Mover a otra fecha';
 
   @override
   String get weekStartsOn => 'La semana empieza el';
@@ -6045,7 +6045,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String transferCodeExpiresAt(String time) {
-    return 'This code expires at $time';
+    return 'Este código expira a las $time';
   }
 
   @override
@@ -6053,31 +6053,31 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count photos did not fit into the transfer and stay on this device.',
-      one: '1 photo did not fit into the transfer and stays on this device.',
+      other: '$count fotos no cupieron en la transferencia y se quedan en este dispositivo.',
+      one: '1 foto no cupo en la transferencia y se queda en este dispositivo.',
     );
-    return '$_temp0 To move everything with every photo, do not use this code. Use Export Data in Settings on this device and Import Data on the other instead.';
+    return '$_temp0 Para pasar todo con todas las fotos, no uses este código. Usa en su lugar Exportar Datos en Ajustes en este dispositivo e Importar Datos en el otro.';
   }
 
   @override
-  String get transferPhotosLeftOutTitle => 'Not every photo fits';
+  String get transferPhotosLeftOutTitle => 'No caben todas las fotos';
 
   @override
   String transferPhotosLeftOutAsk(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count photos do not fit into a transfer and would stay on this device.',
-      one: '1 photo does not fit into a transfer and would stay on this device.',
+      other: '$count fotos no caben en una transferencia y se quedarían en este dispositivo.',
+      one: '1 foto no cabe en una transferencia y se quedaría en este dispositivo.',
     );
-    return '$_temp0 A backup file carries every photo: cancel, then use Export Data in Settings on this device and Import Data on the other. Use one or the other. A backup imported after a transfer adds every recipe a second time.';
+    return '$_temp0 Un archivo de copia de seguridad incluye todas las fotos: cancela y luego usa Exportar Datos en Ajustes en este dispositivo e Importar Datos en el otro. Usa una opción o la otra. Una copia de seguridad importada después de una transferencia agrega cada receta por segunda vez.';
   }
 
   @override
-  String get transferSendWithoutPhotos => 'Send without them';
+  String get transferSendWithoutPhotos => 'Enviar sin ellas';
 
   @override
-  String get transferSignInToSend => 'Sign in to send your recipes to another device. The device that receives them does not need an account.';
+  String get transferSignInToSend => 'Inicia sesión para enviar tus recetas a otro dispositivo. El dispositivo que las recibe no necesita una cuenta.';
 
   @override
   String get transferComplete => '¡Transferencia completa!';
@@ -6087,8 +6087,8 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recipes were already on this device and were left as they are.',
-      one: '1 recipe was already on this device and was left as it is.',
+      other: '$count recetas ya estaban en este dispositivo y se dejaron como estaban.',
+      one: '1 receta ya estaba en este dispositivo y se dejó como estaba.',
     );
     return '$_temp0';
   }
@@ -6112,31 +6112,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get transferMergeNote => 'Los datos existentes en este dispositivo se fusionarán. Los duplicados se omiten.';
 
   @override
-  String get transferErrorTooLarge => 'Your library is too large to send in one transfer. Use Export Data in Settings to make a backup file, and Import Data on the other device.';
+  String get transferErrorTooLarge => 'Tu biblioteca es demasiado grande para enviarla en una sola transferencia. Usa Exportar Datos en Ajustes para crear un archivo de copia de seguridad, e Importar Datos en el otro dispositivo.';
 
   @override
-  String get transferErrorOffline => 'Could not reach the server. Check your connection and try again.';
+  String get transferErrorOffline => 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
-  String get transferErrorServer => 'The server could not complete the transfer. Try again in a moment.';
+  String get transferErrorServer => 'El servidor no pudo completar la transferencia. Inténtalo de nuevo en un momento.';
 
   @override
-  String get transferErrorCodeNotFound => 'Transfer code not found. Check the code and try again.';
+  String get transferErrorCodeNotFound => 'No se encontró el código de transferencia. Revisa el código e inténtalo de nuevo.';
 
   @override
-  String get transferErrorCodeExpired => 'This transfer code has expired. Create a new one on the sending device.';
+  String get transferErrorCodeExpired => 'Este código de transferencia expiró. Crea uno nuevo en el dispositivo que envía.';
 
   @override
-  String get transferErrorCodeUsed => 'This transfer code has already been used. If the transfer did not finish, create a new code on the sending device. Nothing will be imported twice.';
+  String get transferErrorCodeUsed => 'Este código de transferencia ya se usó. Si la transferencia no terminó, crea un código nuevo en el dispositivo que envía. Nada se importará dos veces.';
 
   @override
-  String get transferErrorSyncRunning => 'A sync is in progress. Try again in a moment.';
+  String get transferErrorSyncRunning => 'Hay una sincronización en curso. Inténtalo de nuevo en un momento.';
 
   @override
-  String get transferErrorUnreadable => 'This transfer could not be read. Create a new code on the sending device.';
+  String get transferErrorUnreadable => 'No se pudo leer esta transferencia. Crea un código nuevo en el dispositivo que envía.';
 
   @override
-  String get transferErrorNotSaved => 'The transfer arrived but could not be saved. Nothing on this device was changed. Try again with the same code.';
+  String get transferErrorNotSaved => 'La transferencia llegó, pero no se pudo guardar. No se cambió nada en este dispositivo. Inténtalo de nuevo con el mismo código.';
 
   @override
   String get transferPointCamera => 'Apunta al código QR del dispositivo emisor';
@@ -9503,16 +9503,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuDrawerSettingsSubtitle => 'Tema, idioma y preferencias';
 
   @override
-  String get moreAddRecipes => 'Add recipes';
+  String get moreAddRecipes => 'Agregar recetas';
 
   @override
-  String get moreSharing => 'Sharing & family';
+  String get moreSharing => 'Compartir y familia';
 
   @override
-  String get moreScanProduct => 'Scan a product barcode';
+  String get moreScanProduct => 'Escanear el código de barras de un producto';
 
   @override
-  String get moreScanProductSubtitle => 'Look up a packaged product';
+  String get moreScanProductSubtitle => 'Busca un producto envasado';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {
@@ -10353,19 +10353,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importFromFileSubtitle => 'Admite archivos .json y .zip de respaldo';
 
   @override
-  String get importErrorNoPicker => 'The file picker could not be opened. Try again.';
+  String get importErrorNoPicker => 'No se pudo abrir el selector de archivos. Inténtalo de nuevo.';
 
   @override
-  String get importErrorUnreadable => 'This backup file could not be read. It may be damaged or incomplete.';
+  String get importErrorUnreadable => 'No se pudo leer este archivo de copia de seguridad. Puede estar dañado o incompleto.';
 
   @override
-  String get importErrorNotABackup => 'This file is not a Recipe Spellbook backup.';
+  String get importErrorNotABackup => 'Este archivo no es una copia de seguridad de Recipe Spellbook.';
 
   @override
-  String get importErrorMissingData => 'This zip file is not a Recipe Spellbook backup. It has no data.json in it.';
+  String get importErrorMissingData => 'Este archivo zip no es una copia de seguridad de Recipe Spellbook. No contiene ningún data.json.';
 
   @override
-  String get importErrorRestoreFailed => 'This backup could not be restored. Nothing was imported.';
+  String get importErrorRestoreFailed => 'No se pudo restaurar esta copia de seguridad. No se importó nada.';
 
   @override
   String get exportAdvanced => 'Opciones avanzadas';
@@ -10428,14 +10428,14 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       recipeCount,
       locale: localeName,
-      other: '$recipeCount recipes',
-      one: '1 recipe',
+      other: '$recipeCount recetas',
+      one: '1 receta',
     );
     String _temp1 = intl.Intl.pluralLogic(
       ingredientCount,
       locale: localeName,
-      other: '$ingredientCount ingredients selected',
-      one: '1 ingredient selected',
+      other: '$ingredientCount ingredientes seleccionados',
+      one: '1 ingrediente seleccionado',
     );
     return '$_temp0 • $_temp1';
   }
@@ -10445,16 +10445,16 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       itemCount,
       locale: localeName,
-      other: '$itemCount items',
-      one: '1 item',
+      other: '$itemCount artículos',
+      one: '1 artículo',
     );
     String _temp1 = intl.Intl.pluralLogic(
       recipeCount,
       locale: localeName,
-      other: '$recipeCount recipes',
-      one: '1 recipe',
+      other: '$recipeCount recetas',
+      one: '1 receta',
     );
-    return '$_temp0 from $_temp1';
+    return '$_temp0 de $_temp1';
   }
 
   @override
@@ -10462,29 +10462,29 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Add $count items to list',
-      one: 'Add 1 item to list',
+      other: 'Agregar $count artículos a la lista',
+      one: 'Agregar 1 artículo a la lista',
     );
     return '$_temp0';
   }
 
   @override
-  String get shoppingAddingToList => 'Adding…';
+  String get shoppingAddingToList => 'Agregando…';
 
   @override
-  String get shoppingMarkBought => 'Mark as bought';
+  String get shoppingMarkBought => 'Marcar como comprado';
 
   @override
-  String get shoppingDeleteChecked => 'Delete checked';
+  String get shoppingDeleteChecked => 'Eliminar marcados';
 
   @override
-  String get shareLinkEditDesc => 'Anyone with the link can join and edit this list';
+  String get shareLinkEditDesc => 'Cualquiera con el enlace puede unirse y editar esta lista';
 
   @override
-  String get shareLinkCheckDesc => 'Anyone with the link can join and check off items';
+  String get shareLinkCheckDesc => 'Cualquiera con el enlace puede unirse y marcar artículos';
 
   @override
-  String get shareLinkViewDesc => 'Anyone with the link can view this list';
+  String get shareLinkViewDesc => 'Cualquiera con el enlace puede ver esta lista';
 
   @override
   String get communityICookedThis => 'La cociné';
@@ -10653,215 +10653,215 @@ class AppLocalizationsEs extends AppLocalizations {
   String get plannerNextDay => 'Día siguiente';
 
   @override
-  String get joinLinkMenuLabel => 'Join with invite link';
+  String get joinLinkMenuLabel => 'Unirse con un enlace de invitación';
 
   @override
-  String get joinLinkMenuSubtitle => 'Shared list, cookbook or family';
+  String get joinLinkMenuSubtitle => 'Lista compartida, recetario o familia';
 
   @override
-  String get joinLinkTitle => 'Join with an invite link';
+  String get joinLinkTitle => 'Unirse con un enlace de invitación';
 
   @override
-  String get joinLinkTitleList => 'Join a shared list';
+  String get joinLinkTitleList => 'Unirse a una lista compartida';
 
   @override
-  String get joinLinkTitleCookbook => 'Join a shared cookbook';
+  String get joinLinkTitleCookbook => 'Unirse a un recetario compartido';
 
   @override
-  String get joinLinkTitleFamily => 'Join a family';
+  String get joinLinkTitleFamily => 'Unirse a una familia';
 
   @override
-  String get joinLinkListSubtitle => 'Paste an invite link someone sent you';
+  String get joinLinkListSubtitle => 'Pega un enlace de invitación que te enviaron';
 
   @override
-  String get joinLinkBody => 'Paste the invite link or code someone sent you. It works for shared shopping lists, cookbooks and family invites.';
+  String get joinLinkBody => 'Pega el enlace o el código de invitación que te enviaron. Sirve para listas de compras compartidas, recetarios e invitaciones familiares.';
 
   @override
-  String get joinLinkHint => 'Paste an invite link or code';
+  String get joinLinkHint => 'Pega un enlace o código de invitación';
 
   @override
-  String get joinLinkFromClipboard => 'Filled in from your clipboard';
+  String get joinLinkFromClipboard => 'Completado desde tu portapapeles';
 
   @override
-  String get joinLinkInvalid => 'That doesn\'t look like an invite link or code';
+  String get joinLinkInvalid => 'Eso no parece un enlace ni un código de invitación';
 
   @override
-  String get joinLinkOffline => 'Couldn\'t check that code. Check your connection and try again.';
+  String get joinLinkOffline => 'No se pudo comprobar ese código. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
-  String get inviteTryAnother => 'Try another link';
+  String get inviteTryAnother => 'Probar otro enlace';
 
   @override
-  String get inviteErrorNetwork => 'No connection. Check your internet and try again.';
+  String get inviteErrorNetwork => 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
 
   @override
-  String get inviteErrorSessionExpired => 'Your session has expired. Sign in again to continue.';
+  String get inviteErrorSessionExpired => 'Tu sesión expiró. Vuelve a iniciar sesión para continuar.';
 
   @override
-  String get shareViewerTitleList => 'Shared shopping list';
+  String get shareViewerTitleList => 'Lista de compras compartida';
 
   @override
-  String get shareViewerTitleCookbook => 'Shared cookbook';
+  String get shareViewerTitleCookbook => 'Recetario compartido';
 
   @override
-  String get shareViewerTitleLink => 'Shared link';
+  String get shareViewerTitleLink => 'Enlace compartido';
 
   @override
-  String get shareViewerLoadFailed => 'Couldn\'t load this link';
+  String get shareViewerLoadFailed => 'No se pudo cargar este enlace';
 
   @override
-  String get shareViewerExpiredHint => 'Ask the person who shared it for a new link, or paste another one.';
+  String get shareViewerExpiredHint => 'Pide un enlace nuevo a quien lo compartió, o pega otro.';
 
   @override
-  String get shareViewerJoinList => 'Join this list';
+  String get shareViewerJoinList => 'Unirse a esta lista';
 
   @override
-  String get shareViewerAddToLists => 'Add to my lists';
+  String get shareViewerAddToLists => 'Agregar a mis listas';
 
   @override
   String shareViewerJoinCookbook(String name) {
-    return 'Join \"$name\"';
+    return 'Unirse a \"$name\"';
   }
 
   @override
-  String get shareViewerSignInToJoinList => 'Sign in to join this shopping list. You\'ll be added as soon as you\'re signed in.';
+  String get shareViewerSignInToJoinList => 'Inicia sesión para unirte a esta lista de compras. Te agregaremos en cuanto inicies sesión.';
 
   @override
-  String get shareViewerSignInToJoinCookbook => 'Sign in to collaborate on this cookbook. You\'ll be added as soon as you\'re signed in.';
+  String get shareViewerSignInToJoinCookbook => 'Inicia sesión para colaborar en este recetario. Te agregaremos en cuanto inicies sesión.';
 
   @override
-  String get shareViewerJoinedList => 'Joined! It\'s in your Shopping tab.';
+  String get shareViewerJoinedList => '¡Te uniste! Está en tu pestaña Compras.';
 
   @override
-  String get shareViewerJoinedCookbook => 'Joined! It\'s in your cookbooks.';
+  String get shareViewerJoinedCookbook => '¡Te uniste! Está en tus recetarios.';
 
   @override
-  String get shareViewerOwnItem => 'This is yours — you already have it.';
+  String get shareViewerOwnItem => 'Esto es tuyo. Ya lo tienes.';
 
   @override
-  String get shareViewerJoinNeedsSubscription => 'Collaborating on cookbooks needs a subscription.';
+  String get shareViewerJoinNeedsSubscription => 'Colaborar en recetarios requiere una suscripción.';
 
   @override
-  String get shareViewerOwnerLapsed => 'The owner\'s subscription is no longer active, so this cookbook can\'t be shared right now.';
+  String get shareViewerOwnerLapsed => 'La suscripción del propietario ya no está activa, así que este recetario no se puede compartir ahora.';
 
   @override
-  String get shareViewerNotCollab => 'This link is a one-time copy, not a live invite.';
+  String get shareViewerNotCollab => 'Este enlace es una copia única, no una invitación para colaborar.';
 
   @override
-  String get shareViewerJoinFailed => 'Couldn\'t join. Please try again.';
+  String get shareViewerJoinFailed => 'No pudimos unirte. Inténtalo de nuevo.';
 
   @override
-  String get familyJoinWithCodeOrLink => 'Join with code or link';
+  String get familyJoinWithCodeOrLink => 'Unirse con código o enlace';
 
   @override
-  String get familySignInToUse => 'Sign in to create or join a family.';
+  String get familySignInToUse => 'Inicia sesión para crear una familia o unirte a una.';
 
   @override
-  String get familyInviteMember => 'Invite family member';
+  String get familyInviteMember => 'Invitar a un familiar';
 
   @override
   String familyInviteSheetTitle(String familyName) {
-    return 'Invite to $familyName';
+    return 'Invitar a la familia $familyName';
   }
 
   @override
-  String get familyInviteSheetBody => 'Have them scan this code with their phone camera, or send them the link. They can also paste the link or code in Family → Join with code or link.';
+  String get familyInviteSheetBody => 'Pídele que escanee este código con la cámara de su teléfono, o envíale el enlace. También puede pegar el enlace o el código en Familia → Unirse con código o enlace.';
 
   @override
-  String get familyInviteCode => 'Invite code';
+  String get familyInviteCode => 'Código de invitación';
 
   @override
-  String get familyInviteLink => 'Invite link';
+  String get familyInviteLink => 'Enlace de invitación';
 
   @override
   String familySeatsLeft(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count spots left',
-      one: '1 spot left',
+      other: 'Quedan $count lugares',
+      one: 'Queda 1 lugar',
     );
     return '$_temp0';
   }
 
   @override
-  String get familyFullTitle => 'Your family is full';
+  String get familyFullTitle => 'Tu familia está completa';
 
   @override
   String familyFullOwnerBody(int max) {
-    return 'All $max spots are taken. Remove a member or upgrade your plan to invite someone new.';
+    return 'Los $max lugares están ocupados. Quita a un miembro o mejora tu plan para invitar a alguien nuevo.';
   }
 
   @override
   String familyFullMemberBody(int max) {
-    return 'All $max spots are taken. Ask the family owner to make room.';
+    return 'Los $max lugares están ocupados. Pide al propietario de la familia que haga lugar.';
   }
 
   @override
-  String get familyAloneHint => 'No one else has joined yet. Invite someone to start sharing.';
+  String get familyAloneHint => 'Nadie más se ha unido todavía. Invita a alguien para empezar a compartir.';
 
   @override
-  String get familyYou => 'You';
+  String get familyYou => 'Tú';
 
   @override
-  String get familyErrorSubscription => 'A Premium plan is required to create a family.';
+  String get familyErrorSubscription => 'Se necesita un plan Premium para crear una familia.';
 
   @override
-  String get familyErrorFull => 'This family is full.';
+  String get familyErrorFull => 'Esta familia está completa.';
 
   @override
-  String get familyErrorAlreadyInFamily => 'You\'re already in a family. Leave it first to join another.';
+  String get familyErrorAlreadyInFamily => 'Ya estás en una familia. Sal de ella primero para unirte a otra.';
 
   @override
-  String get familyErrorInvalidCode => 'That invite code isn\'t valid. Check it or ask for a new link.';
+  String get familyErrorInvalidCode => 'Ese código de invitación no es válido. Revísalo o pide un enlace nuevo.';
 
   @override
-  String get familyJoinScreenTitle => 'Family invite';
+  String get familyJoinScreenTitle => 'Invitación familiar';
 
   @override
   String familyJoinPrompt(String familyName) {
-    return 'Join $familyName?';
+    return '¿Unirte a $familyName?';
   }
 
   @override
   String familyJoinInvitedBy(String name) {
-    return '$name invited you to share cookbooks, shopping lists and meal plans.';
+    return '$name te invitó a compartir recetarios, listas de compras y planes de comidas.';
   }
 
   @override
   String familyJoinGenericPrompt(String code) {
-    return 'Join the family with invite code $code?';
+    return '¿Unirte a la familia con el código de invitación $code?';
   }
 
   @override
-  String get familyJoinSignIn => 'Sign in to join this family. You\'ll join as soon as you\'re signed in.';
+  String get familyJoinSignIn => 'Inicia sesión para unirte a esta familia. Te unirás en cuanto inicies sesión.';
 
   @override
-  String get familyJoinConfirm => 'Join family';
+  String get familyJoinConfirm => 'Unirse a la familia';
 
   @override
   String familyJoinAlreadyMember(String familyName) {
-    return 'You\'re already in $familyName.';
+    return 'Ya estás en $familyName.';
   }
 
   @override
   String familyJoinInOtherFamily(String familyName) {
-    return 'You\'re already in $familyName. Leave that family first to join this one.';
+    return 'Ya estás en $familyName. Sal de esa familia primero para unirte a esta.';
   }
 
   @override
   String familyJoinFullBody(String familyName, int max) {
-    return '$familyName is full ($max of $max members). Ask the owner to remove someone or upgrade their plan.';
+    return '$familyName está completa ($max de $max miembros). Pide al propietario que quite a alguien o que mejore su plan.';
   }
 
   @override
-  String get familyJoinOpenFamily => 'Open family';
+  String get familyJoinOpenFamily => 'Abrir familia';
 
   @override
-  String get familyJoinInvalid => 'This family invite isn\'t valid anymore';
+  String get familyJoinInvalid => 'Esta invitación familiar ya no es válida';
 
   @override
-  String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
+  String get familyJoinInvalidHint => 'Puede que el código de invitación haya cambiado. Pide un enlace nuevo o pega otro.';
 
   @override
   String get importLinksNotSaved => 'no se pudieron guardar los enlaces entre recetas';
@@ -10995,310 +10995,310 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteAllDataAccountFailed => 'No se pudo eliminar tu cuenta, así que no se ha eliminado nada. Comprueba tu conexión a internet e inténtalo de nuevo.';
 
   @override
-  String get addRecipeSheetTitle => 'Add a recipe';
+  String get addRecipeSheetTitle => 'Agregar una receta';
 
   @override
-  String get addRecipeSheetSubtitle => 'Paste a link from Instagram, TikTok, a website, anywhere.';
+  String get addRecipeSheetSubtitle => 'Pega un enlace de Instagram, TikTok, un sitio web o de donde sea.';
 
   @override
   String addRecipeSheetPlatformLink(String platform) {
-    return '$platform link';
+    return 'Enlace de $platform';
   }
 
   @override
-  String get addRecipeSheetLinkHint => 'Paste a recipe link…';
+  String get addRecipeSheetLinkHint => 'Pega el enlace de una receta…';
 
   @override
-  String get addRecipeSheetPasteFromClipboard => 'Paste link from clipboard';
+  String get addRecipeSheetPasteFromClipboard => 'Pegar enlace del portapapeles';
 
   @override
-  String get addRecipeSheetImportFromLink => 'Import recipe from link';
+  String get addRecipeSheetImportFromLink => 'Importar receta desde enlace';
 
   @override
   String addRecipeSheetImportFrom(String platform) {
-    return 'Import from $platform';
+    return 'Importar desde $platform';
   }
 
   @override
-  String get addRecipeSheetImportRecipe => 'Import recipe';
+  String get addRecipeSheetImportRecipe => 'Importar receta';
 
   @override
-  String get addRecipeSheetOtherWay => 'or another way';
+  String get addRecipeSheetOtherWay => 'o de otra forma';
 
   @override
-  String get addRecipeSheetPhoto => 'Photo';
+  String get addRecipeSheetPhoto => 'Foto';
 
   @override
-  String get addRecipeSheetPasteText => 'Paste text';
+  String get addRecipeSheetPasteText => 'Pegar texto';
 
   @override
-  String get addRecipeSheetAi => 'AI';
+  String get addRecipeSheetAi => 'IA';
 
   @override
-  String get addRecipeSheetScan => 'Scan';
+  String get addRecipeSheetScan => 'Escanear';
 
   @override
-  String get addRecipeSheetHowToImport => 'How to import';
+  String get addRecipeSheetHowToImport => 'Cómo importar';
 
   @override
-  String get addRecipeSheetTypeItIn => 'Type it in';
+  String get addRecipeSheetTypeItIn => 'Escríbela a mano';
 
   @override
   String addRecipeSheetGrabbing(String platform) {
-    return 'Grabbing the recipe from $platform…';
+    return 'Obteniendo la receta de $platform…';
   }
 
   @override
-  String get addRecipeNothingToPaste => 'Nothing to paste, copy a recipe link first.';
+  String get addRecipeNothingToPaste => 'No hay nada que pegar. Copia primero el enlace de una receta.';
 
   @override
-  String get addRecipePasteLinkFirst => 'Paste a recipe link first.';
+  String get addRecipePasteLinkFirst => 'Pega primero el enlace de una receta.';
 
   @override
-  String get addRecipeNotALink => 'That doesn’t look like a recipe link. Paste a link starting with https://, or use “Paste text” below.';
+  String get addRecipeNotALink => 'Eso no parece el enlace de una receta. Pega un enlace que empiece por https://, o usa “Pegar texto” más abajo.';
 
   @override
-  String get addRecipeNoRecipeInJson => 'We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.';
+  String get addRecipeNoRecipeInJson => 'No pudimos leer una receta en ese JSON. Para recetas generadas con IA, usa la opción “IA” de abajo.';
 
   @override
-  String get addRecipeInvalidJson => 'That looks like recipe data, but it isn’t valid JSON. Copy the whole thing and try again.';
+  String get addRecipeInvalidJson => 'Parecen datos de una receta, pero no es un JSON válido. Cópialo completo e inténtalo de nuevo.';
 
   @override
-  String get addRecipeNoRecipeInText => 'We couldn’t find a recipe in that text. For long recipes, use “Paste text” below.';
+  String get addRecipeNoRecipeInText => 'No encontramos ninguna receta en ese texto. Para recetas largas, usa “Pegar texto” más abajo.';
 
   @override
-  String get addRecipeLinkUnreachable => 'Couldn’t reach that link. Check your connection and try again.';
+  String get addRecipeLinkUnreachable => 'No se pudo acceder a ese enlace. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
-  String get addRecipeLinkNeedsLogin => 'That page needs a login, so we can’t read it. Try a public link.';
+  String get addRecipeLinkNeedsLogin => 'Esa página requiere iniciar sesión, así que no podemos leerla. Prueba con un enlace público.';
 
   @override
-  String get addRecipeLinkNotFound => 'That link couldn’t be found. Double-check the URL.';
+  String get addRecipeLinkNotFound => 'No se encontró ese enlace. Revisa bien la URL.';
 
   @override
-  String get addRecipeLinkUnreadable => 'We couldn’t read a recipe from that link. Try a different link, or paste the recipe text below.';
+  String get addRecipeLinkUnreadable => 'No pudimos leer una receta en ese enlace. Prueba con otro enlace o pega el texto de la receta abajo.';
 
   @override
   String addRecipeAddedToShopping(String item) {
-    return 'Added to shopping list: $item';
+    return 'Agregado a la lista de compras: $item';
   }
 
   @override
   String addRecipeAddToShoppingFailed(String error) {
-    return 'Failed to add to shopping list: $error';
+    return 'No se pudo agregar a la lista de compras: $error';
   }
 
   @override
-  String get paywallHeadline => 'Sync recipes, cookbooks and more\nwith your family';
+  String get paywallHeadline => 'Sincroniza recetas, recetarios y más\ncon tu familia';
 
   @override
-  String get recipeEnhanceWithAi => 'Enhance with AI';
+  String get recipeEnhanceWithAi => 'Mejorar con IA';
 
   @override
   String featureGateRequiresTier(String tier) {
-    return 'Requires $tier or higher';
+    return 'Requiere $tier o superior';
   }
 
   @override
   String featureGateUpgradeBody(String tier, String feature) {
-    return 'This feature requires $tier or higher. Upgrade to access $feature and more.';
+    return 'Esta función requiere $tier o superior. Mejora tu plan para acceder a $feature y más.';
   }
 
   @override
-  String get gatedFeatureCreatorPage => 'Creator Page';
+  String get gatedFeatureCreatorPage => 'Página de creador';
 
   @override
-  String get gatedFeatureCustomDomain => 'Custom Domain';
+  String get gatedFeatureCustomDomain => 'Dominio personalizado';
 
   @override
-  String get storageLimitReachedTitle => 'Storage Limit Reached';
+  String get storageLimitReachedTitle => 'Límite de almacenamiento alcanzado';
 
   @override
   String storageLimitReachedBody(String used, String limit) {
-    return 'You\'ve used $used MB of your $limit limit. Delete some photos or upgrade for more storage.';
+    return 'Has usado $used MB de tu límite de $limit. Elimina algunas fotos o mejora tu plan para tener más espacio.';
   }
 
   @override
-  String get familySheetPermCanEdit => 'Can edit';
+  String get familySheetPermCanEdit => 'Puede editar';
 
   @override
-  String get familySheetPermCanEditDesc => 'Add & edit recipes';
+  String get familySheetPermCanEditDesc => 'Agregar y editar recetas';
 
   @override
-  String get familySheetPermViewOnly => 'View only';
+  String get familySheetPermViewOnly => 'Solo ver';
 
   @override
-  String get familySheetPermViewOnlyDesc => 'Can\'t make changes';
+  String get familySheetPermViewOnlyDesc => 'No puede hacer cambios';
 
   @override
-  String get familySheetPermEditItems => 'Edit items';
+  String get familySheetPermEditItems => 'Editar artículos';
 
   @override
-  String get familySheetPermEditItemsDesc => 'Add, remove & check off';
+  String get familySheetPermEditItemsDesc => 'Agregar, quitar y marcar';
 
   @override
-  String get familySheetPermCheckItems => 'Check items';
+  String get familySheetPermCheckItems => 'Marcar artículos';
 
   @override
-  String get familySheetPermCheckItemsDesc => 'Tick items off only';
+  String get familySheetPermCheckItemsDesc => 'Solo marcar artículos';
 
   @override
-  String get familySheetCollaborateLive => 'Collaborate live';
+  String get familySheetCollaborateLive => 'Colaborar en vivo';
 
   @override
-  String get familySheetInviteViewCookbook => 'Invite people to view this cookbook';
+  String get familySheetInviteViewCookbook => 'Invita a personas a ver este recetario';
 
   @override
-  String get familySheetInviteEditCookbook => 'Invite people to view or edit this cookbook';
+  String get familySheetInviteEditCookbook => 'Invita a personas a ver o editar este recetario';
 
   @override
-  String get familySheetCookbookNeedsPlan => 'Live cookbook collaboration needs a subscription. Sharing shopping lists is free.';
+  String get familySheetCookbookNeedsPlan => 'Colaborar en vivo en recetarios requiere una suscripción. Compartir listas de compras es gratis.';
 
   @override
-  String get familySheetPeopleWithAccess => 'People with access';
+  String get familySheetPeopleWithAccess => 'Personas con acceso';
 
   @override
-  String get familySheetInviteWithLink => 'Invite with a link';
+  String get familySheetInviteWithLink => 'Invitar con un enlace';
 
   @override
-  String get familySheetCreateInviteLink => 'Create invite link';
+  String get familySheetCreateInviteLink => 'Crear enlace de invitación';
 
   @override
-  String get familySheetSendCopy => 'Send a copy';
+  String get familySheetSendCopy => 'Enviar una copia';
 
   @override
-  String get familySheetSendCopySubtitle => 'A one-time snapshot they can import (expires in 24h)';
+  String get familySheetSendCopySubtitle => 'Una copia única que pueden importar (expira en 24 h)';
 
   @override
-  String get familySheetInviteCopied => 'Invite link copied. Send it to anyone.';
+  String get familySheetInviteCopied => 'Enlace de invitación copiado. Envíalo a quien quieras.';
 
   @override
-  String get familySheetAnyoneCanJoin => 'Anyone with this link can join';
+  String get familySheetAnyoneCanJoin => 'Cualquiera con este enlace puede unirse';
 
   @override
-  String get enhanceCopied => 'Copied! Paste it into ChatGPT, Claude, or any AI.';
+  String get enhanceCopied => '¡Copiado! Pégalo en ChatGPT, Claude o cualquier IA.';
 
   @override
-  String get enhanceRecipeUpdated => 'Recipe updated.';
+  String get enhanceRecipeUpdated => 'Receta actualizada.';
 
   @override
   String enhanceUpdateFailed(String error) {
-    return 'Couldn\'t update the recipe: $error';
+    return 'No se pudo actualizar la receta: $error';
   }
 
   @override
-  String get enhanceBackToEdit => 'Back to edit';
+  String get enhanceBackToEdit => 'Volver a editar';
 
   @override
-  String get enhanceLoadFailed => 'Couldn\'t load this recipe.';
+  String get enhanceLoadFailed => 'No se pudo cargar esta receta.';
 
   @override
-  String get enhanceIntroTitle => 'Clean up this recipe with any AI';
+  String get enhanceIntroTitle => 'Ordena esta receta con cualquier IA';
 
   @override
-  String get enhanceIntroBody => 'It adds section headers, writes the exact amounts into each step, and tidies the formatting, without changing your ingredients or method. Your photos, rating, and notes are kept.';
+  String get enhanceIntroBody => 'Agrega encabezados de sección, escribe las cantidades exactas en cada paso y ordena el formato, sin cambiar tus ingredientes ni tu método. Tus fotos, tu valoración y tus notas se conservan.';
 
   @override
-  String get enhanceStep1Title => 'Copy your recipe + the instructions';
+  String get enhanceStep1Title => 'Copia tu receta + las instrucciones';
 
   @override
-  String get enhanceCopyButton => 'Copy recipe + prompt';
+  String get enhanceCopyButton => 'Copiar receta + prompt';
 
   @override
-  String get enhanceStep2Title => 'Paste it into ChatGPT, Claude, or any AI';
+  String get enhanceStep2Title => 'Pégalo en ChatGPT, Claude o cualquier IA';
 
   @override
-  String get enhanceStep2Body => 'The AI returns updated recipe JSON. Copy that JSON.';
+  String get enhanceStep2Body => 'La IA devuelve el JSON actualizado de la receta. Copia ese JSON.';
 
   @override
-  String get enhanceStep3Title => 'Paste the AI\'s JSON back here';
+  String get enhanceStep3Title => 'Pega aquí el JSON de la IA';
 
   @override
-  String get enhancePreviewChanges => 'Preview changes';
+  String get enhancePreviewChanges => 'Ver los cambios';
 
   @override
-  String get enhanceAccept => 'Accept & update recipe';
+  String get enhanceAccept => 'Aceptar y actualizar la receta';
 
   @override
   String enhanceSectionsAdded(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '+$count sections',
-      one: '+1 section',
+      other: '+$count secciones',
+      one: '+1 sección',
     );
     return '$_temp0';
   }
 
   @override
   String enhanceIngredientCount(int before, int after) {
-    return 'Ingredients $before → $after';
+    return 'Ingredientes $before → $after';
   }
 
   @override
   String enhanceStepCount(int before, int after) {
-    return 'Steps $before → $after';
+    return 'Pasos $before → $after';
   }
 
   @override
-  String get enhanceCourseAdded => 'Course added';
+  String get enhanceCourseAdded => 'Plato agregado';
 
   @override
-  String get enhanceCategoryAdded => 'Category added';
+  String get enhanceCategoryAdded => 'Categoría agregada';
 
   @override
-  String get enhanceFormattingRefined => 'Formatting refined';
+  String get enhanceFormattingRefined => 'Formato mejorado';
 
   @override
-  String get enhanceWhatChanged => 'What changed';
+  String get enhanceWhatChanged => 'Qué cambió';
 
   @override
-  String get enhanceIngredientCountWarning => 'Heads up: the ingredient count changed. Double-check nothing was dropped before accepting.';
+  String get enhanceIngredientCountWarning => 'Atención: cambió el número de ingredientes. Comprueba que no falte nada antes de aceptar.';
 
   @override
-  String get enhanceResult => 'Result';
+  String get enhanceResult => 'Resultado';
 
   @override
-  String get enhanceCompare => 'Compare';
+  String get enhanceCompare => 'Comparar';
 
   @override
-  String get enhanceAdded => 'Added';
+  String get enhanceAdded => 'Agregado';
 
   @override
-  String get enhanceRemoved => 'Removed';
+  String get enhanceRemoved => 'Eliminado';
 
   @override
   String aiRecipesFound(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count Recipes Found',
-      one: '1 Recipe Found',
+      other: '$count recetas encontradas',
+      one: '1 receta encontrada',
     );
     return '$_temp0';
   }
 
   @override
-  String get aiCopyPromptHelp => 'Copy this prompt, paste it into any AI (ChatGPT, Claude, Gemini) along with your recipe, then paste the response below.';
+  String get aiCopyPromptHelp => 'Copia este prompt, pégalo en cualquier IA (ChatGPT, Claude, Gemini) junto con tu receta y luego pega la respuesta abajo.';
 
   @override
-  String get aiWeirdFormatTip => 'Have recipes in a weird format? Paste them into any free AI (ChatGPT, Claude, etc.) with this prompt and it\'ll convert them for you. Works with spreadsheets, emails, screenshots, and more!';
+  String get aiWeirdFormatTip => '¿Tienes recetas en un formato raro? Pégalas en cualquier IA gratuita (ChatGPT, Claude, etc.) con este prompt y las convertirá por ti. ¡Funciona con hojas de cálculo, correos, capturas de pantalla y más!';
 
   @override
-  String get aiPasteResponseTitle => 'Paste AI Response';
+  String get aiPasteResponseTitle => 'Pegar respuesta de la IA';
 
   @override
-  String get aiTipsBody => 'Works with any AI. You can also take a photo of a recipe and paste it with the prompt. If the JSON has errors, ask the AI to fix it.';
+  String get aiTipsBody => 'Funciona con cualquier IA. También puedes tomar una foto de una receta y pegarla con el prompt. Si el JSON tiene errores, pide a la IA que los corrija.';
 
   @override
-  String get nutriSheetReviewTitle => 'Nutrition Review';
+  String get nutriSheetReviewTitle => 'Revisión nutricional';
 
   @override
-  String get nutriSheetReviewHint => 'Tap ingredients below to change their USDA match or enter values manually.';
+  String get nutriSheetReviewHint => 'Toca los ingredientes de abajo para cambiar el alimento USDA asociado o introducir los valores a mano.';
 
   @override
   String nutriSheetManuallyEdited(int count) {
-    return '$count manually edited';
+    return 'Editados a mano: $count';
   }
 
   @override
@@ -11310,87 +11310,87 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nutritionCalUnit => 'cal';
 
   @override
-  String get nutriSheetTapIngredientHint => 'Tap any ingredient to change its USDA match or enter nutrition manually.';
+  String get nutriSheetTapIngredientHint => 'Toca cualquier ingrediente para cambiar el alimento USDA asociado o introducir la información nutricional a mano.';
 
   @override
   String nutriSheetResultsFound(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count results found',
-      one: '1 result found',
+      other: '$count resultados encontrados',
+      one: '1 resultado encontrado',
     );
     return '$_temp0';
   }
 
   @override
   String nutriSheetCalPerServing(int count) {
-    return '$count cal per serving';
+    return '$count cal por porción';
   }
 
   @override
-  String get nutriSheetLinkedRecipe => 'Linked Recipe';
+  String get nutriSheetLinkedRecipe => 'Receta vinculada';
 
   @override
   String nutriSheetRecipesLinked(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recipes linked',
-      one: '1 recipe linked',
+      other: '$count recetas vinculadas',
+      one: '1 receta vinculada',
     );
     return '$_temp0';
   }
 
   @override
   String nutriSheetCalTotal(int count) {
-    return '$count cal total';
+    return '$count cal en total';
   }
 
   @override
-  String get nutriSheetNoData => 'No nutrition data';
+  String get nutriSheetNoData => 'Sin datos nutricionales';
 
   @override
   String nutriSheetFromRecipe(String recipe) {
-    return 'Nutrition from $recipe';
+    return 'Nutrición de $recipe';
   }
 
   @override
-  String get nutriSheetFromLinkedRecipe => 'Nutrition from linked recipe';
+  String get nutriSheetFromLinkedRecipe => 'Nutrición de la receta vinculada';
 
   @override
-  String get nutriSheetNoDataOpenRecipe => 'No nutrition data. Open the recipe to calculate it first.';
+  String get nutriSheetNoDataOpenRecipe => 'Sin datos nutricionales. Abre la receta para calcularlos primero.';
 
   @override
-  String get nutriSheetRecipeScale => 'Recipe scale';
+  String get nutriSheetRecipeScale => 'Escala de la receta';
 
   @override
-  String get nutriSheetRecipeScaleHint => 'How much of the linked recipe does this ingredient use?';
+  String get nutriSheetRecipeScaleHint => '¿Cuánto de la receta vinculada usa este ingrediente?';
 
   @override
-  String get nutritionFactsTitle => 'Nutrition Facts';
+  String get nutritionFactsTitle => 'Información nutricional';
 
   @override
-  String get recipeEditDetailedNutrition => 'Detailed Nutrition';
+  String get recipeEditDetailedNutrition => 'Nutrición detallada';
 
   @override
-  String get listGenExitBody => 'Are you sure you wish to exit the shopping list generator? Unsaved changes will be lost.';
+  String get listGenExitBody => '¿Seguro que quieres salir del generador de lista de compras? Se perderán los cambios sin guardar.';
 
   @override
-  String get listGenChooseLinked => 'Choose Linked Recipes';
+  String get listGenChooseLinked => 'Elegir recetas vinculadas';
 
   @override
-  String get listGenChooseLinkedBody => 'Some ingredients link to multiple recipes. Select which ones to include.';
+  String get listGenChooseLinkedBody => 'Algunos ingredientes están vinculados a varias recetas. Selecciona cuáles incluir.';
 
   @override
-  String get listGenSelectIngredients => 'Select Ingredients';
+  String get listGenSelectIngredients => 'Seleccionar ingredientes';
 
   @override
-  String get listGenReviewAdd => 'Review & Add';
+  String get listGenReviewAdd => 'Revisar y agregar';
 
   @override
   String listGenInRecipe(String recipe) {
-    return 'in $recipe';
+    return 'en $recipe';
   }
 
   @override
@@ -11398,153 +11398,153 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Links to $count recipes. Select which to include:',
-      one: 'Links to 1 recipe. Select which to include:',
+      other: 'Vinculado a $count recetas. Selecciona cuáles incluir:',
+      one: 'Vinculado a 1 receta. Selecciona si quieres incluirla:',
     );
     return '$_temp0';
   }
 
   @override
   String listGenSelectedOf(int selected, int total) {
-    return '$selected/$total ingredients';
+    return '$selected/$total ingredientes';
   }
 
   @override
-  String get listGenLinkedBadge => 'linked';
+  String get listGenLinkedBadge => 'vinculado';
 
   @override
-  String get listGenPantryBadge => 'pantry';
+  String get listGenPantryBadge => 'despensa';
 
   @override
   String listGenSeeBelow(String title) {
-    return 'See \"$title\" below';
+    return 'Ver “$title” abajo';
   }
 
   @override
-  String get shoppingSharingStopped => 'Sharing stopped';
+  String get shoppingSharingStopped => 'Se dejó de compartir';
 
   @override
-  String get shoppingStopSharingOnly => 'Stop Sharing Only';
+  String get shoppingStopSharingOnly => 'Solo dejar de compartir';
 
   @override
-  String get shoppingShopOnInstacart => 'Shop on Instacart';
+  String get shoppingShopOnInstacart => 'Comprar en Instacart';
 
   @override
   String shoppingNamedItemRemoved(String name) {
-    return '$name removed';
+    return 'Se quitó $name';
   }
 
   @override
-  String get exportLinkedTitle => 'Export Linked Recipes?';
+  String get exportLinkedTitle => '¿Exportar recetas vinculadas?';
 
   @override
   String exportLinkedBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'This recipe has $count linked recipes:',
-      one: 'This recipe has 1 linked recipe:',
+      other: 'Esta receta tiene $count recetas vinculadas:',
+      one: 'Esta receta tiene 1 receta vinculada:',
     );
     return '$_temp0';
   }
 
   @override
-  String get exportLinkedQuestion => 'Would you like to include them in the export so the links are preserved when imported?';
+  String get exportLinkedQuestion => '¿Quieres incluirlas en la exportación para que los vínculos se conserven al importar?';
 
   @override
   String exportOnlyRecipe(String title) {
-    return 'Only $title';
+    return 'Solo $title';
   }
 
   @override
-  String get exportLinkedAll => 'Export All';
+  String get exportLinkedAll => 'Exportar todo';
 
   @override
-  String get pdfLinkedRecipes => 'Linked Recipes';
+  String get pdfLinkedRecipes => 'Recetas vinculadas';
 
   @override
   String taxonomyCourseExists(String name) {
-    return 'Course \"$name\" already exists';
+    return 'El plato “$name” ya existe';
   }
 
   @override
   String taxonomyCategoryExists(String name) {
-    return 'Category \"$name\" already exists';
+    return 'La categoría “$name” ya existe';
   }
 
   @override
   String taxonomyCreateError(String error) {
-    return 'Error creating: $error';
+    return 'Error al crear: $error';
   }
 
   @override
-  String get shareViewerLiveCollab => 'live collaboration';
+  String get shareViewerLiveCollab => 'colaboración en vivo';
 
   @override
-  String get shareViewerAddedToLists => 'Added to your lists';
+  String get shareViewerAddedToLists => 'Agregada a tus listas';
 
   @override
-  String get cookbookPeopleTitle => 'People in this cookbook';
+  String get cookbookPeopleTitle => 'Personas en este recetario';
 
   @override
   String cravingMoreSteps(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '+ $count more steps',
-      one: '+ 1 more step',
+      other: '+ $count pasos más',
+      one: '+ 1 paso más',
     );
     return '$_temp0';
   }
 
   @override
   String authSignedInAs(String name) {
-    return 'Signed in as $name';
+    return 'Sesión iniciada como $name';
   }
 
   @override
-  String get authSignedOut => 'Signed out';
+  String get authSignedOut => 'Sesión cerrada';
 
   @override
-  String get accountStatFollowers => 'followers';
+  String get accountStatFollowers => 'seguidores';
 
   @override
-  String get accountStatFollowing => 'following';
+  String get accountStatFollowing => 'siguiendo';
 
   @override
-  String get settingsSwitchedToImported => 'Switched to imported cookbook';
+  String get settingsSwitchedToImported => 'Se cambió al recetario importado';
 
   @override
   String resetFailedNothingDeleted(String error) {
-    return 'Reset failed: no data was deleted. ($error)';
+    return 'El restablecimiento falló: no se eliminó ningún dato. ($error)';
   }
 
   @override
   String selectedOfTotal(int selected, int total) {
-    return '$selected of $total';
+    return '$selected de $total';
   }
 
   @override
-  String get platformStripSemantics => 'Works with Instagram, TikTok, YouTube, Pinterest and any recipe website';
+  String get platformStripSemantics => 'Funciona con Instagram, TikTok, YouTube, Pinterest y cualquier sitio web de recetas';
 
   @override
-  String get previewRecipeTitle => 'Grandma\'s Famous Chocolate Cake';
+  String get previewRecipeTitle => 'El famoso pastel de chocolate de la abuela';
 
   @override
-  String get previewRecipeIngredients => '2 cups flour, 1 cup sugar, 3 eggs';
+  String get previewRecipeIngredients => '2 tazas de harina, 1 taza de azúcar, 3 huevos';
 
   @override
-  String get previewIngredientFlour => '• 2 cups all-purpose flour';
+  String get previewIngredientFlour => '• 2 tazas de harina de trigo';
 
   @override
-  String get previewIngredientVanilla => '• 1 tsp vanilla extract';
+  String get previewIngredientVanilla => '• 1 cdta de extracto de vainilla';
 
   @override
-  String get themePreviewRecipe => 'Butter Chicken';
+  String get themePreviewRecipe => 'Pollo a la mantequilla';
 
   @override
-  String get themePreviewPrimary => 'Primary';
+  String get themePreviewPrimary => 'Principal';
 
   @override
-  String get themePreviewSecondary => 'Secondary';
+  String get themePreviewSecondary => 'Secundario';
 }

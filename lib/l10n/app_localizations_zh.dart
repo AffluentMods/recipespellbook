@@ -242,22 +242,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cookbookAdd => '新建食谱书';
 
   @override
-  String get isbnScreenTitle => 'Add a cookbook by barcode';
+  String get isbnScreenTitle => '通过条形码添加食谱书';
 
   @override
-  String get isbnAddFromBarcode => 'Scan a cookbook barcode';
+  String get isbnAddFromBarcode => '扫描食谱书条形码';
 
   @override
-  String get isbnAddFromBarcodeSubtitle => 'Add a printed cookbook from its ISBN';
+  String get isbnAddFromBarcodeSubtitle => '通过 ISBN 添加纸质食谱书';
 
   @override
-  String get isbnCreateBlank => 'Create a new cookbook';
+  String get isbnCreateBlank => '新建食谱书';
 
   @override
-  String get isbnCreateBlankSubtitle => 'Start an empty collection';
+  String get isbnCreateBlankSubtitle => '从空白合集开始';
 
   @override
-  String get isbnPointCamera => 'Point your camera at the barcode on the back cover';
+  String get isbnPointCamera => '将相机对准封底的条形码';
 
   @override
   String get isbnTypeLabel => 'ISBN';
@@ -266,124 +266,124 @@ class AppLocalizationsZh extends AppLocalizations {
   String get isbnTypeHint => '978-0-00-000000-0';
 
   @override
-  String get isbnTypeHelp => 'Or type the ISBN printed above the barcode';
+  String get isbnTypeHelp => '或输入条形码上方印的 ISBN';
 
   @override
-  String get isbnLookUp => 'Look up';
+  String get isbnLookUp => '查询';
 
   @override
-  String get isbnInvalid => 'That doesn\'t look like a valid ISBN. Check the 10 or 13 digits and try again.';
+  String get isbnInvalid => '这似乎不是有效的 ISBN。请检查这 10 位或 13 位数字后重试。';
 
   @override
-  String get isbnLookingUp => 'Looking up the book…';
+  String get isbnLookingUp => '正在查询这本书…';
 
   @override
-  String get isbnNotFound => 'We couldn\'t find this book in the catalogues. Fill in the details and we\'ll add it anyway.';
+  String get isbnNotFound => '在图书目录中找不到这本书。请填写详细信息，我们仍会为你添加。';
 
   @override
-  String get isbnTitleLabel => 'Title';
+  String get isbnTitleLabel => '书名';
 
   @override
-  String get isbnAuthorLabel => 'Author';
+  String get isbnAuthorLabel => '作者';
 
   @override
-  String get isbnAddToLibrary => 'Add to my cookbooks';
+  String get isbnAddToLibrary => '添加为食谱书';
 
   @override
-  String get isbnScanAnother => 'Scan another book';
+  String get isbnScanAnother => '扫描另一本书';
 
   @override
-  String get isbnAlreadyAdded => 'This book is already in your cookbooks.';
+  String get isbnAlreadyAdded => '这本书已在你的食谱书中。';
 
   @override
-  String get isbnOpenCookbook => 'Open cookbook';
+  String get isbnOpenCookbook => '打开食谱书';
 
   @override
-  String get isbnAddedTitle => 'Added to your cookbooks';
+  String get isbnAddedTitle => '已添加到你的食谱书';
 
   @override
-  String get isbnAddedBody => 'Now add the recipes you cook from it.';
+  String get isbnAddedBody => '接下来，添加你用这本书做的食谱吧。';
 
   @override
-  String get isbnAddRecipes => 'Add recipes from this book';
+  String get isbnAddRecipes => '从这本书添加食谱';
 
   @override
   String isbnPages(int count) {
-    return '$count pages';
+    return '$count 页';
   }
 
   @override
-  String get isbnScanBookDetected => 'That\'s a book barcode — opening the cookbook scanner.';
+  String get isbnScanBookDetected => '这是图书条形码，正在打开食谱书扫描。';
 
   @override
-  String get isbnCameraUnavailable => 'Camera unavailable. You can still type the ISBN below.';
+  String get isbnCameraUnavailable => '相机不可用。你仍可在下方输入 ISBN。';
 
   @override
-  String get bookScanAction => 'Scan pages';
+  String get bookScanAction => '扫描书页';
 
   @override
-  String get bookScanFromBook => 'Scan pages from this book';
+  String get bookScanFromBook => '扫描这本书的书页';
 
   @override
-  String get bookScanIntroTitle => 'Scan pages from this book';
+  String get bookScanIntroTitle => '扫描这本书的书页';
 
   @override
   String bookScanIntroBody(String book) {
-    return 'Photograph the recipe pages one after another. They are read on this device and each recipe is filed under $book.';
+    return '逐页拍摄食谱页面。识别在此设备上完成，每个食谱都会归入 $book。';
   }
 
   @override
-  String get bookScanTipLightTitle => 'Flat page, good light';
+  String get bookScanTipLightTitle => '页面平整，光线充足';
 
   @override
-  String get bookScanTipLightBody => 'Shadows and curled pages are harder to read.';
+  String get bookScanTipLightBody => '有阴影或卷曲的页面更难识别。';
 
   @override
-  String get bookScanTipOrderTitle => 'One page after another';
+  String get bookScanTipOrderTitle => '一页接一页';
 
   @override
-  String get bookScanTipOrderBody => 'A recipe that runs onto the next page is joined up for you.';
+  String get bookScanTipOrderBody => '跨页的食谱会自动拼接起来。';
 
   @override
-  String get bookScanTipPagesTitle => 'Page numbers are kept';
+  String get bookScanTipPagesTitle => '保留页码';
 
   @override
-  String get bookScanTipPagesBody => 'Each recipe is saved with the page it came from.';
+  String get bookScanTipPagesBody => '每个食谱都会连同所在页码一起保存。';
 
   @override
-  String get bookScanStart => 'Start scanning';
+  String get bookScanStart => '开始扫描';
 
   @override
-  String get bookScanChoosePhotos => 'Choose photos instead';
+  String get bookScanChoosePhotos => '改为选择照片';
 
   @override
-  String get bookScanChoosePhotosShort => 'Choose photos';
+  String get bookScanChoosePhotosShort => '选择照片';
 
   @override
-  String get bookScanTile => 'Book pages';
+  String get bookScanTile => '书页';
 
   @override
-  String get bookScanMoreSubtitle => 'Turn printed cookbook pages into recipes';
+  String get bookScanMoreSubtitle => '把纸质食谱书的页面变成食谱';
 
   @override
-  String get bookScanPrivacy => 'Pages are read on this device. Nothing is uploaded.';
+  String get bookScanPrivacy => '页面在此设备上识别，不会上传任何内容。';
 
   @override
-  String get bookScanPrivacySynced => 'Pages are read on this device. The recipes you add are synced with their pictures.';
+  String get bookScanPrivacySynced => '页面在此设备上识别。你添加的食谱会连同图片一起同步。';
 
   @override
-  String get bookScanCameraDenied => 'Camera access is off for Recipe Spellbook. Turn it on in Settings, or choose photos you already took.';
+  String get bookScanCameraDenied => 'Recipe Spellbook 的相机权限已关闭。请在设置中开启，或选择已拍好的照片。';
 
   @override
-  String get bookScanScannerFailed => 'The scanner could not be opened. You can still choose photos you already took.';
+  String get bookScanScannerFailed => '无法打开扫描仪。你仍可以选择已拍好的照片。';
 
   @override
   String bookScanLostPages(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'An earlier scan was interrupted. Its $count pages are still on this device.',
-      one: 'An earlier scan was interrupted. Its page is still on this device.',
+      other: '上次扫描被中断，那 $count 页仍保存在此设备上。',
+      one: '上次扫描被中断，那一页仍保存在此设备上。',
     );
     return '$_temp0';
   }
@@ -393,34 +393,32 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Read $count pages',
-      one: 'Read 1 page',
+      other: '识别这 $count 页',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanReadOnly => 'You can only view this cookbook, so recipes cannot be added to it.';
+  String get bookScanReadOnly => '你只能查看这本食谱书，因此无法向其中添加食谱。';
 
   @override
-  String get bookScanReadingTitle => 'Reading your pages';
+  String get bookScanReadingTitle => '正在识别书页';
 
   @override
   String bookScanReadingProgress(int current, int total) {
-    return 'Page $current of $total';
+    return '第 $current 页，共 $total 页';
   }
 
   @override
-  String get bookScanFindingRecipes => 'Finding the recipes';
+  String get bookScanFindingRecipes => '正在查找食谱';
 
   @override
   String bookScanFound(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Found $count recipes',
-      one: 'Found 1 recipe',
-      zero: 'No recipes found',
+      other: '找到 $count 个食谱',
+      zero: '未找到食谱',
     );
     return '$_temp0';
   }
@@ -430,58 +428,56 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count pages',
-      one: '1 page',
+      other: '$count 页',
     );
     return '$_temp0';
   }
 
   @override
   String bookScanPage(String page) {
-    return 'p. $page';
+    return '第 $page 页';
   }
 
   @override
   String bookScanPages(String pages) {
-    return 'pp. $pages';
+    return '第 $pages 页';
   }
 
   @override
   String bookScanSource(String book, String page) {
-    return '$book, p. $page';
+    return '$book，第 $page 页';
   }
 
   @override
   String bookScanSourcePages(String book, String pages) {
-    return '$book, pp. $pages';
+    return '$book，第 $pages 页';
   }
 
   @override
-  String get bookScanNoPageNumbers => 'No page numbers found';
+  String get bookScanNoPageNumbers => '未找到页码';
 
   @override
-  String get bookScanSetPageNumbers => 'Set page numbers';
+  String get bookScanSetPageNumbers => '设置页码';
 
   @override
-  String get bookScanChangePageNumbers => 'Page numbers';
+  String get bookScanChangePageNumbers => '页码';
 
   @override
-  String get bookScanPageNumbersTitle => 'Page numbers';
+  String get bookScanPageNumbersTitle => '页码';
 
   @override
-  String get bookScanFirstPageLabel => 'First page';
+  String get bookScanFirstPageLabel => '起始页码';
 
   @override
-  String get bookScanFirstPageHelp => 'The number printed on the first page you scanned. The rest follow in order.';
+  String get bookScanFirstPageHelp => '你扫描的第一页上印的页码，其余页码按顺序递增。';
 
   @override
   String bookScanIngredientCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ingredients',
-      one: '1 ingredient',
-      zero: 'No ingredients',
+      other: '$count 种食材',
+      zero: '无食材',
     );
     return '$_temp0';
   }
@@ -491,63 +487,61 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count steps',
-      one: '1 step',
-      zero: 'No steps',
+      other: '$count 个步骤',
+      zero: '无步骤',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanIssueTitle => 'Needs a title';
+  String get bookScanIssueTitle => '需要标题';
 
   @override
-  String get bookScanIssueIngredients => 'No ingredients found';
+  String get bookScanIssueIngredients => '未找到食材';
 
   @override
-  String get bookScanIssueSteps => 'No steps found';
+  String get bookScanIssueSteps => '未找到步骤';
 
   @override
-  String get bookScanDuplicate => 'Already in this book';
+  String get bookScanDuplicate => '已在这本书中';
 
   @override
-  String get bookScanUntitled => 'Untitled recipe';
+  String get bookScanUntitled => '未命名食谱';
 
   @override
-  String get bookScanMergeNext => 'Merge with next';
+  String get bookScanMergeNext => '与下一个合并';
 
   @override
-  String get bookScanSplit => 'Split in two';
+  String get bookScanSplit => '拆分为两个';
 
   @override
-  String get bookScanDiscarded => 'Recipe discarded';
+  String get bookScanDiscarded => '食谱已丢弃';
 
   @override
-  String get bookScanMerged => 'Recipes merged';
+  String get bookScanMerged => '食谱已合并';
 
   @override
-  String get bookScanSplitHelp => 'Tap the line where the second recipe starts.';
+  String get bookScanSplitHelp => '点击第二个食谱开始的那一行。';
 
   @override
-  String get bookScanSplitEditedNote => 'Both halves are read again from the page, so your edits to this recipe will be replaced.';
+  String get bookScanSplitEditedNote => '两部分都会从页面重新识别，因此你对这个食谱所做的修改将被替换。';
 
   @override
-  String get bookScanSplitFailed => 'That line cannot start a second recipe.';
+  String get bookScanSplitFailed => '第二个食谱不能从这一行开始。';
 
   @override
   String bookScanAddAll(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Add $count recipes',
-      one: 'Add 1 recipe',
+      other: '添加 $count 个食谱',
     );
     return '$_temp0';
   }
 
   @override
   String bookScanAdding(int current, int total) {
-    return 'Adding $current of $total';
+    return '正在添加第 $current 个，共 $total 个';
   }
 
   @override
@@ -555,8 +549,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Added $count recipes to $book',
-      one: 'Added 1 recipe to $book',
+      other: '已将 $count 个食谱添加到 $book',
     );
     return '$_temp0';
   }
@@ -566,70 +559,68 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recipes could not be added',
-      one: '1 recipe could not be added',
+      other: '有 $count 个食谱无法添加',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanChooseCookbookTitle => 'Choose a cookbook';
+  String get bookScanChooseCookbookTitle => '选择食谱书';
 
   @override
-  String get bookScanChooseCookbook => 'Choose the cookbook the scanned recipes should go to.';
+  String get bookScanChooseCookbook => '选择扫描到的食谱要放入的食谱书。';
 
   @override
-  String get bookScanNoCookbook => 'There is no cookbook that recipes can be added to.';
+  String get bookScanNoCookbook => '没有可以添加食谱的食谱书。';
 
   @override
   String bookScanCookbookGoneChoose(String book) {
-    return '$book is no longer on this device. Choose the cookbook these recipes should go to.';
+    return '$book 已不在此设备上。请选择这些食谱要放入的食谱书。';
   }
 
   @override
   String bookScanCookbookGone(String book) {
-    return '$book is no longer on this device, and there is no other cookbook to add these recipes to.';
+    return '$book 已不在此设备上，也没有其他可以添加这些食谱的食谱书。';
   }
 
   @override
-  String get bookScanMore => 'Scan more pages';
+  String get bookScanMore => '扫描更多书页';
 
   @override
-  String get bookScanEmptyTitle => 'No recipes found';
+  String get bookScanEmptyTitle => '未找到食谱';
 
   @override
-  String get bookScanEmptyBody => 'The pages were read, but none of them looked like a recipe. Try again with the whole page in the photo.';
+  String get bookScanEmptyBody => '页面已识别，但没有一页像是食谱。请让整页都在照片中，然后重试。';
 
   @override
-  String get bookScanNothingReadTitle => 'Nothing could be read';
+  String get bookScanNothingReadTitle => '无法识别任何内容';
 
   @override
   String bookScanNothingReadBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'None of the $count pages could be read. Try again in good light, with the whole page in the photo.',
-      one: 'The page could not be read. Try again in good light, with the whole page in the photo.',
+      other: '$count 页都无法识别。请在光线充足处拍摄，让整页都在照片中，然后重试。',
+      one: '无法识别这一页。请在光线充足处拍摄，让整页都在照片中，然后重试。',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanNothingLeftTitle => 'Nothing left to add';
+  String get bookScanNothingLeftTitle => '没有可添加的内容了';
 
   @override
-  String get bookScanNothingLeftBody => 'Every recipe that was found has been added or discarded. Scan more pages, or go back.';
+  String get bookScanNothingLeftBody => '找到的食谱都已添加或丢弃。你可以扫描更多书页，或返回。';
 
   @override
-  String get bookScanTryAgain => 'Scan again';
+  String get bookScanTryAgain => '重新扫描';
 
   @override
   String bookScanUnreadPages(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count pages could not be read. Scan them again to add what is missing.',
-      one: '1 page could not be read. Scan it again to add what is missing.',
+      other: '有 $count 页无法识别。重新扫描即可补上缺少的内容。',
     );
     return '$_temp0';
   }
@@ -639,57 +630,56 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Photos $photos could not be read. Scan those pages again to add what is missing.',
-      one: 'Photo $photos could not be read. Scan that page again to add what is missing.',
+      other: '第 $photos 张照片无法识别。重新扫描对应的书页即可补上缺少的内容。',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanDiscardTitle => 'Discard this scan?';
+  String get bookScanDiscardTitle => '丢弃这次扫描？';
 
   @override
   String bookScanDiscardBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'The $count recipes that were found will not be added.',
-      one: 'The recipe that was found will not be added.',
+      other: '找到的 $count 个食谱将不会被添加。',
+      one: '找到的食谱将不会被添加。',
     );
     return '$_temp0';
   }
 
   @override
-  String get bookScanKeepReviewing => 'Keep reviewing';
+  String get bookScanKeepReviewing => '继续检查';
 
   @override
-  String get bookScanEditTitle => 'Edit recipe';
+  String get bookScanEditTitle => '编辑食谱';
 
   @override
-  String get bookScanFieldPage => 'Page';
+  String get bookScanFieldPage => '页码';
 
   @override
-  String get bookScanFieldSteps => 'Steps';
+  String get bookScanFieldSteps => '步骤';
 
   @override
-  String get bookScanIngredientsHelp => 'One per line. End a line with a colon to make it a heading.';
+  String get bookScanIngredientsHelp => '每行一项。在行末加冒号即可作为小标题。';
 
   @override
-  String get bookScanStepsHelp => 'One step per line.';
+  String get bookScanStepsHelp => '每行一个步骤。';
 
   @override
-  String get bookScanViewPage => 'View the page';
+  String get bookScanViewPage => '查看页面';
 
   @override
   String bookScanPageOf(int current, int total) {
-    return 'Page $current of $total';
+    return '第 $current 页，共 $total 页';
   }
 
   @override
-  String get bookScanOptions => 'More options';
+  String get bookScanOptions => '更多选项';
 
   @override
-  String get recipeSourceOpen => 'Open the source';
+  String get recipeSourceOpen => '打开来源';
 
   @override
   String get cookbookEdit => '编辑食谱书';
@@ -820,7 +810,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get shoppingSharedLabel => 'Shared';
+  String get shoppingSharedLabel => '已共享';
 
   @override
   String get settingsTitle => '设置';
@@ -3771,7 +3761,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navCommunity => '社区';
 
   @override
-  String get navMore => 'More';
+  String get navMore => '更多';
 
   @override
   String get navComingSoon => '即将推出';
@@ -3798,239 +3788,237 @@ class AppLocalizationsZh extends AppLocalizations {
   String get keySpace => 'Space';
 
   @override
-  String get sidebarLibrary => 'Library';
+  String get sidebarLibrary => '资料库';
 
   @override
-  String get sidebarPlan => 'Plan';
+  String get sidebarPlan => '计划';
 
   @override
-  String get sidebarDiscover => 'Discover';
+  String get sidebarDiscover => '发现';
 
   @override
-  String get sidebarAllRecipes => 'All recipes';
+  String get sidebarAllRecipes => '所有食谱';
 
   @override
-  String get sidebarCollapse => 'Collapse sidebar';
+  String get sidebarCollapse => '收起侧边栏';
 
   @override
-  String get sidebarExpand => 'Expand sidebar';
+  String get sidebarExpand => '展开侧边栏';
 
   @override
-  String get sidebarSwitchCookbook => 'Switch cookbook';
+  String get sidebarSwitchCookbook => '切换食谱书';
 
   @override
-  String get sidebarManageCookbooks => 'Manage cookbooks';
+  String get sidebarManageCookbooks => '管理食谱书';
 
   @override
-  String get sidebarSignInToSync => 'Sign in to sync';
+  String get sidebarSignInToSync => '登录以同步';
 
   @override
-  String get syncStatusJustNow => 'Synced just now';
+  String get syncStatusJustNow => '刚刚已同步';
 
   @override
   String syncStatusMinutes(int minutes) {
-    return 'Synced $minutes min ago';
+    return '$minutes 分钟前已同步';
   }
 
   @override
   String syncStatusHours(int hours) {
-    return 'Synced $hours h ago';
+    return '$hours 小时前已同步';
   }
 
   @override
-  String get syncStatusLocal => 'Saved on this device';
+  String get syncStatusLocal => '已保存在此设备上';
 
   @override
-  String get paletteHint => 'Search recipes and commands…';
+  String get paletteHint => '搜索食谱和命令…';
 
   @override
-  String get paletteSectionRecent => 'Recent';
+  String get paletteSectionRecent => '最近';
 
   @override
-  String get paletteSectionGoTo => 'Go to';
+  String get paletteSectionGoTo => '前往';
 
   @override
-  String get paletteSectionActions => 'Actions';
+  String get paletteSectionActions => '操作';
 
   @override
-  String get paletteSectionRecipes => 'Recipes';
+  String get paletteSectionRecipes => '食谱';
 
   @override
-  String get paletteImportSubtitle => 'From a link, photo, or file';
+  String get paletteImportSubtitle => '通过链接、照片或文件';
 
   @override
-  String get paletteAdvancedSearch => 'Search with filters';
+  String get paletteAdvancedSearch => '使用筛选条件搜索';
 
   @override
-  String get paletteToggleTheme => 'Toggle light / dark';
+  String get paletteToggleTheme => '切换浅色 / 深色';
 
   @override
-  String get paletteAppearance => 'Appearance';
+  String get paletteAppearance => '外观';
 
   @override
   String paletteSearchAll(String query) {
-    return 'Search all recipes for “$query”';
+    return '在所有食谱中搜索“$query”';
   }
 
   @override
-  String get paletteNoMatches => 'No matches';
+  String get paletteNoMatches => '没有匹配项';
 
   @override
-  String get paletteNavigateHint => 'Navigate';
+  String get paletteNavigateHint => '导航';
 
   @override
-  String get paletteOpenHint => 'Open';
+  String get paletteOpenHint => '打开';
 
   @override
-  String get shortcutsTitle => 'Keyboard shortcuts';
+  String get shortcutsTitle => '键盘快捷键';
 
   @override
-  String get shortcutsGeneral => 'General';
+  String get shortcutsGeneral => '常规';
 
   @override
-  String get shortcutsNavigation => 'Navigation';
+  String get shortcutsNavigation => '导航';
 
   @override
-  String get shortcutsRecipes => 'Recipes';
+  String get shortcutsRecipes => '食谱';
 
   @override
-  String get shortcutsShopping => 'Shopping';
+  String get shortcutsShopping => '购物';
 
   @override
-  String get shortcutsEditor => 'Editor';
+  String get shortcutsEditor => '编辑器';
 
   @override
-  String get shortcutCommandPalette => 'Command palette';
+  String get shortcutCommandPalette => '命令面板';
 
   @override
-  String get shortcutNewRecipe => 'New recipe';
+  String get shortcutNewRecipe => '新建食谱';
 
   @override
-  String get shortcutToggleSidebar => 'Toggle sidebar';
+  String get shortcutToggleSidebar => '显示/隐藏侧边栏';
 
   @override
-  String get shortcutGoBack => 'Go back';
+  String get shortcutGoBack => '返回';
 
   @override
-  String get shortcutDismiss => 'Dismiss';
+  String get shortcutDismiss => '关闭';
 
   @override
-  String get shortcutMoveSelection => 'Move selection';
+  String get shortcutMoveSelection => '移动选择';
 
   @override
-  String get shortcutOpenRecipe => 'Open recipe';
+  String get shortcutOpenRecipe => '打开食谱';
 
   @override
-  String get shortcutAddToSelection => 'Add to selection';
+  String get shortcutAddToSelection => '加入选择';
 
   @override
-  String get shortcutRangeSelect => 'Select a range';
+  String get shortcutRangeSelect => '连续选择';
 
   @override
-  String get shortcutClick => 'Click';
+  String get shortcutClick => '点击';
 
   @override
-  String get shortcutTrash => 'Move to trash';
+  String get shortcutTrash => '移到回收站';
 
   @override
-  String get shortcutAddItem => 'Add item';
+  String get shortcutAddItem => '添加项目';
 
   @override
-  String get shortcutToggleItem => 'Check off item';
+  String get shortcutToggleItem => '勾选项目';
 
   @override
-  String get shortcutSaveRecipe => 'Save recipe';
+  String get shortcutSaveRecipe => '保存食谱';
 
   @override
-  String get windowMinimize => 'Minimize';
+  String get windowMinimize => '最小化';
 
   @override
-  String get windowMaximize => 'Maximize';
+  String get windowMaximize => '最大化';
 
   @override
-  String get windowRestore => 'Restore';
+  String get windowRestore => '还原';
 
   @override
-  String get windowClose => 'Close';
+  String get windowClose => '关闭';
 
   @override
   String selectionCount(int count) {
-    return '$count selected';
+    return '已选 $count 个';
   }
 
   @override
-  String get selectionClear => 'Clear selection';
+  String get selectionClear => '清除选择';
 
   @override
-  String get selectAction => 'Select';
+  String get selectAction => '选择';
 
   @override
-  String get homeGreetingMorning => 'Good morning';
+  String get homeGreetingMorning => '早上好';
 
   @override
-  String get homeGreetingAfternoon => 'Good afternoon';
+  String get homeGreetingAfternoon => '下午好';
 
   @override
-  String get homeGreetingEvening => 'Good evening';
+  String get homeGreetingEvening => '晚上好';
 
   @override
-  String get homeNextSevenDays => 'Next 7 days';
+  String get homeNextSevenDays => '未来 7 天';
 
   @override
-  String get homeOpenList => 'Open list';
+  String get homeOpenList => '打开清单';
 
   @override
-  String get homeAllCaughtUp => 'All caught up';
+  String get homeAllCaughtUp => '都买齐了';
 
   @override
   String homeToBuy(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items to buy',
-      one: '1 item to buy',
+      other: '还要买 $count 件',
     );
     return '$_temp0';
   }
 
   @override
   String homeAndMore(int count) {
-    return '+$count more';
+    return '还有 $count 项';
   }
 
   @override
-  String get homeNothingPlanned => 'Nothing planned';
+  String get homeNothingPlanned => '暂无计划';
 
   @override
-  String get homePlanAMeal => 'Plan a meal';
+  String get homePlanAMeal => '安排一餐';
 
   @override
-  String get homeJumpBackIn => 'Jump back in';
+  String get homeJumpBackIn => '继续浏览';
 
   @override
   String shoppingAddNamed(String name) {
-    return 'Add “$name”';
+    return '添加“$name”';
   }
 
   @override
-  String get shoppingUncheck => 'Put back on the list';
+  String get shoppingUncheck => '放回清单';
 
   @override
   String cookbooksCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count cookbooks',
-      one: '1 cookbook',
+      other: '$count 本食谱书',
     );
     return '$_temp0';
   }
 
   @override
-  String get detailChooseRecipe => 'Choose a recipe';
+  String get detailChooseRecipe => '选择一个食谱';
 
   @override
-  String get detailChooseRecipeHint => 'Pick one from the list to read it here.';
+  String get detailChooseRecipeHint => '从列表中选择一个食谱，即可在这里查看。';
 
   @override
   String get mealPlanButton => '餐食计划';
@@ -4315,10 +4303,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get manualEntryHint => '您可以手动输入产品名称。';
 
   @override
-  String get productLookupFailed => 'Could Not Look Up Product';
+  String get productLookupFailed => '无法查询商品';
 
   @override
-  String get productLookupFailedHint => 'The product database did not answer. Check your connection and try again, or enter the product name yourself.';
+  String get productLookupFailedHint => '商品数据库没有响应。请检查网络连接后重试，或自行输入商品名称。';
 
   @override
   String get scanAgain => '重新扫描';
@@ -4970,14 +4958,14 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recipes imported into $cookbook.',
-      one: 'Recipe imported into $cookbook.',
+      other: '$count 个食谱已导入到 $cookbook。',
+      one: '食谱已导入到 $cookbook。',
     );
     return '$_temp0';
   }
 
   @override
-  String get aiNoCookbook => 'There is no cookbook to import into. Add a cookbook first.';
+  String get aiNoCookbook => '没有可导入的食谱书。请先添加一本食谱书。';
 
   @override
   String get aiPreviewImport => '预览并导入';
@@ -5626,22 +5614,21 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count meals removed',
-      one: '1 meal removed',
+      other: '已移除 $count 餐',
     );
     return '$_temp0';
   }
 
   @override
   String plannerMealsMoved(String date) {
-    return 'Moved to $date';
+    return '已移至 $date';
   }
 
   @override
-  String get plannerChangeMealType => 'Change meal type';
+  String get plannerChangeMealType => '更改餐食类型';
 
   @override
-  String get plannerMoveToDate => 'Move to date';
+  String get plannerMoveToDate => '移到其他日期';
 
   @override
   String get weekStartsOn => '周起始日';
@@ -5981,7 +5968,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String transferCodeExpiresAt(String time) {
-    return 'This code expires at $time';
+    return '此代码将于 $time 过期';
   }
 
   @override
@@ -5989,31 +5976,29 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count photos did not fit into the transfer and stay on this device.',
-      one: '1 photo did not fit into the transfer and stays on this device.',
+      other: '有 $count 张照片无法放入此次传输，将留在此设备上。',
     );
-    return '$_temp0 To move everything with every photo, do not use this code. Use Export Data in Settings on this device and Import Data on the other instead.';
+    return '$_temp0若要连同所有照片一起转移，请不要使用此代码，而是在此设备的设置中使用“导出数据”，并在另一台设备上使用“导入数据”。';
   }
 
   @override
-  String get transferPhotosLeftOutTitle => 'Not every photo fits';
+  String get transferPhotosLeftOutTitle => '部分照片无法传输';
 
   @override
   String transferPhotosLeftOutAsk(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count photos do not fit into a transfer and would stay on this device.',
-      one: '1 photo does not fit into a transfer and would stay on this device.',
+      other: '有 $count 张照片无法放入传输，将留在此设备上。',
     );
-    return '$_temp0 A backup file carries every photo: cancel, then use Export Data in Settings on this device and Import Data on the other. Use one or the other. A backup imported after a transfer adds every recipe a second time.';
+    return '$_temp0备份文件可以带上所有照片：请取消，然后在此设备的设置中使用“导出数据”，在另一台设备上使用“导入数据”。两种方式只选其一。传输之后再导入备份，会把每个食谱再添加一次。';
   }
 
   @override
-  String get transferSendWithoutPhotos => 'Send without them';
+  String get transferSendWithoutPhotos => '不带照片发送';
 
   @override
-  String get transferSignInToSend => 'Sign in to send your recipes to another device. The device that receives them does not need an account.';
+  String get transferSignInToSend => '登录后即可将食谱发送到另一台设备。接收的设备不需要账户。';
 
   @override
   String get transferComplete => '传输完成！';
@@ -6023,8 +6008,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recipes were already on this device and were left as they are.',
-      one: '1 recipe was already on this device and was left as it is.',
+      other: '有 $count 个食谱已在此设备上，已保持原样。',
     );
     return '$_temp0';
   }
@@ -6048,31 +6032,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transferMergeNote => '此设备上的现有数据将被合并。重复项将被跳过。';
 
   @override
-  String get transferErrorTooLarge => 'Your library is too large to send in one transfer. Use Export Data in Settings to make a backup file, and Import Data on the other device.';
+  String get transferErrorTooLarge => '你的资料库太大，无法通过一次传输发送。请在设置中使用“导出数据”生成备份文件，然后在另一台设备上使用“导入数据”。';
 
   @override
-  String get transferErrorOffline => 'Could not reach the server. Check your connection and try again.';
+  String get transferErrorOffline => '无法连接到服务器。请检查网络连接后重试。';
 
   @override
-  String get transferErrorServer => 'The server could not complete the transfer. Try again in a moment.';
+  String get transferErrorServer => '服务器无法完成传输。请稍后重试。';
 
   @override
-  String get transferErrorCodeNotFound => 'Transfer code not found. Check the code and try again.';
+  String get transferErrorCodeNotFound => '找不到传输代码。请检查代码后重试。';
 
   @override
-  String get transferErrorCodeExpired => 'This transfer code has expired. Create a new one on the sending device.';
+  String get transferErrorCodeExpired => '此传输代码已过期。请在发送设备上生成新代码。';
 
   @override
-  String get transferErrorCodeUsed => 'This transfer code has already been used. If the transfer did not finish, create a new code on the sending device. Nothing will be imported twice.';
+  String get transferErrorCodeUsed => '此传输代码已被使用。如果传输没有完成，请在发送设备上生成新代码。任何内容都不会被重复导入。';
 
   @override
-  String get transferErrorSyncRunning => 'A sync is in progress. Try again in a moment.';
+  String get transferErrorSyncRunning => '正在同步中。请稍后重试。';
 
   @override
-  String get transferErrorUnreadable => 'This transfer could not be read. Create a new code on the sending device.';
+  String get transferErrorUnreadable => '无法读取此次传输的数据。请在发送设备上生成新代码。';
 
   @override
-  String get transferErrorNotSaved => 'The transfer arrived but could not be saved. Nothing on this device was changed. Try again with the same code.';
+  String get transferErrorNotSaved => '传输的数据已收到，但无法保存。此设备上的内容没有任何改动。请使用同一代码重试。';
 
   @override
   String get transferPointCamera => '对准发送设备上的QR码';
@@ -9430,16 +9414,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menuDrawerSettingsSubtitle => '主题、语言和偏好设置';
 
   @override
-  String get moreAddRecipes => 'Add recipes';
+  String get moreAddRecipes => '添加食谱';
 
   @override
-  String get moreSharing => 'Sharing & family';
+  String get moreSharing => '共享与家庭';
 
   @override
-  String get moreScanProduct => 'Scan a product barcode';
+  String get moreScanProduct => '扫描商品条形码';
 
   @override
-  String get moreScanProductSubtitle => 'Look up a packaged product';
+  String get moreScanProductSubtitle => '查询包装商品';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {
@@ -10274,19 +10258,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importFromFileSubtitle => '支持 .json 和 .zip 备份文件';
 
   @override
-  String get importErrorNoPicker => 'The file picker could not be opened. Try again.';
+  String get importErrorNoPicker => '无法打开文件选择器。请重试。';
 
   @override
-  String get importErrorUnreadable => 'This backup file could not be read. It may be damaged or incomplete.';
+  String get importErrorUnreadable => '无法读取此备份文件，文件可能已损坏或不完整。';
 
   @override
-  String get importErrorNotABackup => 'This file is not a Recipe Spellbook backup.';
+  String get importErrorNotABackup => '此文件不是 Recipe Spellbook 备份。';
 
   @override
-  String get importErrorMissingData => 'This zip file is not a Recipe Spellbook backup. It has no data.json in it.';
+  String get importErrorMissingData => '此 zip 文件不是 Recipe Spellbook 备份，其中没有 data.json。';
 
   @override
-  String get importErrorRestoreFailed => 'This backup could not be restored. Nothing was imported.';
+  String get importErrorRestoreFailed => '无法恢复此备份，未导入任何内容。';
 
   @override
   String get exportAdvanced => '高级选项';
@@ -10349,14 +10333,12 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       recipeCount,
       locale: localeName,
-      other: '$recipeCount recipes',
-      one: '1 recipe',
+      other: '$recipeCount 个食谱',
     );
     String _temp1 = intl.Intl.pluralLogic(
       ingredientCount,
       locale: localeName,
-      other: '$ingredientCount ingredients selected',
-      one: '1 ingredient selected',
+      other: '已选 $ingredientCount 种食材',
     );
     return '$_temp0 • $_temp1';
   }
@@ -10366,16 +10348,14 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       itemCount,
       locale: localeName,
-      other: '$itemCount items',
-      one: '1 item',
+      other: '$itemCount 个项目',
     );
     String _temp1 = intl.Intl.pluralLogic(
       recipeCount,
       locale: localeName,
-      other: '$recipeCount recipes',
-      one: '1 recipe',
+      other: '$recipeCount 个食谱',
     );
-    return '$_temp0 from $_temp1';
+    return '$_temp0，来自 $_temp1';
   }
 
   @override
@@ -10383,29 +10363,28 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Add $count items to list',
-      one: 'Add 1 item to list',
+      other: '将 $count 个项目添加到清单',
     );
     return '$_temp0';
   }
 
   @override
-  String get shoppingAddingToList => 'Adding…';
+  String get shoppingAddingToList => '正在添加…';
 
   @override
-  String get shoppingMarkBought => 'Mark as bought';
+  String get shoppingMarkBought => '标记为已购买';
 
   @override
-  String get shoppingDeleteChecked => 'Delete checked';
+  String get shoppingDeleteChecked => '删除已勾选';
 
   @override
-  String get shareLinkEditDesc => 'Anyone with the link can join and edit this list';
+  String get shareLinkEditDesc => '任何拥有链接的人都可以加入并编辑此清单';
 
   @override
-  String get shareLinkCheckDesc => 'Anyone with the link can join and check off items';
+  String get shareLinkCheckDesc => '任何拥有链接的人都可以加入并勾选项目';
 
   @override
-  String get shareLinkViewDesc => 'Anyone with the link can view this list';
+  String get shareLinkViewDesc => '任何拥有链接的人都可以查看此清单';
 
   @override
   String get communityICookedThis => '我做过这道菜';
@@ -10574,215 +10553,214 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerNextDay => '后一天';
 
   @override
-  String get joinLinkMenuLabel => 'Join with invite link';
+  String get joinLinkMenuLabel => '通过邀请链接加入';
 
   @override
-  String get joinLinkMenuSubtitle => 'Shared list, cookbook or family';
+  String get joinLinkMenuSubtitle => '共享清单、食谱书或家庭';
 
   @override
-  String get joinLinkTitle => 'Join with an invite link';
+  String get joinLinkTitle => '通过邀请链接加入';
 
   @override
-  String get joinLinkTitleList => 'Join a shared list';
+  String get joinLinkTitleList => '加入共享清单';
 
   @override
-  String get joinLinkTitleCookbook => 'Join a shared cookbook';
+  String get joinLinkTitleCookbook => '加入共享食谱书';
 
   @override
-  String get joinLinkTitleFamily => 'Join a family';
+  String get joinLinkTitleFamily => '加入家庭';
 
   @override
-  String get joinLinkListSubtitle => 'Paste an invite link someone sent you';
+  String get joinLinkListSubtitle => '粘贴别人发给你的邀请链接';
 
   @override
-  String get joinLinkBody => 'Paste the invite link or code someone sent you. It works for shared shopping lists, cookbooks and family invites.';
+  String get joinLinkBody => '粘贴别人发给你的邀请链接或代码。适用于共享购物清单、食谱书和家庭邀请。';
 
   @override
-  String get joinLinkHint => 'Paste an invite link or code';
+  String get joinLinkHint => '粘贴邀请链接或代码';
 
   @override
-  String get joinLinkFromClipboard => 'Filled in from your clipboard';
+  String get joinLinkFromClipboard => '已从剪贴板填入';
 
   @override
-  String get joinLinkInvalid => 'That doesn\'t look like an invite link or code';
+  String get joinLinkInvalid => '这似乎不是邀请链接或代码';
 
   @override
-  String get joinLinkOffline => 'Couldn\'t check that code. Check your connection and try again.';
+  String get joinLinkOffline => '无法验证该代码。请检查网络连接后重试。';
 
   @override
-  String get inviteTryAnother => 'Try another link';
+  String get inviteTryAnother => '换一个链接';
 
   @override
-  String get inviteErrorNetwork => 'No connection. Check your internet and try again.';
+  String get inviteErrorNetwork => '没有网络连接。请检查网络后重试。';
 
   @override
-  String get inviteErrorSessionExpired => 'Your session has expired. Sign in again to continue.';
+  String get inviteErrorSessionExpired => '登录已过期。请重新登录以继续。';
 
   @override
-  String get shareViewerTitleList => 'Shared shopping list';
+  String get shareViewerTitleList => '共享购物清单';
 
   @override
-  String get shareViewerTitleCookbook => 'Shared cookbook';
+  String get shareViewerTitleCookbook => '共享食谱书';
 
   @override
-  String get shareViewerTitleLink => 'Shared link';
+  String get shareViewerTitleLink => '共享链接';
 
   @override
-  String get shareViewerLoadFailed => 'Couldn\'t load this link';
+  String get shareViewerLoadFailed => '无法加载此链接';
 
   @override
-  String get shareViewerExpiredHint => 'Ask the person who shared it for a new link, or paste another one.';
+  String get shareViewerExpiredHint => '请向分享者索取新链接，或粘贴另一个链接。';
 
   @override
-  String get shareViewerJoinList => 'Join this list';
+  String get shareViewerJoinList => '加入此清单';
 
   @override
-  String get shareViewerAddToLists => 'Add to my lists';
+  String get shareViewerAddToLists => '添加到我的清单';
 
   @override
   String shareViewerJoinCookbook(String name) {
-    return 'Join \"$name\"';
+    return '加入“$name”';
   }
 
   @override
-  String get shareViewerSignInToJoinList => 'Sign in to join this shopping list. You\'ll be added as soon as you\'re signed in.';
+  String get shareViewerSignInToJoinList => '登录后即可加入此购物清单。登录后会立即将你加入。';
 
   @override
-  String get shareViewerSignInToJoinCookbook => 'Sign in to collaborate on this cookbook. You\'ll be added as soon as you\'re signed in.';
+  String get shareViewerSignInToJoinCookbook => '登录后即可协作编辑此食谱书。登录后会立即将你加入。';
 
   @override
-  String get shareViewerJoinedList => 'Joined! It\'s in your Shopping tab.';
+  String get shareViewerJoinedList => '已加入！可在“购物”标签页中找到。';
 
   @override
-  String get shareViewerJoinedCookbook => 'Joined! It\'s in your cookbooks.';
+  String get shareViewerJoinedCookbook => '已加入！可在你的食谱书中找到。';
 
   @override
-  String get shareViewerOwnItem => 'This is yours — you already have it.';
+  String get shareViewerOwnItem => '这是你自己的，你已经拥有它了。';
 
   @override
-  String get shareViewerJoinNeedsSubscription => 'Collaborating on cookbooks needs a subscription.';
+  String get shareViewerJoinNeedsSubscription => '协作编辑食谱书需要订阅。';
 
   @override
-  String get shareViewerOwnerLapsed => 'The owner\'s subscription is no longer active, so this cookbook can\'t be shared right now.';
+  String get shareViewerOwnerLapsed => '所有者的订阅已失效，因此暂时无法共享此食谱书。';
 
   @override
-  String get shareViewerNotCollab => 'This link is a one-time copy, not a live invite.';
+  String get shareViewerNotCollab => '此链接是一次性副本，不是实时协作邀请。';
 
   @override
-  String get shareViewerJoinFailed => 'Couldn\'t join. Please try again.';
+  String get shareViewerJoinFailed => '无法加入，请重试。';
 
   @override
-  String get familyJoinWithCodeOrLink => 'Join with code or link';
+  String get familyJoinWithCodeOrLink => '使用代码或链接加入';
 
   @override
-  String get familySignInToUse => 'Sign in to create or join a family.';
+  String get familySignInToUse => '登录后即可创建或加入家庭。';
 
   @override
-  String get familyInviteMember => 'Invite family member';
+  String get familyInviteMember => '邀请家庭成员';
 
   @override
   String familyInviteSheetTitle(String familyName) {
-    return 'Invite to $familyName';
+    return '邀请加入 $familyName';
   }
 
   @override
-  String get familyInviteSheetBody => 'Have them scan this code with their phone camera, or send them the link. They can also paste the link or code in Family → Join with code or link.';
+  String get familyInviteSheetBody => '让对方用手机相机扫描此二维码，或把链接发给他们。他们也可以在“家庭 → 使用代码或链接加入”中粘贴链接或代码。';
 
   @override
-  String get familyInviteCode => 'Invite code';
+  String get familyInviteCode => '邀请码';
 
   @override
-  String get familyInviteLink => 'Invite link';
+  String get familyInviteLink => '邀请链接';
 
   @override
   String familySeatsLeft(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count spots left',
-      one: '1 spot left',
+      other: '还剩 $count 个名额',
     );
     return '$_temp0';
   }
 
   @override
-  String get familyFullTitle => 'Your family is full';
+  String get familyFullTitle => '你的家庭已满员';
 
   @override
   String familyFullOwnerBody(int max) {
-    return 'All $max spots are taken. Remove a member or upgrade your plan to invite someone new.';
+    return '$max 个名额已全部占满。请移除一位成员或升级方案，才能邀请新成员。';
   }
 
   @override
   String familyFullMemberBody(int max) {
-    return 'All $max spots are taken. Ask the family owner to make room.';
+    return '$max 个名额已全部占满。请让家庭所有者腾出名额。';
   }
 
   @override
-  String get familyAloneHint => 'No one else has joined yet. Invite someone to start sharing.';
+  String get familyAloneHint => '还没有其他人加入。邀请家人开始共享吧。';
 
   @override
-  String get familyYou => 'You';
+  String get familyYou => '你';
 
   @override
-  String get familyErrorSubscription => 'A Premium plan is required to create a family.';
+  String get familyErrorSubscription => '创建家庭需要高级版方案。';
 
   @override
-  String get familyErrorFull => 'This family is full.';
+  String get familyErrorFull => '此家庭已满员。';
 
   @override
-  String get familyErrorAlreadyInFamily => 'You\'re already in a family. Leave it first to join another.';
+  String get familyErrorAlreadyInFamily => '你已在一个家庭中。请先离开，再加入其他家庭。';
 
   @override
-  String get familyErrorInvalidCode => 'That invite code isn\'t valid. Check it or ask for a new link.';
+  String get familyErrorInvalidCode => '该邀请码无效。请检查邀请码，或索取新链接。';
 
   @override
-  String get familyJoinScreenTitle => 'Family invite';
+  String get familyJoinScreenTitle => '家庭邀请';
 
   @override
   String familyJoinPrompt(String familyName) {
-    return 'Join $familyName?';
+    return '加入 $familyName？';
   }
 
   @override
   String familyJoinInvitedBy(String name) {
-    return '$name invited you to share cookbooks, shopping lists and meal plans.';
+    return '$name 邀请你共享食谱书、购物清单和餐食计划。';
   }
 
   @override
   String familyJoinGenericPrompt(String code) {
-    return 'Join the family with invite code $code?';
+    return '使用邀请码 $code 加入家庭？';
   }
 
   @override
-  String get familyJoinSignIn => 'Sign in to join this family. You\'ll join as soon as you\'re signed in.';
+  String get familyJoinSignIn => '登录后即可加入此家庭。登录后会立即加入。';
 
   @override
-  String get familyJoinConfirm => 'Join family';
+  String get familyJoinConfirm => '加入家庭';
 
   @override
   String familyJoinAlreadyMember(String familyName) {
-    return 'You\'re already in $familyName.';
+    return '你已在 $familyName 中。';
   }
 
   @override
   String familyJoinInOtherFamily(String familyName) {
-    return 'You\'re already in $familyName. Leave that family first to join this one.';
+    return '你已在 $familyName 中。请先离开该家庭，再加入这个家庭。';
   }
 
   @override
   String familyJoinFullBody(String familyName, int max) {
-    return '$familyName is full ($max of $max members). Ask the owner to remove someone or upgrade their plan.';
+    return '$familyName 已满员（$max/$max 名成员）。请让所有者移除一位成员或升级方案。';
   }
 
   @override
-  String get familyJoinOpenFamily => 'Open family';
+  String get familyJoinOpenFamily => '打开家庭';
 
   @override
-  String get familyJoinInvalid => 'This family invite isn\'t valid anymore';
+  String get familyJoinInvalid => '此家庭邀请已失效';
 
   @override
-  String get familyJoinInvalidHint => 'The invite code may have been changed. Ask for a new link, or paste another one.';
+  String get familyJoinInvalidHint => '邀请码可能已更改。请索取新链接，或粘贴另一个链接。';
 
   @override
   String get importLinksNotSaved => '无法保存食谱之间的链接';
@@ -10910,402 +10888,398 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteAllDataAccountFailed => '无法删除你的账户，因此没有删除任何内容。请检查网络连接后重试。';
 
   @override
-  String get addRecipeSheetTitle => 'Add a recipe';
+  String get addRecipeSheetTitle => '添加食谱';
 
   @override
-  String get addRecipeSheetSubtitle => 'Paste a link from Instagram, TikTok, a website, anywhere.';
+  String get addRecipeSheetSubtitle => '粘贴来自 Instagram、TikTok、网站等任何地方的链接。';
 
   @override
   String addRecipeSheetPlatformLink(String platform) {
-    return '$platform link';
+    return '$platform 链接';
   }
 
   @override
-  String get addRecipeSheetLinkHint => 'Paste a recipe link…';
+  String get addRecipeSheetLinkHint => '粘贴食谱链接…';
 
   @override
-  String get addRecipeSheetPasteFromClipboard => 'Paste link from clipboard';
+  String get addRecipeSheetPasteFromClipboard => '从剪贴板粘贴链接';
 
   @override
-  String get addRecipeSheetImportFromLink => 'Import recipe from link';
+  String get addRecipeSheetImportFromLink => '从链接导入食谱';
 
   @override
   String addRecipeSheetImportFrom(String platform) {
-    return 'Import from $platform';
+    return '从 $platform 导入';
   }
 
   @override
-  String get addRecipeSheetImportRecipe => 'Import recipe';
+  String get addRecipeSheetImportRecipe => '导入食谱';
 
   @override
-  String get addRecipeSheetOtherWay => 'or another way';
+  String get addRecipeSheetOtherWay => '或用其他方式';
 
   @override
-  String get addRecipeSheetPhoto => 'Photo';
+  String get addRecipeSheetPhoto => '照片';
 
   @override
-  String get addRecipeSheetPasteText => 'Paste text';
+  String get addRecipeSheetPasteText => '粘贴文本';
 
   @override
   String get addRecipeSheetAi => 'AI';
 
   @override
-  String get addRecipeSheetScan => 'Scan';
+  String get addRecipeSheetScan => '扫描';
 
   @override
-  String get addRecipeSheetHowToImport => 'How to import';
+  String get addRecipeSheetHowToImport => '导入方法';
 
   @override
-  String get addRecipeSheetTypeItIn => 'Type it in';
+  String get addRecipeSheetTypeItIn => '手动输入';
 
   @override
   String addRecipeSheetGrabbing(String platform) {
-    return 'Grabbing the recipe from $platform…';
+    return '正在从 $platform 获取食谱…';
   }
 
   @override
-  String get addRecipeNothingToPaste => 'Nothing to paste, copy a recipe link first.';
+  String get addRecipeNothingToPaste => '没有可粘贴的内容，请先复制食谱链接。';
 
   @override
-  String get addRecipePasteLinkFirst => 'Paste a recipe link first.';
+  String get addRecipePasteLinkFirst => '请先粘贴食谱链接。';
 
   @override
-  String get addRecipeNotALink => 'That doesn’t look like a recipe link. Paste a link starting with https://, or use “Paste text” below.';
+  String get addRecipeNotALink => '这似乎不是食谱链接。请粘贴以 https:// 开头的链接，或使用下方的“粘贴文本”。';
 
   @override
-  String get addRecipeNoRecipeInJson => 'We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.';
+  String get addRecipeNoRecipeInJson => '无法从该 JSON 中读取食谱。如果是 AI 生成的食谱，请使用下方的“AI”选项。';
 
   @override
-  String get addRecipeInvalidJson => 'That looks like recipe data, but it isn’t valid JSON. Copy the whole thing and try again.';
+  String get addRecipeInvalidJson => '这看起来像食谱数据，但不是有效的 JSON。请完整复制后重试。';
 
   @override
-  String get addRecipeNoRecipeInText => 'We couldn’t find a recipe in that text. For long recipes, use “Paste text” below.';
+  String get addRecipeNoRecipeInText => '在该文本中找不到食谱。如果是较长的食谱，请使用下方的“粘贴文本”。';
 
   @override
-  String get addRecipeLinkUnreachable => 'Couldn’t reach that link. Check your connection and try again.';
+  String get addRecipeLinkUnreachable => '无法访问该链接。请检查网络连接后重试。';
 
   @override
-  String get addRecipeLinkNeedsLogin => 'That page needs a login, so we can’t read it. Try a public link.';
+  String get addRecipeLinkNeedsLogin => '该页面需要登录，因此无法读取。请尝试公开链接。';
 
   @override
-  String get addRecipeLinkNotFound => 'That link couldn’t be found. Double-check the URL.';
+  String get addRecipeLinkNotFound => '找不到该链接。请仔细检查网址。';
 
   @override
-  String get addRecipeLinkUnreadable => 'We couldn’t read a recipe from that link. Try a different link, or paste the recipe text below.';
+  String get addRecipeLinkUnreadable => '无法从该链接读取食谱。请尝试其他链接，或在下方粘贴食谱文本。';
 
   @override
   String addRecipeAddedToShopping(String item) {
-    return 'Added to shopping list: $item';
+    return '已添加到购物清单：$item';
   }
 
   @override
   String addRecipeAddToShoppingFailed(String error) {
-    return 'Failed to add to shopping list: $error';
+    return '无法添加到购物清单：$error';
   }
 
   @override
-  String get paywallHeadline => 'Sync recipes, cookbooks and more\nwith your family';
+  String get paywallHeadline => '与家人同步\n食谱、食谱书等更多内容';
 
   @override
-  String get recipeEnhanceWithAi => 'Enhance with AI';
+  String get recipeEnhanceWithAi => '用 AI 优化';
 
   @override
   String featureGateRequiresTier(String tier) {
-    return 'Requires $tier or higher';
+    return '需要 $tier 或更高方案';
   }
 
   @override
   String featureGateUpgradeBody(String tier, String feature) {
-    return 'This feature requires $tier or higher. Upgrade to access $feature and more.';
+    return '此功能需要 $tier 或更高方案。升级即可使用 $feature 等更多功能。';
   }
 
   @override
-  String get gatedFeatureCreatorPage => 'Creator Page';
+  String get gatedFeatureCreatorPage => '创作者主页';
 
   @override
-  String get gatedFeatureCustomDomain => 'Custom Domain';
+  String get gatedFeatureCustomDomain => '自定义域名';
 
   @override
-  String get storageLimitReachedTitle => 'Storage Limit Reached';
+  String get storageLimitReachedTitle => '已达到存储上限';
 
   @override
   String storageLimitReachedBody(String used, String limit) {
-    return 'You\'ve used $used MB of your $limit limit. Delete some photos or upgrade for more storage.';
+    return '你已使用 $used MB，上限为 $limit。请删除一些照片，或升级以获得更多存储空间。';
   }
 
   @override
-  String get familySheetPermCanEdit => 'Can edit';
+  String get familySheetPermCanEdit => '可编辑';
 
   @override
-  String get familySheetPermCanEditDesc => 'Add & edit recipes';
+  String get familySheetPermCanEditDesc => '添加和编辑食谱';
 
   @override
-  String get familySheetPermViewOnly => 'View only';
+  String get familySheetPermViewOnly => '仅查看';
 
   @override
-  String get familySheetPermViewOnlyDesc => 'Can\'t make changes';
+  String get familySheetPermViewOnlyDesc => '无法进行更改';
 
   @override
-  String get familySheetPermEditItems => 'Edit items';
+  String get familySheetPermEditItems => '编辑项目';
 
   @override
-  String get familySheetPermEditItemsDesc => 'Add, remove & check off';
+  String get familySheetPermEditItemsDesc => '添加、删除和勾选';
 
   @override
-  String get familySheetPermCheckItems => 'Check items';
+  String get familySheetPermCheckItems => '勾选项目';
 
   @override
-  String get familySheetPermCheckItemsDesc => 'Tick items off only';
+  String get familySheetPermCheckItemsDesc => '只能勾选项目';
 
   @override
-  String get familySheetCollaborateLive => 'Collaborate live';
+  String get familySheetCollaborateLive => '实时协作';
 
   @override
-  String get familySheetInviteViewCookbook => 'Invite people to view this cookbook';
+  String get familySheetInviteViewCookbook => '邀请他人查看此食谱书';
 
   @override
-  String get familySheetInviteEditCookbook => 'Invite people to view or edit this cookbook';
+  String get familySheetInviteEditCookbook => '邀请他人查看或编辑此食谱书';
 
   @override
-  String get familySheetCookbookNeedsPlan => 'Live cookbook collaboration needs a subscription. Sharing shopping lists is free.';
+  String get familySheetCookbookNeedsPlan => '实时协作编辑食谱书需要订阅。共享购物清单免费。';
 
   @override
-  String get familySheetPeopleWithAccess => 'People with access';
+  String get familySheetPeopleWithAccess => '有访问权限的人';
 
   @override
-  String get familySheetInviteWithLink => 'Invite with a link';
+  String get familySheetInviteWithLink => '通过链接邀请';
 
   @override
-  String get familySheetCreateInviteLink => 'Create invite link';
+  String get familySheetCreateInviteLink => '创建邀请链接';
 
   @override
-  String get familySheetSendCopy => 'Send a copy';
+  String get familySheetSendCopy => '发送副本';
 
   @override
-  String get familySheetSendCopySubtitle => 'A one-time snapshot they can import (expires in 24h)';
+  String get familySheetSendCopySubtitle => '对方可导入的一次性快照（24 小时后过期）';
 
   @override
-  String get familySheetInviteCopied => 'Invite link copied. Send it to anyone.';
+  String get familySheetInviteCopied => '邀请链接已复制，可以发给任何人。';
 
   @override
-  String get familySheetAnyoneCanJoin => 'Anyone with this link can join';
+  String get familySheetAnyoneCanJoin => '任何拥有此链接的人都可以加入';
 
   @override
-  String get enhanceCopied => 'Copied! Paste it into ChatGPT, Claude, or any AI.';
+  String get enhanceCopied => '已复制！粘贴到 ChatGPT、Claude 或任何 AI 中。';
 
   @override
-  String get enhanceRecipeUpdated => 'Recipe updated.';
+  String get enhanceRecipeUpdated => '食谱已更新。';
 
   @override
   String enhanceUpdateFailed(String error) {
-    return 'Couldn\'t update the recipe: $error';
+    return '无法更新食谱：$error';
   }
 
   @override
-  String get enhanceBackToEdit => 'Back to edit';
+  String get enhanceBackToEdit => '返回编辑';
 
   @override
-  String get enhanceLoadFailed => 'Couldn\'t load this recipe.';
+  String get enhanceLoadFailed => '无法加载此食谱。';
 
   @override
-  String get enhanceIntroTitle => 'Clean up this recipe with any AI';
+  String get enhanceIntroTitle => '用任何 AI 整理这个食谱';
 
   @override
-  String get enhanceIntroBody => 'It adds section headers, writes the exact amounts into each step, and tidies the formatting, without changing your ingredients or method. Your photos, rating, and notes are kept.';
+  String get enhanceIntroBody => '它会添加分节标题，把准确用量写进每个步骤，并整理格式，不会改动你的食材或做法。你的照片、评分和备注都会保留。';
 
   @override
-  String get enhanceStep1Title => 'Copy your recipe + the instructions';
+  String get enhanceStep1Title => '复制你的食谱和指令';
 
   @override
-  String get enhanceCopyButton => 'Copy recipe + prompt';
+  String get enhanceCopyButton => '复制食谱和提示词';
 
   @override
-  String get enhanceStep2Title => 'Paste it into ChatGPT, Claude, or any AI';
+  String get enhanceStep2Title => '粘贴到 ChatGPT、Claude 或任何 AI 中';
 
   @override
-  String get enhanceStep2Body => 'The AI returns updated recipe JSON. Copy that JSON.';
+  String get enhanceStep2Body => 'AI 会返回更新后的食谱 JSON。复制这段 JSON。';
 
   @override
-  String get enhanceStep3Title => 'Paste the AI\'s JSON back here';
+  String get enhanceStep3Title => '将 AI 返回的 JSON 粘贴到这里';
 
   @override
-  String get enhancePreviewChanges => 'Preview changes';
+  String get enhancePreviewChanges => '预览更改';
 
   @override
-  String get enhanceAccept => 'Accept & update recipe';
+  String get enhanceAccept => '接受并更新食谱';
 
   @override
   String enhanceSectionsAdded(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '+$count sections',
-      one: '+1 section',
+      other: '+$count 个分节',
     );
     return '$_temp0';
   }
 
   @override
   String enhanceIngredientCount(int before, int after) {
-    return 'Ingredients $before → $after';
+    return '食材 $before → $after';
   }
 
   @override
   String enhanceStepCount(int before, int after) {
-    return 'Steps $before → $after';
+    return '步骤 $before → $after';
   }
 
   @override
-  String get enhanceCourseAdded => 'Course added';
+  String get enhanceCourseAdded => '已添加菜品类型';
 
   @override
-  String get enhanceCategoryAdded => 'Category added';
+  String get enhanceCategoryAdded => '已添加类别';
 
   @override
-  String get enhanceFormattingRefined => 'Formatting refined';
+  String get enhanceFormattingRefined => '格式已优化';
 
   @override
-  String get enhanceWhatChanged => 'What changed';
+  String get enhanceWhatChanged => '更改内容';
 
   @override
-  String get enhanceIngredientCountWarning => 'Heads up: the ingredient count changed. Double-check nothing was dropped before accepting.';
+  String get enhanceIngredientCountWarning => '注意：食材数量有变化。接受前请仔细确认没有遗漏。';
 
   @override
-  String get enhanceResult => 'Result';
+  String get enhanceResult => '结果';
 
   @override
-  String get enhanceCompare => 'Compare';
+  String get enhanceCompare => '对比';
 
   @override
-  String get enhanceAdded => 'Added';
+  String get enhanceAdded => '新增';
 
   @override
-  String get enhanceRemoved => 'Removed';
+  String get enhanceRemoved => '删除';
 
   @override
   String aiRecipesFound(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count Recipes Found',
-      one: '1 Recipe Found',
+      other: '找到 $count 个食谱',
     );
     return '$_temp0';
   }
 
   @override
-  String get aiCopyPromptHelp => 'Copy this prompt, paste it into any AI (ChatGPT, Claude, Gemini) along with your recipe, then paste the response below.';
+  String get aiCopyPromptHelp => '复制此提示词，将它连同你的食谱粘贴到任意 AI（ChatGPT、Claude、Gemini）中，然后把回复粘贴到下方。';
 
   @override
-  String get aiWeirdFormatTip => 'Have recipes in a weird format? Paste them into any free AI (ChatGPT, Claude, etc.) with this prompt and it\'ll convert them for you. Works with spreadsheets, emails, screenshots, and more!';
+  String get aiWeirdFormatTip => '有格式奇怪的食谱？把它们连同此提示词粘贴到任意免费 AI（ChatGPT、Claude 等）中，它就会帮你转换。适用于电子表格、邮件、截图等！';
 
   @override
-  String get aiPasteResponseTitle => 'Paste AI Response';
+  String get aiPasteResponseTitle => '粘贴 AI 回复';
 
   @override
-  String get aiTipsBody => 'Works with any AI. You can also take a photo of a recipe and paste it with the prompt. If the JSON has errors, ask the AI to fix it.';
+  String get aiTipsBody => '适用于任何 AI。你也可以拍下食谱照片，连同提示词一起粘贴。如果 JSON 有错误，请让 AI 修正。';
 
   @override
-  String get nutriSheetReviewTitle => 'Nutrition Review';
+  String get nutriSheetReviewTitle => '营养核对';
 
   @override
-  String get nutriSheetReviewHint => 'Tap ingredients below to change their USDA match or enter values manually.';
+  String get nutriSheetReviewHint => '点击下方食材，可更改其 USDA 匹配项或手动输入数值。';
 
   @override
   String nutriSheetManuallyEdited(int count) {
-    return '$count manually edited';
+    return '$count 项已手动编辑';
   }
 
   @override
   String nutritionCalCount(int count) {
-    return '$count cal';
+    return '$count 千卡';
   }
 
   @override
-  String get nutritionCalUnit => 'cal';
+  String get nutritionCalUnit => '千卡';
 
   @override
-  String get nutriSheetTapIngredientHint => 'Tap any ingredient to change its USDA match or enter nutrition manually.';
+  String get nutriSheetTapIngredientHint => '点击任意食材，可更改其 USDA 匹配项或手动输入营养数据。';
 
   @override
   String nutriSheetResultsFound(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count results found',
-      one: '1 result found',
+      other: '找到 $count 个结果',
     );
     return '$_temp0';
   }
 
   @override
   String nutriSheetCalPerServing(int count) {
-    return '$count cal per serving';
+    return '每份 $count 千卡';
   }
 
   @override
-  String get nutriSheetLinkedRecipe => 'Linked Recipe';
+  String get nutriSheetLinkedRecipe => '关联食谱';
 
   @override
   String nutriSheetRecipesLinked(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recipes linked',
-      one: '1 recipe linked',
+      other: '已关联 $count 个食谱',
     );
     return '$_temp0';
   }
 
   @override
   String nutriSheetCalTotal(int count) {
-    return '$count cal total';
+    return '共 $count 千卡';
   }
 
   @override
-  String get nutriSheetNoData => 'No nutrition data';
+  String get nutriSheetNoData => '暂无营养数据';
 
   @override
   String nutriSheetFromRecipe(String recipe) {
-    return 'Nutrition from $recipe';
+    return '来自 $recipe 的营养数据';
   }
 
   @override
-  String get nutriSheetFromLinkedRecipe => 'Nutrition from linked recipe';
+  String get nutriSheetFromLinkedRecipe => '来自关联食谱的营养数据';
 
   @override
-  String get nutriSheetNoDataOpenRecipe => 'No nutrition data. Open the recipe to calculate it first.';
+  String get nutriSheetNoDataOpenRecipe => '暂无营养数据。请先打开该食谱进行计算。';
 
   @override
-  String get nutriSheetRecipeScale => 'Recipe scale';
+  String get nutriSheetRecipeScale => '食谱比例';
 
   @override
-  String get nutriSheetRecipeScaleHint => 'How much of the linked recipe does this ingredient use?';
+  String get nutriSheetRecipeScaleHint => '此食材用了多少关联食谱的量？';
 
   @override
-  String get nutritionFactsTitle => 'Nutrition Facts';
+  String get nutritionFactsTitle => '营养成分表';
 
   @override
-  String get recipeEditDetailedNutrition => 'Detailed Nutrition';
+  String get recipeEditDetailedNutrition => '详细营养信息';
 
   @override
-  String get listGenExitBody => 'Are you sure you wish to exit the shopping list generator? Unsaved changes will be lost.';
+  String get listGenExitBody => '确定要退出购物清单生成器吗？未保存的更改将会丢失。';
 
   @override
-  String get listGenChooseLinked => 'Choose Linked Recipes';
+  String get listGenChooseLinked => '选择关联食谱';
 
   @override
-  String get listGenChooseLinkedBody => 'Some ingredients link to multiple recipes. Select which ones to include.';
+  String get listGenChooseLinkedBody => '部分食材关联了多个食谱。请选择要包含哪些。';
 
   @override
-  String get listGenSelectIngredients => 'Select Ingredients';
+  String get listGenSelectIngredients => '选择食材';
 
   @override
-  String get listGenReviewAdd => 'Review & Add';
+  String get listGenReviewAdd => '检查并添加';
 
   @override
   String listGenInRecipe(String recipe) {
-    return 'in $recipe';
+    return '来自 $recipe';
   }
 
   @override
@@ -11313,153 +11287,150 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Links to $count recipes. Select which to include:',
-      one: 'Links to 1 recipe. Select which to include:',
+      other: '关联了 $count 个食谱。请选择要包含的：',
     );
     return '$_temp0';
   }
 
   @override
   String listGenSelectedOf(int selected, int total) {
-    return '$selected/$total ingredients';
+    return '$selected/$total 种食材';
   }
 
   @override
-  String get listGenLinkedBadge => 'linked';
+  String get listGenLinkedBadge => '关联';
 
   @override
-  String get listGenPantryBadge => 'pantry';
+  String get listGenPantryBadge => '食材柜';
 
   @override
   String listGenSeeBelow(String title) {
-    return 'See \"$title\" below';
+    return '见下方“$title”';
   }
 
   @override
-  String get shoppingSharingStopped => 'Sharing stopped';
+  String get shoppingSharingStopped => '已停止共享';
 
   @override
-  String get shoppingStopSharingOnly => 'Stop Sharing Only';
+  String get shoppingStopSharingOnly => '仅停止共享';
 
   @override
-  String get shoppingShopOnInstacart => 'Shop on Instacart';
+  String get shoppingShopOnInstacart => '在 Instacart 上购买';
 
   @override
   String shoppingNamedItemRemoved(String name) {
-    return '$name removed';
+    return '已移除 $name';
   }
 
   @override
-  String get exportLinkedTitle => 'Export Linked Recipes?';
+  String get exportLinkedTitle => '导出关联食谱？';
 
   @override
   String exportLinkedBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'This recipe has $count linked recipes:',
-      one: 'This recipe has 1 linked recipe:',
+      other: '此食谱有 $count 个关联食谱：',
     );
     return '$_temp0';
   }
 
   @override
-  String get exportLinkedQuestion => 'Would you like to include them in the export so the links are preserved when imported?';
+  String get exportLinkedQuestion => '是否将它们一并导出，以便导入时保留关联？';
 
   @override
   String exportOnlyRecipe(String title) {
-    return 'Only $title';
+    return '仅 $title';
   }
 
   @override
-  String get exportLinkedAll => 'Export All';
+  String get exportLinkedAll => '全部导出';
 
   @override
-  String get pdfLinkedRecipes => 'Linked Recipes';
+  String get pdfLinkedRecipes => '关联食谱';
 
   @override
   String taxonomyCourseExists(String name) {
-    return 'Course \"$name\" already exists';
+    return '菜品类型“$name”已存在';
   }
 
   @override
   String taxonomyCategoryExists(String name) {
-    return 'Category \"$name\" already exists';
+    return '类别“$name”已存在';
   }
 
   @override
   String taxonomyCreateError(String error) {
-    return 'Error creating: $error';
+    return '创建出错：$error';
   }
 
   @override
-  String get shareViewerLiveCollab => 'live collaboration';
+  String get shareViewerLiveCollab => '实时协作';
 
   @override
-  String get shareViewerAddedToLists => 'Added to your lists';
+  String get shareViewerAddedToLists => '已添加到你的清单';
 
   @override
-  String get cookbookPeopleTitle => 'People in this cookbook';
+  String get cookbookPeopleTitle => '此食谱书的成员';
 
   @override
   String cravingMoreSteps(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '+ $count more steps',
-      one: '+ 1 more step',
+      other: '+ 还有 $count 个步骤',
     );
     return '$_temp0';
   }
 
   @override
   String authSignedInAs(String name) {
-    return 'Signed in as $name';
+    return '已以 $name 身份登录';
   }
 
   @override
-  String get authSignedOut => 'Signed out';
+  String get authSignedOut => '已退出登录';
 
   @override
-  String get accountStatFollowers => 'followers';
+  String get accountStatFollowers => '粉丝';
 
   @override
-  String get accountStatFollowing => 'following';
+  String get accountStatFollowing => '关注';
 
   @override
-  String get settingsSwitchedToImported => 'Switched to imported cookbook';
+  String get settingsSwitchedToImported => '已切换到导入的食谱书';
 
   @override
   String resetFailedNothingDeleted(String error) {
-    return 'Reset failed: no data was deleted. ($error)';
+    return '重置失败，未删除任何数据。（$error）';
   }
 
   @override
   String selectedOfTotal(int selected, int total) {
-    return '$selected of $total';
+    return '$selected/$total';
   }
 
   @override
-  String get platformStripSemantics => 'Works with Instagram, TikTok, YouTube, Pinterest and any recipe website';
+  String get platformStripSemantics => '支持 Instagram、TikTok、YouTube、Pinterest 及任何食谱网站';
 
   @override
-  String get previewRecipeTitle => 'Grandma\'s Famous Chocolate Cake';
+  String get previewRecipeTitle => '奶奶的招牌巧克力蛋糕';
 
   @override
-  String get previewRecipeIngredients => '2 cups flour, 1 cup sugar, 3 eggs';
+  String get previewRecipeIngredients => '面粉 2 杯、糖 1 杯、鸡蛋 3 个';
 
   @override
-  String get previewIngredientFlour => '• 2 cups all-purpose flour';
+  String get previewIngredientFlour => '• 中筋面粉 2 杯';
 
   @override
-  String get previewIngredientVanilla => '• 1 tsp vanilla extract';
+  String get previewIngredientVanilla => '• 香草精 1 茶匙';
 
   @override
-  String get themePreviewRecipe => 'Butter Chicken';
+  String get themePreviewRecipe => '黄油鸡';
 
   @override
-  String get themePreviewPrimary => 'Primary';
+  String get themePreviewPrimary => '主要';
 
   @override
-  String get themePreviewSecondary => 'Secondary';
+  String get themePreviewSecondary => '次要';
 }
