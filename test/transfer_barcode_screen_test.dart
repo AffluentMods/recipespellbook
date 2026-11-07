@@ -15,6 +15,7 @@ import 'package:path/path.dart' as p;
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/services/auth_service.dart';
+import 'package:recipespellbook/services/pantry_service.dart';
 import 'package:recipespellbook/ui/screens/import/transfer_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,7 +57,11 @@ Future<void> _settle(WidgetTester tester, {bool Function()? done}) async {
 void main() {
   final phones = Phones.install();
 
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    // The pantry goes along in a transfer; each test starts with its own.
+    PantryService.resetForTesting();
+  });
 
   /// A phone whose database is left open. Closing a database that a widget
   /// test has used hangs the run.

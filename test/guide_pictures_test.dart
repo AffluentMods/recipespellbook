@@ -13,6 +13,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/providers/database_provider.dart';
 import 'package:recipespellbook/services/pantry_service.dart';
 import 'package:recipespellbook/ui/screens/settings/pantry_screen.dart';
+import 'package:recipespellbook/ui/widgets/guides_tip_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -68,5 +69,28 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
     }
     await tester.runAsync(() => db.close().timeout(const Duration(seconds: 2), onTimeout: () {}));
+  });
+
+  testWidgets('the Home tip leads to the guides and goes away once closed', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    Future<void> show() async {
+      await tester.pumpWidget(const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: GuidesTipCard()),
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    await show();
+    expect(find.text('New here?'), findsOneWidget);
+    await tester.tap(find.text('See the guides'));
+    await tester.pumpAndSettle();
+    expect(find.text('FAQs'), findsOneWidget);
+
+    await show();
+    expect(find.text('New here?'), findsNothing, reason: 'opening the guides counts as seen');
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getBool(GuidesTipCard.dismissedKey), isTrue);
   });
 }

@@ -73,7 +73,15 @@ class PantryNotifier extends AsyncNotifier<PantryState> {
   PantryService get _service => PantryService.instance;
 
   @override
-  Future<PantryState> build() => _read();
+  Future<PantryState> build() {
+    // Sync, a restored backup or a transfer changed it underneath: read again.
+    final service = _service;
+    Future<void> reload() async => state = AsyncData(await _read());
+    void listener() => unawaited(reload());
+    service.revision.addListener(listener);
+    ref.onDispose(() => service.revision.removeListener(listener));
+    return _read();
+  }
 
   Future<PantryState> _read() async =>
       PantryState(entries: await _service.getEntries(), basics: await _service.getBasics());
