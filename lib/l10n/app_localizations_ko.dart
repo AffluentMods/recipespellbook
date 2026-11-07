@@ -12300,4 +12300,23 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => '사용 방법';
+
+  @override
+  String get shoppingPutAway => '정리하기';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개를 식료품 저장소에 넣었어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => '목록에서 삭제';
+
+  @override
+  String get shoppingPutAwayNothing => '체크한 항목 중 저장소에 넣을 것이 없어요';
 }

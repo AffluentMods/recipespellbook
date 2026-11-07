@@ -4362,5 +4362,9 @@
   "faqPantryQTitle": "Was ist der Unterschied zwischen Gerade da und Immer im Haus?",
   "faqPantryQSubtitle": "Die zwei Listen deiner Vorratskammer",
   "faqPantryQAnswer": "Gerade da ist, was du aufbrauchst, wie Milch, Eier und Fleisch. Die App fragt nach einer Weile danach, und nach dem Einkauf kannst du alles leeren. Immer im Haus ist für Dinge, die selten ausgehen, wie Salz, Mehl, Gewürze und Öl. Sie zählen nie als fehlend und werden nie geleert.",
-  "pantryHowItWorks": "So funktioniert es"
+  "pantryHowItWorks": "So funktioniert es",
+  "shoppingPutAway": "Einräumen",
+  "shoppingPutAwayDone": "{count, plural, =1{1 Eintrag in die Vorratskammer gelegt} other{{count} Einträge in die Vorratskammer gelegt}}",
+  "shoppingPutAwayClear": "Von der Liste nehmen",
+  "shoppingPutAwayNothing": "Nichts Abgehaktes gehört in die Vorratskammer"
 }

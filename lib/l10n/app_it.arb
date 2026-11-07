@@ -3824,5 +3824,9 @@
   "faqPantryQTitle": "Che differenza c'è tra In casa ora e Sempre in casa?",
   "faqPantryQSubtitle": "Le due liste della dispensa",
   "faqPantryQAnswer": "In casa ora è il cibo che si consuma, come latte, uova e carne. L'app ne chiede dopo un po', e dopo la spesa puoi svuotare tutto. Sempre in casa è per ciò che finisce di rado, come sale, farina, spezie e olio. Non conta mai come mancante e non viene mai svuotato.",
-  "pantryHowItWorks": "Come funziona"
+  "pantryHowItWorks": "Come funziona",
+  "shoppingPutAway": "Metti via",
+  "shoppingPutAwayDone": "{count, plural, =1{1 articolo messo in dispensa} other{{count} articoli messi in dispensa}}",
+  "shoppingPutAwayClear": "Togli dalla lista",
+  "shoppingPutAwayNothing": "Niente di spuntato va in dispensa"
 }

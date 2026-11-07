@@ -12272,4 +12272,23 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => '使い方';
+
+  @override
+  String get shoppingPutAway => 'しまう';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件をパントリーに追加しました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'リストから削除';
+
+  @override
+  String get shoppingPutAwayNothing => 'チェックした中にパントリーに入れるものはありません';
 }

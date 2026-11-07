@@ -784,6 +784,17 @@ class _DesktopItemsList extends ConsumerWidget {
                       style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: c.textTertiary),
                     ),
                   ),
+                  TextButton.icon(
+                    key: const ValueKey('shopping-put-away'),
+                    onPressed: () => putAwayInPantry(context, ref, checked, removeFromList: onClearChecked),
+                    icon: const Icon(Icons.kitchen_outlined, size: 16),
+                    label: Text(l10n.shoppingPutAway),
+                    style: TextButton.styleFrom(
+                      foregroundColor: c.accent,
+                      visualDensity: VisualDensity.compact,
+                      textStyle: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                    ),
+                  ),
                   if (onClearChecked != null)
                     TextButton(
                       onPressed: onClearChecked,

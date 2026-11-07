@@ -8,6 +8,7 @@ import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/usda_provider.dart';
+import '../../services/pantry_matcher.dart' show ingredientKeyFor;
 import '../../services/nutrition_calculator.dart';
 import '../../services/usda_service.dart';
 import '../../theme/app_colors.dart';
@@ -1251,7 +1252,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     final result = await showDialog<_IngredientEditResult>(
       context: context,
       builder: (context) => _IngredientEditDialog(
-        ingredientName: item.ingredient.name,
+        ingredientName: nutritionSearchTerm(item.ingredient.name),
         displayText: item.displayText,
         currentNutrition: item.nutrition,
         usdaService: usdaService,
@@ -1298,6 +1299,15 @@ class _IngredientEditResult {
 }
 
 /// Enhanced dialog for editing ingredient nutrition
+/// What to search the food database for when an ingredient line is tapped:
+/// the food itself, without prep notes or sizes ("garlic, finely grated" is
+/// "garlic"), so the search finds something.
+@visibleForTesting
+String nutritionSearchTerm(String ingredientName) {
+  final label = ingredientKeyFor(ingredientName).label.trim();
+  return label.isNotEmpty ? label : ingredientName.trim();
+}
+
 class _IngredientEditDialog extends StatefulWidget {
   final String ingredientName;
   final String displayText;

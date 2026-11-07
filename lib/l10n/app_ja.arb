@@ -4800,5 +4800,9 @@
   "faqPantryQTitle": "「今あるもの」と「常備品」の違いは？",
   "faqPantryQSubtitle": "パントリーの2つのリスト",
   "faqPantryQAnswer": "「今あるもの」は牛乳、卵、肉など使えばなくなる食材です。しばらくすると確認され、買い物のあとにまとめて消去できます。「常備品」は塩、小麦粉、スパイス、油などめったに切らさないもので、不足として数えられることも消去されることもありません。",
-  "pantryHowItWorks": "使い方"
+  "pantryHowItWorks": "使い方",
+  "shoppingPutAway": "しまう",
+  "shoppingPutAwayDone": "{count, plural, other{{count}件をパントリーに追加しました}}",
+  "shoppingPutAwayClear": "リストから削除",
+  "shoppingPutAwayNothing": "チェックした中にパントリーに入れるものはありません"
 }

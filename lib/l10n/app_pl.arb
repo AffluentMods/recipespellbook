@@ -4800,5 +4800,9 @@
   "faqPantryQTitle": "Czym różni się Teraz w domu od Zawsze w domu?",
   "faqPantryQSubtitle": "Dwie listy w Twojej spiżarni",
   "faqPantryQAnswer": "Teraz w domu to jedzenie, które się zużywa, jak mleko, jajka i mięso. Aplikacja pyta o nie po pewnym czasie, a po zakupach możesz wszystko wyczyścić. Zawsze w domu to rzeczy, które rzadko się kończą, jak sól, mąka, przyprawy i olej. Nigdy nie liczą się jako brakujące i nigdy nie są czyszczone.",
-  "pantryHowItWorks": "Jak to działa"
+  "pantryHowItWorks": "Jak to działa",
+  "shoppingPutAway": "Odłóż",
+  "shoppingPutAwayDone": "{count, plural, =1{Odłożono 1 produkt do spiżarni} few{Odłożono {count} produkty do spiżarni} many{Odłożono {count} produktów do spiżarni} other{Odłożono {count} produktu do spiżarni}}",
+  "shoppingPutAwayClear": "Usuń z listy",
+  "shoppingPutAwayNothing": "Nic z zaznaczonych nie trafia do spiżarni"
 }

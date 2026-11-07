@@ -12268,4 +12268,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => '使用说明';
+
+  @override
+  String get shoppingPutAway => '放入储藏室';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已将 $count 项放入储藏室',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => '从清单删除';
+
+  @override
+  String get shoppingPutAwayNothing => '勾选的东西里没有要放进储藏室的';
 }

@@ -4800,5 +4800,9 @@
   "faqPantryQTitle": "Qual é a diferença entre Tenho agora e Sempre tenho?",
   "faqPantryQSubtitle": "As duas listas da sua despensa",
   "faqPantryQAnswer": "Tenho agora é a comida que acaba, como leite, ovos e carne. O app pergunta sobre ela depois de um tempo, e você pode limpar tudo depois das compras. Sempre tenho é para o que raramente acaba, como sal, farinha, temperos e óleo. Nunca conta como faltando e nunca é limpo.",
-  "pantryHowItWorks": "Como funciona"
+  "pantryHowItWorks": "Como funciona",
+  "shoppingPutAway": "Guardar",
+  "shoppingPutAwayDone": "{count, plural, =1{1 item guardado na despensa} other{{count} itens guardados na despensa}}",
+  "shoppingPutAwayClear": "Tirar da lista",
+  "shoppingPutAwayNothing": "Nada marcado vai para a despensa"
 }

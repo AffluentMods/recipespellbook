@@ -12613,4 +12613,26 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => 'Как это работает';
+
+  @override
+  String get shoppingPutAway => 'Убрать в кладовую';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В кладовую добавлено $count продукта',
+      many: 'В кладовую добавлено $count продуктов',
+      few: 'В кладовую добавлено $count продукта',
+      one: 'В кладовую добавлен $count продукт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'Удалить из списка';
+
+  @override
+  String get shoppingPutAwayNothing => 'Из отмеченного в кладовую ничего не идёт';
 }
