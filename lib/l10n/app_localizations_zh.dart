@@ -12268,4 +12268,122 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => '使用说明';
+
+  @override
+  String get shoppingPutAway => '放入储藏室';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已将 $count 项放入储藏室',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => '从清单删除';
+
+  @override
+  String get shoppingPutAwayNothing => '勾选的东西里没有要放进储藏室的';
+
+  @override
+  String get guidesTipTitle => '第一次使用？';
+
+  @override
+  String get guidesTipBody => '带图片的简短指南，介绍每项功能怎么用。';
+
+  @override
+  String get guidesTipOpen => '查看指南';
+
+  @override
+  String get faqPlanTitle => '如何计划一周饮食并购物';
+
+  @override
+  String get faqPlanSubtitle => '计划餐食、生成购物清单、把买回的东西放好';
+
+  @override
+  String get faqPlanStep1Title => '打开计划';
+
+  @override
+  String get faqPlanStep1Desc => '点底部的“计划”。在顶部选一天，然后点“添加餐食”。';
+
+  @override
+  String get faqPlanStep2Title => '选择餐次和人数';
+
+  @override
+  String get faqPlanStep2Desc => '选择早餐、午餐或晚餐，设定为几个人做饭，然后点一个菜谱。购物清单会按人数调整。';
+
+  @override
+  String get faqPlanStep3Title => '一周一目了然';
+
+  @override
+  String get faqPlanStep3Desc => '计划好的餐食显示在对应的日子，并标明份数。点一下就能打开菜谱。';
+
+  @override
+  String get faqPlanStep4Title => '生成购物清单';
+
+  @override
+  String get faqPlanStep4Desc => '点“购物”。菜谱需要的东西都会列出，储藏室里已有的不会勾选。点“检查并添加”。';
+
+  @override
+  String get faqPlanStep4Tip => '保持储藏室最新，购物清单会自己变短。';
+
+  @override
+  String get faqPlanStep5Title => '去购物';
+
+  @override
+  String get faqPlanStep5Desc => '清单按货架区域排列。东西放进购物车后，点它旁边的圆圈。';
+
+  @override
+  String get faqPlanStep6Title => '放进储藏室';
+
+  @override
+  String get faqPlanStep6Desc => '回到家，点已勾选项目上方的“放入储藏室”。食物会以今天的日期进入储藏室。';
+
+  @override
+  String get faqPlanStep7Title => '清空清单';
+
+  @override
+  String get faqPlanStep7Desc => '点提示里的“从清单删除”去掉已勾选的项目，或者之后再删除。';
+
+  @override
+  String get faqCommTitle => '如何从社区获取食谱书';
+
+  @override
+  String get faqCommSubtitle => '下载免费食谱书，也分享你自己的';
+
+  @override
+  String get faqCommStep1Title => '打开社区';
+
+  @override
+  String get faqCommStep1Desc => '点底部的“社区”，再点“食谱书”，就能看到整本食谱书，而不是单个菜谱。';
+
+  @override
+  String get faqCommStep2Title => '下载一本食谱书';
+
+  @override
+  String get faqCommStep2Desc => '打开一本食谱书，点“下载全部食谱”。只想要其中几道就点“选择单个食谱”。';
+
+  @override
+  String get faqCommStep2Tip => '作者改进了你下载过的食谱书时，应用会提供新版本，并保留你自己的修改。';
+
+  @override
+  String get faqCommStep3Title => '选择保存位置';
+
+  @override
+  String get faqCommStep3Desc => '点下载旁边的箭头，可以存为“新建食谱书”，或加到“已有食谱书”。';
+
+  @override
+  String get faqCommStep4Title => '下载前先看看';
+
+  @override
+  String get faqCommStep4Desc => '点一个菜谱可以快速浏览，点“查看完整食谱”可以看全部内容。';
+
+  @override
+  String get faqCommStep5Title => '分享你自己的';
+
+  @override
+  String get faqCommStep5Desc => '点“发布”，把你的食谱书或菜谱分享给所有人。需要先登录。';
 }

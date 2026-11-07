@@ -21630,6 +21630,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How it works'**
   String get pantryHowItWorks;
+
+  /// No description provided for @shoppingPutAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Put away'**
+  String get shoppingPutAway;
+
+  /// No description provided for @shoppingPutAwayDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Put 1 item in your pantry} other{Put {count} items in your pantry}}'**
+  String shoppingPutAwayDone(int count);
+
+  /// No description provided for @shoppingPutAwayClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from list'**
+  String get shoppingPutAwayClear;
+
+  /// No description provided for @shoppingPutAwayNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing ticked goes in a pantry'**
+  String get shoppingPutAwayNothing;
+
+  /// No description provided for @guidesTipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New here?'**
+  String get guidesTipTitle;
+
+  /// No description provided for @guidesTipBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Short guides with pictures show how everything works.'**
+  String get guidesTipBody;
+
+  /// No description provided for @guidesTipOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'See the guides'**
+  String get guidesTipOpen;
+
+  /// No description provided for @faqPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to plan your week and shop'**
+  String get faqPlanTitle;
+
+  /// No description provided for @faqPlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan meals, make the shopping list, put the food away'**
+  String get faqPlanSubtitle;
+
+  /// No description provided for @faqPlanStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Planner'**
+  String get faqPlanStep1Title;
+
+  /// No description provided for @faqPlanStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Planner at the bottom. Pick a day at the top, then tap Add meal.'**
+  String get faqPlanStep1Desc;
+
+  /// No description provided for @faqPlanStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the meal and the people'**
+  String get faqPlanStep2Title;
+
+  /// No description provided for @faqPlanStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Breakfast, Lunch or Dinner and set how many people you are cooking for, then tap a recipe. The shopping list follows the number of people.'**
+  String get faqPlanStep2Desc;
+
+  /// No description provided for @faqPlanStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your week at a glance'**
+  String get faqPlanStep3Title;
+
+  /// No description provided for @faqPlanStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned meals show on their day with the number of servings. Tap one to open the recipe.'**
+  String get faqPlanStep3Desc;
+
+  /// No description provided for @faqPlanStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Make the shopping list'**
+  String get faqPlanStep4Title;
+
+  /// No description provided for @faqPlanStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Groceries. Everything the recipes need is listed, and what is already in your pantry is left unticked. Tap Review & Add.'**
+  String get faqPlanStep4Desc;
+
+  /// No description provided for @faqPlanStep4Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your pantry up to date and the shopping list gets shorter on its own.'**
+  String get faqPlanStep4Tip;
+
+  /// No description provided for @faqPlanStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get faqPlanStep5Title;
+
+  /// No description provided for @faqPlanStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The list is sorted by aisle. Tap the circle next to an item when it is in your cart.'**
+  String get faqPlanStep5Desc;
+
+  /// No description provided for @faqPlanStep6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Put it away'**
+  String get faqPlanStep6Title;
+
+  /// No description provided for @faqPlanStep6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Back home, tap Put away above the ticked items. The food goes into your pantry, dated today.'**
+  String get faqPlanStep6Desc;
+
+  /// No description provided for @faqPlanStep7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the list'**
+  String get faqPlanStep7Title;
+
+  /// No description provided for @faqPlanStep7Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Remove from list on the message to clear the ticked items, or Delete checked later.'**
+  String get faqPlanStep7Desc;
+
+  /// No description provided for @faqCommTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get cookbooks from the community'**
+  String get faqCommTitle;
+
+  /// No description provided for @faqCommSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download free cookbooks and share your own'**
+  String get faqCommSubtitle;
+
+  /// No description provided for @faqCommStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Community'**
+  String get faqCommStep1Title;
+
+  /// No description provided for @faqCommStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Community at the bottom, then Cookbooks to see whole cookbooks instead of single recipes.'**
+  String get faqCommStep1Desc;
+
+  /// No description provided for @faqCommStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Download a cookbook'**
+  String get faqCommStep2Title;
+
+  /// No description provided for @faqCommStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a cookbook and tap Download all. Tap Select Individual Recipes if you only want some.'**
+  String get faqCommStep2Desc;
+
+  /// No description provided for @faqCommStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'When the author improves a cookbook you downloaded, the app offers the new version and keeps your own changes.'**
+  String get faqCommStep2Tip;
+
+  /// No description provided for @faqCommStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where it goes'**
+  String get faqCommStep3Title;
+
+  /// No description provided for @faqCommStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the arrow next to Download all to save it as a New Cookbook or add it to an Existing Cookbook.'**
+  String get faqCommStep3Desc;
+
+  /// No description provided for @faqCommStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Look before you download'**
+  String get faqCommStep4Title;
+
+  /// No description provided for @faqCommStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a recipe for a quick look, or View Full Recipe to see all of it.'**
+  String get faqCommStep4Desc;
+
+  /// No description provided for @faqCommStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your own'**
+  String get faqCommStep5Title;
+
+  /// No description provided for @faqCommStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Publish to share one of your cookbooks or recipes with everyone. You need to be signed in.'**
+  String get faqCommStep5Desc;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

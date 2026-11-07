@@ -15,6 +15,8 @@ import '../utils/platform_utils.dart';
 import 'collab_service.dart';
 import 'family_service.dart';
 import 'image_service.dart';
+import 'pantry_service.dart';
+import 'pantry_sync.dart';
 
 // ════════════════════════════════════════════
 //  SYNC RESULT
@@ -133,6 +135,7 @@ class SyncService {
     _morePhotos = false;
     _photosStuck = false;
     _tableSub?.cancel();
+    PantryService.onLocalChange = () => _localChanges.add(const {'pantry'});
     _tableSub = db
         .tableUpdates(TableUpdateQuery.onAllTables([
           db.cookbooks, db.recipes, db.ingredients, db.steps, db.recipeTags, db.recipeLinks,
@@ -318,6 +321,15 @@ class SyncService {
       own = await _syncOwnData(userId, fullSync);
     } catch (e) {
       own = _failureFrom(e);
+    }
+
+    // The pantry is one small document of its own, not table rows.
+    if (own.success && _auth.currentUser?.id == userId) {
+      try {
+        await PantrySync.forAuth(_auth).run(userId);
+      } catch (e) {
+        debugPrint('[Sync] Pantry sync failed (non-fatal): $e');
+      }
     }
 
     // Shared cookbooks / lists work on every tier and don't depend on the

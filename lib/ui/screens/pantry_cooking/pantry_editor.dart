@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/common_ingredient_packs.dart';
+import '../../../database/database.dart' show ShoppingListItem;
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/pantry_cooking_provider.dart';
+import '../../../services/pantry_cooking_service.dart' show recentlyBoughtNames;
 import '../../../services/pantry_service.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
+import '../../../utils/ingredient_utils.dart' show getShoppingCategory;
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/sheet_chrome.dart';
@@ -38,6 +41,41 @@ Future<void> confirmClearPantry(BuildContext context, WidgetRef ref) async {
     ),
   );
   if (yes == true) await ref.read(pantryProvider.notifier).clear();
+}
+
+// ── Put away after shopping ──
+
+const _notFoodCategories = {'household', 'personalCare', 'pet', 'baby'};
+
+/// The foods among ticked-off shopping items, cut down for the pantry
+/// ("2 cups flour" is "flour"), each once. Paper towels and the like stay out.
+List<String> pantryFoodsFromShopping(Iterable<ShoppingListItem> items) => recentlyBoughtNames(
+      [for (final i in items) if (!_notFoodCategories.contains(getShoppingCategory(i.name))) i],
+      limit: 1 << 20,
+    );
+
+/// "Put away": everything ticked off goes into On hand now, dated today.
+/// The snackbar offers to take the ticked items off the list too.
+Future<void> putAwayInPantry(
+  BuildContext context,
+  WidgetRef ref,
+  List<ShoppingListItem> ticked, {
+  VoidCallback? removeFromList,
+}) async {
+  final l10n = AppLocalizations.of(context)!;
+  final names = pantryFoodsFromShopping(ticked);
+  if (names.isEmpty) {
+    AppSnackbar.info(context, l10n.shoppingPutAwayNothing);
+    return;
+  }
+  await ref.read(pantryProvider.notifier).addAll(names);
+  if (!context.mounted) return;
+  final message = l10n.shoppingPutAwayDone(names.length);
+  if (removeFromList != null) {
+    AppSnackbar.successWithAction(context, message, actionLabel: l10n.shoppingPutAwayClear, onAction: removeFromList);
+  } else {
+    AppSnackbar.success(context, message);
+  }
 }
 
 // ── Still have these? ──

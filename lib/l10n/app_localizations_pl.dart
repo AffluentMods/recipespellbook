@@ -12623,4 +12623,125 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => 'Jak to działa';
+
+  @override
+  String get shoppingPutAway => 'Odłóż';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Odłożono $count produktu do spiżarni',
+      many: 'Odłożono $count produktów do spiżarni',
+      few: 'Odłożono $count produkty do spiżarni',
+      one: 'Odłożono 1 produkt do spiżarni',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'Usuń z listy';
+
+  @override
+  String get shoppingPutAwayNothing => 'Nic z zaznaczonych nie trafia do spiżarni';
+
+  @override
+  String get guidesTipTitle => 'Pierwszy raz tutaj?';
+
+  @override
+  String get guidesTipBody => 'Krótkie poradniki z obrazkami pokazują, jak wszystko działa.';
+
+  @override
+  String get guidesTipOpen => 'Zobacz poradniki';
+
+  @override
+  String get faqPlanTitle => 'Jak zaplanować tydzień i zrobić zakupy';
+
+  @override
+  String get faqPlanSubtitle => 'Planuj posiłki, twórz listę zakupów, odkładaj zakupy';
+
+  @override
+  String get faqPlanStep1Title => 'Otwórz Planer';
+
+  @override
+  String get faqPlanStep1Desc => 'Stuknij Planer na dole. Wybierz dzień u góry i stuknij Dodaj posiłek.';
+
+  @override
+  String get faqPlanStep2Title => 'Wybierz posiłek i liczbę osób';
+
+  @override
+  String get faqPlanStep2Desc => 'Wybierz śniadanie, obiad lub kolację i dla ilu osób gotujesz, a potem stuknij przepis. Lista zakupów dopasowuje się do liczby osób.';
+
+  @override
+  String get faqPlanStep3Title => 'Twój tydzień w skrócie';
+
+  @override
+  String get faqPlanStep3Desc => 'Zaplanowane posiłki widać przy ich dniu z liczbą porcji. Stuknij, aby otworzyć przepis.';
+
+  @override
+  String get faqPlanStep4Title => 'Zrób listę zakupów';
+
+  @override
+  String get faqPlanStep4Desc => 'Stuknij Zakupy. Widać wszystko, czego potrzebują przepisy, a to, co już masz w spiżarni, jest odznaczone. Stuknij Przejrzyj i dodaj.';
+
+  @override
+  String get faqPlanStep4Tip => 'Dbaj o aktualną spiżarnię, a lista zakupów sama się skróci.';
+
+  @override
+  String get faqPlanStep5Title => 'Zrób zakupy';
+
+  @override
+  String get faqPlanStep5Desc => 'Lista jest posortowana według działów. Stuknij kółko obok produktu, gdy jest w koszyku.';
+
+  @override
+  String get faqPlanStep6Title => 'Odłóż';
+
+  @override
+  String get faqPlanStep6Desc => 'W domu stuknij Odłóż nad zaznaczonymi produktami. Jedzenie trafia do spiżarni z dzisiejszą datą.';
+
+  @override
+  String get faqPlanStep7Title => 'Wyczyść listę';
+
+  @override
+  String get faqPlanStep7Desc => 'Stuknij Usuń z listy w komunikacie, aby usunąć zaznaczone produkty, albo zrób to później.';
+
+  @override
+  String get faqCommTitle => 'Jak pobierać książki kucharskie od społeczności';
+
+  @override
+  String get faqCommSubtitle => 'Pobieraj darmowe książki kucharskie i udostępniaj własne';
+
+  @override
+  String get faqCommStep1Title => 'Otwórz Społeczność';
+
+  @override
+  String get faqCommStep1Desc => 'Stuknij Społeczność na dole, a potem Książki kucharskie, aby zobaczyć całe książki zamiast pojedynczych przepisów.';
+
+  @override
+  String get faqCommStep2Title => 'Pobierz książkę';
+
+  @override
+  String get faqCommStep2Desc => 'Otwórz książkę i stuknij Pobierz wszystkie przepisy. Stuknij Wybierz poszczególne przepisy, jeśli chcesz tylko kilka.';
+
+  @override
+  String get faqCommStep2Tip => 'Gdy autor ulepszy pobraną przez Ciebie książkę, aplikacja zaproponuje nową wersję i zachowa Twoje zmiany.';
+
+  @override
+  String get faqCommStep3Title => 'Wybierz, gdzie trafi';
+
+  @override
+  String get faqCommStep3Desc => 'Stuknij strzałkę obok pobierania, aby zapisać ją jako Nową książkę kucharską lub dodać do Istniejącej książki kucharskiej.';
+
+  @override
+  String get faqCommStep4Title => 'Obejrzyj przed pobraniem';
+
+  @override
+  String get faqCommStep4Desc => 'Stuknij przepis, aby szybko go obejrzeć, albo Zobacz pełny przepis, aby zobaczyć całość.';
+
+  @override
+  String get faqCommStep5Title => 'Udostępnij własne';
+
+  @override
+  String get faqCommStep5Desc => 'Stuknij Opublikuj, aby udostępnić wszystkim swoją książkę lub przepis. Musisz być zalogowany.';
 }

@@ -12427,4 +12427,123 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => 'Hoe het werkt';
+
+  @override
+  String get shoppingPutAway => 'Opbergen';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items in je voorraadkast gezet',
+      one: '1 item in je voorraadkast gezet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'Van de lijst halen';
+
+  @override
+  String get shoppingPutAwayNothing => 'Niets afgevinkts hoort in de voorraadkast';
+
+  @override
+  String get guidesTipTitle => 'Nieuw hier?';
+
+  @override
+  String get guidesTipBody => 'Korte handleidingen met afbeeldingen laten zien hoe alles werkt.';
+
+  @override
+  String get guidesTipOpen => 'Bekijk de handleidingen';
+
+  @override
+  String get faqPlanTitle => 'Zo plan je je week en doe je boodschappen';
+
+  @override
+  String get faqPlanSubtitle => 'Maaltijden plannen, boodschappenlijst maken, boodschappen opbergen';
+
+  @override
+  String get faqPlanStep1Title => 'Open de Planner';
+
+  @override
+  String get faqPlanStep1Desc => 'Tik onderaan op Planner. Kies bovenaan een dag en tik op Maaltijd toevoegen.';
+
+  @override
+  String get faqPlanStep2Title => 'Kies de maaltijd en het aantal personen';
+
+  @override
+  String get faqPlanStep2Desc => 'Kies ontbijt, lunch of diner en voor hoeveel mensen je kookt, en tik dan op een recept. De boodschappenlijst volgt het aantal personen.';
+
+  @override
+  String get faqPlanStep3Title => 'Je week in één oogopslag';
+
+  @override
+  String get faqPlanStep3Desc => 'Geplande maaltijden staan op hun dag met het aantal porties. Tik erop om het recept te openen.';
+
+  @override
+  String get faqPlanStep4Title => 'Maak de boodschappenlijst';
+
+  @override
+  String get faqPlanStep4Desc => 'Tik op Boodschappen. Alles wat de recepten nodig hebben staat erop, en wat al in je voorraadkast is blijft uitgevinkt. Tik op Controleren & toevoegen.';
+
+  @override
+  String get faqPlanStep4Tip => 'Houd je voorraadkast bij, dan wordt de boodschappenlijst vanzelf korter.';
+
+  @override
+  String get faqPlanStep5Title => 'Boodschappen doen';
+
+  @override
+  String get faqPlanStep5Desc => 'De lijst is gesorteerd per afdeling. Tik op het rondje naast een item als het in je kar ligt.';
+
+  @override
+  String get faqPlanStep6Title => 'Opbergen';
+
+  @override
+  String get faqPlanStep6Desc => 'Thuis tik je boven de afgevinkte items op Opbergen. Het eten gaat met de datum van vandaag in je voorraadkast.';
+
+  @override
+  String get faqPlanStep7Title => 'Lijst leegmaken';
+
+  @override
+  String get faqPlanStep7Desc => 'Tik in de melding op Van de lijst halen om de afgevinkte items weg te halen, of verwijder ze later.';
+
+  @override
+  String get faqCommTitle => 'Zo haal je kookboeken uit de community';
+
+  @override
+  String get faqCommSubtitle => 'Download gratis kookboeken en deel je eigen';
+
+  @override
+  String get faqCommStep1Title => 'Open Community';
+
+  @override
+  String get faqCommStep1Desc => 'Tik onderaan op Community en dan op Kookboeken om hele kookboeken te zien in plaats van losse recepten.';
+
+  @override
+  String get faqCommStep2Title => 'Download een kookboek';
+
+  @override
+  String get faqCommStep2Desc => 'Open een kookboek en tik op Alle recepten downloaden. Tik op Individuele recepten selecteren als je er maar een paar wilt.';
+
+  @override
+  String get faqCommStep2Tip => 'Verbetert de maker een kookboek dat je hebt gedownload, dan biedt de app de nieuwe versie aan en houdt je eigen wijzigingen.';
+
+  @override
+  String get faqCommStep3Title => 'Kies waar het heen gaat';
+
+  @override
+  String get faqCommStep3Desc => 'Tik op het pijltje naast de download om het als Nieuw kookboek op te slaan of aan een Bestaand kookboek toe te voegen.';
+
+  @override
+  String get faqCommStep4Title => 'Kijk voor je downloadt';
+
+  @override
+  String get faqCommStep4Desc => 'Tik op een recept voor een snelle blik, of op Volledig recept bekijken om alles te zien.';
+
+  @override
+  String get faqCommStep5Title => 'Deel je eigen';
+
+  @override
+  String get faqCommStep5Desc => 'Tik op Publiceren om een van je kookboeken of recepten met iedereen te delen. Je moet ingelogd zijn.';
 }

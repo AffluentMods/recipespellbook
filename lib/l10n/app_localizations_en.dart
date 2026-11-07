@@ -12427,4 +12427,123 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => 'How it works';
+
+  @override
+  String get shoppingPutAway => 'Put away';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Put $count items in your pantry',
+      one: 'Put 1 item in your pantry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'Remove from list';
+
+  @override
+  String get shoppingPutAwayNothing => 'Nothing ticked goes in a pantry';
+
+  @override
+  String get guidesTipTitle => 'New here?';
+
+  @override
+  String get guidesTipBody => 'Short guides with pictures show how everything works.';
+
+  @override
+  String get guidesTipOpen => 'See the guides';
+
+  @override
+  String get faqPlanTitle => 'How to plan your week and shop';
+
+  @override
+  String get faqPlanSubtitle => 'Plan meals, make the shopping list, put the food away';
+
+  @override
+  String get faqPlanStep1Title => 'Open the Planner';
+
+  @override
+  String get faqPlanStep1Desc => 'Tap Planner at the bottom. Pick a day at the top, then tap Add meal.';
+
+  @override
+  String get faqPlanStep2Title => 'Choose the meal and the people';
+
+  @override
+  String get faqPlanStep2Desc => 'Pick Breakfast, Lunch or Dinner and set how many people you are cooking for, then tap a recipe. The shopping list follows the number of people.';
+
+  @override
+  String get faqPlanStep3Title => 'Your week at a glance';
+
+  @override
+  String get faqPlanStep3Desc => 'Planned meals show on their day with the number of servings. Tap one to open the recipe.';
+
+  @override
+  String get faqPlanStep4Title => 'Make the shopping list';
+
+  @override
+  String get faqPlanStep4Desc => 'Tap Groceries. Everything the recipes need is listed, and what is already in your pantry is left unticked. Tap Review & Add.';
+
+  @override
+  String get faqPlanStep4Tip => 'Keep your pantry up to date and the shopping list gets shorter on its own.';
+
+  @override
+  String get faqPlanStep5Title => 'Shop';
+
+  @override
+  String get faqPlanStep5Desc => 'The list is sorted by aisle. Tap the circle next to an item when it is in your cart.';
+
+  @override
+  String get faqPlanStep6Title => 'Put it away';
+
+  @override
+  String get faqPlanStep6Desc => 'Back home, tap Put away above the ticked items. The food goes into your pantry, dated today.';
+
+  @override
+  String get faqPlanStep7Title => 'Clear the list';
+
+  @override
+  String get faqPlanStep7Desc => 'Tap Remove from list on the message to clear the ticked items, or Delete checked later.';
+
+  @override
+  String get faqCommTitle => 'How to get cookbooks from the community';
+
+  @override
+  String get faqCommSubtitle => 'Download free cookbooks and share your own';
+
+  @override
+  String get faqCommStep1Title => 'Open Community';
+
+  @override
+  String get faqCommStep1Desc => 'Tap Community at the bottom, then Cookbooks to see whole cookbooks instead of single recipes.';
+
+  @override
+  String get faqCommStep2Title => 'Download a cookbook';
+
+  @override
+  String get faqCommStep2Desc => 'Open a cookbook and tap Download all. Tap Select Individual Recipes if you only want some.';
+
+  @override
+  String get faqCommStep2Tip => 'When the author improves a cookbook you downloaded, the app offers the new version and keeps your own changes.';
+
+  @override
+  String get faqCommStep3Title => 'Choose where it goes';
+
+  @override
+  String get faqCommStep3Desc => 'Tap the arrow next to Download all to save it as a New Cookbook or add it to an Existing Cookbook.';
+
+  @override
+  String get faqCommStep4Title => 'Look before you download';
+
+  @override
+  String get faqCommStep4Desc => 'Tap a recipe for a quick look, or View Full Recipe to see all of it.';
+
+  @override
+  String get faqCommStep5Title => 'Share your own';
+
+  @override
+  String get faqCommStep5Desc => 'Tap Publish to share one of your cookbooks or recipes with everyone. You need to be signed in.';
 }

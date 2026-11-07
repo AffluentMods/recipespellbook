@@ -18,6 +18,7 @@ import '../utils/zip_stream_stub.dart' if (dart.library.io) '../utils/zip_stream
 import 'backup_reminder_service.dart';
 import 'image_service.dart';
 import 'share_file.dart';
+import 'pantry_service.dart';
 
 // ════════════════════════════════════════════
 //  EXPORT / IMPORT OPTIONS
@@ -118,6 +119,13 @@ class ExportImportService {
     }
     if (options.shoppingLists) {
       data['shoppingLists'] = await _exportShoppingLists();
+      // The pantry goes along with the shopping lists. A backup is never
+      // lost over it.
+      try {
+        data['pantry'] = await PantryService.instance.toDoc();
+      } catch (e) {
+        debugPrint('[Export] Left out the pantry: $e');
+      }
     }
     if (options.mealPlans) {
       data['mealPlans'] = await _exportMealPlans();
@@ -1263,6 +1271,15 @@ class ExportImportService {
       // Photos carried inside the JSON are written once the rows are in, so
       // the database is not held open while files are being saved.
       await _saveEmbeddedImages(embeddedImages);
+
+      // The pantry is not a table: what the backup has joins what is here.
+      if (data['pantry'] != null) {
+        try {
+          await PantryService.instance.mergeDoc(data['pantry']);
+        } catch (e) {
+          debugPrint('[Import] Left out the pantry: $e');
+        }
+      }
 
       // Build summary
       final parts = <String>[];

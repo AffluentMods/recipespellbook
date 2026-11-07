@@ -12613,4 +12613,125 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => 'Как это работает';
+
+  @override
+  String get shoppingPutAway => 'Убрать в кладовую';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В кладовую добавлено $count продукта',
+      many: 'В кладовую добавлено $count продуктов',
+      few: 'В кладовую добавлено $count продукта',
+      one: 'В кладовую добавлен $count продукт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'Удалить из списка';
+
+  @override
+  String get shoppingPutAwayNothing => 'Из отмеченного в кладовую ничего не идёт';
+
+  @override
+  String get guidesTipTitle => 'Вы здесь впервые?';
+
+  @override
+  String get guidesTipBody => 'Короткие руководства с картинками показывают, как всё работает.';
+
+  @override
+  String get guidesTipOpen => 'Открыть руководства';
+
+  @override
+  String get faqPlanTitle => 'Как спланировать неделю и сходить за покупками';
+
+  @override
+  String get faqPlanSubtitle => 'Планируйте блюда, составляйте список покупок, убирайте покупки';
+
+  @override
+  String get faqPlanStep1Title => 'Откройте Планировщик';
+
+  @override
+  String get faqPlanStep1Desc => 'Нажмите «Планировщик» внизу. Выберите день вверху и нажмите «Добавить блюдо».';
+
+  @override
+  String get faqPlanStep2Title => 'Выберите приём пищи и число людей';
+
+  @override
+  String get faqPlanStep2Desc => 'Выберите завтрак, обед или ужин и на сколько человек готовите, затем нажмите на рецепт. Количество в списке покупок зависит от числа людей.';
+
+  @override
+  String get faqPlanStep3Title => 'Неделя одним взглядом';
+
+  @override
+  String get faqPlanStep3Desc => 'Запланированные блюда видны в свой день с числом порций. Нажмите, чтобы открыть рецепт.';
+
+  @override
+  String get faqPlanStep4Title => 'Составьте список покупок';
+
+  @override
+  String get faqPlanStep4Desc => 'Нажмите «Покупки». Здесь всё, что нужно для рецептов, а то, что уже есть в кладовой, не отмечено. Нажмите «Проверить и добавить».';
+
+  @override
+  String get faqPlanStep4Tip => 'Следите за кладовой, и список покупок станет короче сам.';
+
+  @override
+  String get faqPlanStep5Title => 'Покупки';
+
+  @override
+  String get faqPlanStep5Desc => 'Список разбит по отделам магазина. Нажмите на кружок рядом с товаром, когда он в корзине.';
+
+  @override
+  String get faqPlanStep6Title => 'Уберите покупки';
+
+  @override
+  String get faqPlanStep6Desc => 'Дома нажмите «Убрать в кладовую» над отмеченными товарами. Продукты попадут в кладовую с сегодняшней датой.';
+
+  @override
+  String get faqPlanStep7Title => 'Очистите список';
+
+  @override
+  String get faqPlanStep7Desc => 'Нажмите «Удалить из списка» в сообщении, чтобы убрать отмеченное, или удалите позже.';
+
+  @override
+  String get faqCommTitle => 'Как получить кулинарные книги от сообщества';
+
+  @override
+  String get faqCommSubtitle => 'Скачивайте бесплатные кулинарные книги и делитесь своими';
+
+  @override
+  String get faqCommStep1Title => 'Откройте Сообщество';
+
+  @override
+  String get faqCommStep1Desc => 'Нажмите «Сообщество» внизу, затем «Кулинарные книги», чтобы видеть целые книги, а не отдельные рецепты.';
+
+  @override
+  String get faqCommStep2Title => 'Скачайте книгу';
+
+  @override
+  String get faqCommStep2Desc => 'Откройте книгу и нажмите «Скачать все рецепты». Если нужны не все, нажмите «Выбрать отдельные рецепты».';
+
+  @override
+  String get faqCommStep2Tip => 'Когда автор улучшит скачанную вами книгу, приложение предложит новую версию и сохранит ваши изменения.';
+
+  @override
+  String get faqCommStep3Title => 'Выберите, куда сохранить';
+
+  @override
+  String get faqCommStep3Desc => 'Нажмите стрелку рядом со скачиванием, чтобы сохранить как новую кулинарную книгу или добавить в существующую.';
+
+  @override
+  String get faqCommStep4Title => 'Посмотрите перед скачиванием';
+
+  @override
+  String get faqCommStep4Desc => 'Нажмите на рецепт, чтобы быстро его просмотреть, или «Посмотреть полный рецепт», чтобы увидеть всё.';
+
+  @override
+  String get faqCommStep5Title => 'Поделитесь своими';
+
+  @override
+  String get faqCommStep5Desc => 'Нажмите «Опубликовать», чтобы поделиться своей книгой или рецептом со всеми. Нужно войти в аккаунт.';
 }
