@@ -12364,4 +12364,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => 'What you have on hand and always keep';
+
+  @override
+  String get faqPantryTitle => 'How to use your pantry';
+
+  @override
+  String get faqPantrySubtitle => 'Keep track of what you have and see what you can cook';
+
+  @override
+  String get faqPantryStep1Title => 'Open your pantry';
+
+  @override
+  String get faqPantryStep1Desc => 'Tap More at the bottom of the screen, then My Pantry. What can I make? is right above it, and on the Home screen too.';
+
+  @override
+  String get faqPantryStep2Title => 'Add what you have';
+
+  @override
+  String get faqPantryStep2Desc => 'Type what you have and tap the tick. Add several at once with commas, like eggs, milk, butter.';
+
+  @override
+  String get faqPantryStep3Title => 'Add common ingredients';
+
+  @override
+  String get faqPantryStep3Desc => 'Tap Add common ingredients and tick what you keep, or tap Select all for a whole group. Pick Always have for things you rarely run out of, like flour and spices, or On hand now for fresh food.';
+
+  @override
+  String get faqPantryStep4Title => 'On hand now and Always have';
+
+  @override
+  String get faqPantryStep4Desc => 'On hand now is what you have this week, with the day you added it. Tap the pin to move an item to Always have, or the snowflake when it goes in the freezer.';
+
+  @override
+  String get faqPantryStep4Tip => 'Always have items never count as missing, so recipes that use them can still be ready to cook.';
+
+  @override
+  String get faqPantryStep5Title => 'After you shop';
+
+  @override
+  String get faqPantryStep5Desc => 'Tap Clear all and answer Yes, then add what you bought. Your Always have list stays as it is.';
+
+  @override
+  String get faqPantryStep6Title => 'Still have these?';
+
+  @override
+  String get faqPantryStep6Desc => 'After a while the app asks about fresh food: about 3 days for meat, a week for most vegetables. Tap Keep if you still have it, or remove it. Frozen food lasts about 6 months.';
+
+  @override
+  String get faqPantryStep7Title => 'See what you can make';
+
+  @override
+  String get faqPantryStep7Desc => 'What can I make? shows your recipes with the ones you can cook right now first. Tap Add missing to put what you need on your shopping list.';
+
+  @override
+  String get faqPantryQTitle => 'What is the difference between On hand now and Always have?';
+
+  @override
+  String get faqPantryQSubtitle => 'The two lists in your pantry';
+
+  @override
+  String get faqPantryQAnswer => 'On hand now is food you use up, like milk, eggs and meat. The app asks about it after a while, and you can clear it all after a shopping trip. Always have is for things you rarely run out of, like salt, flour, spices and oil. They are never counted as missing and never cleared.';
+
+  @override
+  String get pantryHowItWorks => 'How it works';
 }

@@ -160,7 +160,7 @@ void main() {
     }
 
     Future<void> open(WidgetTester tester, AppDatabase db) async {
-      tester.view.physicalSize = const Size(420, 2400);
+      tester.view.physicalSize = const Size(411, 2400); // a Pixel phone's width
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(ProviderScope(

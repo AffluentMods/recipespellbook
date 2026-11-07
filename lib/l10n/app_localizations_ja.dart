@@ -12209,4 +12209,67 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => '今あるものと常備品';
+
+  @override
+  String get faqPantryTitle => 'パントリーの使い方';
+
+  @override
+  String get faqPantrySubtitle => '手元の食材を管理して、作れる料理を見つけましょう';
+
+  @override
+  String get faqPantryStep1Title => 'パントリーを開く';
+
+  @override
+  String get faqPantryStep1Desc => '画面下の「その他」をタップし、「私のパントリー」を開きます。「何が作れる？」はそのすぐ上と、ホーム画面にもあります。';
+
+  @override
+  String get faqPantryStep2Title => '手元にあるものを追加';
+
+  @override
+  String get faqPantryStep2Desc => '手元にあるものを入力してチェックをタップします。卵, 牛乳, バター のようにカンマで区切れば、まとめて追加できます。';
+
+  @override
+  String get faqPantryStep3Title => 'よく使う食材を追加';
+
+  @override
+  String get faqPantryStep3Desc => '「よく使う食材を追加」をタップして、あるものにチェックを入れるか、「すべて選択」でグループごと選びます。小麦粉やスパイスなどめったに切らさないものは「常備品」、生鮮食品は「今あるもの」を選びましょう。';
+
+  @override
+  String get faqPantryStep4Title => '今あるものと常備品';
+
+  @override
+  String get faqPantryStep4Desc => '「今あるもの」は今週手元にあるもので、追加した日も表示されます。ピンをタップすると常備品に移動、雪のマークは冷凍庫に入れたときに使います。';
+
+  @override
+  String get faqPantryStep4Tip => '常備品は不足として数えないので、それを使うレシピもすぐ作れる扱いになります。';
+
+  @override
+  String get faqPantryStep5Title => '買い物のあとで';
+
+  @override
+  String get faqPantryStep5Desc => '「すべて消去」をタップして「はい」を選び、買ってきたものを追加します。常備品のリストはそのままです。';
+
+  @override
+  String get faqPantryStep6Title => 'まだありますか？';
+
+  @override
+  String get faqPantryStep6Desc => 'しばらくすると、生鮮食品について確認されます。肉は約3日、ほとんどの野菜は約1週間です。まだあれば「残す」、なければ削除します。冷凍したものは約6か月もちます。';
+
+  @override
+  String get faqPantryStep7Title => '作れる料理を見る';
+
+  @override
+  String get faqPantryStep7Desc => '「何が作れる？」には、今すぐ作れるレシピから順に表示されます。「不足分を追加」で買い物リストに入れられます。';
+
+  @override
+  String get faqPantryQTitle => '「今あるもの」と「常備品」の違いは？';
+
+  @override
+  String get faqPantryQSubtitle => 'パントリーの2つのリスト';
+
+  @override
+  String get faqPantryQAnswer => '「今あるもの」は牛乳、卵、肉など使えばなくなる食材です。しばらくすると確認され、買い物のあとにまとめて消去できます。「常備品」は塩、小麦粉、スパイス、油などめったに切らさないもので、不足として数えられることも消去されることもありません。';
+
+  @override
+  String get pantryHowItWorks => '使い方';
 }

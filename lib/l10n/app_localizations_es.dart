@@ -12345,4 +12345,67 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => 'Lo que tienes ahora y siempre tienes';
+
+  @override
+  String get faqPantryTitle => 'Cómo usar tu despensa';
+
+  @override
+  String get faqPantrySubtitle => 'Lleva la cuenta de lo que tienes y mira qué puedes cocinar';
+
+  @override
+  String get faqPantryStep1Title => 'Abre tu despensa';
+
+  @override
+  String get faqPantryStep1Desc => 'Toca Más en la parte inferior y luego Mi despensa. ¿Qué puedo cocinar? está justo encima, y también en la pantalla de inicio.';
+
+  @override
+  String get faqPantryStep2Title => 'Añade lo que tienes';
+
+  @override
+  String get faqPantryStep2Desc => 'Escribe lo que tienes y toca el visto. Añade varias cosas a la vez con comas, como huevos, leche, mantequilla.';
+
+  @override
+  String get faqPantryStep3Title => 'Añade ingredientes comunes';
+
+  @override
+  String get faqPantryStep3Desc => 'Toca Añadir ingredientes comunes y marca lo que tienes, o toca Seleccionar todo para un grupo entero. Elige Siempre tengo para lo que casi nunca se acaba, como harina y especias, o Tengo ahora para lo fresco.';
+
+  @override
+  String get faqPantryStep4Title => 'Tengo ahora y Siempre tengo';
+
+  @override
+  String get faqPantryStep4Desc => 'Tengo ahora es lo que tienes esta semana, con el día en que lo añadiste. Toca la chincheta para pasarlo a Siempre tengo, o el copo de nieve cuando va al congelador.';
+
+  @override
+  String get faqPantryStep4Tip => 'Lo que está en Siempre tengo nunca cuenta como faltante, así que las recetas que lo usan pueden estar listas.';
+
+  @override
+  String get faqPantryStep5Title => 'Después de la compra';
+
+  @override
+  String get faqPantryStep5Desc => 'Toca Vaciar todo y responde Sí, y luego añade lo que compraste. Tu lista Siempre tengo se queda igual.';
+
+  @override
+  String get faqPantryStep6Title => '¿Todavía tienes esto?';
+
+  @override
+  String get faqPantryStep6Desc => 'Pasado un tiempo, la app pregunta por lo fresco: unos 3 días para la carne y una semana para casi todas las verduras. Toca Conservar si aún lo tienes, o quítalo. Lo congelado dura unos 6 meses.';
+
+  @override
+  String get faqPantryStep7Title => 'Mira qué puedes cocinar';
+
+  @override
+  String get faqPantryStep7Desc => '¿Qué puedo cocinar? muestra tus recetas, primero las que puedes hacer ya. Toca Añadir lo que falta para ponerlo en tu lista de la compra.';
+
+  @override
+  String get faqPantryQTitle => '¿Qué diferencia hay entre Tengo ahora y Siempre tengo?';
+
+  @override
+  String get faqPantryQSubtitle => 'Las dos listas de tu despensa';
+
+  @override
+  String get faqPantryQAnswer => 'Tengo ahora es la comida que se gasta, como leche, huevos y carne. La app pregunta por ella pasado un tiempo, y puedes vaciarla después de la compra. Siempre tengo es para lo que casi nunca se acaba, como sal, harina, especias y aceite. Nunca cuenta como faltante y nunca se vacía.';
+
+  @override
+  String get pantryHowItWorks => 'Cómo funciona';
 }

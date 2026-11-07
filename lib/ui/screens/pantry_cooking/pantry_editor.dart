@@ -352,8 +352,10 @@ class _CommonIngredientsSheetState extends ConsumerState<_CommonIngredientsSheet
     final c = context.appColors;
     final lang = Localizations.localeOf(context).languageCode;
     final pantry = ref.watch(pantryProvider).valueOrNull;
-    final matcher = pantry?.matcher;
-    bool have(String name) => matcher?.hasItem(name) ?? false;
+    // Exact names only: "all-purpose flour" on hand should still leave
+    // "bread flour" to tick.
+    final owned = {...?pantry?.items, ...?pantry?.basics};
+    bool have(String name) => owned.contains(name.toLowerCase().trim());
 
     return Container(
       key: const ValueKey('pantry-common-sheet'),
@@ -473,7 +475,7 @@ class _CommonIngredientsSheetState extends ConsumerState<_CommonIngredientsSheet
               child: FilledButton(
                 key: const ValueKey('pantry-common-add'),
                 onPressed: _picked.isEmpty ? null : _add,
-                style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
                 child: Text(l10n.pantryCommonAddCount(_picked.length)),
               ),
             ),

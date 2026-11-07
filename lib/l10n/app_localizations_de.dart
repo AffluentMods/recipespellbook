@@ -12352,4 +12352,67 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => 'Was du gerade hast und immer im Haus hast';
+
+  @override
+  String get faqPantryTitle => 'So nutzt du deine Vorratskammer';
+
+  @override
+  String get faqPantrySubtitle => 'Behalte im Blick, was du hast, und sieh, was du kochen kannst';
+
+  @override
+  String get faqPantryStep1Title => 'Vorratskammer öffnen';
+
+  @override
+  String get faqPantryStep1Desc => 'Tippe unten auf Mehr und dann auf Meine Vorratskammer. Was kann ich kochen? steht direkt darüber und auch auf dem Startbildschirm.';
+
+  @override
+  String get faqPantryStep2Title => 'Eintragen, was du hast';
+
+  @override
+  String get faqPantryStep2Desc => 'Tippe ein, was du hast, und tippe auf den Haken. Mehreres auf einmal geht mit Kommas, zum Beispiel Eier, Milch, Butter.';
+
+  @override
+  String get faqPantryStep3Title => 'Gängige Zutaten hinzufügen';
+
+  @override
+  String get faqPantryStep3Desc => 'Tippe auf Gängige Zutaten hinzufügen und hake an, was du hast, oder tippe auf Alle auswählen für eine ganze Gruppe. Wähle Immer im Haus für Dinge, die selten ausgehen, wie Mehl und Gewürze, oder Gerade da für Frisches.';
+
+  @override
+  String get faqPantryStep4Title => 'Gerade da und Immer im Haus';
+
+  @override
+  String get faqPantryStep4Desc => 'Gerade da ist, was du diese Woche hast, mit dem Tag, an dem du es eingetragen hast. Tippe auf die Nadel, um es zu Immer im Haus zu verschieben, oder auf die Schneeflocke, wenn es in den Gefrierschrank kommt.';
+
+  @override
+  String get faqPantryStep4Tip => 'Was Immer im Haus ist, zählt nie als fehlend. Rezepte damit können also trotzdem bereit sein.';
+
+  @override
+  String get faqPantryStep5Title => 'Nach dem Einkauf';
+
+  @override
+  String get faqPantryStep5Desc => 'Tippe auf Alles leeren und antworte mit Ja. Dann trage ein, was du gekauft hast. Deine Liste Immer im Haus bleibt.';
+
+  @override
+  String get faqPantryStep6Title => 'Noch da?';
+
+  @override
+  String get faqPantryStep6Desc => 'Nach einer Weile fragt die App nach Frischem: nach etwa 3 Tagen bei Fleisch, nach einer Woche bei den meisten Gemüsen. Tippe auf Behalten, wenn du es noch hast, oder entferne es. Eingefrorenes hält etwa 6 Monate.';
+
+  @override
+  String get faqPantryStep7Title => 'Sehen, was du kochen kannst';
+
+  @override
+  String get faqPantryStep7Desc => 'Was kann ich kochen? zeigt deine Rezepte, die sofort machbaren zuerst. Tippe auf Fehlendes hinzufügen, um den Rest auf die Einkaufsliste zu setzen.';
+
+  @override
+  String get faqPantryQTitle => 'Was ist der Unterschied zwischen Gerade da und Immer im Haus?';
+
+  @override
+  String get faqPantryQSubtitle => 'Die zwei Listen deiner Vorratskammer';
+
+  @override
+  String get faqPantryQAnswer => 'Gerade da ist, was du aufbrauchst, wie Milch, Eier und Fleisch. Die App fragt nach einer Weile danach, und nach dem Einkauf kannst du alles leeren. Immer im Haus ist für Dinge, die selten ausgehen, wie Salz, Mehl, Gewürze und Öl. Sie zählen nie als fehlend und werden nie geleert.';
+
+  @override
+  String get pantryHowItWorks => 'So funktioniert es';
 }

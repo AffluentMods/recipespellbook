@@ -7,6 +7,15 @@ import '../../../utils/responsive_utils.dart';
 // FAQ SCREEN
 // ═══════════════════════════════════════════════════════════════════
 
+/// Opens one how-to guide straight away (for example 'pantry' from the
+/// pantry screen's help button).
+void openFaqHowTo(BuildContext context, String id) {
+  final l10n = AppLocalizations.of(context)!;
+  final howTo = _FaqScreenState._buildHowTos(l10n).where((h) => h.id == id).firstOrNull;
+  if (howTo == null) return;
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => _FaqDetailScreen(howTo: howTo)));
+}
+
 class FaqScreen extends StatefulWidget {
   const FaqScreen({super.key});
 
@@ -157,8 +166,60 @@ class _FaqScreenState extends State<FaqScreen> {
     );
   }
 
-  List<_HowTo> _buildHowTos(AppLocalizations l10n) {
+  static List<_HowTo> _buildHowTos(AppLocalizations l10n) {
     return [
+      _HowTo(
+        id: 'pantry',
+        icon: Icons.kitchen_rounded,
+        color: const Color(0xFF7CB342),
+        title: l10n.faqPantryTitle,
+        subtitle: l10n.faqPantrySubtitle,
+        steps: [
+          _FaqStep(
+            title: l10n.faqPantryStep1Title,
+            description: l10n.faqPantryStep1Desc,
+            icon: Icons.more_horiz,
+            asset: const _FaqAsset(filename: 'pantry_1.jpg', description: 'More tab with Kitchen circled'),
+          ),
+          _FaqStep(
+            title: l10n.faqPantryStep2Title,
+            description: l10n.faqPantryStep2Desc,
+            icon: Icons.add,
+            asset: const _FaqAsset(filename: 'pantry_2.jpg', description: 'Pantry add field circled'),
+          ),
+          _FaqStep(
+            title: l10n.faqPantryStep3Title,
+            description: l10n.faqPantryStep3Desc,
+            icon: Icons.playlist_add,
+            asset: const _FaqAsset(filename: 'pantry_3.jpg', description: 'Common ingredients lists'),
+          ),
+          _FaqStep(
+            title: l10n.faqPantryStep4Title,
+            description: l10n.faqPantryStep4Desc,
+            icon: Icons.push_pin_outlined,
+            asset: const _FaqAsset(filename: 'pantry_4.jpg', description: 'On hand now list with pin and snowflake circled'),
+            tip: l10n.faqPantryStep4Tip,
+          ),
+          _FaqStep(
+            title: l10n.faqPantryStep5Title,
+            description: l10n.faqPantryStep5Desc,
+            icon: Icons.delete_sweep_outlined,
+            asset: const _FaqAsset(filename: 'pantry_5.jpg', description: 'Clear all with Yes and No'),
+          ),
+          _FaqStep(
+            title: l10n.faqPantryStep6Title,
+            description: l10n.faqPantryStep6Desc,
+            icon: Icons.schedule,
+            asset: const _FaqAsset(filename: 'pantry_6.jpg', description: 'Still have these? card'),
+          ),
+          _FaqStep(
+            title: l10n.faqPantryStep7Title,
+            description: l10n.faqPantryStep7Desc,
+            icon: Icons.restaurant_menu,
+            asset: const _FaqAsset(filename: 'pantry_7.jpg', description: 'What can I make? results'),
+          ),
+        ],
+      ),
       _HowTo(
         id: 'add-headers',
         icon: Icons.view_agenda_outlined,
@@ -319,6 +380,14 @@ class _FaqScreenState extends State<FaqScreen> {
 
   List<_TextQuestion> _buildQuestions(AppLocalizations l10n) {
     return [
+      _TextQuestion(
+        icon: Icons.kitchen_rounded,
+        color: const Color(0xFF7CB342),
+        question: l10n.faqPantryQTitle,
+        subtitle: l10n.faqPantryQSubtitle,
+        answer: l10n.faqPantryQAnswer,
+        linkedHowToId: 'pantry',
+      ),
       _TextQuestion(
         icon: Icons.view_agenda_outlined,
         color: const Color(0xFF2196F3),
@@ -835,11 +904,14 @@ class _FaqAssetWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final assetPath = 'assets/images/faqs/${asset.filename}';
 
-    return ClipRRect(
+    // Tap for the full-size picture.
+    return GestureDetector(
+      onTap: () => showGuideScreenshot(context, assetPath),
+      child: ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 180, maxHeight: 320),
+        constraints: const BoxConstraints(minHeight: 180, maxHeight: 460),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(12),
@@ -866,6 +938,27 @@ class _FaqAssetWidget extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
+}
+
+/// A guide picture at full size, zoomable; tap anywhere to close.
+void showGuideScreenshot(BuildContext context, String assetPath) {
+  showDialog<void>(
+    context: context,
+    barrierColor: Colors.black87,
+    builder: (ctx) => GestureDetector(
+      onTap: () => Navigator.of(ctx).pop(),
+      child: Dialog.fullscreen(
+        backgroundColor: Colors.transparent,
+        child: SafeArea(
+          child: InteractiveViewer(
+            maxScale: 4,
+            child: Center(child: Image.asset(assetPath, fit: BoxFit.contain)),
+          ),
+        ),
+      ),
+    ),
+  );
 }

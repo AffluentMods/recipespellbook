@@ -12358,4 +12358,67 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => 'Quello che hai in casa e tieni sempre';
+
+  @override
+  String get faqPantryTitle => 'Come usare la dispensa';
+
+  @override
+  String get faqPantrySubtitle => 'Tieni traccia di quello che hai e scopri cosa puoi cucinare';
+
+  @override
+  String get faqPantryStep1Title => 'Apri la dispensa';
+
+  @override
+  String get faqPantryStep1Desc => 'Tocca Altro in basso, poi La mia dispensa. Cosa posso cucinare? è subito sopra, e anche nella schermata Home.';
+
+  @override
+  String get faqPantryStep2Title => 'Aggiungi quello che hai';
+
+  @override
+  String get faqPantryStep2Desc => 'Scrivi quello che hai e tocca la spunta. Aggiungi più cose insieme con le virgole, per esempio uova, latte, burro.';
+
+  @override
+  String get faqPantryStep3Title => 'Aggiungi ingredienti comuni';
+
+  @override
+  String get faqPantryStep3Desc => 'Tocca Aggiungi ingredienti comuni e spunta quello che hai, oppure tocca Seleziona tutto per un gruppo intero. Scegli Sempre in casa per ciò che finisce di rado, come farina e spezie, o In casa ora per i freschi.';
+
+  @override
+  String get faqPantryStep4Title => 'In casa ora e Sempre in casa';
+
+  @override
+  String get faqPantryStep4Desc => 'In casa ora è quello che hai questa settimana, con il giorno in cui l\'hai aggiunto. Tocca la puntina per spostarlo in Sempre in casa, o il fiocco di neve quando va nel freezer.';
+
+  @override
+  String get faqPantryStep4Tip => 'Ciò che è in Sempre in casa non conta mai come mancante, quindi le ricette che lo usano possono essere pronte.';
+
+  @override
+  String get faqPantryStep5Title => 'Dopo la spesa';
+
+  @override
+  String get faqPantryStep5Desc => 'Tocca Svuota tutto e rispondi Sì, poi aggiungi quello che hai comprato. La lista Sempre in casa resta com\'è.';
+
+  @override
+  String get faqPantryStep6Title => 'Hai ancora questi?';
+
+  @override
+  String get faqPantryStep6Desc => 'Dopo un po\' l\'app chiede dei freschi: circa 3 giorni per la carne, una settimana per quasi tutte le verdure. Tocca Tieni se lo hai ancora, o rimuovilo. I surgelati durano circa 6 mesi.';
+
+  @override
+  String get faqPantryStep7Title => 'Scopri cosa puoi cucinare';
+
+  @override
+  String get faqPantryStep7Desc => 'Cosa posso cucinare? mostra le tue ricette, prima quelle che puoi fare subito. Tocca Aggiungi ciò che manca per metterli nella lista della spesa.';
+
+  @override
+  String get faqPantryQTitle => 'Che differenza c\'è tra In casa ora e Sempre in casa?';
+
+  @override
+  String get faqPantryQSubtitle => 'Le due liste della dispensa';
+
+  @override
+  String get faqPantryQAnswer => 'In casa ora è il cibo che si consuma, come latte, uova e carne. L\'app ne chiede dopo un po\', e dopo la spesa puoi svuotare tutto. Sempre in casa è per ciò che finisce di rado, come sale, farina, spezie e olio. Non conta mai come mancante e non viene mai svuotato.';
+
+  @override
+  String get pantryHowItWorks => 'Come funziona';
 }

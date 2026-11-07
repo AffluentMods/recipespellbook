@@ -12205,4 +12205,67 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => '现有食材和常备食材';
+
+  @override
+  String get faqPantryTitle => '如何使用储藏室';
+
+  @override
+  String get faqPantrySubtitle => '记录你有什么，看看能做什么菜';
+
+  @override
+  String get faqPantryStep1Title => '打开储藏室';
+
+  @override
+  String get faqPantryStep1Desc => '点屏幕底部的“更多”，再点“我的储藏室”。“我能做什么？”就在它上面，主屏幕上也有。';
+
+  @override
+  String get faqPantryStep2Title => '添加你有的东西';
+
+  @override
+  String get faqPantryStep2Desc => '输入你有的东西并点对勾。用逗号分隔可以一次添加多样，比如 鸡蛋, 牛奶, 黄油。';
+
+  @override
+  String get faqPantryStep3Title => '添加常用食材';
+
+  @override
+  String get faqPantryStep3Desc => '点“添加常用食材”，勾选你有的东西，或点“全选”选中整组。面粉、香料这类很少用完的选“常备”，新鲜食材选“现有食材”。';
+
+  @override
+  String get faqPantryStep4Title => '现有食材和常备';
+
+  @override
+  String get faqPantryStep4Desc => '“现有食材”是你这周手头的东西，并显示添加日期。点图钉可移到“常备”，放进冷冻室时点雪花。';
+
+  @override
+  String get faqPantryStep4Tip => '常备里的东西永远不算缺少，所以用到它们的菜谱也能显示为可以做。';
+
+  @override
+  String get faqPantryStep5Title => '购物之后';
+
+  @override
+  String get faqPantryStep5Desc => '点“全部清空”并选“是”，然后添加新买的东西。常备清单保持不变。';
+
+  @override
+  String get faqPantryStep6Title => '这些还有吗？';
+
+  @override
+  String get faqPantryStep6Desc => '过一段时间，应用会询问新鲜食材：肉大约 3 天，多数蔬菜大约一周。如果还有就点“保留”，没有就删除。冷冻食品大约能放 6 个月。';
+
+  @override
+  String get faqPantryStep7Title => '看看能做什么';
+
+  @override
+  String get faqPantryStep7Desc => '“我能做什么？”会列出你的菜谱，马上能做的排在前面。点“添加缺少的”可以把缺的东西加到购物清单。';
+
+  @override
+  String get faqPantryQTitle => '“现有食材”和“常备”有什么区别？';
+
+  @override
+  String get faqPantryQSubtitle => '储藏室里的两个清单';
+
+  @override
+  String get faqPantryQAnswer => '“现有食材”是会用完的食物，比如牛奶、鸡蛋和肉。过一段时间应用会询问，购物后也可以一次清空。“常备”是很少用完的东西，比如盐、面粉、香料和油。它们永远不算缺少，也不会被清空。';
+
+  @override
+  String get pantryHowItWorks => '使用说明';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'faq_screen.dart' show showGuideScreenshot;
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1991,11 +1992,14 @@ class _AssetPlaceholder extends StatelessWidget {
     // Try to load the real asset first
     final assetPath = 'assets/images/guides/${asset.filename}';
 
-    return ClipRRect(
+    // Tap for the full-size picture.
+    return GestureDetector(
+      onTap: () => showGuideScreenshot(context, assetPath),
+      child: ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 180, maxHeight: 320),
+        constraints: const BoxConstraints(minHeight: 180, maxHeight: 460),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(12),
@@ -2008,6 +2012,7 @@ class _AssetPlaceholder extends StatelessWidget {
           fit: BoxFit.contain,
           errorBuilder: (_, __, ___) => _buildPlaceholder(context, theme),
         ),
+      ),
       ),
     );
   }

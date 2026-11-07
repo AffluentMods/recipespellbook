@@ -12352,4 +12352,67 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => 'Ce que vous avez et gardez toujours';
+
+  @override
+  String get faqPantryTitle => 'Utiliser votre garde-manger';
+
+  @override
+  String get faqPantrySubtitle => 'Suivez ce que vous avez et voyez ce que vous pouvez cuisiner';
+
+  @override
+  String get faqPantryStep1Title => 'Ouvrez votre garde-manger';
+
+  @override
+  String get faqPantryStep1Desc => 'Touchez Plus en bas de l\'écran, puis Mon garde-manger. Que puis-je cuisiner ? est juste au-dessus, et aussi sur l\'accueil.';
+
+  @override
+  String get faqPantryStep2Title => 'Ajoutez ce que vous avez';
+
+  @override
+  String get faqPantryStep2Desc => 'Tapez ce que vous avez et touchez la coche. Ajoutez-en plusieurs avec des virgules, par exemple œufs, lait, beurre.';
+
+  @override
+  String get faqPantryStep3Title => 'Ajoutez des ingrédients courants';
+
+  @override
+  String get faqPantryStep3Desc => 'Touchez Ajouter des ingrédients courants et cochez ce que vous avez, ou touchez Tout sélectionner pour un groupe entier. Choisissez Toujours en stock pour ce qui manque rarement, comme la farine et les épices, ou En stock maintenant pour le frais.';
+
+  @override
+  String get faqPantryStep4Title => 'En stock maintenant et Toujours en stock';
+
+  @override
+  String get faqPantryStep4Desc => 'En stock maintenant, c\'est ce que vous avez cette semaine, avec le jour d\'ajout. Touchez l\'épingle pour passer un article dans Toujours en stock, ou le flocon quand il va au congélateur.';
+
+  @override
+  String get faqPantryStep4Tip => 'Ce qui est dans Toujours en stock ne compte jamais comme manquant : les recettes qui l\'utilisent peuvent être prêtes.';
+
+  @override
+  String get faqPantryStep5Title => 'Après les courses';
+
+  @override
+  String get faqPantryStep5Desc => 'Touchez Tout vider et répondez Oui, puis ajoutez vos achats. Votre liste Toujours en stock ne change pas.';
+
+  @override
+  String get faqPantryStep6Title => 'Vous avez encore ceci ?';
+
+  @override
+  String get faqPantryStep6Desc => 'Au bout d\'un moment, l\'app demande pour le frais : environ 3 jours pour la viande, une semaine pour la plupart des légumes. Touchez Garder si vous l\'avez encore, ou retirez-le. Le surgelé tient environ 6 mois.';
+
+  @override
+  String get faqPantryStep7Title => 'Voyez ce que vous pouvez cuisiner';
+
+  @override
+  String get faqPantryStep7Desc => 'Que puis-je cuisiner ? montre vos recettes, celles que vous pouvez faire tout de suite en premier. Touchez Ajouter ce qui manque pour le mettre sur votre liste de courses.';
+
+  @override
+  String get faqPantryQTitle => 'Quelle différence entre En stock maintenant et Toujours en stock ?';
+
+  @override
+  String get faqPantryQSubtitle => 'Les deux listes de votre garde-manger';
+
+  @override
+  String get faqPantryQAnswer => 'En stock maintenant, c\'est ce qui se consomme, comme le lait, les œufs et la viande. L\'app demande au bout d\'un moment, et vous pouvez tout vider après les courses. Toujours en stock, c\'est ce qui manque rarement, comme le sel, la farine, les épices et l\'huile. Ce n\'est jamais compté comme manquant ni vidé.';
+
+  @override
+  String get pantryHowItWorks => 'Comment ça marche';
 }

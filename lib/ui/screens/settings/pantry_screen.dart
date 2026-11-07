@@ -6,6 +6,7 @@ import '../../../providers/pantry_cooking_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/responsive_utils.dart';
+import '../import/faq_screen.dart' show openFaqHowTo;
 import '../pantry_cooking/pantry_cooking_widgets.dart';
 
 /// The pantry: what is on hand now (dated, so the app can ask "Still have
@@ -33,7 +34,16 @@ class PantryScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.myPantry)),
+      appBar: AppBar(
+        title: Text(l10n.myPantry),
+        actions: [
+          IconButton(
+            tooltip: l10n.pantryHowItWorks,
+            icon: const Icon(Icons.help_outline_rounded),
+            onPressed: () => openFaqHowTo(context, 'pantry'),
+          ),
+        ],
+      ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : Responsive.constrainWidth(

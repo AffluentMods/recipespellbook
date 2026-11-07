@@ -12339,4 +12339,67 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => 'O que você tem agora e sempre tem';
+
+  @override
+  String get faqPantryTitle => 'Como usar sua despensa';
+
+  @override
+  String get faqPantrySubtitle => 'Acompanhe o que você tem e veja o que pode cozinhar';
+
+  @override
+  String get faqPantryStep1Title => 'Abra sua despensa';
+
+  @override
+  String get faqPantryStep1Desc => 'Toque em Mais na parte de baixo da tela e depois em Minha despensa. O que posso cozinhar? fica logo acima, e também na tela inicial.';
+
+  @override
+  String get faqPantryStep2Title => 'Adicione o que você tem';
+
+  @override
+  String get faqPantryStep2Desc => 'Digite o que você tem e toque no visto. Adicione várias coisas de uma vez com vírgulas, como ovos, leite, manteiga.';
+
+  @override
+  String get faqPantryStep3Title => 'Adicione ingredientes comuns';
+
+  @override
+  String get faqPantryStep3Desc => 'Toque em Adicionar ingredientes comuns e marque o que você tem, ou toque em Selecionar tudo para um grupo inteiro. Escolha Sempre tenho para o que raramente acaba, como farinha e temperos, ou Tenho agora para alimentos frescos.';
+
+  @override
+  String get faqPantryStep4Title => 'Tenho agora e Sempre tenho';
+
+  @override
+  String get faqPantryStep4Desc => 'Tenho agora é o que você tem nesta semana, com o dia em que adicionou. Toque no alfinete para mover para Sempre tenho, ou no floco de neve quando for para o congelador.';
+
+  @override
+  String get faqPantryStep4Tip => 'O que está em Sempre tenho nunca conta como faltando, então as receitas que usam esses itens podem ficar prontas.';
+
+  @override
+  String get faqPantryStep5Title => 'Depois das compras';
+
+  @override
+  String get faqPantryStep5Desc => 'Toque em Limpar tudo e responda Sim, depois adicione o que comprou. Sua lista Sempre tenho continua igual.';
+
+  @override
+  String get faqPantryStep6Title => 'Ainda tem estes?';
+
+  @override
+  String get faqPantryStep6Desc => 'Depois de um tempo o app pergunta sobre os alimentos frescos: cerca de 3 dias para carne e uma semana para a maioria dos legumes. Toque em Manter se ainda tiver, ou remova. Congelados duram cerca de 6 meses.';
+
+  @override
+  String get faqPantryStep7Title => 'Veja o que você pode fazer';
+
+  @override
+  String get faqPantryStep7Desc => 'O que posso cozinhar? mostra suas receitas, primeiro as que você pode fazer agora. Toque em Adicionar o que falta para colocar na lista de compras.';
+
+  @override
+  String get faqPantryQTitle => 'Qual é a diferença entre Tenho agora e Sempre tenho?';
+
+  @override
+  String get faqPantryQSubtitle => 'As duas listas da sua despensa';
+
+  @override
+  String get faqPantryQAnswer => 'Tenho agora é a comida que acaba, como leite, ovos e carne. O app pergunta sobre ela depois de um tempo, e você pode limpar tudo depois das compras. Sempre tenho é para o que raramente acaba, como sal, farinha, temperos e óleo. Nunca conta como faltando e nunca é limpo.';
+
+  @override
+  String get pantryHowItWorks => 'Como funciona';
 }

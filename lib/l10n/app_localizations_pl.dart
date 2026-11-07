@@ -12560,4 +12560,67 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => 'To, co masz teraz i zawsze w domu';
+
+  @override
+  String get faqPantryTitle => 'Jak korzystać ze spiżarni';
+
+  @override
+  String get faqPantrySubtitle => 'Śledź, co masz, i zobacz, co możesz ugotować';
+
+  @override
+  String get faqPantryStep1Title => 'Otwórz spiżarnię';
+
+  @override
+  String get faqPantryStep1Desc => 'Stuknij Więcej na dole ekranu, a potem Moja spiżarnia. Co mogę ugotować? jest tuż nad nią, a także na ekranie głównym.';
+
+  @override
+  String get faqPantryStep2Title => 'Dodaj to, co masz';
+
+  @override
+  String get faqPantryStep2Desc => 'Wpisz, co masz, i stuknij ptaszek. Kilka rzeczy naraz dodasz po przecinku, na przykład jajka, mleko, masło.';
+
+  @override
+  String get faqPantryStep3Title => 'Dodaj popularne składniki';
+
+  @override
+  String get faqPantryStep3Desc => 'Stuknij Dodaj popularne składniki i zaznacz, co masz, albo stuknij Zaznacz wszystko dla całej grupy. Wybierz Zawsze w domu dla tego, co rzadko się kończy, jak mąka i przyprawy, albo Teraz w domu dla świeżych produktów.';
+
+  @override
+  String get faqPantryStep4Title => 'Teraz w domu i Zawsze w domu';
+
+  @override
+  String get faqPantryStep4Desc => 'Teraz w domu to to, co masz w tym tygodniu, z dniem dodania. Stuknij pinezkę, aby przenieść produkt do Zawsze w domu, albo płatek śniegu, gdy trafia do zamrażarki.';
+
+  @override
+  String get faqPantryStep4Tip => 'To, co jest w Zawsze w domu, nigdy nie liczy się jako brakujące, więc przepisy z tym produktem mogą być gotowe.';
+
+  @override
+  String get faqPantryStep5Title => 'Po zakupach';
+
+  @override
+  String get faqPantryStep5Desc => 'Stuknij Wyczyść wszystko i odpowiedz Tak, a potem dodaj to, co kupiłeś. Lista Zawsze w domu zostaje bez zmian.';
+
+  @override
+  String get faqPantryStep6Title => 'Nadal to masz?';
+
+  @override
+  String get faqPantryStep6Desc => 'Po pewnym czasie aplikacja pyta o świeże produkty: po około 3 dniach o mięso, po tygodniu o większość warzyw. Stuknij Zostaw, jeśli nadal to masz, albo usuń. Mrożonki wytrzymują około 6 miesięcy.';
+
+  @override
+  String get faqPantryStep7Title => 'Zobacz, co możesz ugotować';
+
+  @override
+  String get faqPantryStep7Desc => 'Co mogę ugotować? pokazuje Twoje przepisy, najpierw te, które możesz zrobić od razu. Stuknij Dodaj brakujące, aby dopisać je do listy zakupów.';
+
+  @override
+  String get faqPantryQTitle => 'Czym różni się Teraz w domu od Zawsze w domu?';
+
+  @override
+  String get faqPantryQSubtitle => 'Dwie listy w Twojej spiżarni';
+
+  @override
+  String get faqPantryQAnswer => 'Teraz w domu to jedzenie, które się zużywa, jak mleko, jajka i mięso. Aplikacja pyta o nie po pewnym czasie, a po zakupach możesz wszystko wyczyścić. Zawsze w domu to rzeczy, które rzadko się kończą, jak sól, mąka, przyprawy i olej. Nigdy nie liczą się jako brakujące i nigdy nie są czyszczone.';
+
+  @override
+  String get pantryHowItWorks => 'Jak to działa';
 }

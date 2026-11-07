@@ -12364,4 +12364,67 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get moreMyPantrySubtitle => 'Wat je nu hebt en altijd in huis hebt';
+
+  @override
+  String get faqPantryTitle => 'Zo gebruik je je voorraadkast';
+
+  @override
+  String get faqPantrySubtitle => 'Houd bij wat je hebt en zie wat je kunt koken';
+
+  @override
+  String get faqPantryStep1Title => 'Open je voorraadkast';
+
+  @override
+  String get faqPantryStep1Desc => 'Tik onderaan op Meer en dan op Mijn voorraadkast. Wat kan ik maken? staat er direct boven, en ook op het beginscherm.';
+
+  @override
+  String get faqPantryStep2Title => 'Voeg toe wat je hebt';
+
+  @override
+  String get faqPantryStep2Desc => 'Typ wat je hebt en tik op het vinkje. Voeg er meerdere tegelijk toe met komma\'s, zoals eieren, melk, boter.';
+
+  @override
+  String get faqPantryStep3Title => 'Voeg veelgebruikte ingrediënten toe';
+
+  @override
+  String get faqPantryStep3Desc => 'Tik op Veelgebruikte ingrediënten toevoegen en vink aan wat je hebt, of tik op Alles selecteren voor een hele groep. Kies Altijd in huis voor wat zelden op raakt, zoals bloem en kruiden, of Nu in huis voor vers eten.';
+
+  @override
+  String get faqPantryStep4Title => 'Nu in huis en Altijd in huis';
+
+  @override
+  String get faqPantryStep4Desc => 'Nu in huis is wat je deze week hebt, met de dag waarop je het toevoegde. Tik op de punaise om het naar Altijd in huis te verplaatsen, of op de sneeuwvlok als het in de vriezer gaat.';
+
+  @override
+  String get faqPantryStep4Tip => 'Wat Altijd in huis is, telt nooit als ontbrekend. Recepten die het gebruiken kunnen dus klaar zijn.';
+
+  @override
+  String get faqPantryStep5Title => 'Na het boodschappen doen';
+
+  @override
+  String get faqPantryStep5Desc => 'Tik op Alles wissen en antwoord Ja, en voeg dan toe wat je kocht. Je lijst Altijd in huis blijft zoals hij is.';
+
+  @override
+  String get faqPantryStep6Title => 'Heb je deze nog?';
+
+  @override
+  String get faqPantryStep6Desc => 'Na een tijdje vraagt de app naar vers eten: na ongeveer 3 dagen voor vlees, een week voor de meeste groenten. Tik op Houden als je het nog hebt, of verwijder het. Diepvries blijft ongeveer 6 maanden goed.';
+
+  @override
+  String get faqPantryStep7Title => 'Zie wat je kunt maken';
+
+  @override
+  String get faqPantryStep7Desc => 'Wat kan ik maken? toont je recepten, die je nu meteen kunt maken eerst. Tik op Ontbrekende toevoegen om ze op je boodschappenlijst te zetten.';
+
+  @override
+  String get faqPantryQTitle => 'Wat is het verschil tussen Nu in huis en Altijd in huis?';
+
+  @override
+  String get faqPantryQSubtitle => 'De twee lijsten in je voorraadkast';
+
+  @override
+  String get faqPantryQAnswer => 'Nu in huis is eten dat opraakt, zoals melk, eieren en vlees. De app vraagt er na een tijdje naar, en na het boodschappen doen kun je alles wissen. Altijd in huis is voor wat zelden op raakt, zoals zout, bloem, kruiden en olie. Dat telt nooit als ontbrekend en wordt nooit gewist.';
+
+  @override
+  String get pantryHowItWorks => 'Hoe het werkt';
 }
