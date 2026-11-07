@@ -12054,4 +12054,250 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => '내 요리책에서';
+
+  @override
+  String get pantryNowTitle => '지금 있는 재료';
+
+  @override
+  String get pantryNowHint => '지금 가지고 있는 재료예요. 장을 본 뒤에는 비우고 새로 산 것을 추가하세요.';
+
+  @override
+  String get pantryClearNow => '모두 지우기';
+
+  @override
+  String get pantryClearNowTitle => '지금 있는 재료를 모두 지울까요?';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목이 삭제됩니다. 항상 있는 재료 목록은 그대로 남아요.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 전에 추가함',
+      one: '어제 추가함',
+      zero: '오늘 추가함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count주 전에 추가함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 전에 냉동함',
+      one: '어제 냉동함',
+      zero: '오늘 냉동함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count주 전에 냉동함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => '냉동실에 넣기';
+
+  @override
+  String get pantryTakeOutOfFreezer => '냉동실에서 꺼내기';
+
+  @override
+  String get pantryMakeAlwaysHave => '항상 있는 재료로 이동';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return '$item을(를) 항상 있는 재료로 옮겼어요';
+  }
+
+  @override
+  String get pantryFreezerSection => '냉동실';
+
+  @override
+  String get pantryStillHaveTitle => '아직 있나요?';
+
+  @override
+  String get pantryStillHaveHint => '다 썼거나 상했을 수 있어요. 아직 있는 것은 남겨 두세요.';
+
+  @override
+  String get pantryKeep => '남기기';
+
+  @override
+  String get pantryRemoveThese => '이 항목 삭제';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '확인할 항목 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => '자주 쓰는 재료 추가';
+
+  @override
+  String get pantryCommonTitle => '자주 쓰는 재료';
+
+  @override
+  String get pantryCommonHint => '주방에 있는 것을 체크하고 한 번에 추가하세요.';
+
+  @override
+  String get pantryCommonAlwaysHint => '항상 있는 재료: 부족한 재료로 세지 않아요. 밀가루, 향신료, 기름에 좋아요.';
+
+  @override
+  String get pantryCommonNowHint => '지금 있는 재료: 다 쓸 때까지 세요. 신선 식품에 좋아요.';
+
+  @override
+  String get pantryCommonSelectAll => '모두 선택';
+
+  @override
+  String get pantryCommonSelectNone => '선택 해제';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '재료 $count개 추가',
+      zero: '추가',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '재료 $count개를 추가했어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => '밀가루와 베이킹';
+
+  @override
+  String get pantryPackSpices => '향신료와 양념';
+
+  @override
+  String get pantryPackHerbs => '말린 허브';
+
+  @override
+  String get pantryPackOils => '기름과 식초';
+
+  @override
+  String get pantryPackSauces => '소스와 조미료';
+
+  @override
+  String get pantryPackGrains => '쌀, 곡물, 파스타';
+
+  @override
+  String get pantryPackCanned => '통조림과 육수';
+
+  @override
+  String get pantryPackFridge => '냉장고 기본';
+
+  @override
+  String get pantryPackFresh => '신선 기본';
+
+  @override
+  String get pantryMoveToNow => '지금 있는 재료로 이동';
+
+  @override
+  String get moreKitchen => '주방';
+
+  @override
+  String get moreMyPantrySubtitle => '지금 있는 재료와 항상 있는 재료';
+
+  @override
+  String get faqPantryTitle => '식료품 저장소 사용법';
+
+  @override
+  String get faqPantrySubtitle => '가진 재료를 관리하고 만들 수 있는 요리를 찾아보세요';
+
+  @override
+  String get faqPantryStep1Title => '식료품 저장소 열기';
+
+  @override
+  String get faqPantryStep1Desc => '화면 아래의 더보기를 누른 뒤 내 식료품 저장소를 누르세요. 무엇을 만들 수 있을까?는 바로 위와 홈 화면에도 있어요.';
+
+  @override
+  String get faqPantryStep2Title => '가진 재료 추가';
+
+  @override
+  String get faqPantryStep2Desc => '가진 재료를 입력하고 체크를 누르세요. 달걀, 우유, 버터처럼 쉼표로 구분하면 한 번에 여러 개를 추가할 수 있어요.';
+
+  @override
+  String get faqPantryStep3Title => '자주 쓰는 재료 추가';
+
+  @override
+  String get faqPantryStep3Desc => '자주 쓰는 재료 추가를 누르고 가진 것을 체크하거나, 모두 선택으로 한 그룹을 통째로 고르세요. 밀가루나 향신료처럼 잘 떨어지지 않는 것은 항상 있는 재료, 신선 식품은 지금 있는 재료를 고르세요.';
+
+  @override
+  String get faqPantryStep4Title => '지금 있는 재료와 항상 있는 재료';
+
+  @override
+  String get faqPantryStep4Desc => '지금 있는 재료는 이번 주에 가진 것으로, 추가한 날짜가 함께 보여요. 핀을 누르면 항상 있는 재료로 옮기고, 냉동실에 넣었다면 눈송이를 누르세요.';
+
+  @override
+  String get faqPantryStep4Tip => '항상 있는 재료는 부족한 재료로 세지 않아서, 그 재료를 쓰는 레시피도 바로 만들 수 있는 것으로 보여요.';
+
+  @override
+  String get faqPantryStep5Title => '장을 본 뒤에';
+
+  @override
+  String get faqPantryStep5Desc => '모두 지우기를 누르고 예를 선택한 다음, 새로 산 것을 추가하세요. 항상 있는 재료 목록은 그대로예요.';
+
+  @override
+  String get faqPantryStep6Title => '아직 있나요?';
+
+  @override
+  String get faqPantryStep6Desc => '시간이 지나면 앱이 신선 식품에 대해 물어봐요. 고기는 약 3일, 대부분의 채소는 약 1주일이에요. 아직 있으면 남기기를 누르고, 없으면 삭제하세요. 냉동 식품은 약 6개월 가요.';
+
+  @override
+  String get faqPantryStep7Title => '만들 수 있는 요리 보기';
+
+  @override
+  String get faqPantryStep7Desc => '무엇을 만들 수 있을까?에서는 지금 바로 만들 수 있는 레시피가 먼저 보여요. 부족한 재료 추가를 누르면 장보기 목록에 들어가요.';
+
+  @override
+  String get faqPantryQTitle => '지금 있는 재료와 항상 있는 재료는 어떻게 다른가요?';
+
+  @override
+  String get faqPantryQSubtitle => '식료품 저장소의 두 목록';
+
+  @override
+  String get faqPantryQAnswer => '지금 있는 재료는 우유, 달걀, 고기처럼 쓰면 없어지는 식품이에요. 시간이 지나면 앱이 물어보고, 장을 본 뒤 한 번에 지울 수 있어요. 항상 있는 재료는 소금, 밀가루, 향신료, 기름처럼 잘 떨어지지 않는 것이에요. 부족한 재료로 세지 않고 지워지지도 않아요.';
+
+  @override
+  String get pantryHowItWorks => '사용 방법';
 }

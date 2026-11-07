@@ -271,8 +271,7 @@ void main() {
     });
   });
 
-  testWidgets('the Web Clipper guide lists its steps, with a store button once there is a store page',
-      (tester) async {
+  testWidgets('the Web Clipper guide stays hidden until the extension is in a store', (tester) async {
     tester.view.physicalSize = const Size(1200, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -283,16 +282,15 @@ void main() {
     ));
     await tester.pump();
 
-    await tester.scrollUntilVisible(find.text('Web Clipper'), 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('Web Clipper'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Add the extension'), findsOneWidget);
-    expect(find.text('Click Save'), findsOneWidget);
-    expect(find.text('Check and save'), findsOneWidget);
-    expect(find.text('Get the extension'), webClipperStoreUrl.isEmpty ? findsNothing : findsOneWidget);
-    // No page on the website for it yet either.
-    expect(find.byIcon(Icons.open_in_browser), findsNothing);
+    expect(webClipperStoreUrl, isEmpty);
+    // The guide list is built lazily: scroll it all the way through.
+    final list = find.byType(Scrollable).first;
+    for (var i = 0; i < 40; i++) {
+      expect(find.text('Web Clipper'), findsNothing);
+      await tester.drag(list, const Offset(0, -400));
+      await tester.pump();
+    }
+    expect(find.text('Web Clipper'), findsNothing);
   });
 
   testWidgets('a route with a bad address shows the error, not a fetch', (tester) async {

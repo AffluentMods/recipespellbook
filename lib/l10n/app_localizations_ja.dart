@@ -12026,4 +12026,250 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => 'あなたのレシピ本から';
+
+  @override
+  String get pantryNowTitle => '今あるもの';
+
+  @override
+  String get pantryNowHint => '今手元にあるもの。買い物のあとは空にして、買ったものを追加しましょう。';
+
+  @override
+  String get pantryClearNow => 'すべて消去';
+
+  @override
+  String get pantryClearNowTitle => '今あるものをすべて消去しますか？';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件を削除します。常備品のリストはそのまま残ります。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count日前に追加',
+      one: '昨日追加',
+      zero: '今日追加',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count週間前に追加',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count日前に冷凍',
+      one: '昨日冷凍',
+      zero: '今日冷凍',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count週間前に冷凍',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => '冷凍庫に入れる';
+
+  @override
+  String get pantryTakeOutOfFreezer => '冷凍庫から出す';
+
+  @override
+  String get pantryMakeAlwaysHave => '常備品に移動';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return '$itemを常備品に移動しました';
+  }
+
+  @override
+  String get pantryFreezerSection => '冷凍庫';
+
+  @override
+  String get pantryStillHaveTitle => 'まだありますか？';
+
+  @override
+  String get pantryStillHaveHint => '使い切ったか傷んでいる可能性があります。まだあるものは残しましょう。';
+
+  @override
+  String get pantryKeep => '残す';
+
+  @override
+  String get pantryRemoveThese => 'これらを削除';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '確認するもの$count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => 'よく使う食材を追加';
+
+  @override
+  String get pantryCommonTitle => 'よく使う食材';
+
+  @override
+  String get pantryCommonHint => 'キッチンにあるものにチェックして、まとめて追加しましょう。';
+
+  @override
+  String get pantryCommonAlwaysHint => '常備品：不足として数えません。小麦粉、スパイス、油に最適。';
+
+  @override
+  String get pantryCommonNowHint => '今あるもの：使い切るまで数えます。生鮮食品に最適。';
+
+  @override
+  String get pantryCommonSelectAll => 'すべて選択';
+
+  @override
+  String get pantryCommonSelectNone => '選択を解除';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count個の食材を追加',
+      zero: '追加',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count個の食材を追加しました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => '粉と製菓材料';
+
+  @override
+  String get pantryPackSpices => 'スパイスと調味料';
+
+  @override
+  String get pantryPackHerbs => '乾燥ハーブ';
+
+  @override
+  String get pantryPackOils => '油と酢';
+
+  @override
+  String get pantryPackSauces => 'ソースと調味料';
+
+  @override
+  String get pantryPackGrains => '米、穀物、パスタ';
+
+  @override
+  String get pantryPackCanned => '缶詰とだし';
+
+  @override
+  String get pantryPackFridge => '冷蔵庫の定番';
+
+  @override
+  String get pantryPackFresh => '生鮮の定番';
+
+  @override
+  String get pantryMoveToNow => '今あるものに移動';
+
+  @override
+  String get moreKitchen => 'キッチン';
+
+  @override
+  String get moreMyPantrySubtitle => '今あるものと常備品';
+
+  @override
+  String get faqPantryTitle => 'パントリーの使い方';
+
+  @override
+  String get faqPantrySubtitle => '手元の食材を管理して、作れる料理を見つけましょう';
+
+  @override
+  String get faqPantryStep1Title => 'パントリーを開く';
+
+  @override
+  String get faqPantryStep1Desc => '画面下の「その他」をタップし、「私のパントリー」を開きます。「何が作れる？」はそのすぐ上と、ホーム画面にもあります。';
+
+  @override
+  String get faqPantryStep2Title => '手元にあるものを追加';
+
+  @override
+  String get faqPantryStep2Desc => '手元にあるものを入力してチェックをタップします。卵, 牛乳, バター のようにカンマで区切れば、まとめて追加できます。';
+
+  @override
+  String get faqPantryStep3Title => 'よく使う食材を追加';
+
+  @override
+  String get faqPantryStep3Desc => '「よく使う食材を追加」をタップして、あるものにチェックを入れるか、「すべて選択」でグループごと選びます。小麦粉やスパイスなどめったに切らさないものは「常備品」、生鮮食品は「今あるもの」を選びましょう。';
+
+  @override
+  String get faqPantryStep4Title => '今あるものと常備品';
+
+  @override
+  String get faqPantryStep4Desc => '「今あるもの」は今週手元にあるもので、追加した日も表示されます。ピンをタップすると常備品に移動、雪のマークは冷凍庫に入れたときに使います。';
+
+  @override
+  String get faqPantryStep4Tip => '常備品は不足として数えないので、それを使うレシピもすぐ作れる扱いになります。';
+
+  @override
+  String get faqPantryStep5Title => '買い物のあとで';
+
+  @override
+  String get faqPantryStep5Desc => '「すべて消去」をタップして「はい」を選び、買ってきたものを追加します。常備品のリストはそのままです。';
+
+  @override
+  String get faqPantryStep6Title => 'まだありますか？';
+
+  @override
+  String get faqPantryStep6Desc => 'しばらくすると、生鮮食品について確認されます。肉は約3日、ほとんどの野菜は約1週間です。まだあれば「残す」、なければ削除します。冷凍したものは約6か月もちます。';
+
+  @override
+  String get faqPantryStep7Title => '作れる料理を見る';
+
+  @override
+  String get faqPantryStep7Desc => '「何が作れる？」には、今すぐ作れるレシピから順に表示されます。「不足分を追加」で買い物リストに入れられます。';
+
+  @override
+  String get faqPantryQTitle => '「今あるもの」と「常備品」の違いは？';
+
+  @override
+  String get faqPantryQSubtitle => 'パントリーの2つのリスト';
+
+  @override
+  String get faqPantryQAnswer => '「今あるもの」は牛乳、卵、肉など使えばなくなる食材です。しばらくすると確認され、買い物のあとにまとめて消去できます。「常備品」は塩、小麦粉、スパイス、油などめったに切らさないもので、不足として数えられることも消去されることもありません。';
+
+  @override
+  String get pantryHowItWorks => '使い方';
 }

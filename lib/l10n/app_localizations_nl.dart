@@ -12175,4 +12175,256 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => 'Uit je kookboeken';
+
+  @override
+  String get pantryNowTitle => 'Nu in huis';
+
+  @override
+  String get pantryNowHint => 'Wat je nu hebt. Maak het leeg na het boodschappen doen en voeg toe wat je kocht.';
+
+  @override
+  String get pantryClearNow => 'Alles wissen';
+
+  @override
+  String get pantryClearNowTitle => 'Alles wissen wat nu in huis is?';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dit verwijdert $count items. Je lijst Altijd in huis blijft.',
+      one: 'Dit verwijdert 1 item. Je lijst Altijd in huis blijft.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dagen geleden toegevoegd',
+      one: 'Gisteren toegevoegd',
+      zero: 'Vandaag toegevoegd',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weken geleden toegevoegd',
+      one: '1 week geleden toegevoegd',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dagen geleden ingevroren',
+      one: 'Gisteren ingevroren',
+      zero: 'Vandaag ingevroren',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weken geleden ingevroren',
+      one: '1 week geleden ingevroren',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => 'In de vriezer';
+
+  @override
+  String get pantryTakeOutOfFreezer => 'Uit de vriezer halen';
+
+  @override
+  String get pantryMakeAlwaysHave => 'Naar Altijd in huis';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return '$item staat nu bij Altijd in huis';
+  }
+
+  @override
+  String get pantryFreezerSection => 'Vriezer';
+
+  @override
+  String get pantryStillHaveTitle => 'Heb je deze nog?';
+
+  @override
+  String get pantryStillHaveHint => 'Deze zijn waarschijnlijk op of bedorven. Houd wat je nog hebt.';
+
+  @override
+  String get pantryKeep => 'Houden';
+
+  @override
+  String get pantryRemoveThese => 'Deze verwijderen';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items om te controleren',
+      one: '1 item om te controleren',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => 'Veelgebruikte ingrediënten toevoegen';
+
+  @override
+  String get pantryCommonTitle => 'Veelgebruikte ingrediënten';
+
+  @override
+  String get pantryCommonHint => 'Vink aan wat je in de keuken hebt en voeg alles in één keer toe.';
+
+  @override
+  String get pantryCommonAlwaysHint => 'Altijd in huis: telt nooit als ontbrekend. Ideaal voor bloem, kruiden en olie.';
+
+  @override
+  String get pantryCommonNowHint => 'Nu in huis: telt tot het op is. Ideaal voor vers eten.';
+
+  @override
+  String get pantryCommonSelectAll => 'Alles selecteren';
+
+  @override
+  String get pantryCommonSelectNone => 'Niets selecteren';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingrediënten toevoegen',
+      one: '1 ingrediënt toevoegen',
+      zero: 'Toevoegen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingrediënten toegevoegd',
+      one: '1 ingrediënt toegevoegd',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => 'Bloem en bakken';
+
+  @override
+  String get pantryPackSpices => 'Specerijen en kruiden';
+
+  @override
+  String get pantryPackHerbs => 'Gedroogde kruiden';
+
+  @override
+  String get pantryPackOils => 'Olie en azijn';
+
+  @override
+  String get pantryPackSauces => 'Sauzen en smaakmakers';
+
+  @override
+  String get pantryPackGrains => 'Rijst, granen en pasta';
+
+  @override
+  String get pantryPackCanned => 'Blikken en bouillon';
+
+  @override
+  String get pantryPackFridge => 'Koelkastbasis';
+
+  @override
+  String get pantryPackFresh => 'Verse basis';
+
+  @override
+  String get pantryMoveToNow => 'Naar Nu in huis';
+
+  @override
+  String get moreKitchen => 'Keuken';
+
+  @override
+  String get moreMyPantrySubtitle => 'Wat je nu hebt en altijd in huis hebt';
+
+  @override
+  String get faqPantryTitle => 'Zo gebruik je je voorraadkast';
+
+  @override
+  String get faqPantrySubtitle => 'Houd bij wat je hebt en zie wat je kunt koken';
+
+  @override
+  String get faqPantryStep1Title => 'Open je voorraadkast';
+
+  @override
+  String get faqPantryStep1Desc => 'Tik onderaan op Meer en dan op Mijn voorraadkast. Wat kan ik maken? staat er direct boven, en ook op het beginscherm.';
+
+  @override
+  String get faqPantryStep2Title => 'Voeg toe wat je hebt';
+
+  @override
+  String get faqPantryStep2Desc => 'Typ wat je hebt en tik op het vinkje. Voeg er meerdere tegelijk toe met komma\'s, zoals eieren, melk, boter.';
+
+  @override
+  String get faqPantryStep3Title => 'Voeg veelgebruikte ingrediënten toe';
+
+  @override
+  String get faqPantryStep3Desc => 'Tik op Veelgebruikte ingrediënten toevoegen en vink aan wat je hebt, of tik op Alles selecteren voor een hele groep. Kies Altijd in huis voor wat zelden op raakt, zoals bloem en kruiden, of Nu in huis voor vers eten.';
+
+  @override
+  String get faqPantryStep4Title => 'Nu in huis en Altijd in huis';
+
+  @override
+  String get faqPantryStep4Desc => 'Nu in huis is wat je deze week hebt, met de dag waarop je het toevoegde. Tik op de punaise om het naar Altijd in huis te verplaatsen, of op de sneeuwvlok als het in de vriezer gaat.';
+
+  @override
+  String get faqPantryStep4Tip => 'Wat Altijd in huis is, telt nooit als ontbrekend. Recepten die het gebruiken kunnen dus klaar zijn.';
+
+  @override
+  String get faqPantryStep5Title => 'Na het boodschappen doen';
+
+  @override
+  String get faqPantryStep5Desc => 'Tik op Alles wissen en antwoord Ja, en voeg dan toe wat je kocht. Je lijst Altijd in huis blijft zoals hij is.';
+
+  @override
+  String get faqPantryStep6Title => 'Heb je deze nog?';
+
+  @override
+  String get faqPantryStep6Desc => 'Na een tijdje vraagt de app naar vers eten: na ongeveer 3 dagen voor vlees, een week voor de meeste groenten. Tik op Houden als je het nog hebt, of verwijder het. Diepvries blijft ongeveer 6 maanden goed.';
+
+  @override
+  String get faqPantryStep7Title => 'Zie wat je kunt maken';
+
+  @override
+  String get faqPantryStep7Desc => 'Wat kan ik maken? toont je recepten, die je nu meteen kunt maken eerst. Tik op Ontbrekende toevoegen om ze op je boodschappenlijst te zetten.';
+
+  @override
+  String get faqPantryQTitle => 'Wat is het verschil tussen Nu in huis en Altijd in huis?';
+
+  @override
+  String get faqPantryQSubtitle => 'De twee lijsten in je voorraadkast';
+
+  @override
+  String get faqPantryQAnswer => 'Nu in huis is eten dat opraakt, zoals melk, eieren en vlees. De app vraagt er na een tijdje naar, en na het boodschappen doen kun je alles wissen. Altijd in huis is voor wat zelden op raakt, zoals zout, bloem, kruiden en olie. Dat telt nooit als ontbrekend en wordt nooit gewist.';
+
+  @override
+  String get pantryHowItWorks => 'Hoe het werkt';
 }

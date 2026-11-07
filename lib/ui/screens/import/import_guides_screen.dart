@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'faq_screen.dart' show showGuideScreenshot;
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -13,7 +14,7 @@ const _kWebGuideBaseUrl = 'https://recipespellbook.app/guides';
 
 /// Store page of the browser extension in web_clipper/ (Chrome Web Store or
 /// Edge Add-ons). Fill in once it is published. While it is empty the Web
-/// clipper guide shows its steps without a button to the store.
+/// clipper guide is left out of the guides.
 const webClipperStoreUrl = '';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -559,8 +560,8 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
             ],
           ),
           // The browser extension (web_clipper/ in this repo). Its README
-          // has the same steps.
-          _ImportGuide(
+          // has the same steps. Hidden until it is published in a store.
+          if (webClipperStoreUrl.isNotEmpty) _ImportGuide(
             id: 'web-clipper',
             icon: Icons.extension_outlined,
             color: const Color(0xFF0F9D58),
@@ -569,7 +570,7 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
             tag: l10n.importGuideTagNew,
             difficulty: l10n.importGuideDifficultyEasy,
             timeEstimate: l10n.importGuideTime15Sec,
-            actionUrl: webClipperStoreUrl.isEmpty ? null : webClipperStoreUrl,
+            actionUrl: webClipperStoreUrl,
             actionLabel: l10n.webClipperGetExtension,
             steps: [
               _GuideStep(
@@ -1991,11 +1992,14 @@ class _AssetPlaceholder extends StatelessWidget {
     // Try to load the real asset first
     final assetPath = 'assets/images/guides/${asset.filename}';
 
-    return ClipRRect(
+    // Tap for the full-size picture.
+    return GestureDetector(
+      onTap: () => showGuideScreenshot(context, assetPath),
+      child: ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 180, maxHeight: 320),
+        constraints: const BoxConstraints(minHeight: 180, maxHeight: 460),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(12),
@@ -2008,6 +2012,7 @@ class _AssetPlaceholder extends StatelessWidget {
           fit: BoxFit.contain,
           errorBuilder: (_, __, ___) => _buildPlaceholder(context, theme),
         ),
+      ),
       ),
     );
   }

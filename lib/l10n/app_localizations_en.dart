@@ -12175,4 +12175,256 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => 'From your cookbooks';
+
+  @override
+  String get pantryNowTitle => 'On hand now';
+
+  @override
+  String get pantryNowHint => 'What you have right now. After you shop, clear these and add what you bought.';
+
+  @override
+  String get pantryClearNow => 'Clear all';
+
+  @override
+  String get pantryClearNowTitle => 'Clear everything on hand?';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'This removes $count items. Your Always have list stays.',
+      one: 'This removes 1 item. Your Always have list stays.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count days ago',
+      one: 'Added yesterday',
+      zero: 'Added today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count weeks ago',
+      one: 'Added 1 week ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Frozen $count days ago',
+      one: 'Frozen yesterday',
+      zero: 'Frozen today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Frozen $count weeks ago',
+      one: 'Frozen 1 week ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => 'Put in the freezer';
+
+  @override
+  String get pantryTakeOutOfFreezer => 'Take out of the freezer';
+
+  @override
+  String get pantryMakeAlwaysHave => 'Move to Always have';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return 'Moved $item to Always have';
+  }
+
+  @override
+  String get pantryFreezerSection => 'Freezer';
+
+  @override
+  String get pantryStillHaveTitle => 'Still have these?';
+
+  @override
+  String get pantryStillHaveHint => 'These have probably been used up or gone off. Keep what you still have.';
+
+  @override
+  String get pantryKeep => 'Keep';
+
+  @override
+  String get pantryRemoveThese => 'Remove these';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items to check',
+      one: '1 item to check',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => 'Add common ingredients';
+
+  @override
+  String get pantryCommonTitle => 'Common ingredients';
+
+  @override
+  String get pantryCommonHint => 'Tick what you keep in your kitchen, then add them all at once.';
+
+  @override
+  String get pantryCommonAlwaysHint => 'Always have: never counted as missing. Best for flour, spices and oils.';
+
+  @override
+  String get pantryCommonNowHint => 'On hand now: counted until you use them up. Best for fresh food.';
+
+  @override
+  String get pantryCommonSelectAll => 'Select all';
+
+  @override
+  String get pantryCommonSelectNone => 'Select none';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count ingredients',
+      one: 'Add 1 ingredient',
+      zero: 'Add',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count ingredients',
+      one: 'Added 1 ingredient',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => 'Flour and baking';
+
+  @override
+  String get pantryPackSpices => 'Spices and seasonings';
+
+  @override
+  String get pantryPackHerbs => 'Dried herbs';
+
+  @override
+  String get pantryPackOils => 'Oils and vinegars';
+
+  @override
+  String get pantryPackSauces => 'Sauces and condiments';
+
+  @override
+  String get pantryPackGrains => 'Rice, grains and pasta';
+
+  @override
+  String get pantryPackCanned => 'Cans and broths';
+
+  @override
+  String get pantryPackFridge => 'Fridge basics';
+
+  @override
+  String get pantryPackFresh => 'Fresh basics';
+
+  @override
+  String get pantryMoveToNow => 'Move to On hand now';
+
+  @override
+  String get moreKitchen => 'Kitchen';
+
+  @override
+  String get moreMyPantrySubtitle => 'What you have on hand and always keep';
+
+  @override
+  String get faqPantryTitle => 'How to use your pantry';
+
+  @override
+  String get faqPantrySubtitle => 'Keep track of what you have and see what you can cook';
+
+  @override
+  String get faqPantryStep1Title => 'Open your pantry';
+
+  @override
+  String get faqPantryStep1Desc => 'Tap More at the bottom of the screen, then My Pantry. What can I make? is right above it, and on the Home screen too.';
+
+  @override
+  String get faqPantryStep2Title => 'Add what you have';
+
+  @override
+  String get faqPantryStep2Desc => 'Type what you have and tap the tick. Add several at once with commas, like eggs, milk, butter.';
+
+  @override
+  String get faqPantryStep3Title => 'Add common ingredients';
+
+  @override
+  String get faqPantryStep3Desc => 'Tap Add common ingredients and tick what you keep, or tap Select all for a whole group. Pick Always have for things you rarely run out of, like flour and spices, or On hand now for fresh food.';
+
+  @override
+  String get faqPantryStep4Title => 'On hand now and Always have';
+
+  @override
+  String get faqPantryStep4Desc => 'On hand now is what you have this week, with the day you added it. Tap the pin to move an item to Always have, or the snowflake when it goes in the freezer.';
+
+  @override
+  String get faqPantryStep4Tip => 'Always have items never count as missing, so recipes that use them can still be ready to cook.';
+
+  @override
+  String get faqPantryStep5Title => 'After you shop';
+
+  @override
+  String get faqPantryStep5Desc => 'Tap Clear all and answer Yes, then add what you bought. Your Always have list stays as it is.';
+
+  @override
+  String get faqPantryStep6Title => 'Still have these?';
+
+  @override
+  String get faqPantryStep6Desc => 'After a while the app asks about fresh food: about 3 days for meat, a week for most vegetables. Tap Keep if you still have it, or remove it. Frozen food lasts about 6 months.';
+
+  @override
+  String get faqPantryStep7Title => 'See what you can make';
+
+  @override
+  String get faqPantryStep7Desc => 'What can I make? shows your recipes with the ones you can cook right now first. Tap Add missing to put what you need on your shopping list.';
+
+  @override
+  String get faqPantryQTitle => 'What is the difference between On hand now and Always have?';
+
+  @override
+  String get faqPantryQSubtitle => 'The two lists in your pantry';
+
+  @override
+  String get faqPantryQAnswer => 'On hand now is food you use up, like milk, eggs and meat. The app asks about it after a while, and you can clear it all after a shopping trip. Always have is for things you rarely run out of, like salt, flour, spices and oil. They are never counted as missing and never cleared.';
+
+  @override
+  String get pantryHowItWorks => 'How it works';
 }

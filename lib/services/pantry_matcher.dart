@@ -469,6 +469,10 @@ class PantryMatcher {
     return IngredientCover.missing;
   }
 
+  /// Whether every food of some alternative of an ingredient line is on hand
+  /// (in the pantry or a basic), optional or not. For the shopping list.
+  bool hasLine(IngredientKey key) => key.alternatives.any((a) => a.every(hasFood));
+
   /// Whether a pantry or shopping item name is already covered, so quick-add
   /// suggestions can leave it out.
   bool hasItem(String item) {
