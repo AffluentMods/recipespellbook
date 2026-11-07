@@ -21264,6 +21264,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'From your cookbooks'**
   String get dinnerReasonFromLibrary;
+
+  /// No description provided for @pantryNowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On hand now'**
+  String get pantryNowTitle;
+
+  /// No description provided for @pantryNowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What you have right now. After you shop, clear these and add what you bought.'**
+  String get pantryNowHint;
+
+  /// No description provided for @pantryClearNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get pantryClearNow;
+
+  /// No description provided for @pantryClearNowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear everything on hand?'**
+  String get pantryClearNowTitle;
+
+  /// No description provided for @pantryClearNowMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This removes 1 item. Your Always have list stays.} other{This removes {count} items. Your Always have list stays.}}'**
+  String pantryClearNowMessage(int count);
+
+  /// No description provided for @pantryAddedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Added today} =1{Added yesterday} other{Added {count} days ago}}'**
+  String pantryAddedAgo(int count);
+
+  /// No description provided for @pantryAddedWeeksAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Added 1 week ago} other{Added {count} weeks ago}}'**
+  String pantryAddedWeeksAgo(int count);
+
+  /// No description provided for @pantryFrozenAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Frozen today} =1{Frozen yesterday} other{Frozen {count} days ago}}'**
+  String pantryFrozenAgo(int count);
+
+  /// No description provided for @pantryFrozenWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Frozen 1 week ago} other{Frozen {count} weeks ago}}'**
+  String pantryFrozenWeeks(int count);
+
+  /// No description provided for @pantryMoveToFreezer.
+  ///
+  /// In en, this message translates to:
+  /// **'Put in the freezer'**
+  String get pantryMoveToFreezer;
+
+  /// No description provided for @pantryTakeOutOfFreezer.
+  ///
+  /// In en, this message translates to:
+  /// **'Take out of the freezer'**
+  String get pantryTakeOutOfFreezer;
+
+  /// No description provided for @pantryMakeAlwaysHave.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Always have'**
+  String get pantryMakeAlwaysHave;
+
+  /// No description provided for @pantryMovedToAlwaysHave.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved {item} to Always have'**
+  String pantryMovedToAlwaysHave(String item);
+
+  /// No description provided for @pantryFreezerSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezer'**
+  String get pantryFreezerSection;
+
+  /// No description provided for @pantryStillHaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Still have these?'**
+  String get pantryStillHaveTitle;
+
+  /// No description provided for @pantryStillHaveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'These have probably been used up or gone off. Keep what you still have.'**
+  String get pantryStillHaveHint;
+
+  /// No description provided for @pantryKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get pantryKeep;
+
+  /// No description provided for @pantryRemoveThese.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove these'**
+  String get pantryRemoveThese;
+
+  /// No description provided for @pantryItemsToCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item to check} other{{count} items to check}}'**
+  String pantryItemsToCheck(int count);
+
+  /// No description provided for @pantryCommonButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add common ingredients'**
+  String get pantryCommonButton;
+
+  /// No description provided for @pantryCommonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Common ingredients'**
+  String get pantryCommonTitle;
+
+  /// No description provided for @pantryCommonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick what you keep in your kitchen, then add them all at once.'**
+  String get pantryCommonHint;
+
+  /// No description provided for @pantryCommonAlwaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Always have: never counted as missing. Best for flour, spices and oils.'**
+  String get pantryCommonAlwaysHint;
+
+  /// No description provided for @pantryCommonNowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On hand now: counted until you use them up. Best for fresh food.'**
+  String get pantryCommonNowHint;
+
+  /// No description provided for @pantryCommonSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get pantryCommonSelectAll;
+
+  /// No description provided for @pantryCommonSelectNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Select none'**
+  String get pantryCommonSelectNone;
+
+  /// No description provided for @pantryCommonAddCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Add} =1{Add 1 ingredient} other{Add {count} ingredients}}'**
+  String pantryCommonAddCount(int count);
+
+  /// No description provided for @pantryCommonAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Added 1 ingredient} other{Added {count} ingredients}}'**
+  String pantryCommonAdded(int count);
+
+  /// No description provided for @pantryPackBaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Flour and baking'**
+  String get pantryPackBaking;
+
+  /// No description provided for @pantryPackSpices.
+  ///
+  /// In en, this message translates to:
+  /// **'Spices and seasonings'**
+  String get pantryPackSpices;
+
+  /// No description provided for @pantryPackHerbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Dried herbs'**
+  String get pantryPackHerbs;
+
+  /// No description provided for @pantryPackOils.
+  ///
+  /// In en, this message translates to:
+  /// **'Oils and vinegars'**
+  String get pantryPackOils;
+
+  /// No description provided for @pantryPackSauces.
+  ///
+  /// In en, this message translates to:
+  /// **'Sauces and condiments'**
+  String get pantryPackSauces;
+
+  /// No description provided for @pantryPackGrains.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice, grains and pasta'**
+  String get pantryPackGrains;
+
+  /// No description provided for @pantryPackCanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Cans and broths'**
+  String get pantryPackCanned;
+
+  /// No description provided for @pantryPackFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Fridge basics'**
+  String get pantryPackFridge;
+
+  /// No description provided for @pantryPackFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh basics'**
+  String get pantryPackFresh;
+
+  /// No description provided for @pantryMoveToNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to On hand now'**
+  String get pantryMoveToNow;
+
+  /// No description provided for @moreKitchen.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitchen'**
+  String get moreKitchen;
+
+  /// No description provided for @moreMyPantrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What you have on hand and always keep'**
+  String get moreMyPantrySubtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -12169,4 +12169,193 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => 'Dai tuoi ricettari';
+
+  @override
+  String get pantryNowTitle => 'In casa ora';
+
+  @override
+  String get pantryNowHint => 'Quello che hai adesso. Dopo la spesa, svuota e aggiungi quello che hai comprato.';
+
+  @override
+  String get pantryClearNow => 'Svuota tutto';
+
+  @override
+  String get pantryClearNowTitle => 'Svuotare tutto quello che hai in casa?';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Verranno rimossi $count articoli. La lista Sempre in casa resta.',
+      one: 'Verrà rimosso 1 articolo. La lista Sempre in casa resta.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Aggiunto $count giorni fa',
+      one: 'Aggiunto ieri',
+      zero: 'Aggiunto oggi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Aggiunto $count settimane fa',
+      one: 'Aggiunto 1 settimana fa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Congelato $count giorni fa',
+      one: 'Congelato ieri',
+      zero: 'Congelato oggi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Congelato $count settimane fa',
+      one: 'Congelato 1 settimana fa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => 'Metti in freezer';
+
+  @override
+  String get pantryTakeOutOfFreezer => 'Togli dal freezer';
+
+  @override
+  String get pantryMakeAlwaysHave => 'Sposta in Sempre in casa';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return '$item spostato in Sempre in casa';
+  }
+
+  @override
+  String get pantryFreezerSection => 'Freezer';
+
+  @override
+  String get pantryStillHaveTitle => 'Hai ancora questi?';
+
+  @override
+  String get pantryStillHaveHint => 'Probabilmente sono finiti o scaduti. Tieni quello che hai ancora.';
+
+  @override
+  String get pantryKeep => 'Tieni';
+
+  @override
+  String get pantryRemoveThese => 'Rimuovi questi';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articoli da controllare',
+      one: '1 articolo da controllare',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => 'Aggiungi ingredienti comuni';
+
+  @override
+  String get pantryCommonTitle => 'Ingredienti comuni';
+
+  @override
+  String get pantryCommonHint => 'Spunta quello che hai in cucina e aggiungi tutto in una volta.';
+
+  @override
+  String get pantryCommonAlwaysHint => 'Sempre in casa: non conta mai come mancante. Ideale per farina, spezie e oli.';
+
+  @override
+  String get pantryCommonNowHint => 'In casa ora: conta finché non lo finisci. Ideale per i freschi.';
+
+  @override
+  String get pantryCommonSelectAll => 'Seleziona tutto';
+
+  @override
+  String get pantryCommonSelectNone => 'Deseleziona tutto';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Aggiungi $count ingredienti',
+      one: 'Aggiungi 1 ingrediente',
+      zero: 'Aggiungi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredienti aggiunti',
+      one: '1 ingrediente aggiunto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => 'Farina e dolci';
+
+  @override
+  String get pantryPackSpices => 'Spezie e condimenti';
+
+  @override
+  String get pantryPackHerbs => 'Erbe secche';
+
+  @override
+  String get pantryPackOils => 'Oli e aceti';
+
+  @override
+  String get pantryPackSauces => 'Salse e condimenti';
+
+  @override
+  String get pantryPackGrains => 'Riso, cereali e pasta';
+
+  @override
+  String get pantryPackCanned => 'Scatolame e brodi';
+
+  @override
+  String get pantryPackFridge => 'Base del frigo';
+
+  @override
+  String get pantryPackFresh => 'Freschi di base';
+
+  @override
+  String get pantryMoveToNow => 'Sposta in In casa ora';
+
+  @override
+  String get moreKitchen => 'Cucina';
+
+  @override
+  String get moreMyPantrySubtitle => 'Quello che hai in casa e tieni sempre';
 }

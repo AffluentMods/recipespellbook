@@ -13,7 +13,7 @@ const _kWebGuideBaseUrl = 'https://recipespellbook.app/guides';
 
 /// Store page of the browser extension in web_clipper/ (Chrome Web Store or
 /// Edge Add-ons). Fill in once it is published. While it is empty the Web
-/// clipper guide shows its steps without a button to the store.
+/// clipper guide is left out of the guides.
 const webClipperStoreUrl = '';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -559,8 +559,8 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
             ],
           ),
           // The browser extension (web_clipper/ in this repo). Its README
-          // has the same steps.
-          _ImportGuide(
+          // has the same steps. Hidden until it is published in a store.
+          if (webClipperStoreUrl.isNotEmpty) _ImportGuide(
             id: 'web-clipper',
             icon: Icons.extension_outlined,
             color: const Color(0xFF0F9D58),
@@ -569,7 +569,7 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
             tag: l10n.importGuideTagNew,
             difficulty: l10n.importGuideDifficultyEasy,
             timeEstimate: l10n.importGuideTime15Sec,
-            actionUrl: webClipperStoreUrl.isEmpty ? null : webClipperStoreUrl,
+            actionUrl: webClipperStoreUrl,
             actionLabel: l10n.webClipperGetExtension,
             steps: [
               _GuideStep(

@@ -12054,4 +12054,187 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => '내 요리책에서';
+
+  @override
+  String get pantryNowTitle => '지금 있는 재료';
+
+  @override
+  String get pantryNowHint => '지금 가지고 있는 재료예요. 장을 본 뒤에는 비우고 새로 산 것을 추가하세요.';
+
+  @override
+  String get pantryClearNow => '모두 지우기';
+
+  @override
+  String get pantryClearNowTitle => '지금 있는 재료를 모두 지울까요?';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목이 삭제됩니다. 항상 있는 재료 목록은 그대로 남아요.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 전에 추가함',
+      one: '어제 추가함',
+      zero: '오늘 추가함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count주 전에 추가함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 전에 냉동함',
+      one: '어제 냉동함',
+      zero: '오늘 냉동함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count주 전에 냉동함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => '냉동실에 넣기';
+
+  @override
+  String get pantryTakeOutOfFreezer => '냉동실에서 꺼내기';
+
+  @override
+  String get pantryMakeAlwaysHave => '항상 있는 재료로 이동';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return '$item을(를) 항상 있는 재료로 옮겼어요';
+  }
+
+  @override
+  String get pantryFreezerSection => '냉동실';
+
+  @override
+  String get pantryStillHaveTitle => '아직 있나요?';
+
+  @override
+  String get pantryStillHaveHint => '다 썼거나 상했을 수 있어요. 아직 있는 것은 남겨 두세요.';
+
+  @override
+  String get pantryKeep => '남기기';
+
+  @override
+  String get pantryRemoveThese => '이 항목 삭제';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '확인할 항목 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => '자주 쓰는 재료 추가';
+
+  @override
+  String get pantryCommonTitle => '자주 쓰는 재료';
+
+  @override
+  String get pantryCommonHint => '주방에 있는 것을 체크하고 한 번에 추가하세요.';
+
+  @override
+  String get pantryCommonAlwaysHint => '항상 있는 재료: 부족한 재료로 세지 않아요. 밀가루, 향신료, 기름에 좋아요.';
+
+  @override
+  String get pantryCommonNowHint => '지금 있는 재료: 다 쓸 때까지 세요. 신선 식품에 좋아요.';
+
+  @override
+  String get pantryCommonSelectAll => '모두 선택';
+
+  @override
+  String get pantryCommonSelectNone => '선택 해제';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '재료 $count개 추가',
+      zero: '추가',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '재료 $count개를 추가했어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => '밀가루와 베이킹';
+
+  @override
+  String get pantryPackSpices => '향신료와 양념';
+
+  @override
+  String get pantryPackHerbs => '말린 허브';
+
+  @override
+  String get pantryPackOils => '기름과 식초';
+
+  @override
+  String get pantryPackSauces => '소스와 조미료';
+
+  @override
+  String get pantryPackGrains => '쌀, 곡물, 파스타';
+
+  @override
+  String get pantryPackCanned => '통조림과 육수';
+
+  @override
+  String get pantryPackFridge => '냉장고 기본';
+
+  @override
+  String get pantryPackFresh => '신선 기본';
+
+  @override
+  String get pantryMoveToNow => '지금 있는 재료로 이동';
+
+  @override
+  String get moreKitchen => '주방';
+
+  @override
+  String get moreMyPantrySubtitle => '지금 있는 재료와 항상 있는 재료';
 }

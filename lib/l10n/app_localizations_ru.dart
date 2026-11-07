@@ -12345,4 +12345,209 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => 'Из твоих кулинарных книг';
+
+  @override
+  String get pantryNowTitle => 'Сейчас есть';
+
+  @override
+  String get pantryNowHint => 'То, что у вас есть сейчас. После покупок очистите список и добавьте купленное.';
+
+  @override
+  String get pantryClearNow => 'Очистить всё';
+
+  @override
+  String get pantryClearNowTitle => 'Очистить всё, что есть сейчас?';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Будет удалено $count продукта. Список Всегда есть останется.',
+      many: 'Будет удалено $count продуктов. Список Всегда есть останется.',
+      few: 'Будет удалено $count продукта. Список Всегда есть останется.',
+      one: 'Будет удалён $count продукт. Список Всегда есть останется.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Добавлено $count дня назад',
+      many: 'Добавлено $count дней назад',
+      few: 'Добавлено $count дня назад',
+      one: 'Добавлено вчера',
+      zero: 'Добавлено сегодня',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Добавлено $count недели назад',
+      many: 'Добавлено $count недель назад',
+      few: 'Добавлено $count недели назад',
+      one: 'Добавлено $count неделю назад',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Заморожено $count дня назад',
+      many: 'Заморожено $count дней назад',
+      few: 'Заморожено $count дня назад',
+      one: 'Заморожено вчера',
+      zero: 'Заморожено сегодня',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Заморожено $count недели назад',
+      many: 'Заморожено $count недель назад',
+      few: 'Заморожено $count недели назад',
+      one: 'Заморожено $count неделю назад',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => 'Положить в морозилку';
+
+  @override
+  String get pantryTakeOutOfFreezer => 'Достать из морозилки';
+
+  @override
+  String get pantryMakeAlwaysHave => 'Перенести во Всегда есть';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return '$item: перенесено во Всегда есть';
+  }
+
+  @override
+  String get pantryFreezerSection => 'Морозилка';
+
+  @override
+  String get pantryStillHaveTitle => 'Это ещё есть?';
+
+  @override
+  String get pantryStillHaveHint => 'Скорее всего, это уже закончилось или испортилось. Оставьте то, что ещё есть.';
+
+  @override
+  String get pantryKeep => 'Оставить';
+
+  @override
+  String get pantryRemoveThese => 'Удалить эти';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count продукта проверить',
+      many: '$count продуктов проверить',
+      few: '$count продукта проверить',
+      one: '$count продукт проверить',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => 'Добавить популярные продукты';
+
+  @override
+  String get pantryCommonTitle => 'Популярные продукты';
+
+  @override
+  String get pantryCommonHint => 'Отметьте, что есть на кухне, и добавьте всё сразу.';
+
+  @override
+  String get pantryCommonAlwaysHint => 'Всегда есть: никогда не считается недостающим. Подходит для муки, специй и масел.';
+
+  @override
+  String get pantryCommonNowHint => 'Сейчас есть: учитывается, пока не закончится. Подходит для свежих продуктов.';
+
+  @override
+  String get pantryCommonSelectAll => 'Выбрать всё';
+
+  @override
+  String get pantryCommonSelectNone => 'Снять выбор';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Добавить $count продукта',
+      many: 'Добавить $count продуктов',
+      few: 'Добавить $count продукта',
+      one: 'Добавить $count продукт',
+      zero: 'Добавить',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Добавлено $count продукта',
+      many: 'Добавлено $count продуктов',
+      few: 'Добавлено $count продукта',
+      one: 'Добавлен $count продукт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => 'Мука и выпечка';
+
+  @override
+  String get pantryPackSpices => 'Специи и приправы';
+
+  @override
+  String get pantryPackHerbs => 'Сушёные травы';
+
+  @override
+  String get pantryPackOils => 'Масла и уксусы';
+
+  @override
+  String get pantryPackSauces => 'Соусы и приправы';
+
+  @override
+  String get pantryPackGrains => 'Рис, крупы и макароны';
+
+  @override
+  String get pantryPackCanned => 'Консервы и бульоны';
+
+  @override
+  String get pantryPackFridge => 'Основное из холодильника';
+
+  @override
+  String get pantryPackFresh => 'Свежее основное';
+
+  @override
+  String get pantryMoveToNow => 'Перенести в Сейчас есть';
+
+  @override
+  String get moreKitchen => 'Кухня';
+
+  @override
+  String get moreMyPantrySubtitle => 'Что есть сейчас и что есть всегда';
 }

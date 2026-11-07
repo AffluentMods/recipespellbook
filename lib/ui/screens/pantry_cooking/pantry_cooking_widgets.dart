@@ -6,7 +6,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/pantry_cooking_provider.dart';
 import '../../../services/pantry_cooking_service.dart';
-import '../../../services/pantry_service.dart';
 import '../../../services/recipe_suggestion_service.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
@@ -14,6 +13,7 @@ import '../../../utils/recipe_title.dart';
 import '../../widgets/app_controls.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
+import 'pantry_editor.dart';
 
 /// Where "What can I make?" lives.
 const pantryCookingPath = '/pantry-cooking';
@@ -387,13 +387,17 @@ class PantryCookingHomeCard extends ConsumerWidget {
 // ── Fast pantry adds ──
 
 /// Adding to the pantry in a few taps: a field that takes one item or a
-/// comma-separated list, recently bought shopping items, and common staples.
-/// Each suggestion leaves once it is in the pantry.
+/// comma-separated list, the ready-made ingredient lists, and recently
+/// bought shopping items (each leaves once it is in the pantry). With
+/// [showItems], also "Still have these?" and everything on hand.
 class PantryQuickAdd extends ConsumerStatefulWidget {
-  /// Show the current pantry items as removable chips too.
+  /// Show "Still have these?" and the items on hand too.
   final bool showItems;
 
-  const PantryQuickAdd({super.key, this.showItems = true});
+  /// Offer a search field once the list of items is long.
+  final bool searchable;
+
+  const PantryQuickAdd({super.key, this.showItems = true, this.searchable = false});
 
   @override
   ConsumerState<PantryQuickAdd> createState() => _PantryQuickAddState();
@@ -432,10 +436,6 @@ class _PantryQuickAddState extends ConsumerState<PantryQuickAdd> {
       for (final name in ref.watch(recentlyBoughtProvider).valueOrNull ?? const <String>[])
         if (!matcher.hasItem(name)) name,
     ].take(12).toList();
-    final staples = [
-      for (final name in PantryService.commonStaples)
-        if (!matcher.hasItem(name)) name,
-    ].take(14).toList();
     final notifier = ref.read(pantryProvider.notifier);
 
     Widget label(String text, {Widget? trailing}) => Padding(
@@ -467,6 +467,10 @@ class _PantryQuickAddState extends ConsumerState<PantryQuickAdd> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (widget.showItems && pantry.dueAt(DateTime.now()).isNotEmpty) ...[
+          const PantryStillHaveCard(),
+          const SizedBox(height: Space.lg),
+        ],
         TextField(
           controller: _controller,
           focusNode: _focus,
@@ -484,6 +488,8 @@ class _PantryQuickAddState extends ConsumerState<PantryQuickAdd> {
           ),
           onSubmitted: _submit,
         ),
+        const SizedBox(height: Space.sm),
+        const CommonIngredientsButton(),
         if (bought.isNotEmpty) ...[
           label(
             l10n.pantryCookRecentlyBought,
@@ -499,29 +505,9 @@ class _PantryQuickAddState extends ConsumerState<PantryQuickAdd> {
           ),
           Wrap(spacing: Space.xs + 2, runSpacing: Space.xs + 2, children: [for (final n in bought) addChip(n)]),
         ],
-        if (staples.isNotEmpty) ...[
-          label(l10n.pantryCommonStaples),
-          Wrap(spacing: Space.xs + 2, runSpacing: Space.xs + 2, children: [for (final n in staples) addChip(n)]),
-        ],
         if (widget.showItems && pantry.items.isNotEmpty) ...[
-          label(l10n.pantryCookItemsInPantry(pantry.items.length)),
-          Wrap(
-            spacing: Space.xs + 2,
-            runSpacing: Space.xs + 2,
-            children: [
-              for (final item in pantry.items)
-                InputChip(
-                  label: Text(item),
-                  visualDensity: VisualDensity.compact,
-                  side: BorderSide(color: c.hairline),
-                  backgroundColor: c.selectedFill,
-                  labelStyle: TextStyle(fontSize: 13, color: c.textPrimary),
-                  deleteIcon: const Icon(Icons.close_rounded, size: 15),
-                  deleteButtonTooltipMessage: l10n.actionRemove,
-                  onDeleted: () => notifier.remove(item),
-                ),
-            ],
-          ),
+          const SizedBox(height: Space.lg),
+          PantryOnHandSection(searchable: widget.searchable),
         ],
       ],
     );
@@ -576,15 +562,34 @@ class _PantryBasicsEditorState extends ConsumerState<PantryBasicsEditor> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             for (final b in basics)
-              InputChip(
-                label: Text(b),
-                visualDensity: VisualDensity.compact,
-                side: BorderSide(color: c.hairline),
-                backgroundColor: c.surface,
-                labelStyle: TextStyle(fontSize: 13, color: c.textPrimary),
-                deleteIcon: const Icon(Icons.close_rounded, size: 15),
-                deleteButtonTooltipMessage: l10n.actionRemove,
-                onDeleted: () => notifier.removeBasic(b),
+              // Tap for "Move to On hand now", or the cross to remove.
+              PopupMenuButton<String>(
+                key: ValueKey('pantry-basic-$b'),
+                tooltip: '',
+                onSelected: (_) => notifier.moveBasicToPantry(b),
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'move',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.kitchen_outlined, size: 18),
+                        const SizedBox(width: Space.sm),
+                        Text(l10n.pantryMoveToNow),
+                      ],
+                    ),
+                  ),
+                ],
+                child: InputChip(
+                  avatar: Icon(Icons.push_pin_rounded, size: 14, color: c.accent),
+                  label: Text(b),
+                  visualDensity: VisualDensity.compact,
+                  side: BorderSide(color: c.hairline),
+                  backgroundColor: c.surface,
+                  labelStyle: TextStyle(fontSize: 13, color: c.textPrimary),
+                  deleteIcon: const Icon(Icons.close_rounded, size: 15),
+                  deleteButtonTooltipMessage: l10n.actionRemove,
+                  onDeleted: () => notifier.removeBasic(b),
+                ),
               ),
             SizedBox(
               width: 200,

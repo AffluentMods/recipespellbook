@@ -139,6 +139,35 @@ class _PantryCookingScreenState extends ConsumerState<PantryCookingScreen> {
                 ],
               ),
             ),
+          if (pantry != null && pantry.dueAt(DateTime.now()).isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.sm),
+              child: Material(
+                color: c.selectedFill,
+                borderRadius: Radii.mdAll,
+                child: InkWell(
+                  key: const ValueKey('pantry-due-banner'),
+                  borderRadius: Radii.mdAll,
+                  onTap: () => showPantrySheet(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.sm + 2),
+                    child: Row(
+                      children: [
+                        Icon(Icons.schedule_rounded, size: 18, color: c.accent),
+                        const SizedBox(width: Space.sm),
+                        Expanded(
+                          child: Text(
+                            '${l10n.pantryStillHaveTitle}  ·  ${l10n.pantryItemsToCheck(pantry.dueAt(DateTime.now()).length)}',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: c.accent),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded, size: 20, color: c.accent),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           Expanded(child: results),
         ],
       ),
