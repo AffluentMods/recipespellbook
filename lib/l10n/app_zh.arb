@@ -4800,5 +4800,9 @@
   "faqPantryQTitle": "“现有食材”和“常备”有什么区别？",
   "faqPantryQSubtitle": "储藏室里的两个清单",
   "faqPantryQAnswer": "“现有食材”是会用完的食物，比如牛奶、鸡蛋和肉。过一段时间应用会询问，购物后也可以一次清空。“常备”是很少用完的东西，比如盐、面粉、香料和油。它们永远不算缺少，也不会被清空。",
-  "pantryHowItWorks": "使用说明"
+  "pantryHowItWorks": "使用说明",
+  "shoppingPutAway": "放入储藏室",
+  "shoppingPutAwayDone": "{count, plural, other{已将 {count} 项放入储藏室}}",
+  "shoppingPutAwayClear": "从清单删除",
+  "shoppingPutAwayNothing": "勾选的东西里没有要放进储藏室的"
 }

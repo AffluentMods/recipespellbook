@@ -12623,4 +12623,26 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => 'Jak to działa';
+
+  @override
+  String get shoppingPutAway => 'Odłóż';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Odłożono $count produktu do spiżarni',
+      many: 'Odłożono $count produktów do spiżarni',
+      few: 'Odłożono $count produkty do spiżarni',
+      one: 'Odłożono 1 produkt do spiżarni',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'Usuń z listy';
+
+  @override
+  String get shoppingPutAwayNothing => 'Nic z zaznaczonych nie trafia do spiżarni';
 }

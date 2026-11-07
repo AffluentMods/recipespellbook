@@ -21630,6 +21630,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How it works'**
   String get pantryHowItWorks;
+
+  /// No description provided for @shoppingPutAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Put away'**
+  String get shoppingPutAway;
+
+  /// No description provided for @shoppingPutAwayDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Put 1 item in your pantry} other{Put {count} items in your pantry}}'**
+  String shoppingPutAwayDone(int count);
+
+  /// No description provided for @shoppingPutAwayClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from list'**
+  String get shoppingPutAwayClear;
+
+  /// No description provided for @shoppingPutAwayNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing ticked goes in a pantry'**
+  String get shoppingPutAwayNothing;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

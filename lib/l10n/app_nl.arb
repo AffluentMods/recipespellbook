@@ -4800,5 +4800,9 @@
   "faqPantryQTitle": "Wat is het verschil tussen Nu in huis en Altijd in huis?",
   "faqPantryQSubtitle": "De twee lijsten in je voorraadkast",
   "faqPantryQAnswer": "Nu in huis is eten dat opraakt, zoals melk, eieren en vlees. De app vraagt er na een tijdje naar, en na het boodschappen doen kun je alles wissen. Altijd in huis is voor wat zelden op raakt, zoals zout, bloem, kruiden en olie. Dat telt nooit als ontbrekend en wordt nooit gewist.",
-  "pantryHowItWorks": "Hoe het werkt"
+  "pantryHowItWorks": "Hoe het werkt",
+  "shoppingPutAway": "Opbergen",
+  "shoppingPutAwayDone": "{count, plural, =1{1 item in je voorraadkast gezet} other{{count} items in je voorraadkast gezet}}",
+  "shoppingPutAwayClear": "Van de lijst halen",
+  "shoppingPutAwayNothing": "Niets afgevinkts hoort in de voorraadkast"
 }

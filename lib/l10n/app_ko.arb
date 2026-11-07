@@ -4800,5 +4800,9 @@
   "faqPantryQTitle": "지금 있는 재료와 항상 있는 재료는 어떻게 다른가요?",
   "faqPantryQSubtitle": "식료품 저장소의 두 목록",
   "faqPantryQAnswer": "지금 있는 재료는 우유, 달걀, 고기처럼 쓰면 없어지는 식품이에요. 시간이 지나면 앱이 물어보고, 장을 본 뒤 한 번에 지울 수 있어요. 항상 있는 재료는 소금, 밀가루, 향신료, 기름처럼 잘 떨어지지 않는 것이에요. 부족한 재료로 세지 않고 지워지지도 않아요.",
-  "pantryHowItWorks": "사용 방법"
+  "pantryHowItWorks": "사용 방법",
+  "shoppingPutAway": "정리하기",
+  "shoppingPutAwayDone": "{count, plural, other{{count}개를 식료품 저장소에 넣었어요}}",
+  "shoppingPutAwayClear": "목록에서 삭제",
+  "shoppingPutAwayNothing": "체크한 항목 중 저장소에 넣을 것이 없어요"
 }

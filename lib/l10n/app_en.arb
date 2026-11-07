@@ -6323,5 +6323,10 @@
   "faqPantryQTitle": "What is the difference between On hand now and Always have?",
   "faqPantryQSubtitle": "The two lists in your pantry",
   "faqPantryQAnswer": "On hand now is food you use up, like milk, eggs and meat. The app asks about it after a while, and you can clear it all after a shopping trip. Always have is for things you rarely run out of, like salt, flour, spices and oil. They are never counted as missing and never cleared.",
-  "pantryHowItWorks": "How it works"
+  "pantryHowItWorks": "How it works",
+  "shoppingPutAway": "Put away",
+  "shoppingPutAwayDone": "{count, plural, =1{Put 1 item in your pantry} other{Put {count} items in your pantry}}",
+  "@shoppingPutAwayDone": {"placeholders": {"count": {"type": "int"}}},
+  "shoppingPutAwayClear": "Remove from list",
+  "shoppingPutAwayNothing": "Nothing ticked goes in a pantry"
 }

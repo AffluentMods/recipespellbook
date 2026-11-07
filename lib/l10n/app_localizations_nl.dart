@@ -12427,4 +12427,24 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => 'Hoe het werkt';
+
+  @override
+  String get shoppingPutAway => 'Opbergen';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items in je voorraadkast gezet',
+      one: '1 item in je voorraadkast gezet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'Van de lijst halen';
+
+  @override
+  String get shoppingPutAwayNothing => 'Niets afgevinkts hoort in de voorraadkast';
 }

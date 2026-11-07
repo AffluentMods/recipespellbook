@@ -66,10 +66,14 @@ class PantryService {
   Set<String> _items = {};
   final Map<String, ({int added, bool frozen})> _info = {};
   Set<String> _basics = {...defaultBasics};
-  bool _loaded = false;
+  Future<void>? _loading;
 
-  Future<void> _ensureLoaded() async {
-    if (_loaded) return;
+  /// Loads once. Callers that arrive while it is loading wait for the same
+  /// load, so a load finishing late cannot wipe an item added meanwhile
+  /// (the first pantry use can be a "Put away" while the provider builds).
+  Future<void> _ensureLoaded() => _loading ??= _load();
+
+  Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     _items = _decode(prefs.getString(_key)) ?? {};
     _basics = _decode(prefs.getString(_basicsKey)) ?? {...defaultBasics};
@@ -85,7 +89,6 @@ class PantryService {
     } catch (_) {
       _info.clear();
     }
-    _loaded = true;
     // Items from before dates were kept start their clock today, so an
     // update never greets anyone with a long "Still have these?" list.
     final undated = _items.where((i) => !_info.containsKey(i)).toList();

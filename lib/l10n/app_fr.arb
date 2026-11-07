@@ -3825,5 +3825,9 @@
   "faqPantryQTitle": "Quelle différence entre En stock maintenant et Toujours en stock ?",
   "faqPantryQSubtitle": "Les deux listes de votre garde-manger",
   "faqPantryQAnswer": "En stock maintenant, c'est ce qui se consomme, comme le lait, les œufs et la viande. L'app demande au bout d'un moment, et vous pouvez tout vider après les courses. Toujours en stock, c'est ce qui manque rarement, comme le sel, la farine, les épices et l'huile. Ce n'est jamais compté comme manquant ni vidé.",
-  "pantryHowItWorks": "Comment ça marche"
+  "pantryHowItWorks": "Comment ça marche",
+  "shoppingPutAway": "Ranger",
+  "shoppingPutAwayDone": "{count, plural, =1{1 article rangé dans votre garde-manger} other{{count} articles rangés dans votre garde-manger}}",
+  "shoppingPutAwayClear": "Retirer de la liste",
+  "shoppingPutAwayNothing": "Rien de coché ne va au garde-manger"
 }
