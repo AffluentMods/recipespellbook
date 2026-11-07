@@ -12156,4 +12156,256 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => 'De tus recetarios';
+
+  @override
+  String get pantryNowTitle => 'Tengo ahora';
+
+  @override
+  String get pantryNowHint => 'Lo que tienes ahora mismo. Después de la compra, vacíalo y añade lo que compraste.';
+
+  @override
+  String get pantryClearNow => 'Vaciar todo';
+
+  @override
+  String get pantryClearNowTitle => '¿Vaciar todo lo que tienes ahora?';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Se quitarán $count artículos. Tu lista Siempre tengo se queda.',
+      one: 'Se quitará 1 artículo. Tu lista Siempre tengo se queda.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Añadido hace $count días',
+      one: 'Añadido ayer',
+      zero: 'Añadido hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Añadido hace $count semanas',
+      one: 'Añadido hace 1 semana',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Congelado hace $count días',
+      one: 'Congelado ayer',
+      zero: 'Congelado hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Congelado hace $count semanas',
+      one: 'Congelado hace 1 semana',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => 'Meter en el congelador';
+
+  @override
+  String get pantryTakeOutOfFreezer => 'Sacar del congelador';
+
+  @override
+  String get pantryMakeAlwaysHave => 'Pasar a Siempre tengo';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return '$item pasó a Siempre tengo';
+  }
+
+  @override
+  String get pantryFreezerSection => 'Congelador';
+
+  @override
+  String get pantryStillHaveTitle => '¿Todavía tienes esto?';
+
+  @override
+  String get pantryStillHaveHint => 'Seguramente ya se gastaron o se estropearon. Quédate con lo que aún tengas.';
+
+  @override
+  String get pantryKeep => 'Conservar';
+
+  @override
+  String get pantryRemoveThese => 'Quitar estos';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count artículos por revisar',
+      one: '1 artículo por revisar',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => 'Añadir ingredientes comunes';
+
+  @override
+  String get pantryCommonTitle => 'Ingredientes comunes';
+
+  @override
+  String get pantryCommonHint => 'Marca lo que tienes en la cocina y añádelo todo de una vez.';
+
+  @override
+  String get pantryCommonAlwaysHint => 'Siempre tengo: nunca cuenta como faltante. Ideal para harina, especias y aceites.';
+
+  @override
+  String get pantryCommonNowHint => 'Tengo ahora: cuenta hasta que se acabe. Ideal para lo fresco.';
+
+  @override
+  String get pantryCommonSelectAll => 'Seleccionar todo';
+
+  @override
+  String get pantryCommonSelectNone => 'No seleccionar nada';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Añadir $count ingredientes',
+      one: 'Añadir 1 ingrediente',
+      zero: 'Añadir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredientes añadidos',
+      one: '1 ingrediente añadido',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => 'Harina y repostería';
+
+  @override
+  String get pantryPackSpices => 'Especias y condimentos';
+
+  @override
+  String get pantryPackHerbs => 'Hierbas secas';
+
+  @override
+  String get pantryPackOils => 'Aceites y vinagres';
+
+  @override
+  String get pantryPackSauces => 'Salsas y aderezos';
+
+  @override
+  String get pantryPackGrains => 'Arroz, cereales y pasta';
+
+  @override
+  String get pantryPackCanned => 'Latas y caldos';
+
+  @override
+  String get pantryPackFridge => 'Básicos de nevera';
+
+  @override
+  String get pantryPackFresh => 'Básicos frescos';
+
+  @override
+  String get pantryMoveToNow => 'Pasar a Tengo ahora';
+
+  @override
+  String get moreKitchen => 'Cocina';
+
+  @override
+  String get moreMyPantrySubtitle => 'Lo que tienes ahora y siempre tienes';
+
+  @override
+  String get faqPantryTitle => 'Cómo usar tu despensa';
+
+  @override
+  String get faqPantrySubtitle => 'Lleva la cuenta de lo que tienes y mira qué puedes cocinar';
+
+  @override
+  String get faqPantryStep1Title => 'Abre tu despensa';
+
+  @override
+  String get faqPantryStep1Desc => 'Toca Más en la parte inferior y luego Mi despensa. ¿Qué puedo cocinar? está justo encima, y también en la pantalla de inicio.';
+
+  @override
+  String get faqPantryStep2Title => 'Añade lo que tienes';
+
+  @override
+  String get faqPantryStep2Desc => 'Escribe lo que tienes y toca el visto. Añade varias cosas a la vez con comas, como huevos, leche, mantequilla.';
+
+  @override
+  String get faqPantryStep3Title => 'Añade ingredientes comunes';
+
+  @override
+  String get faqPantryStep3Desc => 'Toca Añadir ingredientes comunes y marca lo que tienes, o toca Seleccionar todo para un grupo entero. Elige Siempre tengo para lo que casi nunca se acaba, como harina y especias, o Tengo ahora para lo fresco.';
+
+  @override
+  String get faqPantryStep4Title => 'Tengo ahora y Siempre tengo';
+
+  @override
+  String get faqPantryStep4Desc => 'Tengo ahora es lo que tienes esta semana, con el día en que lo añadiste. Toca la chincheta para pasarlo a Siempre tengo, o el copo de nieve cuando va al congelador.';
+
+  @override
+  String get faqPantryStep4Tip => 'Lo que está en Siempre tengo nunca cuenta como faltante, así que las recetas que lo usan pueden estar listas.';
+
+  @override
+  String get faqPantryStep5Title => 'Después de la compra';
+
+  @override
+  String get faqPantryStep5Desc => 'Toca Vaciar todo y responde Sí, y luego añade lo que compraste. Tu lista Siempre tengo se queda igual.';
+
+  @override
+  String get faqPantryStep6Title => '¿Todavía tienes esto?';
+
+  @override
+  String get faqPantryStep6Desc => 'Pasado un tiempo, la app pregunta por lo fresco: unos 3 días para la carne y una semana para casi todas las verduras. Toca Conservar si aún lo tienes, o quítalo. Lo congelado dura unos 6 meses.';
+
+  @override
+  String get faqPantryStep7Title => 'Mira qué puedes cocinar';
+
+  @override
+  String get faqPantryStep7Desc => '¿Qué puedo cocinar? muestra tus recetas, primero las que puedes hacer ya. Toca Añadir lo que falta para ponerlo en tu lista de la compra.';
+
+  @override
+  String get faqPantryQTitle => '¿Qué diferencia hay entre Tengo ahora y Siempre tengo?';
+
+  @override
+  String get faqPantryQSubtitle => 'Las dos listas de tu despensa';
+
+  @override
+  String get faqPantryQAnswer => 'Tengo ahora es la comida que se gasta, como leche, huevos y carne. La app pregunta por ella pasado un tiempo, y puedes vaciarla después de la compra. Siempre tengo es para lo que casi nunca se acaba, como sal, harina, especias y aceite. Nunca cuenta como faltante y nunca se vacía.';
+
+  @override
+  String get pantryHowItWorks => 'Cómo funciona';
 }

@@ -16,6 +16,7 @@ import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_controls.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sheet_chrome.dart';
+import '../import/faq_screen.dart' show openFaqHowTo;
 import 'pantry_cooking_widgets.dart';
 
 /// "What can I make?": every recipe in every cookbook (copies shown once),
@@ -77,6 +78,13 @@ class _PantryCookingScreenState extends ConsumerState<PantryCookingScreen> {
           title: l10n.pantryCookTitle,
           subtitle: summary,
           leading: Navigator.of(context).canPop() ? const HeaderBackButton() : null,
+          actions: [
+            IconButton(
+              tooltip: l10n.pantryHowItWorks,
+              icon: const Icon(Icons.help_outline_rounded),
+              onPressed: () => openFaqHowTo(context, 'pantry'),
+            ),
+          ],
         ),
         body: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -112,6 +120,11 @@ class _PantryCookingScreenState extends ConsumerState<PantryCookingScreen> {
         backgroundColor: c.surface,
         title: Text(l10n.pantryCookTitle),
         actions: [
+          IconButton(
+            tooltip: l10n.pantryHowItWorks,
+            icon: const Icon(Icons.help_outline_rounded),
+            onPressed: () => openFaqHowTo(context, 'pantry'),
+          ),
           if (pantry != null && !pantry.isEmpty)
             IconButton(
               tooltip: l10n.myPantry,
@@ -137,6 +150,35 @@ class _PantryCookingScreenState extends ConsumerState<PantryCookingScreen> {
                     child: Text(l10n.pantryCookEditPantry),
                   ),
                 ],
+              ),
+            ),
+          if (pantry != null && pantry.dueAt(DateTime.now()).isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.sm),
+              child: Material(
+                color: c.selectedFill,
+                borderRadius: Radii.mdAll,
+                child: InkWell(
+                  key: const ValueKey('pantry-due-banner'),
+                  borderRadius: Radii.mdAll,
+                  onTap: () => showPantrySheet(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.sm + 2),
+                    child: Row(
+                      children: [
+                        Icon(Icons.schedule_rounded, size: 18, color: c.accent),
+                        const SizedBox(width: Space.sm),
+                        Expanded(
+                          child: Text(
+                            '${l10n.pantryStillHaveTitle}  ·  ${l10n.pantryItemsToCheck(pantry.dueAt(DateTime.now()).length)}',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: c.accent),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded, size: 20, color: c.accent),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           Expanded(child: results),

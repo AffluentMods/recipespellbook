@@ -49,16 +49,24 @@ final recipeLibraryProvider = FutureProvider<RecipeLibrary>((ref) {
 
 // ── The pantry ──
 
-/// What the user has on hand, and the basics they always have.
+/// What the user has on hand (with dates and freezer flags), and the basics
+/// they always have.
 class PantryState {
-  final List<String> items;
+  final List<PantryEntry> entries;
   final List<String> basics;
 
-  PantryState({required this.items, required this.basics});
+  PantryState({required this.entries, required this.basics})
+      : items = [for (final e in entries) e.name];
+
+  /// The pantry item names, sorted.
+  final List<String> items;
 
   late final PantryMatcher matcher = PantryMatcher(pantry: items, basics: basics);
 
   bool get isEmpty => items.isEmpty;
+
+  /// Items that have probably gone off by [now] ("Still have these?").
+  List<PantryEntry> dueAt(DateTime now) => [for (final e in entries) if (e.isDue(now)) e];
 }
 
 class PantryNotifier extends AsyncNotifier<PantryState> {
@@ -68,19 +76,25 @@ class PantryNotifier extends AsyncNotifier<PantryState> {
   Future<PantryState> build() => _read();
 
   Future<PantryState> _read() async =>
-      PantryState(items: await _service.getAll(), basics: await _service.getBasics());
+      PantryState(entries: await _service.getEntries(), basics: await _service.getBasics());
 
   Future<void> _change(Future<void> Function() change) async {
     await change();
     state = AsyncData(await _read());
   }
 
-  Future<void> add(String name) => _change(() => _service.addItem(name));
+  Future<void> add(String name, {bool frozen = false}) => _change(() => _service.addItem(name, frozen: frozen));
   Future<void> addAll(List<String> names) => _change(() => _service.addItems(names));
   Future<void> remove(String name) => _change(() => _service.removeItem(name));
+  Future<void> removeAll(List<String> names) => _change(() => _service.removeItems(names));
+  Future<void> keep(List<String> names) => _change(() => _service.keepItems(names));
+  Future<void> setFrozen(String name, bool frozen) => _change(() => _service.setFrozen(name, frozen));
   Future<void> clear() => _change(_service.clear);
   Future<void> addBasic(String name) => _change(() => _service.addBasic(name));
+  Future<void> addBasics(List<String> names) => _change(() => _service.addBasics(names));
   Future<void> removeBasic(String name) => _change(() => _service.removeBasic(name));
+  Future<void> moveToBasics(String name) => _change(() => _service.moveToBasics(name));
+  Future<void> moveBasicToPantry(String name) => _change(() => _service.moveBasicToPantry(name));
 }
 
 final pantryProvider = AsyncNotifierProvider<PantryNotifier, PantryState>(PantryNotifier.new);

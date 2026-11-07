@@ -12022,4 +12022,250 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dinnerReasonFromLibrary => '来自你的食谱书';
+
+  @override
+  String get pantryNowTitle => '现有食材';
+
+  @override
+  String get pantryNowHint => '你现在有的东西。购物后清空，再添加新买的。';
+
+  @override
+  String get pantryClearNow => '全部清空';
+
+  @override
+  String get pantryClearNowTitle => '清空所有现有食材？';
+
+  @override
+  String pantryClearNowMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '将删除 $count 项。常备清单保持不变。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 天前添加',
+      one: '昨天添加',
+      zero: '今天添加',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryAddedWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 周前添加',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 天前冷冻',
+      one: '昨天冷冻',
+      zero: '今天冷冻',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryFrozenWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 周前冷冻',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryMoveToFreezer => '放入冷冻室';
+
+  @override
+  String get pantryTakeOutOfFreezer => '从冷冻室取出';
+
+  @override
+  String get pantryMakeAlwaysHave => '移到常备';
+
+  @override
+  String pantryMovedToAlwaysHave(String item) {
+    return '已将$item移到常备';
+  }
+
+  @override
+  String get pantryFreezerSection => '冷冻室';
+
+  @override
+  String get pantryStillHaveTitle => '这些还有吗？';
+
+  @override
+  String get pantryStillHaveHint => '这些可能已经用完或变质了。还有的请保留。';
+
+  @override
+  String get pantryKeep => '保留';
+
+  @override
+  String get pantryRemoveThese => '删除这些';
+
+  @override
+  String pantryItemsToCheck(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 项待确认',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryCommonButton => '添加常用食材';
+
+  @override
+  String get pantryCommonTitle => '常用食材';
+
+  @override
+  String get pantryCommonHint => '勾选厨房里有的东西，一次全部添加。';
+
+  @override
+  String get pantryCommonAlwaysHint => '常备：永远不算缺少。适合面粉、香料和油。';
+
+  @override
+  String get pantryCommonNowHint => '现有食材：用完之前都算在内。适合新鲜食材。';
+
+  @override
+  String get pantryCommonSelectAll => '全选';
+
+  @override
+  String get pantryCommonSelectNone => '全不选';
+
+  @override
+  String pantryCommonAddCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '添加 $count 种食材',
+      zero: '添加',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCommonAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已添加 $count 种食材',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryPackBaking => '面粉和烘焙';
+
+  @override
+  String get pantryPackSpices => '香料和调味料';
+
+  @override
+  String get pantryPackHerbs => '干香草';
+
+  @override
+  String get pantryPackOils => '油和醋';
+
+  @override
+  String get pantryPackSauces => '酱料和调味品';
+
+  @override
+  String get pantryPackGrains => '米、谷物和面';
+
+  @override
+  String get pantryPackCanned => '罐头和高汤';
+
+  @override
+  String get pantryPackFridge => '冰箱常备';
+
+  @override
+  String get pantryPackFresh => '新鲜常备';
+
+  @override
+  String get pantryMoveToNow => '移到现有食材';
+
+  @override
+  String get moreKitchen => '厨房';
+
+  @override
+  String get moreMyPantrySubtitle => '现有食材和常备食材';
+
+  @override
+  String get faqPantryTitle => '如何使用储藏室';
+
+  @override
+  String get faqPantrySubtitle => '记录你有什么，看看能做什么菜';
+
+  @override
+  String get faqPantryStep1Title => '打开储藏室';
+
+  @override
+  String get faqPantryStep1Desc => '点屏幕底部的“更多”，再点“我的储藏室”。“我能做什么？”就在它上面，主屏幕上也有。';
+
+  @override
+  String get faqPantryStep2Title => '添加你有的东西';
+
+  @override
+  String get faqPantryStep2Desc => '输入你有的东西并点对勾。用逗号分隔可以一次添加多样，比如 鸡蛋, 牛奶, 黄油。';
+
+  @override
+  String get faqPantryStep3Title => '添加常用食材';
+
+  @override
+  String get faqPantryStep3Desc => '点“添加常用食材”，勾选你有的东西，或点“全选”选中整组。面粉、香料这类很少用完的选“常备”，新鲜食材选“现有食材”。';
+
+  @override
+  String get faqPantryStep4Title => '现有食材和常备';
+
+  @override
+  String get faqPantryStep4Desc => '“现有食材”是你这周手头的东西，并显示添加日期。点图钉可移到“常备”，放进冷冻室时点雪花。';
+
+  @override
+  String get faqPantryStep4Tip => '常备里的东西永远不算缺少，所以用到它们的菜谱也能显示为可以做。';
+
+  @override
+  String get faqPantryStep5Title => '购物之后';
+
+  @override
+  String get faqPantryStep5Desc => '点“全部清空”并选“是”，然后添加新买的东西。常备清单保持不变。';
+
+  @override
+  String get faqPantryStep6Title => '这些还有吗？';
+
+  @override
+  String get faqPantryStep6Desc => '过一段时间，应用会询问新鲜食材：肉大约 3 天，多数蔬菜大约一周。如果还有就点“保留”，没有就删除。冷冻食品大约能放 6 个月。';
+
+  @override
+  String get faqPantryStep7Title => '看看能做什么';
+
+  @override
+  String get faqPantryStep7Desc => '“我能做什么？”会列出你的菜谱，马上能做的排在前面。点“添加缺少的”可以把缺的东西加到购物清单。';
+
+  @override
+  String get faqPantryQTitle => '“现有食材”和“常备”有什么区别？';
+
+  @override
+  String get faqPantryQSubtitle => '储藏室里的两个清单';
+
+  @override
+  String get faqPantryQAnswer => '“现有食材”是会用完的食物，比如牛奶、鸡蛋和肉。过一段时间应用会询问，购物后也可以一次清空。“常备”是很少用完的东西，比如盐、面粉、香料和油。它们永远不算缺少，也不会被清空。';
+
+  @override
+  String get pantryHowItWorks => '使用说明';
 }

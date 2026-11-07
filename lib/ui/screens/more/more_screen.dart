@@ -26,6 +26,8 @@ import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/sheet_chrome.dart';
 import '../book_scan/book_scan_entry.dart';
 import '../import/import_guides_screen.dart';
+import '../pantry_cooking/pantry_cooking_widgets.dart' show pantryCookingPath;
+import '../settings/pantry_screen.dart';
 
 /// The phone / tablet "More" tab: who you are (account, plan, community
 /// stats) and every place that isn't a tab — the library, the ways to get
@@ -87,6 +89,26 @@ class MoreScreen extends ConsumerWidget {
                   title: l10n.navCookbooks,
                   trailing: count(cookbookCount),
                   onTap: () => context.push('/cookbooks'),
+                ),
+              ],
+            ),
+
+            TouchGroupLabel(l10n.moreKitchen),
+            TouchGroup(
+              children: [
+                TouchRow(
+                  icon: Icons.restaurant_menu_rounded,
+                  title: l10n.pantryCookTitle,
+                  subtitle: l10n.pantryCookPaletteSubtitle,
+                  onTap: () => context.push(pantryCookingPath),
+                ),
+                TouchRow(
+                  icon: Icons.kitchen_rounded,
+                  title: l10n.myPantry,
+                  subtitle: l10n.moreMyPantrySubtitle,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const PantryScreen()),
+                  ),
                 ),
               ],
             ),

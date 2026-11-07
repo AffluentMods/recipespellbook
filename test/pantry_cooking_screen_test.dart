@@ -155,7 +155,8 @@ void main() {
     expect(find.text('What can I make?'), findsOneWidget);
     expect(find.text('My Pantry'), findsOneWidget);
     expect(find.text('Always have'), findsOneWidget);
-    expect(find.text('Common Staples'), findsOneWidget);
+    expect(find.text('Add common ingredients'), findsOneWidget);
+    expect(find.text('On hand now (3)'), findsOneWidget);
 
     await tester.tap(find.text('Add missing'));
     await settleUntil(tester, () => showing('View List'));
