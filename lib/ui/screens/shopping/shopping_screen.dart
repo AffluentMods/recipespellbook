@@ -38,6 +38,7 @@ import '../../../utils/ingredient_utils.dart';
 import 'widgets/quick_add_panel.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
+import '../pantry_cooking/pantry_editor.dart' show putAwayInPantry;
 import '../../widgets/empty_state.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/family_share_sheet.dart';
@@ -4669,18 +4670,40 @@ class _CheckedSection extends ConsumerWidget {
       children: [
         _ShopGroupLabel(
           l10n.shoppingCheckedItemsCount(items.length),
-          trailing: TextButton(
-            onPressed: () {
-              shoppingDao.deleteCheckedItems(listId);
-              // TODO: Kitchen Buddy hidden for now
-              // KitchenBuddyIntegration.updateShoppingCompleteCount(ref, 1);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: theme.colorScheme.error,
-              textStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
-              visualDensity: VisualDensity.compact,
-            ),
-            child: Text(l10n.shoppingDeleteChecked),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Into the pantry, dated today; the snackbar can clear them too.
+              TextButton.icon(
+                key: const ValueKey('shopping-put-away'),
+                onPressed: () => putAwayInPantry(
+                  context,
+                  ref,
+                  items,
+                  removeFromList: () => shoppingDao.deleteCheckedItems(listId),
+                ),
+                icon: const Icon(Icons.kitchen_outlined, size: 17),
+                label: Text(l10n.shoppingPutAway),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.appColors.accent,
+                  textStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  shoppingDao.deleteCheckedItems(listId);
+                  // TODO: Kitchen Buddy hidden for now
+                  // KitchenBuddyIntegration.updateShoppingCompleteCount(ref, 1);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.error,
+                  textStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                  visualDensity: VisualDensity.compact,
+                ),
+                child: Text(l10n.shoppingDeleteChecked),
+              ),
+            ],
           ),
         ),
         _ItemGroup(children: [

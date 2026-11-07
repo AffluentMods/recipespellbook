@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show immutable, visibleForTesting;
+import 'package:flutter/foundation.dart' show ValueNotifier, immutable, visibleForTesting;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pantry_matcher.dart';
@@ -46,6 +46,11 @@ class PantryService {
   static const _key = 'pantry_items';
   static const _infoKey = 'pantry_item_info';
   static const _basicsKey = 'pantry_basics';
+  static const _updatedAtKey = 'pantry_updated_at';
+
+  /// Called after every change made on this device (not after a sync or an
+  /// import put things in place), so cloud sync can push it soon.
+  static void Function()? onLocalChange;
 
   static PantryService? _instance;
   static PantryService get instance => _instance ??= PantryService._();
@@ -66,10 +71,21 @@ class PantryService {
   Set<String> _items = {};
   final Map<String, ({int added, bool frozen})> _info = {};
   Set<String> _basics = {...defaultBasics};
-  bool _loaded = false;
+  Future<void>? _loading;
 
-  Future<void> _ensureLoaded() async {
-    if (_loaded) return;
+  /// Goes up when the pantry changed from outside the app's own editing
+  /// (cloud sync, a restored backup, a transfer), so screens read it again.
+  final revision = ValueNotifier<int>(0);
+
+  /// Loads once. Callers that arrive while it is loading wait for the same
+  /// load, so a load finishing late cannot wipe an item added meanwhile
+  /// (the first pantry use can be a "Put away" while the provider builds).
+  Future<void> _ensureLoaded() => _loading ??= _load().then((_) {}, onError: (Object e, StackTrace st) {
+        _loading = null; // a failed load is tried again next time
+        Error.throwWithStackTrace(e, st);
+      });
+
+  Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     _items = _decode(prefs.getString(_key)) ?? {};
     _basics = _decode(prefs.getString(_basicsKey)) ?? {...defaultBasics};
@@ -85,7 +101,6 @@ class PantryService {
     } catch (_) {
       _info.clear();
     }
-    _loaded = true;
     // Items from before dates were kept start their clock today, so an
     // update never greets anyone with a long "Still have these?" list.
     final undated = _items.where((i) => !_info.containsKey(i)).toList();
@@ -94,7 +109,7 @@ class PantryService {
       for (final i in undated) {
         _info[i] = (added: today, frozen: false);
       }
-      await _save();
+      await _save(edit: false);
     }
   }
 
@@ -110,18 +125,112 @@ class PantryService {
 
   static String _normalize(String name) => name.toLowerCase().trim();
 
-  Future<void> _save() async {
+  /// [edit]: a change made here, which sync should send. [stamp]: the
+  /// "last changed" time to record instead of now (a pulled copy keeps the
+  /// server's).
+  Future<void> _save({bool edit = true, int? stamp}) async {
     final prefs = await SharedPreferences.getInstance();
     _info.removeWhere((name, _) => !_items.contains(name));
     await prefs.setString(_key, jsonEncode(_items.toList()..sort()));
     await prefs.setString(_infoKey, jsonEncode({
       for (final e in _info.entries) e.key: {'a': e.value.added, if (e.value.frozen) 'f': 1},
     }));
+    await _stamp(prefs, edit: edit, stamp: stamp);
   }
 
-  Future<void> _saveBasics() async {
+  Future<void> _saveBasics({bool edit = true, int? stamp}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_basicsKey, jsonEncode(_basics.toList()..sort()));
+    await _stamp(prefs, edit: edit, stamp: stamp);
+  }
+
+  Future<void> _stamp(SharedPreferences prefs, {required bool edit, int? stamp}) async {
+    if (stamp != null) {
+      await prefs.setInt(_updatedAtKey, stamp);
+    } else if (edit) {
+      await prefs.setInt(_updatedAtKey, now().millisecondsSinceEpoch);
+      onLocalChange?.call();
+    }
+  }
+
+  // ── Sync, backups and transfers ──
+
+  /// When the pantry last changed (ms since epoch), 0 if never.
+  Future<int> updatedAt() async {
+    await _ensureLoaded();
+    return (await SharedPreferences.getInstance()).getInt(_updatedAtKey) ?? 0;
+  }
+
+  /// The whole pantry as one document: {items: [{name, added, frozen}], basics}.
+  Future<Map<String, dynamic>> toDoc() async {
+    await _ensureLoaded();
+    return {
+      'items': [
+        for (final name in _items.toList()..sort())
+          {
+            'name': name,
+            'added': _info[name]?.added ?? now().millisecondsSinceEpoch,
+            if (_info[name]?.frozen ?? false) 'frozen': true,
+          },
+      ],
+      'basics': _basics.toList()..sort(),
+    };
+  }
+
+  /// Items and basics from [doc], or null for anything that is not one.
+  static ({Map<String, ({int added, bool frozen})> items, Set<String> basics})? _readDoc(Object? doc) {
+    if (doc is! Map) return null;
+    final items = <String, ({int added, bool frozen})>{};
+    final basics = <String>{};
+    for (final raw in doc['items'] is List ? doc['items'] as List : const []) {
+      if (raw is! Map || raw['name'] is! String) continue;
+      final name = _normalize(raw['name'] as String);
+      if (name.isEmpty) continue;
+      final added = raw['added'] is num ? (raw['added'] as num).toInt() : 0;
+      items[name] = (added: added, frozen: raw['frozen'] == true);
+    }
+    for (final raw in doc['basics'] is List ? doc['basics'] as List : const []) {
+      if (raw is String && _normalize(raw).isNotEmpty) basics.add(_normalize(raw));
+    }
+    return (items: items, basics: basics);
+  }
+
+  /// Put the pantry from another device in place of this one (cloud sync,
+  /// the newer copy wins), keeping its "last changed" time [stampedAt].
+  Future<void> replaceWithDoc(Object? doc, int stampedAt) async {
+    final read = _readDoc(doc);
+    if (read == null) return;
+    await _ensureLoaded();
+    _items = read.items.keys.toSet();
+    _info
+      ..clear()
+      ..addAll(read.items);
+    _basics = read.basics;
+    await _save(stamp: stampedAt);
+    await _saveBasics(stamp: stampedAt);
+    revision.value++;
+  }
+
+  /// Add what [doc] has that this pantry lacks (a backup, a transfer, or the
+  /// first sync of a device). An item in both keeps the later date. Counts
+  /// as a change here, so sync sends the result.
+  Future<void> mergeDoc(Object? doc) async {
+    final read = _readDoc(doc);
+    if (read == null) return;
+    await _ensureLoaded();
+    for (final e in read.items.entries) {
+      if (_basics.contains(e.key)) continue;
+      final mine = _info[e.key];
+      if (!_items.contains(e.key) || mine == null || e.value.added > mine.added) {
+        _items.add(e.key);
+        _info[e.key] = e.value;
+      }
+    }
+    _basics.addAll(read.basics);
+    _items.removeAll(_basics);
+    await _save();
+    await _saveBasics();
+    revision.value++;
   }
 
   // ── Always have ──

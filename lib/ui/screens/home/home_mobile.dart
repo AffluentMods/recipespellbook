@@ -37,6 +37,7 @@ import '../craving/craving_screen.dart';
 import '../pantry_cooking/pantry_cooking_widgets.dart';
 import '../planner/planner_screen.dart'
     show selectedPlannerDateProvider, mealTypeLabel;
+import '../../widgets/guides_tip_card.dart';
 
 /// The phone / tablet home: a dashboard in one scrolling column. A greeting
 /// with the cookbook switcher and search, the library one tap away, then what
@@ -160,6 +161,8 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
                       ],
                     ),
             ),
+            // New here? The how-to guides, until closed.
+            GuidesTipCard(padding: pad.copyWith(top: Space.md)),
             // Deciding dinner: what the pantry covers, then a few
             // suggestions with the reason for each.
             Padding(

@@ -12272,4 +12272,122 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => '使い方';
+
+  @override
+  String get shoppingPutAway => 'しまう';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件をパントリーに追加しました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'リストから削除';
+
+  @override
+  String get shoppingPutAwayNothing => 'チェックした中にパントリーに入れるものはありません';
+
+  @override
+  String get guidesTipTitle => 'はじめての方へ';
+
+  @override
+  String get guidesTipBody => '画像付きの短いガイドで、すべての使い方がわかります。';
+
+  @override
+  String get guidesTipOpen => 'ガイドを見る';
+
+  @override
+  String get faqPlanTitle => '1週間の献立と買い物のしかた';
+
+  @override
+  String get faqPlanSubtitle => '献立を立て、買い物リストを作り、買ったものをしまう';
+
+  @override
+  String get faqPlanStep1Title => 'プランナーを開く';
+
+  @override
+  String get faqPlanStep1Desc => '画面下の「プランナー」をタップし、上で日付を選んで「食事を追加」をタップします。';
+
+  @override
+  String get faqPlanStep2Title => '食事と人数を選ぶ';
+
+  @override
+  String get faqPlanStep2Desc => '朝食・昼食・夕食を選び、何人分作るかを決めてからレシピをタップします。買い物リストの量は人数に合わせて変わります。';
+
+  @override
+  String get faqPlanStep3Title => '1週間をひと目で';
+
+  @override
+  String get faqPlanStep3Desc => '予定した食事は、その日に人数分の数と一緒に表示されます。タップするとレシピが開きます。';
+
+  @override
+  String get faqPlanStep4Title => '買い物リストを作る';
+
+  @override
+  String get faqPlanStep4Desc => '「買い物」をタップします。レシピに必要なものがすべて並び、パントリーにあるものはチェックが外れています。「確認して追加」をタップします。';
+
+  @override
+  String get faqPlanStep4Tip => 'パントリーを最新にしておけば、買い物リストは自然に短くなります。';
+
+  @override
+  String get faqPlanStep5Title => '買い物をする';
+
+  @override
+  String get faqPlanStep5Desc => 'リストは売り場ごとに並んでいます。カートに入れたら、横の丸をタップします。';
+
+  @override
+  String get faqPlanStep6Title => 'しまう';
+
+  @override
+  String get faqPlanStep6Desc => '家に帰ったら、チェック済みの上にある「しまう」をタップします。食材が今日の日付でパントリーに入ります。';
+
+  @override
+  String get faqPlanStep7Title => 'リストを空にする';
+
+  @override
+  String get faqPlanStep7Desc => 'メッセージの「リストから削除」でチェック済みを消すか、あとで削除します。';
+
+  @override
+  String get faqCommTitle => 'コミュニティからクックブックを入手する方法';
+
+  @override
+  String get faqCommSubtitle => '無料のクックブックをダウンロードし、自分のものも共有';
+
+  @override
+  String get faqCommStep1Title => 'コミュニティを開く';
+
+  @override
+  String get faqCommStep1Desc => '画面下の「コミュニティ」をタップし、「クックブック」を開くと、レシピ単体ではなくクックブック全体が見られます。';
+
+  @override
+  String get faqCommStep2Title => 'クックブックをダウンロード';
+
+  @override
+  String get faqCommStep2Desc => 'クックブックを開いて「全件のレシピをダウンロード」をタップします。一部だけなら「個別のレシピを選択」を使います。';
+
+  @override
+  String get faqCommStep2Tip => 'ダウンロードしたクックブックを作者が改善すると、アプリが新しい版を案内し、あなたの変更はそのまま残ります。';
+
+  @override
+  String get faqCommStep3Title => '保存先を選ぶ';
+
+  @override
+  String get faqCommStep3Desc => 'ダウンロードの横の矢印で、「新しいクックブック」として保存するか「既存のクックブック」に追加するかを選びます。';
+
+  @override
+  String get faqCommStep4Title => 'ダウンロード前に見る';
+
+  @override
+  String get faqCommStep4Desc => 'レシピをタップすると内容をさっと確認でき、「レシピ全体を表示」で全部見られます。';
+
+  @override
+  String get faqCommStep5Title => '自分のものを共有';
+
+  @override
+  String get faqCommStep5Desc => '「公開」をタップすると、自分のクックブックやレシピをみんなと共有できます。サインインが必要です。';
 }

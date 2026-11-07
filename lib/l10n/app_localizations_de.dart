@@ -12415,4 +12415,123 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => 'So funktioniert es';
+
+  @override
+  String get shoppingPutAway => 'Einräumen';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge in die Vorratskammer gelegt',
+      one: '1 Eintrag in die Vorratskammer gelegt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => 'Von der Liste nehmen';
+
+  @override
+  String get shoppingPutAwayNothing => 'Nichts Abgehaktes gehört in die Vorratskammer';
+
+  @override
+  String get guidesTipTitle => 'Neu hier?';
+
+  @override
+  String get guidesTipBody => 'Kurze Anleitungen mit Bildern zeigen, wie alles funktioniert.';
+
+  @override
+  String get guidesTipOpen => 'Zu den Anleitungen';
+
+  @override
+  String get faqPlanTitle => 'So planst du deine Woche und kaufst ein';
+
+  @override
+  String get faqPlanSubtitle => 'Mahlzeiten planen, Einkaufsliste machen, Einkäufe einräumen';
+
+  @override
+  String get faqPlanStep1Title => 'Planer öffnen';
+
+  @override
+  String get faqPlanStep1Desc => 'Tippe unten auf Planer. Wähle oben einen Tag und tippe auf Mahlzeit hinzufügen.';
+
+  @override
+  String get faqPlanStep2Title => 'Mahlzeit und Personen wählen';
+
+  @override
+  String get faqPlanStep2Desc => 'Wähle Frühstück, Mittagessen oder Abendessen und für wie viele Personen du kochst, dann tippe auf ein Rezept. Die Einkaufsliste richtet sich nach der Personenzahl.';
+
+  @override
+  String get faqPlanStep3Title => 'Deine Woche auf einen Blick';
+
+  @override
+  String get faqPlanStep3Desc => 'Geplante Mahlzeiten stehen an ihrem Tag mit der Portionenzahl. Tippe darauf, um das Rezept zu öffnen.';
+
+  @override
+  String get faqPlanStep4Title => 'Einkaufsliste erstellen';
+
+  @override
+  String get faqPlanStep4Desc => 'Tippe auf Einkaufen. Alles, was die Rezepte brauchen, steht da, und was schon in deiner Vorratskammer ist, bleibt abgewählt. Tippe auf Prüfen & hinzufügen.';
+
+  @override
+  String get faqPlanStep4Tip => 'Halte deine Vorratskammer aktuell, dann wird die Einkaufsliste von selbst kürzer.';
+
+  @override
+  String get faqPlanStep5Title => 'Einkaufen';
+
+  @override
+  String get faqPlanStep5Desc => 'Die Liste ist nach Abteilungen sortiert. Tippe auf den Kreis neben einem Artikel, wenn er im Wagen liegt.';
+
+  @override
+  String get faqPlanStep6Title => 'Einräumen';
+
+  @override
+  String get faqPlanStep6Desc => 'Zu Hause tippst du über den abgehakten Artikeln auf Einräumen. Die Lebensmittel kommen mit dem heutigen Datum in deine Vorratskammer.';
+
+  @override
+  String get faqPlanStep7Title => 'Liste leeren';
+
+  @override
+  String get faqPlanStep7Desc => 'Tippe in der Meldung auf Von der Liste nehmen, um die abgehakten Artikel zu entfernen, oder lösche sie später.';
+
+  @override
+  String get faqCommTitle => 'So bekommst du Kochbücher aus der Community';
+
+  @override
+  String get faqCommSubtitle => 'Kostenlose Kochbücher herunterladen und eigene teilen';
+
+  @override
+  String get faqCommStep1Title => 'Community öffnen';
+
+  @override
+  String get faqCommStep1Desc => 'Tippe unten auf Community und dann auf Kochbücher, um ganze Kochbücher statt einzelner Rezepte zu sehen.';
+
+  @override
+  String get faqCommStep2Title => 'Kochbuch herunterladen';
+
+  @override
+  String get faqCommStep2Desc => 'Öffne ein Kochbuch und tippe auf Alle Rezepte herunterladen. Mit Einzelne Rezepte auswählen nimmst du nur einige.';
+
+  @override
+  String get faqCommStep2Tip => 'Verbessert der Autor ein Kochbuch, das du heruntergeladen hast, bietet die App die neue Version an und behält deine eigenen Änderungen.';
+
+  @override
+  String get faqCommStep3Title => 'Ziel wählen';
+
+  @override
+  String get faqCommStep3Desc => 'Tippe auf den Pfeil neben dem Download, um es als Neues Kochbuch zu speichern oder einem Vorhandenen Kochbuch hinzuzufügen.';
+
+  @override
+  String get faqCommStep4Title => 'Vorher ansehen';
+
+  @override
+  String get faqCommStep4Desc => 'Tippe auf ein Rezept für einen schnellen Blick oder auf Vollständiges Rezept anzeigen.';
+
+  @override
+  String get faqCommStep5Title => 'Eigene teilen';
+
+  @override
+  String get faqCommStep5Desc => 'Tippe auf Veröffentlichen, um ein Kochbuch oder Rezept mit allen zu teilen. Dafür musst du angemeldet sein.';
 }

@@ -12300,4 +12300,122 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get pantryHowItWorks => '사용 방법';
+
+  @override
+  String get shoppingPutAway => '정리하기';
+
+  @override
+  String shoppingPutAwayDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개를 식료품 저장소에 넣었어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingPutAwayClear => '목록에서 삭제';
+
+  @override
+  String get shoppingPutAwayNothing => '체크한 항목 중 저장소에 넣을 것이 없어요';
+
+  @override
+  String get guidesTipTitle => '처음이신가요?';
+
+  @override
+  String get guidesTipBody => '그림이 있는 짧은 가이드로 모든 기능의 사용법을 알 수 있어요.';
+
+  @override
+  String get guidesTipOpen => '가이드 보기';
+
+  @override
+  String get faqPlanTitle => '한 주 식단을 짜고 장보는 방법';
+
+  @override
+  String get faqPlanSubtitle => '식사를 계획하고, 장보기 목록을 만들고, 산 것을 정리하기';
+
+  @override
+  String get faqPlanStep1Title => '플래너 열기';
+
+  @override
+  String get faqPlanStep1Desc => '화면 아래의 플래너를 누르세요. 위에서 날짜를 고른 뒤 식사 추가를 누르세요.';
+
+  @override
+  String get faqPlanStep2Title => '식사와 인원 고르기';
+
+  @override
+  String get faqPlanStep2Desc => '아침, 점심, 저녁 중 하나와 몇 명이 먹을지 정한 뒤 레시피를 누르세요. 장보기 목록의 양이 인원수를 따라가요.';
+
+  @override
+  String get faqPlanStep3Title => '한 주를 한눈에';
+
+  @override
+  String get faqPlanStep3Desc => '계획한 식사가 그날에 인분 수와 함께 보여요. 누르면 레시피가 열려요.';
+
+  @override
+  String get faqPlanStep4Title => '장보기 목록 만들기';
+
+  @override
+  String get faqPlanStep4Desc => '쇼핑을 누르세요. 레시피에 필요한 것이 모두 나오고, 식료품 저장소에 이미 있는 것은 체크가 해제돼 있어요. 검토 및 추가를 누르세요.';
+
+  @override
+  String get faqPlanStep4Tip => '식료품 저장소를 최신으로 유지하면 장보기 목록이 저절로 짧아져요.';
+
+  @override
+  String get faqPlanStep5Title => '장보기';
+
+  @override
+  String get faqPlanStep5Desc => '목록은 매장 코너별로 정리돼 있어요. 카트에 담으면 옆의 동그라미를 누르세요.';
+
+  @override
+  String get faqPlanStep6Title => '정리하기';
+
+  @override
+  String get faqPlanStep6Desc => '집에 와서 체크한 항목 위의 정리하기를 누르세요. 음식이 오늘 날짜로 식료품 저장소에 들어가요.';
+
+  @override
+  String get faqPlanStep7Title => '목록 비우기';
+
+  @override
+  String get faqPlanStep7Desc => '메시지의 목록에서 삭제를 눌러 체크한 항목을 지우거나, 나중에 삭제하세요.';
+
+  @override
+  String get faqCommTitle => '커뮤니티에서 요리책을 받는 방법';
+
+  @override
+  String get faqCommSubtitle => '무료 요리책을 다운로드하고 내 요리책도 공유하기';
+
+  @override
+  String get faqCommStep1Title => '커뮤니티 열기';
+
+  @override
+  String get faqCommStep1Desc => '화면 아래의 커뮤니티를 누른 뒤 요리책을 누르면 레시피 하나가 아니라 요리책 전체를 볼 수 있어요.';
+
+  @override
+  String get faqCommStep2Title => '요리책 다운로드';
+
+  @override
+  String get faqCommStep2Desc => '요리책을 열고 레시피 모두 다운로드를 누르세요. 일부만 원하면 개별 레시피 선택을 누르세요.';
+
+  @override
+  String get faqCommStep2Tip => '다운로드한 요리책을 작성자가 개선하면 앱이 새 버전을 알려 주고, 내가 바꾼 내용은 그대로 남겨요.';
+
+  @override
+  String get faqCommStep3Title => '저장 위치 고르기';
+
+  @override
+  String get faqCommStep3Desc => '다운로드 옆의 화살표를 눌러 새 요리책으로 저장하거나 기존 요리책에 추가하세요.';
+
+  @override
+  String get faqCommStep4Title => '다운로드 전에 보기';
+
+  @override
+  String get faqCommStep4Desc => '레시피를 누르면 빠르게 살펴볼 수 있고, 전체 레시피 보기로 전부 볼 수 있어요.';
+
+  @override
+  String get faqCommStep5Title => '내 것 공유하기';
+
+  @override
+  String get faqCommStep5Desc => '게시를 눌러 내 요리책이나 레시피를 모두와 공유하세요. 로그인이 필요해요.';
 }
