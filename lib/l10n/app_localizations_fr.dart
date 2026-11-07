@@ -12435,4 +12435,103 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get shoppingPutAwayNothing => 'Rien de coché ne va au garde-manger';
+
+  @override
+  String get guidesTipTitle => 'Nouveau ici ?';
+
+  @override
+  String get guidesTipBody => 'De courts guides illustrés montrent comment tout fonctionne.';
+
+  @override
+  String get guidesTipOpen => 'Voir les guides';
+
+  @override
+  String get faqPlanTitle => 'Planifier la semaine et faire les courses';
+
+  @override
+  String get faqPlanSubtitle => 'Planifiez les repas, faites la liste, rangez les courses';
+
+  @override
+  String get faqPlanStep1Title => 'Ouvrez le Planificateur';
+
+  @override
+  String get faqPlanStep1Desc => 'Touchez Planificateur en bas. Choisissez un jour en haut, puis touchez Ajouter un repas.';
+
+  @override
+  String get faqPlanStep2Title => 'Choisissez le repas et le nombre de personnes';
+
+  @override
+  String get faqPlanStep2Desc => 'Choisissez petit-déjeuner, déjeuner ou dîner et le nombre de personnes, puis touchez une recette. La liste de courses suit le nombre de personnes.';
+
+  @override
+  String get faqPlanStep3Title => 'Votre semaine d\'un coup d\'œil';
+
+  @override
+  String get faqPlanStep3Desc => 'Les repas prévus apparaissent à leur jour avec le nombre de portions. Touchez-en un pour ouvrir la recette.';
+
+  @override
+  String get faqPlanStep4Title => 'Faites la liste de courses';
+
+  @override
+  String get faqPlanStep4Desc => 'Touchez Courses. Tout ce qu\'il faut aux recettes est listé, et ce qui est déjà dans votre garde-manger reste décoché. Touchez Vérifier et ajouter.';
+
+  @override
+  String get faqPlanStep4Tip => 'Gardez votre garde-manger à jour et la liste de courses raccourcit toute seule.';
+
+  @override
+  String get faqPlanStep5Title => 'Faites vos courses';
+
+  @override
+  String get faqPlanStep5Desc => 'La liste est triée par rayon. Touchez le cercle à côté d\'un article quand il est dans le chariot.';
+
+  @override
+  String get faqPlanStep6Title => 'Rangez';
+
+  @override
+  String get faqPlanStep6Desc => 'À la maison, touchez Ranger au-dessus des articles cochés. Les aliments vont dans votre garde-manger, datés d\'aujourd\'hui.';
+
+  @override
+  String get faqPlanStep7Title => 'Videz la liste';
+
+  @override
+  String get faqPlanStep7Desc => 'Touchez Retirer de la liste dans le message pour enlever les articles cochés, ou supprimez-les plus tard.';
+
+  @override
+  String get faqCommTitle => 'Obtenir des livres de recettes de la communauté';
+
+  @override
+  String get faqCommSubtitle => 'Téléchargez des livres gratuits et partagez les vôtres';
+
+  @override
+  String get faqCommStep1Title => 'Ouvrez Communauté';
+
+  @override
+  String get faqCommStep1Desc => 'Touchez Communauté en bas, puis Livres de recettes pour voir des livres entiers plutôt que des recettes seules.';
+
+  @override
+  String get faqCommStep2Title => 'Téléchargez un livre';
+
+  @override
+  String get faqCommStep2Desc => 'Ouvrez un livre et touchez Télécharger les recettes. Touchez Sélectionner des recettes individuelles pour n\'en prendre que certaines.';
+
+  @override
+  String get faqCommStep2Tip => 'Quand l\'auteur améliore un livre que vous avez téléchargé, l\'app propose la nouvelle version et garde vos propres modifications.';
+
+  @override
+  String get faqCommStep3Title => 'Choisissez où il va';
+
+  @override
+  String get faqCommStep3Desc => 'Touchez la flèche à côté du téléchargement pour l\'enregistrer comme Nouveau livre de recettes ou l\'ajouter à un Livre existant.';
+
+  @override
+  String get faqCommStep4Title => 'Regardez avant de télécharger';
+
+  @override
+  String get faqCommStep4Desc => 'Touchez une recette pour un aperçu, ou Voir la recette complète pour tout voir.';
+
+  @override
+  String get faqCommStep5Title => 'Partagez les vôtres';
+
+  @override
+  String get faqCommStep5Desc => 'Touchez Publier pour partager un de vos livres ou recettes avec tout le monde. Il faut être connecté.';
 }

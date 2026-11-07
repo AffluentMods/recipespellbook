@@ -12422,4 +12422,103 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get shoppingPutAwayNothing => 'Nada marcado vai para a despensa';
+
+  @override
+  String get guidesTipTitle => 'É novo por aqui?';
+
+  @override
+  String get guidesTipBody => 'Guias curtos com imagens mostram como tudo funciona.';
+
+  @override
+  String get guidesTipOpen => 'Ver os guias';
+
+  @override
+  String get faqPlanTitle => 'Como planejar a semana e fazer compras';
+
+  @override
+  String get faqPlanSubtitle => 'Planeje refeições, faça a lista e guarde as compras';
+
+  @override
+  String get faqPlanStep1Title => 'Abra o Planejador';
+
+  @override
+  String get faqPlanStep1Desc => 'Toque em Planejador embaixo. Escolha um dia no topo e toque em Adicionar refeição.';
+
+  @override
+  String get faqPlanStep2Title => 'Escolha a refeição e as pessoas';
+
+  @override
+  String get faqPlanStep2Desc => 'Escolha café da manhã, almoço ou jantar e para quantas pessoas vai cozinhar, depois toque em uma receita. A lista de compras acompanha o número de pessoas.';
+
+  @override
+  String get faqPlanStep3Title => 'Sua semana num relance';
+
+  @override
+  String get faqPlanStep3Desc => 'As refeições planejadas aparecem no dia com o número de porções. Toque em uma para abrir a receita.';
+
+  @override
+  String get faqPlanStep4Title => 'Faça a lista de compras';
+
+  @override
+  String get faqPlanStep4Desc => 'Toque em Compras. Tudo o que as receitas pedem aparece, e o que já está na despensa fica desmarcado. Toque em Revisar e adicionar.';
+
+  @override
+  String get faqPlanStep4Tip => 'Mantenha a despensa em dia e a lista de compras fica menor sozinha.';
+
+  @override
+  String get faqPlanStep5Title => 'Faça as compras';
+
+  @override
+  String get faqPlanStep5Desc => 'A lista está organizada por seção. Toque no círculo ao lado de um item quando ele estiver no carrinho.';
+
+  @override
+  String get faqPlanStep6Title => 'Guarde';
+
+  @override
+  String get faqPlanStep6Desc => 'Em casa, toque em Guardar acima dos itens marcados. A comida vai para a despensa com a data de hoje.';
+
+  @override
+  String get faqPlanStep7Title => 'Limpe a lista';
+
+  @override
+  String get faqPlanStep7Desc => 'Toque em Tirar da lista na mensagem para remover os itens marcados, ou apague depois.';
+
+  @override
+  String get faqCommTitle => 'Como pegar livros de receitas da comunidade';
+
+  @override
+  String get faqCommSubtitle => 'Baixe livros de receitas grátis e compartilhe os seus';
+
+  @override
+  String get faqCommStep1Title => 'Abra Comunidade';
+
+  @override
+  String get faqCommStep1Desc => 'Toque em Comunidade embaixo e depois em Livros de receitas para ver livros inteiros em vez de receitas soltas.';
+
+  @override
+  String get faqCommStep2Title => 'Baixe um livro';
+
+  @override
+  String get faqCommStep2Desc => 'Abra um livro e toque em Baixar todas as receitas. Toque em Selecionar receitas individualmente se quiser só algumas.';
+
+  @override
+  String get faqCommStep2Tip => 'Quando o autor melhora um livro que você baixou, o app oferece a nova versão e mantém suas próprias mudanças.';
+
+  @override
+  String get faqCommStep3Title => 'Escolha onde guardar';
+
+  @override
+  String get faqCommStep3Desc => 'Toque na seta ao lado do download para salvar como Novo livro de receitas ou adicionar a um Livro de receitas existente.';
+
+  @override
+  String get faqCommStep4Title => 'Veja antes de baixar';
+
+  @override
+  String get faqCommStep4Desc => 'Toque em uma receita para dar uma olhada, ou em Ver receita completa para ver tudo.';
+
+  @override
+  String get faqCommStep5Title => 'Compartilhe os seus';
+
+  @override
+  String get faqCommStep5Desc => 'Toque em Publicar para compartilhar um livro ou receita seu com todos. É preciso estar conectado.';
 }

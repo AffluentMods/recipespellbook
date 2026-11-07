@@ -13,6 +13,7 @@ import '../services/export_import_service.dart';
 import '../services/image_service.dart';
 import '../services/sync_service.dart';
 import '../utils/platform_utils.dart';
+import 'pantry_service.dart';
 
 // ════════════════════════════════════════════════════════════════
 //  TRANSFER RESULT
@@ -481,6 +482,7 @@ class TransferService {
       'shoppingCategories': [
         for (final c in shoppingCategories) _serializeShoppingCategory(c, editedShoppingCategories[c.id]),
       ],
+      'pantry': await _pantryDoc(),
     }, photos);
   }
 
@@ -552,6 +554,17 @@ class TransferService {
   /// Nothing this device already has is thrown away or doubled. A row both
   /// devices have takes over the one here only when it says something else
   /// and is the newer of the two, or nobody has touched the one here.
+  /// The pantry for the bundle, or null if it cannot be read: a transfer is
+  /// never lost over it.
+  Future<Map<String, dynamic>?> _pantryDoc() async {
+    try {
+      return await PantryService.instance.toDoc();
+    } catch (e) {
+      debugPrint('[Transfer] Left out the pantry: $e');
+      return null;
+    }
+  }
+
   Future<_ImportStats> _importData(Map<String, dynamic> data) async {
     final db = _db!;
     final stats = _ImportStats();
@@ -607,6 +620,13 @@ class TransferService {
         },
       );
     });
+
+    // The pantry is not a table: what the other device has joins this one.
+    try {
+      await PantryService.instance.mergeDoc(data['pantry']);
+    } catch (e) {
+      debugPrint('[Transfer] Left out the pantry: $e');
+    }
 
     return stats;
   }

@@ -33,6 +33,7 @@ import '../book_scan/book_scan_entry.dart';
 import '../cookbooks/cookbook_update_sheet.dart';
 import '../craving/craving_screen.dart';
 import '../pantry_cooking/pantry_cooking_widgets.dart';
+import '../../widgets/guides_tip_card.dart';
 
 /// The desktop home: a dashboard that uses the width instead of stretching the
 /// phone stack. A glance row (the next seven days of meals beside the shopping
@@ -144,6 +145,8 @@ class DesktopHome extends ConsumerWidget {
                             ],
                           ),
                         ),
+                      // New here? The how-to guides, until closed.
+                      const GuidesTipCard(padding: EdgeInsets.only(top: Space.lg)),
                       // Deciding dinner: what the pantry covers, then a few
                       // suggestions with the reason for each.
                       const SizedBox(height: Space.lg),
