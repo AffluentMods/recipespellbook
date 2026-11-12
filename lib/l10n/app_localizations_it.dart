@@ -11682,6 +11682,21 @@ class AppLocalizationsIt extends AppLocalizations {
   String get nutriSheetEditedStatus => 'Modificato manualmente';
 
   @override
+  String get nutriSheetZeroWater => 'Acqua, nessuna caloria';
+
+  @override
+  String get nutriSheetZeroBones => 'Ossa per il brodo, non si mangiano';
+
+  @override
+  String get nutriSheetZeroNotEaten => 'Non si mangia, nessuna caloria';
+
+  @override
+  String get nutriSheetZeroToTaste => 'A piacere, troppo poco per contare';
+
+  @override
+  String get nutriSheetZeroPinch => 'Un pizzico, troppo poco per contare';
+
+  @override
   String nutriSheetLinkedNoNutrition(String title) {
     return '$title: nessun dato nutrizionale';
   }

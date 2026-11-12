@@ -20557,6 +20557,36 @@ abstract class AppLocalizations {
   /// **'Manually edited'**
   String get nutriSheetEditedStatus;
 
+  /// No description provided for @nutriSheetZeroWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Water, no calories'**
+  String get nutriSheetZeroWater;
+
+  /// No description provided for @nutriSheetZeroBones.
+  ///
+  /// In en, this message translates to:
+  /// **'Bones for stock, not eaten'**
+  String get nutriSheetZeroBones;
+
+  /// No description provided for @nutriSheetZeroNotEaten.
+  ///
+  /// In en, this message translates to:
+  /// **'Not eaten, no calories'**
+  String get nutriSheetZeroNotEaten;
+
+  /// No description provided for @nutriSheetZeroToTaste.
+  ///
+  /// In en, this message translates to:
+  /// **'To taste, too little to count'**
+  String get nutriSheetZeroToTaste;
+
+  /// No description provided for @nutriSheetZeroPinch.
+  ///
+  /// In en, this message translates to:
+  /// **'A pinch, too little to count'**
+  String get nutriSheetZeroPinch;
+
   /// No description provided for @nutriSheetLinkedNoNutrition.
   ///
   /// In en, this message translates to:

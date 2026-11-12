@@ -621,3 +621,22 @@ class DailyValues {
     'cholesterol': cholesterol,
   };
 }
+
+final _servingsWord = RegExp(
+    r'(\d+)\s*(?:(?:-|to)\s*\d+\s*)?(?:servings?|portions?|people|persons?|slices|pieces|bowls)\b',
+    caseSensitive: false);
+
+/// How many servings a recipe's servings text means: the number before
+/// "servings" when the text has one ("About 1 1/2 quarts (8 servings)" is 8),
+/// otherwise its first number ("4-6" is 4, "12 bars" is 12). Null when the
+/// text has no number. The nutrition calculator, the Save Nutrition button and
+/// the nutrition display all use it, so a per-serving value is the same
+/// everywhere.
+int? servingsCountOf(String? servings) {
+  if (servings == null) return null;
+  final explicit = _servingsWord.firstMatch(servings);
+  final number = explicit?.group(1) ?? RegExp(r'(\d+)').firstMatch(servings)?.group(1);
+  if (number == null) return null;
+  final n = int.tryParse(number);
+  return n == null || n <= 0 ? null : n;
+}

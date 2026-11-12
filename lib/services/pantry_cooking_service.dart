@@ -125,7 +125,10 @@ String? canonicalCourseKey(String? courseId) {
 /// to a [RecipeLibrary]. Copies with the same title and ingredient names
 /// (see [RecipeSimilarity.copyKey]) become one entry, shown as the favourite
 /// copy, else the one opened last.
-RecipeLibrary buildRecipeLibrary(List<Recipe> recipes, List<IngredientRow> rows) {
+///
+/// [keys] keeps the reduced form of each distinct line ("salt", "2 eggs")
+/// between calls; without it each call reduces every line again.
+RecipeLibrary buildRecipeLibrary(List<Recipe> recipes, List<IngredientRow> rows, {Map<String, IngredientKey>? keys}) {
   final rowsByRecipe = <String, List<IngredientRow>>{};
   for (final row in rows) {
     (rowsByRecipe[row.recipeId] ??= []).add(row);
@@ -133,11 +136,10 @@ RecipeLibrary buildRecipeLibrary(List<Recipe> recipes, List<IngredientRow> rows)
 
   // The same line turns up in many recipes ("salt", "2 eggs"): reduce each
   // distinct line once.
-  final keyCache = <String, IngredientKey>{};
+  final keyCache = keys ?? <String, IngredientKey>{};
   IngredientKey keyFor(IngredientRow row) {
     final notes = row.notes ?? '';
-    return keyCache['${row.name}\u0000$notes'] ??=
-        ingredientKeyFor(row.name, notes: notes.isEmpty ? null : notes);
+    return keyCache[_lineKey(row)] ??= ingredientKeyFor(row.name, notes: notes.isEmpty ? null : notes);
   }
 
   final groups = <String, List<Recipe>>{};
@@ -180,32 +182,66 @@ int _preferredCopyFirst(Recipe a, Recipe b) {
   return a.id.compareTo(b.id);
 }
 
-RecipeLibrary _buildLibraryJob((List<Recipe>, List<IngredientRow>) input) =>
-    buildRecipeLibrary(input.$1, input.$2);
+String _lineKey(IngredientRow row) => '${row.name}\u0000${row.notes ?? ''}';
 
-/// Read every recipe and ingredient line (two queries) and reduce them. Big
-/// libraries are reduced off the UI thread.
+/// Reduces a big library off the UI thread and hands back the lines it
+/// reduced, so the next load can reuse them.
+(RecipeLibrary, Map<String, IngredientKey>) _buildLibraryJob((List<Recipe>, List<IngredientRow>) input) {
+  final keys = <String, IngredientKey>{};
+  return (buildRecipeLibrary(input.$1, input.$2, keys: keys), keys);
+}
+
+// Opening a recipe stamps it as viewed, which changes the recipes table and
+// reloads the library. Ingredient lines change far less often, so they and
+// their reduced form are kept between loads: a reload after a recipes-only
+// change is one query and a regroup, not every line read and reduced again.
+AppDatabase? _rowsDb;
+List<IngredientRow>? _rows;
+final Map<String, IngredientKey> _keyCache = {};
+const _keyCacheLimit = 200000;
+
+/// The ingredients table changed: read the lines again on the next load.
+void markIngredientRowsChanged() => _rows = null;
+
+@visibleForTesting
+void resetRecipeLibraryCacheForTesting() {
+  _rows = null;
+  _rowsDb = null;
+  _keyCache.clear();
+}
+
+/// Read every recipe (one query) and, when they changed, every ingredient
+/// line, and reduce them. Big libraries with new lines are reduced off the UI
+/// thread.
 Future<RecipeLibrary> loadRecipeLibrary(AppDatabase db) async {
   final recipes = await (db.select(db.recipes)..where((r) => r.deletedAt.isNull())).get();
-  final result = await db.customSelect(
-    'SELECT i.recipe_id AS rid, i.name AS name, i.amount AS amount, '
-    'i.unit AS unit, i.notes AS notes FROM ingredients i '
-    'INNER JOIN recipes r ON r.id = i.recipe_id '
-    'WHERE r.deleted_at IS NULL ORDER BY i.recipe_id, i.sort_order',
-    readsFrom: {db.recipes, db.ingredients},
-  ).get();
-  final rows = [
-    for (final row in result)
-      IngredientRow(
-        recipeId: row.read<String>('rid'),
-        name: row.read<String>('name'),
-        amount: row.readNullable<String>('amount'),
-        unit: row.readNullable<String>('unit'),
-        notes: row.readNullable<String>('notes'),
-      ),
-  ];
-  if (kIsWeb || recipes.length < 300) return buildRecipeLibrary(recipes, rows);
-  return compute(_buildLibraryJob, (recipes, rows));
+  if (_rows == null || !identical(_rowsDb, db)) {
+    // Every line, also those of recipes in the trash: restoring one is a
+    // recipes-only change, and its lines have to be here then.
+    final result = await db.customSelect(
+      'SELECT recipe_id AS rid, name, amount, unit, notes FROM ingredients ORDER BY recipe_id, sort_order',
+      readsFrom: {db.ingredients},
+    ).get();
+    _rows = [
+      for (final row in result)
+        IngredientRow(
+          recipeId: row.read<String>('rid'),
+          name: row.read<String>('name'),
+          amount: row.readNullable<String>('amount'),
+          unit: row.readNullable<String>('unit'),
+          notes: row.readNullable<String>('notes'),
+        ),
+    ];
+    _rowsDb = db;
+  }
+  final rows = _rows!;
+  if (_keyCache.length > _keyCacheLimit) _keyCache.clear();
+  final present = {for (final r in recipes) r.id};
+  final allKnown = rows.every((r) => !present.contains(r.recipeId) || _keyCache.containsKey(_lineKey(r)));
+  if (kIsWeb || recipes.length < 300 || allKnown) return buildRecipeLibrary(recipes, rows, keys: _keyCache);
+  final (library, keys) = await compute(_buildLibraryJob, (recipes, rows));
+  _keyCache.addAll(keys);
+  return library;
 }
 
 // ── Ranking ────────────────────────────────────────────────────────────────

@@ -11580,6 +11580,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nutriSheetEditedStatus => '직접 수정함';
 
   @override
+  String get nutriSheetZeroWater => '물, 칼로리 없음';
+
+  @override
+  String get nutriSheetZeroBones => '육수용 뼈, 먹지 않음';
+
+  @override
+  String get nutriSheetZeroNotEaten => '먹지 않음, 칼로리 없음';
+
+  @override
+  String get nutriSheetZeroToTaste => '기호에 따라, 계산하기에는 너무 적음';
+
+  @override
+  String get nutriSheetZeroPinch => '한 꼬집, 계산하기에는 너무 적음';
+
+  @override
   String nutriSheetLinkedNoNutrition(String title) {
     return '$title: 영양 정보 없음';
   }
