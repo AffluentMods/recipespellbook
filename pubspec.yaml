@@ -116,6 +116,10 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   generate: true
+  config:
+    # Flutter 3.50 builds iOS and macOS with Swift Package Manager by default;
+    # speech_to_text and others are not ready for it yet, so stay on CocoaPods.
+    enable-swift-package-manager: false
 
   assets:
     - assets/data/common_ingredients.json
