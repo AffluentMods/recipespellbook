@@ -12561,4 +12561,139 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => 'Tap Publish to share one of your cookbooks or recipes with everyone. You need to be signed in.';
+
+  @override
+  String get bulkNutritionAction => 'Calculate nutrition';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => 'Fill in nutrition for the recipes in this cookbook';
+
+  @override
+  String get bulkNutritionAllCookbooks => 'All your cookbooks';
+
+  @override
+  String get bulkNutritionLibraryTitle => 'Calculate nutrition for all recipes';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => 'Fill in nutrition across all your cookbooks';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes have no nutrition yet',
+      one: '1 recipe has no nutrition yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes already have nutrition',
+      one: '1 recipe already has nutrition',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count of them were entered by hand or came with the recipe',
+      one: '1 of them was entered by hand or came with the recipe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => 'There are no recipes to calculate.';
+
+  @override
+  String get bulkNutritionOnlyMissing => 'Only recipes without nutrition';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => 'Nutrition that is already there stays as it is.';
+
+  @override
+  String get bulkNutritionAll => 'All recipes';
+
+  @override
+  String get bulkNutritionAllHint => 'Calculates every recipe again and replaces its nutrition, also values entered by hand.';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return 'Calculating recipe $current of $total';
+  }
+
+  @override
+  String get bulkNutritionStop => 'Stop';
+
+  @override
+  String get bulkNutritionStopped => 'Stopped. The recipes calculated so far are saved.';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes calculated',
+      one: '1 recipe calculated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes skipped',
+      one: '1 recipe skipped',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Includes $count sub-recipes from other cookbooks',
+      one: 'Includes 1 sub-recipe from another cookbook',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes matched less than 70% of their ingredients',
+      one: '1 recipe matched less than 70% of its ingredients',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes could not be calculated',
+      one: '1 recipe could not be calculated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => 'No ingredients';
+
+  @override
+  String get bulkNutritionNoMatch => 'No ingredient was recognized';
 }

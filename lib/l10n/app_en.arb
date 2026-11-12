@@ -6366,5 +6366,94 @@
   "faqCommStep4Title": "Look before you download",
   "faqCommStep4Desc": "Tap a recipe for a quick look, or View Full Recipe to see all of it.",
   "faqCommStep5Title": "Share your own",
-  "faqCommStep5Desc": "Tap Publish to share one of your cookbooks or recipes with everyone. You need to be signed in."
+  "faqCommStep5Desc": "Tap Publish to share one of your cookbooks or recipes with everyone. You need to be signed in.",
+  "bulkNutritionAction": "Calculate nutrition",
+  "bulkNutritionCookbookSubtitle": "Fill in nutrition for the recipes in this cookbook",
+  "bulkNutritionAllCookbooks": "All your cookbooks",
+  "bulkNutritionLibraryTitle": "Calculate nutrition for all recipes",
+  "bulkNutritionLibrarySubtitle": "Fill in nutrition across all your cookbooks",
+  "bulkNutritionMissing": "{count, plural, =1{1 recipe has no nutrition yet} other{{count} recipes have no nutrition yet}}",
+  "@bulkNutritionMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionExisting": "{count, plural, =1{1 recipe already has nutrition} other{{count} recipes already have nutrition}}",
+  "@bulkNutritionExisting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionEntered": "{count, plural, =1{1 of them was entered by hand or came with the recipe} other{{count} of them were entered by hand or came with the recipe}}",
+  "@bulkNutritionEntered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionNoRecipes": "There are no recipes to calculate.",
+  "bulkNutritionOnlyMissing": "Only recipes without nutrition",
+  "bulkNutritionOnlyMissingHint": "Nutrition that is already there stays as it is.",
+  "bulkNutritionAll": "All recipes",
+  "bulkNutritionAllHint": "Calculates every recipe again and replaces its nutrition, also values entered by hand.",
+  "bulkNutritionProgress": "Calculating recipe {current} of {total}",
+  "@bulkNutritionProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionStop": "Stop",
+  "bulkNutritionStopped": "Stopped. The recipes calculated so far are saved.",
+  "bulkNutritionCalculatedCount": "{count, plural, =1{1 recipe calculated} other{{count} recipes calculated}}",
+  "@bulkNutritionCalculatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionSkippedCount": "{count, plural, =1{1 recipe skipped} other{{count} recipes skipped}}",
+  "@bulkNutritionSkippedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionExternalCount": "{count, plural, =1{Includes 1 sub-recipe from another cookbook} other{Includes {count} sub-recipes from other cookbooks}}",
+  "@bulkNutritionExternalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionLowMatchCount": "{count, plural, =1{1 recipe matched less than 70% of its ingredients} other{{count} recipes matched less than 70% of their ingredients}}",
+  "@bulkNutritionLowMatchCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionNotCalculatedCount": "{count, plural, =1{1 recipe could not be calculated} other{{count} recipes could not be calculated}}",
+  "@bulkNutritionNotCalculatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkNutritionNoIngredients": "No ingredients",
+  "bulkNutritionNoMatch": "No ingredient was recognized"
 }

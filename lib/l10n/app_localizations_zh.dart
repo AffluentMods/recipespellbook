@@ -12401,4 +12401,131 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => '点“发布”，把你的食谱书或菜谱分享给所有人。需要先登录。';
+
+  @override
+  String get bulkNutritionAction => '计算营养素';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => '为这本食谱书中的食谱补全营养信息';
+
+  @override
+  String get bulkNutritionAllCookbooks => '你的所有食谱书';
+
+  @override
+  String get bulkNutritionLibraryTitle => '计算所有食谱的营养素';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => '为你所有食谱书中的食谱补全营养信息';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱还没有营养信息',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱已有营养信息',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '其中 $count 个是手动输入的，或随食谱导入',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => '没有可计算的食谱。';
+
+  @override
+  String get bulkNutritionOnlyMissing => '仅没有营养信息的食谱';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => '已有的营养信息保持不变。';
+
+  @override
+  String get bulkNutritionAll => '所有食谱';
+
+  @override
+  String get bulkNutritionAllHint => '重新计算每个食谱并替换其营养信息，包括手动输入的值。';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return '正在计算第 $current 个，共 $total 个';
+  }
+
+  @override
+  String get bulkNutritionStop => '停止';
+
+  @override
+  String get bulkNutritionStopped => '已停止。已计算的食谱已保存。';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已计算 $count 个食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已跳过 $count 个食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '包括其他食谱书中的 $count 个子食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱识别出的食材不到 70%',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱无法计算',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => '没有食材';
+
+  @override
+  String get bulkNutritionNoMatch => '没有识别出任何食材';
 }

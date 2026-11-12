@@ -21882,6 +21882,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap Publish to share one of your cookbooks or recipes with everyone. You need to be signed in.'**
   String get faqCommStep5Desc;
+
+  /// No description provided for @bulkNutritionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate nutrition'**
+  String get bulkNutritionAction;
+
+  /// No description provided for @bulkNutritionCookbookSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in nutrition for the recipes in this cookbook'**
+  String get bulkNutritionCookbookSubtitle;
+
+  /// No description provided for @bulkNutritionAllCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'All your cookbooks'**
+  String get bulkNutritionAllCookbooks;
+
+  /// No description provided for @bulkNutritionLibraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate nutrition for all recipes'**
+  String get bulkNutritionLibraryTitle;
+
+  /// No description provided for @bulkNutritionLibrarySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in nutrition across all your cookbooks'**
+  String get bulkNutritionLibrarySubtitle;
+
+  /// No description provided for @bulkNutritionMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe has no nutrition yet} other{{count} recipes have no nutrition yet}}'**
+  String bulkNutritionMissing(int count);
+
+  /// No description provided for @bulkNutritionExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe already has nutrition} other{{count} recipes already have nutrition}}'**
+  String bulkNutritionExisting(int count);
+
+  /// No description provided for @bulkNutritionEntered.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 of them was entered by hand or came with the recipe} other{{count} of them were entered by hand or came with the recipe}}'**
+  String bulkNutritionEntered(int count);
+
+  /// No description provided for @bulkNutritionNoRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no recipes to calculate.'**
+  String get bulkNutritionNoRecipes;
+
+  /// No description provided for @bulkNutritionOnlyMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Only recipes without nutrition'**
+  String get bulkNutritionOnlyMissing;
+
+  /// No description provided for @bulkNutritionOnlyMissingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition that is already there stays as it is.'**
+  String get bulkNutritionOnlyMissingHint;
+
+  /// No description provided for @bulkNutritionAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes'**
+  String get bulkNutritionAll;
+
+  /// No description provided for @bulkNutritionAllHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculates every recipe again and replaces its nutrition, also values entered by hand.'**
+  String get bulkNutritionAllHint;
+
+  /// No description provided for @bulkNutritionProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating recipe {current} of {total}'**
+  String bulkNutritionProgress(int current, int total);
+
+  /// No description provided for @bulkNutritionStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get bulkNutritionStop;
+
+  /// No description provided for @bulkNutritionStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped. The recipes calculated so far are saved.'**
+  String get bulkNutritionStopped;
+
+  /// No description provided for @bulkNutritionCalculatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe calculated} other{{count} recipes calculated}}'**
+  String bulkNutritionCalculatedCount(int count);
+
+  /// No description provided for @bulkNutritionSkippedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe skipped} other{{count} recipes skipped}}'**
+  String bulkNutritionSkippedCount(int count);
+
+  /// No description provided for @bulkNutritionExternalCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Includes 1 sub-recipe from another cookbook} other{Includes {count} sub-recipes from other cookbooks}}'**
+  String bulkNutritionExternalCount(int count);
+
+  /// No description provided for @bulkNutritionLowMatchCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe matched less than 70% of its ingredients} other{{count} recipes matched less than 70% of their ingredients}}'**
+  String bulkNutritionLowMatchCount(int count);
+
+  /// No description provided for @bulkNutritionNotCalculatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe could not be calculated} other{{count} recipes could not be calculated}}'**
+  String bulkNutritionNotCalculatedCount(int count);
+
+  /// No description provided for @bulkNutritionNoIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredients'**
+  String get bulkNutritionNoIngredients;
+
+  /// No description provided for @bulkNutritionNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredient was recognized'**
+  String get bulkNutritionNoMatch;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

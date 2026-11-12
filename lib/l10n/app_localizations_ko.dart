@@ -12433,4 +12433,131 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => '게시를 눌러 내 요리책이나 레시피를 모두와 공유하세요. 로그인이 필요해요.';
+
+  @override
+  String get bulkNutritionAction => '영양소 계산';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => '이 요리책의 레시피에 영양 정보를 채워요';
+
+  @override
+  String get bulkNutritionAllCookbooks => '내 모든 요리책';
+
+  @override
+  String get bulkNutritionLibraryTitle => '모든 레시피의 영양소 계산';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => '모든 요리책의 레시피에 영양 정보를 채워요';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '영양 정보가 아직 없는 레시피 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '이미 영양 정보가 있는 레시피 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '그중 $count개는 직접 입력했거나 레시피와 함께 들어온 정보예요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => '계산할 레시피가 없어요.';
+
+  @override
+  String get bulkNutritionOnlyMissing => '영양 정보가 없는 레시피만';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => '이미 있는 영양 정보는 그대로 둬요.';
+
+  @override
+  String get bulkNutritionAll => '모든 레시피';
+
+  @override
+  String get bulkNutritionAllHint => '모든 레시피를 다시 계산하고, 직접 입력한 값을 포함해 영양 정보를 바꿔요.';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return '$total개 중 $current번째 레시피 계산 중';
+  }
+
+  @override
+  String get bulkNutritionStop => '중지';
+
+  @override
+  String get bulkNutritionStopped => '중지했어요. 지금까지 계산한 레시피는 저장되었어요.';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '레시피 $count개 계산 완료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '레시피 $count개 건너뜀',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '다른 요리책의 하위 레시피 $count개 포함',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '재료 인식률이 70% 미만인 레시피 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '계산하지 못한 레시피 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => '재료 없음';
+
+  @override
+  String get bulkNutritionNoMatch => '인식된 재료 없음';
 }
