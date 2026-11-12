@@ -364,6 +364,42 @@ void main() {
       expect(await change(soups), PublicationChange.unchanged);
     });
 
+    test('nutrition filled in after publishing marks it changed, and the update carries the nutrition', () async {
+      await addCookbook('soups', 'Soups');
+      final soups = await publish('soups');
+      final published = (server.posts.single['recipes'] as List).cast<Map<String, dynamic>>();
+      expect(published.map((r) => r['nutritionJson']), everyElement(isNull));
+
+      // What "Calculate nutrition" writes, in the nutrition sheet's format,
+      // through the same DAO call (which moves updatedAt on).
+      const nutrition = '{"calories":455.0,"protein":12.9,"isEstimated":true,'
+          '"matchedIngredients":1,"totalIngredients":1,"calculatedServings":1}';
+      for (var i = 0; i < kMinPublishRecipes; i++) {
+        await db.recipeDao.updateRecipeNutrition('soups-r$i', nutrition);
+      }
+      expect(await change(soups), PublicationChange.changed);
+
+      final summary = await withServer(() => updater.updateAll([soups], l10n: l10n, control: UpdateAllControl()));
+      expect(summary.updated, ['Soups']);
+      final sent = (server.puts[soups.id]!.single['recipes'] as List).cast<Map<String, dynamic>>();
+      expect(sent, hasLength(kMinPublishRecipes));
+      expect(sent.map((r) => r['nutritionJson']), everyElement(nutrition));
+      expect(await change(soups), PublicationChange.unchanged);
+
+      // One recipe's nutrition alone is a change too.
+      await db.recipeDao.updateRecipeNutrition('soups-r3', '{"calories":300.0,"isEstimated":true}');
+      expect(await change(soups), PublicationChange.changed);
+    });
+
+    test('a publication from before sees a nutrition-only change by its timestamp', () async {
+      await addCookbook('old', 'Old', edited: DateTime(2026, 2, 1));
+      await CommunityService.recordPublishSource('pub-old', kind: 'cookbook', sourceId: 'old');
+      final old = pub('pub-old', 'Old', created: DateTime(2026, 3, 1));
+      await db.recipeDao.updateRecipeNutrition('old-r2', '{"calories":100.0,"isEstimated":true}');
+      expect(await change(old), PublicationChange.changed);
+      expect(await PublishSnapshot.lookup('pub-old'), isNull, reason: 'a changed one gets no snapshot yet');
+    });
+
     test('a cookbook renamed since publishing takes the new name along', () async {
       await addCookbook('soups', 'Soups');
       final soups = await publish('soups');

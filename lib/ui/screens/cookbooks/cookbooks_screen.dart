@@ -11,6 +11,7 @@ import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/bulk_nutrition_service.dart';
 import '../../../services/community_cookbook_updates.dart';
 import '../../../services/family_service.dart';
 import '../../../services/revenuecat_service.dart';
@@ -18,6 +19,7 @@ import '../../shell/app_shell.dart';
 import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/bulk_nutrition_sheet.dart';
 import '../community/community_publish_screen.dart';
 import 'cookbook_update_sheet.dart';
 import '../../widgets/family_share_sheet.dart';
@@ -383,6 +385,12 @@ class _CookbookGrid extends ConsumerWidget {
                     onTap: () => _showMergeCookbooksSheet(context, ref,
                         initialCookbookId: cookbook.id),
                   ),
+                  if (canCalculateNutritionIn(cookbook))
+                    ContextMenuItem(
+                      icon: Icons.calculate_outlined,
+                      label: l10n.bulkNutritionAction,
+                      onTap: () => showBulkNutritionSheet(context, ref, cookbook: cookbook),
+                    ),
                   ContextMenuItem(
                     icon: Icons.delete,
                     label: l10n.actionDelete,
@@ -459,6 +467,16 @@ class _CookbookGrid extends ConsumerWidget {
             title: Text(l10n.mergeCookbooksMenu),
           ),
         ),
+        if (canCalculateNutritionIn(cookbook))
+          PopupMenuItem(
+            value: 'nutrition',
+            child: ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.calculate_outlined, size: 20),
+              title: Text(l10n.bulkNutritionAction),
+            ),
+          ),
         PopupMenuItem(
           value: 'delete',
           child: ListTile(
@@ -470,7 +488,7 @@ class _CookbookGrid extends ConsumerWidget {
         ),
       ],
     ).then((value) {
-      if (value == null) return;
+      if (value == null || !context.mounted) return;
       switch (value) {
         case 'edit':
           context.push('/cookbook/${cookbook.id}/edit');
@@ -478,6 +496,8 @@ class _CookbookGrid extends ConsumerWidget {
           _showShareSheet(context, ref, cookbook);
         case 'merge':
           _showMergeCookbooksSheet(context, ref, initialCookbookId: cookbook.id);
+        case 'nutrition':
+          showBulkNutritionSheet(context, ref, cookbook: cookbook);
         case 'delete':
           _showDeleteConfirmation(context, ref, cookbook);
       }

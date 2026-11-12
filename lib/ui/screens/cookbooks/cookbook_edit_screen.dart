@@ -11,9 +11,11 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
+import '../../../services/bulk_nutrition_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../shell/shell_navigation.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/bulk_nutrition_sheet.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 
@@ -364,6 +366,18 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
                   );
                 },
               ),
+              if (_cookbook != null && canCalculateNutritionIn(_cookbook!)) ...[
+                const SizedBox(height: 12),
+                ListTile(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  tileColor: theme.colorScheme.surfaceContainerHighest,
+                  leading: Icon(Icons.calculate_outlined, color: theme.colorScheme.primary),
+                  title: Text(l10n.bulkNutritionAction),
+                  subtitle: Text(l10n.bulkNutritionCookbookSubtitle),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => showBulkNutritionSheet(context, ref, cookbook: _cookbook),
+                ),
+              ],
             ],
           ],
         ),
