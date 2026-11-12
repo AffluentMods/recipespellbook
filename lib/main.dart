@@ -35,6 +35,7 @@ import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
 import 'services/collab_service.dart';
 import 'services/community_cookbook_updates.dart';
+import 'services/photo_path_repair.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/screens/import/video_import_ui.dart';
@@ -297,6 +298,12 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     TransferService.instance.setDatabase(db);
     CollabService.instance.setDatabase(db);
     CollabService.instance.load();
+    // Photos saved before an iOS update point into the old app folder:
+    // point them at the same files in the current one. Not awaited.
+    PhotoPathRepair.run(db).catchError((Object e) {
+      debugPrint('[PhotoPathRepair] failed: $e');
+      return 0;
+    });
     // Home screen widgets: first snapshot now, then whenever meals or the
     // shopping list change. Not awaited: the widgets can wait for auth.
     if (HomeWidgetService.isSupported) {
