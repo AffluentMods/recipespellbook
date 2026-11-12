@@ -12759,4 +12759,155 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => 'Stuknij Opublikuj, aby udostępnić wszystkim swoją książkę lub przepis. Musisz być zalogowany.';
+
+  @override
+  String get bulkNutritionAction => 'Oblicz wartości odżywcze';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => 'Uzupełnij wartości odżywcze przepisów w tej książce';
+
+  @override
+  String get bulkNutritionAllCookbooks => 'Wszystkie twoje książki kucharskie';
+
+  @override
+  String get bulkNutritionLibraryTitle => 'Oblicz wartości odżywcze wszystkich przepisów';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => 'Uzupełnij wartości odżywcze we wszystkich książkach kucharskich';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count przepisu nie ma jeszcze wartości odżywczych',
+      many: '$count przepisów nie ma jeszcze wartości odżywczych',
+      few: '$count przepisy nie mają jeszcze wartości odżywczych',
+      one: '1 przepis nie ma jeszcze wartości odżywczych',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count przepisu ma już wartości odżywcze',
+      many: '$count przepisów ma już wartości odżywcze',
+      few: '$count przepisy mają już wartości odżywcze',
+      one: '1 przepis ma już wartości odżywcze',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'W tym $count z wartościami wpisanymi ręcznie lub dołączonymi do przepisu',
+      many: 'W tym $count z wartościami wpisanymi ręcznie lub dołączonymi do przepisu',
+      few: 'W tym $count z wartościami wpisanymi ręcznie lub dołączonymi do przepisu',
+      one: 'W tym 1 z wartościami wpisanymi ręcznie lub dołączonymi do przepisu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => 'Brak przepisów do obliczenia.';
+
+  @override
+  String get bulkNutritionOnlyMissing => 'Tylko przepisy bez wartości odżywczych';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => 'Istniejące wartości pozostają bez zmian.';
+
+  @override
+  String get bulkNutritionAll => 'Wszystkie przepisy';
+
+  @override
+  String get bulkNutritionAllHint => 'Oblicza każdy przepis od nowa i zastępuje jego wartości odżywcze, także wpisane ręcznie.';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return 'Obliczanie przepisu $current z $total';
+  }
+
+  @override
+  String get bulkNutritionStop => 'Zatrzymaj';
+
+  @override
+  String get bulkNutritionStopped => 'Zatrzymano. Przepisy obliczone do tej pory zostały zapisane.';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Obliczono $count przepisu',
+      many: 'Obliczono $count przepisów',
+      few: 'Obliczono $count przepisy',
+      one: 'Obliczono 1 przepis',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pominięto $count przepisu',
+      many: 'Pominięto $count przepisów',
+      few: 'Pominięto $count przepisy',
+      one: 'Pominięto 1 przepis',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'W tym $count przepisu składowego z innych książek',
+      many: 'W tym $count przepisów składowych z innych książek',
+      few: 'W tym $count przepisy składowe z innych książek',
+      one: 'W tym 1 przepis składowy z innej książki',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'W $count przepisu rozpoznano mniej niż 70% składników',
+      many: 'W $count przepisach rozpoznano mniej niż 70% składników',
+      few: 'W $count przepisach rozpoznano mniej niż 70% składników',
+      one: 'W 1 przepisie rozpoznano mniej niż 70% składników',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nie udało się obliczyć $count przepisu',
+      many: 'Nie udało się obliczyć $count przepisów',
+      few: 'Nie udało się obliczyć $count przepisów',
+      one: 'Nie udało się obliczyć 1 przepisu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => 'Brak składników';
+
+  @override
+  String get bulkNutritionNoMatch => 'Nie rozpoznano żadnego składnika';
 }

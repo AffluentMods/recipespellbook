@@ -12749,4 +12749,155 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => 'Нажмите «Опубликовать», чтобы поделиться своей книгой или рецептом со всеми. Нужно войти в аккаунт.';
+
+  @override
+  String get bulkNutritionAction => 'Рассчитать питательность';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => 'Заполнить пищевую ценность рецептов этой книги';
+
+  @override
+  String get bulkNutritionAllCookbooks => 'Все ваши кулинарные книги';
+
+  @override
+  String get bulkNutritionLibraryTitle => 'Рассчитать питательность всех рецептов';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => 'Заполнить пищевую ценность во всех ваших кулинарных книгах';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'У $count рецепта ещё нет пищевой ценности',
+      many: 'У $count рецептов ещё нет пищевой ценности',
+      few: 'У $count рецептов ещё нет пищевой ценности',
+      one: 'У $count рецепта ещё нет пищевой ценности',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'У $count рецепта уже есть пищевая ценность',
+      many: 'У $count рецептов уже есть пищевая ценность',
+      few: 'У $count рецептов уже есть пищевая ценность',
+      one: 'У $count рецепта уже есть пищевая ценность',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Из них у $count она введена вручную или пришла вместе с рецептом',
+      many: 'Из них у $count она введена вручную или пришла вместе с рецептом',
+      few: 'Из них у $count она введена вручную или пришла вместе с рецептом',
+      one: 'Из них у $count она введена вручную или пришла вместе с рецептом',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => 'Нет рецептов для расчёта.';
+
+  @override
+  String get bulkNutritionOnlyMissing => 'Только рецепты без пищевой ценности';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => 'Уже заполненные значения останутся как есть.';
+
+  @override
+  String get bulkNutritionAll => 'Все рецепты';
+
+  @override
+  String get bulkNutritionAllHint => 'Заново рассчитывает каждый рецепт и заменяет его пищевую ценность, в том числе введённую вручную.';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return 'Расчёт рецепта $current из $total';
+  }
+
+  @override
+  String get bulkNutritionStop => 'Остановить';
+
+  @override
+  String get bulkNutritionStopped => 'Остановлено. Уже рассчитанные рецепты сохранены.';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Рассчитано $count рецепта',
+      many: 'Рассчитано $count рецептов',
+      few: 'Рассчитано $count рецепта',
+      one: 'Рассчитан $count рецепт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Пропущено $count рецепта',
+      many: 'Пропущено $count рецептов',
+      few: 'Пропущено $count рецепта',
+      one: 'Пропущен $count рецепт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В том числе $count вложенного рецепта из других книг',
+      many: 'В том числе $count вложенных рецептов из других книг',
+      few: 'В том числе $count вложенных рецепта из других книг',
+      one: 'В том числе $count вложенный рецепт из другой книги',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В $count рецепта распознано меньше 70% ингредиентов',
+      many: 'В $count рецептах распознано меньше 70% ингредиентов',
+      few: 'В $count рецептах распознано меньше 70% ингредиентов',
+      one: 'В $count рецепте распознано меньше 70% ингредиентов',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не удалось рассчитать $count рецепта',
+      many: 'Не удалось рассчитать $count рецептов',
+      few: 'Не удалось рассчитать $count рецепта',
+      one: 'Не удалось рассчитать $count рецепт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => 'Нет ингредиентов';
+
+  @override
+  String get bulkNutritionNoMatch => 'Ни один ингредиент не распознан';
 }

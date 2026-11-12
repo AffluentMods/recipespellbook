@@ -12549,4 +12549,139 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => 'Touchez Publier pour partager un de vos livres ou recettes avec tout le monde. Il faut être connecté.';
+
+  @override
+  String get bulkNutritionAction => 'Calculer la nutrition';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => 'Compléter les valeurs nutritionnelles des recettes de ce livre';
+
+  @override
+  String get bulkNutritionAllCookbooks => 'Tous vos livres de recettes';
+
+  @override
+  String get bulkNutritionLibraryTitle => 'Calculer la nutrition de toutes les recettes';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => 'Compléter les valeurs nutritionnelles dans tous vos livres de recettes';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes n\'ont pas encore de valeurs nutritionnelles',
+      one: '1 recette n\'a pas encore de valeurs nutritionnelles',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes ont déjà des valeurs nutritionnelles',
+      one: '1 recette a déjà des valeurs nutritionnelles',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count d\'entre elles ont été saisies à la main ou sont venues avec la recette',
+      one: '1 d\'entre elles a été saisie à la main ou est venue avec la recette',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => 'Il n\'y a aucune recette à calculer.';
+
+  @override
+  String get bulkNutritionOnlyMissing => 'Seulement les recettes sans valeurs nutritionnelles';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => 'Les valeurs déjà présentes restent telles quelles.';
+
+  @override
+  String get bulkNutritionAll => 'Toutes les recettes';
+
+  @override
+  String get bulkNutritionAllHint => 'Recalcule chaque recette et remplace ses valeurs nutritionnelles, y compris celles saisies à la main.';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return 'Calcul de la recette $current sur $total';
+  }
+
+  @override
+  String get bulkNutritionStop => 'Arrêter';
+
+  @override
+  String get bulkNutritionStopped => 'Arrêté. Les recettes déjà calculées sont enregistrées.';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes calculées',
+      one: '1 recette calculée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes ignorées',
+      one: '1 recette ignorée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dont $count sous-recettes d\'autres livres',
+      one: 'Dont 1 sous-recette d\'un autre livre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes ont moins de 70 % de leurs ingrédients reconnus',
+      one: '1 recette a moins de 70 % de ses ingrédients reconnus',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes n\'ont pas pu être calculées',
+      one: '1 recette n\'a pas pu être calculée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => 'Aucun ingrédient';
+
+  @override
+  String get bulkNutritionNoMatch => 'Aucun ingrédient reconnu';
 }

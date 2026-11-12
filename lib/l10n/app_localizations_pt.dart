@@ -12536,4 +12536,139 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => 'Toque em Publicar para compartilhar um livro ou receita seu com todos. É preciso estar conectado.';
+
+  @override
+  String get bulkNutritionAction => 'Calcular nutrição';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => 'Preencher a nutrição das receitas deste livro de receitas';
+
+  @override
+  String get bulkNutritionAllCookbooks => 'Todos os seus livros de receitas';
+
+  @override
+  String get bulkNutritionLibraryTitle => 'Calcular a nutrição de todas as receitas';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => 'Preencher a nutrição em todos os seus livros de receitas';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count receitas ainda não têm informação nutricional',
+      one: '1 receita ainda não tem informação nutricional',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count receitas já têm informação nutricional',
+      one: '1 receita já tem informação nutricional',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count delas foram digitadas à mão ou vieram com a receita',
+      one: '1 delas foi digitada à mão ou veio com a receita',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => 'Não há receitas para calcular.';
+
+  @override
+  String get bulkNutritionOnlyMissing => 'Só receitas sem informação nutricional';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => 'A informação que já existe fica como está.';
+
+  @override
+  String get bulkNutritionAll => 'Todas as receitas';
+
+  @override
+  String get bulkNutritionAllHint => 'Calcula de novo cada receita e substitui a informação nutricional, também a digitada à mão.';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return 'Calculando a receita $current de $total';
+  }
+
+  @override
+  String get bulkNutritionStop => 'Parar';
+
+  @override
+  String get bulkNutritionStopped => 'Parado. As receitas calculadas até agora foram salvas.';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count receitas calculadas',
+      one: '1 receita calculada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count receitas ignoradas',
+      one: '1 receita ignorada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Inclui $count sub-receitas de outros livros',
+      one: 'Inclui 1 sub-receita de outro livro',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Em $count receitas, menos de 70% dos ingredientes foram reconhecidos',
+      one: 'Em 1 receita, menos de 70% dos ingredientes foram reconhecidos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Não foi possível calcular $count receitas',
+      one: 'Não foi possível calcular 1 receita',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => 'Sem ingredientes';
+
+  @override
+  String get bulkNutritionNoMatch => 'Nenhum ingrediente reconhecido';
 }

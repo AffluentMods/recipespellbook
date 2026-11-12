@@ -7,6 +7,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/tokens.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/bulk_nutrition_sheet.dart';
 import '../../widgets/nutrition_facts.dart';
 
 // ============================================================
@@ -176,6 +177,15 @@ class NutritionSettingsScreen extends ConsumerWidget {
       body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView(
         padding: const EdgeInsets.only(bottom: 40),
         children: [
+          // ─── FILL IN NUTRITION ACROSS THE LIBRARY ───
+          ListTile(
+            leading: Icon(Icons.calculate_outlined, color: context.appColors.accent),
+            title: Text(l10n.bulkNutritionLibraryTitle),
+            subtitle: Text(l10n.bulkNutritionLibrarySubtitle),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => showBulkNutritionSheet(context, ref),
+          ),
+
           // ─── LIVE PREVIEW ───
           _SectionTitle(l10n.preview, padding: const EdgeInsets.fromLTRB(16, 8, 16, 8)),
           Padding(

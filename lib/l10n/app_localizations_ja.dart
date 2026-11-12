@@ -12405,4 +12405,131 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => '「公開」をタップすると、自分のクックブックやレシピをみんなと共有できます。サインインが必要です。';
+
+  @override
+  String get bulkNutritionAction => '栄養素を計算';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => 'このレシピ本のレシピに栄養価を入れます';
+
+  @override
+  String get bulkNutritionAllCookbooks => 'すべてのレシピ本';
+
+  @override
+  String get bulkNutritionLibraryTitle => 'すべてのレシピの栄養素を計算';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => 'すべてのレシピ本のレシピに栄養価を入れます';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '栄養価がまだないレシピ: $count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '栄養価があるレシピ: $count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'そのうち$count件は手入力、またはレシピに付いていた値です',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => '計算するレシピがありません。';
+
+  @override
+  String get bulkNutritionOnlyMissing => '栄養価がないレシピのみ';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => 'すでにある栄養価はそのまま残ります。';
+
+  @override
+  String get bulkNutritionAll => 'すべてのレシピ';
+
+  @override
+  String get bulkNutritionAllHint => 'すべてのレシピを計算し直し、手入力した値も含めて栄養価を置き換えます。';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return '$total件中$current件目を計算中';
+  }
+
+  @override
+  String get bulkNutritionStop => '停止';
+
+  @override
+  String get bulkNutritionStopped => '停止しました。ここまでに計算したレシピは保存されています。';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のレシピを計算しました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のレシピをスキップしました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ほかのレシピ本のサブレシピ$count件を含みます',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '材料の認識が70%未満のレシピ: $count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '計算できなかったレシピ: $count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => '材料がありません';
+
+  @override
+  String get bulkNutritionNoMatch => '認識できた材料がありません';
 }

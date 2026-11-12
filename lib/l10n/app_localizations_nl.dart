@@ -12561,4 +12561,139 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get faqCommStep5Desc => 'Tik op Publiceren om een van je kookboeken of recepten met iedereen te delen. Je moet ingelogd zijn.';
+
+  @override
+  String get bulkNutritionAction => 'Voedingswaarden berekenen';
+
+  @override
+  String get bulkNutritionCookbookSubtitle => 'Vul de voedingswaarden aan voor de recepten in dit kookboek';
+
+  @override
+  String get bulkNutritionAllCookbooks => 'Al je kookboeken';
+
+  @override
+  String get bulkNutritionLibraryTitle => 'Voedingswaarden voor alle recepten berekenen';
+
+  @override
+  String get bulkNutritionLibrarySubtitle => 'Vul de voedingswaarden aan in al je kookboeken';
+
+  @override
+  String bulkNutritionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten hebben nog geen voedingswaarden',
+      one: '1 recept heeft nog geen voedingswaarden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExisting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten hebben al voedingswaarden',
+      one: '1 recept heeft al voedingswaarden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Daarvan zijn er $count met de hand ingevoerd of met het recept meegekomen',
+      one: 'Daarvan is er 1 met de hand ingevoerd of met het recept meegekomen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoRecipes => 'Er zijn geen recepten om te berekenen.';
+
+  @override
+  String get bulkNutritionOnlyMissing => 'Alleen recepten zonder voedingswaarden';
+
+  @override
+  String get bulkNutritionOnlyMissingHint => 'Voedingswaarden die er al zijn, blijven zoals ze zijn.';
+
+  @override
+  String get bulkNutritionAll => 'Alle recepten';
+
+  @override
+  String get bulkNutritionAllHint => 'Berekent elk recept opnieuw en vervangt de voedingswaarden, ook die met de hand zijn ingevoerd.';
+
+  @override
+  String bulkNutritionProgress(int current, int total) {
+    return 'Recept $current van $total wordt berekend';
+  }
+
+  @override
+  String get bulkNutritionStop => 'Stoppen';
+
+  @override
+  String get bulkNutritionStopped => 'Gestopt. De recepten die al berekend waren, zijn opgeslagen.';
+
+  @override
+  String bulkNutritionCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten berekend',
+      one: '1 recept berekend',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten overgeslagen',
+      one: '1 recept overgeslagen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionExternalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Inclusief $count subrecepten uit andere kookboeken',
+      one: 'Inclusief 1 subrecept uit een ander kookboek',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionLowMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bij $count recepten is minder dan 70% van de ingrediënten herkend',
+      one: 'Bij 1 recept is minder dan 70% van de ingrediënten herkend',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkNutritionNotCalculatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten konden niet worden berekend',
+      one: '1 recept kon niet worden berekend',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkNutritionNoIngredients => 'Geen ingrediënten';
+
+  @override
+  String get bulkNutritionNoMatch => 'Geen enkel ingrediënt herkend';
 }
