@@ -92,6 +92,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   msix: ^3.16.8
 
+  path_provider_platform_interface: ^2.1.2
 flutter_launcher_icons:
   image_path: "assets/images/icon.png"
   android: true
@@ -115,6 +116,10 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   generate: true
+  config:
+    # Flutter 3.50 builds iOS and macOS with Swift Package Manager by default;
+    # speech_to_text and others are not ready for it yet, so stay on CocoaPods.
+    enable-swift-package-manager: false
 
   assets:
     - assets/data/common_ingredients.json
@@ -122,6 +127,9 @@ flutter:
     - assets/images/default_recipes/
     - assets/images/themes/
     - assets/images/guides/
+    # Fonts the opening screens use, so google_fonts never downloads them
+    # (offline first launch, no request to Google). SIL OFL, licenses beside them.
+    - assets/google_fonts/
     - assets/images/faqs/
     - assets/rpg/pets/
     - assets/images/icon.png

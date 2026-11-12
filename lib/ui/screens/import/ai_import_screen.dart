@@ -145,7 +145,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
             borderRadius:
                 SheetPresentation.surfaceRadius(ctx),
           ),
-          child: Column(
+          child: Material(type: MaterialType.transparency, child: Column(
             children: [
               // Handle
               const SizedBox(height: 8),
@@ -266,7 +266,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                 ),
               ),
             ],
-          ),
+          )),
         ),
         );
       }),

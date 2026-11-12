@@ -184,7 +184,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
           borderRadius: SheetPresentation.surfaceRadius(context),
         ),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        child: SingleChildScrollView(
+        child: Material(type: MaterialType.transparency, child: SingleChildScrollView(
           child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,7 +393,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
             const SizedBox(height: 8),
           ],
           ),
-        ),
+        )),
       ),
     );
   }

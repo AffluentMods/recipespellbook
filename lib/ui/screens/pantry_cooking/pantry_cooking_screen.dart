@@ -198,7 +198,7 @@ Future<void> showPantrySheet(BuildContext context) {
       return Container(
         constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
         decoration: BoxDecoration(color: c.surface, borderRadius: SheetPresentation.surfaceRadius(ctx)),
-        child: SafeArea(
+        child: Material(type: MaterialType.transparency, child: SafeArea(
           top: false,
           child: ListView(
             shrinkWrap: true,
@@ -218,7 +218,7 @@ Future<void> showPantrySheet(BuildContext context) {
               const PantryBasicsEditor(),
             ],
           ),
-        ),
+        )),
       );
     },
   );

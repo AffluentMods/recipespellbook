@@ -1232,7 +1232,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 color: theme.colorScheme.surface,
                 borderRadius: SheetPresentation.surfaceRadius(ctx),
               ),
-              child: Column(
+              child: Material(type: MaterialType.transparency, child: Column(
                 children: [
                   // ── Drag handle ──
                   Padding(
@@ -1472,7 +1472,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                     ),
                   ),
                 ],
-              ),
+              )),
             ),
           );
         },
