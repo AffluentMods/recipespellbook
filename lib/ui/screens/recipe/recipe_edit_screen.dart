@@ -722,6 +722,30 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         // Two-pane edit only when the editor genuinely has room. Decide by the
         // pane's actual width (LayoutBuilder), not the whole window.
         final wide = constraints.maxWidth >= 1000;
+        final tabBar = TabBar(
+          indicator: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicatorPadding: const EdgeInsets.all(4),
+          dividerColor: Colors.transparent,
+          labelColor: theme.colorScheme.onPrimary,
+          unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+          labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+          splashBorderRadius: BorderRadius.circular(9),
+          tabs: wide
+              ? [
+                  Tab(text: l10n.tabDetails),
+                  Tab(text: l10n.recipeEditIngredientsSteps),
+                ]
+              : [
+                  Tab(text: l10n.tabDetails),
+                  Tab(text: l10n.ingredientsTitle),
+                  Tab(text: l10n.instructionsTitle),
+                ],
+        );
         return DefaultTabController(
           // 2 tabs when wide (Details | Ingredients & instructions), else 3.
           length: wide ? 2 : 3,
@@ -731,60 +755,39 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       appBar: AppBar(
         title: Text(_isEditing ? l10n.recipeEdit : l10n.recipeAdd),
         actions: [
-          // Prominent Save (the desktop density otherwise shrinks it).
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: FilledButton(
-              onPressed: _isSaving ? null : _saveRecipe,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(0, 44),
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-                textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-              ),
-              child: _isSaving
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text(l10n.actionSave),
+          // Prominent Save (the desktop density otherwise shrinks it). The
+          // toolbar centres it; padding around it would only take height
+          // from the button, and a squeezed button cuts off its label.
+          FilledButton(
+            onPressed: _isSaving ? null : _saveRecipe,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 44),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+              textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             ),
+            child: _isSaving
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : Text(l10n.actionSave),
           ),
           const SizedBox(width: 12),
         ],
-        // Segmented tab switch — capped so it doesn't span the whole window.
+        // Segmented tab switch, capped so it doesn't span the whole window.
+        // The bar is as tall as the toolbar and this strip say they are. A
+        // strip taller than it says takes the difference from the toolbar,
+        // and the Save button in it was squeezed until its label was cut.
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(52),
+          preferredSize: Size.fromHeight(tabBar.preferredSize.height + _tabStripGap),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
               child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, _tabStripGap),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: TabBar(
-                indicator: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: const EdgeInsets.all(4),
-                dividerColor: Colors.transparent,
-                labelColor: theme.colorScheme.onPrimary,
-                unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-                labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
-                splashBorderRadius: BorderRadius.circular(9),
-                tabs: wide
-                    ? [
-                        Tab(text: l10n.tabDetails),
-                        Tab(text: l10n.recipeEditIngredientsSteps),
-                      ]
-                    : [
-                        Tab(text: l10n.tabDetails),
-                        Tab(text: l10n.ingredientsTitle),
-                        Tab(text: l10n.instructionsTitle),
-                      ],
-              ),
+              child: tabBar,
             ),
           ),
             ),
@@ -797,6 +800,9 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       }),
     );
   }
+
+  /// The space under the tab strip, at the foot of the app bar.
+  static const double _tabStripGap = 8;
 
   /// Wraps [child] so Ctrl/Cmd+S saves without leaving the keyboard. Desktop /
   /// web only — mobile has no hardware keyboard shortcut layer.
