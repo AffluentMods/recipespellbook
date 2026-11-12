@@ -25,7 +25,9 @@ class RecipeLibraryVersion extends Notifier<int> {
     Timer? timer;
     final sub = db
         .tableUpdates(TableUpdateQuery.onAllTables([db.recipes, db.ingredients]))
-        .listen((_) {
+        .listen((updates) {
+      // Only an ingredients change makes the next load read the lines again.
+      if (updates.any((u) => u.table == db.ingredients.actualTableName)) markIngredientRowsChanged();
       timer?.cancel();
       timer = Timer(settle, () => state++);
     });

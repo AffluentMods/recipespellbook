@@ -675,6 +675,15 @@ void main() {
       await expectLater(pick('Archive.zip', zipOf(again)), failsSaying('Settings'));
     });
 
+    test('so is a cookbook ZIP in its format: data.json with the cookbooks, its photos, no manifest', () async {
+      final data = jsonDecode(utf8.decode(ownBackup()['data.json']!)) as Map<String, dynamic>;
+      final cookbookZip = {
+        'data.json': utf8.encode(jsonEncode({'version': 2, 'cookbooks': data['cookbooks']})),
+        'images/recipes/r1_cover.jpg': photo(3),
+      };
+      await expectLater(pick('25 Everyday Classics.zip', zipOf(cookbookZip)), failsSaying('Settings'));
+    });
+
     test('an archive that only has files of those names is read as any other', () async {
       final recipes = await pick(
         'export.zip',

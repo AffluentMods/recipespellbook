@@ -368,4 +368,48 @@ void main() {
       expect(picks, isEmpty);
     });
   });
+
+  group('loading the library', () {
+    late AppDatabase db;
+
+    setUp(() async {
+      resetRecipeLibraryCacheForTesting();
+      db = AppDatabase.forTesting(NativeDatabase.memory());
+      await db.into(db.cookbooks).insert(CookbooksCompanion.insert(id: 'cb1', name: 'Mine'));
+      await db.into(db.recipes).insert(RecipesCompanion.insert(id: 'soup', cookbookId: 'cb1', title: 'Soup'));
+      await db.into(db.ingredients)
+          .insert(IngredientsCompanion.insert(id: 'soup_0', recipeId: 'soup', sortOrder: 0, name: 'leeks'));
+    });
+
+    tearDown(() => db.close());
+
+    List<String> names(RecipeLibrary l) => [for (final i in l.recipes.single.ingredients) i.name];
+
+    test('a recipes-only change reuses the ingredient lines; an ingredients change reads them again', () async {
+      expect(names(await loadRecipeLibrary(db)), ['leeks']);
+
+      // Opening or renaming a recipe changes only the recipes table.
+      await (db.update(db.recipes)..where((r) => r.id.equals('soup')))
+          .write(RecipesCompanion(title: const Value('Leek Soup'), lastViewedAt: Value(DateTime(2026, 11, 12))));
+      final renamed = await loadRecipeLibrary(db);
+      expect(renamed.recipes.single.title, 'Leek Soup');
+      expect(renamed.recipes.single.lastViewedAt, DateTime(2026, 11, 12));
+      expect(names(renamed), ['leeks']);
+
+      // A new line shows once the ingredients table is marked changed, as
+      // the library provider does on every ingredients write.
+      await db.into(db.ingredients)
+          .insert(IngredientsCompanion.insert(id: 'soup_1', recipeId: 'soup', sortOrder: 1, name: 'potatoes'));
+      markIngredientRowsChanged();
+      expect(names(await loadRecipeLibrary(db)), ['leeks', 'potatoes']);
+
+      // A recipe back from the trash comes back with its lines.
+      await (db.update(db.recipes)..where((r) => r.id.equals('soup')))
+          .write(RecipesCompanion(deletedAt: Value(DateTime(2026))));
+      expect((await loadRecipeLibrary(db)).recipes, isEmpty);
+      await (db.update(db.recipes)..where((r) => r.id.equals('soup')))
+          .write(const RecipesCompanion(deletedAt: Value(null)));
+      expect(names(await loadRecipeLibrary(db)), ['leeks', 'potatoes']);
+    });
+  });
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import '../../models/imported_recipe.dart';
+import '../backup_zip.dart';
 import 'paprika_importer.dart';
 import 'mela_importer.dart';
 import 'recipe_keeper_importer.dart';
@@ -434,9 +435,10 @@ class FileImportDispatcher {
     } catch (_) {
       throw const FormatException(_damagedZip);
     }
-    // A backup holds the whole library, and Settings is where it is put
-    // back. Read here as loose recipe files, most of what it holds is lost.
-    if (_isOwnBackup(archive)) throw const FormatException(_ownBackup);
+    // A backup holds the whole library and is restored as one, by Settings
+    // and by the Add a recipe sheet before it gets here. Read here as loose
+    // recipe files, most of what it holds is lost.
+    if (BackupZip.isBackup(archive)) throw const FormatException(_ownBackup);
 
     // Try each ZIP-based importer in order of specificity. One that finds
     // no recipe, or fails, leaves the archive to the next.
@@ -461,30 +463,6 @@ class FileImportDispatcher {
     (CookmateImporter.canHandle, CookmateImporter.import_),
     (MelaImporter.canHandleZip, MelaImporter.importMulti),
   ];
-
-  /// How the two files at the top of this app's backup name the app:
-  /// manifest.json as "app" and data.json as "appName".
-  static final _ownBackupMark = RegExp(r'"app(?:Name)?"\s*:\s*"Recipe Spellbook"');
-
-  /// Whether [archive] is a backup made by this app. Its manifest.json or
-  /// its data.json says so, at the top of the archive or one folder down,
-  /// which is where they are after a backup was unpacked and zipped again.
-  /// Other archives have files of those names too, so the name is not enough.
-  static bool _isOwnBackup(Archive archive) {
-    for (final file in archive.files) {
-      final parts = file.name.split('/');
-      if (!file.isFile || parts.length > 2 || ImportSupport.isHiddenEntry(file.name)) continue;
-      if (parts.last != 'manifest.json' && parts.last != 'data.json') continue;
-      try {
-        final content = file.content as List<int>;
-        final start = content.length > 2048 ? content.sublist(0, 2048) : content;
-        if (_ownBackupMark.hasMatch(utf8.decode(start, allowMalformed: true))) return true;
-      } catch (_) {
-        // A file that does not unpack says nothing.
-      }
-    }
-    return false;
-  }
 
   /// Generic ZIP fallback: every recipe file in the archive is read the way
   /// it is when picked on its own.
