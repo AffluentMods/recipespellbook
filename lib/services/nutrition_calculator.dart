@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
+import '../data/food_portions.dart';
 import '../data/ingredient_translations.dart';
 import '../data/nutrition_data.dart';
 import '../database/database.dart';
 import '../services/usda_service.dart';
 import '../ui/widgets/nutrition_system.dart' as local_db;
-import '../utils/ingredient_utils.dart' show parseAmount;
+import '../utils/ingredient_utils.dart' show parseAmount, parseAmountRange;
 
 /// Calculates nutrition for a recipe based on its ingredients
 class NutritionCalculator {
@@ -218,7 +219,10 @@ class NutritionCalculator {
   }
 
   /// Find a linked recipe match for an ingredient name.
-  /// Matches case-insensitively against the keys in the linked recipe map.
+  /// The map is keyed by the names of the ingredients that carry a link, so
+  /// only the same name (ignoring case) matches. A looser match would hand a
+  /// linked recipe's nutrition to another line too: "cream" is not the
+  /// linked "pastry cream".
   MapEntry<String, LinkedRecipeNutrition>? _findLinkedRecipeMatch(
       String ingredientName,
       Map<String, LinkedRecipeNutrition> linkedMap,
@@ -228,24 +232,68 @@ class NutritionCalculator {
       if (lowerName == entry.key.toLowerCase().trim()) {
         return entry;
       }
-      // Also check if the ingredient name contains the linked key or vice versa
-      // e.g., ingredient "pizza dough ball" should match key "pizza dough ball"
-      // but also "white pizza sauce" should match "white pizza sauce"
-      if (lowerName.contains(entry.key.toLowerCase().trim()) ||
-          entry.key.toLowerCase().trim().contains(lowerName)) {
-        return entry;
-      }
     }
     return null;
   }
 
+  /// Words a water or ice line can have besides water or ice itself.
+  static const _waterWords = {
+    'water', 'ice', 'cube', 'crushed', 'block', 'large', 'of', 'cold', 'hot', 'warm',
+    'boiling', 'iced', 'filtered', 'tap', 'lukewarm', 'room', 'temperature',
+    'sparkling', 'soda', 'club', 'mineral', 'still', 'seltzer', 'chilled', 'very',
+    'plain', 'divided', 'reserved', 'pasta', 'cooking', 'rinsing', 'rice', 'or',
+    'more', 'as', 'needed', 'extra', 'a', 'the', 'for', 'bath', 'unflavored', 'tepid',
+    'salted', 'lightly', 'fresh', 'cool', 'bottled', 'spring', 'to', 'cover', 'about',
+    'up', 'top', 'cup', 'splash', 'just', 'boiled', 'freshly', 'cracked', 'per', 'portion',
+  };
+
+  /// Things listed with the ingredients that nobody eats.
+  static const _notEaten = [
+    ['oxygen', 'absorber'], ['mylar'], ['toothpick'], ['skewer'], ['parchment'],
+    ['twine'], ['cheesecloth'], ['foil'], ['coloring'], ['colouring'], ['food', 'color'],
+    ['gold', 'leaf'], ['silver', 'leaf'], ['luster', 'dust'], ['edible', 'glitter'],
+    ['edible', 'flower'], ['wood', 'chip'], ['charcoal'], ['banana', 'leaf'],
+    ['corn', 'husk'], ['bamboo', 'leaf'], ['cooking', 'spray'], ['nonstick', 'spray'],
+    ['non', 'stick', 'spray'], ['bouquet', 'garni'], ['rose', 'water'],
+    ['orange', 'blossom', 'water'], ['orange', 'flower', 'water'], ['liquid', 'smoke'],
+    ['dry', 'ice'], ['pickling', 'lime'], ['zip', 'top'], ['ziplock'], ['paper', 'towel'],
+    ['cocktail', 'pick'], ['cupcake', 'liner'], ['kitchen', 'string'], ['butcher', 'string'],
+    ['rosewater'], ['beeswax'], ['plank'], ['wood', 'chunk'], ['oak', 'wood'], ['label'], ['marker'], ['sterilized'],
+    ['calcium', 'hydroxide'], ['umbrella'],
+  ];
+
+  static bool _containsRun(List<String> words, List<String> run) {
+    for (var i = 0; i + run.length <= words.length; i++) {
+      var ok = true;
+      for (var j = 0; j < run.length; j++) {
+        if (words[i + j] != run[j]) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) return true;
+    }
+    return false;
+  }
+
+  static bool _isWaterOrIce(List<String> core) {
+    if (core.isEmpty) return false;
+    final named = core.contains('water') || core.contains('ice') || core.contains('seltzer') ||
+        (core.contains('club') && core.contains('soda'));
+    return named && core.every(_waterWords.contains);
+  }
+
   /// Check if an ingredient should have negligible calories.
-  /// Returns a near-zero result for bones, water, salt, and "to taste" items
-  /// that would otherwise get wildly inaccurate matches.
-  IngredientNutritionResult? _checkNegligibleCalorieIngredient(Ingredient ingredient) {
-    final lower = ingredient.name.toLowerCase().trim();
+  /// Returns a zero result for bones, water and ice, things nobody eats, and
+  /// "to taste" or pinch-sized seasonings that would otherwise get wildly
+  /// inaccurate matches. [englishName] is the name in English.
+  IngredientNutritionResult? _checkNegligibleCalorieIngredient(
+      Ingredient ingredient, String englishName) {
+    final lower = englishName.toLowerCase().trim();
     final notes = (ingredient.notes ?? '').toLowerCase();
     final unit = (ingredient.unit ?? '').toLowerCase();
+    final words = foodTokens(lower.replaceAll(RegExp(r'\([^)]*\)'), ' '));
+    final core = foodTokens(foodNamePhrases(englishName).first);
 
     // "To taste" items — only negligible if they are typical seasonings/spices
     // Substantial ingredients "to taste" (e.g., cilantro, sugar) should go through
@@ -257,35 +305,36 @@ class NutritionCalculator {
 
     // Bones — used for stock/broth, not eaten
     // Must NOT match "bone-in" or "boneless" (those are cut descriptors, not bone ingredients)
-    final isBone = (RegExp(r'\bbone\b(?!-in)').hasMatch(lower) &&
+    final isBone = (RegExp(r'\bbones?\b(?!-in)').hasMatch(lower) &&
         !lower.contains('boneless') &&
-        !lower.contains('bone-in')) ||
+        !lower.contains('bone-in') &&
+        !lower.contains('broth') &&
+        !lower.contains('stock')) ||
         lower.contains('carcass');
 
-    // Water & ice — zero calories
-    final isWater = lower == 'water' || lower == 'ice' ||
-        lower == 'cold water' || lower == 'hot water' ||
-        lower == 'warm water' || lower == 'boiling water' ||
-        lower == 'ice water' || lower == 'filtered water';
+    final isWater = _isWaterOrIce(core);
+    final isNotEaten = _notEaten.any((run) => _containsRun(words, run));
 
     // Negligible-calorie seasonings when used in cooking amounts
-    final isNegligibleSeasoning = _isNegligibleSeasoning(lower, ingredient.amount, unit);
+    final isNegligibleSeasoning =
+        _isNegligibleSeasoning(lower, notes, ingredient.amount, unit);
 
-    if (!isBone && !isWater && !isToTaste && !isNegligibleSeasoning) return null;
+    if (!isBone && !isWater && !isNotEaten && !isToTaste && !isNegligibleSeasoning) return null;
 
-    // Build descriptive match reason
-    String reason;
+    final ZeroCalorieReason reason;
     if (isBone) {
-      reason = 'Bones (for stock) — negligible calories';
+      reason = ZeroCalorieReason.bones;
     } else if (isWater) {
-      reason = 'Water — 0 calories';
+      reason = ZeroCalorieReason.water;
+    } else if (isNotEaten) {
+      reason = ZeroCalorieReason.notEaten;
     } else if (isToTaste) {
-      reason = 'To taste — negligible calories';
+      reason = ZeroCalorieReason.toTaste;
     } else {
-      reason = 'Seasoning amount — negligible calories';
+      reason = ZeroCalorieReason.seasoning;
     }
 
-    debugPrint('Negligible calorie: "${ingredient.name}" → $reason');
+    debugPrint('Negligible calorie: "${ingredient.name}" -> ${reason.name}');
 
     return IngredientNutritionResult(
       ingredient: ingredient,
@@ -301,30 +350,46 @@ class NutritionCalculator {
       ),
       gramsUsed: 0,
       matchStatus: MatchStatus.matched,
-      matchDescription: reason,
+      matchDescription: reason.description,
+      zeroReason: reason,
     );
   }
 
   /// Check if a seasoning is used in truly negligible amounts.
-  /// Only "pinch", "dash", or no amount are negligible.
-  /// tsp/tbsp have real calories (pepper ~6cal/tsp, ~18cal/tbsp)
-  /// and should go through normal calculation.
-  bool _isNegligibleSeasoning(String lower, String? amount, String unit) {
-    // Salt is truly zero-calorie regardless of amount
+  /// Salt has no calories but does carry sodium, so measured salt is counted;
+  /// a pinch, an unmeasured amount or salt for the cooking water or a brine
+  /// is not. Pepper and spices have real calories (pepper ~6 cal/tsp) and are
+  /// only negligible at a pinch or dash.
+  bool _isNegligibleSeasoning(String name, String notes, String? amountText, String unitText) {
+    var lower = name;
+    var amount = amountText;
+    var unit = unitText;
     const zeroCalSeasonings = {
-      'salt', 'sea salt', 'kosher salt', 'table salt', 'flaky salt',
+      'salt', 'sea salt', 'kosher salt', 'table salt', 'flaky salt', 'fine salt',
+      'coarse salt', 'fine sea salt', 'flaky sea salt', 'coarse sea salt',
+      'flake salt', 'salt flakes', 'diamond crystal kosher salt', 'morton kosher salt',
     };
 
     // Pepper and spices have real calories — only negligible at pinch/dash
     const lowCalSeasonings = {
       'pepper', 'black pepper', 'white pepper', 'ground pepper',
-      'cracked pepper', 'peppercorn', 'peppercorns',
+      'cracked pepper', 'peppercorn', 'peppercorns', 'freshly ground black pepper',
+      'ground black pepper', 'freshly ground pepper', 'cracked black pepper',
     };
+
+    // "pinch of salt" in the name is a pinch.
+    final measure = RegExp(r'^(?:a\s+)?(pinch|dash)(?:es)?\s+(?:of\s+)?').firstMatch(lower);
+    if (measure != null) {
+      lower = lower.substring(measure.end);
+      unit = measure.group(1)!;
+      amount ??= '1';
+    }
 
     // Strip descriptive suffixes: "salt, for pasta water" → "salt"
     final stripped = lower
         .replaceAll(RegExp(r',?\s+for\s+.+$'), '')
         .replaceAll(RegExp(r'\s*\(.*\)'), '')
+        .replaceAll(RegExp(r',.*$'), '')
         .replaceAll(RegExp(r',?\s+-\s+.+$'), '')
         .trim();
 
@@ -333,13 +398,18 @@ class NutritionCalculator {
 
     if (!isSalt && !isLowCal) return false;
 
-    // Salt is always negligible (0 cal)
-    if (isSalt) return true;
+    // Only negligible if truly unmeasured
+    if (amount == null || amount.trim().isEmpty) return true;
+    const tinyUnits = {'pinch', 'pinches', 'dash', 'dashes', 'to taste', 'smidgen'};
+    final u = unit.toLowerCase().trim();
+    if (tinyUnits.contains(u) || u.endsWith('pinch')) return true;
+    if (isLowCal) return u.isEmpty;
 
-    // For pepper/spices: only negligible if truly unmeasured
-    if (amount == null || amount.isEmpty) return true;
-    const tinyUnits = {'pinch', 'pinches', 'dash', 'dashes', ''};
-    return tinyUnits.contains(unit.toLowerCase().trim());
+    // Salt that seasons the cooking water, a brine or a crust is poured off
+    // or scraped away, not eaten.
+    final context = '$lower $notes';
+    return RegExp(r'\b(water|brine|brining|boiling|crust|rim|rimming|the pot)\b')
+        .hasMatch(context);
   }
 
   /// Check if an ingredient with "to taste" is a typical seasoning/spice
@@ -367,10 +437,13 @@ class NutritionCalculator {
       'curry powder', 'garam masala', 'five spice', 'za\'atar',
       'sumac', 'saffron', 'fennel seed', 'celery seed', 'mustard seed',
       'caraway', 'anise', 'star anise', 'fenugreek',
-      'seasoning', 'spice blend', 'herb',
+      'seasoning', 'spice blend', 'herb', 'salt', 'pepper',
     ];
     return seasoningKeywords.any((kw) => lower.contains(kw));
   }
+
+  static final _fatLevelInNotes = RegExp(
+      r'^(2%|1%|nonfat|non-fat|fat-free|fat free|low-fat|lowfat|low fat|reduced-fat|skim|part-skim)(?![\w%])');
 
   /// Calculate nutrition for a single ingredient
   /// [languageCode] - Used to translate ingredient name to English for USDA lookup
@@ -379,34 +452,42 @@ class NutritionCalculator {
       String languageCode,
       ) async {
     try {
+      // The food tables are in English.
+      final englishName = translateIngredientToEnglish(
+        ingredient.name,
+        languageCode,
+      );
+
       // ── Step 0: Handle negligible-calorie ingredients ──
-      // Bones (used for stock/broth), water, salt, and "to taste" items
-      // should return near-zero nutrition instead of wildly wrong values.
-      final negligibleResult = _checkNegligibleCalorieIngredient(ingredient);
+      // Bones (used for stock/broth), water, things nobody eats and pinch or
+      // "to taste" seasonings return zero instead of wildly wrong values.
+      final negligibleResult = _checkNegligibleCalorieIngredient(ingredient, englishName);
       if (negligibleResult != null) return negligibleResult;
 
-      // ── Step 1: Try local NutritionDatabase first ──
-      // This has ~300 curated entries with correct per-100g values for common ingredients.
-      // Much more reliable than USDA search for staples like milk, pepper, broth.
-      // We use findMatch() for NAME matching only, then use _parseAmountToGrams()
-      // for proper amount→grams conversion (handles slices, cloves, fl oz, pints, etc.)
-      final localMatch = local_db.NutritionDatabase.findMatch(ingredient.name);
-      if (localMatch != null && _isLikelyBadLocalMatch(ingredient.name, localMatch.key)) {
-        debugPrint('Rejected bad local match: "${ingredient.name}" → "${localMatch.key}"');
-      }
-      if (localMatch != null && !_isLikelyBadLocalMatch(ingredient.name, localMatch.key)) {
-        final per100g = localMatch.value; // NutritionData per 100g
+      // ── Step 1: Try the local food table first ──
+      // It holds curated values per 100 g for common ingredients and is matched
+      // word by word, so it is more reliable than the USDA search for staples.
+      // The name is matched here; [_parseAmountToGrams] turns the amount into
+      // grams for that food (scoops, slices, cups of oats, cans and so on).
+      // A fat level written in the notes ("plain Greek yogurt | 2%") names
+      // the food more exactly.
+      final fatLevel = _fatLevelInNotes.firstMatch((ingredient.notes ?? '').trim().toLowerCase());
+      final localMatch = (fatLevel != null
+              ? local_db.NutritionDatabase.findMatch('${fatLevel.group(1)} $englishName')
+              : null) ??
+          local_db.NutritionDatabase.findMatch(englishName);
+      if (localMatch != null) {
         final matchedKey = localMatch.key;
+        final words = foodTokens('$englishName ${ingredient.notes ?? ''}');
+        final per100g = local_db.NutritionDatabase.forState(matchedKey, localMatch.value, words);
 
-        // Use the same grams parser as USDA path (handles all units correctly)
         final grams = _parseAmountToGrams(
           amount: ingredient.amount,
           unit: ingredient.unit,
-          ingredientName: ingredient.name,
+          ingredientName: englishName,
+          notes: ingredient.notes,
         );
 
-        // _parseAmountToGrams now always returns a value (uses default when
-        // amount is missing/unparseable), so the per-100g fallback path is gone.
         if (grams != null && grams > 0) {
           final scale = grams / 100.0;
           final nutrition = NutritionData(
@@ -420,7 +501,7 @@ class NutritionCalculator {
           );
           // Flag as uncertain when there was no amount in the source recipe
           final isMissingAmount = ingredient.amount == null || ingredient.amount!.trim().isEmpty;
-          debugPrint('Local match for "${ingredient.name}" → "$matchedKey": ${grams.toStringAsFixed(0)}g → ${(nutrition.calories ?? 0).toStringAsFixed(0)} cal${isMissingAmount ? ' (default amount)' : ''}');
+          debugPrint('Local match for "${ingredient.name}" -> "$matchedKey": ${grams.toStringAsFixed(0)}g -> ${(nutrition.calories ?? 0).toStringAsFixed(0)} cal${isMissingAmount ? ' (default amount)' : ''}');
           return IngredientNutritionResult(
             ingredient: ingredient,
             isMatched: true,
@@ -428,20 +509,14 @@ class NutritionCalculator {
             gramsUsed: grams,
             matchStatus: isMissingAmount ? MatchStatus.uncertain : MatchStatus.matched,
             matchDescription: matchedKey,
-            errorMessage: isMissingAmount ? 'No amount given — using a typical serving' : null,
+            errorMessage: isMissingAmount ? 'No amount given, using a typical serving' : null,
           );
         }
       }
 
       // ── Step 2: Fall back to USDA search ──
-      // Translate ingredient name to English for USDA lookup
-      final translatedName = translateIngredientToEnglish(
-        ingredient.name,
-        languageCode,
-      );
-
       // Strip cooking modifiers (sliced, diced, minced, etc.) before USDA lookup
-      final cleanedName = local_db.stripCookingModifiers(translatedName);
+      final cleanedName = local_db.stripCookingModifiers(englishName);
 
       // Refine the query for better USDA matches
       final searchQuery = _refineSearchQuery(cleanedName);
@@ -460,12 +535,12 @@ class NutritionCalculator {
 
       // Validate the match — reject obviously wrong results
       if (_isLikelyBadMatch(cleanedName, match)) {
-        debugPrint('Rejected likely bad USDA match: "$cleanedName" → "${match.description}"');
+        debugPrint('Rejected likely bad USDA match: "$cleanedName" -> "${match.description}"');
         // Retry with the original cleaned name if the refined query gave bad results
         if (searchQuery != cleanedName) {
           final retryMatch = await _usdaService.autoMatchIngredient(cleanedName);
           if (retryMatch != null && !_isLikelyBadMatch(cleanedName, retryMatch)) {
-            return _buildResultFromMatch(ingredient, retryMatch);
+            return _buildResultFromMatch(ingredient, englishName, retryMatch);
           }
         }
         return IngredientNutritionResult(
@@ -476,7 +551,7 @@ class NutritionCalculator {
         );
       }
 
-      return _buildResultFromMatch(ingredient, match);
+      return _buildResultFromMatch(ingredient, englishName, match);
     } catch (e) {
       debugPrint('Error calculating nutrition for ${ingredient.name}: $e');
       return IngredientNutritionResult(
@@ -490,12 +565,13 @@ class NutritionCalculator {
 
   /// Build a nutrition result from a USDA match
   IngredientNutritionResult _buildResultFromMatch(
-      Ingredient ingredient, UsdaFoodResult match) {
+      Ingredient ingredient, String englishName, UsdaFoodResult match) {
     // Parse the amount and convert to grams
     final grams = _parseAmountToGrams(
       amount: ingredient.amount,
       unit: ingredient.unit,
-      ingredientName: ingredient.name,
+      ingredientName: englishName,
+      notes: ingredient.notes,
     );
 
     if (grams == null || grams <= 0) {
@@ -525,6 +601,26 @@ class NutritionCalculator {
   bool _isLikelyBadMatch(String ingredientName, UsdaFoodResult match) {
     final query = ingredientName.toLowerCase();
     final result = match.description.toLowerCase();
+
+    // ── A different kind of food ──
+    // The name's main word is an oil, a sauce, a flour... that the result is
+    // not, or the result is one that the name is not: "vegetable" is not
+    // "Vegetable oil", "graham cracker" is not "Whole wheat flour".
+    final queryWords = foodTokens(query);
+    final resultWords = foodTokens(result);
+    final resultName = foodTokens(result.split(',').first);
+    final head = foodHeadIndex(queryWords);
+    if (head >= 0) {
+      final word = queryWords[head];
+      if (local_db.NutritionDatabase.isFoodChangingWord(word) && !resultWords.contains(word)) {
+        return true;
+      }
+    }
+    for (final word in resultName) {
+      if (local_db.NutritionDatabase.isFoodChangingWord(word) && !queryWords.contains(word)) {
+        return true;
+      }
+    }
 
     // ── Category mismatches ──
 
@@ -574,115 +670,275 @@ class NutritionCalculator {
     return false;
   }
 
-  /// Check if a local nutrition database match is likely wrong.
-  /// The local DB uses fuzzy keyword matching, which can produce mismatches like:
-  ///   "olives" → "olive oil"  (shares "olive" but completely different food)
-  ///   "white pizza sauce" → "worcestershire sauce"  (shares "sauce" only)
-  bool _isLikelyBadLocalMatch(String ingredientName, String matchedKey) {
-    final ingLower = ingredientName.toLowerCase().trim();
-    final matchLower = matchedKey.toLowerCase().trim();
+  // ───────────────────────── amounts to grams ─────────────────────────
 
-    // Helper: strip trailing plural 's' or 'es'
-    String stem(String s) => s.replaceAll(RegExp(r'e?s$'), '');
+  /// Millilitres in one of each volume unit.
+  static const _volumeMl = {
+    'cup': 236.588, 'c': 236.588, 'tbsp': 14.787, 'tablespoon': 14.787, 'tbs': 14.787,
+    'tbl': 14.787, 'tbls': 14.787, 'tb': 14.787, 'tsp': 4.929, 'teaspoon': 4.929, 'ts': 4.929,
+    'ml': 1.0, 'milliliter': 1.0, 'millilitre': 1.0, 'cc': 1.0, 'l': 1000.0, 'liter': 1000.0,
+    'litre': 1000.0, 'cl': 10.0, 'dl': 100.0, 'floz': 29.574, 'pint': 473.176,
+    'pt': 473.176, 'quart': 946.353, 'qt': 946.353, 'gallon': 3785.41, 'gal': 3785.41,
+    'pinch': 0.31, 'dash': 0.62, 'drop': 0.05, 'smidgen': 0.15, 'splash': 5.0,
+    'shot': 44.36, 'jigger': 44.36,
+  };
 
-    // Word-level stem equality
-    bool wordMatch(String a, String b) => stem(a) == stem(b);
+  /// Grams in one of each weight unit.
+  static const _weightGrams = {
+    'g': 1.0, 'gram': 1.0, 'gr': 1.0, 'kg': 1000.0, 'kilogram': 1000.0, 'kilo': 1000.0,
+    'mg': 0.001, 'milligram': 0.001, 'oz': 28.3495, 'ounce': 28.3495, 'lb': 453.592,
+    'lbs': 453.592, 'pound': 453.592,
+  };
 
-    final ingWords = ingLower.split(RegExp(r'\s+'));
-    final matchWords = matchLower.split(RegExp(r'\s+'));
+  /// Size and fullness words on a unit ("large", "heaping"), with how much
+  /// they change the amount.
+  static const _unitSizeWords = {
+    'small': 0.7, 'medium': 1.0, 'large': 1.3, 'big': 1.3, 'jumbo': 1.6, 'heaping': 1.25,
+    'heaped': 1.25, 'rounded': 1.15, 'scant': 0.9, 'level': 1.0, 'generous': 1.15,
+    'good': 1.1, 'whole': 1.0, 'extra': 1.0, 'full': 1.0,
+  };
 
-    // If every word in the match key appears in the ingredient → match is a subset → OK
-    // e.g., ingredient "ground sausage", match "sausage" → all match words found
-    if (matchWords.every((mw) => ingWords.any((iw) => wordMatch(iw, mw)))) {
-      return false;
+  /// Unit words that can stand in an ingredient's name when the unit field
+  /// is empty ("1 scoop protein powder", "3 garlic cloves", "2 slices bacon").
+  static const _unitWordsInName = {
+    'scoop', 'sheet', 'slice', 'sprig', 'clove', 'pod', 'stick', 'can', 'tin', 'head',
+    'bunch', 'stalk', 'strip', 'piece', 'chunk', 'packet', 'envelope', 'sachet', 'wedge',
+    'spear', 'cube', 'block', 'brick', 'bar', 'round', 'knob', 'thumb', 'handful', 'ball',
+    'link', 'fillet', 'leaf', 'loaf', 'jar', 'bag', 'box', 'package', 'pack', 'tube',
+    'carton', 'container', 'tub', 'pouch', 'zest', 'floret', 'square', 'segment', 'ear',
+    'twist', 'wheel', 'stem', 'rind', 'peel',
+  };
+
+  /// Units that are a container of a fixed size, so a weight written with
+  /// them is the weight of each one ("2 cans (15 oz)").
+  static const _containerUnits = {
+    'can', 'tin', 'jar', 'bottle', 'package', 'pack', 'pkg', 'bag', 'box', 'carton',
+    'container', 'tub', 'packet', 'envelope', 'sachet', 'pouch', 'tube', 'block', 'brick',
+    'bar', 'stick', 'rack',
+  };
+
+  /// Reads a unit field such as "cups", "large", "can (28 oz)" or
+  /// "small bunch" into its unit word, a size factor and any text that was
+  /// in parentheses.
+  static ({String unit, double size, bool sized, String paren}) _readUnit(String? unit) {
+    var u = foldFoodText(unit ?? '').trim();
+    final paren = RegExp(r'\(([^)]*)\)').allMatches(u).map((m) => m.group(1)!).join(' ');
+    u = u.replaceAll(RegExp(r'\([^)]*\)'), ' ');
+    if (u.contains('+')) u = u.split('+').first;
+    u = u.replaceAll('.', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (RegExp(r'^(fl|fluid) (oz|ounces?)$').hasMatch(u)) u = 'floz';
+    var size = 1.0;
+    var sized = false;
+    final rest = <String>[];
+    for (final w in u.split(' ')) {
+      if (w.isEmpty) continue;
+      final factor = _unitSizeWords[w];
+      if (factor != null) {
+        size *= factor;
+        sized = true;
+      } else {
+        rest.add(canonicalFoodWord(w));
+      }
     }
-
-    // Words in match that are NOT present in ingredient
-    final matchExtra = matchWords
-        .where((mw) => !ingWords.any((iw) => wordMatch(iw, mw)))
-        .toList();
-
-    // Words in ingredient that are NOT present in match
-    final ingExtra = ingWords
-        .where((iw) => !matchWords.any((mw) => wordMatch(iw, mw)))
-        .toList();
-
-    // ── Category-changing words ──
-    // If the match adds a word that fundamentally changes the food type → bad
-    // e.g., "olive" + "oil" = different food from "olives"
-    const categoryWords = {
-      'oil', 'sauce', 'juice', 'powder', 'flour', 'milk', 'cream',
-      'butter', 'extract', 'syrup', 'paste', 'vinegar', 'broth',
-      'stock', 'water', 'wine', 'beer', 'sugar', 'dried', 'seed',
-    };
-    if (matchExtra.any((w) => categoryWords.contains(w))) return true;
-    if (ingExtra.any((w) => categoryWords.contains(w))) return true;
-
-    // ── Completely unrelated primary words ──
-    // If the match has a significant word (4+ chars) with no relationship
-    // to any ingredient word → bad
-    // e.g., "worcestershire" has no relationship to "white", "pizza", or "sauce"
-    for (final extra in matchExtra) {
-      if (extra.length < 4) continue;
-      final relatedToAnyIngWord = ingWords.any((iw) {
-        if (iw.length < 3) return false;
-        // Check word containment (handles "sourdough" ↔ "dough")
-        if (extra.contains(iw) || iw.contains(extra)) return true;
-        // Check stem prefix overlap (at least 70% of shorter word)
-        final minLen = iw.length < extra.length ? iw.length : extra.length;
-        if (minLen < 4) return false;
-        final checkLen = (minLen * 0.7).ceil();
-        return iw.substring(0, checkLen) == extra.substring(0, checkLen);
-      });
-      if (!relatedToAnyIngWord) return true;
+    var name = rest.join(' ');
+    if (rest.length > 1 && !_volumeMl.containsKey(name) && !_weightGrams.containsKey(name)) {
+      // "in piece", "small bunch": keep the word that is a unit.
+      name = rest.lastWhere(
+        (w) => _volumeMl.containsKey(w) || _weightGrams.containsKey(w) ||
+            gramsPerCountUnit(w, const []) != null,
+        orElse: () => rest.last,
+      );
     }
-
-    return false;
+    return (unit: name, size: size, sized: sized, paren: paren);
   }
 
-  /// Parse an amount string and unit to grams
+  /// The amount as one number; the middle of a range like "2-3".
+  static double? _amountValue(String? amount) {
+    if (amount == null || amount.trim().isEmpty) return null;
+    final range = parseAmountRange(amount);
+    if (range != null) return (range.$1 + range.$2) / 2;
+    return parseAmount(amount);
+  }
+
+  /// Grams per millilitre of a food measured by volume.
+  static double _gramsPerMl(List<String> food) {
+    final perCup = gramsPerCupOf(food);
+    if (perCup != null) return perCup / 236.588;
+    bool any(Iterable<String> ws) => ws.any(food.contains);
+    if (any(['flour'])) return 0.53;
+    if (any(['sugar'])) return 0.85;
+    if (any(['butter', 'oil'])) return 0.92;
+    if (any(['honey', 'syrup'])) return 1.4;
+    if (any(['cheese'])) return 0.45;
+    if (any(['powder', 'spice', 'seasoning', 'dried', 'ground'])) return 0.5;
+    return 1.0;
+  }
+
+  /// A size from the unit field ("2 | large | eggs"). Egg weights are for
+  /// large eggs already.
+  static double _unitSize(double size, List<String> food) {
+    if (!food.contains('egg')) return size;
+    if (size >= 1.6) return 1.26;
+    if (size >= 1.3) return 1.0;
+    if (size >= 1.0) return 0.88;
+    return 0.76;
+  }
+
+  /// Size factor from size words in the name ("2 large onions").
+  static double _sizeInName(List<String> food) {
+    final isEgg = food.contains('egg');
+    if (food.contains('jumbo')) return isEgg ? 1.26 : 1.6;
+    if (food.contains('extra') && food.contains('large')) return isEgg ? 1.12 : 1.5;
+    if (food.contains('large') || food.contains('big')) return isEgg ? 1.0 : 1.3;
+    if (food.contains('medium')) return isEgg ? 0.88 : 1.0;
+    if (food.contains('small')) return isEgg ? 0.76 : 0.7;
+    if (food.contains('mini')) return 0.5;
+    return 1.0;
+  }
+
+  /// Parse an amount string and unit to grams.
+  ///
+  /// A weight written on the line ("(15 oz / 425 g)", "about 30 g") wins over
+  /// a household measure. Volumes use the weight of a cup of that food, so a
+  /// cup of oats is 81 g and a cup of spinach 30 g. Counted units ("scoop",
+  /// "slice", "can", also when they are written in the name) and counted
+  /// foods ("2 eggs") use typical weights.
   double? _parseAmountToGrams({
     required String? amount,
     required String? unit,
     required String ingredientName,
+    String? notes,
   }) {
-    // No amount → use a sensible default rather than per-100g, which produces
-    // huge calorie counts (e.g. 884 cal for "vegetable oil" with no amount =
-    // 100g of pure oil). Pick a default based on what kind of ingredient
-    // it is — oils/sauces get 1 tbsp, spices/seeds get 1 tsp, fallback 1 tbsp.
-    if (amount == null || amount.isEmpty) {
-      final defaultGrams = _defaultGramsForIngredient(ingredientName);
-      return defaultGrams;
+    final unitInfo = _readUnit(unit);
+    final food = foodTokens(ingredientName.replaceAll(RegExp(r'\([^)]*\)'), ' '));
+    final value = _amountValue(amount);
+    var grams = _gramsFrom(value, unitInfo, food, ingredientName, notes ?? '');
+    if (grams == null) return null;
+
+    // Oil for frying: most of it stays in the pan. Deep frying (a lot of oil)
+    // counts a tenth, shallow frying half.
+    final context = foodTokens('$ingredientName $notes');
+    final isFat = context.any(const {'oil', 'lard', 'tallow', 'shortening', 'fat', 'ghee'}.contains);
+    final isFrying = context.contains('frying') || context.contains('fryer') ||
+        (context.contains('deep') && context.contains('fry')) ||
+        context.contains('confit') || context.contains('cover') || context.contains('submerge');
+    if (isFat && isFrying) grams = grams > 240 ? grams * 0.1 : grams * 0.5;
+
+    // Meat and fish weighed with the bone: about 70% of it is eaten.
+    if (_isWeighedWithBone(context)) grams *= 0.7;
+    return grams;
+  }
+
+  static const _boneInCuts = [
+    ['chicken', 'wing'], ['chicken', 'drumstick'], ['chicken', 'leg'], ['spare', 'rib'],
+    ['baby', 'back', 'rib'], ['pork', 'rib'], ['short', 'rib'], ['turkey', 'wing'],
+    ['turkey', 'leg'], ['duck', 'leg'], ['lamb', 'shank'], ['beef', 'shank'], ['oxtail'],
+    ['ham', 'hock'], ['pork', 'hock'], ['rack', 'of', 'lamb'],
+  ];
+  static const _wholeAnimals = {
+    'chicken', 'turkey', 'duck', 'hen', 'fish', 'bass', 'snapper', 'branzino', 'trout',
+    'mackerel', 'goose', 'quail', 'rabbit', 'crab', 'lobster', 'crayfish',
+  };
+
+  /// Whether a meat or fish line is weighed with its bones: a bone-in cut,
+  /// ribs and wings, or a whole bird or fish.
+  static bool _isWeighedWithBone(List<String> words) {
+    if (words.contains('boneless') || words.contains('fillet') || words.contains('meat')) {
+      return false;
     }
-
-    // Parse the numeric amount (handles fractions like "1/2", "1 1/2")
-    final numericAmount = _parseAmount(amount);
-    if (numericAmount == null || numericAmount <= 0) {
-      // Bad amount but ingredient name matched — assume a default rather
-      // than blowing up to 100g.
-      return _defaultGramsForIngredient(ingredientName);
+    for (var i = 0; i + 1 < words.length; i++) {
+      if (words[i] == 'bone' && words[i + 1] == 'in') return true;
     }
+    if (words.contains('whole') && words.any(_wholeAnimals.contains)) return true;
+    return _boneInCuts.any((run) => _containsRun(words, run));
+  }
 
-    final normalizedUnit = (unit ?? '').toLowerCase().trim();
-
+  double? _gramsFrom(
+    double? value,
+    ({String unit, double size, bool sized, String paren}) unitInfo,
+    List<String> food,
+    String ingredientName,
+    String notes,
+  ) {
     // Direct weight units
-    final directGrams = _convertDirectWeight(numericAmount, normalizedUnit);
-    if (directGrams != null) return directGrams;
+    final perWeight = _weightGrams[unitInfo.unit];
+    if (perWeight != null && value != null && value > 0) return value * perWeight;
 
-    // Volume to weight conversions (approximate)
-    final volumeGrams = _convertVolumeToGrams(numericAmount, normalizedUnit, ingredientName);
-    if (volumeGrams != null) return volumeGrams;
-
-    // Count-based (eggs, pieces, etc.) - use common weights
-    final countGrams = _convertCountToGrams(numericAmount, normalizedUnit, ingredientName);
-    if (countGrams != null) return countGrams;
-
-    // If no unit, assume it's a count
-    if (normalizedUnit.isEmpty) {
-      return _convertCountToGrams(numericAmount, '', ingredientName);
+    // "pinch of salt", "dash cayenne": a small measure written in the name.
+    var unitName = unitInfo.unit;
+    if (unitName.isEmpty && food.isNotEmpty &&
+        const {'pinch', 'dash', 'splash', 'drop', 'smidgen', 'shot'}.contains(food.first)) {
+      unitName = food.first;
     }
 
-    return null;
+    // A unit written in the name when the unit field has none.
+    var countUnit = unitName;
+    if (countUnit.isEmpty) {
+      for (final w in food) {
+        if (_unitWordsInName.contains(w)) {
+          countUnit = w;
+          break;
+        }
+        if (w == 'rib' && food.contains('celery')) {
+          countUnit = w;
+          break;
+        }
+      }
+    }
+
+    // A weight written on the line.
+    final written = writtenWeightIn(unitInfo.paren) ??
+        writtenWeightIn(ingredientName) ??
+        writtenWeightIn(notes);
+    if (written != null) {
+      final g = written.isVolume ? written.grams * _gramsPerMl(food) : written.grams;
+      if (value == null || value <= 0) return g;
+      final perItem = written.each ||
+          unitInfo.paren.isNotEmpty ||
+          _containerUnits.contains(countUnit);
+      return perItem ? value * g : g;
+    }
+
+    // No amount → use a sensible default rather than per-100g, which produces
+    // huge calorie counts (e.g. 884 cal for "vegetable oil" with no amount).
+    if (value == null || value <= 0) return _defaultGramsForIngredient(ingredientName);
+
+    // Volume
+    final ml = _volumeMl[unitName];
+    if (ml != null) return value * unitInfo.size * ml * _gramsPerMl(food);
+
+    // Counted units
+    if (countUnit.isNotEmpty) {
+      final per = gramsPerCountUnit(countUnit, food);
+      if (per != null) {
+        final size = unitInfo.sized ? _unitSize(unitInfo.size, food) : _sizeInName(food);
+        return value * per * size;
+      }
+    }
+
+    // Counted foods ("2 eggs", "1 large onion")
+    final size = unitInfo.sized ? _unitSize(unitInfo.size, food) : _sizeInName(food);
+    final piece = gramsPerPieceOf(food);
+    if (piece != null && unitName.isEmpty) return value * piece * size;
+    if (piece != null && unitInfo.sized) return value * piece * size;
+
+    // Dried herbs and ground spices counted without a unit: about 1 g each.
+    if (food.contains('dried') || food.contains('ground') || food.contains('powder')) {
+      const herbSpice = {
+        'oregano', 'basil', 'thyme', 'rosemary', 'parsley', 'dill', 'sage', 'tarragon',
+        'marjoram', 'cilantro', 'chive', 'mint', 'cumin', 'paprika', 'cayenne', 'cinnamon',
+        'nutmeg', 'allspice', 'clove', 'cardamom', 'coriander', 'turmeric', 'ginger',
+        'fennel', 'anise', 'fenugreek', 'mustard', 'caraway', 'saffron', 'chili', 'herb',
+        'spice', 'seasoning',
+      };
+      if (food.any(herbSpice.contains)) return value * 1.0;
+    }
+
+    // An unknown unit ("batch", "recipe") cannot be weighed.
+    if (unitName.isNotEmpty && !unitInfo.sized) return null;
+
+    // A counted food we have no weight for: assume 100 g each.
+    return value * 100.0 * size;
   }
 
   /// When no amount is specified, return a sensible default in grams so the
@@ -693,150 +949,44 @@ class NutritionCalculator {
   ///   - Pastes (gochujang, miso, tomato paste)    → 1 tbsp (~16g)
   ///   - Anything else                              → 1 tbsp (~15g) generic
   double _defaultGramsForIngredient(String ingredientName) {
-    final n = ingredientName.toLowerCase().trim();
+    final words = foodTokens(ingredientName).toSet();
+    bool has(String w) => words.contains(w);
+    bool any(Iterable<String> ws) => ws.any(words.contains);
 
     // Oils & fats (1 tbsp)
-    if (n.contains('oil') || n.contains('ghee') || n.contains('butter') || n.contains('lard') || n.contains('shortening')) return 14.0;
+    if (any(['oil', 'ghee', 'butter', 'lard', 'shortening'])) return 14.0;
 
     // Sauces, condiments, syrups, juices (1 tbsp ≈ 16g)
     const sauceKeywords = [
-      'sauce', 'syrup', 'juice', 'vinegar', 'paste', 'ketchup', 'mayo',
+      'sauce', 'syrup', 'juice', 'vinegar', 'paste', 'ketchup', 'mayonnaise',
       'mustard', 'honey', 'molasses', 'wine', 'mirin', 'sake', 'extract',
       'gochujang', 'doenjang', 'ssamjang', 'doubanjiang', 'shaoxing',
       'tamari', 'ponzu', 'dashi', 'tahini', 'hummus', 'harissa', 'salsa',
-      'pesto', 'crema', 'jam', 'jelly', 'preserves', 'marmalade', 'glaze',
+      'pesto', 'crema', 'jam', 'jelly', 'preserve', 'marmalade', 'glaze',
     ];
-    for (final k in sauceKeywords) {
-      if (n.contains(k)) return 16.0;
-    }
+    if (any(sauceKeywords)) return 16.0;
 
     // Dry spices, seasonings, seeds, dried herbs (1 tsp ≈ 3g)
     const spiceKeywords = [
-      'salt', 'pepper', 'powder', 'flakes', 'gochugaru', 'paprika',
+      'salt', 'pepper', 'powder', 'flake', 'gochugaru', 'paprika',
       'cumin', 'oregano', 'basil', 'thyme', 'rosemary', 'cinnamon',
       'nutmeg', 'turmeric', 'chili', 'curry', 'garam', 'masala', 'cayenne',
-      'seeds', 'sesame', 'poppy', 'sumac', 'za\'atar', 'zaatar', 'dukkah',
+      'seed', 'sesame', 'poppy', 'sumac', 'zaatar', 'dukkah',
       'shichimi', 'togarashi', 'furikake', 'berbere', 'jerk', 'shawarma',
       'sage', 'tarragon', 'dill', 'chive', 'coriander', 'cardamom',
       'fenugreek', 'methi', 'amchur', 'asafoetida', 'hing',
-      'biryani', 'chaat', 'five spice', 'sichuan', 'szechuan',
+      'biryani', 'chaat', 'spice', 'sichuan', 'szechuan', 'seasoning',
     ];
-    for (final k in spiceKeywords) {
-      if (n.contains(k)) return 3.0;
-    }
-
-    // Pastes (slightly heavier per spoon — 1 tbsp ≈ 16g)
-    if (n.contains('curry paste') || n.contains('tomato paste')) return 16.0;
+    if (any(spiceKeywords)) return 3.0;
 
     // Sweeteners (1 tbsp granulated)
-    if (n.contains('sugar') || n.contains('jaggery')) return 12.0;
+    if (has('sugar') || has('jaggery')) return 12.0;
 
     // Fresh herbs in tiny "garnish" amounts (1 tbsp chopped ≈ 3g)
-    if (n.contains('parsley') || n.contains('cilantro') || n.contains('mint') || n.contains('curry leaf') || n.contains('curry leaves')) return 3.0;
+    if (any(['parsley', 'cilantro', 'mint']) || (has('curry') && has('leaf'))) return 3.0;
 
     // Generic fallback — small amount rather than 100g
     return 15.0;
-  }
-
-  /// Parse a numeric amount, handling fractions and Unicode fraction characters.
-  /// Delegates to the shared parseAmount from ingredient_utils.dart.
-  double? _parseAmount(String amount) => parseAmount(amount);
-
-  /// Convert direct weight measurements to grams
-  double? _convertDirectWeight(double amount, String unit) {
-    const conversions = {
-      'g': 1.0,
-      'gram': 1.0,
-      'grams': 1.0,
-      'kg': 1000.0,
-      'kilogram': 1000.0,
-      'kilograms': 1000.0,
-      'oz': 28.3495,
-      'ounce': 28.3495,
-      'ounces': 28.3495,
-      'lb': 453.592,
-      'lbs': 453.592,
-      'pound': 453.592,
-      'pounds': 453.592,
-      'mg': 0.001,
-      'milligram': 0.001,
-      'milligrams': 0.001,
-    };
-
-    final factor = conversions[unit];
-    return factor != null ? amount * factor : null;
-  }
-
-  /// Convert volume measurements to grams (approximate, assumes water-like density)
-  double? _convertVolumeToGrams(double amount, String unit, String ingredient) {
-    // Density adjustments based on ingredient type
-    double densityFactor = 1.0; // Default water-like
-
-    final lowerIngredient = ingredient.toLowerCase();
-    if (lowerIngredient.contains('flour')) {
-      densityFactor = 0.53; // Flour is ~125g/cup
-    } else if (lowerIngredient.contains('sugar')) {
-      densityFactor = 0.85; // Sugar is ~200g/cup
-    } else if (lowerIngredient.contains('butter') || lowerIngredient.contains('oil')) {
-      densityFactor = 0.92;
-    } else if (lowerIngredient.contains('honey') || lowerIngredient.contains('syrup')) {
-      densityFactor = 1.4;
-    } else if (lowerIngredient.contains('rice') || lowerIngredient.contains('oat')) {
-      densityFactor = 0.8;
-    } else if (lowerIngredient.contains('cream cheese') || lowerIngredient.contains('sour cream')) {
-      densityFactor = 1.0;
-    } else if (lowerIngredient.contains('cream')) {
-      densityFactor = 0.97; // Heavy cream is slightly less dense than water
-    } else if (lowerIngredient.contains('milk')) {
-      densityFactor = 1.03;
-    } else if (lowerIngredient.contains('broth') || lowerIngredient.contains('stock')) {
-      densityFactor = 1.0; // Broth is basically water density
-    } else if (_isCheeseIngredient(lowerIngredient)) {
-      densityFactor = 0.45; // Grated/shredded cheese is airy (~106g/cup)
-    }
-
-    // ml to grams (then adjust for density)
-    const volumeToMl = {
-      'ml': 1.0,
-      'milliliter': 1.0,
-      'milliliters': 1.0,
-      'l': 1000.0,
-      'liter': 1000.0,
-      'liters': 1000.0,
-      'cup': 236.588,
-      'cups': 236.588,
-      'c': 236.588,
-      'tbsp': 14.787,
-      'tablespoon': 14.787,
-      'tablespoons': 14.787,
-      'tbs': 14.787,
-      'tsp': 4.929,
-      'teaspoon': 4.929,
-      'teaspoons': 4.929,
-      'fl oz': 29.574,
-      'fluid ounce': 29.574,
-      'fluid ounces': 29.574,
-      'pint': 473.176,
-      'pints': 473.176,
-      'pt': 473.176,
-      'quart': 946.353,
-      'quarts': 946.353,
-      'qt': 946.353,
-      'gallon': 3785.41,
-      'gallons': 3785.41,
-      'gal': 3785.41,
-      'pinch': 0.36,
-      'pinches': 0.36,
-      'dash': 0.62,
-      'dashes': 0.62,
-    };
-
-    final mlFactor = volumeToMl[unit];
-    if (mlFactor != null) {
-      return amount * mlFactor * densityFactor;
-    }
-
-    return null;
   }
 
   /// Check if a cleaned ingredient name is a cheese variety (for USDA query refinement).
@@ -853,302 +1003,8 @@ class NutritionCalculator {
     return varieties.any((v) => lower.contains(v));
   }
 
-  /// Check if an ingredient is a cheese (including by variety name).
-  /// Many cheese varieties don't include the word "cheese" in the ingredient text
-  /// (e.g. "1 cup sharp cheddar, grated" or "½ cup grated parmesan").
-  bool _isCheeseIngredient(String lowerIngredient) {
-    if (lowerIngredient.contains('cheese') || lowerIngredient.contains('parmesan')) {
-      return true;
-    }
-    // Common cheese varieties that may appear without the word "cheese"
-    const cheeseVarieties = [
-      'cheddar', 'mozzarella', 'gruyere', 'gruyère', 'gouda',
-      'colby', 'monterey jack', 'provolone', 'swiss', 'emmental',
-      'brie', 'camembert', 'feta', 'ricotta', 'mascarpone',
-      'gorgonzola', 'roquefort', 'stilton', 'manchego', 'havarti',
-      'fontina', 'asiago', 'pecorino', 'cotija', 'queso',
-      'goat cheese', 'burrata', 'halloumi', 'paneer',
-      'american cheese', 'velveeta', 'parmigiano',
-    ];
-    return cheeseVarieties.any((v) => lowerIngredient.contains(v));
-  }
-
-  /// Convert count-based amounts to grams
-  double? _convertCountToGrams(double count, String unit, String ingredient) {
-    final lowerIngredient = ingredient.toLowerCase();
-    final lowerUnit = unit.toLowerCase();
-
-    // ── Special unit handling (checked FIRST, before generic weights) ──
-
-    // "clove" of garlic
-    if (lowerUnit.contains('clove')) {
-      if (lowerIngredient.contains('garlic')) return count * 3.0;
-      return count * 3.0; // assume garlic clove if unit is "clove"
-    }
-
-    // "leaf/leaves" of herbs (bay leaves, kaffir lime, etc.)
-    if (lowerUnit.contains('leaf') || lowerUnit.contains('leaves')) {
-      if (lowerIngredient.contains('bay')) return count * 0.6; // bay leaf ~0.6g
-      if (lowerIngredient.contains('kaffir') || lowerIngredient.contains('lime leaf')) return count * 1.0;
-      if (lowerIngredient.contains('basil')) return count * 0.5;
-      if (lowerIngredient.contains('mint')) return count * 0.5;
-      if (lowerIngredient.contains('sage')) return count * 0.7;
-      return count * 0.5; // generic herb leaf
-    }
-
-    // "sprig" of herbs
-    if (lowerUnit.contains('sprig')) {
-      return count * 2.0;
-    }
-
-    // "bunch" of herbs/greens
-    if (lowerUnit.contains('bunch')) {
-      if (lowerIngredient.contains('parsley') || lowerIngredient.contains('cilantro') ||
-          lowerIngredient.contains('basil') || lowerIngredient.contains('mint') ||
-          lowerIngredient.contains('dill') || lowerIngredient.contains('chive')) {
-        return count * 30.0; // herb bunch ~30g
-      }
-      if (lowerIngredient.contains('kale') || lowerIngredient.contains('spinach') ||
-          lowerIngredient.contains('chard') || lowerIngredient.contains('collard')) {
-        return count * 340.0; // large greens bunch
-      }
-      return count * 50.0; // generic bunch
-    }
-
-    // "head" of garlic/lettuce/cauliflower
-    if (lowerUnit.contains('head')) {
-      if (lowerIngredient.contains('garlic')) return count * 40.0;
-      if (lowerIngredient.contains('lettuce')) return count * 500.0;
-      if (lowerIngredient.contains('cabbage')) return count * 900.0;
-      if (lowerIngredient.contains('cauliflower')) return count * 600.0;
-      if (lowerIngredient.contains('broccoli')) return count * 400.0;
-      return count * 300.0;
-    }
-
-    // "can" / "tin" — standard 15oz can
-    if (lowerUnit == 'can' || lowerUnit == 'cans' || lowerUnit == 'tin' || lowerUnit == 'tins') {
-      return count * 425.0; // 15oz can
-    }
-
-    // "stalk" of celery
-    if (lowerUnit.contains('stalk') || lowerUnit.contains('rib')) {
-      if (lowerIngredient.contains('celery')) return count * 40.0;
-      if (lowerIngredient.contains('rhubarb')) return count * 51.0;
-      if (lowerIngredient.contains('lemongrass') || lowerIngredient.contains('lemon grass')) return count * 20.0;
-      return count * 40.0;
-    }
-
-    // "ear" of corn
-    if (lowerUnit.contains('ear')) {
-      return count * 90.0; // kernels from one ear
-    }
-
-    // "link" of sausage
-    if (lowerUnit.contains('link')) {
-      return count * 68.0;
-    }
-
-    // "strip" / "rasher" of bacon
-    if (lowerUnit.contains('strip') || lowerUnit.contains('rasher')) {
-      return count * 28.0; // raw bacon strip
-    }
-
-    // ── Slice handling — weight depends on what's being sliced ──
-    if (lowerUnit.contains('slice')) {
-      if (lowerIngredient.contains('bacon')) return count * 28.0; // raw bacon slice
-      if (lowerIngredient.contains('bread') || lowerIngredient.contains('toast')) return count * 30.0;
-      if (lowerIngredient.contains('cheese')) return count * 21.0; // deli cheese slice
-      if (lowerIngredient.contains('ham') || lowerIngredient.contains('turkey') ||
-          lowerIngredient.contains('salami') || lowerIngredient.contains('deli')) {
-        return count * 28.0;
-      }
-      if (lowerIngredient.contains('tomato')) return count * 27.0;
-      if (lowerIngredient.contains('onion')) return count * 14.0;
-      if (lowerIngredient.contains('lemon') || lowerIngredient.contains('lime')) return count * 8.0;
-      if (lowerIngredient.contains('pizza')) return count * 107.0; // pizza slice
-      if (lowerIngredient.contains('cake')) return count * 80.0;
-      if (lowerIngredient.contains('pie')) return count * 125.0;
-      return count * 30.0; // generic slice
-    }
-
-    // "stick" of butter, celery, etc.
-    if (lowerUnit.contains('stick')) {
-      if (lowerIngredient.contains('butter')) return count * 113.0;
-      if (lowerIngredient.contains('celery')) return count * 40.0;
-      if (lowerIngredient.contains('cinnamon')) return count * 7.0;
-      return count * 113.0; // default to butter stick
-    }
-
-    // "fillet" / "filet" of fish/meat
-    if (lowerUnit.contains('fillet') || lowerUnit.contains('filet')) {
-      if (lowerIngredient.contains('salmon')) return count * 178.0;
-      if (lowerIngredient.contains('chicken')) return count * 170.0;
-      return count * 170.0;
-    }
-
-    // ── Ingredient-specific weights (for count-based: "3 potatoes", "2 zucchini") ──
-    // Sorted LONGEST KEY FIRST to prevent partial matches
-    // e.g., "chicken breast" must match before "chicken"
-    final ingredientWeights = <MapEntry<String, double>>[
-      // Multi-word (must be first)
-      MapEntry('chicken breast', 170.0),
-      MapEntry('chicken thigh', 110.0),
-      MapEntry('chicken drumstick', 130.0),
-      MapEntry('chicken leg', 130.0),
-      MapEntry('chicken wing', 45.0),
-      MapEntry('bell pepper', 150.0),
-      MapEntry('sweet potato', 130.0),
-      MapEntry('russet potato', 213.0), // large russet
-      MapEntry('green onion', 15.0),
-      MapEntry('cherry tomato', 17.0),
-      MapEntry('grape tomato', 8.0),
-      MapEntry('roma tomato', 62.0),
-      MapEntry('plum tomato', 62.0),
-      MapEntry('brussels sprout', 21.0),
-
-      // Single-word produce
-      MapEntry('potato', 170.0),
-      MapEntry('tomato', 150.0),
-      MapEntry('onion', 150.0),
-      MapEntry('zucchini', 200.0),
-      MapEntry('cucumber', 200.0),
-      MapEntry('carrot', 60.0),
-      MapEntry('celery', 40.0),
-      MapEntry('avocado', 200.0),
-      MapEntry('apple', 180.0),
-      MapEntry('banana', 120.0),
-      MapEntry('orange', 130.0),
-      MapEntry('lemon', 60.0),
-      MapEntry('lime', 45.0),
-      MapEntry('peach', 150.0),
-      MapEntry('pear', 178.0),
-      MapEntry('plum', 66.0),
-      MapEntry('apricot', 35.0),
-      MapEntry('mango', 200.0),
-      MapEntry('kiwi', 76.0),
-      MapEntry('fig', 40.0),
-      MapEntry('clementine', 74.0),
-      MapEntry('tangerine', 88.0),
-      MapEntry('nectarine', 142.0),
-      MapEntry('grapefruit', 230.0),
-      MapEntry('pomegranate', 282.0),
-      MapEntry('coconut', 400.0),
-      MapEntry('shallot', 30.0),
-      MapEntry('garlic', 3.0),
-      MapEntry('eggplant', 458.0),
-      MapEntry('squash', 340.0),
-      MapEntry('beet', 82.0),
-      MapEntry('turnip', 122.0),
-      MapEntry('radish', 5.0),
-      MapEntry('artichoke', 128.0),
-      MapEntry('mushroom', 18.0),
-      MapEntry('jalapeno', 14.0),
-      MapEntry('habanero', 8.0),
-      MapEntry('serrano', 6.0),
-      MapEntry('poblano', 65.0),
-      MapEntry('broccoli', 150.0), // 1 crown/head-like piece
-      MapEntry('cauliflower', 100.0), // floret cluster
-
-      // Herbs & leaves (count-based: "2 bay leaves", "4 sage leaves")
-      MapEntry('bay leaf', 0.6),
-      MapEntry('bay leaves', 0.6),
-      MapEntry('kaffir lime leaf', 1.0),
-      MapEntry('kaffir lime leaves', 1.0),
-
-      // Dried herbs — prevent 100g default (1 "dried oregano" ≈ 1 tsp = 1g)
-      MapEntry('dried oregano', 1.0),
-      MapEntry('dried basil', 1.0),
-      MapEntry('dried thyme', 1.0),
-      MapEntry('dried rosemary', 1.0),
-      MapEntry('dried parsley', 1.0),
-      MapEntry('dried dill', 1.0),
-      MapEntry('dried sage', 1.0),
-      MapEntry('dried tarragon', 1.0),
-      MapEntry('dried marjoram', 1.0),
-
-      // Eggs
-      MapEntry('egg', 50.0),
-
-      // Bread / tortilla
-      MapEntry('tostada', 25.0),  // fried corn tortilla shell
-      MapEntry('tortilla', 45.0),
-      MapEntry('pita', 60.0),
-      MapEntry('bagel', 105.0),
-      MapEntry('muffin', 57.0),
-      MapEntry('croissant', 67.0),
-      MapEntry('roll', 43.0),
-      MapEntry('biscuit', 45.0),
-      MapEntry('waffle', 75.0),
-      MapEntry('pancake', 38.0),
-    ];
-
-    // Check ingredient name against weights (longest keys first due to list order)
-    for (final entry in ingredientWeights) {
-      if (lowerIngredient.contains(entry.key)) {
-        return count * entry.value;
-      }
-    }
-
-    // Dried herbs/spices safety net — prevent 100g default for any dried herb
-    // that wasn't caught by the specific entries above
-    if (lowerIngredient.contains('dried') || lowerIngredient.contains('ground') ||
-        lowerIngredient.contains('powder')) {
-      const herbSpiceKeywords = [
-        'oregano', 'basil', 'thyme', 'rosemary', 'parsley', 'dill', 'sage',
-        'tarragon', 'marjoram', 'cilantro', 'chive', 'mint', 'cumin',
-        'paprika', 'cayenne', 'cinnamon', 'nutmeg', 'allspice', 'clove',
-        'cardamom', 'coriander', 'turmeric', 'ginger', 'fennel', 'anise',
-        'fenugreek', 'mustard', 'celery seed', 'caraway', 'saffron',
-        'chili', 'chile', 'herb', 'spice', 'seasoning',
-      ];
-      if (herbSpiceKeywords.any((kw) => lowerIngredient.contains(kw))) {
-        return count * 1.0; // ~1g per "unit" of dried herb/spice
-      }
-    }
-
-    // Check unit name for generic counts
-    if (lowerUnit.contains('piece') || lowerUnit.contains('item') ||
-        lowerUnit.contains('whole') || lowerUnit.contains('medium') ||
-        lowerUnit.contains('large') || lowerUnit.contains('small')) {
-      return count * 100.0; // generic piece
-    }
-
-    // If no unit at all, assume count-based with 100g default
-    if (lowerUnit.isEmpty) {
-      return count * 100.0;
-    }
-
-    return null;
-  }
-
-  /// Parse servings string to a number
-  int _parseServings(String servings) {
-    final trimmed = servings.trim();
-
-    // Try direct parse
-    final direct = int.tryParse(trimmed);
-    if (direct != null) return direct;
-
-    // Handle ranges like "4-6"
-    if (trimmed.contains('-')) {
-      final parts = trimmed.split('-');
-      if (parts.length == 2) {
-        final low = int.tryParse(parts[0].trim());
-        final high = int.tryParse(parts[1].trim());
-        if (low != null && high != null) {
-          return ((low + high) / 2).round();
-        }
-      }
-    }
-
-    // Extract first number from string like "4 servings"
-    final match = RegExp(r'(\d+)').firstMatch(trimmed);
-    if (match != null) {
-      return int.tryParse(match.group(1)!) ?? 1;
-    }
-
-    return 1; // Default to 1 serving
-  }
+  /// Parse servings string to a number (see [servingsCountOf]).
+  int _parseServings(String servings) => servingsCountOf(servings) ?? 1;
 }
 
 /// Result of calculating nutrition for a recipe
@@ -1221,6 +1077,8 @@ class IngredientNutritionResult {
   final String? linkedRecipeId;
   /// The linked recipe's title (for display)
   final String? linkedRecipeTitle;
+  /// Why the line counts as zero calories (water, bones...), or null
+  final ZeroCalorieReason? zeroReason;
 
   IngredientNutritionResult({
     required this.ingredient,
@@ -1235,6 +1093,7 @@ class IngredientNutritionResult {
     this.isLinkedRecipe = false,
     this.linkedRecipeId,
     this.linkedRecipeTitle,
+    this.zeroReason,
   });
 
   /// Display string for the ingredient
@@ -1245,6 +1104,29 @@ class IngredientNutritionResult {
     parts.add(ingredient.name);
     return parts.join(' ');
   }
+}
+
+/// Why an ingredient line counts as zero calories.
+enum ZeroCalorieReason {
+  /// Water or ice
+  water('Water, no calories'),
+
+  /// Bones for a stock, not eaten
+  bones('Bones for stock, not eaten'),
+
+  /// Something listed with the ingredients that is not eaten
+  notEaten('Not eaten, no calories'),
+
+  /// A "to taste" seasoning
+  toTaste('To taste, too little to count'),
+
+  /// A pinch of a seasoning
+  seasoning('A pinch, too little to count');
+
+  const ZeroCalorieReason(this.description);
+
+  /// English description, used where no translation is at hand
+  final String description;
 }
 
 /// Status of ingredient matching

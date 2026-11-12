@@ -255,9 +255,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       }
 
       // Parse the linked recipe's servings (for display only)
-      final linkedServings = int.tryParse(
-        RegExp(r'(\d+)').firstMatch(linkedRecipe.servings ?? '1')?.group(1) ?? '1',
-      ) ?? 1;
+      final linkedServings = servingsCountOf(linkedRecipe.servings) ?? 1;
 
       // Get scale: user override > DB-stored scale > 1.0
       final scale = _linkedRecipeScales[ingredient.name] ?? selectedLinkInfo.scale;
@@ -832,7 +830,14 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         case MatchStatus.matched:
           icon = Icons.check_circle;
           color = greenColor;
-          statusText = item.usdaFood?.description ?? item.matchDescription ?? '';
+          statusText = switch (item.zeroReason) {
+            ZeroCalorieReason.water => l10n.nutriSheetZeroWater,
+            ZeroCalorieReason.bones => l10n.nutriSheetZeroBones,
+            ZeroCalorieReason.notEaten => l10n.nutriSheetZeroNotEaten,
+            ZeroCalorieReason.toTaste => l10n.nutriSheetZeroToTaste,
+            ZeroCalorieReason.seasoning => l10n.nutriSheetZeroPinch,
+            null => item.usdaFood?.description ?? item.matchDescription ?? '',
+          };
           break;
         case MatchStatus.uncertain:
           icon = Icons.help;
@@ -1148,9 +1153,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
                     } else if (_result != null) {
                       // Store TOTAL nutrition with calculatedServings metadata
                       // so display can correctly scale when servings change
-                      final servingsCount = int.tryParse(
-                        RegExp(r'(\d+)').firstMatch(widget.servings)?.group(1) ?? '',
-                      ) ?? 1;
+                      final servingsCount = servingsCountOf(widget.servings) ?? 1;
                       final total = _result!.totalNutrition.copyWith(
                         calculatedServings: servingsCount,
                       );

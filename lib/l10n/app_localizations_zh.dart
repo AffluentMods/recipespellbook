@@ -11548,6 +11548,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nutriSheetEditedStatus => '已手动编辑';
 
   @override
+  String get nutriSheetZeroWater => '水，无热量';
+
+  @override
+  String get nutriSheetZeroBones => '熬汤用的骨头，不食用';
+
+  @override
+  String get nutriSheetZeroNotEaten => '不食用，无热量';
+
+  @override
+  String get nutriSheetZeroToTaste => '适量，用量太少不计';
+
+  @override
+  String get nutriSheetZeroPinch => '一小撮，用量太少不计';
+
+  @override
   String nutriSheetLinkedNoNutrition(String title) {
     return '$title：无营养数据';
   }

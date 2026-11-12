@@ -11688,6 +11688,21 @@ class AppLocalizationsNl extends AppLocalizations {
   String get nutriSheetEditedStatus => 'Handmatig bewerkt';
 
   @override
+  String get nutriSheetZeroWater => 'Water, geen calorieën';
+
+  @override
+  String get nutriSheetZeroBones => 'Botten voor bouillon, worden niet gegeten';
+
+  @override
+  String get nutriSheetZeroNotEaten => 'Wordt niet gegeten, geen calorieën';
+
+  @override
+  String get nutriSheetZeroToTaste => 'Naar smaak, te weinig om te tellen';
+
+  @override
+  String get nutriSheetZeroPinch => 'Een snufje, te weinig om te tellen';
+
+  @override
   String nutriSheetLinkedNoNutrition(String title) {
     return '$title: geen voedingswaarden';
   }

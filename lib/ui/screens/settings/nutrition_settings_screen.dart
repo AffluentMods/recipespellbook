@@ -407,8 +407,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 
   int? _parseServings() {
     if (widget.servings == null || widget.servings!.isEmpty) return null;
-    final match = RegExp(r'(\d+)').firstMatch(widget.servings!);
-    return match != null ? int.tryParse(match.group(1)!) : null;
+    return servingsCountOf(widget.servings);
   }
 
   int? _effectiveServings() {
