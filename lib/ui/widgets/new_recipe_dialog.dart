@@ -14,6 +14,8 @@ import '../../data/nutrition_data.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/imported_recipe.dart';
+import '../../services/backup_zip.dart';
+import '../../services/export_import_service.dart';
 import '../../services/imported_recipe_saver.dart';
 import '../../services/recipe_file_importers/file_import_dispatcher.dart';
 import '../../services/recipe_file_importers/import_support.dart';
@@ -27,6 +29,7 @@ import '../screens/import/import_guides_screen.dart';
 import '../screens/import/import_preview_screen.dart';
 import '../screens/import/video_import_ui.dart';
 import 'app_snackbar.dart';
+import 'backup_restore.dart';
 import 'platform_brand.dart';
 import '../../services/barcode_scanner_service.dart';
 import '../../utils/responsive_utils.dart';
@@ -1012,7 +1015,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     // How the file starts tells them apart from text when the name does not:
     // IMG_2041.jfif, scan.tiff, a photo saved without an extension.
     var kind = ext == 'pdf' ? _FileKind.pdf : (_photoExtensions.contains(ext) ? _FileKind.photo : null);
-    kind ??= _kindOf(picked ?? await _startOf(path));
+    final start = kind != null ? const <int>[] : (picked ?? await _startOf(path));
+    kind ??= _kindOf(start);
     if (!mounted) return;
     if (kind != null) {
       if (!supportsOcr) {
@@ -1028,7 +1032,45 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       return;
     }
 
+    // A backup of this app, or a cookbook ZIP made in its format, is put
+    // back whole, the way Settings does it. Whatever its name: how the zip
+    // starts and what is in it decide.
+    if (ImportSupport.isZip(start)) {
+      _showLoading(l10n.importProcessing);
+      final backup = path != null ? await compute(_isBackupAt, path) : await compute(_isBackupIn, picked!);
+      if (!mounted) return;
+      if (backup) {
+        _restoreBackup(path: path, bytes: picked);
+        return;
+      }
+    }
+
     _processFileWithDispatcher(file.name, bytes: picked, path: path);
+  }
+
+  // What [BackupZip] says of a picked zip, in the background: a backup is
+  // long, and its data.json is unpacked to read the start of it.
+  static bool _isBackupAt(String path) => BackupZip.isBackupFile(path: path);
+  static bool _isBackupIn(Uint8List bytes) => BackupZip.isBackupFile(bytes: bytes);
+
+  /// Restores a backup ZIP with the progress and the result message of
+  /// Settings > Import data, through the same restore. On success the sheet
+  /// makes way for the cookbook the backup brought in.
+  Future<void> _restoreBackup({String? path, Uint8List? bytes}) async {
+    final l10n = AppLocalizations.of(context)!;
+    final service = ExportImportService(ref.read(databaseProvider));
+    _showLoading(l10n.importing);
+    final result = await restoreBackupWithProgress(
+      context,
+      (onProgress) => path != null
+          ? service.importFromZipPath(path, onProgress: onProgress)
+          : service.importFromZipBytes(bytes!, onProgress: onProgress),
+    );
+    // Closed while the restore ran: the library has it all the same.
+    if (!mounted) return;
+    _hideLoading();
+    if (result.success && ModalRoute.of(context)?.isCurrent == true) Navigator.of(context).pop();
+    showBackupRestoreResult(context, result);
   }
 
   /// The first bytes of the file at [path], or nothing when it cannot be
