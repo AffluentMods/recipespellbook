@@ -11832,6 +11832,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get nutriSheetEditedStatus => 'Изменено вручную';
 
   @override
+  String get nutriSheetZeroWater => 'Вода, без калорий';
+
+  @override
+  String get nutriSheetZeroBones => 'Кости для бульона, их не едят';
+
+  @override
+  String get nutriSheetZeroNotEaten => 'Не едят, без калорий';
+
+  @override
+  String get nutriSheetZeroToTaste => 'По вкусу, слишком мало для подсчёта';
+
+  @override
+  String get nutriSheetZeroPinch => 'Щепотка, слишком мало для подсчёта';
+
+  @override
   String nutriSheetLinkedNoNutrition(String title) {
     return '$title: нет данных о пищевой ценности';
   }
