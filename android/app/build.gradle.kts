@@ -17,6 +17,13 @@ plugins {
 android {
     namespace = "com.affluentlabs.recipespellbook"
     compileSdk = flutter.compileSdkVersion
+
+    // Android lint's release check crashes inside AGP 9.3.1 on a plugin
+    // (google_sign_in_android: NoSuchMethodError in JavaDocParser) and fails
+    // the bundle. It is a code scan only; the app builds the same without it.
+    lint {
+        checkReleaseBuilds = false
+    }
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
