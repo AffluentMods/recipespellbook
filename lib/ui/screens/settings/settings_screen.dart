@@ -32,6 +32,7 @@ import '../../../services/onboarding_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/backup_restore.dart';
 import 'allergy_settings_screen.dart';
 import 'custom_theme_screen.dart';
 import 'ingredient_layout_settings_screen.dart';
@@ -721,29 +722,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             leading: const Icon(Icons.file_open), title: Text(l10n.importFromFile), subtitle: Text(l10n.importFromFileSubtitle),
             onTap: () async {
               Navigator.pop(sheetCtx);
-              AppSnackbar.loading(context, '${l10n.importing}...');
-              final result = await service.importFromFile(
-                onProgress: (current, total, label) {
-                  if (context.mounted) {
-                    AppSnackbar.loading(context, '${l10n.importing} $current/$total');
-                  }
-                },
+              // The same progress and result as a backup picked under
+              // Import, File: the imported cookbook opens on success.
+              final result = await restoreBackupWithProgress(
+                context,
+                (onProgress) => service.importFromFile(onProgress: onProgress),
               );
-              if (context.mounted) {
-                AppSnackbar.dismiss(context);
-                if (result.success) {
-                  // Auto-switch to the imported cookbook and go home
-                  if (result.importedCookbookId != null) {
-                    ref.read(selectedCookbookIdProvider.notifier).state = result.importedCookbookId;
-                    context.go('/');
-                    AppSnackbar.success(context, '${result.message}\n${AppLocalizations.of(context)!.settingsSwitchedToImported}');
-                  } else {
-                    AppSnackbar.success(context, result.message);
-                  }
-                } else {
-                  AppSnackbar.error(context, result.message);
-                }
-              }
+              if (context.mounted) showBackupRestoreResult(context, result);
             },
           ),
           const SizedBox(height: 16),
