@@ -111,7 +111,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
             top: BorderSide(color: colors.outline.withValues(alpha: 0.35)),
           ),
         ),
-        child: Column(
+        child: Material(type: MaterialType.transparency, child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 14),
@@ -216,7 +216,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
               ),
             ),
           ],
-        ),
+        )),
       ),
     );
   }

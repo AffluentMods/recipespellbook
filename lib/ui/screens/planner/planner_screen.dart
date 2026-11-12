@@ -2676,7 +2676,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
         color: colors.surface,
         borderRadius: SheetPresentation.surfaceRadius(context),
       ),
-      child: SafeArea(
+      child: Material(type: MaterialType.transparency, child: SafeArea(
         top: false,
         child: SingleChildScrollView(
           child: Column(
@@ -2855,7 +2855,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -3109,7 +3109,7 @@ class _RecipePickerSheetState extends State<_RecipePickerSheet> {
         color: theme.colorScheme.surface,
         borderRadius: SheetPresentation.surfaceRadius(context),
       ),
-      child: Column(
+      child: Material(type: MaterialType.transparency, child: Column(
         children: [
           const SizedBox(height: 12),
           const SheetHandle(top: 0),
@@ -3153,7 +3153,7 @@ class _RecipePickerSheetState extends State<_RecipePickerSheet> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -3228,7 +3228,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
         color: theme.colorScheme.surface,
         borderRadius: SheetPresentation.surfaceRadius(context),
       ),
-      child: Column(
+      child: Material(type: MaterialType.transparency, child: Column(
         children: [
           const SizedBox(height: 12),
           const SheetHandle(top: 0),
@@ -3415,7 +3415,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 

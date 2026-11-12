@@ -88,7 +88,7 @@ class _AddRecipeChooser extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: SheetPresentation.surfaceRadius(context),
       ),
-      child: SafeArea(
+      child: Material(type: MaterialType.transparency, child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
           child: Column(
@@ -132,7 +132,7 @@ class _AddRecipeChooser extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }
@@ -1166,7 +1166,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         color: theme.colorScheme.surface,
         borderRadius: SheetPresentation.surfaceRadius(context),
       ),
-      child: Stack(
+      child: Material(type: MaterialType.transparency, child: Stack(
         children: [
           SafeArea(
             child: SingleChildScrollView(
@@ -1373,7 +1373,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                   color: theme.colorScheme.surface.withValues(alpha: 0.96),
                   borderRadius: SheetPresentation.surfaceRadius(context),
                 ),
-                child: Column(
+                child: Material(type: MaterialType.transparency, child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (_detected != null && _detected != RecipePlatform.website) ...[
@@ -1399,11 +1399,11 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                       TextButton(onPressed: _cancelVideoImport, child: Text(l10n.cancel)),
                     ],
                   ],
-                ),
+                )),
               ),
             ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -1532,7 +1532,7 @@ class _TextInputSheetState extends State<_TextInputSheet> {
       margin: EdgeInsets.only(bottom: bottom),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
       decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: SheetPresentation.surfaceRadius(context)),
-      child: Padding(
+      child: Material(type: MaterialType.transparency, child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1560,7 +1560,7 @@ class _TextInputSheetState extends State<_TextInputSheet> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }

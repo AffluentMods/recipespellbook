@@ -894,7 +894,7 @@ class _RecipeActionBar extends StatelessWidget {
           borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         padding: const EdgeInsets.all(20),
-        child: Column(
+        child: Material(type: MaterialType.transparency, child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Center(
@@ -936,7 +936,7 @@ class _RecipeActionBar extends StatelessWidget {
               ),
             const SizedBox(height: 16),
           ],
-        ),
+        )),
       ),
     );
   }
@@ -1320,7 +1320,7 @@ class _ScaleSheetState extends State<_ScaleSheet> {
         borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-      child: Column(
+      child: Material(type: MaterialType.transparency, child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1398,7 +1398,7 @@ class _ScaleSheetState extends State<_ScaleSheet> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

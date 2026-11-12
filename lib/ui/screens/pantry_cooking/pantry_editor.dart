@@ -399,7 +399,7 @@ class _CommonIngredientsSheetState extends ConsumerState<_CommonIngredientsSheet
       key: const ValueKey('pantry-common-sheet'),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
       decoration: BoxDecoration(color: c.surface, borderRadius: SheetPresentation.surfaceRadius(context)),
-      child: SafeArea(
+      child: Material(type: MaterialType.transparency, child: SafeArea(
         top: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -519,7 +519,7 @@ class _CommonIngredientsSheetState extends ConsumerState<_CommonIngredientsSheet
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }

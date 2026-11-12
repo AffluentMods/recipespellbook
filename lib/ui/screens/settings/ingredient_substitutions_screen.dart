@@ -353,7 +353,7 @@ void showIngredientSubsSheet(BuildContext context, String ingredientName) {
           color: theme.colorScheme.surface,
           borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
-        child: Column(
+        child: Material(type: MaterialType.transparency, child: Column(
           children: [
             // Handle
             const SheetHandle(top: 12),
@@ -411,7 +411,7 @@ void showIngredientSubsSheet(BuildContext context, String ingredientName) {
               ),
             ),
           ],
-        ),
+        )),
       ),
     ),
   );

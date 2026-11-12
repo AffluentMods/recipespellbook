@@ -216,7 +216,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
         color: theme.colorScheme.surface,
         borderRadius: SheetPresentation.surfaceRadius(context),
       ),
-      child: Column(
+      child: Material(type: MaterialType.transparency, child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Handle bar
@@ -390,7 +390,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

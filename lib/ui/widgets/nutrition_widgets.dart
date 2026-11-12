@@ -386,7 +386,7 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
             color: theme.colorScheme.surface,
             borderRadius: SheetPresentation.surfaceRadius(context),
           ),
-          child: Column(
+          child: Material(type: MaterialType.transparency, child: Column(
             children: [
               // Handle
               const SheetHandle(top: 12),
@@ -560,7 +560,7 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
                 ),
               ),
             ],
-          ),
+          )),
         );
       },
     );

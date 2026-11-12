@@ -1251,7 +1251,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           color: theme.colorScheme.surface,
           borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
-        child: SafeArea(
+        child: Material(type: MaterialType.transparency, child: SafeArea(
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1335,7 +1335,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               ],
             ),
           ),
-        ),
+        )),
       ),
     );
   }
@@ -1431,7 +1431,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           color: theme.colorScheme.surface,
           borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
-        child: SafeArea(
+        child: Material(type: MaterialType.transparency, child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1500,7 +1500,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               const SizedBox(height: 16),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
@@ -1535,7 +1535,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           color: theme.colorScheme.surface,
           borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
-        child: SafeArea(
+        child: Material(type: MaterialType.transparency, child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1612,7 +1612,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               const SizedBox(height: 16),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
@@ -2140,7 +2140,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
         color: theme.colorScheme.surface,
         borderRadius: SheetPresentation.surfaceRadius(context),
       ),
-      child: SafeArea(
+      child: Material(type: MaterialType.transparency, child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
           child: Column(
@@ -2204,7 +2204,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -3147,7 +3147,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
           color: theme.colorScheme.surface,
           borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
-        child: SafeArea(
+        child: Material(type: MaterialType.transparency, child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -3201,7 +3201,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               const SizedBox(height: 16),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
@@ -3275,7 +3275,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
           color: theme.colorScheme.surface,
           borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
-        child: SafeArea(
+        child: Material(type: MaterialType.transparency, child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -3302,7 +3302,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               const SizedBox(height: 16),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
@@ -4321,7 +4321,7 @@ void _showShoppingItemEditor(
           borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         padding: const EdgeInsets.all(20),
-        child: Column(
+        child: Material(type: MaterialType.transparency, child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -4443,7 +4443,7 @@ void _showShoppingItemEditor(
             ),
             const SizedBox(height: 8),
           ],
-        ),
+        )),
       ),
     ),
   );
