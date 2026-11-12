@@ -359,6 +359,48 @@ void _updates() {
       final plan = await withServer(() => updates.planFor('community_a'));
       expect(plan!.changed.map((c) => (c.title, c.editedLocally)), [('Dumplings', false)]);
     });
+
+    test('an old download with recipes left out or edited gets no false update; later changes are offered', () async {
+      server.publish('pubold2', 'Weeknight', [
+        _recipe('Stew', photo: 'chef1/stew.jpg', ingredients: ['beef', 'carrot']),
+        _recipe('Dumplings'),
+        _recipe('Pie', ingredients: ['apple']),
+      ]);
+      await db.into(db.cookbooks).insert(CookbooksCompanion.insert(id: 'community_c', name: 'Weeknight'));
+      final recipes = detailOf('pubold2').recipes;
+      final photos = CommunityPhotoPlan.forRecipes('pubold2', recipes, [0, 2]);
+      await fetchPhotos(photos, null);
+      await db.transaction(() async {
+        final writer = CommunityRecipeWriter(db);
+        await writer.insert('community_c', recipes[0], 0, photos);
+        await writer.insert('community_c', recipes[2], 1, photos);
+      });
+      // The user changed the stew before 2.0.
+      final stew = await (db.select(db.recipes)..where((r) => r.title.equals('Stew'))).getSingle();
+      await (db.update(db.ingredients)..where((i) => i.recipeId.equals(stew.id) & i.name.equals('carrot')))
+          .write(const IngredientsCompanion(name: drift.Value('parsnip')));
+
+      expect(await withServer(() => updates.checkAll()), 0, reason: 'no false "Update available"');
+      final book = await cookbook('community_c');
+      expect(book.communitySourceId, 'pubold2');
+      expect(book.communitySourceVersion, 1);
+      final manifest = CommunitySourceManifest.decode(book.communityManifest)!;
+      expect(manifest.recipes['dumplings']!.recipeId, isNull, reason: 'left out, so not offered later');
+
+      // Version 2 changes the stew and the dumplings and adds bread.
+      server.publish('pubold2', 'Weeknight', [
+        _recipe('Stew', photo: 'chef1/stew.jpg', ingredients: ['beef', 'carrot', 'thyme']),
+        _recipe('Dumplings', ingredients: ['flour', 'suet']),
+        _recipe('Pie', ingredients: ['apple']),
+        _recipe('Bread'),
+      ], version: 2);
+      now = now.add(const Duration(days: 1));
+      expect(await withServer(() => updates.checkAll()), 1);
+      final plan = await withServer(() => updates.planFor('community_c'));
+      expect(plan!.added.map((a) => a.title), ['Bread']);
+      expect(plan.changed.map((c) => (c.title, c.editedLocally)), [('Stew', true)],
+          reason: "the user's own stew is kept unless they choose the new one");
+    });
   });
 
   group('applying an update', () {

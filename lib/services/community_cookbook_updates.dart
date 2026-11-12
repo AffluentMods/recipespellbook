@@ -351,36 +351,36 @@ class CommunityCookbookUpdates {
         removed.add(CookbookUpdateRemoved(e.key, byId[e.value.recipeId]!.title, e.value.recipeId!));
       }
     } else {
-      // A download from before sources were recorded: follow recipes by
-      // title. A copy that differs can't be told apart from the user's own
-      // edit, so it counts as edited ("keep mine" unless they choose).
-      // Nothing is offered for removal: the user may have added recipes.
+      // A download from before sources were recorded: there is no record of
+      // what it took, so the first check offers nothing. It notes what the
+      // cookbook has as the starting point and real changes after that are
+      // offered as for any download. A recipe it lacks was left out, deleted
+      // or renamed by the user, not added by the publisher; a copy that
+      // differs may be the user's own edit, so it counts as edited
+      // ("keep mine" unless they choose) when it changes later.
       final unmatched = [...local]..sort((a, b) => (a.deletedAt == null ? 0 : 1) - (b.deletedAt == null ? 0 : 1));
       for (var i = 0; i < keys.length; i++) {
         final key = keys[i];
         final recipe = detail.recipes[i];
+        final upstream = communityRecipeFingerprint(recipe, keys);
         final title = recipe.title.trim().toLowerCase();
         final match = unmatched.where((r) => r.title.trim().toLowerCase() == title).firstOrNull;
         if (match == null) {
-          added.add(CookbookUpdateAdded(i, key, recipe.title));
+          baseline[key] = CommunityManifestRecipe(recipeId: null, upstream: upstream, local: null);
           continue;
         }
         unmatched.remove(match);
-        final upstream = communityRecipeFingerprint(recipe, keys);
         if (match.deletedAt != null) {
           baseline[key] = CommunityManifestRecipe(recipeId: match.id, upstream: upstream, local: null);
           continue;
         }
         present[key] = match.id;
-        if (await comparableLocalFingerprint(db, match.id) == comparableFingerprint(recipe)) {
-          baseline[key] = CommunityManifestRecipe(
-            recipeId: match.id,
-            upstream: upstream,
-            local: await localRecipeFingerprint(db, match.id),
-          );
-        } else {
-          changed.add(CookbookUpdateChanged(i, key, recipe.title, match.id, editedLocally: true));
-        }
+        final same = await comparableLocalFingerprint(db, match.id) == comparableFingerprint(recipe);
+        baseline[key] = CommunityManifestRecipe(
+          recipeId: match.id,
+          upstream: upstream,
+          local: same ? await localRecipeFingerprint(db, match.id) : null,
+        );
       }
     }
 
