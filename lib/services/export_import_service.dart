@@ -18,6 +18,8 @@ import '../utils/platform_utils.dart';
 import '../utils/zip_stream_stub.dart' if (dart.library.io) '../utils/zip_stream_io.dart';
 import 'backup_reminder_service.dart';
 import 'image_service.dart';
+import 'recipe_file_importers/file_import_error.dart' show ZipTooLargeException;
+import 'recipe_file_importers/import_support.dart' show BoundedUnzip;
 import 'share_file.dart';
 import 'pantry_service.dart';
 
@@ -884,7 +886,7 @@ class ExportImportService {
         withData: isWeb,
       );
       if (result == null || result.files.isEmpty) {
-        return (null, ImportResult(success: false, message: 'No file selected'));
+        return (null, ImportResult(success: false, message: 'No file selected', failure: ImportFailure.noFile));
       }
       return (result.files.single, null);
     } catch (e) {
@@ -913,8 +915,10 @@ class ExportImportService {
         // No file streams on this platform (web), so read it into memory.
         return await importFromZipBytes(await File(path).readAsBytes(), onProgress: onProgress);
       }
+      // Reads the list of files only: nothing is unpacked until asked for,
+      // and then within the limits of [restoreLimits].
       final archive = ZipDecoder().decodeBuffer(input);
-      return await _importFromArchive(archive, onProgress: onProgress);
+      return await _importFromArchive(archive, unzip: restoreLimits(input.length), onProgress: onProgress);
     } catch (e) {
       return _unreadableBackup(e);
     } finally {
@@ -926,11 +930,30 @@ class ExportImportService {
   Future<ImportResult> importFromZipBytes(Uint8List zipBytes, {ImportProgressCallback? onProgress}) async {
     try {
       final archive = ZipDecoder().decodeBytes(zipBytes);
-      return await _importFromArchive(archive, onProgress: onProgress);
+      return await _importFromArchive(archive, unzip: restoreLimits(zipBytes.length), onProgress: onProgress);
     } catch (e) {
       return _unreadableBackup(e);
     }
   }
+
+  /// How much a backup of [packedLength] bytes may unpack to: no file over
+  /// [BoundedUnzip.defaultMaxEntryBytes], and all of them together no more
+  /// than fifty times the backup and some room on top. Photos hardly pack
+  /// and data.json packs to a tenth or so, so a real backup stays far below
+  /// that, and a zip bomb is stopped long before it fills the memory or the
+  /// disk. Unlike a file import, a restore writes each photo out and lets it
+  /// go, so a large library is not held to the import's total of 1 GB.
+  @visibleForTesting
+  static BoundedUnzip restoreLimits(int packedLength) =>
+      BoundedUnzip(maxTotalBytes: packedLength * 50 + 64 * 1024 * 1024);
+
+  /// What the user is told when a backup unpacks to more than
+  /// [restoreLimits] allow.
+  static ImportResult _tooLargeBackup() => ImportResult(
+        success: false,
+        message: 'This backup unpacks to more than the app can handle. Nothing was imported.',
+        failure: ImportFailure.tooLarge,
+      );
 
   /// What the user is told when the picked file cannot be read at all: cut
   /// short by a failed download, empty, or not a backup in the first place.
@@ -947,7 +970,13 @@ class ExportImportService {
   /// Shared archive import: extracts images to disk (releasing each
   /// entry's decompressed bytes immediately) and runs the standard data
   /// import, telling it which file each image name in data.json became.
-  Future<ImportResult> _importFromArchive(Archive archive, {ImportProgressCallback? onProgress}) async {
+  /// Every file is unpacked through [unzip]: one over its limits stops the
+  /// restore before anything is imported.
+  Future<ImportResult> _importFromArchive(
+    Archive archive, {
+    required BoundedUnzip unzip,
+    ImportProgressCallback? onProgress,
+  }) async {
     // Find data.json. A backup that was unzipped and zipped again (Finder,
     // Explorer) holds everything one folder down, so look there too.
     var root = '';
@@ -974,7 +1003,13 @@ class ExportImportService {
       );
     }
 
-    final dataStr = utf8.decode(dataFile.content as List<int>);
+    final List<int> dataBytes;
+    try {
+      dataBytes = unzip.bytesOf(dataFile);
+    } on ZipTooLargeException {
+      return _tooLargeBackup();
+    }
+    final dataStr = utf8.decode(dataBytes);
     dataFile.clear(); // release decompressed bytes
     final data = jsonDecode(dataStr);
     if (data is! Map<String, dynamic>) {
@@ -1005,8 +1040,17 @@ class ExportImportService {
         );
         if (target == null) continue;
         try {
-          await File(target).writeAsBytes(file.content as List<int>);
+          await File(target).writeAsBytes(unzip.bytesOf(file));
           photos.files[file.name.substring(root.length)] = target;
+        } on ZipTooLargeException {
+          // No photo is this large, and a backup this large is no backup:
+          // stop before anything is imported, and remove what was unpacked.
+          debugPrint('[Import] ${file.name} unpacks past the limit; restore stopped');
+          await _discard(File(target));
+          for (final path in photos.files.values) {
+            await _discard(File(path));
+          }
+          return _tooLargeBackup();
         } catch (e) {
           // One photo that cannot be unpacked must not stop the restore.
           debugPrint('[Import] Skipped image ${file.name}: $e');
@@ -1291,8 +1335,13 @@ class ExportImportService {
       return ImportResult(
         success: parts.isNotEmpty,
         message: parts.isNotEmpty ? 'Imported ${parts.join(', ')}$skipMsg' : 'Nothing to import',
+        failure: parts.isNotEmpty ? null : ImportFailure.nothingToImport,
         cookbooksImported: cookbooksImported,
         recipesImported: recipesImported,
+        shoppingListsImported: shoppingListsImported,
+        mealPlansImported: mealPlansImported,
+        tagsImported: tagsImported,
+        recipesSkipped: recipesSkipped,
         importedCookbookId: cookbookWithNew ?? cookbookWithKnown ?? lastCookbookId,
       );
     } catch (e) {
@@ -2365,6 +2414,16 @@ enum ImportFailure {
 
   /// Restoring failed part way. Nothing of the backup was kept.
   restoreFailed,
+
+  /// The picker was closed without a file.
+  noFile,
+
+  /// A file in the backup unpacks to more than the app allows (a damaged
+  /// file or a zip bomb). Nothing was imported.
+  tooLarge,
+
+  /// The backup held nothing that could be imported.
+  nothingToImport,
 }
 
 class ImportResult {
@@ -2376,6 +2435,12 @@ class ImportResult {
   final ImportFailure? failure;
   final int cookbooksImported;
   final int recipesImported;
+  final int shoppingListsImported;
+  final int mealPlansImported;
+  final int tagsImported;
+
+  /// Recipes already in the library, not added a second time.
+  final int recipesSkipped;
   final String? importedCookbookId; // A cookbook that received or holds what was imported
 
   ImportResult({
@@ -2384,6 +2449,10 @@ class ImportResult {
     this.failure,
     this.cookbooksImported = 0,
     this.recipesImported = 0,
+    this.shoppingListsImported = 0,
+    this.mealPlansImported = 0,
+    this.tagsImported = 0,
+    this.recipesSkipped = 0,
     this.importedCookbookId,
   });
 }
