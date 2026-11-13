@@ -12,6 +12,7 @@ import '../utils/ingredient_utils.dart';
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../utils/text_normalize.dart';
 import 'book_scan/book_page_splitter.dart' show isSectionHeading, sectionHeadingTitle;
+import 'limited_fetch.dart';
 import 'recipe_import_engine.dart';
 
 /// How the tables mark a section heading among the ingredients or the steps:
@@ -426,23 +427,39 @@ class ImportedRecipeSaver {
     // Only a web address is fetched. An import file can put anything in this
     // field, a path on this device included, and that must never be read.
     if (uri == null || !(uri.isScheme('http') || uri.isScheme('https')) || uri.host.isEmpty) return null;
-    final own = client == null ? http.Client() : null;
     try {
-      final response = await (client ?? own!).get(
+      // Read no further than a photo can be: a link to a film or a page
+      // that never ends is not downloaded whole first.
+      final response = await getLimited(
         uri,
         headers: const {
           'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
           'Accept': 'image/*,*/*;q=0.8',
         },
-      ).timeout(const Duration(seconds: 15));
-      if (response.statusCode != 200) return null;
+        maxBytes: maxDownloadedImageBytes,
+        timeout: const Duration(seconds: 15),
+        client: client,
+        skipBody: _notAnImageType,
+      );
+      if (response.statusCode != 200 || isOverLimit(response, maxDownloadedImageBytes)) return null;
       return await _writeImage(response.bodyBytes, documentsDir);
     } catch (_) {
       return null;
-    } finally {
-      own?.close();
     }
   }
+
+  /// The largest picture an import downloads.
+  static const maxDownloadedImageBytes = 25 * 1024 * 1024;
+
+  /// Answers that are plainly no picture, by their Content-Type: a web page
+  /// (what a dead link often answers with), JSON, a film or a sound. Other
+  /// types are read and told by their bytes, as servers often name a
+  /// picture wrongly.
+  static bool _notAnImageType(String type) =>
+      type.startsWith('text/html') ||
+      type.startsWith('application/json') ||
+      type.startsWith('video/') ||
+      type.startsWith('audio/');
 
   /// Writes [bytes] to a new file in the image folder, or returns null when
   /// they are not a picture worth keeping.

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
+import 'limited_fetch.dart';
 import 'web_page_decoder.dart';
 import '../models/imported_recipe.dart';
 import '../utils/ingredient_utils.dart' show mealMasterIngredient;
@@ -128,14 +130,34 @@ class RecipeImportEngine {
       resp.bodyBytes,
       contentType: resp.headers['content-type']);
 
+  /// The most of a web page that is read. A recipe page is a few hundred
+  /// kilobytes; one larger than this is no recipe page, and is not
+  /// downloaded past it.
+  static const _maxPageBytes = 8 * 1024 * 1024;
+
+  /// Answers whose type says they are no page: their body is not read.
+  /// [_notAWebPage] says what they are, from the same header.
+  static bool _notPageType(String type) =>
+      type.startsWith('image/') ||
+      type.startsWith('video/') ||
+      type.startsWith('audio/') ||
+      type.startsWith('application/pdf') ||
+      type.startsWith('application/zip');
+
+  /// A page, read no further than [_maxPageBytes].
+  static Future<http.Response> _getPage(String url, Map<String, String> headers) => getLimited(
+        Uri.parse(url),
+        headers: headers,
+        maxBytes: _maxPageBytes,
+        skipBody: _notPageType,
+      );
+
   /// Fetch a URL with browser-like headers. If the response is rejected
   /// (4xx/5xx, often WAF bot detection like 403, 451, 455, 503), retry once
   /// with the mobile UA which more sites accept by default.
   static Future<http.Response> _fetchWithFallback(String url, _Platform platform) async {
     final primaryHeaders = _headersForPlatform(platform);
-    var resp = await http
-        .get(Uri.parse(url), headers: primaryHeaders)
-        .timeout(const Duration(seconds: 20));
+    var resp = await _getPage(url, primaryHeaders);
 
     // If primary succeeded or got a "real" non-bot error (404, 410), don't retry.
     if (resp.statusCode == 200) return resp;
@@ -148,13 +170,10 @@ class RecipeImportEngine {
     // Retry with mobile UA + browser headers. Sites blocking desktop crawlers
     // often let mobile Safari through.
     try {
-      final fallbackResp = await http.get(
-        Uri.parse(url),
-        headers: {
-          ..._browserHeaders,
-          'User-Agent': _mobileUserAgent,
-        },
-      ).timeout(const Duration(seconds: 20));
+      final fallbackResp = await _getPage(url, {
+        ..._browserHeaders,
+        'User-Agent': _mobileUserAgent,
+      });
       if (fallbackResp.statusCode == 200) return fallbackResp;
       // Return whichever has a body
       return fallbackResp.bodyBytes.isNotEmpty ? fallbackResp : resp;
@@ -311,8 +330,9 @@ class RecipeImportEngine {
   }
 
   /// Resolve a short URL to its final destination by following redirects.
-  /// Uses a HEAD request with manual redirect handling to avoid downloading
-  /// full JS-rendered pages.
+  /// Each answer's headers are all that is wanted: its body is not read, so
+  /// the page at the end is not downloaded here (it is fetched once more,
+  /// with a limit, by the import).
   static Future<String?> _resolveShortUrl(String url) async {
     try {
       final client = http.Client();
@@ -326,8 +346,9 @@ class RecipeImportEngine {
               'Accept': 'text/html',
             });
           final streamed = await client.send(request).timeout(const Duration(seconds: 10));
-          // Drain the response body to free resources
-          await streamed.stream.drain();
+          // The body is not wanted. Cancelling it closes the connection
+          // instead of downloading what it holds.
+          unawaited(streamed.stream.listen(null).cancel());
 
           if (streamed.statusCode >= 300 && streamed.statusCode < 400) {
             final location = streamed.headers['location'];
@@ -364,10 +385,14 @@ class RecipeImportEngine {
           return null;
       }
 
-      final response = await http.get(
+      // An oEmbed answer is a few kilobytes of JSON.
+      final response = await getLimited(
         Uri.parse(oembedUrl),
         headers: {'User-Agent': _userAgent, 'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 15));
+        maxBytes: 1024 * 1024,
+        timeout: const Duration(seconds: 15),
+      );
+      if (isOverLimit(response, 1024 * 1024)) return null;
 
       if (response.statusCode != 200) return null;
 
@@ -742,7 +767,7 @@ class RecipeImportEngine {
     }
     if (kind != null) return 'No recipe found because that link is $kind, not a web page.';
 
-    if (bytes.length > 8 * 1024 * 1024) {
+    if (isOverLimit(response, _maxPageBytes)) {
       return 'No recipe found because that page is too large to read.';
     }
     return null;
