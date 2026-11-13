@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
@@ -1061,14 +1062,15 @@ class _DataSourceFooter extends StatelessWidget {
   final ProductInfo product;
   const _DataSourceFooter({required this.product});
 
-  static const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
     final d = product.lastModified;
-    final updated = d != null ? ' · updated ${_months[d.month - 1]} ${d.year}' : '';
+    final source = d == null
+        ? l10n.barcodeDataSource
+        : '${l10n.barcodeDataSource} · ${l10n.barcodeDataUpdated(DateFormat.yMMM(Localizations.localeOf(context).toLanguageTag()).format(d))}';
     return Container(
       padding: const EdgeInsets.fromLTRB(Space.md, Space.md, Space.md, Space.xs),
       decoration: BoxDecoration(
@@ -1086,7 +1088,7 @@ class _DataSourceFooter extends StatelessWidget {
                 const SizedBox(width: Space.sm),
                 Expanded(
                   child: Text(
-                    'This record looks incomplete. Some details may be missing or out of date.',
+                    l10n.barcodeRecordIncomplete,
                     style: theme.textTheme.bodySmall?.copyWith(color: c.textPrimary),
                   ),
                 ),
@@ -1101,7 +1103,7 @@ class _DataSourceFooter extends StatelessWidget {
               const SizedBox(width: Space.sm),
               Expanded(
                 child: Text(
-                  'Data from Open Food Facts (community-sourced)$updated',
+                  source,
                   style: theme.textTheme.bodySmall?.copyWith(color: c.textSecondary),
                 ),
               ),
