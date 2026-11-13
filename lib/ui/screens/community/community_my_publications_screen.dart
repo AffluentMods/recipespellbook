@@ -33,6 +33,8 @@ class _CommunityMyPublicationsScreenState extends ConsumerState<CommunityMyPubli
   final _scrollController = ScrollController();
 
   bool _loading = true;
+  // The last load did not come through.
+  bool _loadFailed = false;
   bool _fabVisible = true;
   List<MyPublication> _pubs = [];
 
@@ -98,9 +100,20 @@ class _CommunityMyPublicationsScreenState extends ConsumerState<CommunityMyPubli
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final pubs = await _community.getMyPublications();
+    // Signed out there is nothing to load (the screen asks to sign in).
+    final pubs = AuthService.instance.isSignedIn ? await _community.fetchMyPublications() : <MyPublication>[];
     if (!mounted) return;
-    setState(() { _pubs = pubs; _loading = false; });
+    if (pubs == null) {
+      // Not loaded: keep what is shown, and never show "No publications
+      // yet" for a list that just did not come.
+      setState(() {
+        _loading = false;
+        _loadFailed = true;
+      });
+      if (_pubs.isNotEmpty) AppSnackbar.error(context, AppLocalizations.of(context)!.communityLoadFailed);
+      return;
+    }
+    setState(() { _pubs = pubs; _loading = false; _loadFailed = false; });
     _checkChanges();
   }
 
@@ -451,7 +464,31 @@ class _CommunityMyPublicationsScreenState extends ConsumerState<CommunityMyPubli
             _CheckingLine(checked: _checked, total: _checkTotal),
 
           Expanded(
-            child: _pubs.isEmpty
+            child: _pubs.isEmpty && _loadFailed
+                ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cloud_off_rounded, size: 48, color: theme.colorScheme.outline),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.communityLoadFailed,
+                      style: theme.textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: _load,
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.actionRetry),
+                    ),
+                  ],
+                ),
+              ),
+            )
+                : _pubs.isEmpty
                 ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

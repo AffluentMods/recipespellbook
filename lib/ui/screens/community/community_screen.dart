@@ -56,6 +56,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   bool _hasMore = true;
   // The next page failed to load: show a retry instead of loading on scroll.
   bool _loadMoreFailed = false;
+  // The first page failed to load: an error with a retry, not "nothing yet".
+  bool _loadFailed = false;
   // Bumped by every fresh load, so a page that was still loading for the
   // old search or filter is dropped instead of appended.
   int _feedGeneration = 0;
@@ -159,7 +161,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       if (mounted && generation == _feedGeneration) {
         setState(() {
           _recipeItems = result?.recipes ?? [];
-          _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
+          _hasMore = result != null && result.page < result.totalPages;
+          _loadFailed = result == null;
           _loading = false;
         });
       }
@@ -179,7 +182,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           _items = (result?.publications ?? [])
               .where((p) => !p.isSingleRecipe)
               .toList();
-          _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
+          _hasMore = result != null && result.page < result.totalPages;
+          _loadFailed = result == null;
           _loading = false;
         });
       }
@@ -276,6 +280,38 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   bool get _showFeedFooter => _loading || _loadMoreFailed;
+
+  /// The feed did not load: say so and offer a retry, instead of an empty
+  /// feed that looks like nothing was ever published. Scrollable, so pull
+  /// to refresh works too.
+  Widget _loadFailedView(ThemeData theme, AppLocalizations l10n) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+        Icon(Icons.cloud_off_rounded, size: 80, color: theme.colorScheme.outline),
+        const SizedBox(height: 16),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              l10n.communityLoadFailed,
+              style: TextStyle(color: theme.colorScheme.outline, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: FilledButton.icon(
+            onPressed: _load,
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n.actionRetry),
+          ),
+        ),
+      ],
+    );
+  }
 
   /// Desktop header: the title (admin tap preserved) with the feed's actions
   /// right-aligned — Publish is a button, not a floating action.
@@ -589,7 +625,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 onRefresh: () async => _load(),
                 child: _browseMode == _BrowseMode.recipes
                     ? _buildRecipeFeed(context, theme, l10n)
-                    : (_items.isEmpty && !_loading
+                    : (_items.isEmpty && !_loading && _loadFailed
+                  ? _loadFailedView(theme, l10n)
+                  : _items.isEmpty && !_loading
                   ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
@@ -651,6 +689,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   Widget _buildRecipeFeed(BuildContext context, ThemeData theme, AppLocalizations l10n) {
+    if (_recipeItems.isEmpty && !_loading && _loadFailed) return _loadFailedView(theme, l10n);
     if (_recipeItems.isEmpty && !_loading) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
