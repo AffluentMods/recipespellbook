@@ -253,6 +253,109 @@ class ImageService {
     }
   }
 
+  /// How a run of many photo links waits: between requests, and for the
+  /// server's Retry-After. Tests replace it.
+  @visibleForTesting
+  static Future<void> Function(Duration) wait = Future<void>.delayed;
+
+  /// The most photos one presign-batch request asks for.
+  static const _batchSize = 200;
+
+  /// Fresh links for many stored photos at once, by path; a photo without
+  /// one (not found, not this account's, not reachable) is missing from the
+  /// result. A backup of a library in the cloud needs one for every photo,
+  /// and a request per photo ran into the server's limit of 1,000 requests
+  /// in 15 minutes: photos were left out and the app was locked out.
+  ///
+  /// Asks POST /v1/images/presign-batch, 200 photos a request. A server
+  /// without it (404) gets one request per photo, the first 100 at once and
+  /// then one every 1.2 seconds, which stays under that limit. A 429 waits for its
+  /// Retry-After and tries again, up to [maxWait] in all; after that the
+  /// rest is left without a link.
+  Future<Map<String, String>> getImageUrls(
+    List<String> imagePaths, {
+    Duration maxWait = const Duration(minutes: 3),
+  }) async {
+    final urls = <String, String>{};
+    if (!_auth.isSignedIn) return urls;
+    final paths = <String>[
+      for (final path in imagePaths.toSet())
+        if (_safeImagePathForUrl(path) != null) path,
+    ];
+    var waited = Duration.zero;
+
+    /// Sends [request] until it is not a 429; null when waiting would go
+    /// past [maxWait] or it could not be sent.
+    Future<http.Response?> send(Future<http.Response> Function() request) async {
+      while (true) {
+        final http.Response response;
+        try {
+          response = await request();
+        } catch (e) {
+          debugPrint('[ImageService] Links: $e');
+          return null;
+        }
+        if (response.statusCode != 429) return response;
+        final retryAfter = Duration(seconds: int.tryParse(response.headers['retry-after'] ?? '') ?? 30);
+        if (waited + retryAfter > maxWait) return null;
+        waited += retryAfter;
+        await wait(retryAfter);
+      }
+    }
+
+    var batched = true;
+    for (var i = 0; i < paths.length && batched; i += _batchSize) {
+      final chunk = paths.sublist(i, (i + _batchSize).clamp(0, paths.length));
+      final response = await send(() => _auth.post('/v1/images/presign-batch', {'paths': chunk}));
+      if (response == null) return urls;
+      if (response.statusCode == 404) {
+        batched = false; // an older server
+        break;
+      }
+      if (response.statusCode != 200) {
+        debugPrint('[ImageService] presign-batch failed: ${response.statusCode}');
+        return urls;
+      }
+      try {
+        final got = (jsonDecode(response.body) as Map)['urls'];
+        if (got is Map) {
+          got.forEach((path, url) {
+            if (path is String && url is String) urls[path] = url;
+          });
+        }
+      } catch (_) {}
+    }
+    if (batched) return urls;
+
+    for (final (i, path) in paths.indexed) {
+      if (i >= 100) await wait(const Duration(milliseconds: 1200));
+      final response = await send(() => _auth.get('/v1/images/${_safeImagePathForUrl(path)}'));
+      if (response == null) break;
+      if (response.statusCode != 200) continue;
+      try {
+        final url = (jsonDecode(response.body) as Map)['url'];
+        if (url is String) urls[path] = url;
+      } catch (_) {}
+    }
+    return urls;
+  }
+
+  /// The photo at [url] as bytes (https only, size-capped, must be an
+  /// image), or null. Works where there are no files, such as on the web.
+  Future<Uint8List?> downloadImageBytes(String url, {Duration timeout = const Duration(seconds: 20)}) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return null;
+    final client = http.Client();
+    try {
+      return await _fetchImageBytes(client, uri).timeout(timeout);
+    } catch (e) {
+      debugPrint('[ImageService] Download error: $e');
+      return null;
+    } finally {
+      client.close();
+    }
+  }
+
   /// Check if an imagePath is a server path (vs a local file path).
   /// Server paths look like "userId/hash.ext" (no slashes besides the one).
   static bool isServerPath(String? imagePath) {
