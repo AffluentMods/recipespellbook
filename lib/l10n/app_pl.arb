@@ -2470,6 +2470,9 @@
       }
     }
   },
+  "cookbookLeave": "Opuść książkę",
+  "cookbookLeaveConfirm": "Opuścić \"{name}\"? Zniknie z tego urządzenia, a właściciel zachowa wszystkie przepisy. Aby ją odzyskać, poproś o nowe zaproszenie.",
+  "cookbookLeaveFailed": "Nie udało się opuścić książki. Sprawdź połączenie i spróbuj ponownie.",
   "shareCookbook": "Udostępnij książkę",
   "cookbookEmpty": "Ta książka nie ma przepisów do udostępnienia",
   "recipes": "przepisy",

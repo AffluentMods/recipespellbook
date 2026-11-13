@@ -5876,6 +5876,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Leave cookbook';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Leave \"$name\"? It goes from this device, and the owner keeps every recipe in it. To get it back, ask for a new invite.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Could not leave the cookbook. Check your connection and try again.';
+
+  @override
   String get shareCookbook => 'Share Cookbook';
 
   @override

@@ -5787,6 +5787,17 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => '退出食谱书';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '退出\"$name\"？它会从此设备上移除，所有食谱仍归所有者。若要重新加入，请索取新的邀请。';
+  }
+
+  @override
+  String get cookbookLeaveFailed => '无法退出食谱书。请检查网络连接后重试。';
+
+  @override
   String get shareCookbook => '分享食谱书';
 
   @override

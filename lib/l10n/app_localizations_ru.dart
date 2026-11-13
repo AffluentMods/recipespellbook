@@ -5964,6 +5964,17 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Покинуть книгу';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Покинуть \"$name\"? Книга исчезнет с этого устройства, а все рецепты останутся у владельца. Чтобы вернуться, попросите новое приглашение.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Не удалось покинуть книгу. Проверьте подключение и попробуйте снова.';
+
+  @override
   String get shareCookbook => 'Поделиться книгой';
 
   @override

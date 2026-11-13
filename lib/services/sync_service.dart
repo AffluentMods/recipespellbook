@@ -777,7 +777,9 @@ class SyncService {
             return w;
           }))
         .get();
-    final foreignCookbooks = foreign['cookbooks'] ?? const <String>{};
+    // A cookbook I'm a member of is the owner's, also when its row is not
+    // here (yet, or any more): its recipes go out through the collab push.
+    final foreignCookbooks = {...?foreign['cookbooks'], ...CollabService.instance.collabCookbookIds};
 
     final sharedCookbookIds = (await (db.selectOnly(db.cookbooks)
               ..addColumns([db.cookbooks.id])
@@ -791,7 +793,10 @@ class SyncService {
     var recipes = await (db.select(db.recipes)
           ..where((r) => changed == null ? const Constant(true) : r.updatedAt.isBiggerThanValue(changed)))
         .get();
-    recipes = recipes.where((r) => !sharedCookbookIds.contains(r.cookbookId)).toList();
+    final foreignRecipes = foreign['recipes'] ?? const <String>{};
+    recipes = recipes
+        .where((r) => !sharedCookbookIds.contains(r.cookbookId) && !foreignRecipes.contains(r.id))
+        .toList();
 
     final recipeIds = recipes.map((r) => r.id).toList();
     final ingredientsBy = <String, List<Ingredient>>{};
@@ -1111,6 +1116,17 @@ class SyncService {
                 case 'recipes':
                   final r = await (db.select(db.recipes)..where((t) => t.id.equals(from))).getSingleOrNull();
                   if (r == null) continue;
+                  // A recipe of a shared cookbook is the owner's, not a clash:
+                  // a copy under a new id would go into the owner's cookbook.
+                  final home = await (db.select(db.cookbooks)..where((t) => t.id.equals(r.cookbookId)))
+                      .getSingleOrNull();
+                  if (home?.sharedOwnerId != null ||
+                      CollabService.instance.isCollabCookbook(r.cookbookId) ||
+                      (foreign['cookbooks']?.contains(r.cookbookId) ?? false)) {
+                    foreign.putIfAbsent('recipes', () => {}).add(from);
+                    foreignChanged = true;
+                    continue;
+                  }
                   final exists = await (db.select(db.recipes)..where((t) => t.id.equals(to))).getSingleOrNull();
                   if (exists != null) {
                     // Another device of this account already moved it and we

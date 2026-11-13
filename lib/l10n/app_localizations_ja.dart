@@ -5792,6 +5792,17 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'レシピ本から退出';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '「$name」から退出しますか？このデバイスから消えますが、レシピはすべて所有者の元に残ります。戻るには新しい招待をもらってください。';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'レシピ本から退出できませんでした。接続を確認してもう一度お試しください。';
+
+  @override
   String get shareCookbook => 'レシピ本を共有';
 
   @override

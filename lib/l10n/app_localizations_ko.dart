@@ -5803,6 +5803,17 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => '요리책에서 나가기';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '\"$name\"에서 나갈까요? 이 기기에서 사라지며, 모든 레시피는 소유자에게 남습니다. 다시 참여하려면 새 초대를 요청하세요.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => '요리책에서 나가지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
   String get shareCookbook => '요리책 공유';
 
   @override

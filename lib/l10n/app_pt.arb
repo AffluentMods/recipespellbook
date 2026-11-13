@@ -2470,6 +2470,9 @@
       }
     }
   },
+  "cookbookLeave": "Sair do livro",
+  "cookbookLeaveConfirm": "Sair de \"{name}\"? Ele sai deste dispositivo e o dono fica com todas as receitas. Para voltar, peça um novo convite.",
+  "cookbookLeaveFailed": "Não foi possível sair do livro. Verifique sua conexão e tente novamente.",
   "shareCookbook": "Compartilhar livro",
   "cookbookEmpty": "Este livro não tem receitas para compartilhar",
   "recipes": "receitas",

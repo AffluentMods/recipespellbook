@@ -5870,6 +5870,17 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Lascia il ricettario';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Lasciare \"$name\"? Sparisce da questo dispositivo e il proprietario mantiene tutte le ricette. Per riaverlo, chiedi un nuovo invito.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Impossibile lasciare il ricettario. Controlla la connessione e riprova.';
+
+  @override
   String get shareCookbook => 'Condividi ricettario';
 
   @override

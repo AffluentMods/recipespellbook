@@ -5876,6 +5876,17 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Kookboek verlaten';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '\"$name\" verlaten? Het verdwijnt van dit apparaat en de eigenaar houdt alle recepten. Vraag om een nieuwe uitnodiging om het terug te krijgen.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Kon het kookboek niet verlaten. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
   String get shareCookbook => 'Kookboek delen';
 
   @override

@@ -2870,6 +2870,23 @@
       }
     }
   },
+  "cookbookLeave": "Leave cookbook",
+  "@cookbookLeave": {
+    "description": "Menu item and dialog title for a cookbook someone else shares with you: stop being a member instead of deleting it."
+  },
+  "cookbookLeaveConfirm": "Leave \"{name}\"? It goes from this device, and the owner keeps every recipe in it. To get it back, ask for a new invite.",
+  "@cookbookLeaveConfirm": {
+    "description": "Confirmation before leaving a shared cookbook.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookLeaveFailed": "Could not leave the cookbook. Check your connection and try again.",
+  "@cookbookLeaveFailed": {
+    "description": "Shown when leaving a shared cookbook did not reach the server."
+  },
   "shareCookbook": "Share Cookbook",
   "cookbookEmpty": "This cookbook has no recipes to share",
   "recipes": "recipes",

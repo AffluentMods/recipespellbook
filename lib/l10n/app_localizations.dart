@@ -10435,6 +10435,24 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to delete \"{name}\"?'**
   String cookbookDeleteConfirmNamed(String name);
 
+  /// Menu item and dialog title for a cookbook someone else shares with you: stop being a member instead of deleting it.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave cookbook'**
+  String get cookbookLeave;
+
+  /// Confirmation before leaving a shared cookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave \"{name}\"? It goes from this device, and the owner keeps every recipe in it. To get it back, ask for a new invite.'**
+  String cookbookLeaveConfirm(String name);
+
+  /// Shown when leaving a shared cookbook did not reach the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not leave the cookbook. Check your connection and try again.'**
+  String get cookbookLeaveFailed;
+
   /// No description provided for @shareCookbook.
   ///
   /// In en, this message translates to:

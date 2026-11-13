@@ -2470,6 +2470,9 @@
       }
     }
   },
+  "cookbookLeave": "退出食谱书",
+  "cookbookLeaveConfirm": "退出\"{name}\"？它会从此设备上移除，所有食谱仍归所有者。若要重新加入，请索取新的邀请。",
+  "cookbookLeaveFailed": "无法退出食谱书。请检查网络连接后重试。",
   "shareCookbook": "分享食谱书",
   "cookbookEmpty": "此食谱书没有可分享的食谱",
   "recipes": "食谱",

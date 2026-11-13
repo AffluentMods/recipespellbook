@@ -2470,6 +2470,9 @@
       }
     }
   },
+  "cookbookLeave": "Kookboek verlaten",
+  "cookbookLeaveConfirm": "\"{name}\" verlaten? Het verdwijnt van dit apparaat en de eigenaar houdt alle recepten. Vraag om een nieuwe uitnodiging om het terug te krijgen.",
+  "cookbookLeaveFailed": "Kon het kookboek niet verlaten. Controleer je verbinding en probeer het opnieuw.",
   "shareCookbook": "Kookboek delen",
   "cookbookEmpty": "Dit kookboek heeft geen recepten om te delen",
   "recipes": "recepten",

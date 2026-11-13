@@ -5864,6 +5864,17 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Kochbuch verlassen';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '\"$name\" verlassen? Es verschwindet von diesem Gerät, und der Besitzer behält alle Rezepte darin. Um es wiederzubekommen, bitte um eine neue Einladung.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Das Kochbuch konnte nicht verlassen werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
   String get shareCookbook => 'Kochbuch teilen';
 
   @override

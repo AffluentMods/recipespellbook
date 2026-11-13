@@ -5864,6 +5864,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Quitter le livre';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Quitter \"$name\" ? Il disparaît de cet appareil, et son propriétaire garde toutes ses recettes. Pour le retrouver, demandez une nouvelle invitation.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Impossible de quitter le livre. Vérifiez votre connexion et réessayez.';
+
+  @override
   String get shareCookbook => 'Partager le livre';
 
   @override

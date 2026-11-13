@@ -456,6 +456,29 @@ class FamilyService {
     return false;
   }
 
+  /// Stop being a member of a cookbook or list someone else shares with me
+  /// (a family share or a joined invite link alike). True when no share of
+  /// it is left for me, also when there was none; false when the server
+  /// could not be reached or would not remove it.
+  Future<bool> leaveSharedResource(String resourceType, String resourceId) async {
+    try {
+      final r = await _auth.get('/v1/family/shares');
+      if (r.statusCode != 200) return false;
+      final received = ((jsonDecode(r.body) as Map)['received'] as List? ?? const []).whereType<Map>();
+      for (final share in received) {
+        if (share['resourceType'] != resourceType || share['resourceId'] != resourceId) continue;
+        final id = share['id'];
+        if (id is! String) continue;
+        final d = await _auth.delete('/v1/family/shares/${Uri.encodeComponent(id)}');
+        if (d.statusCode != 200 && d.statusCode != 404) return false;
+      }
+      return true;
+    } catch (e) {
+      debugPrint('[Family] leaveSharedResource: $e');
+      return false;
+    }
+  }
+
   /// Fetch shared content from family members (for sync).
   Future<Map<String, dynamic>?> getSharedContent({DateTime? since}) async {
     try {

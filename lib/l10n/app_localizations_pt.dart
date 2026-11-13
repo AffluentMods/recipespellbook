@@ -5864,6 +5864,17 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Sair do livro';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Sair de \"$name\"? Ele sai deste dispositivo e o dono fica com todas as receitas. Para voltar, peça um novo convite.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Não foi possível sair do livro. Verifique sua conexão e tente novamente.';
+
+  @override
   String get shareCookbook => 'Compartilhar livro';
 
   @override
