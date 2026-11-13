@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
+import 'limited_fetch.dart';
 import 'web_page_decoder.dart';
 import '../models/imported_recipe.dart';
+import '../utils/ingredient_utils.dart' show mealMasterIngredient;
 import 'recipe_file_importers/mastercook_importer.dart';
 
 /// Consolidated recipe import engine.
@@ -127,14 +130,34 @@ class RecipeImportEngine {
       resp.bodyBytes,
       contentType: resp.headers['content-type']);
 
+  /// The most of a web page that is read. A recipe page is a few hundred
+  /// kilobytes; one larger than this is no recipe page, and is not
+  /// downloaded past it.
+  static const _maxPageBytes = 8 * 1024 * 1024;
+
+  /// Answers whose type says they are no page: their body is not read.
+  /// [_notAWebPage] says what they are, from the same header.
+  static bool _notPageType(String type) =>
+      type.startsWith('image/') ||
+      type.startsWith('video/') ||
+      type.startsWith('audio/') ||
+      type.startsWith('application/pdf') ||
+      type.startsWith('application/zip');
+
+  /// A page, read no further than [_maxPageBytes].
+  static Future<http.Response> _getPage(String url, Map<String, String> headers) => getLimited(
+        Uri.parse(url),
+        headers: headers,
+        maxBytes: _maxPageBytes,
+        skipBody: _notPageType,
+      );
+
   /// Fetch a URL with browser-like headers. If the response is rejected
   /// (4xx/5xx, often WAF bot detection like 403, 451, 455, 503), retry once
   /// with the mobile UA which more sites accept by default.
   static Future<http.Response> _fetchWithFallback(String url, _Platform platform) async {
     final primaryHeaders = _headersForPlatform(platform);
-    var resp = await http
-        .get(Uri.parse(url), headers: primaryHeaders)
-        .timeout(const Duration(seconds: 20));
+    var resp = await _getPage(url, primaryHeaders);
 
     // If primary succeeded or got a "real" non-bot error (404, 410), don't retry.
     if (resp.statusCode == 200) return resp;
@@ -147,13 +170,10 @@ class RecipeImportEngine {
     // Retry with mobile UA + browser headers. Sites blocking desktop crawlers
     // often let mobile Safari through.
     try {
-      final fallbackResp = await http.get(
-        Uri.parse(url),
-        headers: {
-          ..._browserHeaders,
-          'User-Agent': _mobileUserAgent,
-        },
-      ).timeout(const Duration(seconds: 20));
+      final fallbackResp = await _getPage(url, {
+        ..._browserHeaders,
+        'User-Agent': _mobileUserAgent,
+      });
       if (fallbackResp.statusCode == 200) return fallbackResp;
       // Return whichever has a body
       return fallbackResp.bodyBytes.isNotEmpty ? fallbackResp : resp;
@@ -310,8 +330,9 @@ class RecipeImportEngine {
   }
 
   /// Resolve a short URL to its final destination by following redirects.
-  /// Uses a HEAD request with manual redirect handling to avoid downloading
-  /// full JS-rendered pages.
+  /// Each answer's headers are all that is wanted: its body is not read, so
+  /// the page at the end is not downloaded here (it is fetched once more,
+  /// with a limit, by the import).
   static Future<String?> _resolveShortUrl(String url) async {
     try {
       final client = http.Client();
@@ -325,8 +346,9 @@ class RecipeImportEngine {
               'Accept': 'text/html',
             });
           final streamed = await client.send(request).timeout(const Duration(seconds: 10));
-          // Drain the response body to free resources
-          await streamed.stream.drain();
+          // The body is not wanted. Cancelling it closes the connection
+          // instead of downloading what it holds.
+          unawaited(streamed.stream.listen(null).cancel());
 
           if (streamed.statusCode >= 300 && streamed.statusCode < 400) {
             final location = streamed.headers['location'];
@@ -363,10 +385,14 @@ class RecipeImportEngine {
           return null;
       }
 
-      final response = await http.get(
+      // An oEmbed answer is a few kilobytes of JSON.
+      final response = await getLimited(
         Uri.parse(oembedUrl),
         headers: {'User-Agent': _userAgent, 'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 15));
+        maxBytes: 1024 * 1024,
+        timeout: const Duration(seconds: 15),
+      );
+      if (isOverLimit(response, 1024 * 1024)) return null;
 
       if (response.statusCode != 200) return null;
 
@@ -741,7 +767,7 @@ class RecipeImportEngine {
     }
     if (kind != null) return 'No recipe found because that link is $kind, not a web page.';
 
-    if (bytes.length > 8 * 1024 * 1024) {
+    if (isOverLimit(response, _maxPageBytes)) {
       return 'No recipe found because that page is too large to read.';
     }
     return null;
@@ -4203,11 +4229,14 @@ class RecipeImportEngine {
     final (sourceUrl, sourceNote) =
         _sourceAndNote(_jsonString(json['source_url']), _jsonString(json['source']));
 
+    final (ingredients, linkedTitles) = _paprikaLinks(_jsonLines(json['ingredients']));
+    final (directions, _) = _paprikaLinks(_jsonLines(json['directions']));
     return ImportedRecipe(
       title: _jsonString(json['name']) ?? _jsonString(json['title']) ?? 'Paprika Recipe',
       description: _jsonString(json['description']),
-      ingredients: _jsonLines(json['ingredients']),
-      instructions: _withoutStepNumbers(_jsonLines(json['directions'])),
+      ingredients: ingredients,
+      linkedTitles: linkedTitles.isEmpty ? null : linkedTitles,
+      instructions: _withoutStepNumbers(directions),
       prepTimeMinutes: prepTime,
       cookTimeMinutes: cookTime,
       servings: _jsonServings(json['servings']),
@@ -4226,6 +4255,27 @@ class RecipeImportEngine {
       rating: _jsonRating(json['rating']),
       sourceApp: 'paprika',
     );
+  }
+
+  /// Paprika's link to another recipe in a line: "[recipe:Pizza Dough]".
+  static final _paprikaLink = RegExp(r'\[recipe:\s*([^\]\n]+?)\s*\]', caseSensitive: false);
+
+  /// [lines] without Paprika's link syntax ("1 batch [recipe:Pizza Dough]"
+  /// is "1 batch Pizza Dough"), and the title each line links to, by its
+  /// place in the list.
+  static (List<String>, Map<int, String>) _paprikaLinks(List<String> lines) {
+    final titles = <int, String>{};
+    final out = <String>[];
+    for (final line in lines) {
+      final first = _paprikaLink.firstMatch(line);
+      if (first == null) {
+        out.add(line);
+        continue;
+      }
+      titles[out.length] = first.group(1)!;
+      out.add(line.replaceAllMapped(_paprikaLink, (m) => m.group(1)!).replaceAll(RegExp(r'\s{2,}'), ' ').trim());
+    }
+    return (out, titles);
   }
 
   /// What a Mela recipe is known by: a title and a short text next to the
@@ -4344,19 +4394,33 @@ class RecipeImportEngine {
     return _mealMasterBanner.hasMatch(content) || _mealMasterFields.hasMatch(content);
   }
 
+  /// Where one Meal-Master recipe begins or ends: the line that opens it
+  /// ("MMMMM----- Recipe via Meal-Master (tm) v8.05", "---------- Recipe via
+  /// Meal-Master", MasterCook's "----- Exported from ...") and the bare
+  /// "MMMMM" or "-----" that closes it.
+  static final _mealMasterDelimiter = RegExp(
+    r'^(?:(?:MMMMM|-{5,})-*[ \t]*(?:Recipe via\b|[^\n]{0,40}Meal-?Master)[^\n]*'
+    r'|-{5,}[ \t]*Exported from[^\n]*'
+    r'|MMMMM[ \t]*\r?|-----[ \t]*\r?)$',
+    multiLine: true,
+    caseSensitive: false,
+  );
+
+  /// A section header inside a Meal-Master recipe. Group 1 is its name.
+  static final _mealMasterSection = RegExp(r'^(?:MMMMM-*|-{5,})\s*(.*?)\s*-*$');
+
   /// Parse MealMaster format (*.mmf, *.mk).
   /// Format: recipes delimited by MMMMM markers or ----- Recipe via Meal-Master headers.
   /// Each recipe has: Title, Categories, Yield, then ingredients, then directions.
   static List<ImportedRecipe> _parseMealMaster(String content) {
     final recipes = <ImportedRecipe>[];
 
-    // Split into recipe blocks.
-    // MealMaster uses MMMMM lines or "---------- Recipe via Meal-Master" as delimiters
-    final blocks = content.split(RegExp(
-      r'(?:^MMMMM.*$|^-{5,}\s*Recipe via Meal-Master.*$|^-{5,}\s*Exported from.*$)',
-      multiLine: true,
-      caseSensitive: false,
-    ));
+    // Split into recipe blocks. A recipe opens with "MMMMM----- Recipe via
+    // Meal-Master" (or "---------- Recipe via Meal-Master") and ends with a
+    // bare "MMMMM" (or "-----"). The other MMMMM lines are the headers of
+    // sections inside a recipe ("MMMMM-----FOR THE SAUCE-----"), and stay
+    // in it.
+    final blocks = content.split(_mealMasterDelimiter);
 
     for (final block in blocks) {
       final trimmed = block.trim();
@@ -4371,6 +4435,9 @@ class RecipeImportEngine {
       final lines = trimmed.split('\n');
       var inIngredients = true; // MealMaster: ingredients come before directions
       var hitBlankAfterIngredients = false;
+      // A section header was the last line: a blank line under it does not
+      // end the ingredients.
+      var afterHeader = false;
 
       for (final rawLine in lines) {
         final line = rawLine.trimRight();
@@ -4389,22 +4456,29 @@ class RecipeImportEngine {
           continue;
         }
 
-        // Skip MMMMM section markers within block
-        if (RegExp(r'^MMMMM-+').hasMatch(line.trim())) {
-          // This is a sub-section marker (e.g., "MMMMM----- FOR THE SAUCE")
-          final sectionName = line.replaceAll(RegExp(r'^MMMMM-+\s*'), '').replaceAll(RegExp(r'-+$'), '').trim();
-          if (sectionName.isNotEmpty) ingredients.add('— $sectionName —');
+        // A section header inside the recipe ("MMMMM-----FOR THE SAUCE-----",
+        // or in dashes alone). The ingredients go on under it.
+        final section = _mealMasterSection.firstMatch(line.trim());
+        if (section != null) {
+          final sectionName = section.group(1)!.trim();
+          if (sectionName.isNotEmpty) {
+            ingredients.add('— $sectionName —');
+            inIngredients = true;
+            hitBlankAfterIngredients = false;
+            afterHeader = true;
+          }
           continue;
         }
 
         final trimmedLine = line.trim();
         if (trimmedLine.isEmpty) {
           // Blank line after ingredients = switch to instructions
-          if (inIngredients && ingredients.isNotEmpty) {
+          if (inIngredients && ingredients.isNotEmpty && !afterHeader) {
             hitBlankAfterIngredients = true;
           }
           continue;
         }
+        afterHeader = false;
 
         // MealMaster ingredient format: "  1 1/2 c  Flour, all-purpose" or "           -- sifted"
         // Columns: amount (1-7), unit (8-9), ingredient name (11+)
@@ -4415,14 +4489,15 @@ class RecipeImportEngine {
               RegExp(r'^\s{7,}').hasMatch(line) && trimmedLine.length > 2) {
             // MealMaster two-column: ingredient | ingredient
             // Each column is ~41 chars
+            // Its unit codes ("T", "t", "pn", "ea") are written out.
             if (line.length > 42 && RegExp(r'\d').hasMatch(line.substring(41))) {
               // Two-column
               final col1 = line.substring(0, 41).trim();
               final col2 = line.substring(41).trim();
-              if (col1.isNotEmpty) ingredients.add(col1);
-              if (col2.isNotEmpty) ingredients.add(col2);
+              if (col1.isNotEmpty) ingredients.add(mealMasterIngredient(col1));
+              if (col2.isNotEmpty) ingredients.add(mealMasterIngredient(col2));
             } else {
-              ingredients.add(trimmedLine);
+              ingredients.add(mealMasterIngredient(trimmedLine));
             }
           } else if (trimmedLine.startsWith('--') || trimmedLine.startsWith('-')) {
             // Continuation or note for previous ingredient

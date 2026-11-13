@@ -143,35 +143,33 @@ class MasterCookImporter {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException(_damaged);
+      throw const FileImportException.damaged(_app);
     }
 
-    final photo = ImportSupport.photosIn(archive);
+    final unzip = BoundedUnzip.forArchive(bytes.length);
+    final photo = ImportSupport.photosIn(archive, unzip);
     final recipes = <ImportedRecipe>[];
     var documents = 0;
     var unreadable = false;
     for (final file in archive.files) {
       if (!file.isFile || !file.name.toLowerCase().endsWith('.mx2')) continue;
       documents++;
-      final String content;
-      try {
-        content = ImportSupport.decodeText(file.content as List<int>);
-      } catch (_) {
+      final bytes = unzip.tryBytesOf(file);
+      if (bytes == null) {
         // The archive lists the file but its data does not unpack.
         unreadable = true;
         continue;
       }
-      recipes.addAll(importMx2(content, filename, photo: photo));
+      recipes.addAll(importMx2(ImportSupport.decodeText(bytes), filename, photo: photo));
     }
     if (documents == 0) {
-      throw const FormatException('This .mz2 file does not contain a MasterCook .mx2 document.');
+      throw const FileImportException.noRecipes(_app, 'This .mz2 file does not contain a MasterCook .mx2 document.');
     }
-    if (recipes.isEmpty && unreadable) throw const FormatException(_damaged);
+    if (recipes.isEmpty && unreadable) throw const FileImportException.damaged(_app);
     return recipes;
   }
 
-  static const _damaged =
-      'This MasterCook file is damaged or incomplete. Export it again and retry.';
+  static const _app = 'MasterCook';
 
   /// Reads one recipe from the lines [start] to [end] of a text export. Null
   /// when they hold no ingredient table: MasterCook writes one for every

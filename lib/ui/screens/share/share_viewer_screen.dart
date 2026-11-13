@@ -677,7 +677,7 @@ class _FullRecipeView extends StatelessWidget {
           const SizedBox(height: 20),
           _sectionTitle(context, l10n.nutritionTitle),
           const SizedBox(height: 12),
-          _nutritionBlock(context, nutrition),
+          _nutritionBlock(context, nutrition, servingsCountOf(recipe['servings'] as String?)),
         ],
 
         if (ingredients.isNotEmpty) ...[
@@ -801,18 +801,20 @@ class _FullRecipeView extends StatelessWidget {
     );
   }
 
-  Widget _nutritionBlock(BuildContext context, NutritionData n) {
+  /// One serving of [stored], as the recipe page shows it, for a recipe of
+  /// [servings].
+  Widget _nutritionBlock(BuildContext context, NutritionData stored, int? servings) {
     final l10n = AppLocalizations.of(context)!;
-    final div = (n.calculatedServings != null && n.calculatedServings! > 0) ? n.calculatedServings! : 1;
-    double? per(double? v) => v == null ? null : v / div;
+    final n = stored.perServingOf(servings);
+    final count = servings ?? stored.calculatedServings ?? 1;
 
     final secondary = <(String, double, String)>[
-      if (n.fiber != null) ('Fiber', per(n.fiber)!, 'g'),
-      if (n.sugar != null) ('Sugar', per(n.sugar)!, 'g'),
-      if (n.saturatedFat != null) ('Sat. Fat', per(n.saturatedFat)!, 'g'),
-      if (n.sodium != null) ('Sodium', per(n.sodium)!, 'mg'),
-      if (n.cholesterol != null) ('Cholesterol', per(n.cholesterol)!, 'mg'),
-      if (n.potassium != null) ('Potassium', per(n.potassium)!, 'mg'),
+      if (n.fiber != null) (l10n.nutritionFiber, n.fiber!, 'g'),
+      if (n.sugar != null) (l10n.nutritionSugar, n.sugar!, 'g'),
+      if (n.saturatedFat != null) (l10n.nutritionSaturatedFat, n.saturatedFat!, 'g'),
+      if (n.sodium != null) (l10n.nutritionSodium, n.sodium!, 'mg'),
+      if (n.cholesterol != null) (l10n.nutritionCholesterol, n.cholesterol!, 'mg'),
+      if (n.potassium != null) (l10n.nutritionPotassium, n.potassium!, 'mg'),
     ];
 
     final theme = Theme.of(context);
@@ -820,11 +822,11 @@ class _FullRecipeView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MacroRing(
-          calories: per(n.calories) ?? 0,
-          protein: per(n.protein) ?? 0,
-          carbs: per(n.carbohydrates) ?? 0,
-          fat: per(n.fat) ?? 0,
-          caption: div > 1 ? l10n.perServing : null,
+          calories: n.calories ?? 0,
+          protein: n.protein ?? 0,
+          carbs: n.carbohydrates ?? 0,
+          fat: n.fat ?? 0,
+          caption: count > 1 ? l10n.perServing : null,
         ),
         if (secondary.isNotEmpty) ...[
           const SizedBox(height: 16),

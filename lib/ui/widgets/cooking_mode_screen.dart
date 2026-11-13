@@ -237,11 +237,12 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen>
         .where((s) => s.notes != '__header__')
         .toList();
 
-    // Load nutrition if available
+    // Load nutrition if available: one serving, as the recipe page shows it
     NutritionData? nutrition;
     if (recipe.nutritionJson != null) {
       try {
-        nutrition = NutritionData.fromJson(jsonDecode(recipe.nutritionJson!));
+        nutrition = NutritionData.fromJson(jsonDecode(recipe.nutritionJson!))
+            .perServingOf(servingsCountOf(recipe.servings));
       } catch (_) {}
     }
 

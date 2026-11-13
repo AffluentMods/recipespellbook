@@ -5,6 +5,7 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 
 import '../models/imported_recipe.dart';
+import 'limited_fetch.dart';
 import 'recipe_import_engine.dart';
 import 'web_page_decoder.dart';
 
@@ -303,6 +304,10 @@ class VideoRecipeImporter {
   final ImportCancellation? cancellation;
   final Duration requestTimeout;
   final Duration overallTimeout;
+
+  /// The most of a page or caption file that is read. A video page is a
+  /// megabyte or two.
+  static const maxPageBytes = 16 * 1024 * 1024;
 
   /// Reads the recipe of the video [link] points to. Throws a
   /// [VideoImportException] when the video cannot be read, and
@@ -681,7 +686,17 @@ class VideoRecipeImporter {
     Map<String, String>? headers,
     Duration? timeout,
   }) {
-    return _guard(platform, client.get(url, headers: headers ?? RecipeImportEngine.pageHeaders()),
+    // Read no further than a page can be: a link to the film itself is not
+    // downloaded.
+    return _guard(
+        platform,
+        getLimited(
+          url,
+          headers: headers ?? RecipeImportEngine.pageHeaders(),
+          client: client,
+          maxBytes: maxPageBytes,
+          timeout: timeout ?? requestTimeout,
+        ),
         timeout ?? requestTimeout);
   }
 

@@ -13,6 +13,7 @@ import '../../../services/imported_recipe_saver.dart';
 import '../../../services/video_recipe_import.dart';
 import '../../../utils/recipe_similarity.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/platform_brand.dart';
@@ -29,6 +30,12 @@ class ImportPreviewScreen extends ConsumerStatefulWidget {
   /// text: video text is no written recipe, and the person should check it.
   final VideoTextSource? videoTextSource;
 
+  /// A folder of working files the recipes point at (the photos cut out of
+  /// a PDF, or carried inside an export). Saving copies the ones it keeps,
+  /// and the folder is deleted once this screen is gone and no save is
+  /// still reading from it.
+  final String? temporaryFolder;
+
   const ImportPreviewScreen({
     super.key,
     required this.recipes,
@@ -36,7 +43,17 @@ class ImportPreviewScreen extends ConsumerStatefulWidget {
     this.sourceText,
     this.sourceUrl,
     this.videoTextSource,
+    this.temporaryFolder,
   });
+
+  /// Deletes [folder] and what is in it. Never throws.
+  static Future<void> deleteTemporaryFolder(String folder) async {
+    try {
+      await Directory(folder).delete(recursive: true);
+    } catch (_) {
+      // Gone already, or the system cleans its temp folder up itself.
+    }
+  }
 
   @override
   ConsumerState<ImportPreviewScreen> createState() => _ImportPreviewScreenState();
@@ -67,6 +84,18 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   /// Rows the duplicate check unticked. A row the user ticks or unticks
   /// leaves this set: from then on the choice is theirs.
   final Set<int> _leftOut = {};
+
+  /// The save in progress, which may still read from the temporary folder.
+  Future<Object?>? _saving;
+
+  @override
+  void dispose() {
+    final folder = widget.temporaryFolder;
+    if (folder != null) {
+      (_saving ?? Future<Object?>.value()).whenComplete(() => ImportPreviewScreen.deleteTemporaryFolder(folder));
+    }
+    super.dispose();
+  }
 
   /// What the library has, so each card can show the course, category and
   /// tags its recipe will be saved with.
@@ -228,7 +257,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
 
     var closing = false;
     try {
-      final result = await _saveAll(selectedRecipes, l10n);
+      final saving = _saveAll(selectedRecipes, l10n);
+      _saving = saving;
+      final result = await saving;
       if (!mounted) {
         final below = _contextOnTop(navigator);
         if (below != null && below.mounted && (result.imported > 0 || result.errors.isNotEmpty)) {
@@ -282,7 +313,12 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         final images = await Future.wait([
           for (final recipe in batch)
             documentsDir != null && _hasImage(recipe)
-                ? ImportedRecipeSaver.storeImage(recipe, documentsDir: documentsDir, client: client)
+                ? ImportedRecipeSaver.storeImage(
+                    recipe,
+                    documentsDir: documentsDir,
+                    client: client,
+                    temporaryFolder: widget.temporaryFolder,
+                  )
                 : Future<String?>.value(),
         ]);
 

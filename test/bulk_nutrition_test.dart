@@ -238,8 +238,27 @@ void main() {
       ingredients: [(await db.recipeDao.getIngredientsForRecipe('parfait'))[0]],
       servings: '2',
     );
-    // The jam line is the jam recipe's whole total (servings 2, scale 1).
-    expect((parfait['calories'] as num).toDouble(), closeTo(yogurt.totalNutrition.calories! + 321, 0.01));
+    // Jam's nutrition was entered as one serving (no servings stored with
+    // it): the jam line is the whole recipe, its 2 servings at scale 1.
+    expect((parfait['calories'] as num).toDouble(), closeTo(yogurt.totalNutrition.calories! + 321 * 2, 0.01));
+  });
+
+  test('a linked sub-recipe entered by hand: one serving before, the total since', () async {
+    // Entered now: the total of 4 servings of 100 kcal. Entered before: one
+    // serving of 100 kcal. Either way the whole sauce is 400 kcal.
+    final enteredNow = jsonEncode(
+        NutritionData.storedFromPerServing(const NutritionData(calories: 100, protein: 1), 4).toJson());
+    const enteredBefore = '{"calories":100.0,"protein":1.0}';
+    for (final sauce in [enteredNow, enteredBefore]) {
+      await db.delete(db.recipeLinks).go();
+      await db.delete(db.ingredients).go();
+      await db.delete(db.recipes).go();
+      await addRecipe('pasta', 'Pasta', [('1', null, 'tomato sauce')]);
+      await addRecipe('sauce', 'Tomato Sauce', [('1', 'can', 'tomatoes')], servings: '4', nutrition: sauce);
+      await link('pasta', 0, 'sauce', scale: 0.5);
+      await run(BulkNutritionScope.missingOnly);
+      expect((await stored('pasta'))!['calories'], closeTo(200, 0.01), reason: sauce);
+    }
   });
 
   test('a circle of links does not hang; the recipe that closes it reads the stored value', () async {

@@ -364,8 +364,9 @@ class BulkNutritionCalculator {
       }
 
       // The linked sub-recipes, as the sheet builds them: the first link of
-      // each ingredient, the linked recipe's stored total divided by its
-      // servings, at the link's scale.
+      // each ingredient, one serving of the linked recipe (a stored total
+      // divided by its servings, one serving entered by hand as it is), at
+      // the link's scale.
       final recipeLinks = await linksOf(recipe.id);
       final linked = <String, LinkedRecipeNutrition>{};
       for (final ingredient in ingredients) {
@@ -378,7 +379,7 @@ class BulkNutritionCalculator {
         linked[ingredient.name] = LinkedRecipeNutrition(
           recipeId: target.id,
           recipeTitle: target.title,
-          perServingNutrition: stored?.scaled(1.0 / linkedServings),
+          perServingNutrition: stored?.perServingOf(linkedServings),
           servingCount: linkedServings,
           scale: info.scale,
         );

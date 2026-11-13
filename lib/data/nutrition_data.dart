@@ -447,6 +447,41 @@ class NutritionData {
   /// Check if nutrition data has any values
   bool get isNotEmpty => !isEmpty;
 
+  // A recipe's stored nutrition comes in two forms. With
+  // [calculatedServings] set it is the whole recipe's total: what the
+  // calculator saves, and what the Enter Manually tab saves since 2.1.1.
+  // Without it, it is one serving: what Enter Manually saved before, and
+  // what some imports bring. Everything that reads stored nutrition goes
+  // through [perServingOf] or [totalOf], so the recipe page, the nutrition
+  // sheet, linked sub-recipes, the cookbook calculation and the share page
+  // all agree.
+
+  /// One serving of a recipe that makes [servings] (its count now, see
+  /// [servingsCountOf]). A total is divided by that count, or by the count
+  /// it was made for when the recipe gives none. One serving is kept as it
+  /// is.
+  NutritionData perServingOf(int? servings) {
+    final made = calculatedServings;
+    if (made == null) return this;
+    final count = servings != null && servings > 0 ? servings : made;
+    return count > 1 ? scaled(1.0 / count) : this;
+  }
+
+  /// The whole of a recipe that makes [servings]. A total is kept as it is,
+  /// one serving is multiplied by the count (one when there is none).
+  NutritionData totalOf(int? servings) {
+    if (calculatedServings != null) return this;
+    final count = servings != null && servings > 0 ? servings : 1;
+    return scaled(count.toDouble());
+  }
+
+  /// [perServing] (what one serving holds) in the stored form: the total of
+  /// [servings] with that count in [calculatedServings].
+  static NutritionData storedFromPerServing(NutritionData perServing, int? servings) {
+    final count = servings != null && servings > 0 ? servings : 1;
+    return perServing.scaled(count.toDouble()).copyWith(calculatedServings: count);
+  }
+
   /// Empty nutrition data constant
   static const empty = NutritionData();
 }

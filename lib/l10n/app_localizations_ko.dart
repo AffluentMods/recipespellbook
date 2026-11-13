@@ -12716,4 +12716,366 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get shareCookbookTooLarge => '이 요리책은 일회용 링크로 보내기에는 너무 큽니다. 레시피를 하나씩 공유하거나 요리책을 커뮤니티에 게시하세요.';
+
+  @override
+  String get nutriSheetAmountNotWeighed => '분량 확인';
+
+  @override
+  String get nutriSheetLookupFailed => '조회할 수 없습니다';
+
+  @override
+  String get fileImportEmpty => '이 파일은 비어 있습니다.';
+
+  @override
+  String get fileImportUnsupported => '지원하지 않는 파일 형식입니다.';
+
+  @override
+  String get fileImportNotText => '파일이 손상되었거나 텍스트 파일이 아닙니다.';
+
+  @override
+  String get fileImportRichText => '서식 있는 텍스트 파일은 지원하지 않습니다. 레시피를 일반 텍스트로 저장한 뒤 다시 시도하세요.';
+
+  @override
+  String get fileImportUnknownXml => '이 XML 파일은 앱에서 읽을 수 있는 레시피 내보내기 파일이 아닙니다.';
+
+  @override
+  String get fileImportDamagedZip => 'ZIP 파일이 손상되었거나 불완전합니다. 다시 내보낸 뒤 시도하세요.';
+
+  @override
+  String get fileImportOwnBackup => 'Recipe Spellbook 백업 파일입니다. 설정의 데이터 가져오기에서 복원하세요.';
+
+  @override
+  String fileImportDamaged(String app) {
+    return '$app 파일이 손상되었거나 불완전합니다. 다시 내보낸 뒤 시도하세요.';
+  }
+
+  @override
+  String fileImportNoRecipes(String app) {
+    return '이 파일에는 $app 레시피가 없습니다.';
+  }
+
+  @override
+  String get fileImportTooLarge => '이 파일은 압축을 풀면 앱이 한 번에 읽을 수 있는 크기를 넘습니다. 한 번에 내보내는 레시피 수를 줄인 뒤 다시 시도하세요.';
+
+  @override
+  String importPdfRecipeNumbered(String name, int number) {
+    return '$name 레시피 $number';
+  }
+
+  @override
+  String get aiImportPasteFirst => '먼저 AI 응답을 붙여넣거나 불러오세요.';
+
+  @override
+  String aiImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '레시피 $count개를 가져왔습니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String aiImportErrInRecipe(int number, String problem) {
+    return '레시피 $number: $problem';
+  }
+
+  @override
+  String get aiImportErrNoRecipes => '레시피를 찾지 못했습니다. 응답에 레시피가 하나 이상 있어야 합니다.';
+
+  @override
+  String get aiImportErrInvalidJson => '올바른 레시피 JSON이 아닙니다. 응답 전체를 복사했는지 확인하세요.';
+
+  @override
+  String get aiImportErrCutOff => '괄호가 열린 뒤 닫히지 않았습니다. 응답이 중간에 잘렸을 수 있습니다.';
+
+  @override
+  String aiImportErrOutsideBrackets(String field) {
+    return '\"$field\"이(가) 레시피의 괄호 밖에 있습니다. 괄호나 따옴표가 빠졌거나, 지워야 할 설명일 수 있습니다.';
+  }
+
+  @override
+  String aiImportErrBlockUnreadable(int block, int count) {
+    return '$count개 중 $block번째 블록을 읽을 수 없습니다. 괄호나 따옴표가 빠졌을 수 있습니다.';
+  }
+
+  @override
+  String get aiImportErrMissingTitle => '\"title\" 필드가 없습니다.';
+
+  @override
+  String get aiImportErrMissingIngredients => '\"ingredients\" 목록이 없습니다.';
+
+  @override
+  String get aiImportErrNoIngredients => '\"ingredients\" 목록이 비어 있습니다. 레시피에는 재료가 하나 이상 있어야 합니다.';
+
+  @override
+  String aiImportErrIngredientInvalid(int number) {
+    return '재료 $number이(가) 올바른 객체가 아닙니다.';
+  }
+
+  @override
+  String aiImportErrIngredientNoName(int number) {
+    return '재료 $number에 \"name\"이 없습니다.';
+  }
+
+  @override
+  String get aiImportErrMissingSteps => '\"steps\" 목록이 없습니다.';
+
+  @override
+  String get aiImportErrNoSteps => '\"steps\" 목록이 비어 있습니다. 레시피에는 단계가 하나 이상 있어야 합니다.';
+
+  @override
+  String aiImportErrStepInvalid(int number) {
+    return '단계 $number이(가) 올바른 객체가 아닙니다.';
+  }
+
+  @override
+  String aiImportErrStepNoInstruction(int number) {
+    return '단계 $number에 \"instruction\"이 없습니다.';
+  }
+
+  @override
+  String get barcodeDataSource => 'Open Food Facts 데이터 (커뮤니티 제공)';
+
+  @override
+  String barcodeDataUpdated(String date) {
+    return '$date 업데이트';
+  }
+
+  @override
+  String get barcodeRecordIncomplete => '이 정보는 불완전해 보입니다. 일부 내용이 빠졌거나 오래되었을 수 있습니다.';
+
+  @override
+  String get importGuidePopularTag => '인기';
+
+  @override
+  String get importGuideOpenInApp => 'Recipe Spellbook에서 열기';
+
+  @override
+  String get importGuideReviewImport => '확인하고 가져오기';
+
+  @override
+  String get importGuideExportRecipes => '레시피 내보내기';
+
+  @override
+  String importGuideOpenApp(String app) {
+    return '$app 열기';
+  }
+
+  @override
+  String importGuideExportAs(String format) {
+    return '$format(으)로 내보내기';
+  }
+
+  @override
+  String importGuideGoToSite(String site) {
+    return '$site에 접속';
+  }
+
+  @override
+  String importGuidePickFile(String file) {
+    return 'Recipe Spellbook을 열고 +를 탭한 뒤 \"파일\"을 선택하고 $file 파일을 고르세요.';
+  }
+
+  @override
+  String importGuideOpenSettings(String app) {
+    return '$app을(를) 열고 설정으로 이동하세요.';
+  }
+
+  @override
+  String importGuideLogIn(String app) {
+    return '컴퓨터에서 $app 인스턴스에 로그인하세요.';
+  }
+
+  @override
+  String get importGuidePaprikaSubtitle => 'Paprika 3의 모든 레시피를 사진과 함께 가져오기';
+
+  @override
+  String get importGuidePaprikaStep1 => '기기에서 Paprika 3을 열고 설정 또는 파일 메뉴로 이동하세요.';
+
+  @override
+  String get importGuidePaprikaStep2Title => '모든 레시피 내보내기';
+
+  @override
+  String get importGuidePaprikaStep2 => '\"Export\"를 탭하고 \"Paprika Export Format\"(.paprikarecipes)을 선택하세요. 모든 레시피와 사진이 담긴 파일이 만들어집니다.';
+
+  @override
+  String get importGuidePaprikaStep2Tip => 'iOS/Android: 설정 > Export. 데스크톱: 파일 > Export.';
+
+  @override
+  String get importGuidePaprikaStep4 => '레시피를 미리 보고 원하지 않는 항목은 선택 해제한 뒤 가져오기를 탭하세요. 사진은 자동으로 포함됩니다.';
+
+  @override
+  String get importGuideMelaSubtitle => '레시피 관리 앱 Mela에서 레시피 가져오기';
+
+  @override
+  String get importGuideMelaStep2 => '\"Export\"를 탭하고 모든 레시피 내보내기를 선택하세요. .melarecipes 파일이 만들어집니다.';
+
+  @override
+  String get importGuideMelaStep2Tip => '개별 레시피를 .melarecipe 파일로 공유할 수도 있습니다.';
+
+  @override
+  String get importGuideMelaStep4 => '레시피를 미리 보고 가져오세요. 카테고리는 태그로 바뀝니다.';
+
+  @override
+  String get importGuideCroutonSubtitle => 'Crouton 앱에서 레시피 가져오기';
+
+  @override
+  String get importGuideCroutonStep2Title => '데이터 내보내기';
+
+  @override
+  String get importGuideCroutonStep2 => '\"Export\"를 탭해 모든 레시피가 담긴 .crumb 파일을 만드세요.';
+
+  @override
+  String get importGuideCroutonStep4 => '레시피를 미리 보고 가져오세요. 재료 구역은 그대로 유지됩니다.';
+
+  @override
+  String get importGuideRecipeKeeperSubtitle => 'Recipe Keeper에서 가져오기 (ZIP 또는 HTML)';
+
+  @override
+  String get importGuideRecipeKeeperStep1 => 'Recipe Keeper를 열고 설정 > Export로 이동하세요.';
+
+  @override
+  String get importGuideRecipeKeeperStep2 => '\"Export as ZIP\" 또는 \"Export as HTML\"을 선택하세요. ZIP 형식에는 사진이 포함됩니다.';
+
+  @override
+  String get importGuideRecipeKeeperStep2Tip => 'ZIP 내보내기를 권장합니다. 모든 레시피 사진이 포함됩니다.';
+
+  @override
+  String get importGuideRecipeKeeperStep3 => 'Recipe Spellbook을 열고 +를 탭한 뒤 \"파일\"을 선택하고 내보낸 ZIP 또는 HTML 파일을 고르세요.';
+
+  @override
+  String get importGuideRecipeKeeperStep4 => '모든 레시피가 자동으로 감지됩니다. 확인한 뒤 사진과 함께 가져오세요.';
+
+  @override
+  String get importGuideCopyMeThatSubtitle => 'CopyMeThat HTML 내보내기에서 가져오기';
+
+  @override
+  String get importGuideCopyMeThatStep1 => '컴퓨터에서 CopyMeThat.com에 로그인하세요.';
+
+  @override
+  String get importGuideCopyMeThatStep2 => 'Settings > Export로 이동해 모든 레시피가 담긴 HTML 파일을 내려받으세요.';
+
+  @override
+  String get importGuideCopyMeThatStep4 => 'HTML 파일의 모든 레시피를 읽어 가져올 준비를 합니다.';
+
+  @override
+  String get importGuideMealieSubtitle => '자체 호스팅 레시피 관리 앱 Mealie에서 가져오기';
+
+  @override
+  String get importGuideMealieStep2 => 'Admin > Backups에서 새 백업을 만들고 JSON 내보내기를 내려받으세요.';
+
+  @override
+  String get importGuideMealieStep2Tip => '레시피 페이지에서 개별 레시피를 JSON으로 내보낼 수도 있습니다.';
+
+  @override
+  String get importGuideMealieStep4 => 'Mealie의 레시피 데이터는 잘 정리되어 있어 모든 항목을 정확하게 가져옵니다.';
+
+  @override
+  String get importGuideTandoorSubtitle => 'Tandoor Recipes에서 가져오기';
+
+  @override
+  String get importGuideTandoorStep2 => 'Admin > Export로 이동해 레시피를 선택하고 JSON으로 내려받으세요.';
+
+  @override
+  String get importGuideTandoorStep4 => '키워드와 재료 정보가 그대로 유지됩니다. 확인하고 가져오세요.';
+
+  @override
+  String get importGuideCookmateSubtitle => 'Cookmate .mcb 내보내기에서 가져오기';
+
+  @override
+  String get importGuideCookmateStep1 => 'Cookmate(이전 이름 \"My CookBook\")를 열고 설정으로 이동하세요.';
+
+  @override
+  String get importGuideCookmateStep2 => 'Export를 탭하고 .mcb 형식을 선택하세요. 레시피와 사진이 포함됩니다.';
+
+  @override
+  String get importGuideCookmateStep4 => '모든 레시피를 카테고리, 사진과 함께 가져옵니다.';
+
+  @override
+  String get importGuidePlanToEatSubtitle => 'Plan to Eat CSV 내보내기에서 가져오기';
+
+  @override
+  String get importGuidePlanToEatStep1 => '컴퓨터에서 Plan to Eat 계정에 로그인하세요.';
+
+  @override
+  String get importGuidePlanToEatStep2 => 'Settings > Export Data로 이동해 레시피를 CSV 파일로 내려받으세요.';
+
+  @override
+  String get importGuidePlanToEatStep4 => '제목, 재료, 조리법, 태그, 시간 등 모든 열을 읽습니다.';
+
+  @override
+  String get importGuideMasterCookSubtitle => 'MasterCook .mxp 파일 가져오기';
+
+  @override
+  String get importGuideMasterCookStep1 => 'MasterCook을 열고 내보낼 레시피를 선택하세요.';
+
+  @override
+  String get importGuideMasterCookStep2 => '파일 > Export로 이동해 .mxp 형식을 선택하세요.';
+
+  @override
+  String get importGuideMasterCookStep4 => '고정 폭 서식을 자동으로 읽습니다. 레시피를 확인하고 가져오세요.';
+
+  @override
+  String get importGuideMealMasterSubtitle => 'Meal-Master .mmf 파일 가져오기';
+
+  @override
+  String get importGuideMealMasterStep1Title => '파일 찾기';
+
+  @override
+  String get importGuideMealMasterStep1 => '컴퓨터에서 Meal-Master .mmf 또는 .mk 파일을 찾으세요.';
+
+  @override
+  String get importGuideMealMasterStep2Tip => 'Meal-Master 파일 하나에 수백 개의 레시피가 들어 있을 수 있습니다.';
+
+  @override
+  String get importGuideMealMasterStep3 => '파일의 모든 레시피를 읽습니다. 두 열로 된 재료 목록도 지원합니다.';
+
+  @override
+  String get importGuideCooklangSubtitle => 'Cooklang .cook 레시피 파일 가져오기';
+
+  @override
+  String get importGuideCooklangStep1Title => '.cook 파일 찾기';
+
+  @override
+  String get importGuideCooklangStep1 => 'Cooklang 레시피 파일을 찾으세요. 확장자가 .cook인 일반 텍스트 파일입니다.';
+
+  @override
+  String get importGuideCooklangStep2Tip => 'Cooklang 표기(@재료, #조리도구, ~타이머)를 자동으로 읽습니다.';
+
+  @override
+  String get importGuideCooklangStep3 => '표기에서 재료를 뽑아내고 단계는 읽기 쉬운 글로 정리합니다.';
+
+  @override
+  String get importGuideLivingCookbookSubtitle => 'Living Cookbook .fdx 파일 가져오기';
+
+  @override
+  String get importGuideLivingCookbookStep1 => 'Living Cookbook을 열고 파일 > Export로 이동하세요.';
+
+  @override
+  String get importGuideLivingCookbookStep2 => 'FDX(Food Data Exchange) 형식을 선택하고 레시피를 내보내세요.';
+
+  @override
+  String get importGuideLivingCookbookStep4 => 'XML 데이터를 재료와 조리 과정이 정리된 레시피로 바꿉니다.';
+
+  @override
+  String get importGuideSamsungFoodSubtitle => 'Samsung Food JSON 내보내기에서 가져오기';
+
+  @override
+  String get importGuideSamsungFoodStep1Title => '데이터 요청하기';
+
+  @override
+  String get importGuideSamsungFoodStep1 => 'Samsung Food 앱이나 웹사이트를 열고 Settings > Privacy > Download My Data로 이동하세요.';
+
+  @override
+  String get importGuideSamsungFoodStep2Title => '내보내기 파일 내려받기';
+
+  @override
+  String get importGuideSamsungFoodStep2 => '다운로드 링크를 받게 됩니다(시간이 걸릴 수 있습니다). JSON 파일을 내려받으세요.';
+
+  @override
+  String get importGuideSamsungFoodStep2Tip => '예전에 Whisk를 사용했다면 형식은 같습니다.';
+
+  @override
+  String get importGuideSamsungFoodStep4 => 'Samsung Food의 레시피 데이터를 읽어 가져올 준비를 합니다.';
 }
