@@ -234,6 +234,8 @@ class SyncService {
       await prefs.remove(_key(prefix));
     }
     await prefs.remove(_legacyLastSyncKey);
+    final userId = _auth.currentUser?.id;
+    if (userId != null) await PantrySync.forget(prefs, userId);
     if (_db != null) await SyncJournal.clear(_db!);
   }
 
