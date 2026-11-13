@@ -115,7 +115,116 @@ const _dropWords = <String>{
   'at', 'cut', 'very', 'well', 'just', 'few', 'some', 'several', 'each',
   'any', 'other', 'such', 'as', 'like', 'preferably', 'if', 'possible',
   'available', 'your', 'favorite', 'favourite', 'brand', 'style', 'n',
+  // The same in the app's other languages (accents folded), enough for the
+  // usual "1 TL Salz", "sal al gusto", "щепотка соли".
+  // German.
+  'tl', 'el', 'teeloffel', 'essloffel', 'prise', 'prisen', 'msp',
+  'messerspitze', 'tasse', 'tassen', 'stuck', 'bund', 'dose', 'zehe',
+  'zehen', 'packchen', 'becher', 'etwas', 'nach', 'geschmack', 'belieben',
+  'frisch', 'frische', 'frischer', 'gemahlen', 'gemahlener', 'gemahlene',
+  'aus', 'der', 'die', 'das', 'dem', 'den', 'muhle', 'kalt', 'kaltes',
+  'kaltem', 'warmes', 'warmem', 'lauwarm', 'lauwarmes', 'heiss', 'heisses',
+  'gramm', 'zum', 'zur', 'fur', 'ca', 'grob', 'fein',
+  // Spanish and Portuguese.
+  'cucharada', 'cucharadita', 'cda', 'cdta', 'cdita', 'pizca', 'taza',
+  'gramo', 'al', 'gusto', 'de', 'del', 'la', 'un', 'una', 'poco', 'chorrito',
+  'diente', 'lata', 'fria', 'frio', 'caliente', 'tibia', 'tibio', 'molida',
+  'molido', 'recien', 'colher', 'colhere', 'pitada', 'xicara', 'gosto', 'da',
+  'do', 'um', 'uma', 'morna', 'quente', 'moida', 'dente',
+  // French.
+  'cuillere', 'cs', 'cc', 'cas', 'cac', 'pincee', 'gousse', 'boite',
+  'sachet', 'du', 'le', 'les', 'une', 'au', 'gout', 'froide', 'froid',
+  'chaude', 'chaud', 'tiede', 'moulu', 'fraichement', 'peu', 'selon',
+  // Italian.
+  'cucchiaio', 'cucchiai', 'cucchiaino', 'cucchiaini', 'pizzico', 'qb',
+  'tazza', 'spicchio', 'spicchi', 'di', 'po', 'fredda', 'freddo', 'calda',
+  'caldo', 'tiepida', 'macinato', 'macinata', 'fresco', 'fresca',
+  // Dutch.
+  'eetlepel', 'theelepel', 'snufje', 'mespunt', 'kopje', 'teen', 'teentje',
+  'beetje', 'naar', 'smaak', 'koud', 'koude', 'lauw', 'gemalen',
+  'versgemalen', 'vers', 'verse', 'een', 'van', 'het',
+  // Polish.
+  'lyzka', 'lyzki', 'lyzek', 'lyzeczka', 'lyzeczki', 'lyzeczek', 'szczypta',
+  'szczypty', 'szklanka', 'szklanki', 'zabek', 'zabki', 'smaku', 'troche',
+  'zimna', 'zimnej', 'ciepla', 'cieplej', 'mielony', 'mielonego', 'swiezo',
+  'swiezy',
+  // Russian.
+  'ст', 'ч', 'л', 'ложка', 'ложки', 'чайная', 'чайной', 'чайные', 'столовая',
+  'столовые', 'столовой', 'щепотка', 'щепотки', 'стакан', 'стакана', 'по',
+  'вкусу', 'г', 'гр', 'мл', 'кг', 'зубчик', 'зубчика', 'немного',
+  'холодной', 'холодная', 'теплой', 'тёплой', 'теплая', 'тёплая', 'горячей',
+  'молотый', 'молотого', 'свежемолотый', 'свежемолотого', 'для', 'шт',
 };
+
+/// The always-have basics (water, salt, pepper) in the app's other
+/// languages, folded to the English the basics are kept in, so "1 TL Salz",
+/// "agua" and "щепотка соли" count as basics like "salt" and "water" do.
+const _basicWords = <String, String>{
+  // Salt.
+  'salz': 'salt', 'sal': 'salt', 'sel': 'salt', 'sale': 'salt',
+  'zout': 'salt', 'sol': 'salt', 'soli': 'salt', 'соль': 'salt',
+  'соли': 'salt', 'солью': 'salt',
+  // Water.
+  'wasser': 'water', 'agua': 'water', 'eau': 'water', 'acqua': 'water',
+  'woda': 'water', 'wody': 'water', 'wode': 'water', 'вода': 'water',
+  'воды': 'water', 'воду': 'water', 'водой': 'water',
+  // Pepper, and the black of black pepper.
+  'pfeffer': 'pepper', 'pimienta': 'pepper', 'poivre': 'pepper',
+  'pepe': 'pepper', 'peper': 'pepper', 'pimenta': 'pepper',
+  'pieprz': 'pepper', 'pieprzu': 'pepper', 'перец': 'pepper',
+  'перца': 'pepper', 'перцем': 'pepper',
+  'schwarz': 'black', 'schwarzer': 'black', 'schwarzen': 'black',
+  'negra': 'black', 'noir': 'black', 'nero': 'black', 'zwarte': 'black',
+  'preta': 'black', 'czarny': 'black', 'czarnego': 'black',
+  'черный': 'black', 'чёрный': 'black', 'черного': 'black',
+  'чёрного': 'black', 'черным': 'black', 'чёрным': 'black',
+};
+
+/// Units and amounts in other languages that are more than one word, and
+/// names that are: removed (or put in English) before the line is split.
+final _foreignPhrases = <RegExp, String>{
+  // "cuillère à soupe", "c. à café": a spoon, not soup or coffee.
+  RegExp(r'\b(?:cuilleres?|c)\s*\.?\s*a\s+(?:soupe|cafe|the)\b'): ' ',
+  // "colher de sopa / chá": the same in Portuguese.
+  RegExp(r'\bcolher(?:es)?\s+(?:de\s+)?(?:sopa|cha|cafe|sobremesa)\b'): ' ',
+  // Portuguese black pepper.
+  RegExp(r'\bpimenta[\s-]+do[\s-]+reino\b'): ' black pepper ',
+  // Dutch "zout en peper": "en" is not split on, being "in" in French and
+  // Spanish ("atun en aceite"), so the pair is spelled out.
+  RegExp(r'\bzout\s+en\s+peper\b'): ' zout and peper ',
+};
+
+/// Chinese, Japanese and Korean lines: amounts and units, which are written
+/// against the food without spaces ("塩小さじ1", "盐适量", "간장 2큰술").
+final _cjkUnits = RegExp(
+  r'適量|适量|少许|少許|少量|少々|若干|一些|一点|一點|一撮|適宜|お好みで|ひとつまみ'
+  r'|大さじ|小さじ|カップ|茶匙|汤匙|湯匙|大匙|小匙'
+  r'|약간|조금|적당량|적당히|큰술|작은술|티스푼|테이블스푼|한꼬집|꼬집'
+  // A one-character unit only next to its number: 本 and 片 are also in
+  // food names (日本酒, 薯片).
+  r'|\d+(?:[./]\d+)?\s*(?:kg|g|ml|cc|l|个|個|只|片|根|瓣|块|塊|杯|碗|勺|克|斤|两|兩|颗|顆|条|條|张|張|包|罐|盒|袋|份|本|枚|切れ|かけ|束|缶|合|개|컵|줌|톨|쪽|장|대)'
+  r'|(?:个|個|片|根|本|枚|개|컵)\s*\d+',
+  caseSensitive: false,
+);
+
+/// Salt, water and pepper written in Chinese, Japanese or Korean, as the
+/// English the basics are kept in.
+const _cjkBasics = <String, List<String>>{
+  '盐': ['salt'], '鹽': ['salt'], '食盐': ['salt'], '食鹽': ['salt'],
+  '塩': ['salt'], '食塩': ['salt'], 'しお': ['salt'], '소금': ['salt'],
+  '水': ['water'], '清水': ['water'], '冷水': ['water'], '温水': ['water'],
+  '凉水': ['water'], 'お水': ['water'], '물': ['water'], '찬물': ['water'],
+  '黑胡椒': ['black', 'pepper'], '黑胡椒粉': ['black', 'pepper'],
+  '黒胡椒': ['black', 'pepper'], '黒こしょう': ['black', 'pepper'],
+  '黒コショウ': ['black', 'pepper'], 'ブラックペッパー': ['black', 'pepper'],
+  '흑후추': ['black', 'pepper'], '검은후추': ['black', 'pepper'],
+  '胡椒': ['pepper'], '胡椒粉': ['pepper'], 'こしょう': ['pepper'],
+  'コショウ': ['pepper'], '후추': ['pepper'], '후춧가루': ['pepper'],
+};
+
+/// "Salt and pepper" written as one word in Japanese and Chinese, and with a
+/// particle in Korean: spelled out so each is its own part.
+final _cjkSaltAndPepper = RegExp(r'塩こしょう|塩コショウ|塩胡椒|盐和胡椒|鹽和胡椒|소금과\s*후추');
 
 /// A word inside "for garnish", "to serve", "optional": the line is not
 /// needed to make the dish.
@@ -129,7 +238,10 @@ final _alsoNeededPattern = RegExp(r'\b(?:plus|more|additional)\b');
 final _bracketed = RegExp(r'\([^)]*\)|\[[^\]]*\]');
 final _noteStart = RegExp(r'[,;]');
 final _alternativeSplit = RegExp(r'\bor\b|(?<=\p{L})\s*/\s*(?=\p{L})', unicode: true);
-final _partSplit = RegExp(r'\band\b|&|\+|\bplus\b');
+final _partSplit = RegExp(
+  r'(?<!\p{L})(?:and|und|y|e|et|i|и|plus)(?!\p{L})|&|\+',
+  unicode: true,
+);
 final _nonLetter = RegExp(r'[^\p{L}]+', unicode: true);
 final _cjkChar = RegExp(r'[぀-ヿ㐀-鿿가-힯]');
 final _cjkSpace = RegExp(r'[\s\p{P}\d]+', unicode: true);
@@ -200,21 +312,49 @@ String singularize(String word) {
 /// left. [labelWords] collects the kept words as written, for display.
 FoodPhrase? _phraseOf(String text, [List<String>? labelWords]) {
   if (_cjkChar.hasMatch(text)) {
-    final compact = text.replaceAll(_cjkSpace, '');
+    final compact = text.replaceAll(_cjkUnits, ' ').replaceAll(_cjkSpace, '');
     if (compact.isEmpty) return null;
     labelWords?.add(text.trim());
+    final basic = _cjkBasics[compact];
+    if (basic != null) return FoodPhrase(basic);
     return FoodPhrase([compact], cjk: true);
   }
   final tokens = <String>[];
   for (final raw in text.split(_nonLetter)) {
-    if (raw.isEmpty) continue;
-    final word = singularize(raw);
+    // A single letter is an abbreviation ("c." for cup, "q.b."), never a food.
+    if (raw.length < 2) continue;
+    // Italian "sale" (salt) comes first; French "sale" (salé, salted)
+    // follows the food ("beurre sale"), like English "salted".
+    final word = raw == 'sale' && tokens.isNotEmpty
+        ? 'salted'
+        : _basicWords[raw] ?? singularize(raw);
     if (_dropWords.contains(word) || _dropWords.contains(raw)) continue;
     tokens.add(word);
     labelWords?.add(raw);
   }
   if (tokens.isEmpty) return null;
+  // "pimienta negra", "перец черный": the adjective after the noun.
+  final pepper = tokens.indexOf('pepper');
+  if (pepper >= 0 && pepper < tokens.length - 1 && tokens[pepper + 1] == 'black') {
+    tokens
+      ..removeAt(pepper)
+      ..add('pepper');
+  }
   return FoodPhrase(tokens);
+}
+
+/// [s] (accents folded) with the units and names of [_foreignPhrases] dealt
+/// with, and "salt and pepper" in one CJK word spelled out.
+String _foreignPrepass(String s) {
+  for (final e in _foreignPhrases.entries) {
+    s = s.replaceAll(e.key, e.value);
+  }
+  return s.replaceAllMapped(_cjkSaltAndPepper, (m) {
+    final w = m[0]!;
+    if (w.startsWith('소금')) return '소금 and 후추';
+    if (w.startsWith('盐') || w.startsWith('鹽')) return '${w[0]} and 胡椒';
+    return '塩 and こしょう';
+  });
 }
 
 /// Reduce one ingredient line ([name], with its prep [notes]) to the foods it
@@ -231,7 +371,7 @@ IngredientKey ingredientKeyFor(String name, {String? notes}) {
   for (final e in _joinedNames.entries) {
     if (s.contains(e.key)) s = s.replaceAll(e.key, e.value);
   }
-  s = canonicalizeFoodText(s);
+  s = canonicalizeFoodText(_foreignPrepass(s));
 
   final alternatives = <List<FoodPhrase>>[];
   final labelWords = <String>[];
@@ -255,7 +395,7 @@ FoodPhrase? pantryPhraseFor(String item) {
   for (final e in _joinedNames.entries) {
     if (s.contains(e.key)) s = s.replaceAll(e.key, e.value);
   }
-  return _phraseOf(canonicalizeFoodText(s));
+  return _phraseOf(canonicalizeFoodText(_foreignPrepass(s)));
 }
 
 // ── Matching ───────────────────────────────────────────────────────────────
@@ -322,6 +462,14 @@ const _partWords = <String>{
   'spear', 'heart', 'tip', 'half', 'tender', 'bulb',
 };
 
+/// Parts that are taken out of a food: having the part is not having the
+/// food. "Lemon juice" in the pantry does not cover a lemon, and "egg whites"
+/// do not cover eggs (the other way round is fine).
+const _takenOutParts = <String>{
+  'juice', 'zest', 'rind', 'peel', 'yolk', 'white', 'kernel', 'segment',
+  'heart', 'tip', 'wedge',
+};
+
 /// Foods that are not the base of the cheese named after them ("cream
 /// cheese" is not made from the cream in the pantry).
 const _notCheeseBases = <String>{'cream', 'cottage', 'milk', 'butter', 'goat'};
@@ -331,7 +479,15 @@ const _notCheeseBases = <String>{'cream', 'cottage', 'milk', 'butter', 'goat'};
 bool phraseCovers(FoodPhrase pantry, FoodPhrase ingredient) {
   if (pantry.text == ingredient.text) return true;
   if (pantry.cjk || ingredient.cjk) {
-    return ingredient.text.contains(pantry.text) || pantry.text.contains(ingredient.text);
+    if (!pantry.cjk || !ingredient.cjk) return false;
+    // Without spaces, a name inside a longer one is the nearest thing to the
+    // word rules. But one character is a word of its own and part of many
+    // other foods: 油 (oil) is in 酱油 (soy sauce) and 黄油 (butter). It
+    // only covers itself.
+    final p = pantry.text, i = ingredient.text;
+    if (p.runes.length >= 2 && i.contains(p)) return true;
+    if (i.runes.length >= 2 && p.contains(i)) return true;
+    return false;
   }
   final p = pantry.tokens;
   final i = ingredient.tokens;
@@ -351,12 +507,17 @@ bool phraseCovers(FoodPhrase pantry, FoodPhrase ingredient) {
     }
     return false;
   }
-  return _coversByPart(p, i) || _coversByPart(i, p);
+  // The recipe asks for a part of the pantry's food ("chicken" covers
+  // "chicken thigh"), or the pantry has a cut of the food the recipe asks
+  // for ("chicken thighs" cover "chicken"), but not a part taken out of it.
+  return _coversByPart(p, i) || _coversByPart(i, p, pantryHasPart: true);
 }
 
 /// Whether [longer] is [base] followed by part words only ("chicken" and
 /// "chicken thigh"), with anything in front of it ("boneless" is gone).
-bool _coversByPart(List<String> base, List<String> longer) {
+/// [pantryHasPart]: [longer] is what the pantry has, which must not be a
+/// part taken out of the food ([_takenOutParts]).
+bool _coversByPart(List<String> base, List<String> longer, {bool pantryHasPart = false}) {
   if (longer.length <= base.length) return false;
   for (var start = 0; start + base.length < longer.length; start++) {
     var found = true;
@@ -369,6 +530,7 @@ bool _coversByPart(List<String> base, List<String> longer) {
     if (!found) continue;
     final tail = longer.sublist(start + base.length);
     if (!tail.every(_partWords.contains)) continue;
+    if (pantryHasPart && tail.any(_takenOutParts.contains)) return false;
     if (tail.contains('cheese') && _notCheeseBases.contains(base.last)) return false;
     return true;
   }

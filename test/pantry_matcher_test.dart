@@ -140,6 +140,68 @@ void main() {
     });
   });
 
+  group("the basics in the app's other languages", () {
+    test('water, salt and pepper count as basics in all twelve', () {
+      for (final line in [
+        '1 TL Salz', 'Salz und Pfeffer', 'eine Prise Salz', 'schwarzer Pfeffer aus der Mühle', '200 ml Wasser',
+        'sal al gusto', 'sal y pimienta', 'pimienta negra molida', 'agua',
+        'sel et poivre', '1 c. à café de sel', 'poivre noir', "500 ml d'eau",
+        'sale e pepe q.b.', 'pepe nero', 'acqua',
+        'zout en peper', 'zwarte peper', 'water',
+        'sal e pimenta a gosto', 'pimenta-do-reino', 'água',
+        'szczypta soli', 'sól i pieprz do smaku', 'pieprz czarny mielony', 'woda',
+        'щепотка соли', 'Соль и перец по вкусу', 'перец черный молотый', 'вода',
+        '塩 少々', '塩こしょう 少々', '黒こしょう', '水 200ml', '小さじ1 塩',
+        '盐 适量', '黑胡椒粉', '清水',
+        '소금 약간', '후추 약간', '물 2컵',
+      ]) {
+        expect(cover(line, const []), IngredientCover.basic, reason: line);
+      }
+    });
+
+    test('foods named after them are still foods', () {
+      expect(cover('beurre salé', const []), IngredientCover.missing);
+      expect(cover('agua de coco', const []), IngredientCover.missing);
+      expect(cover('1 rote Paprika', const []), IngredientCover.missing);
+    });
+
+    test('a pantry item in another language covers the English line', () {
+      expect(has('1 tsp salt', ['Salz']), isTrue);
+      expect(has('2 cups water', ['agua']), isTrue);
+    });
+  });
+
+  group('Chinese, Japanese and Korean names', () {
+    test('a one-character name only covers itself', () {
+      expect(has('酱油 2汤匙', ['油']), isFalse, reason: 'soy sauce is not oil');
+      expect(has('黄油 50克', ['油']), isFalse, reason: 'butter is not oil');
+      expect(has('油 1汤匙', ['油']), isTrue);
+      expect(has('油', ['酱油']), isFalse, reason: 'soy sauce does not cover oil');
+    });
+
+    test('longer names cover the lines they are part of', () {
+      expect(has('老抽酱油 1汤匙', ['酱油']), isTrue);
+      expect(has('酱油', ['生抽酱油']), isTrue);
+      expect(has('鸡蛋 2个', ['鸡蛋']), isTrue);
+      expect(has('醤油 大さじ2', ['醤油']), isTrue);
+      expect(has('간장 2큰술', ['간장']), isTrue);
+    });
+  });
+
+  group('the pantry having a part of a food', () {
+    test('a part taken out of it does not give the food', () {
+      expect(has('1 lemon', ['lemon juice']), isFalse);
+      expect(has('3 eggs', ['egg whites']), isFalse);
+      expect(has('1 orange', ['orange zest']), isFalse);
+    });
+
+    test('a cut of it still does', () {
+      expect(has('1 lb chicken', ['chicken thighs']), isTrue);
+      expect(has('broccoli', ['broccoli florets']), isTrue);
+      expect(has('2 egg whites', ['eggs']), isTrue, reason: 'the other way round is fine');
+    });
+  });
+
   test('pantry items already covered are recognised for quick add', () {
     final matcher = PantryMatcher(pantry: ['eggs', 'olive oil'], basics: ['salt']);
     expect(matcher.hasItem('Egg'), isTrue);
