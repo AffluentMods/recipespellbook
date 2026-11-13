@@ -4870,5 +4870,6 @@
   "mealPlanNextWeekend": "W przyszły weekend",
   "shoppingAlreadyPlanned": "Już w planie posiłków: {when}",
   "communityPreviewViewFullRecipe": "Zobacz pełny przepis",
-  "communityFollowFailed": "Nie udało się zmienić obserwowanych. Sprawdź połączenie i spróbuj ponownie."
+  "communityFollowFailed": "Nie udało się zmienić obserwowanych. Sprawdź połączenie i spróbuj ponownie.",
+  "communityPublishPhotosUnsupported": "Niektóre zdjęcia mają format, którego to urządzenie nie odczyta (np. HEIC), więc pominięto je w:"
 }

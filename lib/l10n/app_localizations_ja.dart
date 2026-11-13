@@ -12549,4 +12549,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityFollowFailed => 'フォローを変更できませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String get communityPublishPhotosUnsupported => '一部の写真はこのデバイスで読み込めない形式（HEICなど）のため、次のレシピから除外されました:';
 }

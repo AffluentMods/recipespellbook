@@ -12713,4 +12713,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityFollowFailed => 'Volgen kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Sommige foto\'s hebben een formaat dat dit apparaat niet kan lezen (zoals HEIC) en zijn daarom weggelaten bij:';
 }

@@ -7,6 +7,7 @@ import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/services/auth_service.dart';
@@ -79,7 +80,8 @@ void main() {
 
   test('offline is not refused: the photo goes up later', () async {
     await http.runWithClient(() async {
-      final photo = File(p.join(phone.temp.path, 'photo.png'))..writeAsBytesSync([1, 2, 3, 4]);
+      final photo = File(p.join(phone.temp.path, 'photo.png'))
+        ..writeAsBytesSync(img.encodePng(img.Image(width: 4, height: 4)));
       expect(await upload(photo), isNull);
       expect(ImageService.instance.lastUploadRefused, isFalse);
     }, () => server(offline: true));

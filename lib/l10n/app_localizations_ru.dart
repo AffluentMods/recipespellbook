@@ -12917,4 +12917,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityFollowFailed => 'Не удалось изменить подписку. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Некоторые фото в формате, который это устройство не может прочитать (например, HEIC), поэтому они не вошли в:';
 }

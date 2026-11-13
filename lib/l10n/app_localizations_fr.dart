@@ -12701,4 +12701,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get communityFollowFailed => 'Impossible de modifier vos abonnements. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Certaines photos sont dans un format que cet appareil ne sait pas lire (comme HEIC) et ont été retirées de :';
 }

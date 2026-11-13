@@ -135,6 +135,9 @@ class PublishRunResult {
   /// With [photosFailed]: the recipes whose photos did not upload.
   final List<String> failedRecipes;
 
+  /// Recipes whose photos are in a format this device cannot read (left out).
+  final List<String> unsupportedRecipes;
+
   const PublishRunResult._({
     this.success = false,
     this.cancelled = false,
@@ -149,6 +152,7 @@ class PublishRunResult {
     this.photosReused = 0,
     this.rejectedRecipes = const [],
     this.failedRecipes = const [],
+    this.unsupportedRecipes = const [],
   });
 
   static const _cancelled = PublishRunResult._(cancelled: true);
@@ -479,6 +483,7 @@ class CommunityPublishPipeline {
       var pathMapping = <String, String>{}; // local path → server path
       var totalImageBytes = 0;
       var rejected = <String>[];
+      var unsupported = <String>[];
       var storeKeys = <String>[];
       var photoKeys = <String, ({String serverPath, int bytes})>{};
       var reused = 0;
@@ -521,9 +526,10 @@ class CommunityPublishPipeline {
             errorMessage: l10n.communityPublishPhotosFailedTitle,
             uploadedImages: photos.uploaded.length,
             totalImages: job.photoPaths.length,
-            skippedImages: photos.rejected.length + photos.failed.length,
+            skippedImages: photos.rejected.length + photos.unsupported.length + photos.failed.length,
             failedRecipes: job.recipesFor(photos.failed),
             rejectedRecipes: job.recipesFor(photos.rejected),
+            unsupportedRecipes: job.recipesFor(photos.unsupported),
           ));
           return PublishRunResult._(
             error: l10n.communityPublishPhotosFailedTitle,
@@ -535,6 +541,7 @@ class CommunityPublishPipeline {
         pathMapping = photos.uploaded;
         totalImageBytes = photos.bytesSent;
         rejected = photos.rejected;
+        unsupported = photos.unsupported;
         storeKeys = photos.storeKeys;
         photoKeys = photos.photoKeys;
         reused = photos.reused;
@@ -559,6 +566,7 @@ class CommunityPublishPipeline {
       ];
       final cookbookImagePath = serverPath(job.coverPath);
       final rejectedRecipes = job.recipesFor(rejected);
+      final unsupportedRecipes = job.recipesFor(unsupported);
       final photosSent = pathMapping.length - reused;
 
       Future<void> forgetUploadedPhotos() async {
@@ -615,6 +623,7 @@ class CommunityPublishPipeline {
           totalImages: pathMapping.length,
           skippedImages: rejected.length,
           rejectedRecipes: rejectedRecipes,
+          unsupportedRecipes: unsupportedRecipes,
           publicationId: republishPublicationId,
         ));
         return PublishRunResult._(
@@ -624,6 +633,7 @@ class CommunityPublishPipeline {
           photosSent: photosSent,
           photosReused: reused,
           rejectedRecipes: rejectedRecipes,
+          unsupportedRecipes: unsupportedRecipes,
         );
       }
 
@@ -680,6 +690,7 @@ class CommunityPublishPipeline {
           totalImages: pathMapping.length,
           skippedImages: rejected.length,
           rejectedRecipes: rejectedRecipes,
+          unsupportedRecipes: unsupportedRecipes,
           publicationId: result.publicationId,
         ));
         return PublishRunResult._(
@@ -689,6 +700,7 @@ class CommunityPublishPipeline {
           photosSent: photosSent,
           photosReused: reused,
           rejectedRecipes: rejectedRecipes,
+          unsupportedRecipes: unsupportedRecipes,
         );
       }
 

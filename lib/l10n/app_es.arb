@@ -4397,5 +4397,6 @@
   "mealPlanNextWeekend": "Próximo Fin de Semana",
   "shoppingAlreadyPlanned": "Ya está en tu plan de comidas: {when}",
   "communityPreviewViewFullRecipe": "Ver receta completa",
-  "communityFollowFailed": "No se pudo cambiar a quién sigues. Comprueba tu conexión e inténtalo de nuevo."
+  "communityFollowFailed": "No se pudo cambiar a quién sigues. Comprueba tu conexión e inténtalo de nuevo.",
+  "communityPublishPhotosUnsupported": "Algunas fotos tienen un formato que este dispositivo no puede leer (como HEIC), así que se omitieron en:"
 }

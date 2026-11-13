@@ -4870,5 +4870,6 @@
   "mealPlanNextWeekend": "В следующие выходные",
   "shoppingAlreadyPlanned": "Уже в плане питания: {when}",
   "communityPreviewViewFullRecipe": "Посмотреть полный рецепт",
-  "communityFollowFailed": "Не удалось изменить подписку. Проверьте подключение и попробуйте снова."
+  "communityFollowFailed": "Не удалось изменить подписку. Проверьте подключение и попробуйте снова.",
+  "communityPublishPhotosUnsupported": "Некоторые фото в формате, который это устройство не может прочитать (например, HEIC), поэтому они не вошли в:"
 }

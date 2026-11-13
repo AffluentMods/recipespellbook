@@ -408,6 +408,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           builder: (ctx, progress, _) {
             final status = progress?.status ?? 'preparing';
             final rejected = progress?.rejectedRecipes ?? const <String>[];
+            final unsupported = progress?.unsupportedRecipes ?? const <String>[];
             final failed = progress?.failedRecipes ?? const <String>[];
             final waitSeconds = progress?.waitSeconds ?? 0;
 
@@ -427,6 +428,16 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     ),
                     const SizedBox(height: 8),
                     _RecipeTitleList(titles: rejected),
+                  ],
+                  if (unsupported.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.communityPublishPhotosUnsupported,
+                      style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    _RecipeTitleList(titles: unsupported),
                   ],
                   if (offerNotifications) ...[
                     const SizedBox(height: 16),

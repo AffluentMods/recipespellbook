@@ -3895,5 +3895,6 @@
   "mealPlanNextWeekend": "Week-end prochain",
   "shoppingAlreadyPlanned": "Déjà au menu : {when}",
   "communityPreviewViewFullRecipe": "Voir la recette complète",
-  "communityFollowFailed": "Impossible de modifier vos abonnements. Vérifiez votre connexion et réessayez."
+  "communityFollowFailed": "Impossible de modifier vos abonnements. Vérifiez votre connexion et réessayez.",
+  "communityPublishPhotosUnsupported": "Certaines photos sont dans un format que cet appareil ne sait pas lire (comme HEIC) et ont été retirées de :"
 }

@@ -4870,5 +4870,6 @@
   "mealPlanNextWeekend": "Volgend weekend",
   "shoppingAlreadyPlanned": "Staat al in je maaltijdplan: {when}",
   "communityPreviewViewFullRecipe": "Volledig recept bekijken",
-  "communityFollowFailed": "Volgen kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw."
+  "communityFollowFailed": "Volgen kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw.",
+  "communityPublishPhotosUnsupported": "Sommige foto's hebben een formaat dat dit apparaat niet kan lezen (zoals HEIC) en zijn daarom weggelaten bij:"
 }

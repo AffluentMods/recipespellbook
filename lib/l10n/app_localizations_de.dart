@@ -12701,4 +12701,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get communityFollowFailed => 'Folgen konnte nicht geändert werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Einige Fotos haben ein Format, das dieses Gerät nicht lesen kann (etwa HEIC), und fehlen deshalb bei:';
 }

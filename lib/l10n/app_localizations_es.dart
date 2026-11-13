@@ -12694,4 +12694,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get communityFollowFailed => 'No se pudo cambiar a quién sigues. Comprueba tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Algunas fotos tienen un formato que este dispositivo no puede leer (como HEIC), así que se omitieron en:';
 }

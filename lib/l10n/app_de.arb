@@ -4432,5 +4432,6 @@
   "mealPlanNextWeekend": "Nächstes Wochenende",
   "shoppingAlreadyPlanned": "Schon im Essensplan: {when}",
   "communityPreviewViewFullRecipe": "Vollständiges Rezept anzeigen",
-  "communityFollowFailed": "Folgen konnte nicht geändert werden. Prüfe deine Verbindung und versuche es erneut."
+  "communityFollowFailed": "Folgen konnte nicht geändert werden. Prüfe deine Verbindung und versuche es erneut.",
+  "communityPublishPhotosUnsupported": "Einige Fotos haben ein Format, das dieses Gerät nicht lesen kann (etwa HEIC), und fehlen deshalb bei:"
 }

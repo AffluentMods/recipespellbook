@@ -22050,6 +22050,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not change who you follow. Check your connection and try again.'**
   String get communityFollowFailed;
+
+  /// On the publish screen once published: some photos were in a format the device cannot read (HEIC or AVIF) and were left out. The recipe titles follow in a list.
+  ///
+  /// In en, this message translates to:
+  /// **'Some photos are in a format this device cannot read (such as HEIC), so they were left out of:'**
+  String get communityPublishPhotosUnsupported;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

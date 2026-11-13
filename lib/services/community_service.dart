@@ -659,6 +659,10 @@ class PublishProgress {
   /// was published. The publish screen offers to retry just those photos.
   final List<String> failedRecipes;
 
+  /// Recipes whose photos are in a format this device cannot read (HEIC or
+  /// AVIF without a decoder): left out of the publication.
+  final List<String> unsupportedRecipes;
+
   const PublishProgress({
     required this.status,
     this.uploadedImages = 0,
@@ -669,6 +673,7 @@ class PublishProgress {
     this.waitSeconds = 0,
     this.rejectedRecipes = const [],
     this.failedRecipes = const [],
+    this.unsupportedRecipes = const [],
   });
 
   PublishProgress copyWith({
@@ -681,6 +686,7 @@ class PublishProgress {
     int? waitSeconds,
     List<String>? rejectedRecipes,
     List<String>? failedRecipes,
+    List<String>? unsupportedRecipes,
   }) => PublishProgress(
     status: status ?? this.status,
     uploadedImages: uploadedImages ?? this.uploadedImages,
@@ -691,6 +697,7 @@ class PublishProgress {
     waitSeconds: waitSeconds ?? this.waitSeconds,
     rejectedRecipes: rejectedRecipes ?? this.rejectedRecipes,
     failedRecipes: failedRecipes ?? this.failedRecipes,
+    unsupportedRecipes: unsupportedRecipes ?? this.unsupportedRecipes,
   );
 }
 

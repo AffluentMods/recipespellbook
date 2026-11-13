@@ -12577,4 +12577,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityFollowFailed => '팔로우를 변경하지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get communityPublishPhotosUnsupported => '일부 사진은 이 기기에서 읽을 수 없는 형식(HEIC 등)이라 다음 레시피에서 제외되었습니다:';
 }

@@ -12545,4 +12545,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityFollowFailed => '无法更改关注状态。请检查网络连接后重试。';
+
+  @override
+  String get communityPublishPhotosUnsupported => '部分照片的格式（如 HEIC）无法在此设备上读取，已从以下食谱中移除：';
 }

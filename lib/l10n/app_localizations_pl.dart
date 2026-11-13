@@ -12927,4 +12927,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityFollowFailed => 'Nie udało się zmienić obserwowanych. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Niektóre zdjęcia mają format, którego to urządzenie nie odczyta (np. HEIC), więc pominięto je w:';
 }

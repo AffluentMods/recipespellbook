@@ -6480,5 +6480,9 @@
   "communityFollowFailed": "Could not change who you follow. Check your connection and try again.",
   "@communityFollowFailed": {
     "description": "Snackbar on a creator's profile when following or unfollowing did not go through."
+  },
+  "communityPublishPhotosUnsupported": "Some photos are in a format this device cannot read (such as HEIC), so they were left out of:",
+  "@communityPublishPhotosUnsupported": {
+    "description": "On the publish screen once published: some photos were in a format the device cannot read (HEIC or AVIF) and were left out. The recipe titles follow in a list."
   }
 }
