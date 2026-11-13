@@ -323,7 +323,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       debugPrint('[Init] Wiring services failed: $e');
     }
 
-    // 2. Restore auth session (must be first — determines signed-in state).
+    // 2. Restore auth session (must be first: it decides the signed-in state).
     //    It settles on signed out when the keychain cannot be read; a failure
     //    here must still let every later step run.
     try {
