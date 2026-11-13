@@ -12574,4 +12574,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => '전체 레시피 보기';
+
+  @override
+  String get nutriSheetAmountNotWeighed => '분량 확인';
+
+  @override
+  String get nutriSheetLookupFailed => '조회할 수 없습니다';
 }

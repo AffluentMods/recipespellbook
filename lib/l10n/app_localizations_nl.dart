@@ -12710,4 +12710,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Volledig recept bekijken';
+
+  @override
+  String get nutriSheetAmountNotWeighed => 'hoeveelheid controleren';
+
+  @override
+  String get nutriSheetLookupFailed => 'Kon niet worden opgezocht';
 }

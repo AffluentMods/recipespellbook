@@ -12704,4 +12704,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Vedi ricetta completa';
+
+  @override
+  String get nutriSheetAmountNotWeighed => 'verifica la quantità';
+
+  @override
+  String get nutriSheetLookupFailed => 'Ricerca non riuscita';
 }

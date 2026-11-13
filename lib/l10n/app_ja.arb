@@ -4869,5 +4869,7 @@
   "pressBackAgainToExit": "もう一度「戻る」を押すと終了します",
   "mealPlanNextWeekend": "来週末",
   "shoppingAlreadyPlanned": "すでに献立にあります：{when}",
-  "communityPreviewViewFullRecipe": "レシピ全体を表示"
+  "communityPreviewViewFullRecipe": "レシピ全体を表示",
+  "nutriSheetAmountNotWeighed": "分量を確認",
+  "nutriSheetLookupFailed": "調べられませんでした"
 }

@@ -22044,6 +22044,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View full recipe'**
   String get communityPreviewViewFullRecipe;
+
+  /// Nutrition sheet, in brackets after an ingredient whose food was found but whose amount or unit could not be turned into grams, so it adds nothing yet.
+  ///
+  /// In en, this message translates to:
+  /// **'check the amount'**
+  String get nutriSheetAmountNotWeighed;
+
+  /// Nutrition sheet, the status of an ingredient whose nutrition lookup failed with an error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not be looked up'**
+  String get nutriSheetLookupFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -837,7 +837,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         case MatchStatus.uncertain:
           icon = Icons.help;
           color = orangeColor;
-          statusText = '${item.usdaFood?.description ?? item.matchDescription ?? ''} (${l10n.nutritionUncertain})';
+          final check = item.amountNotWeighed ? l10n.nutriSheetAmountNotWeighed : l10n.nutritionUncertain;
+          statusText = '${item.usdaFood?.description ?? item.matchDescription ?? ''} ($check)';
           break;
         case MatchStatus.notFound:
           icon = Icons.cancel;
@@ -847,7 +848,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         case MatchStatus.error:
           icon = Icons.error;
           color = redColor;
-          statusText = item.errorMessage ?? l10n.errorGeneric;
+          // The calculator's message is the error in English, for the log.
+          statusText = l10n.nutriSheetLookupFailed;
           break;
         case MatchStatus.linkedRecipe:
           icon = Icons.check_circle;

@@ -4869,5 +4869,7 @@
   "pressBackAgainToExit": "Нажмите «Назад» ещё раз, чтобы выйти",
   "mealPlanNextWeekend": "В следующие выходные",
   "shoppingAlreadyPlanned": "Уже в плане питания: {when}",
-  "communityPreviewViewFullRecipe": "Посмотреть полный рецепт"
+  "communityPreviewViewFullRecipe": "Посмотреть полный рецепт",
+  "nutriSheetAmountNotWeighed": "проверить количество",
+  "nutriSheetLookupFailed": "Не удалось найти данные"
 }

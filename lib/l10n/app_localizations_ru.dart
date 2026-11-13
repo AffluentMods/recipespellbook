@@ -12914,4 +12914,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Посмотреть полный рецепт';
+
+  @override
+  String get nutriSheetAmountNotWeighed => 'проверить количество';
+
+  @override
+  String get nutriSheetLookupFailed => 'Не удалось найти данные';
 }

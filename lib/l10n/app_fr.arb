@@ -3894,5 +3894,7 @@
   "pressBackAgainToExit": "Appuyez de nouveau sur Retour pour quitter",
   "mealPlanNextWeekend": "Week-end prochain",
   "shoppingAlreadyPlanned": "Déjà au menu : {when}",
-  "communityPreviewViewFullRecipe": "Voir la recette complète"
+  "communityPreviewViewFullRecipe": "Voir la recette complète",
+  "nutriSheetAmountNotWeighed": "vérifier la quantité",
+  "nutriSheetLookupFailed": "Recherche impossible"
 }

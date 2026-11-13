@@ -4869,5 +4869,7 @@
   "pressBackAgainToExit": "Pressione voltar novamente para sair",
   "mealPlanNextWeekend": "Próximo Fim de Semana",
   "shoppingAlreadyPlanned": "Já está no plano de refeições: {when}",
-  "communityPreviewViewFullRecipe": "Ver receita completa"
+  "communityPreviewViewFullRecipe": "Ver receita completa",
+  "nutriSheetAmountNotWeighed": "verificar a quantidade",
+  "nutriSheetLookupFailed": "Não foi possível consultar"
 }

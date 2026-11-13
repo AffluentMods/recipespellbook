@@ -12542,4 +12542,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => '查看完整食谱';
+
+  @override
+  String get nutriSheetAmountNotWeighed => '确认用量';
+
+  @override
+  String get nutriSheetLookupFailed => '无法查询';
 }

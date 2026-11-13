@@ -4869,5 +4869,7 @@
   "pressBackAgainToExit": "뒤로 버튼을 한 번 더 누르면 종료됩니다",
   "mealPlanNextWeekend": "다음 주말",
   "shoppingAlreadyPlanned": "이미 식단 계획에 있습니다: {when}",
-  "communityPreviewViewFullRecipe": "전체 레시피 보기"
+  "communityPreviewViewFullRecipe": "전체 레시피 보기",
+  "nutriSheetAmountNotWeighed": "분량 확인",
+  "nutriSheetLookupFailed": "조회할 수 없습니다"
 }

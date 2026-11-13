@@ -12546,4 +12546,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'レシピ全体を表示';
+
+  @override
+  String get nutriSheetAmountNotWeighed => '分量を確認';
+
+  @override
+  String get nutriSheetLookupFailed => '調べられませんでした';
 }

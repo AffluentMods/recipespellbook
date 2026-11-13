@@ -4431,5 +4431,7 @@
   "pressBackAgainToExit": "Zum Beenden noch einmal Zurück drücken",
   "mealPlanNextWeekend": "Nächstes Wochenende",
   "shoppingAlreadyPlanned": "Schon im Essensplan: {when}",
-  "communityPreviewViewFullRecipe": "Vollständiges Rezept anzeigen"
+  "communityPreviewViewFullRecipe": "Vollständiges Rezept anzeigen",
+  "nutriSheetAmountNotWeighed": "Menge prüfen",
+  "nutriSheetLookupFailed": "Konnte nicht nachgeschlagen werden"
 }

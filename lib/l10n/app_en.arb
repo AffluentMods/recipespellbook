@@ -6476,5 +6476,13 @@
   "communityPreviewViewFullRecipe": "View full recipe",
   "@communityPreviewViewFullRecipe": {
     "description": "Button in the Community recipe preview that opens the whole recipe."
+  },
+  "nutriSheetAmountNotWeighed": "check the amount",
+  "@nutriSheetAmountNotWeighed": {
+    "description": "Nutrition sheet, in brackets after an ingredient whose food was found but whose amount or unit could not be turned into grams, so it adds nothing yet."
+  },
+  "nutriSheetLookupFailed": "Could not be looked up",
+  "@nutriSheetLookupFailed": {
+    "description": "Nutrition sheet, the status of an ingredient whose nutrition lookup failed with an error."
   }
 }
