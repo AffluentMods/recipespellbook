@@ -4881,5 +4881,7 @@
   "pantryCookLineFrom": "{ingredient}：{items}",
   "cookingStopTimer": "タイマーを止める",
   "cookingStartTimerFor": "{duration}のタイマーを開始",
-  "durationSeconds": "{count}秒"
+  "durationSeconds": "{count}秒",
+  "notifChannelCookingTimers": "調理タイマー",
+  "notifChannelCookingTimersDesc": "調理モードのタイマーが終わったとき"
 }

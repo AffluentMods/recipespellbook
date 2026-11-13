@@ -4881,5 +4881,7 @@
   "pantryCookLineFrom": "{ingredient}: {items}",
   "cookingStopTimer": "타이머 중지",
   "cookingStartTimerFor": "{duration} 타이머 시작",
-  "durationSeconds": "{count}초"
+  "durationSeconds": "{count}초",
+  "notifChannelCookingTimers": "요리 타이머",
+  "notifChannelCookingTimersDesc": "요리 모드 타이머가 끝나면"
 }

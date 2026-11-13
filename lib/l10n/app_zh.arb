@@ -4881,5 +4881,7 @@
   "pantryCookLineFrom": "{ingredient}：{items}",
   "cookingStopTimer": "停止计时器",
   "cookingStartTimerFor": "开始{duration}计时",
-  "durationSeconds": "{count}秒"
+  "durationSeconds": "{count}秒",
+  "notifChannelCookingTimers": "烹饪计时器",
+  "notifChannelCookingTimersDesc": "烹饪模式中的计时器结束时"
 }

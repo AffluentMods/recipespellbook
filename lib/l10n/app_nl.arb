@@ -4881,5 +4881,7 @@
   "pantryCookLineFrom": "{ingredient}: {items}",
   "cookingStopTimer": "Timer stoppen",
   "cookingStartTimerFor": "Timer van {duration} starten",
-  "durationSeconds": "{count} sec"
+  "durationSeconds": "{count} sec",
+  "notifChannelCookingTimers": "Kookwekkers",
+  "notifChannelCookingTimersDesc": "Als een timer in de kookmodus afloopt"
 }

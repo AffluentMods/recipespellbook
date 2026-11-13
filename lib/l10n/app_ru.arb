@@ -4881,5 +4881,7 @@
   "pantryCookLineFrom": "{ingredient}: {items}",
   "cookingStopTimer": "Остановить таймер",
   "cookingStartTimerFor": "Запустить таймер на {duration}",
-  "durationSeconds": "{count} сек"
+  "durationSeconds": "{count} сек",
+  "notifChannelCookingTimers": "Кухонные таймеры",
+  "notifChannelCookingTimersDesc": "Когда заканчивается таймер в режиме готовки"
 }

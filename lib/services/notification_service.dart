@@ -60,9 +60,14 @@ class NotificationService {
   /// app's language, see [localizeChannels].
   static const _communityChannelId = 'community';
 
-  /// Channels earlier versions made for notifications nothing sends
-  /// (cooking reminders, achievements). Removed from the phone's settings.
-  static const _retiredChannelIds = ['cooking_reminders', 'achievements'];
+  /// Cooking mode timers (CookingTimerAlerts schedules on it). The id is
+  /// the one earlier versions used for cooking reminders, so a phone keeps
+  /// the user's settings for it.
+  static const cookingChannelId = 'cooking_reminders';
+
+  /// A channel earlier versions made for notifications nothing sends
+  /// (achievements). Removed from the phone's settings.
+  static const _retiredChannelIds = ['achievements'];
 
   /// The community channel's name, as last localized.
   String _communityChannelName = 'Community Updates';
@@ -84,6 +89,12 @@ class NotificationService {
         l10n.settingsNotifCommunity,
         description: l10n.settingsNotifNewDownloadsSubtitle,
         importance: Importance.defaultImportance,
+      ));
+      await android.createNotificationChannel(AndroidNotificationChannel(
+        cookingChannelId,
+        l10n.notifChannelCookingTimers,
+        description: l10n.notifChannelCookingTimersDesc,
+        importance: Importance.high,
       ));
       for (final id in _retiredChannelIds) {
         await android.deleteNotificationChannel(id);

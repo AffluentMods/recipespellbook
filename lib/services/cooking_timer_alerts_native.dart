@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../utils/platform_utils.dart';
+import 'notification_service.dart';
 
 /// Schedules the "timer done" notification for a cooking mode timer through
 /// the local notifications NotificationService sets up on phones, on its
@@ -14,8 +15,9 @@ class CookingTimerAlerts {
   static final _plugin = FlutterLocalNotificationsPlugin();
   static bool _asked = false;
 
-  /// NotificationService's cooking channel (created at startup).
-  static const _channelId = 'cooking_reminders';
+  /// NotificationService's cooking channel (created at startup, named in
+  /// the app's language; the name below only applies if it is missing).
+  static const _channelId = NotificationService.cookingChannelId;
   static const _channelName = 'Cooking Reminders';
 
   /// Where NotificationService initialises the plugin.

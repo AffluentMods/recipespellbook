@@ -12972,4 +12972,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String durationSeconds(int count) {
     return '$count сек';
   }
+
+  @override
+  String get notifChannelCookingTimers => 'Кухонные таймеры';
+
+  @override
+  String get notifChannelCookingTimersDesc => 'Когда заканчивается таймер в режиме готовки';
 }

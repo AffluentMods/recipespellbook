@@ -12601,4 +12601,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String durationSeconds(int count) {
     return '$count秒';
   }
+
+  @override
+  String get notifChannelCookingTimers => '調理タイマー';
+
+  @override
+  String get notifChannelCookingTimersDesc => '調理モードのタイマーが終わったとき';
 }

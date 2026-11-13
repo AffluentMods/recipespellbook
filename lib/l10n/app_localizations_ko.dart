@@ -12629,4 +12629,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String durationSeconds(int count) {
     return '$count초';
   }
+
+  @override
+  String get notifChannelCookingTimers => '요리 타이머';
+
+  @override
+  String get notifChannelCookingTimersDesc => '요리 모드 타이머가 끝나면';
 }

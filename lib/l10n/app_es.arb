@@ -4408,5 +4408,7 @@
   "pantryCookLineFrom": "{ingredient}: {items}",
   "cookingStopTimer": "Detener temporizador",
   "cookingStartTimerFor": "Iniciar un temporizador de {duration}",
-  "durationSeconds": "{count} s"
+  "durationSeconds": "{count} s",
+  "notifChannelCookingTimers": "Temporizadores de cocina",
+  "notifChannelCookingTimersDesc": "Cuando termina un temporizador del modo cocina"
 }

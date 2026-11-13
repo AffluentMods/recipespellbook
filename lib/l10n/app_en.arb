@@ -6568,5 +6568,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "notifChannelCookingTimers": "Cooking timers",
+  "notifChannelCookingTimersDesc": "When a timer in cooking mode finishes"
 }

@@ -22116,6 +22116,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} sec'**
   String durationSeconds(int count);
+
+  /// No description provided for @notifChannelCookingTimers.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking timers'**
+  String get notifChannelCookingTimers;
+
+  /// No description provided for @notifChannelCookingTimersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When a timer in cooking mode finishes'**
+  String get notifChannelCookingTimersDesc;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

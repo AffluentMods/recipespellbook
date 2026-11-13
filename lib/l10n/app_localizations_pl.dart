@@ -12982,4 +12982,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String durationSeconds(int count) {
     return '$count s';
   }
+
+  @override
+  String get notifChannelCookingTimers => 'Minutniki kuchenne';
+
+  @override
+  String get notifChannelCookingTimersDesc => 'Gdy skończy się minutnik w trybie gotowania';
 }

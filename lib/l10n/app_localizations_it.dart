@@ -12760,4 +12760,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String durationSeconds(int count) {
     return '$count s';
   }
+
+  @override
+  String get notifChannelCookingTimers => 'Timer di cucina';
+
+  @override
+  String get notifChannelCookingTimersDesc => 'Quando finisce un timer della modalità cucina';
 }

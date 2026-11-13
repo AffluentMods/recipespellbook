@@ -12741,4 +12741,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String durationSeconds(int count) {
     return '$count s';
   }
+
+  @override
+  String get notifChannelCookingTimers => 'Temporizadores de cozinha';
+
+  @override
+  String get notifChannelCookingTimersDesc => 'Quando um temporizador do modo cozinha termina';
 }

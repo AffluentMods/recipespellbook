@@ -12597,4 +12597,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String durationSeconds(int count) {
     return '$count秒';
   }
+
+  @override
+  String get notifChannelCookingTimers => '烹饪计时器';
+
+  @override
+  String get notifChannelCookingTimersDesc => '烹饪模式中的计时器结束时';
 }

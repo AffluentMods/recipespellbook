@@ -4881,5 +4881,7 @@
   "pantryCookLineFrom": "{ingredient}: {items}",
   "cookingStopTimer": "Zatrzymaj timer",
   "cookingStartTimerFor": "Uruchom timer na {duration}",
-  "durationSeconds": "{count} s"
+  "durationSeconds": "{count} s",
+  "notifChannelCookingTimers": "Minutniki kuchenne",
+  "notifChannelCookingTimersDesc": "Gdy skończy się minutnik w trybie gotowania"
 }

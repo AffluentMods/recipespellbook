@@ -12766,4 +12766,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String durationSeconds(int count) {
     return '$count sec';
   }
+
+  @override
+  String get notifChannelCookingTimers => 'Kookwekkers';
+
+  @override
+  String get notifChannelCookingTimersDesc => 'Als een timer in de kookmodus afloopt';
 }
