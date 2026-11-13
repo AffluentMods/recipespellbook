@@ -3893,5 +3893,6 @@
   "pressBackAgainToExit": "Premi di nuovo Indietro per uscire",
   "mealPlanNextWeekend": "Prossimo fine settimana",
   "shoppingAlreadyPlanned": "Già nel piano dei pasti: {when}",
-  "communityPreviewViewFullRecipe": "Vedi ricetta completa"
+  "communityPreviewViewFullRecipe": "Vedi ricetta completa",
+  "communityFollowFailed": "Impossibile aggiornare chi segui. Controlla la connessione e riprova."
 }

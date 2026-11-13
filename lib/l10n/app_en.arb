@@ -6476,5 +6476,9 @@
   "communityPreviewViewFullRecipe": "View full recipe",
   "@communityPreviewViewFullRecipe": {
     "description": "Button in the Community recipe preview that opens the whole recipe."
+  },
+  "communityFollowFailed": "Could not change who you follow. Check your connection and try again.",
+  "@communityFollowFailed": {
+    "description": "Snackbar on a creator's profile when following or unfollowing did not go through."
   }
 }

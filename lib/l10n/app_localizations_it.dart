@@ -12704,4 +12704,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Vedi ricetta completa';
+
+  @override
+  String get communityFollowFailed => 'Impossibile aggiornare chi segui. Controlla la connessione e riprova.';
 }

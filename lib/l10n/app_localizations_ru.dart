@@ -12914,4 +12914,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Посмотреть полный рецепт';
+
+  @override
+  String get communityFollowFailed => 'Не удалось изменить подписку. Проверьте подключение и попробуйте снова.';
 }

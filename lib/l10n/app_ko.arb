@@ -4869,5 +4869,6 @@
   "pressBackAgainToExit": "뒤로 버튼을 한 번 더 누르면 종료됩니다",
   "mealPlanNextWeekend": "다음 주말",
   "shoppingAlreadyPlanned": "이미 식단 계획에 있습니다: {when}",
-  "communityPreviewViewFullRecipe": "전체 레시피 보기"
+  "communityPreviewViewFullRecipe": "전체 레시피 보기",
+  "communityFollowFailed": "팔로우를 변경하지 못했습니다. 연결을 확인하고 다시 시도하세요."
 }

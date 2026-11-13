@@ -12574,4 +12574,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => '전체 레시피 보기';
+
+  @override
+  String get communityFollowFailed => '팔로우를 변경하지 못했습니다. 연결을 확인하고 다시 시도하세요.';
 }

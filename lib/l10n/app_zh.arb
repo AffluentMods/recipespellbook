@@ -4869,5 +4869,6 @@
   "pressBackAgainToExit": "再按一次返回键退出",
   "mealPlanNextWeekend": "下周末",
   "shoppingAlreadyPlanned": "已在膳食计划中：{when}",
-  "communityPreviewViewFullRecipe": "查看完整食谱"
+  "communityPreviewViewFullRecipe": "查看完整食谱",
+  "communityFollowFailed": "无法更改关注状态。请检查网络连接后重试。"
 }

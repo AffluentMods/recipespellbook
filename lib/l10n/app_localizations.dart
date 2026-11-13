@@ -22044,6 +22044,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View full recipe'**
   String get communityPreviewViewFullRecipe;
+
+  /// Snackbar on a creator's profile when following or unfollowing did not go through.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change who you follow. Check your connection and try again.'**
+  String get communityFollowFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

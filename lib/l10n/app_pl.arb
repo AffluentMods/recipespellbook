@@ -4869,5 +4869,6 @@
   "pressBackAgainToExit": "Naciśnij ponownie Wstecz, aby wyjść",
   "mealPlanNextWeekend": "W przyszły weekend",
   "shoppingAlreadyPlanned": "Już w planie posiłków: {when}",
-  "communityPreviewViewFullRecipe": "Zobacz pełny przepis"
+  "communityPreviewViewFullRecipe": "Zobacz pełny przepis",
+  "communityFollowFailed": "Nie udało się zmienić obserwowanych. Sprawdź połączenie i spróbuj ponownie."
 }

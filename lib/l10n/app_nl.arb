@@ -4869,5 +4869,6 @@
   "pressBackAgainToExit": "Druk nogmaals op Terug om af te sluiten",
   "mealPlanNextWeekend": "Volgend weekend",
   "shoppingAlreadyPlanned": "Staat al in je maaltijdplan: {when}",
-  "communityPreviewViewFullRecipe": "Volledig recept bekijken"
+  "communityPreviewViewFullRecipe": "Volledig recept bekijken",
+  "communityFollowFailed": "Volgen kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw."
 }

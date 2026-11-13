@@ -12542,4 +12542,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => '查看完整食谱';
+
+  @override
+  String get communityFollowFailed => '无法更改关注状态。请检查网络连接后重试。';
 }

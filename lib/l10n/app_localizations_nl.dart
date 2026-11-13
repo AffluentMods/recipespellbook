@@ -12710,4 +12710,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Volledig recept bekijken';
+
+  @override
+  String get communityFollowFailed => 'Volgen kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw.';
 }

@@ -12546,4 +12546,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'レシピ全体を表示';
+
+  @override
+  String get communityFollowFailed => 'フォローを変更できませんでした。接続を確認して、もう一度お試しください。';
 }

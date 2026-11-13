@@ -12698,4 +12698,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Voir la recette complète';
+
+  @override
+  String get communityFollowFailed => 'Impossible de modifier vos abonnements. Vérifiez votre connexion et réessayez.';
 }

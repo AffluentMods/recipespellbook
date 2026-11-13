@@ -905,32 +905,37 @@ class CommunityService {
   //  Follow / Unfollow
   // ────────────────────────────────────
 
-  /// Follow a creator. Returns updated follow state + follower count.
-  Future<({bool following, int followerCount})> followCreator(String userId) async {
+  /// Follow a creator. Returns the new follow state and follower count, or
+  /// null when it did not go through (offline, signed out, server error).
+  Future<({bool following, int followerCount})?> followCreator(String userId) async {
     try {
       final r = await _auth.post('/v1/community/creator/$userId/follow', {});
-      if (r.statusCode == 200) {
-        final data = jsonDecode(r.body);
-        return (following: data['following'] as bool, followerCount: data['followerCount'] as int);
-      }
+      if (r.statusCode == 200) return _followState(jsonDecode(r.body));
     } catch (e) {
       debugPrint('[Community] follow: $e');
     }
-    return (following: false, followerCount: 0);
+    return null;
   }
 
-  /// Unfollow a creator. Returns updated follow state + follower count.
-  Future<({bool following, int followerCount})> unfollowCreator(String userId) async {
+  /// Unfollow a creator. Returns the new follow state and follower count,
+  /// or null when it did not go through, so a failure never looks like a
+  /// successful unfollow.
+  Future<({bool following, int followerCount})?> unfollowCreator(String userId) async {
     try {
       final r = await _auth.delete('/v1/community/creator/$userId/follow');
-      if (r.statusCode == 200) {
-        final data = jsonDecode(r.body);
-        return (following: data['following'] as bool, followerCount: data['followerCount'] as int);
-      }
+      if (r.statusCode == 200) return _followState(jsonDecode(r.body));
     } catch (e) {
       debugPrint('[Community] unfollow: $e');
     }
-    return (following: false, followerCount: 0);
+    return null;
+  }
+
+  static ({bool following, int followerCount})? _followState(Object? data) {
+    if (data is! Map) return null;
+    final following = data['following'];
+    final count = data['followerCount'];
+    if (following is! bool || count is! num) return null;
+    return (following: following, followerCount: count.toInt());
   }
 
   // ────────────────────────────────────

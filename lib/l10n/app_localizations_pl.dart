@@ -12924,4 +12924,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Zobacz pełny przepis';
+
+  @override
+  String get communityFollowFailed => 'Nie udało się zmienić obserwowanych. Sprawdź połączenie i spróbuj ponownie.';
 }

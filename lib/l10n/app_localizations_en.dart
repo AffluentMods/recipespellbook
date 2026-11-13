@@ -12710,4 +12710,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'View full recipe';
+
+  @override
+  String get communityFollowFailed => 'Could not change who you follow. Check your connection and try again.';
 }
