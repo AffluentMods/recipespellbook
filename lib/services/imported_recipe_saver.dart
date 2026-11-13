@@ -438,10 +438,26 @@ class ImportedRecipeSaver {
     }
   }
 
+  /// A copy of the picture at [path] in the image folder under
+  /// [documentsDir], for another recipe to own. Null when it cannot be made.
+  static Future<String?> copyImage(String path, {required String documentsDir}) async {
+    try {
+      final folder = Directory(p.join(documentsDir, imageFolder));
+      await folder.create(recursive: true);
+      final extension = p.extension(path).toLowerCase();
+      final copy = p.join(folder.path, 'img_${_uuid.v4()}${extension.isEmpty ? '.jpg' : extension}');
+      await File(path).copy(copy);
+      return copy;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// A photo the app itself put on this device. One that already sits in the
-  /// documents directory (a page cut out of a PDF) is used where it is. A
-  /// picked or freshly taken photo lives in a temp folder the system empties
-  /// when it likes, so that one is copied.
+  /// documents directory is used where it is. A picked or freshly taken
+  /// photo lives in a temp folder the system empties when it likes, and the
+  /// photos of a PDF or an export wait in [temporaryFolder] until the import
+  /// is over, so those are copied.
   static Future<String?> _keepLocalImage(String path, String documentsDir, String? temporaryFolder) async {
     try {
       final file = File(path);
