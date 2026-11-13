@@ -264,6 +264,31 @@ class SyncService {
     await prefs.setString(_key(_foreignPrefix, userId), jsonEncode(ids.map((k, v) => MapEntry(k, v.toList()))));
   }
 
+  /// The cookbooks and shopping lists on this device that someone else
+  /// shares with this account: theirs, not this account's, wherever they
+  /// go (a transfer leaves them out; they reach a new device through the
+  /// share).
+  Future<({Set<String> cookbooks, Set<String> lists})> sharedWithMe(AppDatabase db) async {
+    final userId = _auth.currentUser?.id;
+    final foreign = userId == null ? <String, Set<String>>{} : await _foreignIds(userId);
+    final collab = CollabService.instance;
+    final cookbooks = <String>{
+      ...?foreign['cookbooks'],
+      ...collab.collabCookbookIds,
+      ...await (db.selectOnly(db.cookbooks)
+            ..addColumns([db.cookbooks.id])
+            ..where(db.cookbooks.sharedOwnerId.isNotNull()))
+          .map((row) => row.read(db.cookbooks.id)!)
+          .get(),
+    };
+    final lists = <String>{
+      ...?foreign['shoppingLists'],
+      for (final id in collab.collabListIds)
+        if (collab.permissionFor(id) != 'full') id,
+    };
+    return (cookbooks: cookbooks, lists: lists);
+  }
+
   /// Purge ALL synced data from the server for the current user.
   ///
   /// Called when user chooses "Delete All Data" in settings.

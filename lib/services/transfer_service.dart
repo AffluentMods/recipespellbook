@@ -122,6 +122,12 @@ class TransferException implements Exception {
 //  TRANSFER SERVICE
 // ════════════════════════════════════════════════════════════════
 
+/// Logs what may name the user's things (file paths, row contents, error
+/// text from the server) in debug builds only.
+void _log(String message) {
+  if (kDebugMode) debugPrint(message);
+}
+
 /// Handles one-time device-to-device data transfer for free-tier users.
 ///
 /// Flow (Send):
@@ -218,7 +224,9 @@ class TransferService {
       throw TransferException(TransferFailure.server, _parseError(response));
     }
 
-    debugPrint('[Transfer] Created code=$code '
+    // Never the code: a live one in a log lets anyone who reads it take
+    // the whole library and the sign-in that comes with it.
+    debugPrint('[Transfer] Created a code '
         '(${result['recipesCount']} recipes, '
         '${result['cookbooksCount']} cookbooks, '
         '$photosSent photos, $photosLeftOut left out)');
@@ -248,7 +256,7 @@ class TransferService {
     // the user with a spent code and nothing imported.
     if (SyncService.instance.isSyncing) throw const TransferException(TransferFailure.syncRunning);
 
-    debugPrint('[Transfer] Claiming code=$code...');
+    debugPrint('[Transfer] Claiming a code...');
 
     await _tidying;
     final kept = await _keptBundle(code);
@@ -348,7 +356,7 @@ class TransferService {
       await File(p.join(folder, 'transfer_bundle.txt'))
           .writeAsString('$code\n${DateTime.now().toUtc().toIso8601String()}', flush: true);
     } catch (e) {
-      debugPrint('[Transfer] Could not keep the bundle for a retry: $e');
+      _log('[Transfer] Could not keep the bundle for a retry: $e');
     }
   }
 
@@ -371,7 +379,7 @@ class TransferService {
         if (kept is Map<String, dynamic>) return {'data': kept};
       }
     } catch (e) {
-      debugPrint('[Transfer] Could not read the kept bundle: $e');
+      _log('[Transfer] Could not read the kept bundle: $e');
     }
     // Too old or damaged: of no use any more.
     await _forgetBundle(folder);
@@ -387,7 +395,7 @@ class TransferService {
         final file = File(p.join(folder ??= await _bundleFolder(), name));
         if (await file.exists()) await file.delete();
       } catch (e) {
-        debugPrint('[Transfer] Could not remove $name: $e');
+        _log('[Transfer] Could not remove $name: $e');
       }
     }
   }
@@ -400,9 +408,15 @@ class TransferService {
     final db = _db!;
     final photos = <_Photo>[];
 
+    // Cookbooks and lists someone else shares with this account are theirs.
+    // Sent along, they arrived as this account's own and became private
+    // duplicates; the new device gets them through the share instead.
+    final notMine = await SyncService.instance.sharedWithMe(db);
+
     // Cookbooks
     final cookbookMaps = <Map<String, dynamic>>[];
     for (final cookbook in await db.select(db.cookbooks).get()) {
+      if (notMine.cookbooks.contains(cookbook.id)) continue;
       final map = _serializeCookbook(cookbook);
       cookbookMaps.add(map);
       _offerPhoto(photos, map, cookbook.imagePath, _Photo.cookbookCover);
@@ -429,6 +443,7 @@ class TransferService {
 
     final recipeMaps = <Map<String, dynamic>>[];
     for (final recipe in await db.select(db.recipes).get()) {
+      if (notMine.cookbooks.contains(recipe.cookbookId)) continue;
       final live = recipe.deletedAt == null;
       final stepMaps = <Map<String, dynamic>>[];
       for (final step in steps[recipe.id] ?? const <Step>[]) {
@@ -451,8 +466,10 @@ class TransferService {
     // Small tables. They have no "changed" column, the journal the sync
     // keeps is the only record of which ones the user has edited.
     final categories = await db.select(db.categories).get();
-    final customCategories = await db.select(db.customCategories).get();
-    final customCourses = await db.select(db.customCourses).get();
+    final customCategories =
+        (await db.select(db.customCategories).get()).where((c) => !notMine.cookbooks.contains(c.cookbookId));
+    final customCourses =
+        (await db.select(db.customCourses).get()).where((c) => !notMine.cookbooks.contains(c.cookbookId));
     final tags = await db.select(db.tags).get();
     final shoppingCategories = await db.select(db.shoppingCategories).get();
     final editedCategories = await SyncJournal.touched(db, SyncJournal.categories);
@@ -465,8 +482,9 @@ class TransferService {
     final mealPlans = await db.select(db.mealPlans).get();
 
     // Shopping
-    final shoppingLists = await db.select(db.shoppingLists).get();
-    final shoppingListItems = await db.select(db.shoppingListItems).get();
+    final shoppingLists = (await db.select(db.shoppingLists).get()).where((l) => !notMine.lists.contains(l.id));
+    final shoppingListItems =
+        (await db.select(db.shoppingListItems).get()).where((i) => !notMine.lists.contains(i.listId));
 
     return _Library({
       'cookbooks': cookbookMaps,
@@ -539,7 +557,7 @@ class TransferService {
         photo.holder['imageBase64'] = base64Encode(await File(photo.path).readAsBytes());
         sent++;
       } catch (e) {
-        debugPrint('[Transfer] Could not read a photo to send: $e');
+        _log('[Transfer] Could not read a photo to send: $e');
       }
     }
     return sent;
@@ -561,7 +579,7 @@ class TransferService {
     try {
       return await PantryService.instance.toDoc();
     } catch (e) {
-      debugPrint('[Transfer] Left out the pantry: $e');
+      _log('[Transfer] Left out the pantry: $e');
       return null;
     }
   }
@@ -626,7 +644,7 @@ class TransferService {
     try {
       await PantryService.instance.mergeDoc(data['pantry']);
     } catch (e) {
-      debugPrint('[Transfer] Left out the pantry: $e');
+      _log('[Transfer] Left out the pantry: $e');
     }
 
     return stats;
@@ -709,7 +727,7 @@ class TransferService {
         stats.written++;
       } catch (e) {
         stats.failed++;
-        debugPrint('[Transfer] Left out a ${table.actualTableName} row: $e');
+        _log('[Transfer] Left out a ${table.actualTableName} row: $e');
       }
     }
   }
@@ -753,7 +771,7 @@ class TransferService {
         if (arrived) stats.written++;
       } catch (e) {
         stats.failed++;
-        debugPrint('[Transfer] Left out a cookbook: $e');
+        _log('[Transfer] Left out a cookbook: $e');
       }
     }
   }
@@ -828,7 +846,7 @@ class TransferService {
         plans[id] = plan;
       } catch (e) {
         stats.failed++;
-        debugPrint('[Transfer] Left out a recipe that could not be read: $e');
+        _log('[Transfer] Left out a recipe that could not be read: $e');
       }
     }
 
@@ -854,7 +872,7 @@ class TransferService {
         }
       } catch (e) {
         stats.failed++;
-        debugPrint('[Transfer] Left out a recipe that could not be stored: $e');
+        _log('[Transfer] Left out a recipe that could not be stored: $e');
       }
     }
     return ids;
@@ -1604,7 +1622,7 @@ class TransferService {
       if (!await file.exists() || await file.length() != bytes.length) await file.writeAsBytes(bytes);
       return file.path;
     } catch (e) {
-      debugPrint('[Transfer] Failed to decode/save photo: $e');
+      _log('[Transfer] Failed to decode/save photo: $e');
       return null;
     }
   }
