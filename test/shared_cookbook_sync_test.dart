@@ -135,6 +135,7 @@ void main() {
       var here = await (db.select(db.recipes)..where((r) => r.id.equals('pie'))).getSingle();
       expect(here.isFavorite, isTrue, reason: 'the pull left the unsent edit alone');
       expect(CollabService.instance.dirtyCookbookRecipeIds, contains('pie'));
+      expect(SyncService.instance.health.value.sharedPushFailed, isTrue, reason: 'shown in Cloud Sync');
 
       server.cookbookPushAnswer = {'permissions': <String, String>{}};
       server.shared = {...server.shared, 'recipes': <Object>[]}; // nothing new from the owner
@@ -143,6 +144,7 @@ void main() {
       final sent = (server.cookbookPushes.last['recipes'] as List).cast<Map>().single;
       expect(sent['isFavorite'], isTrue);
       expect(CollabService.instance.dirtyCookbookRecipeIds, isNot(contains('pie')));
+      expect(SyncService.instance.health.value.ok, isTrue);
       here = await (db.select(db.recipes)..where((r) => r.id.equals('pie'))).getSingle();
       expect(here.isFavorite, isTrue);
     });

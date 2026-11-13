@@ -13573,6 +13573,24 @@ abstract class AppLocalizations {
   /// **'Your recipes are synced, but some photos can\'t upload right now. They keep trying on their own.'**
   String get syncPhotosStuckDetail;
 
+  /// Cloud Sync settings, under Sync now: the last sync could not send edits made to cookbooks someone else shares with you.
+  ///
+  /// In en, this message translates to:
+  /// **'Your edits to shared cookbooks have not gone out yet. The next sync sends them.'**
+  String get syncHealthSharedPush;
+
+  /// Cloud Sync settings, under Sync now: the last sync could not fetch the cookbooks and lists shared with you.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared cookbooks and lists could not be updated. The next sync tries again.'**
+  String get syncHealthSharedPull;
+
+  /// Cloud Sync settings, under Sync now: the last sync could not sync the pantry.
+  ///
+  /// In en, this message translates to:
+  /// **'The pantry did not sync. The next sync tries again.'**
+  String get syncHealthPantry;
+
   /// No description provided for @syncSuccess.
   ///
   /// In en, this message translates to:

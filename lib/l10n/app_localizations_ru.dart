@@ -7839,6 +7839,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get syncPhotosStuckDetail => 'Рецепты синхронизированы, но некоторые фото сейчас не удаётся загрузить. Приложение будет пробовать снова автоматически.';
 
   @override
+  String get syncHealthSharedPush => 'Ваши изменения в общих книгах ещё не отправлены. Следующая синхронизация отправит их.';
+
+  @override
+  String get syncHealthSharedPull => 'Не удалось обновить общие книги и списки. Следующая синхронизация попробует снова.';
+
+  @override
+  String get syncHealthPantry => 'Кладовая не синхронизировалась. Следующая синхронизация попробует снова.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return 'Синхронизировано: $pushed отправлено, $pulled получено';
   }

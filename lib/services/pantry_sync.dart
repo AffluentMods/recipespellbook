@@ -43,11 +43,13 @@ class PantrySync {
     await prefs.remove(_baseKey(userId));
   }
 
-  Future<void> run(String userId) async {
+  /// Whether the pantry is in sync now (or the server has no pantry
+  /// routes to sync with).
+  Future<bool> run(String userId) async {
     final response = await _get('/v1/sync/pantry');
     if (response.statusCode != 200) {
       debugPrint('[PantrySync] Skipped (${response.statusCode})');
-      return;
+      return response.statusCode == 404;
     }
     final server = jsonDecode(response.body) as Map<String, dynamic>;
     var serverDoc = server['pantry'];
@@ -59,9 +61,9 @@ class PantrySync {
     if (synced && baseRaw == null) {
       // Synced by a version that kept no copy to merge from: once more the
       // way it did, then item by item from the copy this one leaves.
-      await _lastChangeWins(serverDoc, serverAt);
+      if (!await _lastChangeWins(serverDoc, serverAt)) return false;
       await prefs.setString(_baseKey(userId), jsonEncode(await _pantry.toDoc()));
-      return;
+      return true;
     }
     Object? base;
     try {
@@ -76,7 +78,7 @@ class PantrySync {
       if (serverDoc != null && sameDoc(merged, serverDoc) && serverAt != null) {
         await _apply(local, merged, serverAt);
         await _remember(prefs, userId, merged);
-        return;
+        return true;
       }
       final put = await _put('/v1/sync/pantry', {
         'pantry': merged,
@@ -85,18 +87,19 @@ class PantrySync {
         // Lets the server correct for this device's clock.
         'clientTime': DateTime.now().toUtc().toIso8601String(),
       });
-      if (put.statusCode != 200) return;
+      if (put.statusCode != 200) return false;
       final body = jsonDecode(put.body) as Map<String, dynamic>;
       final at = (body['updatedAt'] as num?)?.toInt();
       if (body['accepted'] == true) {
         await _apply(local, merged, at ?? DateTime.now().millisecondsSinceEpoch);
         await _remember(prefs, userId, merged);
-        return;
+        return true;
       }
       // Another device got there first: merge with what it sent.
       serverDoc = body['pantry'];
       serverAt = at;
     }
+    return false;
   }
 
   Future<void> _remember(SharedPreferences prefs, String userId, Map<String, dynamic> doc) async {
@@ -114,7 +117,7 @@ class PantrySync {
   }
 
   /// The way versions before 2.1.1 synced: the copy changed last wins whole.
-  Future<void> _lastChangeWins(Object? serverDoc, int? serverAt) async {
+  Future<bool> _lastChangeWins(Object? serverDoc, int? serverAt) async {
     final localAt = await _pantry.updatedAt();
     if (serverDoc != null && serverAt != null && serverAt > localAt) {
       await _pantry.replaceWithDoc(serverDoc, serverAt);
@@ -124,13 +127,14 @@ class PantrySync {
         'updatedAt': localAt,
         'clientTime': DateTime.now().toUtc().toIso8601String(),
       });
-      if (response.statusCode != 200) return;
+      if (response.statusCode != 200) return false;
       final body = jsonDecode(response.body) as Map<String, dynamic>;
       final at = (body['updatedAt'] as num?)?.toInt();
       if (body['accepted'] != true && body['pantry'] != null && at != null) {
         await _pantry.replaceWithDoc(body['pantry'], at);
       }
     }
+    return true;
   }
 
   // ── Merging ──

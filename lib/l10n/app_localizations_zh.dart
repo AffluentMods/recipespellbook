@@ -7619,6 +7619,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncPhotosStuckDetail => '你的食谱已同步，但部分照片暂时无法上传。应用会自动重试。';
 
   @override
+  String get syncHealthSharedPush => '你对共享食谱书的修改尚未发送。下次同步时会发送。';
+
+  @override
+  String get syncHealthSharedPull => '无法更新共享的食谱书和清单。下次同步时会重试。';
+
+  @override
+  String get syncHealthPantry => '食材柜未能同步。下次同步时会重试。';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return '已同步：$pushed个已推送，$pulled个已拉取';
   }

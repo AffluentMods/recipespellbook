@@ -7624,6 +7624,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get syncPhotosStuckDetail => 'レシピは同期済みですが、一部の写真を今はアップロードできません。自動的に再試行します。';
 
   @override
+  String get syncHealthSharedPush => '共有レシピ本への変更はまだ送信されていません。次の同期で送信されます。';
+
+  @override
+  String get syncHealthSharedPull => '共有レシピ本とリストを更新できませんでした。次の同期で再試行します。';
+
+  @override
+  String get syncHealthPantry => 'パントリーを同期できませんでした。次の同期で再試行します。';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return '同期完了：$pushed件プッシュ、$pulled件プル';
   }

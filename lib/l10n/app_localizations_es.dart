@@ -7709,6 +7709,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get syncPhotosStuckDetail => 'Tus recetas están sincronizadas, pero algunas fotos no se pueden subir ahora. Se volverá a intentar automáticamente.';
 
   @override
+  String get syncHealthSharedPush => 'Tus cambios en recetarios compartidos aún no se han enviado. La próxima sincronización los enviará.';
+
+  @override
+  String get syncHealthSharedPull => 'No se pudieron actualizar los recetarios y listas compartidos. La próxima sincronización lo intentará de nuevo.';
+
+  @override
+  String get syncHealthPantry => 'La despensa no se sincronizó. La próxima sincronización lo intentará de nuevo.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return 'Sincronizado: $pushed enviados, $pulled recibidos';
   }

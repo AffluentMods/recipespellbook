@@ -57,6 +57,31 @@ class SyncResult {
         error = message;
 }
 
+/// Parts of a sync that can fail without failing the sync: the push of
+/// edits to shared cookbooks, the pull of what is shared with this account,
+/// and the pantry. Shown in the Cloud Sync settings, so such a failure is
+/// not only in the log.
+@immutable
+class SyncHealth {
+  const SyncHealth({this.sharedPushFailed = false, this.sharedPullFailed = false, this.pantryFailed = false});
+
+  final bool sharedPushFailed;
+  final bool sharedPullFailed;
+  final bool pantryFailed;
+
+  bool get ok => !sharedPushFailed && !sharedPullFailed && !pantryFailed;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SyncHealth &&
+      other.sharedPushFailed == sharedPushFailed &&
+      other.sharedPullFailed == sharedPullFailed &&
+      other.pantryFailed == pantryFailed;
+
+  @override
+  int get hashCode => Object.hash(sharedPushFailed, sharedPullFailed, pantryFailed);
+}
+
 /// A row moved to a new id because its old id already belonged to another
 /// account on the server (see [SyncService] "Re-keying").
 class SyncRekey {
@@ -186,6 +211,9 @@ class SyncService {
   bool _queuedFull = false;
 
   bool get isSyncing => _active != null;
+
+  /// How the parts of the last syncs that fail on their own went.
+  final health = ValueNotifier<SyncHealth>(const SyncHealth());
 
   /// Whether this session already asked the server to verify purchases.
   bool _purchaseVerified = false;
@@ -351,13 +379,18 @@ class SyncService {
       own = _failureFrom(e);
     }
 
+    var health = this.health.value;
+
     // The pantry is one small document of its own, not table rows.
     if (own.success && _auth.currentUser?.id == userId) {
+      var pantryOk = false;
       try {
-        await PantrySync.forAuth(_auth).run(userId);
+        pantryOk = await PantrySync.forAuth(_auth).run(userId);
       } catch (e) {
         debugPrint('[Sync] Pantry sync failed (non-fatal): $e');
       }
+      health = SyncHealth(
+          sharedPushFailed: health.sharedPushFailed, sharedPullFailed: health.sharedPullFailed, pantryFailed: !pantryOk);
     }
 
     // Shared cookbooks / lists work on every tier and don't depend on the
@@ -365,18 +398,25 @@ class SyncService {
     var sharedPulled = 0;
     if (_auth.currentUser?.id == userId) {
       final collabStart = DateTime.now();
+      var pushed = false;
       try {
-        await _pushDirtyCookbookRecipes(userId, collabStart);
+        pushed = await _pushDirtyCookbookRecipes(userId, collabStart);
       } catch (e) {
         debugPrint('[Sync] Cookbook collab push failed (non-fatal): $e');
       }
       final fromScratch = _sharedFromScratch;
       _sharedFromScratch = false;
+      int? pulled;
       try {
-        sharedPulled = await _pullFamilyShared(userId, inflightAfter: collabStart, fromScratch: fromScratch);
+        pulled = await _pullFamilyShared(userId, inflightAfter: collabStart, fromScratch: fromScratch);
+        sharedPulled = pulled ?? 0;
       } catch (e) {
         if (fromScratch) _sharedFromScratch = true;
         debugPrint('[Sync] Family pull failed (non-fatal): $e');
+      }
+      // Offline, everything fails and the sync says so itself.
+      if (!own.offline) {
+        health = SyncHealth(sharedPushFailed: !pushed, sharedPullFailed: pulled == null, pantryFailed: health.pantryFailed);
       }
       try {
         await _downloadCookbookCovers();
@@ -384,6 +424,8 @@ class SyncService {
         debugPrint('[Sync] Cover download failed (non-fatal): $e');
       }
     }
+
+    this.health.value = health;
 
     if (own.success && _morePhotos) {
       _photoRun?.cancel();
@@ -586,7 +628,8 @@ class SyncService {
 
   /// Cursor for the family (shared-with-me) pull, kept separately so a failed
   /// pull is retried from the same point instead of silently skipped.
-  Future<int> _pullFamilyShared(String userId, {DateTime? inflightAfter, bool fromScratch = false}) async {
+  /// How many rows it brought; null when it could not be fetched.
+  Future<int?> _pullFamilyShared(String userId, {DateTime? inflightAfter, bool fromScratch = false}) async {
     final since = fromScratch ? null : await _readDate(_familyCursorPrefix, userId);
     final requestedAt = DateTime.now().toUtc();
     final familyData = await FamilyService.instance.getSharedContent(
@@ -596,7 +639,7 @@ class SyncService {
     );
     if (familyData == null) {
       if (fromScratch) _sharedFromScratch = true; // tried again next sync
-      return 0;
+      return null;
     }
     final pulled = await _applyServerData(
       familyData,
@@ -1365,9 +1408,10 @@ class SyncService {
   /// moves, trash, course/category changes made from lists never marked
   /// themselves dirty and were silently lost. Pulled shared recipes are stored
   /// with timestamps below this mark, so they aren't mistaken for edits.
-  Future<void> _pushDirtyCookbookRecipes(String userId, DateTime startedAt) async {
+  /// Whether nothing is left to send (or nothing could be sent).
+  Future<bool> _pushDirtyCookbookRecipes(String userId, DateTime startedAt) async {
     final db = _db;
-    if (db == null || !_auth.isSignedIn) return;
+    if (db == null || !_auth.isSignedIn) return true;
     final collab = CollabService.instance;
     final editable = [for (final id in collab.collabCookbookIds) if (collab.canEditCookbook(id)) id];
     final mark = await _readDate(_collabMarkPrefix, userId);
@@ -1387,7 +1431,7 @@ class SyncService {
     final dirty = collab.dirtyCookbookRecipeIds;
     if (dirty.isEmpty) {
       await _saveDate(_collabMarkPrefix, userId, startedAt);
-      return;
+      return true;
     }
 
     // A recipe's tags go only when they were changed here: the owner's tags
@@ -1437,7 +1481,7 @@ class SyncService {
       await collab.unmarkRecipesDirty(dropIds);
       await SyncJournal.untouch(db, SyncJournal.recipeTags, dropIds);
     }
-    if (payloads.isEmpty) return;
+    if (payloads.isEmpty) return true;
 
     // Order so a recipe appears before any recipe that links to it — the
     // backend inserts recipe links sequentially and would otherwise FK-fail.
@@ -1465,6 +1509,7 @@ class SyncService {
       await _saveDate(_collabMarkPrefix, userId, startedAt);
       debugPrint('[Sync] Pushed ${payloads.length} shared-cookbook recipe edit(s), cleared ${clear.length}');
     }
+    return resp != null;
   }
 
   // ════════════════════════════════════════════
@@ -1992,171 +2037,185 @@ class SyncService {
     }
     final localStamps = {for (final e in existingById.entries) e.key: e.value.updatedAt as DateTime?};
     final knownTags = (await db.select(db.tags).get()).map((t) => t.id).toSet();
-
-    var n = 0;
-    for (final d in rows) {
-      final recipeId = d['id'] as String;
-      // An unpushed local edit to a shared-cookbook recipe — don't let the
-      // server's older copy overwrite it before the collab push goes out.
-      if (skipRecipeIds != null && skipRecipeIds.contains(recipeId)) continue;
-      if (!_accept(ctx, SyncJournal.recipes, recipeId, localStamps)) continue;
-      final cookbookId = d['cookbookId'] as String?;
-      final title = d['title'] as String?;
-      if (cookbookId == null || title == null) continue;
-
-      final incomingImage = d['imagePath'] as String?;
-      final incomingIsServer = ImageService.isServerPath(incomingImage);
-      final ex = existingById[recipeId];
-      final exLocal = ex?.imagePath;
-      final exLocalAlive = exLocal != null && !ImageService.isServerPath(exLocal) && localFileExists(exLocal);
-      // Keep this device's local file when the cloud copy is the one we already
-      // know, or when the cloud has no copy at all yet (the photo was never
-      // uploaded — it would otherwise be wiped from the device that has it).
-      final keepLocal = exLocalAlive &&
-          ((incomingIsServer && incomingImage == ex?.imageServerPath) ||
-              (incomingImage == null && ex?.imageServerPath == null));
-      // lastViewedAt is per-device history; never move it backwards.
-      final incomingViewed = _parseDateNullable(d['lastViewedAt']);
-      final exViewed = ex?.lastViewedAt;
-      final viewed = exViewed != null && (incomingViewed == null || exViewed.isAfter(incomingViewed))
-          ? exViewed
-          : incomingViewed;
-
-      await db.into(db.recipes).insertOnConflictUpdate(
-        RecipesCompanion(
-          id: Value(recipeId),
-          cookbookId: Value(cookbookId),
-          title: Value(title),
-          description: Value(d['description'] as String?),
-          servings: Value(d['servings'] as String?),
-          prepTimeMinutes: Value((d['prepTimeMinutes'] as num?)?.toInt()),
-          cookTimeMinutes: Value((d['cookTimeMinutes'] as num?)?.toInt()),
-          sourceUrl: Value(d['sourceUrl'] as String?),
-          imagePath: Value(keepLocal ? exLocal : incomingImage),
-          imageServerPath: Value(incomingIsServer ? incomingImage : (keepLocal ? ex?.imageServerPath : null)),
-          courseId: Value(d['courseId'] as String?),
-          categoryId: Value(d['categoryId'] as String?),
-          rating: Value((d['rating'] as num?)?.toInt()),
-          notes: Value(d['notes'] as String?),
-          nutritionJson: Value(d['nutritionJson'] as String?),
-          isFavorite: Value(d['isFavorite'] as bool? ?? false),
-          isPinned: Value(d['isPinned'] as bool? ?? false),
-          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
-          lastViewedAt: Value(viewed),
-          createdAt: Value(_parseDate(d['createdAt'])),
-          updatedAt: Value(ctx.localize(_parseDate(d['updatedAt']))),
-        ),
-      );
-      n++;
-
-      // Replace ingredients
-      if (d['ingredients'] is List) {
-        await (db.delete(db.ingredients)..where((i) => i.recipeId.equals(recipeId))).go();
-        var order = 0;
-        for (final i in (d['ingredients'] as List).whereType<Map<String, dynamic>>()) {
-          final name = (i['name'] as String?)?.trim() ?? '';
-          final ingId = i['id'] as String?;
-          if (ingId == null || name.isEmpty) continue;
-          await db.into(db.ingredients).insertOnConflictUpdate(
-            IngredientsCompanion.insert(
-              id: ingId,
-              recipeId: recipeId,
-              sortOrder: (i['sortOrder'] as num?)?.toInt() ?? order,
-              amount: Value(i['amount'] as String?),
-              unit: Value(i['unit'] as String?),
-              name: _clip(name, 200),
-              notes: Value(i['notes'] as String?),
-            ),
-          );
-          order++;
-        }
-      }
-
-      // Replace steps
-      if (d['steps'] is List) {
-        // LOCAL-FIRST: before wiping, remember which cloud copies already have
-        // a live local file on this device so the re-insert keeps rendering it.
-        final oldSteps = await (db.select(db.steps)..where((s) => s.recipeId.equals(recipeId))).get();
-        final localByServer = <String, String>{
-          for (final s in oldSteps)
-            if (s.imageServerPath != null &&
-                s.imagePath != null &&
-                !ImageService.isServerPath(s.imagePath) &&
-                localFileExists(s.imagePath!))
-              s.imageServerPath!: s.imagePath!,
-        };
-        // A photo with no cloud copy yet stays with its own step, by id: by
-        // position it went to whichever step moved into that place.
-        final localOnly = <String, String>{
-          for (final s in oldSteps)
-            if (s.imageServerPath == null &&
-                s.imagePath != null &&
-                !ImageService.isServerPath(s.imagePath) &&
-                localFileExists(s.imagePath!))
-              s.id: s.imagePath!,
-        };
-        await (db.delete(db.steps)..where((s) => s.recipeId.equals(recipeId))).go();
-        var order = 0;
-        for (final s in (d['steps'] as List).whereType<Map<String, dynamic>>()) {
-          final stepId = s['id'] as String?;
-          final instruction = s['instruction'] as String?;
-          if (stepId == null || instruction == null) continue;
-          final sort = (s['sortOrder'] as num?)?.toInt() ?? order;
-          final sImg = s['imagePath'] as String?;
-          final sIsServer = ImageService.isServerPath(sImg);
-          await db.into(db.steps).insertOnConflictUpdate(
-            StepsCompanion.insert(
-              id: stepId,
-              recipeId: recipeId,
-              sortOrder: sort,
-              instruction: instruction,
-              durationMinutes: Value((s['durationMinutes'] as num?)?.toInt()),
-              imagePath: Value(sIsServer ? (localByServer[sImg] ?? sImg) : (sImg ?? localOnly[stepId])),
-              imageServerPath: Value(sIsServer ? sImg : null),
-              notes: Value(s['notes'] as String?),
-            ),
-          );
-          order++;
-        }
-      }
-
-      // Replace recipe tags whenever the payload carries them — an empty list
-      // means "all tags removed" and must clear them here too.
-      final tagsList = (d['recipeTags'] ?? d['tags']) as List?;
-      if (tagsList != null) {
-        final owners = sharedCookbooks?.contains(cookbookId) ?? false;
-        await (db.delete(db.recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).go();
-        for (final rt in tagsList) {
-          final raw = rt is String ? rt : (rt is Map ? rt['tagId'] as String? : null);
-          final tagId = owners ? raw : _bare(raw);
-          if (tagId == null || (!owners && !knownTags.contains(tagId))) continue;
-          await db.into(db.recipeTags).insert(
-                RecipeTagsCompanion.insert(recipeId: recipeId, tagId: tagId),
-                mode: InsertMode.insertOrIgnore,
-              );
-        }
-      }
-
-      // Replace recipe links (push sends 'recipeLinks', server returns 'sourceLinks').
-      final linksList = (d['sourceLinks'] ?? d['recipeLinks']) as List?;
-      if (linksList != null) {
-        await (db.delete(db.recipeLinks)..where((rl) => rl.sourceRecipeId.equals(recipeId))).go();
-        for (final l in linksList.whereType<Map<String, dynamic>>()) {
-          final ingredientId = l['ingredientId'] as String?;
-          final linkedId = l['linkedRecipeId'] as String?;
-          if (ingredientId == null || linkedId == null) continue;
-          await db.into(db.recipeLinks).insertOnConflictUpdate(
-            RecipeLinksCompanion.insert(
-              sourceRecipeId: recipeId,
-              ingredientId: ingredientId,
-              linkedRecipeId: linkedId,
-              scale: Value((l['scale'] as num?)?.toDouble() ?? 1.0),
-              sortOrder: Value((l['sortOrder'] as num?)?.toInt() ?? 0),
-            ),
-          );
-        }
+    // The steps there are now, for the recipes whose steps are replaced.
+    final stepIds = [for (final d in rows) if (d['steps'] is List) d['id'] as String];
+    final stepsBefore = <String, List<Step>>{};
+    for (var i = 0; i < stepIds.length; i += 500) {
+      final chunk = stepIds.sublist(i, (i + 500).clamp(0, stepIds.length));
+      for (final s in await (db.select(db.steps)..where((t) => t.recipeId.isIn(chunk))).get()) {
+        (stepsBefore[s.recipeId] ??= []).add(s);
       }
     }
+
+    // Every row goes in one batch: a pull of a few hundred recipes wrote
+    // each ingredient, step, tag and link with a statement of its own.
+    var n = 0;
+    await db.batch((batch) {
+      for (final d in rows) {
+        final recipeId = d['id'] as String;
+        // An unpushed local edit to a shared-cookbook recipe — don't let the
+        // server's older copy overwrite it before the collab push goes out.
+        if (skipRecipeIds != null && skipRecipeIds.contains(recipeId)) continue;
+        if (!_accept(ctx, SyncJournal.recipes, recipeId, localStamps)) continue;
+        final cookbookId = d['cookbookId'] as String?;
+        final title = d['title'] as String?;
+        if (cookbookId == null || title == null) continue;
+
+        final incomingImage = d['imagePath'] as String?;
+        final incomingIsServer = ImageService.isServerPath(incomingImage);
+        final ex = existingById[recipeId];
+        final exLocal = ex?.imagePath;
+        final exLocalAlive = exLocal != null && !ImageService.isServerPath(exLocal) && localFileExists(exLocal);
+        // Keep this device's local file when the cloud copy is the one we already
+        // know, or when the cloud has no copy at all yet (the photo was never
+        // uploaded — it would otherwise be wiped from the device that has it).
+        final keepLocal = exLocalAlive &&
+            ((incomingIsServer && incomingImage == ex?.imageServerPath) ||
+                (incomingImage == null && ex?.imageServerPath == null));
+        // lastViewedAt is per-device history; never move it backwards.
+        final incomingViewed = _parseDateNullable(d['lastViewedAt']);
+        final exViewed = ex?.lastViewedAt;
+        final viewed = exViewed != null && (incomingViewed == null || exViewed.isAfter(incomingViewed))
+            ? exViewed
+            : incomingViewed;
+
+        batch.insertAllOnConflictUpdate(db.recipes, [
+          RecipesCompanion(
+            id: Value(recipeId),
+            cookbookId: Value(cookbookId),
+            title: Value(title),
+            description: Value(d['description'] as String?),
+            servings: Value(d['servings'] as String?),
+            prepTimeMinutes: Value((d['prepTimeMinutes'] as num?)?.toInt()),
+            cookTimeMinutes: Value((d['cookTimeMinutes'] as num?)?.toInt()),
+            sourceUrl: Value(d['sourceUrl'] as String?),
+            imagePath: Value(keepLocal ? exLocal : incomingImage),
+            imageServerPath: Value(incomingIsServer ? incomingImage : (keepLocal ? ex?.imageServerPath : null)),
+            courseId: Value(d['courseId'] as String?),
+            categoryId: Value(d['categoryId'] as String?),
+            rating: Value((d['rating'] as num?)?.toInt()),
+            notes: Value(d['notes'] as String?),
+            nutritionJson: Value(d['nutritionJson'] as String?),
+            isFavorite: Value(d['isFavorite'] as bool? ?? false),
+            isPinned: Value(d['isPinned'] as bool? ?? false),
+            deletedAt: Value(_parseDateNullable(d['deletedAt'])),
+            lastViewedAt: Value(viewed),
+            createdAt: Value(_parseDate(d['createdAt'])),
+            updatedAt: Value(ctx.localize(_parseDate(d['updatedAt']))),
+          ),
+        ]);
+        n++;
+
+        // Replace ingredients
+        if (d['ingredients'] is List) {
+          batch.deleteWhere(db.ingredients, (i) => i.recipeId.equals(recipeId));
+          var order = 0;
+          for (final i in (d['ingredients'] as List).whereType<Map<String, dynamic>>()) {
+            final name = (i['name'] as String?)?.trim() ?? '';
+            final ingId = i['id'] as String?;
+            if (ingId == null || name.isEmpty) continue;
+            batch.insertAllOnConflictUpdate(db.ingredients, [
+              IngredientsCompanion.insert(
+                id: ingId,
+                recipeId: recipeId,
+                sortOrder: (i['sortOrder'] as num?)?.toInt() ?? order,
+                amount: Value(i['amount'] as String?),
+                unit: Value(i['unit'] as String?),
+                name: _clip(name, 200),
+                notes: Value(i['notes'] as String?),
+              ),
+            ]);
+            order++;
+          }
+        }
+
+        // Replace steps
+        if (d['steps'] is List) {
+          // LOCAL-FIRST: before wiping, remember which cloud copies already have
+          // a live local file on this device so the re-insert keeps rendering it.
+          final oldSteps = stepsBefore[recipeId] ?? const <Step>[];
+          final localByServer = <String, String>{
+            for (final s in oldSteps)
+              if (s.imageServerPath != null &&
+                  s.imagePath != null &&
+                  !ImageService.isServerPath(s.imagePath) &&
+                  localFileExists(s.imagePath!))
+                s.imageServerPath!: s.imagePath!,
+          };
+          // A photo with no cloud copy yet stays with its own step, by id: by
+          // position it went to whichever step moved into that place.
+          final localOnly = <String, String>{
+            for (final s in oldSteps)
+              if (s.imageServerPath == null &&
+                  s.imagePath != null &&
+                  !ImageService.isServerPath(s.imagePath) &&
+                  localFileExists(s.imagePath!))
+                s.id: s.imagePath!,
+          };
+          batch.deleteWhere(db.steps, (s) => s.recipeId.equals(recipeId));
+          var order = 0;
+          for (final s in (d['steps'] as List).whereType<Map<String, dynamic>>()) {
+            final stepId = s['id'] as String?;
+            final instruction = s['instruction'] as String?;
+            if (stepId == null || instruction == null) continue;
+            final sort = (s['sortOrder'] as num?)?.toInt() ?? order;
+            final sImg = s['imagePath'] as String?;
+            final sIsServer = ImageService.isServerPath(sImg);
+            batch.insertAllOnConflictUpdate(db.steps, [
+              StepsCompanion.insert(
+                id: stepId,
+                recipeId: recipeId,
+                sortOrder: sort,
+                instruction: instruction,
+                durationMinutes: Value((s['durationMinutes'] as num?)?.toInt()),
+                imagePath: Value(sIsServer ? (localByServer[sImg] ?? sImg) : (sImg ?? localOnly[stepId])),
+                imageServerPath: Value(sIsServer ? sImg : null),
+                notes: Value(s['notes'] as String?),
+              ),
+            ]);
+            order++;
+          }
+        }
+
+        // Replace recipe tags whenever the payload carries them — an empty list
+        // means "all tags removed" and must clear them here too.
+        final tagsList = (d['recipeTags'] ?? d['tags']) as List?;
+        if (tagsList != null) {
+          final owners = sharedCookbooks?.contains(cookbookId) ?? false;
+          batch.deleteWhere(db.recipeTags, (rt) => rt.recipeId.equals(recipeId));
+          for (final rt in tagsList) {
+            final raw = rt is String ? rt : (rt is Map ? rt['tagId'] as String? : null);
+            final tagId = owners ? raw : _bare(raw);
+            if (tagId == null || (!owners && !knownTags.contains(tagId))) continue;
+            batch.insert(
+              db.recipeTags,
+              RecipeTagsCompanion.insert(recipeId: recipeId, tagId: tagId),
+              mode: InsertMode.insertOrIgnore,
+            );
+          }
+        }
+
+        // Replace recipe links (push sends 'recipeLinks', server returns 'sourceLinks').
+        final linksList = (d['sourceLinks'] ?? d['recipeLinks']) as List?;
+        if (linksList != null) {
+          batch.deleteWhere(db.recipeLinks, (rl) => rl.sourceRecipeId.equals(recipeId));
+          for (final l in linksList.whereType<Map<String, dynamic>>()) {
+            final ingredientId = l['ingredientId'] as String?;
+            final linkedId = l['linkedRecipeId'] as String?;
+            if (ingredientId == null || linkedId == null) continue;
+            batch.insertAllOnConflictUpdate(db.recipeLinks, [
+              RecipeLinksCompanion.insert(
+                sourceRecipeId: recipeId,
+                ingredientId: ingredientId,
+                linkedRecipeId: linkedId,
+                scale: Value((l['scale'] as num?)?.toDouble() ?? 1.0),
+                sortOrder: Value((l['sortOrder'] as num?)?.toInt() ?? 0),
+              ),
+            ]);
+          }
+        }
+      }
+    });
     return n;
   }
 

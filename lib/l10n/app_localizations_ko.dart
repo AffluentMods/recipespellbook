@@ -7638,6 +7638,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get syncPhotosStuckDetail => '레시피는 동기화되었지만 일부 사진을 지금 업로드할 수 없습니다. 자동으로 다시 시도합니다.';
 
   @override
+  String get syncHealthSharedPush => '공유 요리책의 변경 사항이 아직 전송되지 않았습니다. 다음 동기화 때 전송됩니다.';
+
+  @override
+  String get syncHealthSharedPull => '공유 요리책과 목록을 업데이트하지 못했습니다. 다음 동기화 때 다시 시도합니다.';
+
+  @override
+  String get syncHealthPantry => '식료품 저장소를 동기화하지 못했습니다. 다음 동기화 때 다시 시도합니다.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return '동기화 완료: $pushed개 푸시, $pulled개 풀';
   }

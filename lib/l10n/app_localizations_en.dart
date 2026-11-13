@@ -7721,6 +7721,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncPhotosStuckDetail => 'Your recipes are synced, but some photos can\'t upload right now. They keep trying on their own.';
 
   @override
+  String get syncHealthSharedPush => 'Your edits to shared cookbooks have not gone out yet. The next sync sends them.';
+
+  @override
+  String get syncHealthSharedPull => 'Shared cookbooks and lists could not be updated. The next sync tries again.';
+
+  @override
+  String get syncHealthPantry => 'The pantry did not sync. The next sync tries again.';
+
+  @override
   String syncSuccess(int pushed, int pulled) {
     return 'Synced: $pushed pushed, $pulled pulled';
   }
