@@ -21,6 +21,7 @@ import '../../../utils/native_file_image.dart';
 import '../../../utils/planned_servings.dart' show plannedRecipeLocation;
 import '../../../utils/recipe_title.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../../utils/week_start.dart';
 import '../../shell/shell_navigation.dart';
 import '../../widgets/app_controls.dart';
 import '../../widgets/backup_reminder_banner.dart';
@@ -392,7 +393,7 @@ class _WeekGlanceCardState extends ConsumerState<_WeekGlanceCard> {
   void _watchWeek() {
     final now = DateTime.now();
     _today = DateTime(now.year, now.month, now.day);
-    _week = ref.read(mealPlanDaoProvider).watchMealPlansWithRecipesForRange(_today, _today.add(const Duration(days: 7)));
+    _week = ref.read(mealPlanDaoProvider).watchMealPlansWithRecipesForRange(_today, addDays(_today, 7));
   }
 
   @override
@@ -420,8 +421,9 @@ class _WeekGlanceCardState extends ConsumerState<_WeekGlanceCard> {
           final plans = snapshot.data ?? const <MealPlanWithRecipe>[];
           final byDay = <int, List<MealPlanWithRecipe>>{};
           for (final p in plans) {
-            final d = p.mealPlan.date;
-            final idx = DateTime(d.year, d.month, d.day).difference(today).inDays;
+            // Calendar days, not 24 hour periods (one short across a
+            // daylight saving change, which put meals in the wrong column).
+            final idx = calendarDaysBetween(today, p.mealPlan.date);
             if (idx >= 0 && idx < 7) byDay.putIfAbsent(idx, () => []).add(p);
           }
           // As many days as fit legibly (≥ ~104 px each, so a meal title's
@@ -435,7 +437,7 @@ class _WeekGlanceCardState extends ConsumerState<_WeekGlanceCard> {
                   if (i > 0) const SizedBox(width: Space.xs + 2),
                   Expanded(
                     child: _DayColumn(
-                      date: today.add(Duration(days: i)),
+                      date: addDays(today, i),
                       isToday: i == 0,
                       meals: byDay[i] ?? const [],
                       locale: locale,

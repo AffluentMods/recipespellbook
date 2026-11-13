@@ -2365,8 +2365,11 @@ String _mealBlockEmoji(String type) {
   }
 }
 
+/// [minutes] after midnight of [base]'s day, as a time of day. Built from
+/// the calendar fields: adding a Duration counts real hours, and on the day
+/// the clocks change "7 PM" came out as 6 or 8 PM.
 String _clock(DateTime base, int minutes) =>
-    DateFormat.jm().format(base.add(Duration(minutes: minutes)));
+    DateFormat.jm().format(DateTime(base.year, base.month, base.day, 0, minutes));
 
 /// A planned meal, rendered under the hour it starts. Tap to edit, long-press
 /// to multi-select, swipe to delete.
