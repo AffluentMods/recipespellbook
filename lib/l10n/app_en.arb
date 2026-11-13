@@ -3039,7 +3039,7 @@
   "importReviewItems": "Review items",
   "importNoItemsDetected": "No items detected",
   "mealPlanDate": "Date",
-  "mealPlanThisWeekend": "This Weekend",
+  "mealPlanThisWeekend": "This weekend",
   "menuKitchenBuddy": "Kitchen Buddy",
   "menuTools": "Tools",
   "menuSupport": "Support",
@@ -6455,5 +6455,26 @@
     }
   },
   "bulkNutritionNoIngredients": "No ingredients",
-  "bulkNutritionNoMatch": "No ingredient was recognized"
+  "bulkNutritionNoMatch": "No ingredient was recognized",
+  "pressBackAgainToExit": "Press back again to exit",
+  "@pressBackAgainToExit": {
+    "description": "Shown after the first Android back press on Home; a second press within two seconds closes the app."
+  },
+  "mealPlanNextWeekend": "Next weekend",
+  "@mealPlanNextWeekend": {
+    "description": "Quick date pick in Add to meal plan on a Saturday or Sunday: next week's Saturday."
+  },
+  "shoppingAlreadyPlanned": "Already in your meal plan: {when}",
+  "@shoppingAlreadyPlanned": {
+    "description": "Under \"Also add to meal plan\" when the recipe is already planned. The placeholder is a day (Today, Tomorrow, Sat, Nov 14), or recipe names each with their day.",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "communityPreviewViewFullRecipe": "View full recipe",
+  "@communityPreviewViewFullRecipe": {
+    "description": "Button in the Community recipe preview that opens the whole recipe."
+  }
 }

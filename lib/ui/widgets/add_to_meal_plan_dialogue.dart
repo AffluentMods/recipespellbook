@@ -6,6 +6,7 @@ import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../utils/meal_plan_quick_dates.dart';
 import '../../utils/planned_servings.dart';
 import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
@@ -169,10 +170,26 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
     }
   }
 
+  /// The third quick pick's label: "This weekend", "Next weekend", or on a
+  /// Friday the name of the day it lands on (Sunday).
+  String _weekendLabel(AppLocalizations l10n, QuickPlanDates picks) {
+    switch (picks.weekendPick) {
+      case WeekendPick.thisWeekend:
+        return l10n.mealPlanThisWeekend;
+      case WeekendPick.nextWeekend:
+        return l10n.mealPlanNextWeekend;
+      case WeekendPick.weekdayName:
+        final locale = Localizations.localeOf(context).toString();
+        return toBeginningOfSentenceCase(DateFormat.EEEE(locale).format(picks.weekend), locale);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final picks = QuickPlanDates.forDay(DateTime.now());
+    final selectedDay = DateUtils.dateOnly(_selectedDate);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -265,25 +282,26 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Quick date buttons
+            // Quick date buttons: three different days, each lit only when
+            // it is the chosen date.
             Row(
               children: [
                 _QuickDateButton(
                   label: l10n.today,
-                  isSelected: _isToday(_selectedDate),
-                  onTap: () => setState(() => _selectedDate = DateTime.now()),
+                  isSelected: selectedDay == picks.today,
+                  onTap: () => setState(() => _selectedDate = picks.today),
                 ),
                 const SizedBox(width: 8),
                 _QuickDateButton(
                   label: l10n.dateTomorrow,
-                  isSelected: _isTomorrow(_selectedDate),
-                  onTap: () => setState(() => _selectedDate = DateTime.now().add(const Duration(days: 1))),
+                  isSelected: selectedDay == picks.tomorrow,
+                  onTap: () => setState(() => _selectedDate = picks.tomorrow),
                 ),
                 const SizedBox(width: 8),
                 _QuickDateButton(
-                  label: l10n.mealPlanThisWeekend,
-                  isSelected: _selectedDate.weekday == DateTime.saturday || _selectedDate.weekday == DateTime.sunday,
-                  onTap: () => setState(() => _selectedDate = _nextWeekend()),
+                  label: _weekendLabel(l10n, picks),
+                  isSelected: selectedDay == picks.weekend,
+                  onTap: () => setState(() => _selectedDate = picks.weekend),
                 ),
               ],
             ),
@@ -468,36 +486,6 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
     }
   }
 
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return date.year == now.year && date.month == now.month && date.day == now.day;
-  }
-
-  bool _isTomorrow(DateTime date) {
-    final tomorrow = DateTime.now().add(const Duration(days: 1));
-    return date.year == tomorrow.year && date.month == tomorrow.month && date.day == tomorrow.day;
-  }
-
-  DateTime _nextWeekend() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final selected = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-
-    // If currently viewing Saturday, toggle to Sunday
-    if (selected.weekday == DateTime.saturday) {
-      return selected.add(const Duration(days: 1));
-    }
-
-    // If currently viewing Sunday, go to next Saturday
-    if (selected.weekday == DateTime.sunday) {
-      return today.add(Duration(days: (DateTime.saturday - today.weekday) % 7 + 7));
-    }
-
-    // Otherwise, go to the nearest Saturday
-    final daysUntilSaturday = (DateTime.saturday - today.weekday) % 7;
-    return today.add(Duration(days: daysUntilSaturday == 0 ? 7 : daysUntilSaturday));
-  }
-
   IconData _getMealIcon(String mealType) {
     switch (mealType) {
       case 'Breakfast':
@@ -534,20 +522,24 @@ class _QuickDateButton extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Expanded(
-      child: Material(
-        color: isSelected ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onTap,
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        child: Material(
+          color: isSelected ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: isSelected ? theme.colorScheme.onPrimaryContainer : null,
-                fontWeight: isSelected ? FontWeight.bold : null,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: isSelected ? theme.colorScheme.onPrimaryContainer : null,
+                  fontWeight: isSelected ? FontWeight.bold : null,
+                ),
               ),
             ),
           ),

@@ -3890,5 +3890,9 @@
   "bulkNutritionLowMatchCount": "{count, plural, =1{1 recette a moins de 70 % de ses ingrédients reconnus} other{{count} recettes ont moins de 70 % de leurs ingrédients reconnus}}",
   "bulkNutritionNotCalculatedCount": "{count, plural, =1{1 recette n'a pas pu être calculée} other{{count} recettes n'ont pas pu être calculées}}",
   "bulkNutritionNoIngredients": "Aucun ingrédient",
-  "bulkNutritionNoMatch": "Aucun ingrédient reconnu"
+  "bulkNutritionNoMatch": "Aucun ingrédient reconnu",
+  "pressBackAgainToExit": "Appuyez de nouveau sur Retour pour quitter",
+  "mealPlanNextWeekend": "Week-end prochain",
+  "shoppingAlreadyPlanned": "Déjà au menu : {when}",
+  "communityPreviewViewFullRecipe": "Voir la recette complète"
 }

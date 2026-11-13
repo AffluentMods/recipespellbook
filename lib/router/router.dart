@@ -140,7 +140,8 @@ final router = GoRouter(
     // ═══════════════════════════════════════════════════════
     ShellRoute(
       navigatorKey: shellNavigatorKey,
-      builder: (context, state, child) => AppShell(child: child),
+      builder: (context, state, child) =>
+          AppShell(navigatorKey: shellNavigatorKey, child: child),
       routes: [
         // ── Recipe editor (in-shell: sidebar stays on desktop, immersive on
         //    mobile via AppShell) ──

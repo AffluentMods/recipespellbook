@@ -263,7 +263,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (Responsive.useTwoPane(context)) {
         setState(() => _previewId = r.id);
       } else {
-        dao.updateLastViewed(r.id);
         context.pushNamed('recipe', pathParameters: {'id': r.id});
       }
     }
@@ -395,7 +394,6 @@ class _RecentlyViewed extends ConsumerWidget {
               key: ValueKey(r.id),
               recipe: r,
               onTap: () {
-                ref.read(recipeDaoProvider).updateLastViewed(r.id);
                 context.pushNamed('recipe', pathParameters: {'id': r.id});
               },
             ),
@@ -701,7 +699,6 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
                         if (_isSelecting) {
                           _toggleSelection(recipe.id);
                         } else {
-                          ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
                           context.pushNamed('recipe', pathParameters: {'id': recipe.id});
                         }
                       },
@@ -807,10 +804,7 @@ class _SearchResultCard extends ConsumerWidget {
         color: isSelected ? c.selectedFill : Colors.transparent,
         borderRadius: Radii.lgAll,
         child: InkWell(
-          onTap: onTap ?? () {
-            ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
-            context.pushNamed('recipe', pathParameters: {'id': recipe.id});
-          },
+          onTap: onTap ?? () => context.pushNamed('recipe', pathParameters: {'id': recipe.id}),
           onLongPress: onLongPress ?? () => _showRecipeActions(context, ref, recipe),
           borderRadius: Radii.lgAll,
           child: Padding(

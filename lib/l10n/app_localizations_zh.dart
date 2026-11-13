@@ -12528,4 +12528,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => '没有识别出任何食材';
+
+  @override
+  String get pressBackAgainToExit => '再按一次返回键退出';
+
+  @override
+  String get mealPlanNextWeekend => '下周末';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return '已在膳食计划中：$when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => '查看完整食谱';
 }

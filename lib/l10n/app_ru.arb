@@ -4865,5 +4865,9 @@
   "bulkNutritionLowMatchCount": "{count, plural, one{В {count} рецепте распознано меньше 70% ингредиентов} few{В {count} рецептах распознано меньше 70% ингредиентов} many{В {count} рецептах распознано меньше 70% ингредиентов} other{В {count} рецепта распознано меньше 70% ингредиентов}}",
   "bulkNutritionNotCalculatedCount": "{count, plural, one{Не удалось рассчитать {count} рецепт} few{Не удалось рассчитать {count} рецепта} many{Не удалось рассчитать {count} рецептов} other{Не удалось рассчитать {count} рецепта}}",
   "bulkNutritionNoIngredients": "Нет ингредиентов",
-  "bulkNutritionNoMatch": "Ни один ингредиент не распознан"
+  "bulkNutritionNoMatch": "Ни один ингредиент не распознан",
+  "pressBackAgainToExit": "Нажмите «Назад» ещё раз, чтобы выйти",
+  "mealPlanNextWeekend": "В следующие выходные",
+  "shoppingAlreadyPlanned": "Уже в плане питания: {when}",
+  "communityPreviewViewFullRecipe": "Посмотреть полный рецепт"
 }

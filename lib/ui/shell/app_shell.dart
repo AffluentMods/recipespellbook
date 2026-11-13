@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +36,16 @@ final shoppingBadgeCountProvider = Provider<int>((ref) {
 
 class AppShell extends ConsumerStatefulWidget {
   final Widget child;
-  const AppShell({super.key, required this.child});
+
+  /// The shell's own navigator (the tabs and the pages pushed over them).
+  /// System back gives its page the first say (Planner and Shopping use it to
+  /// clear a multi-selection) before going Home or offering to exit.
+  final GlobalKey<NavigatorState>? navigatorKey;
+
+  const AppShell({super.key, required this.child, this.navigatorKey});
+
+  /// How long "Press back again to exit" waits for the second press.
+  static const exitConfirmWindow = Duration(seconds: 2);
 
   @override
   ConsumerState<AppShell> createState() => _AppShellState();
@@ -45,10 +56,19 @@ class _AppShellState extends ConsumerState<AppShell> {
   bool _servicesInitialized = false;
   String? _lastLocation;
 
+  /// Running while a second back press on Home would exit the app.
+  Timer? _exitWindow;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _initServices());
+  }
+
+  @override
+  void dispose() {
+    _exitWindow?.cancel();
+    super.dispose();
   }
 
   Future<void> _initServices() async {
@@ -94,6 +114,43 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (mounted) context.go(MobileTab.values[index].path);
   }
 
+  /// System back (Android) once the router has nothing left to pop: the page
+  /// pushed over a tab, a sheet or a dialog all close first, as before. Then
+  /// the tab's own page may still hold back (multi-select); otherwise any
+  /// tab but Home goes Home, and on Home a second press within
+  /// [AppShell.exitConfirmWindow] closes the app.
+  Future<void> _onSystemBack() async {
+    // The router asks the root navigator once the shell's own has a single
+    // page, so a tab page's PopScope would never hear about it otherwise.
+    final shellNavigator = widget.navigatorKey?.currentState;
+    if (shellNavigator != null && await shellNavigator.maybePop()) return;
+    if (!mounted) return;
+
+    if (_lastLocation != MobileTab.home.path) {
+      _exitWindow?.cancel();
+      _exitWindow = null;
+      if (!await confirmDiscardBeforeLeaving(ref)) return;
+      if (!mounted) return;
+      ref.read(currentNavIndexProvider.notifier).state = MobileTab.home.index;
+      context.go(MobileTab.home.path);
+      return;
+    }
+
+    if (_exitWindow?.isActive ?? false) {
+      _exitWindow!.cancel();
+      _exitWindow = null;
+      AppSnackbar.dismiss(context);
+      await SystemNavigator.pop();
+      return;
+    }
+    _exitWindow = Timer(AppShell.exitConfirmWindow, () => _exitWindow = null);
+    AppSnackbar.info(
+      context,
+      AppLocalizations.of(context)!.pressBackAgainToExit,
+      duration: AppShell.exitConfirmWindow,
+    );
+  }
+
   /// The recipe editor / new-recipe routes render as a full editing surface
   /// (no bottom nav / selection bar), but keep the desktop sidebar.
   bool _isImmersiveRoute(String location) =>
@@ -105,6 +162,19 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Phones and tablets: system back never leaves the app from a tab
+    // without asking (see _onSystemBack). Desktop keeps the plain behaviour.
+    final handlesBack = !Responsive.useExpandedSidebar(context);
+    return PopScope(
+      canPop: !handlesBack,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && handlesBack) _onSystemBack();
+      },
+      child: _buildLayout(context),
+    );
+  }
+
+  Widget _buildLayout(BuildContext context) {
     final currentIndex = ref.watch(currentNavIndexProvider);
     final shoppingCount = ref.watch(shoppingBadgeCountProvider);
 

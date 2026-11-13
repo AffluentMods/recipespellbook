@@ -4865,5 +4865,9 @@
   "bulkNutritionLowMatchCount": "{count, plural, =1{Bij 1 recept is minder dan 70% van de ingrediënten herkend} other{Bij {count} recepten is minder dan 70% van de ingrediënten herkend}}",
   "bulkNutritionNotCalculatedCount": "{count, plural, =1{1 recept kon niet worden berekend} other{{count} recepten konden niet worden berekend}}",
   "bulkNutritionNoIngredients": "Geen ingrediënten",
-  "bulkNutritionNoMatch": "Geen enkel ingrediënt herkend"
+  "bulkNutritionNoMatch": "Geen enkel ingrediënt herkend",
+  "pressBackAgainToExit": "Druk nogmaals op Terug om af te sluiten",
+  "mealPlanNextWeekend": "Volgend weekend",
+  "shoppingAlreadyPlanned": "Staat al in je maaltijdplan: {when}",
+  "communityPreviewViewFullRecipe": "Volledig recept bekijken"
 }

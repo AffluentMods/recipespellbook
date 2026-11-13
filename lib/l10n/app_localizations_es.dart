@@ -12677,4 +12677,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => 'No se reconoció ningún ingrediente';
+
+  @override
+  String get pressBackAgainToExit => 'Vuelve a pulsar atrás para salir';
+
+  @override
+  String get mealPlanNextWeekend => 'Próximo Fin de Semana';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return 'Ya está en tu plan de comidas: $when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => 'Ver receta completa';
 }

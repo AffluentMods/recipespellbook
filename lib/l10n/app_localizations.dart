@@ -11284,7 +11284,7 @@ abstract class AppLocalizations {
   /// No description provided for @mealPlanThisWeekend.
   ///
   /// In en, this message translates to:
-  /// **'This Weekend'**
+  /// **'This weekend'**
   String get mealPlanThisWeekend;
 
   /// No description provided for @menuKitchenBuddy.
@@ -22020,6 +22020,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No ingredient was recognized'**
   String get bulkNutritionNoMatch;
+
+  /// Shown after the first Android back press on Home; a second press within two seconds closes the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Press back again to exit'**
+  String get pressBackAgainToExit;
+
+  /// Quick date pick in Add to meal plan on a Saturday or Sunday: next week's Saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Next weekend'**
+  String get mealPlanNextWeekend;
+
+  /// Under "Also add to meal plan" when the recipe is already planned. The placeholder is a day (Today, Tomorrow, Sat, Nov 14), or recipe names each with their day.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in your meal plan: {when}'**
+  String shoppingAlreadyPlanned(String when);
+
+  /// Button in the Community recipe preview that opens the whole recipe.
+  ///
+  /// In en, this message translates to:
+  /// **'View full recipe'**
+  String get communityPreviewViewFullRecipe;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
