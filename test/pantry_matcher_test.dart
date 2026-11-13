@@ -202,6 +202,13 @@ void main() {
     });
   });
 
+  test('says which pantry item covers a line', () {
+    final matcher = PantryMatcher(pantry: ['Lemons', 'chicken thighs', 'flour'], basics: ['salt']);
+    expect(matcher.pantryItemsFor(ingredientKeyFor('2 tbsp lemon juice')), ['Lemons']);
+    expect(matcher.pantryItemsFor(ingredientKeyFor('flour and salt')), ['flour'], reason: 'basics are left out');
+    expect(matcher.pantryItemsFor(ingredientKeyFor('1 cup sugar')), isEmpty);
+  });
+
   test('pantry items already covered are recognised for quick add', () {
     final matcher = PantryMatcher(pantry: ['eggs', 'olive oil'], basics: ['salt']);
     expect(matcher.hasItem('Egg'), isTrue);

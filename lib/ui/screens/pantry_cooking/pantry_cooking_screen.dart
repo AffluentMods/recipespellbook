@@ -593,6 +593,26 @@ class _MatchTile extends ConsumerWidget {
       ],
     );
 
+    // Which pantry items it uses, so a match is never a mystery ("lemon
+    // juice" covered by "lemons"). Each line and its item on hover / long
+    // press.
+    final used = match.pantryItemsUsed;
+    final usedRow = used.isEmpty
+        ? null
+        : Tooltip(
+            message: [
+              for (final (ingredient, items) in match.coveredBy)
+                if (items.isNotEmpty) l10n.pantryCookLineFrom(ingredient.name, items.join(', ')),
+            ].join('\n'),
+            waitDuration: const Duration(milliseconds: 500),
+            child: Text(
+              l10n.pantryCookFromPantry(used.join(', ')),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12, color: c.textTertiary),
+            ),
+          );
+
     final missing = match.missing;
     final missingRow = missing.isEmpty
         ? null
@@ -708,6 +728,10 @@ class _MatchTile extends ConsumerWidget {
                     ),
                     const SizedBox(height: Space.xs + 2),
                     coverage,
+                    if (usedRow != null) ...[
+                      const SizedBox(height: Space.xs),
+                      usedRow,
+                    ],
                     if (missingRow != null) ...[
                       const SizedBox(height: Space.sm),
                       missingRow,

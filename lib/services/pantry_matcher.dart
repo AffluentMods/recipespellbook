@@ -562,7 +562,11 @@ class PantryMatcher {
   final Map<String, bool> _pantryCache = {};
   final Map<String, bool> _basicCache = {};
 
-  PantryMatcher._(this._pantry, this._basics)
+  /// Each pantry phrase's item as the user wrote it, to say which one
+  /// covered a line.
+  final Map<String, String> _pantryNames;
+
+  PantryMatcher._(this._pantry, this._basics, this._pantryNames)
       : _pantryByToken = _indexByToken(_pantry),
         _basicsByToken = _indexByToken(_basics);
 
@@ -573,7 +577,12 @@ class PantryMatcher {
     List<FoodPhrase> phrases(Iterable<String> items) => {
           for (final item in items) ?pantryPhraseFor(item),
         }.toList();
-    return PantryMatcher._(phrases(pantry), phrases(basics));
+    final names = <String, String>{};
+    for (final item in pantry) {
+      final phrase = pantryPhraseFor(item);
+      if (phrase != null) names.putIfAbsent(phrase.text, () => item.trim());
+    }
+    return PantryMatcher._(phrases(pantry), phrases(basics), names);
   }
 
   bool get pantryIsEmpty => _pantry.isEmpty;
@@ -592,22 +601,30 @@ class PantryMatcher {
     FoodPhrase phrase,
     List<FoodPhrase> all,
     Map<String, List<FoodPhrase>> byToken,
+  ) =>
+      _coverFor(phrase, all, byToken) != null;
+
+  /// The first of [all] that covers [phrase], or null.
+  static FoodPhrase? _coverFor(
+    FoodPhrase phrase,
+    List<FoodPhrase> all,
+    Map<String, List<FoodPhrase>> byToken,
   ) {
     if (phrase.cjk) {
       for (final p in all) {
-        if (phraseCovers(p, phrase)) return true;
+        if (phraseCovers(p, phrase)) return p;
       }
-      return false;
+      return null;
     }
     final seen = <FoodPhrase>{};
     for (final t in phrase.tokens) {
       final candidates = byToken[t];
       if (candidates == null) continue;
       for (final c in candidates) {
-        if (seen.add(c) && phraseCovers(c, phrase)) return true;
+        if (seen.add(c) && phraseCovers(c, phrase)) return c;
       }
     }
-    return false;
+    return null;
   }
 
   /// Whether one food is an always-have basic.
@@ -629,6 +646,22 @@ class PantryMatcher {
       if (alternative.every(hasFood)) return IngredientCover.covered;
     }
     return IngredientCover.missing;
+  }
+
+  /// The pantry items that cover an ingredient line (the first alternative
+  /// that is all on hand), as the user wrote them. Basics are left out, so a
+  /// line of basics only, or a line not on hand, gives none.
+  List<String> pantryItemsFor(IngredientKey key) {
+    for (final alternative in key.alternatives) {
+      if (!alternative.every(hasFood)) continue;
+      return [
+        for (final phrase in alternative)
+          if (!isBasic(phrase))
+            if (_coverFor(phrase, _pantry, _pantryByToken) case final p?)
+              _pantryNames[p.text] ?? p.text,
+      ];
+    }
+    return const [];
   }
 
   /// Whether every food of some alternative of an ingredient line is on hand

@@ -1,7 +1,7 @@
 // "What can I make?": a chosen cookbook stays on its chip while chosen, even
 // when nothing in it uses the pantry any more, so it can be cleared. The chip
 // used to vanish with the last match and leave "No recipes match" with
-// nothing to tap.
+// nothing to tap. And each recipe says which pantry items it uses.
 import 'dart:async';
 import 'dart:convert';
 
@@ -69,6 +69,10 @@ void main() {
       await _settle(tester, rounds: 1);
     }
     expect(find.text('Omelette'), findsOneWidget);
+
+    // Which pantry items each recipe uses.
+    expect(find.text('From your pantry: flour, milk, lemons'), findsOneWidget);
+    expect(find.text('From your pantry: eggs, butter'), findsOneWidget);
 
     // Only Baking.
     await tester.ensureVisible(find.text('All cookbooks'));
