@@ -100,6 +100,16 @@ class CollabService {
   /// Recipe ids edited locally in a shared cookbook, awaiting a collab push.
   Set<String> get dirtyCookbookRecipeIds => Set.unmodifiable(_dirtyCookbookRecipeIds);
 
+  /// Forget every membership and pending edit (tests start each case clean).
+  @visibleForTesting
+  void resetForTesting() {
+    _collabListIds = {};
+    _permissions = {};
+    _cookbookPermissions = {};
+    _cookbookOwners = {};
+    _dirtyCookbookRecipeIds = {};
+  }
+
   /// Restore the known collab list ids on launch so we push their edits even
   /// before the first pull returns.
   Future<void> load() async {

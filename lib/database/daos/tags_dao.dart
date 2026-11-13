@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
+import '../seeded_defaults.dart';
 import '../sync_journal.dart';
 import '../tables/recipe_tags.dart';
 
@@ -132,89 +133,36 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
     return result.isEmpty;
   }
 
-  /// Seed default tags if none exist
-  Future<void> seedDefaultTags() async {
+  /// Seed default tags if none exist. [install]: the seeding of a new
+  /// install, dated as untouched (see [SeededDefaults]); otherwise the user
+  /// asked for them, and they are dated now.
+  Future<void> seedDefaultTags({bool install = false}) async {
     final isEmpty = await hasNoTags();
     if (!isEmpty) return;
-
-    final defaultTags = [
-      // Dietary
-      ('tag_vegan', 'Vegan', '#4CAF50', '🌱', 0, true),
-      ('tag_vegetarian', 'Vegetarian', '#8BC34A', '🥬', 1, true),
-      ('tag_gluten_free', 'Gluten-Free', '#FF9800', '🌾', 2, true),
-      ('tag_dairy_free', 'Dairy-Free', '#2196F3', '🥛', 3, true),
-      ('tag_keto', 'Keto', '#9C27B0', '🥑', 4, true),
-      ('tag_paleo', 'Paleo', '#795548', '🥩', 5, true),
-      ('tag_low_carb', 'Low Carb', '#00BCD4', '📉', 6, true),
-      ('tag_nut_free', 'Nut-Free', '#FF5722', '🥜', 7, true),
-
-      // Meal timing / Occasion
-      ('tag_quick', 'Quick & Easy', '#4CAF50', '⚡', 10, true),
-      ('tag_meal_prep', 'Meal Prep', '#3F51B5', '📦', 11, true),
-      ('tag_weeknight', 'Weeknight Dinner', '#607D8B', '🌙', 12, true),
-      ('tag_weekend', 'Weekend Project', '#FFC107', '☀️', 13, true),
-      ('tag_comfort', 'Comfort Food', '#FF5722', '🔥', 14, true),
-      ('tag_healthy', 'Healthy', '#4CAF50', '💪', 15, true),
-
-      // Special
-      ('tag_family', 'Family Favorite', '#E91E63', '❤️', 20, true),
-      ('tag_crowd', 'Crowd Pleaser', '#9C27B0', '🎉', 21, true),
-      ('tag_budget', 'Budget Friendly', '#4CAF50', '💰', 22, true),
-      ('tag_kid', 'Kid Friendly', '#FF9800', '👶', 23, true),
-      ('tag_spicy', 'Spicy', '#F44336', '🌶️', 24, true),
-      ('tag_one_pot', 'One Pot', '#795548', '🍲', 25, true),
-    ];
-
-    for (final tag in defaultTags) {
-      await into(tags).insert(TagsCompanion.insert(
-        id: tag.$1,
-        name: tag.$2,
-        color: Value(tag.$3),
-        icon: Value(tag.$4),
-        sortOrder: Value(tag.$5),
-        isBuiltIn: Value(tag.$6),
-      ));
-    }
+    await _insertDefaultTags(install: install);
   }
 
   /// Force reseed default tags (for migration/reset)
   Future<void> forceReseedDefaultTags() async {
     // Delete all built-in tags first
     await (delete(tags)..where((t) => t.isBuiltIn.equals(true))).go();
+    await _insertDefaultTags();
+  }
 
-    // Now reseed
-    final defaultTags = [
-      ('tag_vegan', 'Vegan', '#4CAF50', '🌱', 0, true),
-      ('tag_vegetarian', 'Vegetarian', '#8BC34A', '🥬', 1, true),
-      ('tag_gluten_free', 'Gluten-Free', '#FF9800', '🌾', 2, true),
-      ('tag_dairy_free', 'Dairy-Free', '#2196F3', '🥛', 3, true),
-      ('tag_keto', 'Keto', '#9C27B0', '🥑', 4, true),
-      ('tag_paleo', 'Paleo', '#795548', '🥩', 5, true),
-      ('tag_low_carb', 'Low Carb', '#00BCD4', '📉', 6, true),
-      ('tag_nut_free', 'Nut-Free', '#FF5722', '🥜', 7, true),
-      ('tag_quick', 'Quick & Easy', '#4CAF50', '⚡', 10, true),
-      ('tag_meal_prep', 'Meal Prep', '#3F51B5', '📦', 11, true),
-      ('tag_weeknight', 'Weeknight Dinner', '#607D8B', '🌙', 12, true),
-      ('tag_weekend', 'Weekend Project', '#FFC107', '☀️', 13, true),
-      ('tag_comfort', 'Comfort Food', '#FF5722', '🔥', 14, true),
-      ('tag_healthy', 'Healthy', '#4CAF50', '💪', 15, true),
-      ('tag_family', 'Family Favorite', '#E91E63', '❤️', 20, true),
-      ('tag_crowd', 'Crowd Pleaser', '#9C27B0', '🎉', 21, true),
-      ('tag_budget', 'Budget Friendly', '#4CAF50', '💰', 22, true),
-      ('tag_kid', 'Kid Friendly', '#FF9800', '👶', 23, true),
-      ('tag_spicy', 'Spicy', '#F44336', '🌶️', 24, true),
-      ('tag_one_pot', 'One Pot', '#795548', '🍲', 25, true),
-    ];
-
-    for (final tag in defaultTags) {
-      await into(tags).insert(TagsCompanion.insert(
-        id: tag.$1,
-        name: tag.$2,
-        color: Value(tag.$3),
-        icon: Value(tag.$4),
-        sortOrder: Value(tag.$5),
-        isBuiltIn: Value(tag.$6),
-      ));
+  Future<void> _insertDefaultTags({bool install = false}) async {
+    for (final (id, name, color, icon, sortOrder) in SeededDefaults.tags) {
+      await into(tags).insert(
+        TagsCompanion.insert(
+          id: id,
+          name: name,
+          color: Value(color),
+          icon: Value(icon),
+          sortOrder: Value(sortOrder),
+          isBuiltIn: const Value(true),
+          createdAt: install ? Value(SeededDefaults.epoch) : const Value.absent(),
+        ),
+        mode: InsertMode.insertOrIgnore,
+      );
     }
   }
 }

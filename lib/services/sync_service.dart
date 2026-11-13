@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' hide Category;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/database.dart';
+import '../database/seeded_defaults.dart';
 import '../database/sync_journal.dart';
 import '../services/auth_service.dart';
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
@@ -1484,14 +1485,31 @@ class SyncService {
       ..addAll(sorted);
   }
 
+  /// When a small-table row was made and last changed, for the server's
+  /// last-write-wins. A seeded row nobody changed (see [SeededDefaults]) is
+  /// dated the epoch: on the first sync of a new install it never takes the
+  /// place of what the user changed on another device, and never brings
+  /// back a default the user deleted there.
+  Map<String, String?> _smallStamps<D>(
+    Map<String, Insertable<D>> seeded,
+    String id,
+    Insertable<D> row,
+    DateTime createdAt,
+    DateTime? touchedAt,
+  ) {
+    if (SeededDefaults.untouched(seeded, id, row, editedAt: touchedAt)) {
+      return {'createdAt': _iso(SeededDefaults.epoch), 'updatedAt': _iso(SeededDefaults.epoch)};
+    }
+    return {'createdAt': _iso(createdAt), 'updatedAt': _iso(touchedAt ?? createdAt)};
+  }
+
   Map<String, dynamic> _serializeCategory(Category c, [DateTime? touchedAt]) => {
     'id': c.id,
     'name': c.name,
     'sortOrder': c.sortOrder,
     'isDefault': c.isDefault,
     'isHidden': c.isHidden,
-    'createdAt': _iso(c.createdAt),
-    'updatedAt': _iso(touchedAt ?? c.createdAt),
+    ..._smallStamps(SeededDefaults.categoryRows, c.id, c, c.createdAt, touchedAt),
     'deletedAt': _iso(c.deletedAt),
   };
 
@@ -1524,8 +1542,7 @@ class SyncService {
     'icon': t.icon,
     'sortOrder': t.sortOrder,
     'isBuiltIn': t.isBuiltIn,
-    'createdAt': _iso(t.createdAt),
-    'updatedAt': _iso(touchedAt ?? t.createdAt),
+    ..._smallStamps(SeededDefaults.tagRows, t.id, t, t.createdAt, touchedAt),
     'deletedAt': _iso(t.deletedAt),
   };
 
@@ -1584,8 +1601,7 @@ class SyncService {
     'sortOrder': sc.sortOrder,
     'isDefault': sc.isDefault,
     'isHidden': sc.isHidden,
-    'createdAt': _iso(sc.createdAt),
-    'updatedAt': _iso(touchedAt ?? sc.createdAt),
+    ..._smallStamps(SeededDefaults.shoppingCategoryRows, sc.id, sc, sc.createdAt, touchedAt),
     'deletedAt': _iso(sc.deletedAt),
   };
 

@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 
 import '../data/default_recipes.dart';
 import '../database/database.dart';
+import '../database/seeded_defaults.dart';
 import '../utils/platform_utils.dart';
 import '../utils/zip_stream_stub.dart' if (dart.library.io) '../utils/zip_stream_io.dart';
 import 'backup_reminder_service.dart';
@@ -1235,7 +1236,10 @@ class ExportImportService {
 
         // Tags
         if (data.containsKey('tags')) {
-          tagsImported = await _importTags(data['tags'] as List, ids);
+          tagsImported = await _importTags(data['tags'] as List, ids, usedTagIds: {
+            for (final cookbook in cookbooks)
+              for (final recipe in cookbook.recipes.whereType<Map>()) ...?(recipe['tagIds'] as List?),
+          });
         }
         final knownTagIds = {for (final tag in await db.select(db.tags).get()) tag.id};
 
@@ -2052,7 +2056,11 @@ class ExportImportService {
   /// [ids] remembers it, and the recipes that carry it in the backup are
   /// given the one here. A cookbook shared by someone who also has a
   /// "Holiday" tag used to leave two of them.
-  Future<int> _importTags(List data, _RestoredIds ids) async {
+  ///
+  /// A built-in tag the backup holds as the app seeded it, on no recipe of
+  /// the backup, is not added either: this device does not have it because
+  /// the user deleted it here (see [SeededDefaults]).
+  Future<int> _importTags(List data, _RestoredIds ids, {Set<Object?> usedTagIds = const {}}) async {
     int count = 0;
     final existing = await db.select(db.tags).get();
     final existingIds = {for (final t in existing) t.id};
@@ -2066,6 +2074,7 @@ class ExportImportService {
       final tag = tagData as Map<String, dynamic>;
       final id = tag['id'] as String;
       if (existingIds.contains(id)) continue;
+      if (!usedTagIds.contains(id) && SeededDefaults.untouched(SeededDefaults.tagRows, id, _tagRow(tag))) continue;
       final name = (tag['name'] as String).trim().toLowerCase();
       final sameName = idByName[name];
       if (sameName != null) {
@@ -2095,6 +2104,13 @@ class ExportImportService {
     }
     return count;
   }
+
+  static TagsCompanion _tagRow(Map<String, dynamic> tag) => TagsCompanion(
+        name: Value(tag['name'] as String),
+        color: Value(tag['color'] as String?),
+        icon: Value(tag['icon'] as String?),
+        sortOrder: Value(tag['sortOrder'] as int? ?? 0),
+      );
 
   /// Custom categories belong to a cookbook, and recipes name them by id.
   /// Each one goes under the cookbook its own was restored into, and
