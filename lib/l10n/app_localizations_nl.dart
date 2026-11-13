@@ -12749,4 +12749,27 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityReportFailed => 'De melding kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'De link bevat $count foto\'s niet, omdat het uploaden te lang duurde.',
+      one: 'De link bevat 1 foto niet, omdat het uploaden te lang duurde.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'De link kon niet worden gemaakt';
+
+  @override
+  String get shareLinkFailedBody => 'Controleer je verbinding en probeer het opnieuw, of deel het recept als tekst.';
+
+  @override
+  String get shareLinkShareAsText => 'Als tekst delen';
+
+  @override
+  String get shareCookbookTooLarge => 'Dit kookboek is te groot voor een eenmalige link. Deel de recepten één voor één, of publiceer het kookboek in de Community.';
 }

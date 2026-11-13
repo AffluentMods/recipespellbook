@@ -4882,5 +4882,10 @@
   "communityLoadFailed": "无法加载。请检查网络连接后重试。",
   "cookbookUpdateSourceGone": "此食谱书已不在社区中提供，因此没有可更新的内容。你的副本保持不变。",
   "communityDownloadSelectionChanged": "创作者刚刚修改了这本食谱书。请检查你的选择后重试。",
-  "communityReportFailed": "无法发送举报。请检查网络连接后重试。"
+  "communityReportFailed": "无法发送举报。请检查网络连接后重试。",
+  "shareLinkPhotosLeftOut": "{count, plural, other{有 {count} 张照片上传时间过长，未包含在链接中。}}",
+  "shareLinkFailedTitle": "无法创建链接",
+  "shareLinkFailedBody": "请检查网络连接后重试，或改为以文本形式分享食谱。",
+  "shareLinkShareAsText": "以文本分享",
+  "shareCookbookTooLarge": "这本食谱书太大，无法通过一次性链接分享。请逐个分享食谱，或将食谱书发布到社区。"
 }

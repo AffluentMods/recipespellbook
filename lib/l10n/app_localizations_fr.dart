@@ -12737,4 +12737,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get communityReportFailed => 'Impossible d\'envoyer le signalement. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Le lien ne contient pas $count photos, trop longues à envoyer.',
+      one: 'Le lien ne contient pas $count photo, trop longue à envoyer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Impossible de créer le lien';
+
+  @override
+  String get shareLinkFailedBody => 'Vérifiez votre connexion et réessayez, ou partagez plutôt la recette en texte.';
+
+  @override
+  String get shareLinkShareAsText => 'Partager en texte';
+
+  @override
+  String get shareCookbookTooLarge => 'Ce livre de recettes est trop volumineux pour un lien à usage unique. Partagez ses recettes une par une, ou publiez-le dans la Communauté.';
 }

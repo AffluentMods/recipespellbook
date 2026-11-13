@@ -12953,4 +12953,29 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityReportFailed => 'Не удалось отправить жалобу. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В ссылку не попали $count фотографии: они загружались слишком долго.',
+      many: 'В ссылку не попали $count фотографий: они загружались слишком долго.',
+      few: 'В ссылку не попали $count фотографии: они загружались слишком долго.',
+      one: 'В ссылку не попала $count фотография: она загружалась слишком долго.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Не удалось создать ссылку';
+
+  @override
+  String get shareLinkFailedBody => 'Проверьте подключение и попробуйте снова или поделитесь рецептом в виде текста.';
+
+  @override
+  String get shareLinkShareAsText => 'Поделиться текстом';
+
+  @override
+  String get shareCookbookTooLarge => 'Эта кулинарная книга слишком велика для одноразовой ссылки. Делитесь рецептами по одному или опубликуйте книгу в сообществе.';
 }

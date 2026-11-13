@@ -4882,5 +4882,10 @@
   "communityLoadFailed": "Não foi possível carregar. Verifique sua conexão e tente novamente.",
   "cookbookUpdateSourceGone": "Este livro de receitas não está mais disponível na Comunidade, então não há nada para atualizar. Sua cópia fica como está.",
   "communityDownloadSelectionChanged": "O criador acabou de alterar este livro de receitas. Confira sua seleção e tente novamente.",
-  "communityReportFailed": "Não foi possível enviar a denúncia. Verifique sua conexão e tente novamente."
+  "communityReportFailed": "Não foi possível enviar a denúncia. Verifique sua conexão e tente novamente.",
+  "shareLinkPhotosLeftOut": "{count, plural, one{O link não inclui 1 foto que demorou demais para enviar.} other{O link não inclui {count} fotos que demoraram demais para enviar.}}",
+  "shareLinkFailedTitle": "Não foi possível criar o link",
+  "shareLinkFailedBody": "Verifique sua conexão e tente novamente, ou compartilhe a receita como texto.",
+  "shareLinkShareAsText": "Compartilhar como texto",
+  "shareCookbookTooLarge": "Este livro de receitas é grande demais para um link de uso único. Compartilhe as receitas uma de cada vez ou publique o livro na Comunidade."
 }

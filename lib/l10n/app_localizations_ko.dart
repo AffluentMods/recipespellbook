@@ -12613,4 +12613,26 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityReportFailed => '신고를 보내지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '업로드가 너무 오래 걸린 사진 $count장은 링크에 포함되지 않았습니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => '링크를 만들지 못했습니다';
+
+  @override
+  String get shareLinkFailedBody => '연결을 확인하고 다시 시도하거나 레시피를 텍스트로 공유하세요.';
+
+  @override
+  String get shareLinkShareAsText => '텍스트로 공유';
+
+  @override
+  String get shareCookbookTooLarge => '이 요리책은 일회용 링크로 보내기에는 너무 큽니다. 레시피를 하나씩 공유하거나 요리책을 커뮤니티에 게시하세요.';
 }

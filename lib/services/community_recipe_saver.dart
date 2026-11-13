@@ -99,11 +99,26 @@ int? indexOfCommunityRecipe(List<CommunityRecipe> recipes, {String? recipeId, St
 
 /// A shared recipe (the snapshot behind a one-time share link) as Community
 /// recipes, so it saves through the same writer: the recipe first, then the
-/// sub-recipes that travel with it, its ingredients linked to them.
-List<CommunityRecipe> sharedRecipeAsCommunity(Map<String, dynamic> snapshot) {
+/// sub-recipes that travel with it, its ingredients linked to them. In a
+/// shared cookbook a recipe's sub-recipes are among the other recipes of
+/// the share, its [siblings].
+List<CommunityRecipe> sharedRecipeAsCommunity(
+  Map<String, dynamic> snapshot, {
+  List<Map<String, dynamic>> siblings = const [],
+}) {
   Map<String, dynamic> asMap(Object? v) => v is Map ? Map<String, dynamic>.from(v) : <String, dynamic>{};
   final main = CommunityRecipe.fromJson(asMap(snapshot));
   final linkedMaps = [for (final raw in (snapshot['linkedRecipes'] as List?) ?? const []) asMap(raw)];
+  final carried = {for (final m in linkedMaps) m['id']};
+  for (final raw in (snapshot['links'] as List?) ?? const []) {
+    final subId = asMap(raw)['subId'];
+    if (subId == null || subId == snapshot['id'] || carried.contains(subId)) continue;
+    final sibling = siblings.where((s) => s['id'] == subId).firstOrNull;
+    if (sibling != null) {
+      linkedMaps.add(asMap(sibling));
+      carried.add(subId);
+    }
+  }
   final linked = [for (final m in linkedMaps) CommunityRecipe.fromJson(m)];
 
   // Links name the ingredient and the sub-recipe's id in the snapshot.

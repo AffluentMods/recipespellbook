@@ -22122,6 +22122,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not send the report. Check your connection and try again.'**
   String get communityReportFailed;
+
+  /// After a one-time share link was made: some photos were left out because they took too long to upload.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{The link leaves out 1 photo that took too long to upload.} other{The link leaves out {count} photos that took too long to upload.}}'**
+  String shareLinkPhotosLeftOut(int count);
+
+  /// Title of the dialog when a recipe share link could not be made.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the link'**
+  String get shareLinkFailedTitle;
+
+  /// Body of the dialog when a recipe share link could not be made; the buttons are Retry and Share as text.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again, or share the recipe as text instead.'**
+  String get shareLinkFailedBody;
+
+  /// Button in the dialog when a share link could not be made: share the recipe as text instead.
+  ///
+  /// In en, this message translates to:
+  /// **'Share as text'**
+  String get shareLinkShareAsText;
+
+  /// Error when a cookbook is too large to send as a one-time share link.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is too big for a one-time link. Share its recipes one at a time, or post the cookbook to the Community.'**
+  String get shareCookbookTooLarge;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

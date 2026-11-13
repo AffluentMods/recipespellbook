@@ -4409,5 +4409,10 @@
   "communityLoadFailed": "No se pudo cargar. Comprueba tu conexión e inténtalo de nuevo.",
   "cookbookUpdateSourceGone": "Este recetario ya no está disponible en la Comunidad, así que no hay nada que actualizar. Tu copia se queda como está.",
   "communityDownloadSelectionChanged": "El creador acaba de cambiar este recetario. Revisa tu selección e inténtalo de nuevo.",
-  "communityReportFailed": "No se pudo enviar el informe. Comprueba tu conexión e inténtalo de nuevo."
+  "communityReportFailed": "No se pudo enviar el informe. Comprueba tu conexión e inténtalo de nuevo.",
+  "shareLinkPhotosLeftOut": "{count, plural, one{El enlace no incluye 1 foto que tardó demasiado en subirse.} other{El enlace no incluye {count} fotos que tardaron demasiado en subirse.}}",
+  "shareLinkFailedTitle": "No se pudo crear el enlace",
+  "shareLinkFailedBody": "Comprueba tu conexión e inténtalo de nuevo, o comparte la receta como texto.",
+  "shareLinkShareAsText": "Compartir como texto",
+  "shareCookbookTooLarge": "Este recetario es demasiado grande para un enlace de un solo uso. Comparte sus recetas de una en una o publica el recetario en la Comunidad."
 }

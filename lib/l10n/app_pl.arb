@@ -4882,5 +4882,10 @@
   "communityLoadFailed": "Nie udało się wczytać. Sprawdź połączenie i spróbuj ponownie.",
   "cookbookUpdateSourceGone": "Ta książka kucharska nie jest już dostępna w Społeczności, więc nie ma czego aktualizować. Twoja kopia pozostaje bez zmian.",
   "communityDownloadSelectionChanged": "Twórca właśnie zmienił tę książkę kucharską. Sprawdź wybór i spróbuj ponownie.",
-  "communityReportFailed": "Nie udało się wysłać zgłoszenia. Sprawdź połączenie i spróbuj ponownie."
+  "communityReportFailed": "Nie udało się wysłać zgłoszenia. Sprawdź połączenie i spróbuj ponownie.",
+  "shareLinkPhotosLeftOut": "{count, plural, one{Link nie zawiera {count} zdjęcia, którego przesyłanie trwało zbyt długo.} few{Link nie zawiera {count} zdjęć, których przesyłanie trwało zbyt długo.} many{Link nie zawiera {count} zdjęć, których przesyłanie trwało zbyt długo.} other{Link nie zawiera zdjęć ({count}), których przesyłanie trwało zbyt długo.}}",
+  "shareLinkFailedTitle": "Nie udało się utworzyć linku",
+  "shareLinkFailedBody": "Sprawdź połączenie i spróbuj ponownie albo udostępnij przepis jako tekst.",
+  "shareLinkShareAsText": "Udostępnij jako tekst",
+  "shareCookbookTooLarge": "Ta książka kucharska jest za duża na jednorazowy link. Udostępniaj przepisy pojedynczo albo opublikuj książkę w Społeczności."
 }

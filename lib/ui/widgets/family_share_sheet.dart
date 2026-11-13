@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../utils/share_origin.dart';
 
+import '../../providers/database_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/auth_service.dart';
+import '../../services/share_snapshot.dart';
 import '../../services/family_service.dart';
 import '../../services/collab_service.dart';
 import '../../services/revenuecat_service.dart';
@@ -91,6 +93,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   ShareLinkInfo? _collabLink;   // live collaboration invite link
   late String _collabPermission; // default permission for new collab links
   bool _creatingCollab = false;
+  bool _creatingLink = false;   // one-time link being made (photos going up)
 
   bool get _isCookbook => widget.resourceType == 'cookbook';
   bool get _hasFamilyTier {
@@ -263,8 +266,10 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: _createOneTimeLink,
-                      icon: const Icon(Icons.add_link, size: 18),
+                      onPressed: _creatingLink ? null : _createOneTimeLink,
+                      icon: _creatingLink
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.add_link, size: 18),
                       label: Text(l10n.shareGenerateLink),
                     ),
                   ),
@@ -287,18 +292,37 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
       AppSnackbar.error(context, l10n.shareSignInRequired);
       return;
     }
+    if (_creatingLink) return;
+    setState(() => _creatingLink = true);
 
-    // Shopping lists ship a self-contained snapshot so the copy link works even
-    // for free / unsynced lists.
-    final snapshot = _isCookbook
-        ? null
-        : await CollabService.instance.buildListSnapshot(widget.resourceId);
-    final link = await _family.createShareLink(widget.resourceType, widget.resourceId, snapshot: snapshot);
+    // Both ship a self-contained snapshot, so the copy link works for free /
+    // unsynced cookbooks and lists, and shows them as they are now.
+    ShareLinkInfo? link;
+    var tooLarge = false;
+    var photosLeftOut = 0;
+    try {
+      if (_isCookbook) {
+        final cookbook = await ref.read(cookbookDaoProvider).getCookbookById(widget.resourceId);
+        if (cookbook != null) {
+          final result = await createCookbookShareLink(ref.read(databaseProvider), cookbook);
+          link = result.link;
+          tooLarge = result.tooLarge;
+          photosLeftOut = result.photosLeftOut;
+        }
+      } else {
+        final snapshot = await CollabService.instance.buildListSnapshot(widget.resourceId);
+        link = await _family.createShareLink(widget.resourceType, widget.resourceId, snapshot: snapshot);
+      }
+    } catch (e) {
+      debugPrint('[Share] one-time link: $e');
+    }
     if (!mounted) return;
+    setState(() => _creatingLink = false);
     if (link != null) {
       setState(() => _activeLink = link);
+      if (photosLeftOut > 0) AppSnackbar.info(context, l10n.shareLinkPhotosLeftOut(photosLeftOut));
     } else {
-      AppSnackbar.error(context, l10n.shareCreateFailed);
+      AppSnackbar.error(context, tooLarge ? l10n.shareCookbookTooLarge : l10n.shareCreateFailed);
     }
   }
 

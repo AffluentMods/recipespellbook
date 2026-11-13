@@ -6528,5 +6528,30 @@
   "communityReportFailed": "Could not send the report. Check your connection and try again.",
   "@communityReportFailed": {
     "description": "Error when a report of Community content did not go through (the person is signed in)."
+  },
+  "shareLinkPhotosLeftOut": "{count, plural, one{The link leaves out 1 photo that took too long to upload.} other{The link leaves out {count} photos that took too long to upload.}}",
+  "@shareLinkPhotosLeftOut": {
+    "description": "After a one-time share link was made: some photos were left out because they took too long to upload.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareLinkFailedTitle": "Could not create the link",
+  "@shareLinkFailedTitle": {
+    "description": "Title of the dialog when a recipe share link could not be made."
+  },
+  "shareLinkFailedBody": "Check your connection and try again, or share the recipe as text instead.",
+  "@shareLinkFailedBody": {
+    "description": "Body of the dialog when a recipe share link could not be made; the buttons are Retry and Share as text."
+  },
+  "shareLinkShareAsText": "Share as text",
+  "@shareLinkShareAsText": {
+    "description": "Button in the dialog when a share link could not be made: share the recipe as text instead."
+  },
+  "shareCookbookTooLarge": "This cookbook is too big for a one-time link. Share its recipes one at a time, or post the cookbook to the Community.",
+  "@shareCookbookTooLarge": {
+    "description": "Error when a cookbook is too large to send as a one-time share link."
   }
 }

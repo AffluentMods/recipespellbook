@@ -4444,5 +4444,10 @@
   "communityLoadFailed": "Das konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
   "cookbookUpdateSourceGone": "Dieses Kochbuch ist in der Community nicht mehr verfügbar, es gibt also nichts zu aktualisieren. Deine Kopie bleibt, wie sie ist.",
   "communityDownloadSelectionChanged": "Der Ersteller hat dieses Kochbuch gerade geändert. Prüfe deine Auswahl und versuche es erneut.",
-  "communityReportFailed": "Die Meldung konnte nicht gesendet werden. Prüfe deine Verbindung und versuche es erneut."
+  "communityReportFailed": "Die Meldung konnte nicht gesendet werden. Prüfe deine Verbindung und versuche es erneut.",
+  "shareLinkPhotosLeftOut": "{count, plural, one{Im Link fehlt 1 Foto, das zu lange zum Hochladen brauchte.} other{Im Link fehlen {count} Fotos, die zu lange zum Hochladen brauchten.}}",
+  "shareLinkFailedTitle": "Link konnte nicht erstellt werden",
+  "shareLinkFailedBody": "Prüfe deine Verbindung und versuche es erneut, oder teile das Rezept stattdessen als Text.",
+  "shareLinkShareAsText": "Als Text teilen",
+  "shareCookbookTooLarge": "Dieses Kochbuch ist zu groß für einen einmaligen Link. Teile die Rezepte einzeln oder veröffentliche das Kochbuch in der Community."
 }

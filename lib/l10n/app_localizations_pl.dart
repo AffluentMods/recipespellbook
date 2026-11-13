@@ -12963,4 +12963,29 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityReportFailed => 'Nie udało się wysłać zgłoszenia. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Link nie zawiera zdjęć ($count), których przesyłanie trwało zbyt długo.',
+      many: 'Link nie zawiera $count zdjęć, których przesyłanie trwało zbyt długo.',
+      few: 'Link nie zawiera $count zdjęć, których przesyłanie trwało zbyt długo.',
+      one: 'Link nie zawiera $count zdjęcia, którego przesyłanie trwało zbyt długo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Nie udało się utworzyć linku';
+
+  @override
+  String get shareLinkFailedBody => 'Sprawdź połączenie i spróbuj ponownie albo udostępnij przepis jako tekst.';
+
+  @override
+  String get shareLinkShareAsText => 'Udostępnij jako tekst';
+
+  @override
+  String get shareCookbookTooLarge => 'Ta książka kucharska jest za duża na jednorazowy link. Udostępniaj przepisy pojedynczo albo opublikuj książkę w Społeczności.';
 }

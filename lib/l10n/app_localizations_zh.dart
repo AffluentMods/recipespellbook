@@ -12581,4 +12581,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityReportFailed => '无法发送举报。请检查网络连接后重试。';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 张照片上传时间过长，未包含在链接中。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => '无法创建链接';
+
+  @override
+  String get shareLinkFailedBody => '请检查网络连接后重试，或改为以文本形式分享食谱。';
+
+  @override
+  String get shareLinkShareAsText => '以文本分享';
+
+  @override
+  String get shareCookbookTooLarge => '这本食谱书太大，无法通过一次性链接分享。请逐个分享食谱，或将食谱书发布到社区。';
 }

@@ -3906,5 +3906,10 @@
   "communityLoadFailed": "Impossibile caricare. Controlla la connessione e riprova.",
   "cookbookUpdateSourceGone": "Questo ricettario non è più disponibile nella Community, quindi non c'è nulla da aggiornare. La tua copia resta com'è.",
   "communityDownloadSelectionChanged": "Il creatore ha appena modificato questo ricettario. Controlla la selezione e riprova.",
-  "communityReportFailed": "Impossibile inviare la segnalazione. Controlla la connessione e riprova."
+  "communityReportFailed": "Impossibile inviare la segnalazione. Controlla la connessione e riprova.",
+  "shareLinkPhotosLeftOut": "{count, plural, one{Il link non include 1 foto che impiegava troppo a caricarsi.} other{Il link non include {count} foto che impiegavano troppo a caricarsi.}}",
+  "shareLinkFailedTitle": "Impossibile creare il link",
+  "shareLinkFailedBody": "Controlla la connessione e riprova, oppure condividi la ricetta come testo.",
+  "shareLinkShareAsText": "Condividi come testo",
+  "shareCookbookTooLarge": "Questo ricettario è troppo grande per un link monouso. Condividi le ricette una alla volta o pubblica il ricettario nella Community."
 }

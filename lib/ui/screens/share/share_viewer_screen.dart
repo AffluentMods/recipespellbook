@@ -590,7 +590,8 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
     final db = ref.read(databaseProvider);
     setState(() => _saving = true);
     try {
-      final recipes = sharedRecipeAsCommunity(recipe);
+      // In a shared cookbook, its sub-recipes are other recipes of the share.
+      final recipes = sharedRecipeAsCommunity(recipe, siblings: _recipes);
       final all = [for (var i = 0; i < recipes.length; i++) i];
       final photos = CommunityPhotoPlan.forRecipes(
         widget.code,

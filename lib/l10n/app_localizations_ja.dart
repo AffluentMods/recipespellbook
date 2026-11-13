@@ -12585,4 +12585,26 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityReportFailed => '報告を送信できませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'アップロードに時間がかかりすぎた写真$count枚はリンクに含まれていません。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'リンクを作成できませんでした';
+
+  @override
+  String get shareLinkFailedBody => '接続を確認してもう一度お試しいただくか、レシピをテキストで共有してください。';
+
+  @override
+  String get shareLinkShareAsText => 'テキストで共有';
+
+  @override
+  String get shareCookbookTooLarge => 'このレシピ本は1回限りのリンクには大きすぎます。レシピを1つずつ共有するか、レシピ本をコミュニティに投稿してください。';
 }

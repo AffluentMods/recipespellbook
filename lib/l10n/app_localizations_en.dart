@@ -12749,4 +12749,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityReportFailed => 'Could not send the report. Check your connection and try again.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The link leaves out $count photos that took too long to upload.',
+      one: 'The link leaves out 1 photo that took too long to upload.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Could not create the link';
+
+  @override
+  String get shareLinkFailedBody => 'Check your connection and try again, or share the recipe as text instead.';
+
+  @override
+  String get shareLinkShareAsText => 'Share as text';
+
+  @override
+  String get shareCookbookTooLarge => 'This cookbook is too big for a one-time link. Share its recipes one at a time, or post the cookbook to the Community.';
 }

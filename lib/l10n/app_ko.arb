@@ -4882,5 +4882,10 @@
   "communityLoadFailed": "불러오지 못했습니다. 연결을 확인하고 다시 시도하세요.",
   "cookbookUpdateSourceGone": "이 요리책은 더 이상 커뮤니티에서 볼 수 없어 업데이트할 내용이 없습니다. 내 사본은 그대로 유지됩니다.",
   "communityDownloadSelectionChanged": "크리에이터가 방금 이 요리책을 변경했습니다. 선택 항목을 확인하고 다시 시도하세요.",
-  "communityReportFailed": "신고를 보내지 못했습니다. 연결을 확인하고 다시 시도하세요."
+  "communityReportFailed": "신고를 보내지 못했습니다. 연결을 확인하고 다시 시도하세요.",
+  "shareLinkPhotosLeftOut": "{count, plural, other{업로드가 너무 오래 걸린 사진 {count}장은 링크에 포함되지 않았습니다.}}",
+  "shareLinkFailedTitle": "링크를 만들지 못했습니다",
+  "shareLinkFailedBody": "연결을 확인하고 다시 시도하거나 레시피를 텍스트로 공유하세요.",
+  "shareLinkShareAsText": "텍스트로 공유",
+  "shareCookbookTooLarge": "이 요리책은 일회용 링크로 보내기에는 너무 큽니다. 레시피를 하나씩 공유하거나 요리책을 커뮤니티에 게시하세요."
 }
