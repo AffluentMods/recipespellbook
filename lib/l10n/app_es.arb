@@ -4400,5 +4400,13 @@
   "pressBackAgainToExit": "Vuelve a pulsar atrás para salir",
   "mealPlanNextWeekend": "Próximo Fin de Semana",
   "shoppingAlreadyPlanned": "Ya está en tu plan de comidas: {when}",
-  "communityPreviewViewFullRecipe": "Ver receta completa"
+  "communityPreviewViewFullRecipe": "Ver receta completa",
+  "plannerDateRange": "Del {start} al {end}",
+  "clearWeekRangeWarning": "Esto eliminará todas las comidas planificadas del {start} al {end}. No se puede deshacer.",
+  "shoppingDeleteSharedListConfirm": "{count, plural, =1{Esta lista está compartida con 1 persona. Si la eliminas, dejará de sincronizarse para todos.} other{Esta lista está compartida con {count} personas. Si la eliminas, dejará de sincronizarse para todos.}}",
+  "pantryCookFromPantry": "De tu despensa: {items}",
+  "pantryCookLineFrom": "{ingredient}: {items}",
+  "cookingStopTimer": "Detener temporizador",
+  "cookingStartTimerFor": "Iniciar un temporizador de {duration}",
+  "durationSeconds": "{count} s"
 }

@@ -4873,5 +4873,13 @@
   "pressBackAgainToExit": "뒤로 버튼을 한 번 더 누르면 종료됩니다",
   "mealPlanNextWeekend": "다음 주말",
   "shoppingAlreadyPlanned": "이미 식단 계획에 있습니다: {when}",
-  "communityPreviewViewFullRecipe": "전체 레시피 보기"
+  "communityPreviewViewFullRecipe": "전체 레시피 보기",
+  "plannerDateRange": "{start}~{end}",
+  "clearWeekRangeWarning": "{start}~{end}에 계획된 모든 식사가 삭제됩니다. 되돌릴 수 없습니다.",
+  "shoppingDeleteSharedListConfirm": "{count, plural, other{이 목록은 {count}명과 공유 중입니다. 삭제하면 모두의 동기화가 중지됩니다.}}",
+  "pantryCookFromPantry": "식료품 저장소에서: {items}",
+  "pantryCookLineFrom": "{ingredient}: {items}",
+  "cookingStopTimer": "타이머 중지",
+  "cookingStartTimerFor": "{duration} 타이머 시작",
+  "durationSeconds": "{count}초"
 }

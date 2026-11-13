@@ -12586,4 +12586,47 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => '전체 레시피 보기';
+
+  @override
+  String plannerDateRange(String start, String end) {
+    return '$start~$end';
+  }
+
+  @override
+  String clearWeekRangeWarning(String start, String end) {
+    return '$start~$end에 계획된 모든 식사가 삭제됩니다. 되돌릴 수 없습니다.';
+  }
+
+  @override
+  String shoppingDeleteSharedListConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '이 목록은 $count명과 공유 중입니다. 삭제하면 모두의 동기화가 중지됩니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookFromPantry(String items) {
+    return '식료품 저장소에서: $items';
+  }
+
+  @override
+  String pantryCookLineFrom(String ingredient, String items) {
+    return '$ingredient: $items';
+  }
+
+  @override
+  String get cookingStopTimer => '타이머 중지';
+
+  @override
+  String cookingStartTimerFor(String duration) {
+    return '$duration 타이머 시작';
+  }
+
+  @override
+  String durationSeconds(int count) {
+    return '$count초';
+  }
 }

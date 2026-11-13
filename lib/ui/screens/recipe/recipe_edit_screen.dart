@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../utils/platform_utils.dart';
+import '../../../utils/step_image_files.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -464,7 +465,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   bool get _hasUnsavedChanges =>
       _initialCaptured && _editSnapshot() != _initialSnapshot;
 
-  /// Our published discard guard, if any (desktop / large-tablet in-shell only).
+  /// Our published discard guard (see initState).
   DiscardGuard? _registeredGuard;
 
   /// Returns true when it's safe to leave this editor: nothing changed, or the
@@ -501,17 +502,17 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   void initState() {
     super.initState();
     _loadRecipe();
-    // On desktop / large tablet the editor lives inside the shell, so a
-    // sidebar / rail / command-palette / shortcut `context.go()` can unmount it
-    // WITHOUT firing PopScope. Publish a guard those paths await. Phones push
-    // the editor full-screen, where PopScope already covers the only exit.
-    if (!isMobile) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _registeredGuard = _confirmDiscardIfNeeded;
-        ref.read(unsavedEditorGuardProvider.notifier).state = _registeredGuard;
-      });
-    }
+    // Wherever the shell shows its navigation beside the editor (the desktop
+    // sidebar and the tablet rail, chosen by window width, so iPads and
+    // Android tablets too), a sidebar / rail / command-palette / shortcut
+    // `context.go()` can unmount it WITHOUT firing PopScope. Publish a guard
+    // those paths await. Always: whether there is a sidebar depends on the
+    // width, which can change while the editor is open, not on the platform.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _registeredGuard = _confirmDiscardIfNeeded;
+      ref.read(unsavedEditorGuardProvider.notifier).state = _registeredGuard;
+    });
   }
 
   @override
@@ -1327,13 +1328,24 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       // uploaded BEFORE anything is written: the old steps used to be deleted
       // first, so a slow or failed upload left the recipe without them.
       final stepRows = <StepsCompanion>[];
+      final documentsDir = _steps.any((s) => s.imagePath != null)
+          ? (await getApplicationDocumentsDirectory()).path
+          : '';
       for (var i = 0; i < _steps.length; i++) {
         final step = _steps[i];
         if (step.instruction.trim().isNotEmpty) {
-          // Copy step image to permanent location if it's a temp file
+          // A picked photo (a temp file) is copied into the step photo folder
+          // under a name of its own; one already kept there stays as it is.
           String? stepImagePath = step.imagePath;
-          if (stepImagePath != null && (!_isEditing || !stepImagePath.contains('images/steps'))) {
-            stepImagePath = await _copyStepImage(stepImagePath, recipeId, i);
+          if (stepImagePath != null &&
+              !ImageService.isServerPath(stepImagePath) &&
+              !stepImagePath.startsWith('http')) {
+            stepImagePath = await keepStepImage(
+              stepImagePath,
+              documentsDir: documentsDir,
+              recipeId: recipeId,
+              copyKept: !_isEditing,
+            );
           }
           final stepServerPath = await _stepServerPathFor(stepImagePath);
           stepRows.add(StepsCompanion.insert(
@@ -1497,21 +1509,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       await file.writeAsBytes(response.bodyBytes);
       return file.path;
     } catch (e) { return null; }
-  }
-
-  Future<String?> _copyStepImage(String sourcePath, String recipeId, int stepIndex) async {
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final ext = p.extension(sourcePath);
-      final filename = 'step_${recipeId}_$stepIndex$ext';
-      final destPath = p.join(dir.path, 'images', 'steps', filename);
-      final destFile = File(destPath);
-      await destFile.parent.create(recursive: true);
-      await File(sourcePath).copy(destPath);
-      return destPath;
-    } catch (e) {
-      return sourcePath; // Return original path if copy fails
-    }
   }
 
   /// Copy a picked/cropped main recipe image out of the OS temp/cache dir into

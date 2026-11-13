@@ -12703,4 +12703,48 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Ver receta completa';
+
+  @override
+  String plannerDateRange(String start, String end) {
+    return 'Del $start al $end';
+  }
+
+  @override
+  String clearWeekRangeWarning(String start, String end) {
+    return 'Esto eliminará todas las comidas planificadas del $start al $end. No se puede deshacer.';
+  }
+
+  @override
+  String shoppingDeleteSharedListConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Esta lista está compartida con $count personas. Si la eliminas, dejará de sincronizarse para todos.',
+      one: 'Esta lista está compartida con 1 persona. Si la eliminas, dejará de sincronizarse para todos.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookFromPantry(String items) {
+    return 'De tu despensa: $items';
+  }
+
+  @override
+  String pantryCookLineFrom(String ingredient, String items) {
+    return '$ingredient: $items';
+  }
+
+  @override
+  String get cookingStopTimer => 'Detener temporizador';
+
+  @override
+  String cookingStartTimerFor(String duration) {
+    return 'Iniciar un temporizador de $duration';
+  }
+
+  @override
+  String durationSeconds(int count) {
+    return '$count s';
+  }
 }

@@ -313,11 +313,20 @@ class _Results extends ConsumerWidget {
       return builtIn != null ? translator.translateCourse(builtIn.name) : key;
     }
 
+    // A chosen course or cookbook stays on offer while it is chosen, even
+    // when nothing in it uses the pantry any more: its chip is what clears
+    // it. Hidden, it left "No recipes match" with nothing to tap.
+    final allCookbooks = ref.watch(cookbooksProvider).valueOrNull;
     final cookbooks = [
-      for (final cb in ref.watch(cookbooksProvider).valueOrNull ?? const <Cookbook>[])
-        if ((cookbookCounts[cb.id] ?? 0) > 0) cb,
+      for (final cb in allCookbooks ?? const <Cookbook>[])
+        if ((cookbookCounts[cb.id] ?? 0) > 0 || cb.id == cookbook) cb,
     ];
-    final courses = courseCounts.keys.toList()..sort((a, b) => courseName(a).compareTo(courseName(b)));
+    final courses = {...courseCounts.keys, ?course}.toList()
+      ..sort((a, b) => courseName(a).compareTo(courseName(b)));
+    // A chosen cookbook that is gone (deleted) has no chip to show: clear it.
+    if (cookbook != null && allCookbooks != null && !allCookbooks.any((cb) => cb.id == cookbook)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => onCookbook(null));
+    }
     final side = desktop ? Space.xxxl - 4 : Space.lg;
 
     final filters = SingleChildScrollView(
@@ -344,13 +353,13 @@ class _Results extends ConsumerWidget {
               value: course,
               options: [
                 (null, l10n.pantryCookAllCourses),
-                for (final k in courses) (k, '${courseName(k)}  ${courseCounts[k]}'),
+                for (final k in courses) (k, '${courseName(k)}  ${courseCounts[k] ?? 0}'),
               ],
               onSelected: onCourse,
             ),
             const SizedBox(width: Space.sm),
           ],
-          if (cookbooks.length > 1)
+          if (cookbooks.length > 1 || cookbook != null)
             _MenuChip<String?>(
               label: cookbook == null
                   ? l10n.pantryCookAllCookbooks
@@ -359,7 +368,7 @@ class _Results extends ConsumerWidget {
               value: cookbook,
               options: [
                 (null, l10n.pantryCookAllCookbooks),
-                for (final cb in cookbooks) (cb.id, '${cb.name}  ${cookbookCounts[cb.id]}'),
+                for (final cb in cookbooks) (cb.id, '${cb.name}  ${cookbookCounts[cb.id] ?? 0}'),
               ],
               // Each cookbook's cover; "All cookbooks" a plain library mark.
               leading: (id, size) {
@@ -584,6 +593,26 @@ class _MatchTile extends ConsumerWidget {
       ],
     );
 
+    // Which pantry items it uses, so a match is never a mystery ("lemon
+    // juice" covered by "lemons"). Each line and its item on hover / long
+    // press.
+    final used = match.pantryItemsUsed;
+    final usedRow = used.isEmpty
+        ? null
+        : Tooltip(
+            message: [
+              for (final (ingredient, items) in match.coveredBy)
+                if (items.isNotEmpty) l10n.pantryCookLineFrom(ingredient.name, items.join(', ')),
+            ].join('\n'),
+            waitDuration: const Duration(milliseconds: 500),
+            child: Text(
+              l10n.pantryCookFromPantry(used.join(', ')),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12, color: c.textTertiary),
+            ),
+          );
+
     final missing = match.missing;
     final missingRow = missing.isEmpty
         ? null
@@ -699,6 +728,10 @@ class _MatchTile extends ConsumerWidget {
                     ),
                     const SizedBox(height: Space.xs + 2),
                     coverage,
+                    if (usedRow != null) ...[
+                      const SizedBox(height: Space.xs),
+                      usedRow,
+                    ],
                     if (missingRow != null) ...[
                       const SizedBox(height: Space.sm),
                       missingRow,

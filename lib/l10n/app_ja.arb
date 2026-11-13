@@ -4873,5 +4873,13 @@
   "pressBackAgainToExit": "もう一度「戻る」を押すと終了します",
   "mealPlanNextWeekend": "来週末",
   "shoppingAlreadyPlanned": "すでに献立にあります：{when}",
-  "communityPreviewViewFullRecipe": "レシピ全体を表示"
+  "communityPreviewViewFullRecipe": "レシピ全体を表示",
+  "plannerDateRange": "{start}～{end}",
+  "clearWeekRangeWarning": "{start}～{end}に計画された食事がすべて削除されます。元に戻せません。",
+  "shoppingDeleteSharedListConfirm": "{count, plural, other{このリストは{count}人と共有されています。削除すると全員の同期が止まります。}}",
+  "pantryCookFromPantry": "パントリーから：{items}",
+  "pantryCookLineFrom": "{ingredient}：{items}",
+  "cookingStopTimer": "タイマーを止める",
+  "cookingStartTimerFor": "{duration}のタイマーを開始",
+  "durationSeconds": "{count}秒"
 }

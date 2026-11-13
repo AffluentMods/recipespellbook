@@ -142,6 +142,13 @@
                 android:resource="@xml/widget_shopping_list_info" />
         </receiver>
 
+        <!-- Cooking mode timers that end while the app is in the background:
+             flutter_local_notifications delivers scheduled notifications
+             through this receiver. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

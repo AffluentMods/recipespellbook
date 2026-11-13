@@ -4873,5 +4873,13 @@
   "pressBackAgainToExit": "Naciśnij ponownie Wstecz, aby wyjść",
   "mealPlanNextWeekend": "W przyszły weekend",
   "shoppingAlreadyPlanned": "Już w planie posiłków: {when}",
-  "communityPreviewViewFullRecipe": "Zobacz pełny przepis"
+  "communityPreviewViewFullRecipe": "Zobacz pełny przepis",
+  "plannerDateRange": "Od {start} do {end}",
+  "clearWeekRangeWarning": "Spowoduje to usunięcie wszystkich posiłków zaplanowanych od {start} do {end}. Tej operacji nie można cofnąć.",
+  "shoppingDeleteSharedListConfirm": "{count, plural, one{Ta lista jest udostępniona {count} osobie. Jej usunięcie zatrzyma synchronizację u wszystkich.} few{Ta lista jest udostępniona {count} osobom. Jej usunięcie zatrzyma synchronizację u wszystkich.} many{Ta lista jest udostępniona {count} osobom. Jej usunięcie zatrzyma synchronizację u wszystkich.} other{Ta lista jest udostępniona {count} osoby. Jej usunięcie zatrzyma synchronizację u wszystkich.}}",
+  "pantryCookFromPantry": "Z twojej spiżarni: {items}",
+  "pantryCookLineFrom": "{ingredient}: {items}",
+  "cookingStopTimer": "Zatrzymaj timer",
+  "cookingStartTimerFor": "Uruchom timer na {duration}",
+  "durationSeconds": "{count} s"
 }

@@ -5,11 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// user chose Discard), false to keep editing.
 typedef DiscardGuard = Future<bool> Function();
 
-/// Null unless a recipe editor is mounted in-shell on desktop / large tablet,
-/// where a sidebar/rail/shortcut/palette `context.go()` would replace (unmount)
-/// the editor WITHOUT triggering its PopScope. Consumers await this before any
-/// such navigation. Always null on phones (the editor is full-screen there and
-/// PopScope already covers the only exit).
+/// Null unless a recipe editor is mounted. Beside the desktop sidebar or the
+/// tablet rail (shown by window width, on any platform), a
+/// sidebar/rail/shortcut/palette `context.go()` would replace (unmount) the
+/// editor WITHOUT triggering its PopScope. Consumers await this before any
+/// such navigation.
 final unsavedEditorGuardProvider = StateProvider<DiscardGuard?>((ref) => null);
 
 /// Consults [unsavedEditorGuardProvider] before a route change that would
