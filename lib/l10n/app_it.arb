@@ -3895,5 +3895,7 @@
   "shoppingAlreadyPlanned": "Già nel piano dei pasti: {when}",
   "communityPreviewViewFullRecipe": "Vedi ricetta completa",
   "communityFollowFailed": "Impossibile aggiornare chi segui. Controlla la connessione e riprova.",
-  "communityPublishPhotosUnsupported": "Alcune foto sono in un formato che questo dispositivo non sa leggere (come HEIC) e sono state escluse da:"
+  "communityPublishPhotosUnsupported": "Alcune foto sono in un formato che questo dispositivo non sa leggere (come HEIC) e sono state escluse da:",
+  "communityPublishIncludeNotes": "Includi le mie note",
+  "communityPublishIncludeNotesSubtitle": "Pubblica le note che hai scritto su ogni ricetta. Le tue valutazioni a stelle non vengono mai pubblicate."
 }

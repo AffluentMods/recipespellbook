@@ -4871,5 +4871,7 @@
   "shoppingAlreadyPlanned": "Уже в плане питания: {when}",
   "communityPreviewViewFullRecipe": "Посмотреть полный рецепт",
   "communityFollowFailed": "Не удалось изменить подписку. Проверьте подключение и попробуйте снова.",
-  "communityPublishPhotosUnsupported": "Некоторые фото в формате, который это устройство не может прочитать (например, HEIC), поэтому они не вошли в:"
+  "communityPublishPhotosUnsupported": "Некоторые фото в формате, который это устройство не может прочитать (например, HEIC), поэтому они не вошли в:",
+  "communityPublishIncludeNotes": "Включить мои заметки",
+  "communityPublishIncludeNotesSubtitle": "Публикует заметки, которые вы написали к каждому рецепту. Ваши собственные оценки звёздами никогда не публикуются."
 }

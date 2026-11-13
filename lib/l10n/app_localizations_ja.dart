@@ -12552,4 +12552,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityPublishPhotosUnsupported => '一部の写真はこのデバイスで読み込めない形式（HEICなど）のため、次のレシピから除外されました:';
+
+  @override
+  String get communityPublishIncludeNotes => '自分のメモを含める';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => '各レシピに書いたメモを公開します。自分の星評価が公開されることはありません。';
 }

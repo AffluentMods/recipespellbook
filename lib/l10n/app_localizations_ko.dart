@@ -12580,4 +12580,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityPublishPhotosUnsupported => '일부 사진은 이 기기에서 읽을 수 없는 형식(HEIC 등)이라 다음 레시피에서 제외되었습니다:';
+
+  @override
+  String get communityPublishIncludeNotes => '내 메모 포함';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => '각 레시피에 작성한 메모를 게시합니다. 내 별점은 게시되지 않습니다.';
 }

@@ -4871,5 +4871,7 @@
   "shoppingAlreadyPlanned": "Já está no plano de refeições: {when}",
   "communityPreviewViewFullRecipe": "Ver receita completa",
   "communityFollowFailed": "Não foi possível alterar quem você segue. Verifique sua conexão e tente novamente.",
-  "communityPublishPhotosUnsupported": "Algumas fotos estão em um formato que este dispositivo não consegue ler (como HEIC) e ficaram de fora de:"
+  "communityPublishPhotosUnsupported": "Algumas fotos estão em um formato que este dispositivo não consegue ler (como HEIC) e ficaram de fora de:",
+  "communityPublishIncludeNotes": "Incluir minhas notas",
+  "communityPublishIncludeNotesSubtitle": "Publica as notas que você escreveu em cada receita. Suas avaliações com estrelas nunca são publicadas."
 }

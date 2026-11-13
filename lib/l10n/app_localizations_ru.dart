@@ -12920,4 +12920,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityPublishPhotosUnsupported => 'Некоторые фото в формате, который это устройство не может прочитать (например, HEIC), поэтому они не вошли в:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Включить мои заметки';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Публикует заметки, которые вы написали к каждому рецепту. Ваши собственные оценки звёздами никогда не публикуются.';
 }

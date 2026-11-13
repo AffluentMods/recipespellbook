@@ -4871,5 +4871,7 @@
   "shoppingAlreadyPlanned": "已在膳食计划中：{when}",
   "communityPreviewViewFullRecipe": "查看完整食谱",
   "communityFollowFailed": "无法更改关注状态。请检查网络连接后重试。",
-  "communityPublishPhotosUnsupported": "部分照片的格式（如 HEIC）无法在此设备上读取，已从以下食谱中移除："
+  "communityPublishPhotosUnsupported": "部分照片的格式（如 HEIC）无法在此设备上读取，已从以下食谱中移除：",
+  "communityPublishIncludeNotes": "包含我的备注",
+  "communityPublishIncludeNotesSubtitle": "发布你在每个食谱上写的备注。你自己的星级评分永远不会发布。"
 }

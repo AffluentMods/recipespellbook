@@ -22056,6 +22056,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some photos are in a format this device cannot read (such as HEIC), so they were left out of:'**
   String get communityPublishPhotosUnsupported;
+
+  /// Switch on the Community publish screen: also publish the notes the person wrote on their recipes. Off by default.
+  ///
+  /// In en, this message translates to:
+  /// **'Include my notes'**
+  String get communityPublishIncludeNotes;
+
+  /// Under the "Include my notes" switch on the publish screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish the notes you wrote on each recipe. Your own star ratings are never published.'**
+  String get communityPublishIncludeNotesSubtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

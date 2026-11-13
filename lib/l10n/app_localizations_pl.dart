@@ -12930,4 +12930,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityPublishPhotosUnsupported => 'Niektóre zdjęcia mają format, którego to urządzenie nie odczyta (np. HEIC), więc pominięto je w:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Dołącz moje notatki';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Publikuje notatki dodane do każdego przepisu. Twoje oceny w gwiazdkach nigdy nie są publikowane.';
 }

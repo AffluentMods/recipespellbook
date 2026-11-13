@@ -149,12 +149,13 @@ void main() {
     }
   }
 
-  Future<PreparedPublish> prepare({bool includeImages = true}) async {
+  Future<PreparedPublish> prepare({bool includeImages = true, bool includeNotes = false}) async {
     final cookbook = (await db.cookbookDao.getCookbookById('book'))!;
     return pipeline.prepare(
       recipes: await db.recipeDao.getRecipesForCookbook('book'),
       title: 'Soups',
       includeImages: includeImages,
+      includeNotes: includeNotes,
       kind: 'cookbook',
       sourceId: 'book',
       coverPath: cookbook.imagePath,
@@ -206,6 +207,31 @@ void main() {
       expect(result.success, isTrue, reason: result.error);
       expect(fetched, isEmpty);
       expect((server.posts.single['recipes'] as List)[0]['imagePath'], isNull);
+    });
+  });
+
+  group('the person\'s own notes and rating', () {
+    test('stay private unless notes are switched on; the rating never goes', () async {
+      await addCookbook(notes: 'Too salty for Dad, use less.', rating: 5);
+      final result = await run(await prepare());
+      expect(result.success, isTrue, reason: result.error);
+      final sent = (server.posts.single['recipes'] as List).cast<Map<String, dynamic>>().first;
+      expect(sent['notes'], isNull);
+      expect(sent.containsKey('rating'), isFalse);
+      expect((await PublishSnapshot.lookup(result.publicationId!))!.includeNotes, isFalse);
+    });
+
+    test('go out when switched on, and the choice is remembered for updates', () async {
+      await addCookbook(notes: 'Add lemon at the end.', rating: 4);
+      final result = await run(await prepare(includeNotes: true));
+      final sent = (server.posts.single['recipes'] as List).cast<Map<String, dynamic>>().first;
+      expect(sent['notes'], 'Add lemon at the end.');
+      expect(sent.containsKey('rating'), isFalse);
+      expect((await PublishSnapshot.lookup(result.publicationId!))!.includeNotes, isTrue);
+    });
+
+    test('a snapshot from before the choice existed keeps notes private', () {
+      expect(PublishSnapshot.fromJson({'h': 'abc', 'img': true, 't': 0})!.includeNotes, isFalse);
     });
   });
 }

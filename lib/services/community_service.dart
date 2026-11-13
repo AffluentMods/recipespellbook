@@ -1503,6 +1503,11 @@ class PublishSnapshot {
   /// Whether photos were included.
   final bool includeImages;
 
+  /// Whether the person chose to include their own notes. Snapshots from
+  /// before that choice existed read as false: notes stay private unless
+  /// the person says otherwise.
+  final bool includeNotes;
+
   /// Sub-recipes from other cookbooks that were offered, and the ones of
   /// those that went in. A sub-recipe linked later is new and goes in, as
   /// the publish sheet would have it.
@@ -1515,6 +1520,7 @@ class PublishSnapshot {
     required this.hash,
     required this.name,
     required this.includeImages,
+    this.includeNotes = false,
     this.externalRecipeIds = const [],
     this.includedExternalIds = const [],
     required this.at,
@@ -1524,6 +1530,7 @@ class PublishSnapshot {
         'h': hash,
         if (name != null) 'n': name,
         'img': includeImages,
+        if (includeNotes) 'nt': true,
         if (externalRecipeIds.isNotEmpty) 'o': externalRecipeIds,
         if (includedExternalIds.isNotEmpty) 'x': includedExternalIds,
         't': at.millisecondsSinceEpoch,
@@ -1538,6 +1545,7 @@ class PublishSnapshot {
       hash: hash,
       name: json['n'] as String?,
       includeImages: json['img'] as bool? ?? true,
+      includeNotes: json['nt'] == true,
       externalRecipeIds: ids(json['o']),
       includedExternalIds: ids(json['x']),
       at: DateTime.fromMillisecondsSinceEpoch((json['t'] as num?)?.toInt() ?? 0),

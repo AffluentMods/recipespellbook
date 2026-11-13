@@ -12548,4 +12548,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityPublishPhotosUnsupported => '部分照片的格式（如 HEIC）无法在此设备上读取，已从以下食谱中移除：';
+
+  @override
+  String get communityPublishIncludeNotes => '包含我的备注';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => '发布你在每个食谱上写的备注。你自己的星级评分永远不会发布。';
 }

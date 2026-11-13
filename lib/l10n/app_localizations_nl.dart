@@ -12716,4 +12716,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityPublishPhotosUnsupported => 'Sommige foto\'s hebben een formaat dat dit apparaat niet kan lezen (zoals HEIC) en zijn daarom weggelaten bij:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Mijn notities toevoegen';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Publiceert de notities die je bij elk recept hebt geschreven. Je eigen sterrenbeoordelingen worden nooit gepubliceerd.';
 }

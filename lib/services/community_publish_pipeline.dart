@@ -55,6 +55,10 @@ class PreparedPublish {
   final String? sourceName;
   final bool includeImages;
 
+  /// Whether the person's own notes on each recipe go out. Off unless they
+  /// switched it on; their star rating never does.
+  final bool includeNotes;
+
   /// Sub-recipes from other cookbooks that were offered, and the ones that
   /// went in (cookbooks only).
   final List<String> externalRecipeIds;
@@ -77,6 +81,7 @@ class PreparedPublish {
     required this.sourceId,
     required this.sourceName,
     required this.includeImages,
+    this.includeNotes = false,
     required this.externalRecipeIds,
     required this.includedExternalIds,
     required this.contentHash,
@@ -231,6 +236,7 @@ class CommunityPublishPipeline {
     String? description,
     List<String> tags = const [],
     required bool includeImages,
+    bool includeNotes = false,
     required String kind,
     required String sourceId,
     String? coverPath,
@@ -305,8 +311,9 @@ class CommunityPublishPipeline {
         'imagePath': photo, // Replaced with the server path per run
         'categoryId': r.categoryId,
         'courseId': r.courseId,
-        'rating': r.rating,
-        'notes': r.notes,
+        // The person's own star rating is theirs: it is never published.
+        // Their notes only go out when they chose to include them.
+        'notes': includeNotes ? r.notes : null,
         'nutritionJson': r.nutritionJson,
         'ingredients': ingredients.map((i) => {
           'sortOrder': i.sortOrder,
@@ -403,6 +410,7 @@ class CommunityPublishPipeline {
       sourceId: sourceId,
       sourceName: singleRecipe ? null : sourceName,
       includeImages: includeImages,
+      includeNotes: includeNotes,
       externalRecipeIds: externalRecipeIds,
       includedExternalIds: includedExternalIds,
       contentHash: await fingerprint(
@@ -805,10 +813,11 @@ class CommunityPublishPipeline {
   }
 
   /// After a publish or update went through: keep the photos it used for
-  /// the next update and, for a cookbook, a [PublishSnapshot]. An update of
-  /// a cookbook renamed since the last snapshot also takes the new name
-  /// over as the publication's title; returns false when that failed (the
-  /// old name stays in the snapshot, so it still shows as changed).
+  /// the next update and a [PublishSnapshot] (what was sent, and the
+  /// person's choices for photos and notes). An update of a cookbook renamed
+  /// since the last snapshot also takes the new name over as the
+  /// publication's title; returns false when that failed (the old name stays
+  /// in the snapshot, so it still shows as changed).
   Future<bool> _remember(
     String publicationId,
     PreparedPublish job,
@@ -816,11 +825,10 @@ class CommunityPublishPipeline {
     required bool update,
   }) async {
     await PublishedPhotos.save(publicationId, photoKeys);
-    if (job.isSingleRecipe) return true;
 
     var name = job.sourceName;
     var renamed = true;
-    if (update && name != null) {
+    if (update && name != null && !job.isSingleRecipe) {
       final previous = await PublishSnapshot.lookup(publicationId);
       final oldName = previous?.name;
       if (oldName != null && oldName != name) {
@@ -834,6 +842,7 @@ class CommunityPublishPipeline {
         hash: job.contentHash,
         name: name,
         includeImages: job.includeImages,
+        includeNotes: job.includeNotes,
         externalRecipeIds: job.externalRecipeIds,
         includedExternalIds: job.includedExternalIds,
         at: DateTime.now(),

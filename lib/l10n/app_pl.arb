@@ -4871,5 +4871,7 @@
   "shoppingAlreadyPlanned": "Już w planie posiłków: {when}",
   "communityPreviewViewFullRecipe": "Zobacz pełny przepis",
   "communityFollowFailed": "Nie udało się zmienić obserwowanych. Sprawdź połączenie i spróbuj ponownie.",
-  "communityPublishPhotosUnsupported": "Niektóre zdjęcia mają format, którego to urządzenie nie odczyta (np. HEIC), więc pominięto je w:"
+  "communityPublishPhotosUnsupported": "Niektóre zdjęcia mają format, którego to urządzenie nie odczyta (np. HEIC), więc pominięto je w:",
+  "communityPublishIncludeNotes": "Dołącz moje notatki",
+  "communityPublishIncludeNotesSubtitle": "Publikuje notatki dodane do każdego przepisu. Twoje oceny w gwiazdkach nigdy nie są publikowane."
 }

@@ -12704,4 +12704,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get communityPublishPhotosUnsupported => 'Einige Fotos haben ein Format, das dieses Gerät nicht lesen kann (etwa HEIC), und fehlen deshalb bei:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Meine Notizen einbeziehen';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Veröffentlicht die Notizen, die du zu jedem Rezept geschrieben hast. Deine eigenen Sternebewertungen werden nie veröffentlicht.';
 }

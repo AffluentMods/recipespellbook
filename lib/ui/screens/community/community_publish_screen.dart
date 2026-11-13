@@ -69,6 +69,8 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   final _descController = TextEditingController();
   List<String> _selectedTags = [];
   bool _includeImages = true;
+  // The person's own notes on each recipe stay private unless they say so.
+  bool _includeNotes = false;
 
   // Step 3 state
   bool _isPublishing = false;
@@ -83,6 +85,17 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   @override
   void initState() {
     super.initState();
+    final republishing = widget.republishPublicationId;
+    if (republishing != null) {
+      // An update starts from the choices the last publish made.
+      PublishSnapshot.lookup(republishing).then((snapshot) {
+        if (!mounted || snapshot == null) return;
+        setState(() {
+          _includeImages = snapshot.includeImages;
+          _includeNotes = snapshot.includeNotes;
+        });
+      });
+    }
     if (_isSingleRecipeMode) {
       // Load the recipe and jump straight to step 2.
       WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -352,6 +365,20 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             value: _includeImages,
             onChanged: (v) => setState(() => _includeImages = v),
             secondary: const Icon(Icons.image_outlined),
+          ),
+        ),
+
+        // Include my notes (off unless the person turns it on)
+        Card(
+          child: SwitchListTile(
+            title: Text(l10n.communityPublishIncludeNotes, style: const TextStyle(fontWeight: FontWeight.w500)),
+            subtitle: Text(
+              l10n.communityPublishIncludeNotesSubtitle,
+              style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+            ),
+            value: _includeNotes,
+            onChanged: (v) => setState(() => _includeNotes = v),
+            secondary: const Icon(Icons.sticky_note_2_outlined),
           ),
         ),
 
@@ -633,6 +660,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         description: _descController.text.trim(),
         tags: _selectedTags,
         includeImages: _includeImages,
+        includeNotes: _includeNotes,
         kind: _isSingleRecipeMode ? 'recipe' : 'cookbook',
         sourceId: _isSingleRecipeMode ? _singleRecipe!.id : _selectedCookbook!.id,
         // For cookbook mode use the cookbook cover; for single-recipe mode

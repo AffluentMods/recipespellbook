@@ -212,6 +212,8 @@ class CommunityPublicationUpdater {
       recipes: [...recipes, ...extras],
       title: pub.title,
       includeImages: snapshot?.includeImages ?? true,
+      // The choice made when publishing; off when it was never made.
+      includeNotes: snapshot?.includeNotes ?? false,
       kind: 'cookbook',
       sourceId: cookbook.id,
       coverPath: cookbook.imagePath,

@@ -3896,5 +3896,7 @@
   "shoppingAlreadyPlanned": "Déjà au menu : {when}",
   "communityPreviewViewFullRecipe": "Voir la recette complète",
   "communityFollowFailed": "Impossible de modifier vos abonnements. Vérifiez votre connexion et réessayez.",
-  "communityPublishPhotosUnsupported": "Certaines photos sont dans un format que cet appareil ne sait pas lire (comme HEIC) et ont été retirées de :"
+  "communityPublishPhotosUnsupported": "Certaines photos sont dans un format que cet appareil ne sait pas lire (comme HEIC) et ont été retirées de :",
+  "communityPublishIncludeNotes": "Inclure mes notes",
+  "communityPublishIncludeNotesSubtitle": "Publie les notes que vous avez écrites sur chaque recette. Vos propres notes en étoiles ne sont jamais publiées."
 }

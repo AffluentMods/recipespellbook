@@ -4433,5 +4433,7 @@
   "shoppingAlreadyPlanned": "Schon im Essensplan: {when}",
   "communityPreviewViewFullRecipe": "Vollständiges Rezept anzeigen",
   "communityFollowFailed": "Folgen konnte nicht geändert werden. Prüfe deine Verbindung und versuche es erneut.",
-  "communityPublishPhotosUnsupported": "Einige Fotos haben ein Format, das dieses Gerät nicht lesen kann (etwa HEIC), und fehlen deshalb bei:"
+  "communityPublishPhotosUnsupported": "Einige Fotos haben ein Format, das dieses Gerät nicht lesen kann (etwa HEIC), und fehlen deshalb bei:",
+  "communityPublishIncludeNotes": "Meine Notizen einbeziehen",
+  "communityPublishIncludeNotesSubtitle": "Veröffentlicht die Notizen, die du zu jedem Rezept geschrieben hast. Deine eigenen Sternebewertungen werden nie veröffentlicht."
 }
