@@ -48,10 +48,18 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
 
   // ============ RECIPE-TAG ASSOCIATIONS ============
 
+  /// A recipe tag is shown as the tag of the same id here, or as the one
+  /// whose id it ends with after a ':'. A recipe in a cookbook someone else
+  /// shares keeps the owner's tag ids as the server has them
+  /// ("ownerId:tag_quick"), so that an edit here sends them back unchanged.
+  Expression<bool> get _shownAs =>
+      recipeTags.tagId.equalsExp(tags.id) |
+      const CustomExpression<bool>("substr(recipe_tags.tag_id, -length(tags.id) - 1) = ':' || tags.id");
+
   /// Get all tags for a recipe
   Future<List<Tag>> getTagsForRecipe(String recipeId) async {
     final query = select(tags).join([
-      innerJoin(recipeTags, recipeTags.tagId.equalsExp(tags.id)),
+      innerJoin(recipeTags, _shownAs),
     ])..where(recipeTags.recipeId.equals(recipeId));
 
     final rows = await query.get();
@@ -61,7 +69,7 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
   /// Watch tags for a recipe
   Stream<List<Tag>> watchTagsForRecipe(String recipeId) {
     final query = select(tags).join([
-      innerJoin(recipeTags, recipeTags.tagId.equalsExp(tags.id)),
+      innerJoin(recipeTags, _shownAs),
     ])..where(recipeTags.recipeId.equals(recipeId));
 
     return query.watch().map((rows) => rows.map((row) => row.readTable(tags)).toList());
@@ -80,11 +88,11 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
 
   /// Add a tag to a recipe
   Future<void> addTagToRecipe(String recipeId, String tagId) async {
-    await into(recipeTags).insert(
-      RecipeTagsCompanion.insert(recipeId: recipeId, tagId: tagId),
-      mode: InsertMode.insertOrIgnore,
-    );
-    await _touchRecipe(recipeId);
+    final current = await _tagIdsOf(recipeId);
+    await setTagsForRecipe(recipeId, [
+      for (final id in current) _shownId(id, await _localTagIds()) ?? id,
+      tagId,
+    ]);
   }
 
   /// Tags travel with their recipe in sync, so the recipe must look changed.
@@ -94,24 +102,72 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
 
   /// Remove a tag from a recipe
   Future<void> removeTagFromRecipe(String recipeId, String tagId) async {
-    await (delete(recipeTags)
-      ..where((rt) => rt.recipeId.equals(recipeId) & rt.tagId.equals(tagId)))
-        .go();
-    await _touchRecipe(recipeId);
+    final local = await _localTagIds();
+    final current = await _tagIdsOf(recipeId);
+    await setTagsForRecipe(recipeId, [
+      for (final id in current)
+        if (_shownId(id, local) != null && _shownId(id, local) != tagId) _shownId(id, local)!,
+    ]);
   }
 
-  /// Set all tags for a recipe (replaces existing)
+  /// Set the tags of a recipe to [tagIds], the tags the user picked of
+  /// those here. Nothing is written when that changes nothing.
+  ///
+  /// A recipe in a cookbook someone else shares keeps what the user could
+  /// not see (the owner's own tags), keeps the owner's ids for the tags it
+  /// shows, and names a built-in tag added here by the owner's id. Its
+  /// change is recorded for the collab push, which sends a recipe's tags
+  /// only then.
   Future<void> setTagsForRecipe(String recipeId, List<String> tagIds) async {
-    // Remove existing tags
-    await (delete(recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).go();
-
-    // Add new tags
+    final existing = await _tagIdsOf(recipeId);
+    final owner = await _sharedOwnerOf(recipeId);
+    final local = await _localTagIds();
+    final next = <String>{
+      // Tags the user could not see: they could not have taken them off.
+      if (owner != null)
+        for (final id in existing)
+          if (_shownId(id, local) == null) id,
+    };
     for (final tagId in tagIds) {
+      final kept = existing.where((id) => _shownId(id, local) == tagId).firstOrNull;
+      next.add(kept ?? (owner != null && SeededDefaults.tagRows.containsKey(tagId) ? '$owner:$tagId' : tagId));
+    }
+    if (next.length == existing.length && next.containsAll(existing)) return;
+
+    await (delete(recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).go();
+    for (final tagId in next) {
       await into(recipeTags).insert(
         RecipeTagsCompanion.insert(recipeId: recipeId, tagId: tagId),
+        mode: InsertMode.insertOrIgnore,
       );
     }
     await _touchRecipe(recipeId);
+    if (owner != null) await SyncJournal.touch(attachedDatabase, SyncJournal.recipeTags, recipeId);
+  }
+
+  Future<List<String>> _tagIdsOf(String recipeId) async =>
+      (await (select(recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).get()).map((rt) => rt.tagId).toList();
+
+  Future<Set<String>> _localTagIds() async => (await select(tags).get()).map((t) => t.id).toSet();
+
+  /// The tag here a stored recipe tag shows as (see [_shownAs]), or null.
+  static String? _shownId(String stored, Set<String> local) {
+    if (local.contains(stored)) return stored;
+    final at = stored.lastIndexOf(':');
+    if (at < 0) return null;
+    final bare = stored.substring(at + 1);
+    return local.contains(bare) ? bare : null;
+  }
+
+  /// The owner of the shared cookbook [recipeId] is in, or null for one of
+  /// the user's own.
+  Future<String?> _sharedOwnerOf(String recipeId) async {
+    final row = await customSelect(
+      'SELECT c.shared_owner_id AS owner FROM recipes r JOIN cookbooks c ON c.id = r.cookbook_id WHERE r.id = ?',
+      variables: [Variable.withString(recipeId)],
+      readsFrom: {attachedDatabase.recipes, attachedDatabase.cookbooks},
+    ).getSingleOrNull();
+    return row?.readNullable<String>('owner');
   }
 
   /// Get recipe count for a tag

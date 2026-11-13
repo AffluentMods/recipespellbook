@@ -23,6 +23,9 @@ class SyncTestServer {
   /// Every request, as "METHOD /path".
   final requests = <String>[];
 
+  /// Every request's full address.
+  final urls = <Uri>[];
+
   /// What /v1/sync/push answers besides the cursor (conflicts, cookbooks…).
   Map<String, dynamic> Function(Map<String, dynamic> push) pushAnswer = (_) => {};
 
@@ -47,6 +50,7 @@ class SyncTestServer {
   http.Client get client => MockClient((request) async {
         final path = request.url.path;
         requests.add('${request.method} $path');
+        urls.add(request.url);
         final now = DateTime.now().toUtc().toIso8601String();
         final custom = await other?.call(request);
         if (custom != null) return custom;

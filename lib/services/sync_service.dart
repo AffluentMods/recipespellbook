@@ -343,9 +343,12 @@ class SyncService {
       } catch (e) {
         debugPrint('[Sync] Cookbook collab push failed (non-fatal): $e');
       }
+      final fromScratch = _sharedFromScratch;
+      _sharedFromScratch = false;
       try {
-        sharedPulled = await _pullFamilyShared(userId, inflightAfter: collabStart);
+        sharedPulled = await _pullFamilyShared(userId, inflightAfter: collabStart, fromScratch: fromScratch);
       } catch (e) {
+        if (fromScratch) _sharedFromScratch = true;
         debugPrint('[Sync] Family pull failed (non-fatal): $e');
       }
       try {
@@ -556,15 +559,18 @@ class SyncService {
 
   /// Cursor for the family (shared-with-me) pull, kept separately so a failed
   /// pull is retried from the same point instead of silently skipped.
-  Future<int> _pullFamilyShared(String userId, {DateTime? inflightAfter}) async {
-    final since = await _readDate(_familyCursorPrefix, userId);
+  Future<int> _pullFamilyShared(String userId, {DateTime? inflightAfter, bool fromScratch = false}) async {
+    final since = fromScratch ? null : await _readDate(_familyCursorPrefix, userId);
     final requestedAt = DateTime.now().toUtc();
     final familyData = await FamilyService.instance.getSharedContent(
       // A little overlap: this cursor comes from the device clock when the
       // server doesn't report its own time.
       since: since?.subtract(const Duration(minutes: 2)),
     );
-    if (familyData == null) return 0;
+    if (familyData == null) {
+      if (fromScratch) _sharedFromScratch = true; // tried again next sync
+      return 0;
+    }
     final pulled = await _applyServerData(
       familyData,
       sharedOwners: _extractSharedCookbookOwners(familyData),
@@ -961,7 +967,7 @@ class SyncService {
           count += await _upsertCustomCourses(data['customCourses'], ctx);
           count += await _upsertTags(data['tags'], ctx);
           count += await _upsertShoppingCategories(data['shoppingCategories'], ctx);
-          count += await _upsertRecipes(data['recipes'], ctx, skipRecipeIds);
+          count += await _upsertRecipes(data['recipes'], ctx, skipRecipeIds, sharedOwners?.keys.toSet());
           count += await _upsertMealPlans(data['mealPlans'], ctx);
           count += await _upsertShoppingLists(data['shoppingLists'], ctx);
           count += await _upsertShoppingListItems(data['shoppingListItems'], ctx);
@@ -1256,26 +1262,22 @@ class SyncService {
   /// Fetch ALL shared content (no `since` filter) and reconcile it locally.
   /// Used right after joining a shared cookbook so the member sees it even when
   /// the cookbook's `updatedAt` predates their last sync cursor.
+  ///
+  /// It is a sync like any other (one at a time, see [sync]) whose shared
+  /// pull starts from scratch: edits to shared recipes not sent yet go out
+  /// first, and the pull leaves them alone until they have.
   Future<void> pullSharedNow() async {
     if (_db == null || !_auth.isSignedIn) return;
+    _sharedFromScratch = true;
     try {
-      final userId = _auth.currentUser!.id;
-      final startedAt = DateTime.now();
-      final familyData = await FamilyService.instance.getSharedContent();
-      if (familyData == null) return;
-      await _applyServerData(
-        familyData,
-        sharedOwners: _extractSharedCookbookOwners(familyData),
-        skipRecipeIds: CollabService.instance.dirtyCookbookRecipeIds,
-        inflightAfter: startedAt,
-      );
-      CollabService.instance.setCookbookAccess(_extractCookbookShares(familyData));
-      // What we just pulled is the server's copy, not a member edit to push.
-      await _saveDate(_collabMarkPrefix, userId, startedAt);
+      await sync();
     } catch (e) {
       debugPrint('[Sync] pullSharedNow failed: $e');
     }
   }
+
+  /// The next shared pull fetches everything, not only what changed.
+  bool _sharedFromScratch = false;
 
   /// Push local edits to recipes in shared cookbooks I can edit through the
   /// free /collab cookbook channel (server preserves the owner's userId).
@@ -1302,11 +1304,22 @@ class SyncService {
                       : db.recipes.updatedAt.isBiggerThanValue(mark.subtract(_pushOverlap)))))
             .map((r) => r.read(db.recipes.id)!)
             .get();
-    final dirty = {...collab.dirtyCookbookRecipeIds, ...changed};
+    // Into the dirty set until they have gone: the pull after this push
+    // leaves dirty recipes alone, also when this push fails.
+    await collab.markRecipesDirty(changed);
+    final dirty = collab.dirtyCookbookRecipeIds;
     if (dirty.isEmpty) {
       await _saveDate(_collabMarkPrefix, userId, startedAt);
       return;
     }
+
+    // A recipe's tags go only when they were changed here: the owner's tags
+    // are not all on this device, and the server replaces them with what is
+    // sent (see TagsDao.setTagsForRecipe). The member's own tags mean
+    // nothing to the owner and stay here.
+    final tagsChanged = await SyncJournal.touched(db, SyncJournal.recipeTags);
+    final localTags = (await db.select(db.tags).get()).map((t) => t.id).toSet();
+    bool sendsTag(String id) => id.contains(':') || SeededDefaults.tagRows.containsKey(id) || !localTags.contains(id);
 
     final payloads = <Map<String, dynamic>>[];
     final pushIds = <String>[];   // cleared only on a successful push
@@ -1336,13 +1349,17 @@ class SyncService {
         ..._serializeRecipe(recipe),
         'ingredients': ingredients.map(_serializeIngredient).toList(),
         'steps': steps.map(_serializeStep).toList(),
-        'tags': recipeTags.map((rt) => rt.tagId).toList(),
+        if (tagsChanged.containsKey(recipeId))
+          'tags': [for (final rt in recipeTags) if (sendsTag(rt.tagId)) rt.tagId],
         'recipeLinks': recipeLinks.map(_serializeRecipeLink).toList(),
       });
       pushIds.add(recipeId);
     }
 
-    if (dropIds.isNotEmpty) await collab.unmarkRecipesDirty(dropIds);
+    if (dropIds.isNotEmpty) {
+      await collab.unmarkRecipesDirty(dropIds);
+      await SyncJournal.untouch(db, SyncJournal.recipeTags, dropIds);
+    }
     if (payloads.isEmpty) return;
 
     // Order so a recipe appears before any recipe that links to it — the
@@ -1366,6 +1383,8 @@ class SyncService {
         }
       }
       if (clear.isNotEmpty) await collab.unmarkRecipesDirty(clear);
+      // Tag changes up to the start went out (the journal has milliseconds).
+      await SyncJournal.untouch(db, SyncJournal.recipeTags, pushIds, upTo: startedAt);
       await _saveDate(_collabMarkPrefix, userId, startedAt);
       debugPrint('[Sync] Pushed ${payloads.length} shared-cookbook recipe edit(s), cleared ${clear.length}');
     }
@@ -1874,7 +1893,11 @@ class SyncService {
     return n;
   }
 
-  Future<int> _upsertRecipes(dynamic data, _ApplyCtx ctx, [Set<String>? skipRecipeIds]) async {
+  /// [sharedCookbooks]: cookbooks someone else shares with this account.
+  /// Their recipes keep the owner's tag ids as they come, also ones this
+  /// device has no tag for, so that a member's edit can send them back.
+  Future<int> _upsertRecipes(dynamic data, _ApplyCtx ctx,
+      [Set<String>? skipRecipeIds, Set<String>? sharedCookbooks]) async {
     final rows = _rows(data);
     if (rows.isEmpty) return 0;
     final db = _db!;
@@ -2022,10 +2045,12 @@ class SyncService {
       // means "all tags removed" and must clear them here too.
       final tagsList = (d['recipeTags'] ?? d['tags']) as List?;
       if (tagsList != null) {
+        final owners = sharedCookbooks?.contains(cookbookId) ?? false;
         await (db.delete(db.recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).go();
         for (final rt in tagsList) {
-          final tagId = _bare(rt is String ? rt : (rt is Map ? rt['tagId'] as String? : null));
-          if (tagId == null || !knownTags.contains(tagId)) continue;
+          final raw = rt is String ? rt : (rt is Map ? rt['tagId'] as String? : null);
+          final tagId = owners ? raw : _bare(raw);
+          if (tagId == null || (!owners && !knownTags.contains(tagId))) continue;
           await db.into(db.recipeTags).insert(
                 RecipeTagsCompanion.insert(recipeId: recipeId, tagId: tagId),
                 mode: InsertMode.insertOrIgnore,

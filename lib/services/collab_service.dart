@@ -229,6 +229,15 @@ class CollabService {
     await prefs.setStringList(_dirtyRecipesKey, _dirtyCookbookRecipeIds.toList());
   }
 
+  /// Flag several recipes at once (see [markRecipeDirty]).
+  Future<void> markRecipesDirty(Iterable<String> recipeIds) async {
+    final next = {..._dirtyCookbookRecipeIds, ...recipeIds};
+    if (next.length == _dirtyCookbookRecipeIds.length) return;
+    _dirtyCookbookRecipeIds = next;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_dirtyRecipesKey, _dirtyCookbookRecipeIds.toList());
+  }
+
   /// Clear recipes from the dirty set (after a successful push, or when they're
   /// no longer pushable).
   Future<void> unmarkRecipesDirty(Iterable<String> recipeIds) async {
