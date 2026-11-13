@@ -2394,7 +2394,19 @@ class _MealBlock extends ConsumerWidget {
       child: Dismissible(
         key: Key('tl_${plan.mealPlan.id}'),
         direction: selecting ? DismissDirection.none : DismissDirection.endToStart,
-        onDismissed: (_) => ref.read(mealPlanDaoProvider).deleteMealPlan(plan.mealPlan.id),
+        onDismissed: (_) {
+          // A swipe is easy to make by accident: offer it back. The snackbar
+          // is shown first, while this card's context is still mounted.
+          final dao = ref.read(mealPlanDaoProvider);
+          final removed = plan.mealPlan;
+          AppSnackbar.successWithAction(
+            context,
+            l10n.plannerMealRemoved,
+            actionLabel: l10n.actionUndo,
+            onAction: () => dao.insertMealPlan(removed.toCompanion(false)),
+          );
+          dao.deleteMealPlan(removed.id);
+        },
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
