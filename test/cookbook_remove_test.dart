@@ -160,12 +160,12 @@ void main() {
   test('a selected cookbook that is gone falls back to one that is here', () async {
     final container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
     addTearDown(container.dispose);
+    container.read(settingsProvider); // loaded, as it is long before anything is deleted
+    await Future<void>.delayed(const Duration(milliseconds: 50));
     container.read(selectedCookbookIdProvider.notifier).state = 'deleted_elsewhere';
-    final sub = container.listen(cookbooksProvider, (_, _) {});
+    final sub = container.listen(selectedCookbookProvider, (_, _) {});
     addTearDown(sub.close);
     await container.read(cookbooksProvider.future);
-    // The cookbooks stream reports again on any change.
-    await db.into(db.cookbooks).insert(CookbooksCompanion.insert(id: 'new_one', name: 'New'));
     await Future<void>.delayed(const Duration(milliseconds: 50));
 
     expect(container.read(selectedCookbookIdProvider), 'starter');

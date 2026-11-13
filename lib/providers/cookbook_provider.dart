@@ -10,21 +10,9 @@ final cookbooksProvider = StreamProvider<List<Cookbook>>((ref) {
 });
 
 /// Currently selected cookbook ID — initialized from persisted settings.
-///
-/// When the cookbook it names is gone (deleted, left, or deleted on another
-/// device) it moves to another one, and that is remembered: new recipes
-/// would otherwise go into a cookbook that no longer exists and never show.
+/// [selectedCookbookProvider] moves it on when its cookbook is gone.
 final selectedCookbookIdProvider = StateProvider<String?>((ref) {
   final settings = ref.read(settingsProvider);
-  ref.listen<AsyncValue<List<Cookbook>>>(cookbooksProvider, (_, next) {
-    final list = next.valueOrNull;
-    if (list == null || list.isEmpty) return;
-    final current = ref.controller.state;
-    if (current != null && list.any((c) => c.id == current)) return;
-    final fallback = fallbackCookbookId(list, current);
-    ref.controller.state = fallback;
-    ref.read(settingsProvider.notifier).setCurrentCookbook(fallback);
-  });
   return settings.currentCookbookId ?? 'starter';
 });
 
@@ -68,6 +56,25 @@ final selectedCookbookProvider = Provider<AsyncValue<Cookbook?>>((ref) {
   return cookbooks.when(
     data: (list) {
       final cookbook = list.where((c) => c.id == selectedId).firstOrNull;
+      if (cookbook == null && list.isNotEmpty) {
+        // The selected cookbook is gone (deleted, left, or deleted on another
+        // device). Another one is selected and remembered: new recipes would
+        // otherwise go into a cookbook that no longer exists and never show.
+        final fallback = fallbackCookbookId(list, selectedId);
+        Future.microtask(() {
+          try {
+            // Both read first: once the selection changes, this provider's
+            // ref may not be used until it has rebuilt.
+            final selection = ref.read(selectedCookbookIdProvider.notifier);
+            final settings = ref.read(settingsProvider.notifier);
+            if (selection.state != selectedId) return;
+            selection.state = fallback;
+            settings.setCurrentCookbook(fallback);
+          } catch (_) {
+            // Disposed meanwhile: nobody is looking.
+          }
+        });
+      }
       return AsyncValue.data(cookbook);
     },
     loading: () => const AsyncValue.loading(),
