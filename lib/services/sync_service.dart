@@ -659,6 +659,25 @@ class SyncService {
           ..where(recipes.imageServerPath.isNull() & recipes.imagePath.isNotNull() & recipes.deletedAt.isNull())
           ..orderBy([OrderingTerm.desc(recipes.createdAt), OrderingTerm.desc(recipes.rowId)]))
         .get();
+    // Step photos last. A restore, a transfer or a duplicate brings them as
+    // files with no cloud copy, and they never reached the other devices.
+    final steps = db.steps;
+    final waitingSteps = await (db.selectOnly(steps).join([
+      innerJoin(recipes, recipes.id.equalsExp(steps.recipeId), useColumns: false),
+    ])
+          ..addColumns([steps.id, steps.recipeId, steps.imagePath, recipes.cookbookId])
+          ..where(steps.imageServerPath.isNull() & steps.imagePath.isNotNull() & recipes.deletedAt.isNull())
+          ..orderBy([OrderingTerm.desc(recipes.createdAt), OrderingTerm.asc(steps.sortOrder)]))
+        .get();
+    Future<void> sendRecipeAgain(String recipeId, String cookbookId) async {
+      // A recipe in a shared cookbook goes out through the collab push. Until
+      // that push lands the pull must leave it alone: the server's copy is the
+      // older one, has no photo, and would take this one's photo away.
+      if (CollabService.instance.canEditCookbook(cookbookId)) {
+        await CollabService.instance.markRecipeDirty(recipeId);
+      }
+    }
+
     final queue = <_PhotoWaiting>[
       for (final cb in covers)
         _PhotoWaiting('cookbook:${cb.id}', cb.imagePath!, (serverPath) async {
@@ -674,12 +693,17 @@ class SyncService {
             imageServerPath: Value(serverPath),
             updatedAt: Value(DateTime.now()),
           ));
-          // A recipe in a shared cookbook goes out through the collab push. Until
-          // that push lands the pull must leave it alone: the server's copy is the
-          // older one, has no photo, and would take this one's photo away.
-          if (CollabService.instance.canEditCookbook(row.read(recipes.cookbookId)!)) {
-            await CollabService.instance.markRecipeDirty(id);
-          }
+          await sendRecipeAgain(id, row.read(recipes.cookbookId)!);
+        }),
+      for (final row in waitingSteps)
+        _PhotoWaiting('step:${row.read(steps.id)}', row.read(steps.imagePath)!, (serverPath) async {
+          final recipeId = row.read(steps.recipeId)!;
+          await (db.update(steps)..where((t) => t.id.equals(row.read(steps.id)!)))
+              .write(StepsCompanion(imageServerPath: Value(serverPath)));
+          // Steps go out with their recipe.
+          await (db.update(recipes)..where((t) => t.id.equals(recipeId)))
+              .write(RecipesCompanion(updatedAt: Value(DateTime.now())));
+          await sendRecipeAgain(recipeId, row.read(recipes.cookbookId)!);
         }),
     ];
     final candidates = [
@@ -2008,13 +2032,15 @@ class SyncService {
                 localFileExists(s.imagePath!))
               s.imageServerPath!: s.imagePath!,
         };
-        final localOnly = <int, String>{
+        // A photo with no cloud copy yet stays with its own step, by id: by
+        // position it went to whichever step moved into that place.
+        final localOnly = <String, String>{
           for (final s in oldSteps)
             if (s.imageServerPath == null &&
                 s.imagePath != null &&
                 !ImageService.isServerPath(s.imagePath) &&
                 localFileExists(s.imagePath!))
-              s.sortOrder: s.imagePath!,
+              s.id: s.imagePath!,
         };
         await (db.delete(db.steps)..where((s) => s.recipeId.equals(recipeId))).go();
         var order = 0;
@@ -2032,7 +2058,7 @@ class SyncService {
               sortOrder: sort,
               instruction: instruction,
               durationMinutes: Value((s['durationMinutes'] as num?)?.toInt()),
-              imagePath: Value(sIsServer ? (localByServer[sImg] ?? sImg) : (sImg ?? localOnly[sort])),
+              imagePath: Value(sIsServer ? (localByServer[sImg] ?? sImg) : (sImg ?? localOnly[stepId])),
               imageServerPath: Value(sIsServer ? sImg : null),
               notes: Value(s['notes'] as String?),
             ),
