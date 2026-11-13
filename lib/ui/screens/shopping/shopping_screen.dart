@@ -164,7 +164,11 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   // Wide-viewport (nav-rail) slide-in add panel; compact keeps the full-screen
   // add flow. See [_openQuickAdd] / [_wrapWithQuickAdd].
   bool _quickAddOpen = false;
+
+  /// Items ticked in the last two seconds. The tick is already saved; they
+  /// only stay where they were for a moment before moving down to Checked.
   final Set<String> _recentlyCheckedIds = {};
+  final Map<String, Timer> _settleTimers = {};
   Map<String, int> _sharedListCounts = {}; // listId → share count
   Map<String, List<_ShopMember>> _sharedListMembers = {}; // listId → members
 
@@ -240,6 +244,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   @override
   void dispose() {
     _collabTimer?.cancel();
+    for (final t in _settleTimers.values) {
+      t.cancel();
+    }
     CollabService.instance.revision.removeListener(_onCollabRevision);
     super.dispose();
   }
@@ -1708,31 +1715,32 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     );
   }
 
-  /// Delayed check: item stays in place for 2s with visual feedback
-  /// (checkbox filled, text struck through), then moves to checked section.
-  /// Tapping again during the delay cancels the check.
+  /// How long a ticked item stays in place before moving to Checked.
+  static const settleDelay = Duration(milliseconds: 2000);
+
+  /// A tick is saved at once, so leaving the tab (or the app) right after
+  /// never loses it. Only the move is delayed: the item stays in place for
+  /// [settleDelay] with its box filled and its name struck through, then
+  /// moves down to the checked section. Phone and desktop views both.
   void _onItemChecked(String itemId) {
+    ref.read(shoppingDaoProvider).toggleItemChecked(itemId, true);
+    _settleTimers.remove(itemId)?.cancel();
     setState(() => _recentlyCheckedIds.add(itemId));
-    Future.delayed(const Duration(milliseconds: 2000), () {
-      if (!mounted) return;
-      // If still in the "recently checked" set, persist it
-      if (_recentlyCheckedIds.contains(itemId)) {
-        final shoppingDao = ref.read(shoppingDaoProvider);
-        shoppingDao.toggleItemChecked(itemId, true);
+    _settleTimers[itemId] = Timer(settleDelay, () {
+      _settleTimers.remove(itemId);
+      if (mounted && _recentlyCheckedIds.contains(itemId)) {
         setState(() => _recentlyCheckedIds.remove(itemId));
       }
     });
   }
 
-  /// Instant uncheck — no delay needed
+  /// Untick at once, also during the settle window.
   void _onItemUnchecked(String itemId) {
-    // If the item is still in the delay window, just cancel it
+    _settleTimers.remove(itemId)?.cancel();
     if (_recentlyCheckedIds.contains(itemId)) {
       setState(() => _recentlyCheckedIds.remove(itemId));
-      return;
     }
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    shoppingDao.toggleItemChecked(itemId, false);
+    ref.read(shoppingDaoProvider).toggleItemChecked(itemId, false);
   }
 }
 
