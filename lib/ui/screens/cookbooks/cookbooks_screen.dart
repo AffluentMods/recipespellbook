@@ -15,6 +15,7 @@ import '../../../services/bulk_nutrition_service.dart';
 import '../../../services/community_cookbook_updates.dart';
 import '../../../services/family_service.dart';
 import '../../../services/revenuecat_service.dart';
+import '../../../services/share_snapshot.dart';
 import '../../shell/app_shell.dart';
 import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_refresh_indicator.dart';
@@ -24,6 +25,7 @@ import '../community/community_publish_screen.dart';
 import 'cookbook_update_sheet.dart';
 import '../../widgets/family_share_sheet.dart';
 import '../../widgets/join_with_link_dialog.dart';
+import '../../widgets/leave_cookbook_dialog.dart';
 import '../../widgets/new_cookbook_chooser.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
@@ -391,12 +393,21 @@ class _CookbookGrid extends ConsumerWidget {
                       label: l10n.bulkNutritionAction,
                       onTap: () => showBulkNutritionSheet(context, ref, cookbook: cookbook),
                     ),
-                  ContextMenuItem(
-                    icon: Icons.delete,
-                    label: l10n.actionDelete,
-                    onTap: () => _showDeleteConfirmation(context, ref, cookbook),
-                    isDestructive: true,
-                  ),
+                  // Someone else's cookbook is left, never deleted.
+                  if (isSharedInCookbook(cookbook))
+                    ContextMenuItem(
+                      icon: Icons.logout,
+                      label: l10n.cookbookLeave,
+                      onTap: () => confirmLeaveCookbook(context, ref, cookbook),
+                      isDestructive: true,
+                    )
+                  else
+                    ContextMenuItem(
+                      icon: Icons.delete,
+                      label: l10n.actionDelete,
+                      onTap: () => _showDeleteConfirmation(context, ref, cookbook),
+                      isDestructive: true,
+                    ),
                 ];
               if (Responsive.isDesktopLayout(context)) {
                 return ContextMenuRegion(
@@ -477,15 +488,26 @@ class _CookbookGrid extends ConsumerWidget {
               title: Text(l10n.bulkNutritionAction),
             ),
           ),
-        PopupMenuItem(
-          value: 'delete',
-          child: ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.delete, size: 20, color: theme.colorScheme.error),
-            title: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),
+        if (isSharedInCookbook(cookbook))
+          PopupMenuItem(
+            value: 'leave',
+            child: ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.logout, size: 20, color: theme.colorScheme.error),
+              title: Text(l10n.cookbookLeave, style: TextStyle(color: theme.colorScheme.error)),
+            ),
+          )
+        else
+          PopupMenuItem(
+            value: 'delete',
+            child: ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.delete, size: 20, color: theme.colorScheme.error),
+              title: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),
+            ),
           ),
-        ),
       ],
     ).then((value) {
       if (value == null || !context.mounted) return;
@@ -500,6 +522,8 @@ class _CookbookGrid extends ConsumerWidget {
           showBulkNutritionSheet(context, ref, cookbook: cookbook);
         case 'delete':
           _showDeleteConfirmation(context, ref, cookbook);
+        case 'leave':
+          confirmLeaveCookbook(context, ref, cookbook);
       }
     });
   }
@@ -590,14 +614,20 @@ class _CookbookGrid extends ConsumerWidget {
     AppSnackbar.loading(context, AppLocalizations.of(context)!.generatingLink);
 
     try {
-      final link = await FamilyService.instance.createShareLink(
-        'cookbook', cookbook.id,
-      );
+      // The link carries a copy of the cookbook (recipes and photos), so it
+      // works without cloud sync and shows the cookbook as it is now.
+      final result = await createCookbookShareLink(ref.read(databaseProvider), cookbook);
       if (!context.mounted) return;
       AppSnackbar.dismiss(context);
 
+      final link = result.link;
       if (link != null) {
         _showLinkResult(context, link);
+        if (result.photosLeftOut > 0) {
+          AppSnackbar.info(context, AppLocalizations.of(context)!.shareLinkPhotosLeftOut(result.photosLeftOut));
+        }
+      } else if (result.tooLarge) {
+        AppSnackbar.error(context, AppLocalizations.of(context)!.shareCookbookTooLarge);
       } else {
         AppSnackbar.error(context, AppLocalizations.of(context)!.failedToCreateLink);
       }
@@ -822,16 +852,10 @@ class _CookbookGrid extends ConsumerWidget {
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () async {
-              await ref.read(cookbookDaoProvider).deleteCookbook(cookbook.id);
               if (ctx.mounted) Navigator.pop(ctx);
-
-              // If we deleted the currently selected cookbook, switch to another
-              final selectedId = ref.read(selectedCookbookIdProvider);
-              if (selectedId == cookbook.id) {
-                final remaining = ref.read(cookbooksProvider).valueOrNull ?? [];
-                final next = remaining.where((c) => c.id != cookbook.id).firstOrNull;
-                ref.read(selectedCookbookIdProvider.notifier).state = next?.id ?? 'starter';
-              }
+              // Selects (and remembers) another cookbook when this one was
+              // the selected one.
+              await deleteCookbookAndMoveOn(ref.read, cookbook.id);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: Text(l10n.actionDelete),

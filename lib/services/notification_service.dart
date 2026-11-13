@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'notification_stub.dart' if (dart.library.io) 'notification_native.dart';
 import 'package:flutter/foundation.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/settings_provider.dart' show SettingsNotifier;
+import '../router/link_navigation.dart';
 import '../utils/platform_utils.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../router/router.dart';
+import 'home_widget_service.dart' show HomeWidgetService;
 
 /// Top-level handler for background FCM messages (must be top-level function).
 @pragma('vm:entry-point')
@@ -13,12 +15,26 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('[FCM] Background message: ${message.messageId}');
 }
 
+/// What came of switching download notifications on or off.
+enum NotificationSwitch {
+  /// Done: off, or on with this device registered.
+  done,
+
+  /// The system, or the user at its prompt, does not allow notifications.
+  denied,
+
+  /// Allowed, but this device got no push token (push is not set up for
+  /// this build, or the push service could not be reached). It stays off.
+  unavailable,
+}
+
 /// Manages Firebase Cloud Messaging and local notification display.
 class NotificationService {
   NotificationService._();
   static final instance = NotificationService._();
 
-  final _messaging = FirebaseMessaging.instance;
+  // A getter: building the service must not fail when Firebase did not start.
+  FirebaseMessaging get _messaging => FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
 
   String? _fcmToken;
@@ -37,28 +53,56 @@ class NotificationService {
     return prefs.getBool(communityPrefKey) ?? false;
   }
 
-  // ── Android notification channels ──
+  // ── Android notification channel ──
 
-  static const _cookingChannel = AndroidNotificationChannel(
-    'cooking_reminders',
-    'Cooking Reminders',
-    description: 'Meal plan alerts and cooking reminders',
-    importance: Importance.high,
-  );
+  /// The one channel: downloads of what the user published to Community.
+  /// Its name and description (shown in Android's settings) are in the
+  /// app's language, see [localizeChannels].
+  static const _communityChannelId = 'community';
 
-  static const _communityChannel = AndroidNotificationChannel(
-    'community',
-    'Community',
-    description: 'Downloads, ratings, and comments on your recipes',
-    importance: Importance.defaultImportance,
-  );
+  /// Cooking mode timers (CookingTimerAlerts schedules on it). The id is
+  /// the one earlier versions used for cooking reminders, so a phone keeps
+  /// the user's settings for it.
+  static const cookingChannelId = 'cooking_reminders';
 
-  static const _achievementsChannel = AndroidNotificationChannel(
-    'achievements',
-    'Achievements & Quests',
-    description: 'Achievement unlocks and quest reminders',
-    importance: Importance.defaultImportance,
-  );
+  /// A channel earlier versions made for notifications nothing sends
+  /// (achievements). Removed from the phone's settings.
+  static const _retiredChannelIds = ['achievements'];
+
+  /// The community channel's name, as last localized.
+  String _communityChannelName = 'Community Updates';
+
+  /// Creates (or renames) the Android channel in the language [languageCode]
+  /// ('system' for the phone's) and deletes the retired ones.
+  Future<void> localizeChannels(String languageCode) async {
+    final l10n = lookupAppLocalizations(
+      HomeWidgetService.resolveLocale(languageCode, PlatformDispatcher.instance.locale),
+    );
+    _communityChannelName = l10n.settingsNotifCommunity;
+    try {
+      final android = _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      if (android == null) return;
+      // Creating an existing channel again updates its name and description.
+      await android.createNotificationChannel(AndroidNotificationChannel(
+        _communityChannelId,
+        l10n.settingsNotifCommunity,
+        description: l10n.settingsNotifNewDownloadsSubtitle,
+        importance: Importance.defaultImportance,
+      ));
+      await android.createNotificationChannel(AndroidNotificationChannel(
+        cookingChannelId,
+        l10n.notifChannelCookingTimers,
+        description: l10n.notifChannelCookingTimersDesc,
+        importance: Importance.high,
+      ));
+      for (final id in _retiredChannelIds) {
+        await android.deleteNotificationChannel(id);
+      }
+    } catch (e) {
+      debugPrint('[FCM] Could not set up the notification channel: $e');
+    }
+  }
 
   // ── Initialization ──
 
@@ -76,14 +120,9 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
 
-    // Create Android notification channels
-    final androidPlugin = _localNotifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    if (androidPlugin != null) {
-      await androidPlugin.createNotificationChannel(_cookingChannel);
-      await androidPlugin.createNotificationChannel(_communityChannel);
-      await androidPlugin.createNotificationChannel(_achievementsChannel);
-    }
+    // Create the Android notification channel in the app's language.
+    final prefs = await SharedPreferences.getInstance();
+    await localizeChannels(prefs.getString(SettingsNotifier.languagePrefKey) ?? 'system');
 
     // Listen for foreground messages
     FirebaseMessaging.onMessage.listen(_showForegroundNotification);
@@ -132,11 +171,14 @@ class NotificationService {
 
   /// Switch community notifications on for this device: ask for permission
   /// (Android 13+ and iOS show a prompt) and register the device with the
-  /// server. Returns false when permission was refused.
-  Future<bool> enableCommunityNotifications() async {
-    final granted = await requestPermission();
-    if (granted) await _registerTokenWithBackend();
-    return granted;
+  /// server. Says [NotificationSwitch.denied] when permission was refused
+  /// and [NotificationSwitch.unavailable] when no push token came back (on
+  /// iOS: no APNs token, as in a build without the Push capability).
+  Future<NotificationSwitch> enableCommunityNotifications() async {
+    if (!await requestPermission()) return NotificationSwitch.denied;
+    if (_fcmToken == null) return NotificationSwitch.unavailable;
+    await _registerTokenWithBackend();
+    return NotificationSwitch.done;
   }
 
   /// Switch community notifications off for this device: the server forgets
@@ -145,13 +187,31 @@ class NotificationService {
 
   // ── Token management ──
 
-  Future<void> _fetchToken() async {
+  /// Gets this device's push token into [_fcmToken]; returns it, or null
+  /// when there is none.
+  Future<String?> _fetchToken() async {
     try {
+      if (isIOS) {
+        // On iOS, FCM has no token until APNs gave one. That comes a moment
+        // after permission is granted, and never without the Push
+        // Notifications capability (aps-environment) and an APNs key in
+        // Firebase.
+        var apns = await _messaging.getAPNSToken();
+        for (var i = 0; apns == null && i < 10; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+          apns = await _messaging.getAPNSToken();
+        }
+        if (apns == null) {
+          debugPrint('[FCM] No APNs token: is push set up for this build?');
+          return _fcmToken;
+        }
+      }
       _fcmToken = await _messaging.getToken();
       debugPrint('[FCM] Token received (${_fcmToken?.length ?? 0} chars)');
     } catch (e) {
       debugPrint('[FCM] Failed to get token: $e');
     }
+    return _fcmToken;
   }
 
   /// Set the auth JWT so we can register FCM tokens with the backend.
@@ -238,26 +298,10 @@ class NotificationService {
     final notification = message.notification;
     if (notification == null) return;
 
-    // Pick channel based on data payload
+    // The server sends one kind: Community downloads.
     final category = message.data['category'] as String? ?? 'community';
-    if (category == 'community' && !await communityNotificationsEnabled()) {
-      return; // switched off on this device
-    }
-    String channelId;
-    String channelName;
-    switch (category) {
-      case 'cooking':
-        channelId = _cookingChannel.id;
-        channelName = _cookingChannel.name;
-        break;
-      case 'achievement':
-      case 'quest':
-        channelId = _achievementsChannel.id;
-        channelName = _achievementsChannel.name;
-        break;
-      default:
-        channelId = _communityChannel.id;
-        channelName = _communityChannel.name;
+    if (category != 'community' || !await communityNotificationsEnabled()) {
+      return; // switched off on this device, or nothing this app shows
     }
 
     // Use messageId for stable unique ID, fallback to timestamp
@@ -271,8 +315,8 @@ class NotificationService {
         notification.body,
         NotificationDetails(
           android: AndroidNotificationDetails(
-            channelId,
-            channelName,
+            _communityChannelId,
+            _communityChannelName,
             icon: '@mipmap/launcher_icon',
           ),
           iOS: const DarwinNotificationDetails(
@@ -306,32 +350,23 @@ class NotificationService {
     }
   }
 
+  /// Opens the screen of a tapped notification. A tap that started the app
+  /// arrives while the splash is up: it is handed to the splash, which opens
+  /// it over Home (see [openLinkTarget]), instead of being covered by it.
   void _navigateFromData(Map<String, dynamic> data) {
-    final context = rootNavigatorKey.currentContext;
-    if (context == null) return;
+    final route = routeFor(data);
+    if (route != null) openLinkTarget(route);
+  }
 
-    final category = data['category'] as String?;
-    // Community download pushes carry the cookbook as publicationId.
-    final resourceId = (data['resourceId'] ?? data['publicationId']) as String?;
-
-    switch (category) {
-      case 'cooking':
-        if (resourceId != null) {
-          context.push('/recipe/$resourceId');
-        } else {
-          context.go('/planner');
-        }
-      case 'achievement':
-      case 'quest':
-        context.push('/rpg/achievements');
-      case 'community':
-        if (resourceId != null) {
-          context.push('/community/$resourceId');
-        } else {
-          context.go('/community');
-        }
-      default:
-        break;
-    }
+  /// The screen a notification with [data] opens, or null. The server sends
+  /// one kind: a download of something the user published to Community
+  /// (category "community", shown the same when it has no category), with
+  /// the publication as publicationId or resourceId.
+  static String? routeFor(Map<String, dynamic> data) {
+    final category = data['category'] as String? ?? 'community';
+    if (category != 'community') return null;
+    final id = (data['resourceId'] ?? data['publicationId'])?.toString().trim();
+    if (id == null || id.isEmpty) return '/community';
+    return '/community/${Uri.encodeComponent(id)}';
   }
 }

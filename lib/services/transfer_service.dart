@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../database/database.dart';
+import '../database/seeded_defaults.dart';
 import '../database/sync_journal.dart';
 import '../services/auth_service.dart';
 import '../services/export_import_service.dart';
@@ -121,6 +122,12 @@ class TransferException implements Exception {
 //  TRANSFER SERVICE
 // ════════════════════════════════════════════════════════════════
 
+/// Logs what may name the user's things (file paths, row contents, error
+/// text from the server) in debug builds only.
+void _log(String message) {
+  if (kDebugMode) debugPrint(message);
+}
+
 /// Handles one-time device-to-device data transfer for free-tier users.
 ///
 /// Flow (Send):
@@ -217,7 +224,9 @@ class TransferService {
       throw TransferException(TransferFailure.server, _parseError(response));
     }
 
-    debugPrint('[Transfer] Created code=$code '
+    // Never the code: a live one in a log lets anyone who reads it take
+    // the whole library and the sign-in that comes with it.
+    debugPrint('[Transfer] Created a code '
         '(${result['recipesCount']} recipes, '
         '${result['cookbooksCount']} cookbooks, '
         '$photosSent photos, $photosLeftOut left out)');
@@ -247,7 +256,7 @@ class TransferService {
     // the user with a spent code and nothing imported.
     if (SyncService.instance.isSyncing) throw const TransferException(TransferFailure.syncRunning);
 
-    debugPrint('[Transfer] Claiming code=$code...');
+    debugPrint('[Transfer] Claiming a code...');
 
     await _tidying;
     final kept = await _keptBundle(code);
@@ -347,7 +356,7 @@ class TransferService {
       await File(p.join(folder, 'transfer_bundle.txt'))
           .writeAsString('$code\n${DateTime.now().toUtc().toIso8601String()}', flush: true);
     } catch (e) {
-      debugPrint('[Transfer] Could not keep the bundle for a retry: $e');
+      _log('[Transfer] Could not keep the bundle for a retry: $e');
     }
   }
 
@@ -370,7 +379,7 @@ class TransferService {
         if (kept is Map<String, dynamic>) return {'data': kept};
       }
     } catch (e) {
-      debugPrint('[Transfer] Could not read the kept bundle: $e');
+      _log('[Transfer] Could not read the kept bundle: $e');
     }
     // Too old or damaged: of no use any more.
     await _forgetBundle(folder);
@@ -386,7 +395,7 @@ class TransferService {
         final file = File(p.join(folder ??= await _bundleFolder(), name));
         if (await file.exists()) await file.delete();
       } catch (e) {
-        debugPrint('[Transfer] Could not remove $name: $e');
+        _log('[Transfer] Could not remove $name: $e');
       }
     }
   }
@@ -399,9 +408,15 @@ class TransferService {
     final db = _db!;
     final photos = <_Photo>[];
 
+    // Cookbooks and lists someone else shares with this account are theirs.
+    // Sent along, they arrived as this account's own and became private
+    // duplicates; the new device gets them through the share instead.
+    final notMine = await SyncService.instance.sharedWithMe(db);
+
     // Cookbooks
     final cookbookMaps = <Map<String, dynamic>>[];
     for (final cookbook in await db.select(db.cookbooks).get()) {
+      if (notMine.cookbooks.contains(cookbook.id)) continue;
       final map = _serializeCookbook(cookbook);
       cookbookMaps.add(map);
       _offerPhoto(photos, map, cookbook.imagePath, _Photo.cookbookCover);
@@ -428,6 +443,7 @@ class TransferService {
 
     final recipeMaps = <Map<String, dynamic>>[];
     for (final recipe in await db.select(db.recipes).get()) {
+      if (notMine.cookbooks.contains(recipe.cookbookId)) continue;
       final live = recipe.deletedAt == null;
       final stepMaps = <Map<String, dynamic>>[];
       for (final step in steps[recipe.id] ?? const <Step>[]) {
@@ -450,8 +466,10 @@ class TransferService {
     // Small tables. They have no "changed" column, the journal the sync
     // keeps is the only record of which ones the user has edited.
     final categories = await db.select(db.categories).get();
-    final customCategories = await db.select(db.customCategories).get();
-    final customCourses = await db.select(db.customCourses).get();
+    final customCategories =
+        (await db.select(db.customCategories).get()).where((c) => !notMine.cookbooks.contains(c.cookbookId));
+    final customCourses =
+        (await db.select(db.customCourses).get()).where((c) => !notMine.cookbooks.contains(c.cookbookId));
     final tags = await db.select(db.tags).get();
     final shoppingCategories = await db.select(db.shoppingCategories).get();
     final editedCategories = await SyncJournal.touched(db, SyncJournal.categories);
@@ -464,8 +482,9 @@ class TransferService {
     final mealPlans = await db.select(db.mealPlans).get();
 
     // Shopping
-    final shoppingLists = await db.select(db.shoppingLists).get();
-    final shoppingListItems = await db.select(db.shoppingListItems).get();
+    final shoppingLists = (await db.select(db.shoppingLists).get()).where((l) => !notMine.lists.contains(l.id));
+    final shoppingListItems =
+        (await db.select(db.shoppingListItems).get()).where((i) => !notMine.lists.contains(i.listId));
 
     return _Library({
       'cookbooks': cookbookMaps,
@@ -538,7 +557,7 @@ class TransferService {
         photo.holder['imageBase64'] = base64Encode(await File(photo.path).readAsBytes());
         sent++;
       } catch (e) {
-        debugPrint('[Transfer] Could not read a photo to send: $e');
+        _log('[Transfer] Could not read a photo to send: $e');
       }
     }
     return sent;
@@ -560,7 +579,7 @@ class TransferService {
     try {
       return await PantryService.instance.toDoc();
     } catch (e) {
-      debugPrint('[Transfer] Left out the pantry: $e');
+      _log('[Transfer] Left out the pantry: $e');
       return null;
     }
   }
@@ -583,7 +602,7 @@ class TransferService {
       await _mergeRows(db.categories, data['categories'], _toCategoryCompanion, stats,
           mine: await _journalled(
               SyncJournal.categories, await db.select(db.categories).get(), (c) => c.id, (c) => c.createdAt),
-          seeded: _seededCategories);
+          seeded: SeededDefaults.categoryRows);
       await _mergeRows(db.customCategories, data['customCategories'], _toCustomCategoryCompanion, stats,
           mine: await _journalled(SyncJournal.customCategories, await db.select(db.customCategories).get(),
               (c) => c.id, (c) => c.createdAt));
@@ -592,11 +611,11 @@ class TransferService {
               SyncJournal.customCourses, await db.select(db.customCourses).get(), (c) => c.id, (c) => c.createdAt));
       await _mergeRows(db.tags, data['tags'], _toTagCompanion, stats,
           mine: await _journalled(SyncJournal.tags, await db.select(db.tags).get(), (t) => t.id, (t) => t.createdAt),
-          seeded: _seededTags);
+          seeded: SeededDefaults.tagRows);
       await _mergeRows(db.shoppingCategories, data['shoppingCategories'], _toShoppingCategoryCompanion, stats,
           mine: await _journalled(SyncJournal.shoppingCategories, await db.select(db.shoppingCategories).get(),
               (c) => c.id, (c) => c.createdAt),
-          seeded: _seededShoppingCategories);
+          seeded: SeededDefaults.shoppingCategoryRows);
 
       // Recipes with children
       final recipeIds = await _mergeRecipes(db, data['recipes'] as List, imagesDir, stats);
@@ -609,7 +628,7 @@ class TransferService {
           mine: {
             for (final l in await db.select(db.shoppingLists).get()) l.id: (l, _Stamps(l.createdAt, l.updatedAt)),
           },
-          seeded: _seededShoppingLists);
+          seeded: SeededDefaults.shoppingListRows);
       await _mergeRows(
         db.shoppingListItems,
         data['shoppingListItems'],
@@ -625,7 +644,7 @@ class TransferService {
     try {
       await PantryService.instance.mergeDoc(data['pantry']);
     } catch (e) {
-      debugPrint('[Transfer] Left out the pantry: $e');
+      _log('[Transfer] Left out the pantry: $e');
     }
 
     return stats;
@@ -658,16 +677,7 @@ class TransferService {
   /// does not say already. When a row was made and last changed is
   /// bookkeeping: a row that differs in that alone is not written again,
   /// and is not counted as something that arrived.
-  bool _sameRow<D>(Insertable<D> theirs, Insertable<D> mine) {
-    Object? said(Expression? column) => column is Variable ? column.value : column;
-    final here = mine.toColumns(false);
-    for (final column in theirs.toColumns(false).entries) {
-      if (column.key == 'created_at' || column.key == 'updated_at') continue;
-      final a = said(column.value), b = said(here[column.key]);
-      if (a is DateTime && b is DateTime ? !_sameSecond(a, b) : a != b) return false;
-    }
-    return true;
-  }
+  bool _sameRow<D>(Insertable<D> theirs, Insertable<D> mine) => SeededDefaults.sameContent(theirs, mine);
 
   /// The rows of a table without a "changed" column, each with when it was
   /// made and last edited. The journal the sync keeps is the only record of
@@ -705,12 +715,11 @@ class TransferService {
         if (here != null) {
           final (local, stamps) = here;
           if (_sameRow(theirs, local)) continue;
-          final asSeeded = seeded[id];
           final takesOver = _takesOver(
             stamps,
             _Stamps(_parseDate(d['createdAt']), _parseDate(d['updatedAt'])),
-            mineAsSeeded: asSeeded != null && _sameRow(asSeeded, local),
-            theirsAsSeeded: asSeeded != null && _sameRow(asSeeded, theirs),
+            mineAsSeeded: SeededDefaults.untouched(seeded, id, local),
+            theirsAsSeeded: SeededDefaults.untouched(seeded, id, theirs),
           );
           if (!takesOver) continue;
         }
@@ -718,7 +727,7 @@ class TransferService {
         stats.written++;
       } catch (e) {
         stats.failed++;
-        debugPrint('[Transfer] Left out a ${table.actualTableName} row: $e');
+        _log('[Transfer] Left out a ${table.actualTableName} row: $e');
       }
     }
   }
@@ -736,13 +745,13 @@ class TransferService {
         }
         final theirs = _toCookbookCompanion(d);
         final local = mine[id];
-        final asSeeded = _seededCookbooks[id];
+        final seeded = SeededDefaults.cookbookRows;
         final takesOver = local == null ||
             _takesOver(
               _Stamps(local.createdAt, local.updatedAt),
               _Stamps(_parseDate(d['createdAt']), _parseDate(d['updatedAt'])),
-              mineAsSeeded: asSeeded != null && local.imagePath == null && _sameRow(asSeeded, local),
-              theirsAsSeeded: asSeeded != null && !_carriesCover(d) && _sameRow(asSeeded, theirs),
+              mineAsSeeded: SeededDefaults.untouched(seeded, id, local),
+              theirsAsSeeded: !_carriesCover(d) && SeededDefaults.untouched(seeded, id, theirs),
             );
         var arrived = false;
         if (local == null || (takesOver && !_sameRow(theirs, local))) {
@@ -762,7 +771,7 @@ class TransferService {
         if (arrived) stats.written++;
       } catch (e) {
         stats.failed++;
-        debugPrint('[Transfer] Left out a cookbook: $e');
+        _log('[Transfer] Left out a cookbook: $e');
       }
     }
   }
@@ -837,7 +846,7 @@ class TransferService {
         plans[id] = plan;
       } catch (e) {
         stats.failed++;
-        debugPrint('[Transfer] Left out a recipe that could not be read: $e');
+        _log('[Transfer] Left out a recipe that could not be read: $e');
       }
     }
 
@@ -863,7 +872,7 @@ class TransferService {
         }
       } catch (e) {
         stats.failed++;
-        debugPrint('[Transfer] Left out a recipe that could not be stored: $e');
+        _log('[Transfer] Left out a recipe that could not be stored: $e');
       }
     }
     return ids;
@@ -1316,98 +1325,6 @@ class TransferService {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  WHAT EVERY INSTALL STARTS OUT WITH
-  // ════════════════════════════════════════════════════════════════
-  //
-  // The rows the app writes on first launch, with what a user can change
-  // about each. They repeat what AppDatabase and TagsDao seed and have to
-  // stay in step with them. Edits to these rows were not dated before
-  // version 1.7, and a cloud sync clears the journal that dates them since,
-  // so for most of them nothing says whether the user ever changed them.
-  // Comparing with what the app wrote does: a row that still reads like
-  // this never takes the place of one that does not.
-
-  static final Map<String, Insertable<Cookbook>> _seededCookbooks = {
-    'starter': const CookbooksCompanion(name: Value('My Recipes'), description: Value(null)),
-  };
-
-  static final Map<String, Insertable<ShoppingList>> _seededShoppingLists = {
-    'list_default': const ShoppingListsCompanion(name: Value('Shopping List'), color: Value(null)),
-  };
-
-  static final Map<String, Insertable<Category>> _seededCategories = {
-    for (final (id, name, sortOrder) in const [
-      ('cat_appetizer', 'Appetizer', 0),
-      ('cat_beverage', 'Beverages', 1),
-      ('cat_dessert', 'Desserts', 2),
-      ('cat_entree', 'Entrée', 3),
-      ('cat_side', 'Sides', 4),
-      ('cat_sauce', 'Sauces', 5),
-    ])
-      id: CategoriesCompanion(name: Value(name), sortOrder: Value(sortOrder), isHidden: const Value(false)),
-  };
-
-  static final Map<String, Insertable<ShoppingCategory>> _seededShoppingCategories = {
-    for (final (id, name, sortOrder) in const [
-      ('produce', 'Produce', 1),
-      ('bakery', 'Bakery', 2),
-      ('deli', 'Deli', 3),
-      ('dairy', 'Dairy & Eggs', 4),
-      ('meat', 'Meat & Poultry', 5),
-      ('seafood', 'Seafood', 6),
-      ('frozen', 'Frozen', 7),
-      ('breakfastCereal', 'Breakfast & Cereal', 8),
-      ('grainsAndPasta', 'Grains, Pasta & Rice', 9),
-      ('cannedGoods', 'Canned Goods', 10),
-      ('condiments', 'Condiments & Sauces', 11),
-      ('spices', 'Spices & Seasonings', 12),
-      ('cookingAndBaking', 'Cooking & Baking', 13),
-      ('snacks', 'Snacks', 14),
-      ('beverages', 'Beverages', 15),
-      ('beerWineSpirits', 'Beer, Wine & Spirits', 16),
-      ('international', 'International', 17),
-      ('baby', 'Baby', 18),
-      ('pet', 'Pet Supplies', 19),
-      ('household', 'Household', 20),
-      ('personalCare', 'Personal Care', 21),
-      ('pantry', 'Pantry', 22),
-      ('other', 'Other', 99),
-    ])
-      id: ShoppingCategoriesCompanion(
-        name: Value(name),
-        iconName: const Value(null),
-        sortOrder: Value(sortOrder),
-        isHidden: const Value(false),
-      ),
-  };
-
-  static final Map<String, Insertable<Tag>> _seededTags = {
-    for (final (id, name, color, icon, sortOrder) in const [
-      ('tag_vegan', 'Vegan', '#4CAF50', '🌱', 0),
-      ('tag_vegetarian', 'Vegetarian', '#8BC34A', '🥬', 1),
-      ('tag_gluten_free', 'Gluten-Free', '#FF9800', '🌾', 2),
-      ('tag_dairy_free', 'Dairy-Free', '#2196F3', '🥛', 3),
-      ('tag_keto', 'Keto', '#9C27B0', '🥑', 4),
-      ('tag_paleo', 'Paleo', '#795548', '🥩', 5),
-      ('tag_low_carb', 'Low Carb', '#00BCD4', '📉', 6),
-      ('tag_nut_free', 'Nut-Free', '#FF5722', '🥜', 7),
-      ('tag_quick', 'Quick & Easy', '#4CAF50', '⚡', 10),
-      ('tag_meal_prep', 'Meal Prep', '#3F51B5', '📦', 11),
-      ('tag_weeknight', 'Weeknight Dinner', '#607D8B', '🌙', 12),
-      ('tag_weekend', 'Weekend Project', '#FFC107', '☀️', 13),
-      ('tag_comfort', 'Comfort Food', '#FF5722', '🔥', 14),
-      ('tag_healthy', 'Healthy', '#4CAF50', '💪', 15),
-      ('tag_family', 'Family Favorite', '#E91E63', '❤️', 20),
-      ('tag_crowd', 'Crowd Pleaser', '#9C27B0', '🎉', 21),
-      ('tag_budget', 'Budget Friendly', '#4CAF50', '💰', 22),
-      ('tag_kid', 'Kid Friendly', '#FF9800', '👶', 23),
-      ('tag_spicy', 'Spicy', '#F44336', '🌶️', 24),
-      ('tag_one_pot', 'One Pot', '#795548', '🍲', 25),
-    ])
-      id: TagsCompanion(name: Value(name), color: Value(color), icon: Value(icon), sortOrder: Value(sortOrder)),
-  };
-
-  // ════════════════════════════════════════════════════════════════
   //  COMPANION BUILDERS (JSON → Drift Companion)
   // ════════════════════════════════════════════════════════════════
 
@@ -1705,7 +1622,7 @@ class TransferService {
       if (!await file.exists() || await file.length() != bytes.length) await file.writeAsBytes(bytes);
       return file.path;
     } catch (e) {
-      debugPrint('[Transfer] Failed to decode/save photo: $e');
+      _log('[Transfer] Failed to decode/save photo: $e');
       return null;
     }
   }

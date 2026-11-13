@@ -40,12 +40,13 @@ class _NotificationSettingsScreenState
     final l10n = AppLocalizations.of(context)!;
     setState(() => _busy = true);
     try {
-      final ok = await ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(v);
+      final result = await ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(v);
       if (!mounted) return;
-      if (!ok) AppSnackbar.info(context, l10n.notifPermissionDenied);
+      final message = notificationSwitchMessage(l10n, result);
+      if (message != null) AppSnackbar.info(context, message);
       await _checkSystemPermission();
     } catch (_) {
-      if (mounted) AppSnackbar.error(context, l10n.notifPermissionDenied);
+      if (mounted) AppSnackbar.error(context, l10n.notifPushUnavailable);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

@@ -12,7 +12,9 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
 
   Stream<List<MealPlanWithRecipe>> watchMealPlansWithRecipesForDate(DateTime date) {
     final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    // The next midnight by the calendar: a day is 23 or 25 hours long when
+    // the clocks change, and adding 24 hours missed or doubled a meal.
+    final endOfDay = DateTime(date.year, date.month, date.day + 1);
 
     final query = select(mealPlans).join([
       leftOuterJoin(recipes, recipes.id.equalsExp(mealPlans.recipeId)),
@@ -72,6 +74,49 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
     return into(mealPlans).insert(mealPlan);
   }
 
+  /// Whether [recipeId] is already planned as [mealType] on [date]'s day.
+  Future<bool> isRecipePlanned({
+    required String recipeId,
+    required DateTime date,
+    required String mealType,
+  }) async {
+    final day = DateTime(date.year, date.month, date.day);
+    final next = DateTime(date.year, date.month, date.day + 1);
+    final row = await (select(mealPlans)
+          ..where((t) =>
+              t.recipeId.equals(recipeId) &
+              t.mealType.equals(mealType) &
+              t.date.isBiggerOrEqualValue(day) &
+              t.date.isSmallerThanValue(next) &
+              t.deletedAt.isNull())
+          ..limit(1))
+        .getSingleOrNull();
+    return row != null;
+  }
+
+  /// For each of [recipeIds] that is planned on [from]'s day or later, the
+  /// first day it is planned for (at midnight). Recipes with nothing planned
+  /// from then on are left out.
+  Future<Map<String, DateTime>> nextPlannedDays(
+      Iterable<String> recipeIds, DateTime from) async {
+    final ids = recipeIds.toSet();
+    if (ids.isEmpty) return const {};
+    final start = DateTime(from.year, from.month, from.day);
+    final rows = await (select(mealPlans)
+          ..where((t) =>
+              t.recipeId.isIn(ids) &
+              t.date.isBiggerOrEqualValue(start) &
+              t.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm(expression: t.date)]))
+        .get();
+    final firstDay = <String, DateTime>{};
+    for (final r in rows) {
+      final d = r.date;
+      firstDay.putIfAbsent(r.recipeId!, () => DateTime(d.year, d.month, d.day));
+    }
+    return firstDay;
+  }
+
   Future<void> deleteMealPlan(String id) async {
     await (delete(mealPlans)..where((t) => t.id.equals(id))).go();
     await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.mealPlans, id);
@@ -91,7 +136,9 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
 
   Stream<List<MealPlan>> watchMealPlansForDate(String cookbookId, DateTime date) {
     final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    // The next midnight by the calendar: a day is 23 or 25 hours long when
+    // the clocks change, and adding 24 hours missed or doubled a meal.
+    final endOfDay = DateTime(date.year, date.month, date.day + 1);
 
     return (select(mealPlans)
       ..where((t) => t.date.isBiggerOrEqualValue(startOfDay))

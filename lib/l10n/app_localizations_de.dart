@@ -5864,6 +5864,17 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Kochbuch verlassen';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '\"$name\" verlassen? Es verschwindet von diesem Gerät, und der Besitzer behält alle Rezepte darin. Um es wiederzubekommen, bitte um eine neue Einladung.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Das Kochbuch konnte nicht verlassen werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
   String get shareCookbook => 'Kochbuch teilen';
 
   @override
@@ -7696,6 +7707,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => 'Deine Rezepte sind synchronisiert, aber einige Fotos lassen sich gerade nicht hochladen. Sie werden automatisch erneut versucht.';
+
+  @override
+  String get syncHealthSharedPush => 'Deine Änderungen an geteilten Kochbüchern wurden noch nicht gesendet. Die nächste Synchronisierung sendet sie.';
+
+  @override
+  String get syncHealthSharedPull => 'Geteilte Kochbücher und Listen konnten nicht aktualisiert werden. Die nächste Synchronisierung versucht es erneut.';
+
+  @override
+  String get syncHealthPantry => 'Die Vorratskammer wurde nicht synchronisiert. Die nächste Synchronisierung versucht es erneut.';
 
   @override
   String syncSuccess(int pushed, int pulled) {
@@ -11091,6 +11111,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get notifPermissionDenied => 'Benachrichtigungen für Recipe Spellbook sind aus. Schalte sie in den Geräteeinstellungen ein.';
 
   @override
+  String get notifPushUnavailable => 'Dieses Gerät konnte nicht für Benachrichtigungen registriert werden. Versuche es später erneut.';
+
+  @override
+  String get signInFailed => 'Die Anmeldung ist fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get signInTransferExpired => 'Die Anmeldung von deinem anderen Gerät ist abgelaufen. Melde dich auf diesem Gerät erneut an.';
+
+  @override
+  String get paywallPurchasePending => 'Dein Kauf wird bearbeitet. Premium wird freigeschaltet, sobald der Store ihn bestätigt.';
+
+  @override
   String get syncNotInPlan => 'Cloud-Synchronisierung ist in deinem Tarif nicht enthalten';
 
   @override
@@ -12684,4 +12716,721 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => 'Keine Zutat wurde erkannt';
+
+  @override
+  String get pressBackAgainToExit => 'Zum Beenden noch einmal Zurück drücken';
+
+  @override
+  String get mealPlanNextWeekend => 'Nächstes Wochenende';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return 'Schon im Essensplan: $when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => 'Vollständiges Rezept anzeigen';
+
+  @override
+  String plannerDateRange(String start, String end) {
+    return '$start bis $end';
+  }
+
+  @override
+  String clearWeekRangeWarning(String start, String end) {
+    return 'Dies entfernt alle Mahlzeiten, die vom $start bis $end geplant sind. Dies kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String shoppingDeleteSharedListConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Diese Liste ist mit $count Personen geteilt. Wenn du sie löschst, wird sie für niemanden mehr synchronisiert.',
+      one: 'Diese Liste ist mit 1 Person geteilt. Wenn du sie löschst, wird sie für niemanden mehr synchronisiert.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookFromPantry(String items) {
+    return 'Aus deiner Vorratskammer: $items';
+  }
+
+  @override
+  String pantryCookLineFrom(String ingredient, String items) {
+    return '$ingredient: $items';
+  }
+
+  @override
+  String get cookingStopTimer => 'Timer stoppen';
+
+  @override
+  String cookingStartTimerFor(String duration) {
+    return 'Timer für $duration starten';
+  }
+
+  @override
+  String durationSeconds(int count) {
+    return '$count Sek.';
+  }
+
+  @override
+  String get notifChannelCookingTimers => 'Koch-Timer';
+
+  @override
+  String get notifChannelCookingTimersDesc => 'Wenn ein Timer im Kochmodus abläuft';
+
+  @override
+  String get communityFollowFailed => 'Folgen konnte nicht geändert werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Einige Fotos haben ein Format, das dieses Gerät nicht lesen kann (etwa HEIC), und fehlen deshalb bei:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Meine Notizen einbeziehen';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Veröffentlicht die Notizen, die du zu jedem Rezept geschrieben hast. Deine eigenen Sternebewertungen werden nie veröffentlicht.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Jede erhält die Rezepte aus ihrem Kochbuch auf diesem Gerät. Fotos nur, wenn sie mit Fotos veröffentlicht wurde, und deine Notizen nur, wo du sie einbezogen hast. Bewertungen und Downloads bleiben erhalten.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'Die Rezepte wurden aktualisiert, aber der neue Titel, die Beschreibung oder die Tags wurden nicht gespeichert. Versuche es in Meine Veröffentlichungen erneut.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'Titel, Beschreibung und Tags der Veröffentlichung konnten nicht geladen werden und bleiben daher, wie sie sind. Die Rezepte werden trotzdem aktualisiert.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Das Rezept konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Dieses Rezept ist in der Community nicht mehr verfügbar.';
+
+  @override
+  String get communityLoadFailed => 'Das konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Dieses Kochbuch ist in der Community nicht mehr verfügbar, es gibt also nichts zu aktualisieren. Deine Kopie bleibt, wie sie ist.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'Der Ersteller hat dieses Kochbuch gerade geändert. Prüfe deine Auswahl und versuche es erneut.';
+
+  @override
+  String get communityReportFailed => 'Die Meldung konnte nicht gesendet werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Im Link fehlen $count Fotos, die zu lange zum Hochladen brauchten.',
+      one: 'Im Link fehlt 1 Foto, das zu lange zum Hochladen brauchte.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Link konnte nicht erstellt werden';
+
+  @override
+  String get shareLinkFailedBody => 'Prüfe deine Verbindung und versuche es erneut, oder teile das Rezept stattdessen als Text.';
+
+  @override
+  String get shareLinkShareAsText => 'Als Text teilen';
+
+  @override
+  String get shareCookbookTooLarge => 'Dieses Kochbuch ist zu groß für einen einmaligen Link. Teile die Rezepte einzeln oder veröffentliche das Kochbuch in der Community.';
+
+  @override
+  String get nutriSheetAmountNotWeighed => 'Menge prüfen';
+
+  @override
+  String get nutriSheetLookupFailed => 'Konnte nicht nachgeschlagen werden';
+
+  @override
+  String get fileImportEmpty => 'Diese Datei ist leer.';
+
+  @override
+  String get fileImportUnsupported => 'Dieser Dateityp wird nicht unterstützt.';
+
+  @override
+  String get fileImportNotText => 'Diese Datei ist beschädigt oder keine Textdatei.';
+
+  @override
+  String get fileImportRichText => 'RTF-Dateien werden nicht unterstützt. Speichere das Rezept als reinen Text und versuche es erneut.';
+
+  @override
+  String get fileImportUnknownXml => 'Diese XML-Datei ist kein Rezeptexport, den die App lesen kann.';
+
+  @override
+  String get fileImportDamagedZip => 'Diese ZIP-Datei ist beschädigt oder unvollständig. Exportiere sie erneut und versuche es noch einmal.';
+
+  @override
+  String get fileImportOwnBackup => 'Das ist ein Recipe Spellbook-Backup. Stelle es unter Einstellungen, Daten importieren wieder her.';
+
+  @override
+  String fileImportDamaged(String app) {
+    return 'Diese $app-Datei ist beschädigt oder unvollständig. Exportiere sie erneut und versuche es noch einmal.';
+  }
+
+  @override
+  String fileImportNoRecipes(String app) {
+    return 'Diese Datei enthält keine $app-Rezepte.';
+  }
+
+  @override
+  String get fileImportTooLarge => 'Diese Datei entpackt sich zu mehr, als die App auf einmal lesen kann. Exportiere weniger Rezepte auf einmal und versuche es erneut.';
+
+  @override
+  String importPdfRecipeNumbered(String name, int number) {
+    return '$name, Rezept $number';
+  }
+
+  @override
+  String get aiImportPasteFirst => 'Füge zuerst die Antwort der KI ein oder lade sie.';
+
+  @override
+  String aiImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Rezepte importiert.',
+      one: '$count Rezept importiert.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String aiImportErrInRecipe(int number, String problem) {
+    return 'Rezept $number: $problem';
+  }
+
+  @override
+  String get aiImportErrNoRecipes => 'Keine Rezepte gefunden. Die Antwort braucht mindestens ein Rezept.';
+
+  @override
+  String get aiImportErrInvalidJson => 'Das ist kein gültiges Rezept-JSON. Prüfe, ob die ganze Antwort kopiert wurde.';
+
+  @override
+  String get aiImportErrCutOff => 'Eine Klammer wird geöffnet, aber nie geschlossen. Die Antwort wurde vielleicht abgeschnitten.';
+
+  @override
+  String aiImportErrOutsideBrackets(String field) {
+    return '„$field“ steht außerhalb der Klammern eines Rezepts. Vielleicht fehlt eine Klammer oder ein Anführungszeichen, oder es ist eine Bemerkung, die entfernt werden muss.';
+  }
+
+  @override
+  String aiImportErrBlockUnreadable(int block, int count) {
+    return 'Block $block von $count konnte nicht gelesen werden. Vielleicht fehlt eine Klammer oder ein Anführungszeichen.';
+  }
+
+  @override
+  String get aiImportErrMissingTitle => 'Das Feld „title“ fehlt.';
+
+  @override
+  String get aiImportErrMissingIngredients => 'Die Liste „ingredients“ fehlt.';
+
+  @override
+  String get aiImportErrNoIngredients => 'Die Liste „ingredients“ ist leer. Ein Rezept braucht mindestens eine Zutat.';
+
+  @override
+  String aiImportErrIngredientInvalid(int number) {
+    return 'Zutat $number ist kein gültiges Objekt.';
+  }
+
+  @override
+  String aiImportErrIngredientNoName(int number) {
+    return 'Zutat $number hat keinen „name“.';
+  }
+
+  @override
+  String get aiImportErrMissingSteps => 'Die Liste „steps“ fehlt.';
+
+  @override
+  String get aiImportErrNoSteps => 'Die Liste „steps“ ist leer. Ein Rezept braucht mindestens einen Schritt.';
+
+  @override
+  String aiImportErrStepInvalid(int number) {
+    return 'Schritt $number ist kein gültiges Objekt.';
+  }
+
+  @override
+  String aiImportErrStepNoInstruction(int number) {
+    return 'Schritt $number hat keine „instruction“.';
+  }
+
+  @override
+  String get barcodeDataSource => 'Daten von Open Food Facts (aus der Community)';
+
+  @override
+  String barcodeDataUpdated(String date) {
+    return 'aktualisiert $date';
+  }
+
+  @override
+  String get barcodeRecordIncomplete => 'Dieser Eintrag wirkt unvollständig. Manche Angaben fehlen vielleicht oder sind veraltet.';
+
+  @override
+  String get importGuidePopularTag => 'BELIEBT';
+
+  @override
+  String get importGuideOpenInApp => 'In Recipe Spellbook öffnen';
+
+  @override
+  String get importGuideReviewImport => 'Prüfen und importieren';
+
+  @override
+  String get importGuideExportRecipes => 'Rezepte exportieren';
+
+  @override
+  String importGuideOpenApp(String app) {
+    return '$app öffnen';
+  }
+
+  @override
+  String importGuideExportAs(String format) {
+    return 'Als $format exportieren';
+  }
+
+  @override
+  String importGuideGoToSite(String site) {
+    return 'Zu $site gehen';
+  }
+
+  @override
+  String importGuidePickFile(String file) {
+    return 'Öffne Recipe Spellbook, tippe auf +, wähle „Datei“ und wähle die $file-Datei aus.';
+  }
+
+  @override
+  String importGuideOpenSettings(String app) {
+    return 'Öffne $app und gehe zu den Einstellungen.';
+  }
+
+  @override
+  String importGuideLogIn(String app) {
+    return 'Melde dich am Computer bei deiner $app-Instanz an.';
+  }
+
+  @override
+  String get importGuidePaprikaSubtitle => 'Alle Rezepte aus Paprika 3 mit Fotos importieren';
+
+  @override
+  String get importGuidePaprikaStep1 => 'Öffne Paprika 3 auf deinem Gerät. Gehe zu den Einstellungen oder ins Menü „Datei“.';
+
+  @override
+  String get importGuidePaprikaStep2Title => 'Alle Rezepte exportieren';
+
+  @override
+  String get importGuidePaprikaStep2 => 'Tippe auf „Export“ und wähle „Paprika Export Format“ (.paprikarecipes). So entsteht eine Datei mit all deinen Rezepten und Fotos.';
+
+  @override
+  String get importGuidePaprikaStep2Tip => 'Auf iOS/Android: Einstellungen > Export. Am Computer: Datei > Export.';
+
+  @override
+  String get importGuidePaprikaStep4 => 'Sieh dir die Rezepte an, wähle ab, was du nicht willst, und tippe auf Importieren. Fotos kommen automatisch mit.';
+
+  @override
+  String get importGuideMelaSubtitle => 'Rezepte aus der Rezeptverwaltung Mela importieren';
+
+  @override
+  String get importGuideMelaStep2 => 'Tippe auf „Export“ und wähle, alle Rezepte zu exportieren. So entsteht eine .melarecipes-Datei.';
+
+  @override
+  String get importGuideMelaStep2Tip => 'Du kannst auch einzelne Rezepte als .melarecipe-Dateien teilen.';
+
+  @override
+  String get importGuideMelaStep4 => 'Sieh dir die Rezepte an und importiere sie. Kategorien werden zu Tags.';
+
+  @override
+  String get importGuideCroutonSubtitle => 'Rezepte aus der App Crouton importieren';
+
+  @override
+  String get importGuideCroutonStep2Title => 'Daten exportieren';
+
+  @override
+  String get importGuideCroutonStep2 => 'Tippe auf „Export“, um eine .crumb-Datei mit all deinen Rezepten zu erstellen.';
+
+  @override
+  String get importGuideCroutonStep4 => 'Sieh dir die Rezepte an und importiere sie. Zutatenabschnitte bleiben erhalten.';
+
+  @override
+  String get importGuideRecipeKeeperSubtitle => 'Aus Recipe Keeper importieren (ZIP oder HTML)';
+
+  @override
+  String get importGuideRecipeKeeperStep1 => 'Öffne Recipe Keeper und gehe zu Einstellungen > Export.';
+
+  @override
+  String get importGuideRecipeKeeperStep2 => 'Wähle „Export as ZIP“ oder „Export as HTML“. Das ZIP-Format enthält die Fotos.';
+
+  @override
+  String get importGuideRecipeKeeperStep2Tip => 'Der ZIP-Export wird empfohlen. Er enthält alle deine Rezeptfotos.';
+
+  @override
+  String get importGuideRecipeKeeperStep3 => 'Öffne Recipe Spellbook, tippe auf +, wähle „Datei“ und wähle die exportierte ZIP- oder HTML-Datei aus.';
+
+  @override
+  String get importGuideRecipeKeeperStep4 => 'Alle Rezepte werden automatisch erkannt. Prüfe sie und importiere sie mit Fotos.';
+
+  @override
+  String get importGuideCopyMeThatSubtitle => 'Aus dem HTML-Export von CopyMeThat importieren';
+
+  @override
+  String get importGuideCopyMeThatStep1 => 'Melde dich am Computer bei CopyMeThat.com an.';
+
+  @override
+  String get importGuideCopyMeThatStep2 => 'Gehe zu Settings > Export und lade die HTML-Datei mit all deinen Rezepten herunter.';
+
+  @override
+  String get importGuideCopyMeThatStep4 => 'Alle Rezepte aus der HTML-Datei werden gelesen und sind bereit zum Import.';
+
+  @override
+  String get importGuideMealieSubtitle => 'Aus der selbst gehosteten Rezeptverwaltung Mealie importieren';
+
+  @override
+  String get importGuideMealieStep2 => 'Gehe zu Admin > Backups und erstelle ein neues Backup. Lade den JSON-Export herunter.';
+
+  @override
+  String get importGuideMealieStep2Tip => 'Du kannst einzelne Rezepte auch auf der Rezeptseite als JSON exportieren.';
+
+  @override
+  String get importGuideMealieStep4 => 'Die Rezeptdaten von Mealie sind gut strukturiert. Alle Felder werden genau übernommen.';
+
+  @override
+  String get importGuideTandoorSubtitle => 'Aus Tandoor Recipes importieren';
+
+  @override
+  String get importGuideTandoorStep2 => 'Gehe zu Admin > Export. Wähle deine Rezepte aus und lade sie als JSON herunter.';
+
+  @override
+  String get importGuideTandoorStep4 => 'Stichwörter und Zutatendetails bleiben erhalten. Prüfen und importieren.';
+
+  @override
+  String get importGuideCookmateSubtitle => 'Aus dem .mcb-Export von Cookmate importieren';
+
+  @override
+  String get importGuideCookmateStep1 => 'Öffne Cookmate (früher „My CookBook“) und gehe zu den Einstellungen.';
+
+  @override
+  String get importGuideCookmateStep2 => 'Tippe auf Export und wähle das Format .mcb. Es enthält Rezepte und Fotos.';
+
+  @override
+  String get importGuideCookmateStep4 => 'Alle Rezepte werden mit Kategorien und Fotos importiert.';
+
+  @override
+  String get importGuidePlanToEatSubtitle => 'Aus dem CSV-Export von Plan to Eat importieren';
+
+  @override
+  String get importGuidePlanToEatStep1 => 'Melde dich am Computer bei deinem Plan to Eat-Konto an.';
+
+  @override
+  String get importGuidePlanToEatStep2 => 'Gehe zu Settings > Export Data und lade deine Rezepte als CSV-Datei herunter.';
+
+  @override
+  String get importGuidePlanToEatStep4 => 'Alle Spalten werden gelesen: Titel, Zutaten, Anleitung, Tags, Zeiten und mehr.';
+
+  @override
+  String get importGuideMasterCookSubtitle => 'MasterCook-Dateien (.mxp) importieren';
+
+  @override
+  String get importGuideMasterCookStep1 => 'Öffne MasterCook und wähle die Rezepte aus, die du exportieren willst.';
+
+  @override
+  String get importGuideMasterCookStep2 => 'Gehe zu Datei > Export und wähle das Format .mxp.';
+
+  @override
+  String get importGuideMasterCookStep4 => 'Die Spaltenformatierung wird automatisch gelesen. Prüfe und importiere deine Rezepte.';
+
+  @override
+  String get importGuideMealMasterSubtitle => 'Meal-Master-Dateien (.mmf) importieren';
+
+  @override
+  String get importGuideMealMasterStep1Title => 'Dateien finden';
+
+  @override
+  String get importGuideMealMasterStep1 => 'Suche deine Meal-Master-Dateien (.mmf oder .mk) auf deinem Computer.';
+
+  @override
+  String get importGuideMealMasterStep2Tip => 'Eine Meal-Master-Datei kann Hunderte Rezepte enthalten.';
+
+  @override
+  String get importGuideMealMasterStep3 => 'Alle Rezepte werden aus der Datei gelesen. Zutaten in zwei Spalten werden unterstützt.';
+
+  @override
+  String get importGuideCooklangSubtitle => 'Cooklang-Rezeptdateien (.cook) importieren';
+
+  @override
+  String get importGuideCooklangStep1Title => 'Finde deine .cook-Dateien';
+
+  @override
+  String get importGuideCooklangStep1 => 'Suche deine Cooklang-Rezeptdateien. Es sind reine Textdateien mit der Endung .cook.';
+
+  @override
+  String get importGuideCooklangStep2Tip => 'Cooklang-Auszeichnungen (@Zutaten, #Kochgeschirr, ~Timer) werden automatisch gelesen.';
+
+  @override
+  String get importGuideCooklangStep3 => 'Die Zutaten werden aus den Auszeichnungen gelesen und die Schritte als lesbarer Text aufbereitet.';
+
+  @override
+  String get importGuideLivingCookbookSubtitle => 'Living Cookbook-Dateien (.fdx) importieren';
+
+  @override
+  String get importGuideLivingCookbookStep1 => 'Öffne Living Cookbook und gehe zu Datei > Export.';
+
+  @override
+  String get importGuideLivingCookbookStep2 => 'Wähle das Format FDX (Food Data Exchange) und exportiere deine Rezepte.';
+
+  @override
+  String get importGuideLivingCookbookStep4 => 'Die XML-Daten werden zu geordneten Rezepten mit Zutaten und Arbeitsschritten.';
+
+  @override
+  String get importGuideSamsungFoodSubtitle => 'Aus dem JSON-Export von Samsung Food importieren';
+
+  @override
+  String get importGuideSamsungFoodStep1Title => 'Daten anfordern';
+
+  @override
+  String get importGuideSamsungFoodStep1 => 'Öffne die App oder Website von Samsung Food und gehe zu Settings > Privacy > Download My Data.';
+
+  @override
+  String get importGuideSamsungFoodStep2Title => 'Export herunterladen';
+
+  @override
+  String get importGuideSamsungFoodStep2 => 'Du bekommst einen Download-Link (das kann etwas dauern). Lade die JSON-Datei herunter.';
+
+  @override
+  String get importGuideSamsungFoodStep2Tip => 'Wenn du früher Whisk genutzt hast: Das Format ist dasselbe.';
+
+  @override
+  String get importGuideSamsungFoodStep4 => 'Die Rezeptdaten von Samsung Food werden gelesen und sind bereit zum Import.';
+
+  @override
+  String get communityPublishDailyLimitReached => 'Du hast das heutige Limit für Foto-Uploads erreicht. Versuche es morgen erneut.';
+
+  @override
+  String communityPublishPhotosDropped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Der Server hat $count Fotos nicht übernommen, sie fehlen deshalb. Sie werden bei der nächsten Aktualisierung erneut gesendet.',
+      one: 'Der Server hat 1 Foto nicht übernommen, es fehlt deshalb. Es wird bei der nächsten Aktualisierung erneut gesendet.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestoreNoFile => 'Keine Datei ausgewählt.';
+
+  @override
+  String get backupRestoreTooLarge => 'Dieses Backup entpackt sich zu mehr, als die App verarbeiten kann, daher wurde nichts importiert. Es ist möglicherweise beschädigt.';
+
+  @override
+  String get backupRestoreNothing => 'Nichts zu importieren.';
+
+  @override
+  String backupRestoreImported(String items) {
+    return 'Importiert: $items';
+  }
+
+  @override
+  String backupRestoreCookbooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Kochbücher',
+      one: '1 Kochbuch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Rezepte',
+      one: '1 Rezept',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreShoppingLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einkaufslisten',
+      one: '1 Einkaufsliste',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreMealPlans(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count geplante Mahlzeiten',
+      one: '1 geplante Mahlzeit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tags',
+      one: '1 Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '($count Duplikate übersprungen)',
+      one: '(1 Duplikat übersprungen)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importPreviewOwnExport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Recipe Spellbook-Export ($count Rezepte)',
+      one: 'Recipe Spellbook-Export (1 Rezept)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get barcodeNovaUnprocessed => 'Unverarbeitet';
+
+  @override
+  String get barcodeNovaProcessedIngredients => 'Verarbeitete Zutaten';
+
+  @override
+  String get barcodeNovaProcessedFood => 'Verarbeitetes Lebensmittel';
+
+  @override
+  String get barcodeNovaUltraProcessed => 'Hochverarbeitet';
+
+  @override
+  String get barcodeScoreUnknown => 'Unbekannt';
+
+  @override
+  String get barcodeNutriScoreExcellent => 'Ausgezeichnet';
+
+  @override
+  String get barcodeNutriScoreGood => 'Gut';
+
+  @override
+  String get barcodeNutriScoreAverage => 'Mittel';
+
+  @override
+  String get barcodeNutriScorePoor => 'Mäßig';
+
+  @override
+  String get barcodeNutriScoreBad => 'Schlecht';
+
+  @override
+  String get barcodeAdditives => 'Zusatzstoffe';
+
+  @override
+  String barcodeAdditivesFound(int count) {
+    return '$count gefunden';
+  }
+
+  @override
+  String barcodeAdditivesCaution(int count) {
+    return '$count bedenklich';
+  }
+
+  @override
+  String barcodeAdditivesModerate(int count) {
+    return '$count mäßig bedenklich';
+  }
+
+  @override
+  String get barcodeAdditiveNotInDatabase => 'Nicht in der Datenbank';
+
+  @override
+  String get shoppingSharedCanTick => 'Geteilte Liste · du kannst Einträge abhaken, aber keine hinzufügen oder entfernen';
+
+  @override
+  String get shoppingSharedViewOnly => 'Geteilte Liste · nur ansehen';
+
+  @override
+  String shoppingImportedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge importiert',
+      one: '1 Eintrag importiert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingImportWrongFile => 'Diese Datei ist kein Einkaufslisten-Export von Recipe Spellbook.';
+
+  @override
+  String get groceryInstacartStores => 'Costco, Publix, Safeway, Aldi, Sprouts und über 1.500 weitere Geschäfte';
+
+  @override
+  String get groceryKrogerStores => 'Kroger, Fred Meyer, Ralphs, Harris Teeter und mehr';
+
+  @override
+  String get webImportBlocked => 'Die Website hat unsere Anfrage blockiert. Kopiere stattdessen den Rezepttext und füge ihn ein.';
+
+  @override
+  String get webImportRateLimited => 'Die Website lehnt Anfragen gerade ab. Versuche es in einer Minute erneut.';
+
+  @override
+  String webImportSiteError(int code) {
+    return 'Die Website hat gerade Probleme (HTTP $code). Versuche es später erneut.';
+  }
+
+  @override
+  String webImportHttpError(int code) {
+    return 'Die Seite konnte nicht geladen werden (HTTP $code).';
+  }
+
+  @override
+  String webImportNotAWebPage(String kind) {
+    String _temp0 = intl.Intl.selectLogic(
+      kind,
+      {
+        'pdf': 'Kein Rezept gefunden: Dieser Link ist ein PDF, keine Webseite.',
+        'image': 'Kein Rezept gefunden: Dieser Link ist ein Bild, keine Webseite.',
+        'video': 'Kein Rezept gefunden: Dieser Link ist ein Video, keine Webseite.',
+        'audio': 'Kein Rezept gefunden: Dieser Link ist eine Audiodatei, keine Webseite.',
+        'zip': 'Kein Rezept gefunden: Dieser Link ist eine ZIP-Datei, keine Webseite.',
+        'other': 'Kein Rezept gefunden: Dieser Link ist eine Datei, keine Webseite.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get webImportPageTooLarge => 'Kein Rezept gefunden: Diese Seite ist zu groß zum Lesen.';
+
+  @override
+  String webImportUnreadableEncoding(String charset) {
+    return 'Diese Seite verwendet eine Textkodierung ($charset), die die App nicht lesen kann.';
+  }
+
+  @override
+  String get webImportNoRecipeInVideo => 'In der Beschreibung dieses Videos wurde kein Rezept gefunden.';
+
+  @override
+  String get webImportTimedOut => 'Die Website hat zu lange nicht geantwortet. Versuche es später erneut.';
 }

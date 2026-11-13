@@ -138,7 +138,7 @@ void main() {
     await tapTile(tester, 'File');
     await settleUntil(
       tester,
-      () => find.textContaining('Imported ').evaluate().isNotEmpty || sheetMessage(tester) != null || previewOpen(),
+      () => find.textContaining('Imported:').evaluate().isNotEmpty || sheetMessage(tester) != null || previewOpen(),
       rounds: 400,
     );
     await settle(tester);
@@ -176,7 +176,7 @@ void main() {
       await pick(tester, db, _onDisk('RecipeSpellbook_Export_2026-11-12.zip', await fullExport(tester)));
 
       expect(previewOpen(), isFalse, reason: 'a backup is restored whole, not offered recipe by recipe');
-      expect(find.textContaining('Imported 2 cookbook(s), 1 recipe(s)'), findsOneWidget);
+      expect(find.textContaining('Imported: 2 cookbooks, 1 recipe'), findsOneWidget);
       expect(find.textContaining('Switched to imported cookbook'), findsOneWidget);
       expect(sheetOpen(), isFalse);
 
@@ -229,7 +229,7 @@ void main() {
       await pick(tester, db, _onDisk('25 Everyday Classics.zip', _zipOf(cookbookZip())));
 
       expect(previewOpen(), isFalse);
-      expect(find.textContaining('Imported 1 cookbook(s), 1 recipe(s)'), findsOneWidget);
+      expect(find.textContaining('Imported: 1 cookbook, 1 recipe'), findsOneWidget);
       final classics = await cookbookNamed(tester, db, 'Everyday Classics');
       expect(classics.description, 'The staples people look for first.');
       expect(selectedCookbook(tester), classics.id);
@@ -300,7 +300,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Importing... 2/3'), findsOneWidget);
 
-      finish.complete(ImportResult(success: true, message: 'Imported 1 cookbook(s), 3 recipe(s)', importedCookbookId: 'book'));
+      finish.complete(ImportResult(
+        success: true,
+        message: 'Imported 1 cookbook(s), 3 recipe(s)',
+        cookbooksImported: 1,
+        recipesImported: 3,
+        importedCookbookId: 'book',
+      ));
       await tester.pump();
       final result = await running;
       await tester.pump(const Duration(milliseconds: 400));
@@ -308,7 +314,7 @@ void main() {
 
       showBackupRestoreResult(page, result);
       await tester.pump(const Duration(milliseconds: 400));
-      expect(find.text('Imported 1 cookbook(s), 3 recipe(s)\nSwitched to imported cookbook'), findsOneWidget);
+      expect(find.text('Imported: 1 cookbook, 3 recipes\nSwitched to imported cookbook'), findsOneWidget);
       expect(selectedCookbook(tester), 'book');
       await clearSnackbar(tester);
     });
@@ -322,11 +328,16 @@ void main() {
 
       final result = await restoreBackupWithProgress(
         page,
-        (_) async => ImportResult(success: false, message: 'Invalid backup: missing data.json'),
+        (_) async => ImportResult(
+          success: false,
+          message: 'Invalid backup: missing data.json',
+          failure: ImportFailure.missingData,
+        ),
       );
       showBackupRestoreResult(page, result);
       await tester.pump(const Duration(milliseconds: 400));
-      expect(find.text('Invalid backup: missing data.json'), findsOneWidget);
+      // Said in the app's language, not in the service's English.
+      expect(find.text('This zip file is not a Recipe Spellbook backup. It has no data.json in it.'), findsOneWidget);
       expect(find.textContaining('Importing'), findsNothing);
       expect(selectedCookbook(tester), before);
       await clearSnackbar(tester);

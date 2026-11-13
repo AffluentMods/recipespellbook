@@ -31,6 +31,12 @@ class ImportedRecipe {
   List<ImportedIngredient>? ingredientRows;
   List<ImportedStep>? stepRows;
 
+  // An ingredient that stands for another recipe by its title, as Paprika
+  // writes "1 batch [recipe:Pizza Dough]": the place of the line in
+  // [ingredients] and the title. The save links the line to the recipe of
+  // that title in the same import (or the library).
+  Map<int, String>? linkedTitles;
+
   // Bulk import tracking
   String? sourceApp; // "paprika", "recipekeeper", "crouton", etc.
   String? sourceFile; // Original filename
@@ -65,6 +71,7 @@ class ImportedRecipe {
     this.categoryName,
     this.ingredientRows,
     this.stepRows,
+    this.linkedTitles,
     this.sourceApp,
     this.sourceFile,
     this.parseConfidence,

@@ -13,7 +13,9 @@ import '../../../services/revenuecat_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../utils/platform_utils.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/sync_health_tile.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/auth_error_message.dart';
 import '../../widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════════════════════
@@ -41,9 +43,28 @@ class AccountScreen extends ConsumerWidget {
 //  SIGNED OUT — Sign-in flow
 // ════════════════════════════════════════════
 
+/// Restores purchases and says what came of it: found, nothing found, or
+/// that it could not be checked (offline).
+Future<void> _restorePurchases(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  try {
+    final found = await ref.read(subscriptionProvider.notifier).restorePurchases();
+    if (!context.mounted) return;
+    if (found) {
+      AppSnackbar.success(context, l10n.purchasesRestored);
+    } else {
+      AppSnackbar.info(context, l10n.noPurchasesFound);
+    }
+  } on PurchaseCheckFailed {
+    if (context.mounted) AppSnackbar.error(context, l10n.errorNetwork);
+  } catch (_) {
+    if (context.mounted) AppSnackbar.error(context, l10n.restoreFailed);
+  }
+}
+
 class _SignedOutBody extends ConsumerWidget {
   final bool isLoading;
-  final String? error;
+  final AuthError? error;
   const _SignedOutBody({required this.isLoading, this.error});
 
   @override
@@ -94,7 +115,10 @@ class _SignedOutBody extends ConsumerWidget {
                     Icon(Icons.error_outline, size: 18, color: theme.colorScheme.error),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(error!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                      child: Text(
+                        authErrorMessage(l10n, error!),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                      ),
                     ),
                     GestureDetector(
                       onTap: () => ref.read(authProvider.notifier).clearError(),
@@ -131,6 +155,16 @@ class _SignedOutBody extends ConsumerWidget {
               ),
             ),
 
+            // Desktop: the sign-in waits for the browser. Let the user stop
+            // waiting (closed tab, wrong account) instead of a long spinner.
+            if (isLoading && isDesktop) ...[
+              const SizedBox(height: 6),
+              TextButton(
+                onPressed: () => ref.read(authProvider.notifier).cancelSignIn(),
+                child: Text(l10n.actionCancel),
+              ),
+            ],
+
             // Apple Sign-In
             if (supportsAppleSignIn) ...[
               const SizedBox(height: 10),
@@ -160,23 +194,7 @@ class _SignedOutBody extends ConsumerWidget {
 
             // Restore purchases
             TextButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      try {
-                        await ref.read(subscriptionProvider.notifier).restorePurchases();
-                        if (context.mounted) {
-                          final isPro = ref.read(subscriptionProvider).isPro;
-                          if (isPro) {
-                            AppSnackbar.success(context, l10n.purchasesRestored);
-                          } else {
-                            AppSnackbar.info(context, l10n.noPurchasesFound);
-                          }
-                        }
-                      } catch (e) {
-                        if (context.mounted) AppSnackbar.error(context, l10n.restoreFailed);
-                      }
-                    },
+              onPressed: isLoading ? null : () => _restorePurchases(context, ref),
               child: Text(l10n.restorePurchases),
             ),
           ],
@@ -841,16 +859,7 @@ class _SubscriptionCard extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Center(
                   child: TextButton(
-                    onPressed: () async {
-                      try {
-                        await ref.read(subscriptionProvider.notifier).restorePurchases();
-                        if (context.mounted) {
-                          AppSnackbar.success(context, l10n.purchasesRestored);
-                        }
-                      } catch (e) {
-                        if (context.mounted) AppSnackbar.error(context, l10n.restoreFailed);
-                      }
-                    },
+                    onPressed: () => _restorePurchases(context, ref),
                     child: Text(l10n.restorePurchases),
                   ),
                 ),
@@ -894,21 +903,7 @@ class _SubscriptionCard extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               TextButton(
-                onPressed: () async {
-                  try {
-                    await ref.read(subscriptionProvider.notifier).restorePurchases();
-                    if (context.mounted) {
-                      final isPro = ref.read(subscriptionProvider).isPro;
-                      if (isPro) {
-                        AppSnackbar.success(context, l10n.purchasesRestored);
-                      } else {
-                        AppSnackbar.info(context, l10n.noPurchasesFound);
-                      }
-                    }
-                  } catch (e) {
-                    if (context.mounted) AppSnackbar.error(context, l10n.restoreFailed);
-                  }
-                },
+                onPressed: () => _restorePurchases(context, ref),
                 child: Text(l10n.restorePurchases),
               ),
             ]),
@@ -952,7 +947,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
     } else if (result.notEntitled) {
       AppSnackbar.error(context, l10n.syncNotInPlan);
     } else {
-      AppSnackbar.error(context, result.error ?? l10n.syncFailed);
+      // The result's error is English for the log: say it in the user's
+      // language, telling a missing connection apart.
+      AppSnackbar.error(context, result.offline ? l10n.errorNetworkMessage : l10n.syncFailed);
     }
   }
 
@@ -999,6 +996,8 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   child: Text(l10n.sync),
                 ),
         ),
+        // Shared cookbooks, shared lists and the pantry can fail on their own.
+        if (!_syncing) const SyncHealthTiles(),
       ],
     );
   }

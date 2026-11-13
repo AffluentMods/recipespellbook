@@ -62,18 +62,16 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
         ? await CommunityService.instance.unfollowCreator(widget.userId)
         : await CommunityService.instance.followCreator(widget.userId);
 
-    if (mounted) {
-      setState(() {
-        _followLoading = false;
-        // If API succeeded, use server values; otherwise revert
-        if (result.followerCount > 0 || result.following == !wasFollowing) {
-          _isFollowing = result.following;
-          _followerCount = result.followerCount;
-        } else {
-          _isFollowing = wasFollowing;
-          _followerCount = oldCount;
-        }
-      });
+    if (!mounted) return;
+    setState(() {
+      _followLoading = false;
+      // The server's answer when it went through; otherwise back to how it
+      // was, so a failed unfollow never shows as done.
+      _isFollowing = result?.following ?? wasFollowing;
+      _followerCount = result?.followerCount ?? oldCount;
+    });
+    if (result == null) {
+      AppSnackbar.error(context, AppLocalizations.of(context)!.communityFollowFailed);
     }
   }
 
@@ -122,7 +120,8 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                   } else if (result.error == 'Cannot report yourself') {
                     AppSnackbar.info(context, l10n.cannotReportSelf);
                   } else {
-                    AppSnackbar.error(context, result.error ?? l10n.accountProfileUpdateFailed);
+                    // The server's own text is English: say it in the user's language.
+                    AppSnackbar.error(context, l10n.communityReportFailed);
                   }
                 }
               },

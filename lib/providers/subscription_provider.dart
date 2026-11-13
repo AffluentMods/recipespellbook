@@ -118,18 +118,27 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
 
   /// The device sees a paid purchase the server may not know about yet
   /// (App Store / Play purchases reach the server only this way or via the
-  /// RevenueCat webhook). Ask it to verify once per user+tier.
+  /// RevenueCat webhook). Ask it to verify once per user+tier, then hand the
+  /// updated account on, so the plan shown with it (the Account page's badge)
+  /// follows without a restart.
   Future<void> _verifyWithServer() async {
     final auth = AuthService.instance;
     final user = auth.currentUser;
-    final rcTier = RevenueCatService.instance.currentTier;
-    if (user == null || rcTier == SubscriptionTier.free) return;
-    if (SubscriptionTier.fromBackendString(user.tier).index >= rcTier.index) return;
-    final key = '${user.id}:${rcTier.name}';
+    final storeTier = RevenueCatService.instance.storeTier;
+    if (user == null || storeTier == SubscriptionTier.free) return;
+    if (SubscriptionTier.fromBackendString(user.tier).index >= storeTier.index) return;
+    final key = '${user.id}:${storeTier.name}';
     if (_verifiedFor == key) return;
     _verifiedFor = key;
     final serverTier = await auth.verifySubscription();
     debugPrint('[Sub] Server verified purchase: $serverTier');
+    if (serverTier == null) {
+      _verifiedFor = null; // not checked: try again on the next change
+      return;
+    }
+    RevenueCatService.instance.setTierFromBackend(serverTier);
+    final refreshed = auth.currentUser;
+    if (refreshed != null && refreshed.id == user.id) onAccountRefreshed?.call(refreshed);
   }
 
   /// Sync full state from RevenueCatService.
@@ -144,14 +153,24 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
 
   // ── Lifecycle ──
 
+  /// The one start of the subscription state, once it has begun.
+  Future<void>? _initializing;
+
   /// Initialize subscription state. Call after auth is ready.
-  Future<void> initialize() async {
+  ///
+  /// It runs once: main.dart starts it and the app shell waits for the same
+  /// run, so the store and the server are asked once per launch. A call
+  /// after that returns the same, finished, run. Signing in and out later
+  /// goes through [login] and [logout].
+  Future<void> initialize() => _initializing ??= _initialize();
+
+  Future<void> _initialize() async {
     state = state.copyWith(isLoading: true);
 
     try {
       final user = AuthService.instance.currentUser;
 
-      debugPrint('[Sub] Initializing RevenueCat, userId=${user?.id}');
+      debugPrint('[Sub] Initializing RevenueCat (signed in: ${user != null})');
 
       // Initialize RevenueCat SDK
       await RevenueCatService.instance.initialize(
@@ -262,9 +281,10 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
   }
 
   /// Restore previous purchases. Returns true when a paid plan was found.
-  /// Without the RevenueCat SDK this re-reads the account from the server and
-  /// throws [PurchaseCheckFailed] when that is not possible, so callers can
-  /// say the check failed instead of "no purchases found".
+  /// Without the RevenueCat SDK this re-reads the account from the server.
+  /// Throws [PurchaseCheckFailed] when the store or the server could not be
+  /// reached, so callers can say the check failed instead of "no purchases
+  /// found"; other failures are rethrown.
   Future<bool> restorePurchases() async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -286,11 +306,10 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
       state = state.copyWith(isLoading: false);
       return tier != SubscriptionTier.free;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Restore failed: $e',
-      );
-      return false;
+      state = state.copyWith(isLoading: false);
+      // Offline is not "no purchases found": say the check failed.
+      if (RevenueCatService.isNetworkError(e)) throw const PurchaseCheckFailed();
+      rethrow;
     }
   }
 

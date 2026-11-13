@@ -5787,6 +5787,17 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => '退出食谱书';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '退出\"$name\"？它会从此设备上移除，所有食谱仍归所有者。若要重新加入，请索取新的邀请。';
+  }
+
+  @override
+  String get cookbookLeaveFailed => '无法退出食谱书。请检查网络连接后重试。';
+
+  @override
   String get shareCookbook => '分享食谱书';
 
   @override
@@ -7606,6 +7617,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => '你的食谱已同步，但部分照片暂时无法上传。应用会自动重试。';
+
+  @override
+  String get syncHealthSharedPush => '你对共享食谱书的修改尚未发送。下次同步时会发送。';
+
+  @override
+  String get syncHealthSharedPull => '无法更新共享的食谱书和清单。下次同步时会重试。';
+
+  @override
+  String get syncHealthPantry => '食材柜未能同步。下次同步时会重试。';
 
   @override
   String syncSuccess(int pushed, int pulled) {
@@ -10972,6 +10992,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notifPermissionDenied => 'Recipe Spellbook 的通知已关闭。请在设备设置中开启。';
 
   @override
+  String get notifPushUnavailable => '无法为此设备注册通知，请稍后再试。';
+
+  @override
+  String get signInFailed => '登录失败，请重试。';
+
+  @override
+  String get signInTransferExpired => '来自另一台设备的登录已过期，请在此设备上重新登录。';
+
+  @override
+  String get paywallPurchasePending => '你的购买正在处理中。商店确认后即可解锁高级版。';
+
+  @override
   String get syncNotInPlan => '你的套餐不包含云同步';
 
   @override
@@ -12528,4 +12560,709 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => '没有识别出任何食材';
+
+  @override
+  String get pressBackAgainToExit => '再按一次返回键退出';
+
+  @override
+  String get mealPlanNextWeekend => '下周末';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return '已在膳食计划中：$when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => '查看完整食谱';
+
+  @override
+  String plannerDateRange(String start, String end) {
+    return '$start至$end';
+  }
+
+  @override
+  String clearWeekRangeWarning(String start, String end) {
+    return '将删除$start至$end的所有计划餐食。此操作无法撤销。';
+  }
+
+  @override
+  String shoppingDeleteSharedListConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此清单已与 $count 人共享。删除后，所有人都将停止同步。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookFromPantry(String items) {
+    return '来自你的储藏室：$items';
+  }
+
+  @override
+  String pantryCookLineFrom(String ingredient, String items) {
+    return '$ingredient：$items';
+  }
+
+  @override
+  String get cookingStopTimer => '停止计时器';
+
+  @override
+  String cookingStartTimerFor(String duration) {
+    return '开始$duration计时';
+  }
+
+  @override
+  String durationSeconds(int count) {
+    return '$count秒';
+  }
+
+  @override
+  String get notifChannelCookingTimers => '烹饪计时器';
+
+  @override
+  String get notifChannelCookingTimersDesc => '烹饪模式中的计时器结束时';
+
+  @override
+  String get communityFollowFailed => '无法更改关注状态。请检查网络连接后重试。';
+
+  @override
+  String get communityPublishPhotosUnsupported => '部分照片的格式（如 HEIC）无法在此设备上读取，已从以下食谱中移除：';
+
+  @override
+  String get communityPublishIncludeNotes => '包含我的备注';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => '发布你在每个食谱上写的备注。你自己的星级评分永远不会发布。';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => '每个都会使用此设备上对应食谱书中的食谱更新。照片只会加到发布时带照片的出版物，备注只会加到你选择包含备注的出版物。评分和下载次数将保留。';
+
+  @override
+  String get communityRepublishDetailsNotSaved => '食谱已更新，但新的标题、描述或标签未能保存。请在“我的发布”中重试。';
+
+  @override
+  String get communityRepublishDetailsUnavailable => '无法加载该发布的标题、描述和标签，因此它们保持不变。食谱仍会更新。';
+
+  @override
+  String get communitySaveRecipeFailed => '无法保存食谱。请检查网络连接后重试。';
+
+  @override
+  String get communityRecipeNoLongerAvailable => '此食谱已不在社区中提供。';
+
+  @override
+  String get communityLoadFailed => '无法加载。请检查网络连接后重试。';
+
+  @override
+  String get cookbookUpdateSourceGone => '此食谱书已不在社区中提供，因此没有可更新的内容。你的副本保持不变。';
+
+  @override
+  String get communityDownloadSelectionChanged => '创作者刚刚修改了这本食谱书。请检查你的选择后重试。';
+
+  @override
+  String get communityReportFailed => '无法发送举报。请检查网络连接后重试。';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 张照片上传时间过长，未包含在链接中。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => '无法创建链接';
+
+  @override
+  String get shareLinkFailedBody => '请检查网络连接后重试，或改为以文本形式分享食谱。';
+
+  @override
+  String get shareLinkShareAsText => '以文本分享';
+
+  @override
+  String get shareCookbookTooLarge => '这本食谱书太大，无法通过一次性链接分享。请逐个分享食谱，或将食谱书发布到社区。';
+
+  @override
+  String get nutriSheetAmountNotWeighed => '确认用量';
+
+  @override
+  String get nutriSheetLookupFailed => '无法查询';
+
+  @override
+  String get fileImportEmpty => '此文件为空。';
+
+  @override
+  String get fileImportUnsupported => '不支持此文件类型。';
+
+  @override
+  String get fileImportNotText => '此文件已损坏或不是文本文件。';
+
+  @override
+  String get fileImportRichText => '不支持富文本文件。请将食谱另存为纯文本后重试。';
+
+  @override
+  String get fileImportUnknownXml => '此 XML 文件不是本应用可读取的食谱导出文件。';
+
+  @override
+  String get fileImportDamagedZip => '此 ZIP 文件已损坏或不完整。请重新导出后重试。';
+
+  @override
+  String get fileImportOwnBackup => '这是 Recipe Spellbook 的备份。请在“设置”的“导入数据”中恢复。';
+
+  @override
+  String fileImportDamaged(String app) {
+    return '此 $app 文件已损坏或不完整。请重新导出后重试。';
+  }
+
+  @override
+  String fileImportNoRecipes(String app) {
+    return '此文件中没有 $app 食谱。';
+  }
+
+  @override
+  String get fileImportTooLarge => '此文件解压后超出了应用一次可读取的大小。请每次导出更少的食谱后重试。';
+
+  @override
+  String importPdfRecipeNumbered(String name, int number) {
+    return '$name 食谱 $number';
+  }
+
+  @override
+  String get aiImportPasteFirst => '请先粘贴或载入 AI 的回答。';
+
+  @override
+  String aiImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已导入 $count 个食谱。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String aiImportErrInRecipe(int number, String problem) {
+    return '食谱 $number：$problem';
+  }
+
+  @override
+  String get aiImportErrNoRecipes => '未找到食谱。回答中至少需要一个食谱。';
+
+  @override
+  String get aiImportErrInvalidJson => '这不是有效的食谱 JSON。请确认已复制完整的回答。';
+
+  @override
+  String get aiImportErrCutOff => '有括号打开后未关闭。回答可能被截断了。';
+
+  @override
+  String aiImportErrOutsideBrackets(String field) {
+    return '“$field”位于食谱的括号之外。可能缺少括号或引号，或者是需要删除的说明文字。';
+  }
+
+  @override
+  String aiImportErrBlockUnreadable(int block, int count) {
+    return '无法读取第 $block 块（共 $count 块）。可能缺少括号或引号。';
+  }
+
+  @override
+  String get aiImportErrMissingTitle => '缺少“title”字段。';
+
+  @override
+  String get aiImportErrMissingIngredients => '缺少“ingredients”列表。';
+
+  @override
+  String get aiImportErrNoIngredients => '“ingredients”列表为空。食谱至少需要一种食材。';
+
+  @override
+  String aiImportErrIngredientInvalid(int number) {
+    return '第 $number 种食材不是有效的对象。';
+  }
+
+  @override
+  String aiImportErrIngredientNoName(int number) {
+    return '第 $number 种食材没有“name”。';
+  }
+
+  @override
+  String get aiImportErrMissingSteps => '缺少“steps”列表。';
+
+  @override
+  String get aiImportErrNoSteps => '“steps”列表为空。食谱至少需要一个步骤。';
+
+  @override
+  String aiImportErrStepInvalid(int number) {
+    return '第 $number 步不是有效的对象。';
+  }
+
+  @override
+  String aiImportErrStepNoInstruction(int number) {
+    return '第 $number 步没有“instruction”。';
+  }
+
+  @override
+  String get barcodeDataSource => '数据来自 Open Food Facts（社区提供）';
+
+  @override
+  String barcodeDataUpdated(String date) {
+    return '$date更新';
+  }
+
+  @override
+  String get barcodeRecordIncomplete => '此记录似乎不完整。部分信息可能缺失或已过时。';
+
+  @override
+  String get importGuidePopularTag => '热门';
+
+  @override
+  String get importGuideOpenInApp => '在 Recipe Spellbook 中打开';
+
+  @override
+  String get importGuideReviewImport => '检查并导入';
+
+  @override
+  String get importGuideExportRecipes => '导出食谱';
+
+  @override
+  String importGuideOpenApp(String app) {
+    return '打开 $app';
+  }
+
+  @override
+  String importGuideExportAs(String format) {
+    return '导出为 $format';
+  }
+
+  @override
+  String importGuideGoToSite(String site) {
+    return '前往 $site';
+  }
+
+  @override
+  String importGuidePickFile(String file) {
+    return '打开 Recipe Spellbook，点按 +，选择“文件”，然后选择 $file 文件。';
+  }
+
+  @override
+  String importGuideOpenSettings(String app) {
+    return '打开 $app 并进入设置。';
+  }
+
+  @override
+  String importGuideLogIn(String app) {
+    return '在电脑上登录你的 $app 实例。';
+  }
+
+  @override
+  String get importGuidePaprikaSubtitle => '从 Paprika 3 导入所有食谱及照片';
+
+  @override
+  String get importGuidePaprikaStep1 => '在设备上打开 Paprika 3，进入设置或“文件”菜单。';
+
+  @override
+  String get importGuidePaprikaStep2Title => '导出所有食谱';
+
+  @override
+  String get importGuidePaprikaStep2 => '点按“Export”并选择“Paprika Export Format”（.paprikarecipes）。这会生成一个包含所有食谱和照片的文件。';
+
+  @override
+  String get importGuidePaprikaStep2Tip => 'iOS/Android：设置 > Export。电脑：文件 > Export。';
+
+  @override
+  String get importGuidePaprikaStep4 => '预览食谱，取消勾选不需要的，然后点按“导入”。照片会自动包含在内。';
+
+  @override
+  String get importGuideMelaSubtitle => '从食谱管理应用 Mela 导入食谱';
+
+  @override
+  String get importGuideMelaStep2 => '点按“Export”并选择导出所有食谱。这会生成一个 .melarecipes 文件。';
+
+  @override
+  String get importGuideMelaStep2Tip => '你也可以将单个食谱分享为 .melarecipe 文件。';
+
+  @override
+  String get importGuideMelaStep4 => '预览并导入食谱。分类会转换为标签。';
+
+  @override
+  String get importGuideCroutonSubtitle => '从 Crouton 应用导入食谱';
+
+  @override
+  String get importGuideCroutonStep2Title => '导出数据';
+
+  @override
+  String get importGuideCroutonStep2 => '点按“Export”，生成包含所有食谱的 .crumb 文件。';
+
+  @override
+  String get importGuideCroutonStep4 => '预览并导入食谱。食材分组会保留。';
+
+  @override
+  String get importGuideRecipeKeeperSubtitle => '从 Recipe Keeper 导入（ZIP 或 HTML）';
+
+  @override
+  String get importGuideRecipeKeeperStep1 => '打开 Recipe Keeper，进入设置 > Export。';
+
+  @override
+  String get importGuideRecipeKeeperStep2 => '选择“Export as ZIP”或“Export as HTML”。ZIP 格式包含照片。';
+
+  @override
+  String get importGuideRecipeKeeperStep2Tip => '建议导出为 ZIP。它包含你所有的食谱照片。';
+
+  @override
+  String get importGuideRecipeKeeperStep3 => '打开 Recipe Spellbook，点按 +，选择“文件”，然后选择导出的 ZIP 或 HTML 文件。';
+
+  @override
+  String get importGuideRecipeKeeperStep4 => '所有食谱都会被自动识别。检查后连同照片一起导入。';
+
+  @override
+  String get importGuideCopyMeThatSubtitle => '从 CopyMeThat 的 HTML 导出导入';
+
+  @override
+  String get importGuideCopyMeThatStep1 => '在电脑上登录 CopyMeThat.com。';
+
+  @override
+  String get importGuideCopyMeThatStep2 => '进入 Settings > Export，下载包含所有食谱的 HTML 文件。';
+
+  @override
+  String get importGuideCopyMeThatStep4 => 'HTML 文件中的所有食谱都会被读取，随时可以导入。';
+
+  @override
+  String get importGuideMealieSubtitle => '从自托管食谱管理器 Mealie 导入';
+
+  @override
+  String get importGuideMealieStep2 => '进入 Admin > Backups 创建新的备份，然后下载 JSON 导出文件。';
+
+  @override
+  String get importGuideMealieStep2Tip => '你也可以在食谱页面将单个食谱导出为 JSON。';
+
+  @override
+  String get importGuideMealieStep4 => 'Mealie 的食谱数据结构清晰，所有字段都会被准确导入。';
+
+  @override
+  String get importGuideTandoorSubtitle => '从 Tandoor Recipes 导入';
+
+  @override
+  String get importGuideTandoorStep2 => '进入 Admin > Export，选择食谱并以 JSON 格式下载。';
+
+  @override
+  String get importGuideTandoorStep4 => '关键词和食材详情都会保留。检查后导入。';
+
+  @override
+  String get importGuideCookmateSubtitle => '从 Cookmate 的 .mcb 导出导入';
+
+  @override
+  String get importGuideCookmateStep1 => '打开 Cookmate（原名“My CookBook”）并进入设置。';
+
+  @override
+  String get importGuideCookmateStep2 => '点按 Export 并选择 .mcb 格式。其中包含食谱和照片。';
+
+  @override
+  String get importGuideCookmateStep4 => '所有食谱都会连同分类和照片一起导入。';
+
+  @override
+  String get importGuidePlanToEatSubtitle => '从 Plan to Eat 的 CSV 导出导入';
+
+  @override
+  String get importGuidePlanToEatStep1 => '在电脑上登录你的 Plan to Eat 账户。';
+
+  @override
+  String get importGuidePlanToEatStep2 => '进入 Settings > Export Data，将食谱下载为 CSV 文件。';
+
+  @override
+  String get importGuidePlanToEatStep4 => '所有列都会被读取：标题、食材、做法、标签、时间等。';
+
+  @override
+  String get importGuideMasterCookSubtitle => '导入 MasterCook 的 .mxp 文件';
+
+  @override
+  String get importGuideMasterCookStep1 => '打开 MasterCook，选择要导出的食谱。';
+
+  @override
+  String get importGuideMasterCookStep2 => '进入文件 > Export，选择 .mxp 格式。';
+
+  @override
+  String get importGuideMasterCookStep4 => '固定宽度的排版会被自动读取。检查并导入食谱。';
+
+  @override
+  String get importGuideMealMasterSubtitle => '导入 Meal-Master 的 .mmf 文件';
+
+  @override
+  String get importGuideMealMasterStep1Title => '找到你的文件';
+
+  @override
+  String get importGuideMealMasterStep1 => '在电脑上找到 Meal-Master 的 .mmf 或 .mk 文件。';
+
+  @override
+  String get importGuideMealMasterStep2Tip => '一个 Meal-Master 文件可以包含数百个食谱。';
+
+  @override
+  String get importGuideMealMasterStep3 => '文件中的所有食谱都会被读取。支持两栏排列的食材。';
+
+  @override
+  String get importGuideCooklangSubtitle => '导入 Cooklang 的 .cook 食谱文件';
+
+  @override
+  String get importGuideCooklangStep1Title => '找到你的 .cook 文件';
+
+  @override
+  String get importGuideCooklangStep1 => '找到 Cooklang 食谱文件。它们是扩展名为 .cook 的纯文本文件。';
+
+  @override
+  String get importGuideCooklangStep2Tip => 'Cooklang 标记（@食材、#厨具、~计时器）会被自动读取。';
+
+  @override
+  String get importGuideCooklangStep3 => '会从标记中提取食材，并将步骤整理成易读的文字。';
+
+  @override
+  String get importGuideLivingCookbookSubtitle => '导入 Living Cookbook 的 .fdx 文件';
+
+  @override
+  String get importGuideLivingCookbookStep1 => '打开 Living Cookbook，进入文件 > Export。';
+
+  @override
+  String get importGuideLivingCookbookStep2 => '选择 FDX（Food Data Exchange）格式并导出食谱。';
+
+  @override
+  String get importGuideLivingCookbookStep4 => 'XML 数据会被整理成包含食材和步骤的食谱。';
+
+  @override
+  String get importGuideSamsungFoodSubtitle => '从 Samsung Food 的 JSON 导出导入';
+
+  @override
+  String get importGuideSamsungFoodStep1Title => '申请你的数据';
+
+  @override
+  String get importGuideSamsungFoodStep1 => '打开 Samsung Food 应用或网站，进入 Settings > Privacy > Download My Data。';
+
+  @override
+  String get importGuideSamsungFoodStep2Title => '下载导出文件';
+
+  @override
+  String get importGuideSamsungFoodStep2 => '你会收到一个下载链接（可能需要一些时间）。下载 JSON 文件。';
+
+  @override
+  String get importGuideSamsungFoodStep2Tip => '如果你以前用过 Whisk，格式是一样的。';
+
+  @override
+  String get importGuideSamsungFoodStep4 => 'Samsung Food 的食谱数据会被读取，随时可以导入。';
+
+  @override
+  String get communityPublishDailyLimitReached => '已达到今天的照片上传上限。请明天再试。';
+
+  @override
+  String communityPublishPhotosDropped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '服务器未保留 $count 张照片，因此已将其排除。下次更新时会重新发送。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestoreNoFile => '未选择文件。';
+
+  @override
+  String get backupRestoreTooLarge => '此备份解压后超出了应用可处理的大小，因此未导入任何内容。它可能已损坏。';
+
+  @override
+  String get backupRestoreNothing => '没有可导入的内容。';
+
+  @override
+  String backupRestoreImported(String items) {
+    return '已导入：$items';
+  }
+
+  @override
+  String backupRestoreCookbooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 本食谱书',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreShoppingLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个购物清单',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreMealPlans(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个餐食计划',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个标签',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '（跳过了 $count 个重复项）',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importPreviewOwnExport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Recipe Spellbook 导出（$count 个食谱）',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get barcodeNovaUnprocessed => '未加工';
+
+  @override
+  String get barcodeNovaProcessedIngredients => '加工配料';
+
+  @override
+  String get barcodeNovaProcessedFood => '加工食品';
+
+  @override
+  String get barcodeNovaUltraProcessed => '超加工';
+
+  @override
+  String get barcodeScoreUnknown => '未知';
+
+  @override
+  String get barcodeNutriScoreExcellent => '优秀';
+
+  @override
+  String get barcodeNutriScoreGood => '良好';
+
+  @override
+  String get barcodeNutriScoreAverage => '一般';
+
+  @override
+  String get barcodeNutriScorePoor => '较差';
+
+  @override
+  String get barcodeNutriScoreBad => '差';
+
+  @override
+  String get barcodeAdditives => '添加剂';
+
+  @override
+  String barcodeAdditivesFound(int count) {
+    return '找到 $count 种';
+  }
+
+  @override
+  String barcodeAdditivesCaution(int count) {
+    return '需注意 $count 种';
+  }
+
+  @override
+  String barcodeAdditivesModerate(int count) {
+    return '中等 $count 种';
+  }
+
+  @override
+  String get barcodeAdditiveNotInDatabase => '不在数据库中';
+
+  @override
+  String get shoppingSharedCanTick => '共享清单 · 你可以勾选项目，但不能添加或删除';
+
+  @override
+  String get shoppingSharedViewOnly => '共享清单 · 仅查看';
+
+  @override
+  String shoppingImportedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已导入 $count 个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingImportWrongFile => '此文件不是Recipe Spellbook购物清单导出文件。';
+
+  @override
+  String get groceryInstacartStores => 'Costco、Publix、Safeway、Aldi、Sprouts 等 1,500 多家商店';
+
+  @override
+  String get groceryKrogerStores => 'Kroger、Fred Meyer、Ralphs、Harris Teeter 等';
+
+  @override
+  String get webImportBlocked => '该网站拦截了我们的请求。请改为复制食谱文本并粘贴。';
+
+  @override
+  String get webImportRateLimited => '该网站暂时拒绝请求。请一分钟后再试。';
+
+  @override
+  String webImportSiteError(int code) {
+    return '该网站目前出现问题（HTTP $code）。请稍后再试。';
+  }
+
+  @override
+  String webImportHttpError(int code) {
+    return '无法加载该页面（HTTP $code）。';
+  }
+
+  @override
+  String webImportNotAWebPage(String kind) {
+    String _temp0 = intl.Intl.selectLogic(
+      kind,
+      {
+        'pdf': '未找到食谱：该链接是 PDF，而不是网页。',
+        'image': '未找到食谱：该链接是图片，而不是网页。',
+        'video': '未找到食谱：该链接是视频，而不是网页。',
+        'audio': '未找到食谱：该链接是音频文件，而不是网页。',
+        'zip': '未找到食谱：该链接是 ZIP 文件，而不是网页。',
+        'other': '未找到食谱：该链接是文件，而不是网页。',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get webImportPageTooLarge => '未找到食谱：该页面太大，无法读取。';
+
+  @override
+  String webImportUnreadableEncoding(String charset) {
+    return '该页面使用了本应用无法读取的文本编码（$charset）。';
+  }
+
+  @override
+  String get webImportNoRecipeInVideo => '该视频的描述中未找到食谱。';
+
+  @override
+  String get webImportTimedOut => '网站响应时间过长。请稍后再试。';
 }

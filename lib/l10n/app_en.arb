@@ -2870,6 +2870,23 @@
       }
     }
   },
+  "cookbookLeave": "Leave cookbook",
+  "@cookbookLeave": {
+    "description": "Menu item and dialog title for a cookbook someone else shares with you: stop being a member instead of deleting it."
+  },
+  "cookbookLeaveConfirm": "Leave \"{name}\"? It goes from this device, and the owner keeps every recipe in it. To get it back, ask for a new invite.",
+  "@cookbookLeaveConfirm": {
+    "description": "Confirmation before leaving a shared cookbook.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookLeaveFailed": "Could not leave the cookbook. Check your connection and try again.",
+  "@cookbookLeaveFailed": {
+    "description": "Shown when leaving a shared cookbook did not reach the server."
+  },
   "shareCookbook": "Share Cookbook",
   "cookbookEmpty": "This cookbook has no recipes to share",
   "recipes": "recipes",
@@ -3039,7 +3056,7 @@
   "importReviewItems": "Review items",
   "importNoItemsDetected": "No items detected",
   "mealPlanDate": "Date",
-  "mealPlanThisWeekend": "This Weekend",
+  "mealPlanThisWeekend": "This weekend",
   "menuKitchenBuddy": "Kitchen Buddy",
   "menuTools": "Tools",
   "menuSupport": "Support",
@@ -4016,6 +4033,18 @@
   "syncFailed": "Sync failed",
   "syncPhotosStuck": "Photos not uploading",
   "syncPhotosStuckDetail": "Your recipes are synced, but some photos can't upload right now. They keep trying on their own.",
+  "syncHealthSharedPush": "Your edits to shared cookbooks have not gone out yet. The next sync sends them.",
+  "@syncHealthSharedPush": {
+    "description": "Cloud Sync settings, under Sync now: the last sync could not send edits made to cookbooks someone else shares with you."
+  },
+  "syncHealthSharedPull": "Shared cookbooks and lists could not be updated. The next sync tries again.",
+  "@syncHealthSharedPull": {
+    "description": "Cloud Sync settings, under Sync now: the last sync could not fetch the cookbooks and lists shared with you."
+  },
+  "syncHealthPantry": "The pantry did not sync. The next sync tries again.",
+  "@syncHealthPantry": {
+    "description": "Cloud Sync settings, under Sync now: the last sync could not sync the pantry."
+  },
   "syncSuccess": "Synced: {pushed} pushed, {pulled} pulled",
   "@syncSuccess": {
     "placeholders": {
@@ -5895,6 +5924,22 @@
   "notifDownloadsOffer": "Notify me about downloads",
   "notifDownloadsOn": "You'll get a notification when someone downloads it.",
   "notifPermissionDenied": "Notifications are off for Recipe Spellbook. Turn them on in your device settings.",
+  "notifPushUnavailable": "This device could not be registered for notifications. Try again later.",
+  "@notifPushUnavailable": {
+    "description": "Shown when notifications were allowed but the device got no push token (for example the Push setup is missing), so the switch stays off."
+  },
+  "signInFailed": "Sign-in failed. Please try again.",
+  "@signInFailed": {
+    "description": "Google or Apple sign-in, or the server, refused the sign-in."
+  },
+  "signInTransferExpired": "The sign-in from your other device has expired. Sign in again on this device.",
+  "@signInTransferExpired": {
+    "description": "A transfer from another device carried a sign-in that the server no longer accepts."
+  },
+  "paywallPurchasePending": "Your purchase is being processed. Premium unlocks as soon as the store confirms it.",
+  "@paywallPurchasePending": {
+    "description": "After a store purchase that went through but is not confirmed yet (for example a pending payment), so the plan is still Free."
+  },
   "syncNotInPlan": "Cloud Sync is not included in your plan",
   "transferRowsLeftOut": "{count, plural, =1{1 item could not be saved on this device.} other{{count} items could not be saved on this device.}} To try once more, enter the same code again within a day.",
   "@transferRowsLeftOut": {"placeholders": {"count": {"type": "int"}}},
@@ -6455,5 +6500,376 @@
     }
   },
   "bulkNutritionNoIngredients": "No ingredients",
-  "bulkNutritionNoMatch": "No ingredient was recognized"
+  "bulkNutritionNoMatch": "No ingredient was recognized",
+  "pressBackAgainToExit": "Press back again to exit",
+  "@pressBackAgainToExit": {
+    "description": "Shown after the first Android back press on Home; a second press within two seconds closes the app."
+  },
+  "mealPlanNextWeekend": "Next weekend",
+  "@mealPlanNextWeekend": {
+    "description": "Quick date pick in Add to meal plan on a Saturday or Sunday: next week's Saturday."
+  },
+  "shoppingAlreadyPlanned": "Already in your meal plan: {when}",
+  "@shoppingAlreadyPlanned": {
+    "description": "Under \"Also add to meal plan\" when the recipe is already planned. The placeholder is a day (Today, Tomorrow, Sat, Nov 14), or recipe names each with their day.",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "communityPreviewViewFullRecipe": "View full recipe",
+  "@communityPreviewViewFullRecipe": {
+    "description": "Button in the Community recipe preview that opens the whole recipe."
+  },
+  "plannerDateRange": "{start} to {end}",
+  "@plannerDateRange": {
+    "description": "A span of days in the planner, both ends included: under the week's title, and under Add week to shopping list and Clear this week. The placeholders are short dates such as Nov 10.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "clearWeekRangeWarning": "This will remove all meals planned from {start} to {end}. This cannot be undone.",
+  "@clearWeekRangeWarning": {
+    "description": "Body of the Clear this week? dialog in the planner. The placeholders are the first and last day of the week, short dates such as Nov 10.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingDeleteSharedListConfirm": "{count, plural, =1{This list is shared with 1 person. Deleting it stops syncing for everyone.} other{This list is shared with {count} people. Deleting it stops syncing for everyone.}}",
+  "@shoppingDeleteSharedListConfirm": {
+    "description": "Delete list dialog for a shopping list shared with other people. The placeholder is how many people it is shared with.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pantryCookFromPantry": "From your pantry: {items}",
+  "@pantryCookFromPantry": {
+    "description": "Under a recipe in What can I make?: the pantry items it uses, separated by commas.",
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "pantryCookLineFrom": "{ingredient}: {items}",
+  "@pantryCookLineFrom": {
+    "description": "One line of the tooltip on From your pantry in What can I make?: a recipe's ingredient and the pantry item that covers it.",
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "cookingStopTimer": "Stop timer",
+  "@cookingStopTimer": {
+    "description": "Tooltip of the stop button on a running timer in cooking mode."
+  },
+  "cookingStartTimerFor": "Start a {duration} timer",
+  "@cookingStartTimerFor": {
+    "description": "Tooltip of a one-tap timer under a cooking mode step, for a time the step names. The placeholder is the time, such as 10 min.",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "durationSeconds": "{count} sec",
+  "@durationSeconds": {
+    "description": "A length of time under a minute, as a cooking mode timer shows it.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifChannelCookingTimers": "Cooking timers",
+  "notifChannelCookingTimersDesc": "When a timer in cooking mode finishes",
+  "communityFollowFailed": "Could not change who you follow. Check your connection and try again.",
+  "@communityFollowFailed": {"description": "Snackbar on a creator's profile when following or unfollowing did not go through."},
+  "communityPublishPhotosUnsupported": "Some photos are in a format this device cannot read (such as HEIC), so they were left out of:",
+  "@communityPublishPhotosUnsupported": {"description": "On the publish screen once published: some photos were in a format the device cannot read (HEIC or AVIF) and were left out. The recipe titles follow in a list."},
+  "communityPublishIncludeNotes": "Include my notes",
+  "@communityPublishIncludeNotes": {"description": "Switch on the Community publish screen: also publish the notes the person wrote on their recipes. Off by default."},
+  "communityPublishIncludeNotesSubtitle": "Publish the notes you wrote on each recipe. Your own star ratings are never published.",
+  "@communityPublishIncludeNotesSubtitle": {"description": "Under the \"Include my notes\" switch on the publish screen."},
+  "publicationsUpdateAllConfirmBody": "Each one gets the recipes from its cookbook on this device. Photos go only to the ones published with photos, and your notes only where you chose to include them. Ratings and downloads are kept.",
+  "@publicationsUpdateAllConfirmBody": {"description": "Body of the confirmation before Update all in My Publications. Each publication is updated with the photo and notes choices it was published with."},
+  "communityRepublishDetailsNotSaved": "The recipes were updated, but the new title, description or tags were not saved. Try again from My Publications.",
+  "@communityRepublishDetailsNotSaved": {"description": "Snackbar after updating a published cookbook from the publish screen: the recipes went in but the edited title, description or tags did not."},
+  "communityRepublishDetailsUnavailable": "The publication's title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.",
+  "@communityRepublishDetailsUnavailable": {"description": "On the publish screen when updating a publication whose title, description and tags could not be loaded: those fields are locked and kept as they are."},
+  "communitySaveRecipeFailed": "Could not save the recipe. Check your connection and try again.",
+  "@communitySaveRecipeFailed": {"description": "Error when saving a Community or shared recipe into a cookbook did not work (for example offline)."},
+  "communityRecipeNoLongerAvailable": "This recipe is no longer available in the Community.",
+  "@communityRecipeNoLongerAvailable": {"description": "A Community recipe that was removed, unpublished or put under review since it was shown."},
+  "communityLoadFailed": "Could not load this. Check your connection and try again.",
+  "@communityLoadFailed": {"description": "Shown with a Retry button when a Community page (feed, cookbook, recipe, My Publications) could not load."},
+  "cookbookUpdateSourceGone": "This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.",
+  "@cookbookUpdateSourceGone": {"description": "In the update sheet of a downloaded Community cookbook whose publication was unpublished, removed or put under review."},
+  "communityDownloadSelectionChanged": "The creator just changed this cookbook. Check your selection and try again.",
+  "@communityDownloadSelectionChanged": {"description": "Saving picked recipes of a Community cookbook found that the creator changed it since it was shown; it is reloaded so the person can pick again."},
+  "communityReportFailed": "Could not send the report. Check your connection and try again.",
+  "@communityReportFailed": {"description": "Error when a report of Community content did not go through (the person is signed in)."},
+  "shareLinkPhotosLeftOut": "{count, plural, one{The link leaves out 1 photo that took too long to upload.} other{The link leaves out {count} photos that took too long to upload.}}",
+  "@shareLinkPhotosLeftOut": {"description": "After a one-time share link was made: some photos were left out because they took too long to upload.", "placeholders": {"count": {"type": "int"}}},
+  "shareLinkFailedTitle": "Could not create the link",
+  "@shareLinkFailedTitle": {"description": "Title of the dialog when a recipe share link could not be made."},
+  "shareLinkFailedBody": "Check your connection and try again, or share the recipe as text instead.",
+  "@shareLinkFailedBody": {"description": "Body of the dialog when a recipe share link could not be made; the buttons are Retry and Share as text."},
+  "shareLinkShareAsText": "Share as text",
+  "@shareLinkShareAsText": {"description": "Button in the dialog when a share link could not be made: share the recipe as text instead."},
+  "shareCookbookTooLarge": "This cookbook is too big for a one-time link. Share its recipes one at a time, or post the cookbook to the Community.",
+  "@shareCookbookTooLarge": {"description": "Error when a cookbook is too large to send as a one-time share link."},
+  "nutriSheetAmountNotWeighed": "check the amount",
+  "@nutriSheetAmountNotWeighed": {"description": "Nutrition sheet, in brackets after an ingredient whose food was found but whose amount or unit could not be turned into grams, so it adds nothing yet."},
+  "nutriSheetLookupFailed": "Could not be looked up",
+  "@nutriSheetLookupFailed": {"description": "Nutrition sheet, the status of an ingredient whose nutrition lookup failed with an error."},
+  "fileImportEmpty": "This file is empty.",
+  "@fileImportEmpty": {"description": "Import > File: the picked file holds nothing."},
+  "fileImportUnsupported": "This file type is not supported.",
+  "@fileImportUnsupported": {"description": "Import > File: a photo, a video, a Word document or another kind of file the app does not read."},
+  "fileImportNotText": "This file is damaged or is not a text file.",
+  "@fileImportNotText": {"description": "Import > File: a file with a recipe extension that holds something other than text."},
+  "fileImportRichText": "Rich text files are not supported. Save the recipe as plain text and retry.",
+  "@fileImportRichText": {"description": "Import > File: an RTF document."},
+  "fileImportUnknownXml": "This XML file is not a recipe export the app can read.",
+  "@fileImportUnknownXml": {"description": "Import > File: XML that is none of the recipe exports the app reads."},
+  "fileImportDamagedZip": "This ZIP file is damaged or incomplete. Export it again and retry.",
+  "@fileImportDamagedZip": {"description": "Import > File: a ZIP file that does not open."},
+  "fileImportOwnBackup": "This is a Recipe Spellbook backup. Restore it from Settings, Import Data.",
+  "@fileImportOwnBackup": {"description": "Import > File: a backup of this app found where single recipes were expected."},
+  "fileImportDamaged": "This {app} file is damaged or incomplete. Export it again and retry.",
+  "@fileImportDamaged": {"description": "Import > File: an export of another recipe app that is damaged or cut short.", "placeholders": {"app": {"type": "String", "example": "Paprika"}}},
+  "fileImportNoRecipes": "This file does not contain any {app} recipes.",
+  "@fileImportNoRecipes": {"description": "Import > File: an archive with the name of another app's export that holds none of its recipes.", "placeholders": {"app": {"type": "String", "example": "MasterCook"}}},
+  "fileImportTooLarge": "This file unpacks to more than the app can read at once. Export fewer recipes at a time and retry.",
+  "@fileImportTooLarge": {"description": "Import > File: an archive that unpacks to far more than any recipe export (a zip bomb, or an entry of gigabytes)."},
+  "importPdfRecipeNumbered": "{name}, recipe {number}",
+  "@importPdfRecipeNumbered": {"description": "Title of a recipe read from a PDF of several recipes whose own title could not be read: the PDF's file name and the recipe's place in it.", "placeholders": {"name": {"type": "String", "example": "Holiday cookies"}, "number": {"type": "int", "example": "3"}}},
+  "aiImportPasteFirst": "Paste or load the AI response first.",
+  "@aiImportPasteFirst": {"description": "AI import: Preview was tapped with nothing pasted."},
+  "aiImportedCount": "{count, plural, one{{count} recipe imported successfully!} other{{count} recipes imported successfully!}}",
+  "@aiImportedCount": {"description": "AI import: several recipes were imported.", "placeholders": {"count": {"type": "int"}}},
+  "aiImportErrInRecipe": "Recipe {number}: {problem}",
+  "@aiImportErrInRecipe": {"description": "AI import: a problem in one recipe of the pasted answer, counted from 1.", "placeholders": {"number": {"type": "int"}, "problem": {"type": "String"}}},
+  "aiImportErrNoRecipes": "No recipes found. The answer needs at least one recipe.",
+  "@aiImportErrNoRecipes": {"description": "AI import: the pasted answer holds no recipe."},
+  "aiImportErrInvalidJson": "This is not valid recipe JSON. Check that the whole answer was copied.",
+  "@aiImportErrInvalidJson": {"description": "AI import: the pasted text cannot be read as JSON."},
+  "aiImportErrCutOff": "A bracket is opened and never closed. The answer may have been cut off.",
+  "@aiImportErrCutOff": {"description": "AI import: the pasted JSON ends before a bracket is closed."},
+  "aiImportErrOutsideBrackets": "\"{field}\" stands outside the brackets of a recipe. A bracket or a quote may be missing, or it is a remark to take out.",
+  "@aiImportErrOutsideBrackets": {"description": "AI import: a recipe field name stands outside any recipe object in the pasted JSON.", "placeholders": {"field": {"type": "String", "example": "ingredients"}}},
+  "aiImportErrBlockUnreadable": "Block {block} of {count} could not be read. A bracket or a quote may be missing.",
+  "@aiImportErrBlockUnreadable": {"description": "AI import: the answer holds several JSON blocks and one meant as a recipe cannot be read.", "placeholders": {"block": {"type": "int"}, "count": {"type": "int"}}},
+  "aiImportErrMissingTitle": "The \"title\" field is missing.",
+  "@aiImportErrMissingTitle": {"description": "AI import: a recipe without a title. The field name stays in English."},
+  "aiImportErrMissingIngredients": "The \"ingredients\" list is missing.",
+  "@aiImportErrMissingIngredients": {"description": "AI import: a recipe without an ingredients list. The field name stays in English."},
+  "aiImportErrNoIngredients": "The \"ingredients\" list is empty. A recipe needs at least one ingredient.",
+  "@aiImportErrNoIngredients": {"description": "AI import: a recipe with an empty ingredients list."},
+  "aiImportErrIngredientInvalid": "Ingredient {number} is not a valid object.",
+  "@aiImportErrIngredientInvalid": {"description": "AI import: an ingredient entry that is not a JSON object.", "placeholders": {"number": {"type": "int"}}},
+  "aiImportErrIngredientNoName": "Ingredient {number} has no \"name\".",
+  "@aiImportErrIngredientNoName": {"description": "AI import: an ingredient without a name. The field name stays in English.", "placeholders": {"number": {"type": "int"}}},
+  "aiImportErrMissingSteps": "The \"steps\" list is missing.",
+  "@aiImportErrMissingSteps": {"description": "AI import: a recipe without a steps list. The field name stays in English."},
+  "aiImportErrNoSteps": "The \"steps\" list is empty. A recipe needs at least one step.",
+  "@aiImportErrNoSteps": {"description": "AI import: a recipe with an empty steps list."},
+  "aiImportErrStepInvalid": "Step {number} is not a valid object.",
+  "@aiImportErrStepInvalid": {"description": "AI import: a step entry that is not a JSON object.", "placeholders": {"number": {"type": "int"}}},
+  "aiImportErrStepNoInstruction": "Step {number} has no \"instruction\".",
+  "@aiImportErrStepNoInstruction": {"description": "AI import: a step without its instruction text. The field name stays in English.", "placeholders": {"number": {"type": "int"}}},
+  "barcodeDataSource": "Data from Open Food Facts (community-sourced)",
+  "@barcodeDataSource": {"description": "Barcode scan result: where the product data comes from."},
+  "barcodeDataUpdated": "updated {date}",
+  "@barcodeDataUpdated": {"description": "Barcode scan result, after the data source: when the product record was last changed, a month and a year.", "placeholders": {"date": {"type": "String", "example": "Mar 2026"}}},
+  "barcodeRecordIncomplete": "This record looks incomplete. Some details may be missing or out of date.",
+  "@barcodeRecordIncomplete": {"description": "Barcode scan result: the product record has few fields filled in."},
+  "importGuidePopularTag": "POPULAR",
+  "@importGuidePopularTag": {"description": "Import guides: tag on the guides of the most used apps."},
+  "importGuideOpenInApp": "Open in Recipe Spellbook",
+  "@importGuideOpenInApp": {"description": "Import guides: title of the step that picks the exported file in this app."},
+  "importGuideReviewImport": "Review & Import",
+  "@importGuideReviewImport": {"description": "Import guides: title of the last step."},
+  "importGuideExportRecipes": "Export Recipes",
+  "@importGuideExportRecipes": {"description": "Import guides: title of the step that exports from the other app."},
+  "importGuideOpenApp": "Open {app}",
+  "@importGuideOpenApp": {"description": "Import guides: title of the first step, with the other app's name.", "placeholders": {"app": {"type": "String", "example": "Mela"}}},
+  "importGuideExportAs": "Export as {format}",
+  "@importGuideExportAs": {"description": "Import guides: step title, with a file format such as ZIP or CSV.", "placeholders": {"format": {"type": "String", "example": "CSV"}}},
+  "importGuideGoToSite": "Go to {site}",
+  "@importGuideGoToSite": {"description": "Import guides: step title, with a website.", "placeholders": {"site": {"type": "String", "example": "plantoeat.com"}}},
+  "importGuidePickFile": "Open Recipe Spellbook, tap +, choose \"File\", and select the {file} file.",
+  "@importGuidePickFile": {"description": "Import guides: how to pick the exported file in this app. 'File' is the button of the add recipe sheet.", "placeholders": {"file": {"type": "String", "example": ".melarecipes"}}},
+  "importGuideOpenSettings": "Open {app} and go to Settings.",
+  "@importGuideOpenSettings": {"description": "Import guides: first step for an app whose export is in its settings.", "placeholders": {"app": {"type": "String", "example": "Mela"}}},
+  "importGuideLogIn": "Log in to your {app} instance on a computer.",
+  "@importGuideLogIn": {"description": "Import guides: first step for a self-hosted recipe manager.", "placeholders": {"app": {"type": "String", "example": "Mealie"}}},
+  "importGuidePaprikaSubtitle": "Import all recipes from Paprika 3 with photos",
+  "importGuidePaprikaStep1": "Open Paprika 3 on your device. Go to Settings or the File menu.",
+  "importGuidePaprikaStep2Title": "Export All Recipes",
+  "importGuidePaprikaStep2": "Tap \"Export\" and choose \"Paprika Export Format\" (.paprikarecipes). This creates a file with all your recipes and photos.",
+  "importGuidePaprikaStep2Tip": "On iOS/Android: Settings > Export. On Desktop: File > Export.",
+  "importGuidePaprikaStep4": "Preview your recipes, deselect any you don't want, then tap Import. Photos will be included automatically.",
+  "importGuideMelaSubtitle": "Import recipes from Mela recipe manager",
+  "importGuideMelaStep2": "Tap \"Export\" and choose to export all recipes. This creates a .melarecipes file.",
+  "importGuideMelaStep2Tip": "You can also share individual recipes as .melarecipe files.",
+  "importGuideMelaStep4": "Preview and import your recipes. Categories will be converted to tags.",
+  "importGuideCroutonSubtitle": "Import recipes from Crouton app",
+  "importGuideCroutonStep2Title": "Export Data",
+  "importGuideCroutonStep2": "Tap \"Export\" to create a .crumb file with all your recipes.",
+  "importGuideCroutonStep4": "Preview your recipes and import them. Ingredient sections are preserved.",
+  "importGuideRecipeKeeperSubtitle": "Import from Recipe Keeper (ZIP or HTML)",
+  "importGuideRecipeKeeperStep1": "Open Recipe Keeper and go to Settings > Export.",
+  "importGuideRecipeKeeperStep2": "Choose \"Export as ZIP\" or \"Export as HTML\". The ZIP format includes photos.",
+  "importGuideRecipeKeeperStep2Tip": "ZIP export is recommended. It includes all your recipe photos.",
+  "importGuideRecipeKeeperStep3": "Open Recipe Spellbook, tap +, choose \"File\", and select the exported ZIP or HTML file.",
+  "importGuideRecipeKeeperStep4": "All recipes will be detected automatically. Review and import with photos.",
+  "importGuideCopyMeThatSubtitle": "Import from CopyMeThat HTML export",
+  "importGuideCopyMeThatStep1": "Log in to CopyMeThat.com on your computer.",
+  "importGuideCopyMeThatStep2": "Go to Settings > Export and download the HTML file with all your recipes.",
+  "importGuideCopyMeThatStep4": "All recipes from the HTML file will be parsed and ready to import.",
+  "importGuideMealieSubtitle": "Import from Mealie self-hosted recipe manager",
+  "importGuideMealieStep2": "Go to Admin > Backups and create a new backup. Download the JSON export.",
+  "importGuideMealieStep2Tip": "You can also export individual recipes as JSON from the recipe page.",
+  "importGuideMealieStep4": "Mealie recipe data is well-structured. All fields will be imported accurately.",
+  "importGuideTandoorSubtitle": "Import from Tandoor Recipes",
+  "importGuideTandoorStep2": "Go to Admin > Export. Select your recipes and download as JSON.",
+  "importGuideTandoorStep4": "Keywords and ingredient details are preserved. Review and import.",
+  "importGuideCookmateSubtitle": "Import from Cookmate .mcb export",
+  "importGuideCookmateStep1": "Open Cookmate (previously \"My CookBook\") and go to Settings.",
+  "importGuideCookmateStep2": "Tap Export and choose the .mcb format. This includes recipes and photos.",
+  "importGuideCookmateStep4": "All recipes with categories and photos will be imported.",
+  "importGuidePlanToEatSubtitle": "Import from Plan to Eat CSV export",
+  "importGuidePlanToEatStep1": "Log in to your Plan to Eat account on a computer.",
+  "importGuidePlanToEatStep2": "Go to Settings > Export Data and download your recipes as a CSV file.",
+  "importGuidePlanToEatStep4": "All columns are parsed: title, ingredients, directions, tags, times, and more.",
+  "importGuideMasterCookSubtitle": "Import MasterCook .mxp files",
+  "importGuideMasterCookStep1": "Open MasterCook and select the recipes you want to export.",
+  "importGuideMasterCookStep2": "Go to File > Export and choose the .mxp format.",
+  "importGuideMasterCookStep4": "Fixed-width formatting is parsed automatically. Review and import your recipes.",
+  "importGuideMealMasterSubtitle": "Import Meal-Master .mmf files",
+  "importGuideMealMasterStep1Title": "Locate your files",
+  "importGuideMealMasterStep1": "Find your Meal-Master .mmf or .mk files on your computer.",
+  "importGuideMealMasterStep2Tip": "Meal-Master files can contain hundreds of recipes in a single file.",
+  "importGuideMealMasterStep3": "All recipes are parsed from the file. Two-column ingredient layouts are supported.",
+  "importGuideCooklangSubtitle": "Import Cooklang .cook recipe files",
+  "importGuideCooklangStep1Title": "Find your .cook files",
+  "importGuideCooklangStep1": "Locate your Cooklang recipe files. They're plain text files with .cook extension.",
+  "importGuideCooklangStep2Tip": "Cooklang markup (@ingredients, #cookware, ~timers) is automatically parsed.",
+  "importGuideCooklangStep3": "Ingredients are extracted from the markup and steps are formatted as readable text.",
+  "importGuideLivingCookbookSubtitle": "Import Living Cookbook .fdx files",
+  "importGuideLivingCookbookStep1": "Open Living Cookbook and go to File > Export.",
+  "importGuideLivingCookbookStep2": "Choose the FDX (Food Data Exchange) format and export your recipes.",
+  "importGuideLivingCookbookStep4": "XML data is parsed into structured recipes with ingredients and procedures.",
+  "importGuideSamsungFoodSubtitle": "Import from Samsung Food JSON export",
+  "importGuideSamsungFoodStep1Title": "Request your data",
+  "importGuideSamsungFoodStep1": "Open Samsung Food app or website and go to Settings > Privacy > Download My Data.",
+  "importGuideSamsungFoodStep2Title": "Download the export",
+  "importGuideSamsungFoodStep2": "You'll receive a download link (may take some time). Download the JSON file.",
+  "importGuideSamsungFoodStep2Tip": "If you previously used Whisk, the format is the same.",
+  "importGuideSamsungFoodStep4": "Samsung Food recipe data will be parsed and ready to import.",
+  "communityPublishDailyLimitReached": "You've reached today's photo upload limit. Try again tomorrow.",
+  "@communityPublishDailyLimitReached": {"description": "Publish/update stopped part way because the server says today's photo upload allowance is used up. Not retried until tomorrow."},
+  "communityPublishPhotosDropped": "{count, plural, =1{The server did not keep 1 photo, so it was left out. It is sent again with the next update.} other{The server did not keep {count} photos, so they were left out. They are sent again with the next update.}}",
+  "@communityPublishPhotosDropped": {"description": "A publish or update went through, but the server did not keep some photos (they were not the publisher's own Community uploads). They are sent again with the next update.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "backupRestoreNoFile": "No file selected.",
+  "@backupRestoreNoFile": {"description": "Restore a backup: the file picker was closed without a file."},
+  "backupRestoreTooLarge": "This backup unpacks to more than the app can handle, so nothing was imported. It may be damaged.",
+  "@backupRestoreTooLarge": {"description": "Restore a backup: a file in the ZIP unpacks to more than the app can handle (a damaged file or a zip bomb). Nothing was imported."},
+  "backupRestoreNothing": "Nothing to import.",
+  "@backupRestoreNothing": {"description": "Restore a backup: it held nothing to import."},
+  "backupRestoreImported": "Imported: {items}",
+  "@backupRestoreImported": {"description": "Restore a backup: what came in. {items} is a comma-separated list such as '2 cookbooks, 40 recipes', possibly followed by '(3 duplicates skipped)'.", "placeholders": {"items": {"type": "String", "example": "2 cookbooks, 40 recipes"}}},
+  "backupRestoreCookbooks": "{count, plural, =1{1 cookbook} other{{count} cookbooks}}",
+  "@backupRestoreCookbooks": {"description": "Restore a backup: part of the list in backupRestoreImported.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "backupRestoreRecipes": "{count, plural, =1{1 recipe} other{{count} recipes}}",
+  "@backupRestoreRecipes": {"description": "Restore a backup: part of the list in backupRestoreImported.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "backupRestoreShoppingLists": "{count, plural, =1{1 shopping list} other{{count} shopping lists}}",
+  "@backupRestoreShoppingLists": {"description": "Restore a backup: part of the list in backupRestoreImported.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "backupRestoreMealPlans": "{count, plural, =1{1 planned meal} other{{count} planned meals}}",
+  "@backupRestoreMealPlans": {"description": "Restore a backup: part of the list in backupRestoreImported. Meals planned in the meal planner.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "backupRestoreTags": "{count, plural, =1{1 tag} other{{count} tags}}",
+  "@backupRestoreTags": {"description": "Restore a backup: part of the list in backupRestoreImported.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "backupRestoreSkipped": "{count, plural, =1{(1 duplicate skipped)} other{({count} duplicates skipped)}}",
+  "@backupRestoreSkipped": {"description": "Restore a backup: recipes already in the library that were not added again. Follows the list in backupRestoreImported.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "importPreviewOwnExport": "{count, plural, =1{Recipe Spellbook export (1 recipe)} other{Recipe Spellbook export ({count} recipes)}}",
+  "@importPreviewOwnExport": {"description": "Import preview: where the recipes came from, for a JSON export of this app.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "barcodeNovaUnprocessed": "Unprocessed",
+  "@barcodeNovaUnprocessed": {"description": "Barcode result: NOVA group 1 (unprocessed or minimally processed food)."},
+  "barcodeNovaProcessedIngredients": "Processed ingredients",
+  "@barcodeNovaProcessedIngredients": {"description": "Barcode result: NOVA group 2 (processed culinary ingredients such as oil or sugar)."},
+  "barcodeNovaProcessedFood": "Processed food",
+  "@barcodeNovaProcessedFood": {"description": "Barcode result: NOVA group 3 (processed food)."},
+  "barcodeNovaUltraProcessed": "Ultra-processed",
+  "@barcodeNovaUltraProcessed": {"description": "Barcode result: NOVA group 4 (ultra-processed food)."},
+  "barcodeScoreUnknown": "Unknown",
+  "@barcodeScoreUnknown": {"description": "Barcode result: a NOVA group the app does not know."},
+  "barcodeNutriScoreExcellent": "Excellent",
+  "@barcodeNutriScoreExcellent": {"description": "Barcode result: Nutri-Score A."},
+  "barcodeNutriScoreGood": "Good",
+  "@barcodeNutriScoreGood": {"description": "Barcode result: Nutri-Score B."},
+  "barcodeNutriScoreAverage": "Average",
+  "@barcodeNutriScoreAverage": {"description": "Barcode result: Nutri-Score C."},
+  "barcodeNutriScorePoor": "Poor",
+  "@barcodeNutriScorePoor": {"description": "Barcode result: Nutri-Score D."},
+  "barcodeNutriScoreBad": "Bad",
+  "@barcodeNutriScoreBad": {"description": "Barcode result: Nutri-Score E."},
+  "barcodeAdditives": "Additives",
+  "@barcodeAdditives": {"description": "Barcode result: heading of the food additives section."},
+  "barcodeAdditivesFound": "{count} found",
+  "@barcodeAdditivesFound": {"description": "Barcode result: how many additives the product lists, beside the Additives heading.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "barcodeAdditivesCaution": "{count} caution",
+  "@barcodeAdditivesCaution": {"description": "Barcode result: how many of the additives call for caution.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "barcodeAdditivesModerate": "{count} moderate",
+  "@barcodeAdditivesModerate": {"description": "Barcode result: how many of the additives are of moderate concern.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "barcodeAdditiveNotInDatabase": "Not in database",
+  "@barcodeAdditiveNotInDatabase": {"description": "Barcode result: an additive the app has no information on."},
+  "shoppingSharedCanTick": "Shared list · you can tick items off, but not add or remove them",
+  "@shoppingSharedCanTick": {"description": "Shopping list banner: a list shared with you where you may tick items but not add or remove them."},
+  "shoppingSharedViewOnly": "Shared list · view only",
+  "@shoppingSharedViewOnly": {"description": "Shopping list banner: a list shared with you that you can only look at."},
+  "shoppingImportedItems": "{count, plural, =1{Imported 1 item} other{Imported {count} items}}",
+  "@shoppingImportedItems": {"description": "Shopping: a shopping list file was imported with this many items.", "placeholders": {"count": {"type": "int", "example": "3"}}},
+  "shoppingImportWrongFile": "This file is not a Recipe Spellbook shopping list export.",
+  "@shoppingImportWrongFile": {"description": "Shopping: the picked file is not a shopping list exported from this app."},
+  "groceryInstacartStores": "Costco, Publix, Safeway, Aldi, Sprouts and 1,500+ more stores",
+  "@groceryInstacartStores": {"description": "Order online sheet: stores reachable through Instacart (store names stay as they are)."},
+  "groceryKrogerStores": "Kroger, Fred Meyer, Ralphs, Harris Teeter and more",
+  "@groceryKrogerStores": {"description": "Order online sheet: stores reachable through Kroger (store names stay as they are)."},
+  "webImportBlocked": "The site blocked our request. Copy the recipe text and paste it instead.",
+  "@webImportBlocked": {"description": "Import from a link: the site refused the request (HTTP 401, 403, 451)."},
+  "webImportRateLimited": "The site is turning away requests for now. Try again in a minute.",
+  "@webImportRateLimited": {"description": "Import from a link: the site answered 429 (too many requests)."},
+  "webImportSiteError": "The site is having problems right now (HTTP {code}). Try again later.",
+  "@webImportSiteError": {"description": "Import from a link: the site answered with a server error (HTTP 5xx).", "placeholders": {"code": {"type": "int", "example": "503"}}},
+  "webImportHttpError": "The page could not be loaded (HTTP {code}).",
+  "@webImportHttpError": {"description": "Import from a link: the page did not load, with this HTTP status.", "placeholders": {"code": {"type": "int", "example": "503"}}},
+  "webImportNotAWebPage": "{kind, select, pdf{No recipe found: that link is a PDF, not a web page.} image{No recipe found: that link is an image, not a web page.} video{No recipe found: that link is a video, not a web page.} audio{No recipe found: that link is an audio file, not a web page.} zip{No recipe found: that link is a ZIP file, not a web page.} other{No recipe found: that link is a file, not a web page.}}",
+  "@webImportNotAWebPage": {"description": "Import from a link: the link is a file, not a web page. kind is pdf, image, video, audio, zip or other.", "placeholders": {"kind": {"type": "String", "example": "pdf"}}},
+  "webImportPageTooLarge": "No recipe found: that page is too large to read.",
+  "@webImportPageTooLarge": {"description": "Import from a link: the page is larger than the app reads."},
+  "webImportUnreadableEncoding": "That page uses a text encoding ({charset}) this app cannot read.",
+  "@webImportUnreadableEncoding": {"description": "Import from a link: the page is in a character set the app has no table for.", "placeholders": {"charset": {"type": "String", "example": "shift_jis"}}},
+  "webImportNoRecipeInVideo": "No recipe found in that video's description.",
+  "@webImportNoRecipeInVideo": {"description": "Import from a link: a YouTube page whose description holds no recipe."},
+  "webImportTimedOut": "The website took too long to respond. Try again later.",
+  "@webImportTimedOut": {"description": "Import from a link: the site did not answer in time."}
 }

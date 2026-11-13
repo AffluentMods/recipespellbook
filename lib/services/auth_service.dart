@@ -1,13 +1,37 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../utils/platform_utils.dart' show isDesktop, isWeb;
+import '../utils/platform_utils.dart' show isDesktop, isIOS, isWeb;
 import 'desktop_google_auth.dart'
     if (dart.library.html) 'desktop_google_auth_stub.dart';
+
+/// Why signing in, or deleting the account, did not work. The screens turn
+/// it into a message in the app's language.
+enum AuthError {
+  /// No connection to the server.
+  network,
+
+  /// The server took too long to answer.
+  timeout,
+
+  /// The server had a problem of its own (a 5xx answer).
+  server,
+
+  /// The provider or the server refused the sign-in.
+  signInFailed,
+
+  /// The sign-in handed over from another device is no longer valid.
+  transferExpired,
+
+  /// The account could not be deleted.
+  deleteFailed,
+}
 
 /// User model returned from the API after auth.
 class AuthUser {
@@ -70,7 +94,7 @@ class AuthState {
   final AuthUser? user;
   final String? jwt;
   final bool isLoading;
-  final String? error;
+  final AuthError? error;
 
   const AuthState({
     this.user,
@@ -89,7 +113,7 @@ class AuthState {
     AuthUser? user,
     String? jwt,
     bool? isLoading,
-    String? error,
+    AuthError? error,
   }) => AuthState(
     user: user ?? this.user,
     jwt: jwt ?? this.jwt,
@@ -114,7 +138,10 @@ class AuthService {
 
   final _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    // This device only: the sign-in is not carried to another iPhone by a
+    // backup. Items saved before with first_unlock still read (reads do not
+    // ask for an accessibility), and move over when they are next written.
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
     // The macOS app is ad-hoc signed with no keychain-access-groups
     // entitlement, so the data protection keychain (the plugin default)
     // refuses every write with -34018. The login keychain works there.
@@ -201,42 +228,60 @@ class AuthService {
   // ════════════════════════════════════════════
 
   /// Call once at app startup (in main.dart or splash screen).
-  /// Restores saved session from secure storage.
+  /// Restores saved session from secure storage. Never throws: when the
+  /// session cannot be read this run starts signed out.
+  ///
+  /// The saved session is only deleted when the server says the token is no
+  /// longer valid (401 or 403). An unreachable server, a server error, a rate
+  /// limit or a storage that cannot be read keeps it for the next start.
   Future<AuthState> initialize() async {
+    String? jwt;
+    String? userJson;
     try {
-      final jwt = await _storage.read(key: _keyJwt);
-      final userJson = await _storage.read(key: _keyUser);
-
-      if (jwt != null && userJson != null) {
-        final savedUser = AuthUser.fromJson(jsonDecode(userJson));
-
-        // Validate the JWT is still good by calling the API
-        final result = await _refreshUser(jwt);
-        if (result.user != null) {
-          // Server confirmed the JWT is valid — use refreshed user data
-          _currentJwt = jwt;
-          _currentUser = result.user;
-          await _saveUser(result.user!);
-          return AuthState(user: result.user, jwt: jwt);
-        }
-
-        if (!result.reachable) {
-          // Network unreachable — use saved session (offline-friendly)
-          debugPrint('[Auth] Offline — using saved session for ${savedUser.displayName}');
-          _currentJwt = jwt;
-          _currentUser = savedUser;
-          return AuthState(user: savedUser, jwt: jwt);
-        }
-
-        // Server responded but JWT is expired/invalid — clear session
-        await _clearStorage();
-      }
+      jwt = await _storage.read(key: _keyJwt);
+      userJson = await _storage.read(key: _keyUser);
     } catch (e) {
-      debugPrint('Auth init error: $e');
-      await _clearStorage();
+      // A Linux desktop without an unlocked keyring, or a macOS keychain
+      // prompt that was refused. What is stored may read next time.
+      debugPrint('[Auth] Could not read the saved session: $e');
+      return const AuthState.initial();
+    }
+    if (jwt == null) return const AuthState.initial();
+
+    AuthUser? savedUser;
+    if (userJson != null) {
+      try {
+        savedUser = AuthUser.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
+      } catch (e) {
+        debugPrint('[Auth] The saved account could not be read: $e');
+      }
     }
 
-    return const AuthState.initial();
+    // Validate the JWT is still good by calling the API
+    final result = await _refreshUser(jwt);
+    final user = result.user;
+    if (user != null) {
+      // Server confirmed the JWT is valid: use the refreshed user data.
+      _currentJwt = jwt;
+      _currentUser = user;
+      await _bestEffort('save the account', () => _saveUser(user));
+      // Moves a token saved before the iOS accessibility change to it.
+      if (isIOS) await _bestEffort('save the token', () => _storage.write(key: _keyJwt, value: jwt));
+      return AuthState(user: user, jwt: jwt);
+    }
+
+    if (result.rejected) {
+      // The server says the token is expired or revoked.
+      await _clearStorage();
+      return const AuthState.initial();
+    }
+
+    // Offline, or the server could not answer: keep the saved session.
+    if (savedUser == null) return const AuthState.initial();
+    debugPrint('[Auth] Server not reachable: using the saved session');
+    _currentJwt = jwt;
+    _currentUser = savedUser;
+    return AuthState(user: savedUser, jwt: jwt);
   }
 
   // ════════════════════════════════════════════
@@ -305,7 +350,8 @@ class AuthService {
       }
 
       if (idToken == null) {
-        return AuthState(error: 'Failed to get Google ID token');
+        debugPrint('[Auth] Google gave no ID token');
+        return const AuthState(error: AuthError.signInFailed);
       }
 
       // Exchange with our API (mobile only — desktop/web return earlier)
@@ -316,8 +362,18 @@ class AuthService {
       );
     } catch (e) {
       debugPrint('Google sign-in error: $e');
-      return AuthState(error: 'Google sign-in failed: ${_friendlyError(e)}');
+      // Closing the account picker is a cancel, not a failure.
+      if (e is PlatformException && e.code == GoogleSignIn.kSignInCanceledError) {
+        return const AuthState.initial();
+      }
+      return AuthState(error: _errorFor(e));
     }
+  }
+
+  /// Stops a desktop Google sign-in that is waiting for the browser. The
+  /// sign-in then ends as if the user had cancelled it.
+  Future<void> cancelGoogleSignIn() async {
+    if (isDesktop) await DesktopGoogleAuth.cancel();
   }
 
   // ════════════════════════════════════════════
@@ -348,7 +404,7 @@ class AuthService {
       if (e.toString().contains('canceled') || e.toString().contains('cancelled')) {
         return const AuthState.initial();
       }
-      return AuthState(error: 'Apple sign-in failed: ${_friendlyError(e)}');
+      return AuthState(error: _errorFor(e));
     }
   }
 
@@ -387,22 +443,21 @@ class AuthService {
     try {
       // Validate the JWT is still good
       final result = await _refreshUser(token);
-      if (result.user != null) {
+      final user = result.user;
+      if (user != null) {
         _currentJwt = token;
-        _currentUser = result.user;
-        await _storage.write(key: _keyJwt, value: token);
-        await _saveUser(result.user!);
-        await _storage.write(key: _keyProvider, value: 'transfer');
-        return AuthState(user: result.user, jwt: token);
+        _currentUser = user;
+        await _persistSession(token, user, 'transfer');
+        return AuthState(user: user, jwt: token);
       }
 
       // JWT expired — build a user from the bundle info anyway?
       // No — if the token is dead, don't pretend we're signed in.
-      debugPrint('[Auth] Transfer token is expired or invalid');
-      return const AuthState(error: 'Transfer sign-in failed — token expired');
+      debugPrint('[Auth] Transfer token could not be confirmed (rejected: ${result.rejected})');
+      return AuthState(error: result.rejected ? AuthError.transferExpired : (result.error ?? AuthError.network));
     } catch (e) {
       debugPrint('[Auth] restoreFromTransfer error: $e');
-      return AuthState(error: 'Transfer sign-in failed: ${_friendlyError(e)}');
+      return AuthState(error: _errorFor(e));
     }
   }
 
@@ -468,7 +523,9 @@ class AuthService {
           createdAt: _currentUser?.createdAt,
         );
         _currentUser = updated;
-        await _saveUser(updated);
+        // The server has the change; a keychain that refuses the write
+        // (macOS) must not make it look as if it had failed.
+        await _bestEffort('save the account', () => _saveUser(updated));
         return updated;
       }
 
@@ -537,34 +594,28 @@ class AuthService {
         // Save everything
         _currentJwt = jwt;
         _currentUser = user;
-        await _storage.write(key: _keyJwt, value: jwt);
-        await _saveUser(user);
-        await _storage.write(key: _keyProvider, value: provider);
+        await _persistSession(jwt, user, provider);
 
         return AuthState(user: user, jwt: jwt);
       }
 
-      // Parse error message from API
-      String errorMsg = 'Sign-in failed';
-      try {
-        final data = jsonDecode(response.body);
-        errorMsg = data['message'] ?? data['error'] ?? errorMsg;
-      } catch (_) {}
-
-      return AuthState(error: errorMsg);
+      // The server's own text is English and for us: log it, show ours.
+      debugPrint('[Auth] Sign-in refused (${response.statusCode}): ${response.body}');
+      return AuthState(error: response.statusCode >= 500 ? AuthError.server : AuthError.signInFailed);
     } catch (e) {
-      final msg = e.toString();
-      if (msg.contains('SocketException') || msg.contains('Failed to fetch') || msg.contains('NetworkError')) {
-        return const AuthState(error: 'No internet connection');
-      }
-      return AuthState(error: 'Sign-in failed: ${_friendlyError(e)}');
+      debugPrint('[Auth] Sign-in exchange failed: $e');
+      return AuthState(error: _errorFor(e));
     }
   }
 
   /// Refresh user data from the API using existing JWT.
-  /// Returns ({AuthUser? user, bool reachable}) to distinguish
-  /// "JWT expired" (reachable=true, user=null) from "offline" (reachable=false).
-  Future<({AuthUser? user, bool reachable})> _refreshUser(String jwt) async {
+  ///
+  /// `rejected` is true only when the server said the token is no longer
+  /// valid (401 or 403): then the session is over. Anything else without a
+  /// user (offline, a timeout, a 5xx or Cloudflare 52x answer, a 429, an
+  /// answer that is not the account) means the server could not confirm it
+  /// right now, and `error` says why.
+  Future<({AuthUser? user, bool rejected, AuthError? error})> _refreshUser(String jwt) async {
     try {
       final uri = Uri.parse('$_apiBaseUrl/v1/auth/me');
       final response = await http.get(
@@ -575,23 +626,21 @@ class AuthService {
         },
       ).timeout(const Duration(seconds: 10));
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final userJson = data['user'] as Map<String, dynamic>? ?? data;
-        return (user: AuthUser.fromJson(userJson), reachable: true);
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        return (user: null, rejected: true, error: null);
       }
-
-      // Server responded but JWT is invalid/expired
-      return (user: null, reachable: true);
+      if (response.statusCode != 200) {
+        debugPrint('[Auth] /me answered ${response.statusCode}: keeping the session');
+        return (user: null, rejected: false, error: response.statusCode >= 500 ? AuthError.server : AuthError.network);
+      }
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final userJson = data['user'] as Map<String, dynamic>? ?? data;
+      return (user: AuthUser.fromJson(userJson), rejected: false, error: null);
     } catch (e) {
-      final msg = e.toString();
-      if (msg.contains('SocketException') || msg.contains('Failed to fetch') || msg.contains('NetworkError')) {
-        debugPrint('Refresh user failed: no internet');
-        return (user: null, reachable: false);
-      }
-      debugPrint('Refresh user failed: $e');
-      // Timeout or other network error — treat as unreachable
-      return (user: null, reachable: false);
+      // Offline, a timeout, or a 200 whose body is not the account (an
+      // error page from a proxy): the server did not confirm the token.
+      debugPrint('[Auth] Refresh user failed: $e');
+      return (user: null, rejected: false, error: _errorFor(e));
     }
   }
 
@@ -632,37 +681,70 @@ class AuthService {
     await _storage.write(key: _keyUser, value: jsonEncode(user.toJson()));
   }
 
+  /// Keeps a new session for the next start. Best-effort: when the keychain
+  /// refuses (a macOS prompt that was denied, a locked Linux keyring) the
+  /// user stays signed in for this run and signs in again next time.
+  Future<void> _persistSession(String jwt, AuthUser user, String provider) async {
+    await _bestEffort('save the token', () => _storage.write(key: _keyJwt, value: jwt));
+    await _bestEffort('save the account', () => _saveUser(user));
+    await _bestEffort('save the provider', () => _storage.write(key: _keyProvider, value: provider));
+  }
+
+  /// Runs a secure storage call that may fail without ending the session.
+  Future<void> _bestEffort(String what, Future<void> Function() call) async {
+    try {
+      await call();
+    } catch (e) {
+      debugPrint('[Auth] Could not $what: $e');
+    }
+  }
+
+  /// Forgets the saved session. Never throws: a storage that cannot be
+  /// written must not keep the app from starting or signing out.
   Future<void> _clearStorage() async {
-    await _storage.delete(key: _keyJwt);
-    await _storage.delete(key: _keyUser);
-    await _storage.delete(key: _keyProvider);
+    for (final key in [_keyJwt, _keyUser, _keyProvider]) {
+      await _bestEffort('delete $key', () => _storage.delete(key: key));
+    }
     // Note: _keyLastBoundUserId is NOT cleared — it persists across sign-outs
     // so we can detect account switches on the next sign-in.
   }
 
   // ── Account tracking ──
 
-  /// Get the last user ID that signed in on this device.
+  /// Get the last user ID that signed in on this device, or null when there
+  /// is none or it cannot be read.
   /// Used to detect account switches and manage per-account sync state.
   Future<String?> getLastBoundUserId() async {
-    return await _storage.read(key: _keyLastBoundUserId);
+    try {
+      return await _storage.read(key: _keyLastBoundUserId);
+    } catch (e) {
+      debugPrint('[Auth] Could not read the last account: $e');
+      return null;
+    }
   }
 
   /// Save the current user's ID. Persists across sign-outs so we can
-  /// detect account switches on the next sign-in.
-  Future<void> saveLastBoundUserId(String userId) async {
-    await _storage.write(key: _keyLastBoundUserId, value: userId);
-  }
+  /// detect account switches on the next sign-in. Best-effort.
+  Future<void> saveLastBoundUserId(String userId) =>
+      _bestEffort('save the last account', () => _storage.write(key: _keyLastBoundUserId, value: userId));
 
-  String _friendlyError(dynamic e) {
+  /// Forgets which account last used this device ("Delete all data").
+  Future<void> forgetLastBoundUserId() =>
+      _bestEffort('delete the last account', () => _storage.delete(key: _keyLastBoundUserId));
+
+  /// The [AuthError] for an exception from a sign-in or a request.
+  static AuthError _errorFor(Object e) {
+    if (e is TimeoutException) return AuthError.timeout;
     final msg = e.toString();
-    if (msg.contains('SocketException') || msg.contains('HandshakeException')) {
-      return 'No internet connection';
+    if (msg.contains('TimeoutException')) return AuthError.timeout;
+    if (e is http.ClientException ||
+        msg.contains('SocketException') ||
+        msg.contains('HandshakeException') ||
+        msg.contains('Failed to fetch') ||
+        msg.contains('NetworkError') ||
+        msg.contains('network_error')) {
+      return AuthError.network;
     }
-    if (msg.contains('TimeoutException')) {
-      return 'Connection timed out';
-    }
-    // Strip Flutter exception prefixes
-    return msg.replaceFirst('Exception: ', '').replaceFirst('PlatformException', 'Error');
+    return AuthError.signInFailed;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'revenuecat_stub.dart' if (dart.library.io) 'revenuecat_native.dart';
 import '../utils/platform_utils.dart' show supportsRevenueCatSdk;
 
@@ -176,11 +177,20 @@ class RevenueCatService {
 
   bool _initialized = false;
   SubscriptionTier _currentTier = SubscriptionTier.free;
+
+  /// What the store says (RevenueCat), and what the account on the server
+  /// says (a Stripe purchase, a tier granted by the server). The tier in use
+  /// is the higher of the two, so neither can take away what the other gave.
+  SubscriptionTier _storeTier = SubscriptionTier.free;
+  SubscriptionTier _backendTier = SubscriptionTier.free;
   bool _isCancelled = false;
   DateTime? _expirationDate;
   final _listeners = <void Function(SubscriptionTier)>[];
 
   SubscriptionTier get currentTier => _currentTier;
+
+  /// The tier the store's purchases alone give (free without the SDK).
+  SubscriptionTier get storeTier => _storeTier;
   bool get isCancelled => _isCancelled;
   DateTime? get expirationDate => _expirationDate;
   bool get isInitialized => _initialized;
@@ -240,7 +250,7 @@ class RevenueCatService {
       Purchases.addCustomerInfoUpdateListener(_onCustomerInfoUpdated);
 
       _initialized = true;
-      debugPrint('[RevenueCat] Initialized for user: $userId');
+      debugPrint('[RevenueCat] Initialized (signed in: ${userId != null})');
 
       // Sync initial state
       await refreshStatus();
@@ -267,7 +277,7 @@ class RevenueCatService {
     try {
       final result = await Purchases.logIn(userId);
       _syncFromCustomerInfo(result.customerInfo);
-      debugPrint('[RevenueCat] Logged in as: $userId');
+      debugPrint('[RevenueCat] Logged in');
     } catch (e) {
       debugPrint('[RevenueCat] Login failed: $e');
     }
@@ -286,19 +296,29 @@ class RevenueCatService {
   }
 
   /// Update tier from the backend user profile. The backend tier is a
-  /// FALLBACK/FLOOR — it can UPGRADE the tier (e.g. a web purchase the store SDK
-  /// can't see) but must NEVER downgrade a tier RevenueCat already verified from
-  /// the store. Otherwise a stale backend 'free' knocks a real purchase back to
-  /// free on every cold start (until the user taps Restore). Take the higher.
+  /// FLOOR next to the store's: it can UPGRADE the tier (e.g. a web purchase
+  /// the store SDK can't see) but never takes away a purchase RevenueCat
+  /// verified from the store, and a later store update (Restore, a late
+  /// customer-info event) never takes away the backend's. Take the higher.
   void setTierFromBackend(String? backendTier) {
-    final backend = SubscriptionTier.fromBackendString(backendTier);
-    final resolved = backend.index > _currentTier.index ? backend : _currentTier;
+    _backendTier = SubscriptionTier.fromBackendString(backendTier);
+    _resolveTier();
+  }
+
+  /// The tier in use: the higher of the store's and the backend's.
+  void _resolveTier() {
+    final resolved = _backendTier.index > _storeTier.index ? _backendTier : _storeTier;
     if (resolved != _currentTier) {
+      debugPrint('[RevenueCat] Tier: store=$_storeTier backend=$_backendTier, now $resolved');
       _currentTier = resolved;
-      debugPrint('[RevenueCat] Tier from backend: backend=$backend → resolved=$resolved');
       _notifyListeners();
     }
   }
+
+  /// Test hook: what the store reports (RevenueCat's customer-info JSON), as
+  /// a customer-info update would.
+  @visibleForTesting
+  void debugSyncFromCustomerInfo(Map<String, dynamic> json) => _syncFromCustomerInfo(CustomerInfo.fromJson(json));
 
   /// Manually set tier (for testing or admin override).
   void setTier(SubscriptionTier tier) {
@@ -311,6 +331,8 @@ class RevenueCatService {
   /// Reset to free tier.
   void reset() {
     _currentTier = SubscriptionTier.free;
+    _storeTier = SubscriptionTier.free;
+    _backendTier = SubscriptionTier.free;
     _isCancelled = false;
     _expirationDate = null;
     _notifyListeners();
@@ -418,7 +440,9 @@ class RevenueCatService {
     }
   }
 
-  /// Restore previous purchases.
+  /// Restore previous purchases. Returns the tier in use afterwards. Throws
+  /// when the store could not be asked, so the caller can say so instead of
+  /// "no purchases found" (see [isNetworkError]).
   Future<SubscriptionTier> restorePurchases() async {
     if (!supportsRevenueCatSdk) return _currentTier;
     try {
@@ -427,8 +451,30 @@ class RevenueCatService {
       return _currentTier;
     } catch (e) {
       debugPrint('[RevenueCat] Restore failed: $e');
-      return _currentTier;
+      rethrow;
     }
+  }
+
+  /// Whether [e], from a RevenueCat call, means the store or RevenueCat
+  /// could not be reached.
+  static bool isNetworkError(Object e) {
+    if (e is PurchasesErrorCode) {
+      return e == PurchasesErrorCode.networkError || e == PurchasesErrorCode.offlineConnectionError;
+    }
+    if (e is PlatformException) {
+      try {
+        final code = PurchasesErrorHelper.getErrorCode(e);
+        if (code == PurchasesErrorCode.networkError || code == PurchasesErrorCode.offlineConnectionError) {
+          return true;
+        }
+      } catch (_) {/* not a numeric RevenueCat code */}
+    }
+    final msg = e.toString();
+    return msg.contains('NETWORK_ERROR') ||
+        msg.contains('NetworkError') ||
+        msg.contains('OFFLINE_CONNECTION_ERROR') ||
+        msg.contains('OfflineConnectionError') ||
+        msg.contains('SocketException');
   }
 
   // ── Internal ──
@@ -438,7 +484,6 @@ class RevenueCatService {
   }
 
   void _syncFromCustomerInfo(CustomerInfo info) {
-    final oldTier = _currentTier;
     final entitlements = info.entitlements.active;
     // Products are ONE-TIME LIFETIME purchases, so a bought product stays in
     // this list forever. Detection is deliberately lenient: there is effectively
@@ -458,11 +503,11 @@ class RevenueCatService {
 
     if (entitlements.containsKey(RCConfig.familyEntitlement) ||
         owned.contains(RCConfig.familyLifetimeId)) {
-      _currentTier = SubscriptionTier.family; // grandfathered legacy family buyers
+      _storeTier = SubscriptionTier.family; // grandfathered legacy family buyers
     } else if (entitlements.isNotEmpty || ownsPaid) {
-      _currentTier = SubscriptionTier.premium;
+      _storeTier = SubscriptionTier.premium;
     } else {
-      _currentTier = SubscriptionTier.free;
+      _storeTier = SubscriptionTier.free;
     }
 
     // Get cancellation/expiry info from the highest active entitlement
@@ -479,10 +524,9 @@ class RevenueCatService {
       _expirationDate = null;
     }
 
-    if (_currentTier != oldTier) {
-      debugPrint('[RevenueCat] Tier changed: $oldTier → $_currentTier');
-      _notifyListeners();
-    }
+    // A Stripe-bought or server-granted plan the store does not know about
+    // stays: the tier is the higher of this and the backend's.
+    _resolveTier();
   }
 
   String? _packagePeriod(PackageType type) {

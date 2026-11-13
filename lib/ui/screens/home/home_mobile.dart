@@ -23,6 +23,7 @@ import '../../../utils/planned_servings.dart' show plannedRecipeLocation;
 import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../../utils/week_start.dart';
 import '../../widgets/app_controls.dart';
 import '../../widgets/backup_reminder_banner.dart';
 import '../../widgets/new_cookbook_chooser.dart';
@@ -64,8 +65,15 @@ class MobileHome extends ConsumerStatefulWidget {
 
 class _MobileHomeState extends ConsumerState<MobileHome> {
   /// The add button shows its label at the top of the page and folds to an
-  /// icon once the user scrolls into the content.
-  bool _fabExtended = true;
+  /// icon once the user scrolls into the content. Only the button listens:
+  /// folding it must not rebuild the dashboard in the middle of a scroll.
+  final _fabExtended = ValueNotifier<bool>(true);
+
+  @override
+  void dispose() {
+    _fabExtended.dispose();
+    super.dispose();
+  }
 
   String _greeting(AppLocalizations l10n) {
     final h = DateTime.now().hour;
@@ -78,9 +86,7 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
     if (n.metrics.axis != Axis.vertical) return false;
     final extend =
         n.direction == ScrollDirection.forward || n.metrics.pixels < 40;
-    if (n.direction != ScrollDirection.idle && extend != _fabExtended) {
-      setState(() => _fabExtended = extend);
-    }
+    if (n.direction != ScrollDirection.idle) _fabExtended.value = extend;
     return false;
   }
 
@@ -199,9 +205,19 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
           ],
         ];
 
+        // A short, fixed set of sections, all built up front and kept while
+        // scrolling. A lazy list dropped the ones scrolled out of view and
+        // rebuilt them on the way back at their loading height (zero, or a
+        // placeholder), so they grew a frame later and pushed the scroll
+        // position against the finger.
         return NotificationListener<UserScrollNotification>(
           onNotification: _onScroll,
-          child: ListView(padding: EdgeInsets.zero, children: children),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
+          ),
         );
       },
     );
@@ -211,11 +227,14 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
       body: body,
       floatingActionButton: recipes.isEmpty
           ? null
-          : AccentFab(
-              icon: Icons.add_rounded,
-              extended: _fabExtended,
-              label: l10n.recipeAdd,
-              onPressed: () => showNewRecipeDialog(context, cookbookId),
+          : ValueListenableBuilder<bool>(
+              valueListenable: _fabExtended,
+              builder: (context, extended, _) => AccentFab(
+                icon: Icons.add_rounded,
+                extended: extended,
+                label: l10n.recipeAdd,
+                onPressed: () => showNewRecipeDialog(context, cookbookId),
+              ),
             ),
     );
   }
@@ -663,6 +682,34 @@ class _WeekPanel extends ConsumerStatefulWidget {
 class _WeekPanelState extends ConsumerState<_WeekPanel> {
   int _day = 0;
 
+  /// The week's meals, watched from one stream for the life of the panel.
+  /// Made in build, every rebuild started a new stream that answered empty
+  /// first, so the panel shrank and grew again.
+  late DateTime _today;
+  late Stream<List<MealPlanWithRecipe>> _week;
+
+  @override
+  void initState() {
+    super.initState();
+    _watchWeek();
+  }
+
+  @override
+  void didUpdateWidget(covariant _WeekPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Left open past midnight: follow the new day.
+    final now = DateTime.now();
+    if (DateTime(now.year, now.month, now.day) != _today) _watchWeek();
+  }
+
+  void _watchWeek() {
+    final now = DateTime.now();
+    _today = DateTime(now.year, now.month, now.day);
+    _week = ref
+        .read(mealPlanDaoProvider)
+        .watchMealPlansWithRecipesForRange(_today, addDays(_today, 7));
+  }
+
   void _openPlanner(DateTime date) {
     ref.read(selectedPlannerDateProvider.notifier).state = date;
     context.go('/planner');
@@ -672,11 +719,11 @@ class _WeekPanelState extends ConsumerState<_WeekPanel> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = context.appColors;
-    final dao = ref.watch(mealPlanDaoProvider);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = _today;
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final selectedDate = today.add(Duration(days: _day));
+    // Calendar days: `add(Duration(days: n))` adds 24 hour periods, which
+    // put a meal in the wrong cell around a daylight saving change.
+    final selectedDate = addDays(today, _day);
 
     return _Panel(
       title: l10n.homeNextSevenDays,
@@ -686,19 +733,11 @@ class _WeekPanelState extends ConsumerState<_WeekPanel> {
         onPressed: () => _openPlanner(today),
       ),
       child: StreamBuilder<List<MealPlanWithRecipe>>(
-        stream: dao.watchMealPlansWithRecipesForRange(
-          today,
-          today.add(const Duration(days: 7)),
-        ),
+        stream: _week,
         builder: (context, snapshot) {
           final byDay = <int, List<MealPlanWithRecipe>>{};
           for (final p in snapshot.data ?? const <MealPlanWithRecipe>[]) {
-            final d = p.mealPlan.date;
-            final idx = DateTime(
-              d.year,
-              d.month,
-              d.day,
-            ).difference(today).inDays;
+            final idx = calendarDaysBetween(today, p.mealPlan.date);
             if (idx >= 0 && idx < 7) byDay.putIfAbsent(idx, () => []).add(p);
           }
           final meals = byDay[_day] ?? const <MealPlanWithRecipe>[];
@@ -715,7 +754,7 @@ class _WeekPanelState extends ConsumerState<_WeekPanel> {
                   for (var i = 0; i < 7; i++)
                     Expanded(
                       child: _DayCell(
-                        date: today.add(Duration(days: i)),
+                        date: addDays(today, i),
                         locale: locale,
                         isToday: i == 0,
                         selected: i == _day,
@@ -1011,6 +1050,18 @@ class _ShoppingPanel extends ConsumerStatefulWidget {
 class _ShoppingPanelState extends ConsumerState<_ShoppingPanel> {
   String? _listId;
 
+  /// The list's items, one stream per list rather than a new one per build.
+  Stream<List<ShoppingListItem>>? _items;
+  String? _itemsListId;
+
+  Stream<List<ShoppingListItem>> _itemsOf(String listId) {
+    if (_items == null || _itemsListId != listId) {
+      _itemsListId = listId;
+      _items = ref.read(shoppingDaoProvider).watchItemsInList(listId);
+    }
+    return _items!;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1039,7 +1090,6 @@ class _ShoppingPanelState extends ConsumerState<_ShoppingPanel> {
         ref.watch(shoppingListsProvider).valueOrNull ?? const <ShoppingList>[];
     final listId = _listId;
     final list = lists.where((l) => l.id == listId).firstOrNull;
-    final dao = ref.watch(shoppingDaoProvider);
 
     return _Panel(
       title: list?.name ?? l10n.navShopping,
@@ -1051,7 +1101,7 @@ class _ShoppingPanelState extends ConsumerState<_ShoppingPanel> {
       child: listId == null
           ? const SizedBox(height: 80)
           : StreamBuilder<List<ShoppingListItem>>(
-              stream: dao.watchItemsInList(listId),
+              stream: _itemsOf(listId),
               builder: (context, snapshot) {
                 final unchecked = (snapshot.data ?? const <ShoppingListItem>[])
                     .where((i) => !i.isChecked)
@@ -1089,7 +1139,9 @@ class _ShoppingPanelState extends ConsumerState<_ShoppingPanel> {
                         item: item,
                         onCheck: () {
                           HapticFeedback.lightImpact();
-                          dao.toggleItemChecked(item.id, true);
+                          ref
+                              .read(shoppingDaoProvider)
+                              .toggleItemChecked(item.id, true);
                         },
                       ),
                     if (unchecked.length > shown)

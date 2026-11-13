@@ -211,10 +211,15 @@ class CommunityPublicationUpdater {
     final job = await _pipeline.prepare(
       recipes: [...recipes, ...extras],
       title: pub.title,
-      includeImages: snapshot?.includeImages ?? true,
+      // What it was published with. One from before snapshots has photos
+      // only if the server counts some: a text-only cookbook stays text only.
+      includeImages: snapshot?.includeImages ?? pub.imageCount > 0,
+      // The choice made when publishing; off when it was never made.
+      includeNotes: snapshot?.includeNotes ?? false,
       kind: 'cookbook',
       sourceId: cookbook.id,
       coverPath: cookbook.imagePath,
+      coverCloudPath: cookbook.imageServerPath,
       sourceName: cookbook.name,
       externalRecipeIds: external.toList(),
       includedExternalIds: included,
@@ -328,15 +333,22 @@ class CommunityPublicationUpdater {
         token: token,
         l10n: l10n,
         republishPublicationId: check.publication.id,
+        // A renamed cookbook renames the publication only while its title
+        // is still the cookbook's old name.
+        publishedTitle: check.publication.title,
         onProgress: progress,
       );
       control._current = null;
 
       if (result.success) {
-        if (result.renamed) {
-          updated.add(title);
-        } else {
+        if (!result.renamed) {
           failed.add((title: title, reason: l10n.publicationsUpdateAllNameNotSaved));
+        } else if (result.photosDropped > 0) {
+          // Live, but without photos the server did not keep: the next
+          // update sends them again.
+          failed.add((title: title, reason: l10n.communityPublishPhotosDropped(result.photosDropped)));
+        } else {
+          updated.add(title);
         }
         continue;
       }

@@ -11,7 +11,6 @@ import 'utils/share_handler_stub.dart' if (dart.library.io) 'package:share_handl
 import 'l10n/app_localizations.dart';
 import 'utils/invite_link_parser.dart';
 import 'utils/platform_utils.dart';
-import 'utils/pending_deep_link.dart';
 import 'utils/widget_links.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cookbook_provider.dart';
@@ -19,6 +18,7 @@ import 'providers/database_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'providers/sync_provider.dart';
+import 'router/link_navigation.dart';
 import 'router/router.dart';
 import 'ui/shell/desktop_title_bar.dart';
 import 'ui/widgets/command_palette.dart';
@@ -40,6 +40,7 @@ import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/screens/import/video_import_ui.dart';
 import 'ui/widgets/app_shortcuts.dart';
+import 'ui/widgets/new_recipe_dialog.dart' show friendlyImportError;
 
 /// Scroll behaviour: touch, stylus and trackpad drag-scroll everywhere. A
 /// MOUSE only drags on phones/tablets — on desktop and web a mouse drag must
@@ -278,11 +279,16 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     WidgetsBinding.instance.addObserver(this);
     // Delay to avoid modifying providers during widget tree build
     WidgetsBinding.instance.addPostFrameCallback((_) => _initServices());
-    // The home screen widgets use the app's language: redraw them when it
-    // changes.
+    // The home screen widgets and the Android notification channel use the
+    // app's language: update them when it changes (or is first loaded).
     ref.listenManual(
       settingsProvider.select((s) => s.languageCode),
-      (_, _) => HomeWidgetService.instance.scheduleRefresh(),
+      (_, languageCode) {
+        HomeWidgetService.instance.scheduleRefresh();
+        if (supportsFirebaseMessaging) {
+          NotificationService.instance.localizeChannels(languageCode);
+        }
+      },
     );
   }
 
@@ -294,27 +300,37 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     // 1. Wire services to database
     final db = ref.read(databaseProvider);
-    SyncService.instance.setDatabase(db);
-    TransferService.instance.setDatabase(db);
-    CollabService.instance.setDatabase(db);
-    CollabService.instance.load();
-    // Photos saved before an iOS update point into the old app folder:
-    // point them at the same files in the current one. Not awaited.
-    PhotoPathRepair.run(db).catchError((Object e) {
-      debugPrint('[PhotoPathRepair] failed: $e');
-      return 0;
-    });
-    // Home screen widgets: first snapshot now, then whenever meals or the
-    // shopping list change. Not awaited: the widgets can wait for auth.
-    if (HomeWidgetService.isSupported) {
-      HomeWidgetService.instance.start(
-        db,
-        languageCode: () => ref.read(settingsProvider).languageCode,
-      );
+    try {
+      SyncService.instance.setDatabase(db);
+      TransferService.instance.setDatabase(db);
+      CollabService.instance.setDatabase(db);
+      CollabService.instance.load();
+      // Photos saved before an iOS update point into the old app folder:
+      // point them at the same files in the current one. Not awaited.
+      PhotoPathRepair.run(db).catchError((Object e) {
+        debugPrint('[PhotoPathRepair] failed: $e');
+        return 0;
+      });
+      // Home screen widgets: first snapshot now, then whenever meals or the
+      // shopping list change. Not awaited: the widgets can wait for auth.
+      if (HomeWidgetService.isSupported) {
+        HomeWidgetService.instance.start(
+          db,
+          languageCode: () => ref.read(settingsProvider).languageCode,
+        );
+      }
+    } catch (e) {
+      debugPrint('[Init] Wiring services failed: $e');
     }
 
-    // 2. Restore auth session (must be first — determines signed-in state)
-    await ref.read(authProvider.notifier).initialize();
+    // 2. Restore auth session (must be first: it decides the signed-in state).
+    //    It settles on signed out when the keychain cannot be read; a failure
+    //    here must still let every later step run.
+    try {
+      await ref.read(authProvider.notifier).initialize();
+    } catch (e) {
+      debugPrint('[Init] Auth restore failed: $e');
+    }
 
     // 3. Remove splash screen — show the app while the rest loads in background.
     // Unguarded: on web this removes the static HTML splash overlay from
@@ -414,19 +430,10 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     return WidgetLinks.routeFor(uri) ?? InviteLinkParser.parseUri(uri)?.route;
   }
 
-  void _navigateToLinkTarget(String target) {
-    // On cold start the splash navigates Home when its intro finishes, which
-    // would clobber a push here. While the splash owns navigation, hand it the
-    // target (it opens it on top of Home); once warm, navigate directly.
-    if (splashActive) {
-      pendingDeepLink = target;
-    } else if (WidgetLinks.isTabRoute(target)) {
-      // A main tab (from a home screen widget) is switched to, not stacked.
-      router.go(target);
-    } else {
-      router.push(target);
-    }
-  }
+  // On cold start the splash navigates Home when its intro finishes, which
+  // would clobber a push here: openLinkTarget hands it the target while it
+  // owns navigation. Notification taps go the same way.
+  void _navigateToLinkTarget(String target) => openLinkTarget(target);
 
   /// Initialize subscription + notifications in background (non-blocking).
   /// These don't need to complete before the user sees the app.
@@ -512,6 +519,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     final cookbookAsync = ref.read(selectedCookbookProvider);
     final cookbookId = cookbookAsync.valueOrNull?.id ?? 'starter';
+    final l10n = AppLocalizations.of(nav.context)!;
 
     // Show loading overlay
     showDialog(
@@ -530,8 +538,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
                 children: [
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
-                  Text('Scanning ${imagePaths.length} image${imagePaths.length > 1 ? 's' : ''}...',
-                    style: const TextStyle(fontWeight: FontWeight.w500)),
+                  Text(l10n.importingRecipe, style: const TextStyle(fontWeight: FontWeight.w500)),
                 ],
               ),
             ),
@@ -547,10 +554,11 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       if (nav.canPop()) nav.pop();
 
       if (ocrResult.isEmpty) {
-        if (nav.context.mounted) {
-          ScaffoldMessenger.of(nav.context).showSnackBar(
-            const SnackBar(
-              content: Text('No text found in the shared image. Try a clearer photo or paste text instead.'),
+        final ctx = nav.context;
+        if (ctx.mounted) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(
+              content: Text(l10n.scanNoTextImage),
               backgroundColor: Colors.orange,
             ),
           );
@@ -574,10 +582,11 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       );
     } catch (e) {
       if (nav.canPop()) nav.pop();
-      if (nav.context.mounted) {
-        ScaffoldMessenger.of(nav.context).showSnackBar(
+      final ctx = nav.context;
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(
-            content: Text('Failed to scan image: ${e.toString().replaceFirst("Exception: ", "")}'),
+            content: Text(l10n.failedToImport(e.toString().replaceFirst("Exception: ", ""))),
             backgroundColor: Colors.red,
           ),
         );
@@ -680,12 +689,12 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       // Dismiss loading dialog
       if (nav.canPop()) nav.pop();
 
-      // Show error snackbar
+      // Show error snackbar: why, in the user's language.
       final ctx = nav.context;
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(
-            content: Text(l10n.failedToImport(e.toString().replaceFirst("Exception: ", ""))),
+            content: Text(friendlyImportError(e, l10n)),
             backgroundColor: Colors.red,
           ),
         );

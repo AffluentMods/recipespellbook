@@ -47,7 +47,7 @@ class RecipeKeeperImporter {
   /// Check if ZIP contents look like a Recipe Keeper export.
   static bool canHandle(Uint8List bytes) {
     try {
-      return _pageIn(ZipDecoder().decodeBytes(bytes)) != null;
+      return _pageIn(ZipDecoder().decodeBytes(bytes), BoundedUnzip.forArchive(bytes.length)) != null;
     } catch (_) {
       return false;
     }
@@ -56,17 +56,17 @@ class RecipeKeeperImporter {
   /// The page of the export in [archive]: recipes.html, in a folder or not,
   /// or index.html. Other archives hold pages of those names too, so the page
   /// must also read like one of Recipe Keeper's.
-  static String? _pageIn(Archive archive) {
+  static String? _pageIn(Archive archive, BoundedUnzip unzip) {
     for (final file in archive.files) {
       if (!file.isFile) continue;
       final name = file.name.toLowerCase();
       if (name != 'recipes.html' && name != 'index.html' && !name.endsWith('/recipes.html')) {
         continue;
       }
-      try {
-        final content = ImportSupport.decodeText(file.content as List<int>);
-        if (looksLikeExport(content)) return content;
-      } catch (_) {}
+      final bytes = unzip.tryBytesOf(file);
+      if (bytes == null) continue;
+      final content = ImportSupport.decodeText(bytes);
+      if (looksLikeExport(content)) return content;
     }
     return null;
   }
@@ -80,13 +80,13 @@ class RecipeKeeperImporter {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException(
-          'This Recipe Keeper file is damaged or incomplete. Export it again and retry.');
+      throw const FileImportException.damaged('Recipe Keeper');
     }
 
-    final page = _pageIn(archive);
+    final unzip = BoundedUnzip.forArchive(bytes.length);
+    final page = _pageIn(archive, unzip);
     if (page == null) return [];
-    return importHtml(page, filename, photo: ImportSupport.photosIn(archive));
+    return importHtml(page, filename, photo: ImportSupport.photosIn(archive, unzip));
   }
 
   /// Parse the page of a Recipe Keeper export: the recipes.html inside the

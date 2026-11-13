@@ -25,6 +25,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/device_data_wiper.dart';
 import '../../../services/export_import_service.dart';
 import '../../../services/share_file.dart';
 import '../../../services/family_service.dart';
@@ -979,7 +980,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           }
           return;
         }
-        settingsNotifier?.resetToDefaults();
+        // The preferences are cleared already; this resets what the
+        // running app holds (the web build does not restart).
+        await settingsNotifier?.resetToDefaults();
       } else {
         await db.deleteLocalRecipeData();
         await SyncService.instance.clearLastSyncAt();
@@ -1101,13 +1104,21 @@ class _TierBadge extends ConsumerWidget {
 enum _ResetScope { local, all }
 
 /// "Delete all data": the account on the server first, then everything on
-/// this device. When there is an account and it could not be deleted
-/// (offline, a server error), nothing is deleted and this says false: wiping
-/// the device and quitting would leave the cloud account and its data
-/// behind while the app said they were gone.
-Future<bool> deleteAccountThenData(AppDatabase db) async {
+/// this device: the database, the photos, every setting and what is kept
+/// in preferences (pantry, cook history, Kitchen Buddy...), and the Kroger
+/// connection (see [DeviceDataWiper]). When there is an account and it
+/// could not be deleted (offline, a server error), nothing is deleted and
+/// this says false: wiping the device and quitting would leave the cloud
+/// account and its data behind while the app said they were gone.
+///
+/// [documentsDir] and [sharedDocuments] are for tests (see
+/// [DeviceDataWiper.wipe]).
+Future<bool> deleteAccountThenData(AppDatabase db, {String? documentsDir, bool? sharedDocuments}) async {
   if (AuthService.instance.isSignedIn && !await AuthService.instance.deleteAccount()) return false;
+  final photos = await DeviceDataWiper.photoPaths(db);
+  // Throws (and rolls back) before anything else is touched.
   await db.deleteAllUserData();
+  await DeviceDataWiper.wipe(photoPaths: photos, documentsDir: documentsDir, sharedDocuments: sharedDocuments);
   return true;
 }
 

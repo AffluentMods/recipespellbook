@@ -266,7 +266,7 @@ void main() {
         'Images/Apple Crisp.JPG': big,
         'images/chili.png': other,
         'Images/tiny.jpg': [1, 2, 3],
-      })));
+      })), BoundedUnzip());
       expect(photo('apple crisp.jpg'), big);
       expect(photo('Images/Apple Crisp.JPG'), big);
       expect(photo(r'C:\Photos\APPLE CRISP.jpg'), big);

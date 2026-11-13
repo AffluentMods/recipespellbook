@@ -104,16 +104,10 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     // Listen for tab changes to pre-fill manual from auto-calculated
     _tabController.addListener(_onTabChanged);
 
-    // Pre-fill manual entry with existing nutrition if available
+    // Pre-fill manual entry with existing nutrition if available. The
+    // fields hold one serving; what is stored may be the recipe's total.
     if (widget.existingNutrition != null) {
-      final n = widget.existingNutrition!;
-      _caloriesController.text = n.calories?.round().toString() ?? '';
-      _proteinController.text = n.protein?.round().toString() ?? '';
-      _carbsController.text = n.carbohydrates?.round().toString() ?? '';
-      _fatController.text = n.fat?.round().toString() ?? '';
-      _fiberController.text = n.fiber?.round().toString() ?? '';
-      _sugarController.text = n.sugar?.round().toString() ?? '';
-      _sodiumController.text = n.sodium?.round().toString() ?? '';
+      _fillManualFields(widget.existingNutrition!.perServingOf(_servingsCount), onlyEmpty: false);
     }
 
 // NOTE: _calculateNutrition() moved to didChangeDependencies
@@ -129,32 +123,33 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     }
   }
 
+  /// The recipe's servings as a count, as the calculator and the recipe
+  /// page read them. Null when the text has no number.
+  int? get _servingsCount => servingsCountOf(widget.servings);
+
+  /// Puts [perServing] into the manual fields. With [onlyEmpty] a field the
+  /// person already filled in keeps its value.
+  void _fillManualFields(NutritionData perServing, {required bool onlyEmpty}) {
+    void fill(TextEditingController controller, double? value) {
+      if (onlyEmpty && (controller.text.isNotEmpty || value == null)) return;
+      controller.text = value?.round().toString() ?? '';
+    }
+
+    fill(_caloriesController, perServing.calories);
+    fill(_proteinController, perServing.protein);
+    fill(_carbsController, perServing.carbohydrates);
+    fill(_fatController, perServing.fat);
+    fill(_fiberController, perServing.fiber);
+    fill(_sugarController, perServing.sugar);
+    fill(_sodiumController, perServing.sodium);
+  }
+
   /// When switching to manual tab, pre-fill with auto-calculated values
   void _onTabChanged() {
     if (_tabController.index == 1 && _result != null) {
-      // Switching to manual tab - pre-fill from auto-calculated if fields are empty
-      final n = _result!.totalNutrition;
-      if (_caloriesController.text.isEmpty && n.calories != null) {
-        _caloriesController.text = n.calories!.round().toString();
-      }
-      if (_proteinController.text.isEmpty && n.protein != null) {
-        _proteinController.text = n.protein!.round().toString();
-      }
-      if (_carbsController.text.isEmpty && n.carbohydrates != null) {
-        _carbsController.text = n.carbohydrates!.round().toString();
-      }
-      if (_fatController.text.isEmpty && n.fat != null) {
-        _fatController.text = n.fat!.round().toString();
-      }
-      if (_fiberController.text.isEmpty && n.fiber != null) {
-        _fiberController.text = n.fiber!.round().toString();
-      }
-      if (_sugarController.text.isEmpty && n.sugar != null) {
-        _sugarController.text = n.sugar!.round().toString();
-      }
-      if (_sodiumController.text.isEmpty && n.sodium != null) {
-        _sodiumController.text = n.sodium!.round().toString();
-      }
+      // Switching to manual tab: the empty fields get one serving of the
+      // auto-calculated result.
+      _fillManualFields(_result!.perServingNutrition, onlyEmpty: true);
     }
   }
 
@@ -241,9 +236,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       }
       final linkedRecipe = selectedLinkInfo.recipe;
 
-      // Parse the linked recipe's stored nutrition JSON
-      // NOTE: nutritionJson stores the TOTAL recipe nutrition (not per-serving),
-      // regardless of whether calculatedServings is present.
+      // Parse the linked recipe's stored nutrition JSON: the recipe's total
+      // when calculatedServings is set, one serving when it is not.
       NutritionData? storedNutrition;
       if (linkedRecipe.nutritionJson != null) {
         try {
@@ -254,7 +248,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         }
       }
 
-      // Parse the linked recipe's servings (for display only)
+      // The linked recipe's servings: one serving times this count is the
+      // whole linked recipe.
       final linkedServings = servingsCountOf(linkedRecipe.servings) ?? 1;
 
       // Get scale: user override > DB-stored scale > 1.0
@@ -263,10 +258,10 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       // Store DB default scale for dialog display
       _dbDefaultScales[ingredient.name] = selectedLinkInfo.scale;
 
-      // storedNutrition is the TOTAL recipe nutrition, but
-      // LinkedRecipeNutrition.perServingNutrition expects per-serving.
-      // Divide by the linked recipe's serving count to get per-serving.
-      final perServing = storedNutrition?.scaled(1.0 / linkedServings);
+      // LinkedRecipeNutrition.perServingNutrition is one serving: a stored
+      // total is divided by the linked recipe's servings, one serving
+      // entered by hand is used as it is.
+      final perServing = storedNutrition?.perServingOf(linkedServings);
 
       linkedNutritionMap[ingredient.name] = LinkedRecipeNutrition(
         recipeId: linkedRecipe.id,
@@ -842,7 +837,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         case MatchStatus.uncertain:
           icon = Icons.help;
           color = orangeColor;
-          statusText = '${item.usdaFood?.description ?? item.matchDescription ?? ''} (${l10n.nutritionUncertain})';
+          final check = item.amountNotWeighed ? l10n.nutriSheetAmountNotWeighed : l10n.nutritionUncertain;
+          statusText = '${item.usdaFood?.description ?? item.matchDescription ?? ''} ($check)';
           break;
         case MatchStatus.notFound:
           icon = Icons.cancel;
@@ -852,7 +848,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         case MatchStatus.error:
           icon = Icons.error;
           color = redColor;
-          statusText = item.errorMessage ?? l10n.errorGeneric;
+          // The calculator's message is the error in English, for the log.
+          statusText = l10n.nutriSheetLookupFailed;
           break;
         case MatchStatus.linkedRecipe:
           icon = Icons.check_circle;
@@ -1022,8 +1019,18 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Main nutrients
-              heading(l10n.nutritionMainNutrients),
+              // Main nutrients. Every field is for one serving.
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: heading(l10n.nutritionMainNutrients)),
+                  const SizedBox(width: Space.sm),
+                  Text(
+                    l10n.nutritionPerServing,
+                    style: theme.textTheme.labelMedium?.copyWith(color: c.textSecondary),
+                  ),
+                ],
+              ),
               _buildManualField(l10n.nutritionCalories, _caloriesController, l10n.unitKcal),
               pair(
                 _buildManualField(l10n.nutritionProtein, _proteinController, 'g'),
@@ -1054,20 +1061,10 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     );
   }
 
-  /// Copy values from auto-calculated to manual fields
+  /// Copy one serving of the auto-calculated result to the manual fields
   void _copyFromAutoCalculated() {
     if (_result == null) return;
-    final n = _result!.totalNutrition;
-
-    setState(() {
-      _caloriesController.text = n.calories?.round().toString() ?? '';
-      _proteinController.text = n.protein?.round().toString() ?? '';
-      _carbsController.text = n.carbohydrates?.round().toString() ?? '';
-      _fatController.text = n.fat?.round().toString() ?? '';
-      _fiberController.text = n.fiber?.round().toString() ?? '';
-      _sugarController.text = n.sugar?.round().toString() ?? '';
-      _sodiumController.text = n.sodium?.round().toString() ?? '';
-    });
+    setState(() => _fillManualFields(_result!.perServingNutrition, onlyEmpty: false));
   }
 
   Widget _buildManualField(String label, TextEditingController controller, String unit) {
@@ -1088,6 +1085,9 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     );
   }
 
+  /// What the manual fields hold, which is one serving, in the form it is
+  /// stored in: the recipe's total with its servings, like a calculated
+  /// result.
   NutritionData? _getManualNutrition() {
     final calories = double.tryParse(_caloriesController.text);
     final protein = double.tryParse(_proteinController.text);
@@ -1102,7 +1102,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       return null;
     }
 
-    return NutritionData(
+    final perServing = NutritionData(
       calories: calories,
       protein: protein,
       carbohydrates: carbs,
@@ -1111,6 +1111,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       sugar: sugar,
       sodium: sodium,
     );
+    return NutritionData.storedFromPerServing(perServing, _servingsCount);
   }
 
   // ============ BOTTOM ACTIONS ============
@@ -1153,9 +1154,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
                     } else if (_result != null) {
                       // Store TOTAL nutrition with calculatedServings metadata
                       // so display can correctly scale when servings change
-                      final servingsCount = servingsCountOf(widget.servings) ?? 1;
                       final total = _result!.totalNutrition.copyWith(
-                        calculatedServings: servingsCount,
+                        calculatedServings: _servingsCount ?? 1,
                       );
                       Navigator.pop(context, total);
                     }
@@ -1747,13 +1747,14 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
         .firstOrNull?.recipe;
   }
 
-  /// Get scaled nutrition for preview
+  /// What the ingredient takes of the selected recipe: its whole nutrition
+  /// at the chosen scale, also when one serving was entered by hand.
   NutritionData? get _scaledNutrition {
     final recipe = _selectedRecipe;
     if (recipe == null) return null;
     final nutrition = _parseNutrition(recipe);
     if (nutrition == null) return null;
-    return nutrition.scaled(_scale);
+    return nutrition.totalOf(servingsCountOf(recipe.servings)).scaled(_scale);
   }
 
   void _showCustomScaleInput() {
@@ -2047,10 +2048,10 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                         ),
                         const SizedBox(height: 12),
                         if (hasNutrition) ...[
-                          _nutritionPreviewRow(theme, 'Calories', '${scaledNutrition.calories?.round() ?? 0}', 'kcal'),
-                          _nutritionPreviewRow(theme, 'Protein', '${scaledNutrition.protein?.round() ?? 0}', 'g'),
-                          _nutritionPreviewRow(theme, 'Fat', '${scaledNutrition.fat?.round() ?? 0}', 'g'),
-                          _nutritionPreviewRow(theme, 'Carbs', '${scaledNutrition.carbohydrates?.round() ?? 0}', 'g'),
+                          _nutritionPreviewRow(theme, l10n.nutritionCalories, '${scaledNutrition.calories?.round() ?? 0}', l10n.unitKcal),
+                          _nutritionPreviewRow(theme, l10n.nutritionProtein, '${scaledNutrition.protein?.round() ?? 0}', 'g'),
+                          _nutritionPreviewRow(theme, l10n.nutritionFat, '${scaledNutrition.fat?.round() ?? 0}', 'g'),
+                          _nutritionPreviewRow(theme, l10n.nutritionCarbs, '${scaledNutrition.carbohydrates?.round() ?? 0}', 'g'),
                         ] else
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -2103,7 +2104,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                       }),
                       _scaleChip(
                         theme,
-                        _isCustomScale ? '${_scale}x' : 'Custom',
+                        _isCustomScale ? '${_scale}x' : l10n.scaleCustom,
                         _isCustomScale,
                         _showCustomScaleInput,
                       ),

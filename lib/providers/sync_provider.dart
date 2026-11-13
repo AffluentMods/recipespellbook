@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cookbook_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../services/collab_service.dart';
+import '../services/home_widget_snapshot.dart' show shoppingLastListPrefKey;
 import '../services/sync_service.dart';
 
 // ════════════════════════════════════════════
@@ -173,14 +175,32 @@ class SyncNotifier extends StateNotifier<SyncState> {
     CollabService.instance.syncNow();
   }
 
-  /// Follow a cookbook that moved to a new id (see SyncService re-keying).
+  /// Follow a cookbook or shopping list that moved to a new id (see
+  /// SyncService re-keying).
   void _onRekey(SyncRekey r) {
+    if (r.entity == 'shoppingLists') {
+      unawaited(_followList(r));
+      return;
+    }
     if (r.entity != 'cookbooks') return;
     if (_ref.read(selectedCookbookIdProvider) == r.from) {
       _ref.read(selectedCookbookIdProvider.notifier).state = r.to;
     }
     if (_ref.read(settingsProvider).currentCookbookId == r.from) {
       _ref.read(settingsProvider.notifier).setCurrentCookbook(r.to);
+    }
+  }
+
+  /// The shopping list last open (the Shopping tab and the home screen
+  /// widget open it again) follows its list to the new id.
+  Future<void> _followList(SyncRekey r) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getString(shoppingLastListPrefKey) == r.from) {
+        await prefs.setString(shoppingLastListPrefKey, r.to);
+      }
+    } catch (e) {
+      debugPrint('[Sync] Could not follow a moved list: $e');
     }
   }
 
@@ -228,11 +248,13 @@ class SyncNotifier extends StateNotifier<SyncState> {
     }
 
     if (!_hasCloudSync) {
+      // Not in the plan: the screens say so in the user's language.
       state = state.copyWith(
         status: SyncStatus.error,
         error: 'Upgrade to Cloud Sync to enable syncing',
+        notEntitled: true,
       );
-      return const SyncResult.failure('Cloud Sync required');
+      return const SyncResult.failure('Cloud Sync required', notEntitled: true);
     }
 
     state = state.copyWith(status: SyncStatus.syncing, error: null);

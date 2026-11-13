@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../utils/platform_utils.dart';
+import '../../../utils/step_image_files.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -464,7 +465,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   bool get _hasUnsavedChanges =>
       _initialCaptured && _editSnapshot() != _initialSnapshot;
 
-  /// Our published discard guard, if any (desktop / large-tablet in-shell only).
+  /// Our published discard guard (see initState).
   DiscardGuard? _registeredGuard;
 
   /// Returns true when it's safe to leave this editor: nothing changed, or the
@@ -501,17 +502,17 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   void initState() {
     super.initState();
     _loadRecipe();
-    // On desktop / large tablet the editor lives inside the shell, so a
-    // sidebar / rail / command-palette / shortcut `context.go()` can unmount it
-    // WITHOUT firing PopScope. Publish a guard those paths await. Phones push
-    // the editor full-screen, where PopScope already covers the only exit.
-    if (!isMobile) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _registeredGuard = _confirmDiscardIfNeeded;
-        ref.read(unsavedEditorGuardProvider.notifier).state = _registeredGuard;
-      });
-    }
+    // Wherever the shell shows its navigation beside the editor (the desktop
+    // sidebar and the tablet rail, chosen by window width, so iPads and
+    // Android tablets too), a sidebar / rail / command-palette / shortcut
+    // `context.go()` can unmount it WITHOUT firing PopScope. Publish a guard
+    // those paths await. Always: whether there is a sidebar depends on the
+    // width, which can change while the editor is open, not on the platform.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _registeredGuard = _confirmDiscardIfNeeded;
+      ref.read(unsavedEditorGuardProvider.notifier).state = _registeredGuard;
+    });
   }
 
   @override
@@ -1327,13 +1328,24 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       // uploaded BEFORE anything is written: the old steps used to be deleted
       // first, so a slow or failed upload left the recipe without them.
       final stepRows = <StepsCompanion>[];
+      final documentsDir = _steps.any((s) => s.imagePath != null)
+          ? (await getApplicationDocumentsDirectory()).path
+          : '';
       for (var i = 0; i < _steps.length; i++) {
         final step = _steps[i];
         if (step.instruction.trim().isNotEmpty) {
-          // Copy step image to permanent location if it's a temp file
+          // A picked photo (a temp file) is copied into the step photo folder
+          // under a name of its own; one already kept there stays as it is.
           String? stepImagePath = step.imagePath;
-          if (stepImagePath != null && (!_isEditing || !stepImagePath.contains('images/steps'))) {
-            stepImagePath = await _copyStepImage(stepImagePath, recipeId, i);
+          if (stepImagePath != null &&
+              !ImageService.isServerPath(stepImagePath) &&
+              !stepImagePath.startsWith('http')) {
+            stepImagePath = await keepStepImage(
+              stepImagePath,
+              documentsDir: documentsDir,
+              recipeId: recipeId,
+              copyKept: !_isEditing,
+            );
           }
           final stepServerPath = await _stepServerPathFor(stepImagePath);
           stepRows.add(StepsCompanion.insert(
@@ -1499,21 +1511,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     } catch (e) { return null; }
   }
 
-  Future<String?> _copyStepImage(String sourcePath, String recipeId, int stepIndex) async {
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final ext = p.extension(sourcePath);
-      final filename = 'step_${recipeId}_$stepIndex$ext';
-      final destPath = p.join(dir.path, 'images', 'steps', filename);
-      final destFile = File(destPath);
-      await destFile.parent.create(recursive: true);
-      await File(sourcePath).copy(destPath);
-      return destPath;
-    } catch (e) {
-      return sourcePath; // Return original path if copy fails
-    }
-  }
-
   /// Copy a picked/cropped main recipe image out of the OS temp/cache dir into
   /// permanent app-documents storage so it survives after the picker's temp
   /// file is evicted. Returns the new permanent path, or null on failure.
@@ -1646,22 +1643,18 @@ class _ImprovedNutritionSectionState extends State<ImprovedNutritionSection> {
       );
     }
 
-    final nutrition = widget.nutrition!;
     final servings = widget.servingsCount > 0 ? widget.servingsCount : 1;
+    // Stored as the recipe's total or, entered by hand before 2.1.1, as one
+    // serving: read both ways the recipe page reads them.
+    final perServing = widget.nutrition!.perServingOf(servings);
+    final total = widget.nutrition!.totalOf(servings);
+    final shown = _showPerServing ? perServing : total;
 
     // Calculate display values based on toggle
-    final displayCalories = _showPerServing
-        ? nutrition.calories
-        : (nutrition.calories ?? 0) * servings;
-    final displayProtein = _showPerServing
-        ? nutrition.protein
-        : (nutrition.protein ?? 0) * servings;
-    final displayCarbs = _showPerServing
-        ? nutrition.carbohydrates
-        : (nutrition.carbohydrates ?? 0) * servings;
-    final displayFat = _showPerServing
-        ? nutrition.fat
-        : (nutrition.fat ?? 0) * servings;
+    final displayCalories = shown.calories ?? (_showPerServing ? null : 0);
+    final displayProtein = shown.protein ?? (_showPerServing ? null : 0);
+    final displayCarbs = shown.carbohydrates ?? (_showPerServing ? null : 0);
+    final displayFat = shown.fat ?? (_showPerServing ? null : 0);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1676,8 +1669,8 @@ class _ImprovedNutritionSectionState extends State<ImprovedNutritionSection> {
           // Header with all 3 values summary
           _NutritionSummaryHeader(
             servingsCount: servings,
-            totalCalories: (nutrition.calories ?? 0) * servings,
-            caloriesPerServing: nutrition.calories ?? 0,
+            totalCalories: total.calories ?? 0,
+            caloriesPerServing: perServing.calories ?? 0,
             theme: theme,
           ),
 
@@ -1739,8 +1732,8 @@ class _ImprovedNutritionSectionState extends State<ImprovedNutritionSection> {
             const Divider(),
             const SizedBox(height: 12),
             _ExpandedNutritionInfo(
-              nutrition: nutrition,
-              multiplier: _showPerServing ? 1.0 : servings.toDouble(),
+              nutrition: shown,
+              multiplier: 1.0,
               theme: theme,
               l10n: l10n,
             ),

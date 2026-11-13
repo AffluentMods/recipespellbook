@@ -17,4 +17,6 @@ class DesktopGoogleAuth {
   }) async {
     throw UnsupportedError('Desktop Google Auth is not available on web');
   }
+
+  static Future<void> cancel() async {}
 }

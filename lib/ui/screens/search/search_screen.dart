@@ -194,6 +194,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   /// Desktop: the result shown in the preview pane.
   String? _previewId;
 
+  /// Whether the shared query has been set to this screen's own (the one it
+  /// opened with, else empty). Until then the provider can still hold the
+  /// query of an earlier visit, whose results must not show under an empty
+  /// box.
+  bool _querySynced = false;
+
   @override
   void initState() {
     super.initState();
@@ -201,9 +207,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (initial != null && initial.isNotEmpty) {
       _controller.text = initial;
     }
+    // A provider cannot be written while the tree builds: on the next frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (initial != null) ref.read(searchQueryProvider.notifier).state = initial;
+      ref.read(searchQueryProvider.notifier).state = _controller.text;
+      setState(() => _querySynced = true);
       _focusNode.requestFocus();
     });
   }
@@ -218,8 +226,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final resultsAsync = ref.watch(searchResultsProvider);
-    final query = ref.watch(searchQueryProvider);
+    final resultsAsync = _querySynced
+        ? ref.watch(searchResultsProvider)
+        : const AsyncValue<List<Recipe>>.data([]);
+    final query = _querySynced ? ref.watch(searchQueryProvider) : _controller.text;
 
     if (Responsive.isDesktopLayout(context)) {
       return _buildDesktop(context, query, resultsAsync);
@@ -263,7 +273,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (Responsive.useTwoPane(context)) {
         setState(() => _previewId = r.id);
       } else {
-        dao.updateLastViewed(r.id);
         context.pushNamed('recipe', pathParameters: {'id': r.id});
       }
     }
@@ -395,7 +404,6 @@ class _RecentlyViewed extends ConsumerWidget {
               key: ValueKey(r.id),
               recipe: r,
               onTap: () {
-                ref.read(recipeDaoProvider).updateLastViewed(r.id);
                 context.pushNamed('recipe', pathParameters: {'id': r.id});
               },
             ),
@@ -701,7 +709,6 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
                         if (_isSelecting) {
                           _toggleSelection(recipe.id);
                         } else {
-                          ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
                           context.pushNamed('recipe', pathParameters: {'id': recipe.id});
                         }
                       },
@@ -807,10 +814,7 @@ class _SearchResultCard extends ConsumerWidget {
         color: isSelected ? c.selectedFill : Colors.transparent,
         borderRadius: Radii.lgAll,
         child: InkWell(
-          onTap: onTap ?? () {
-            ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
-            context.pushNamed('recipe', pathParameters: {'id': recipe.id});
-          },
+          onTap: onTap ?? () => context.pushNamed('recipe', pathParameters: {'id': recipe.id}),
           onLongPress: onLongPress ?? () => _showRecipeActions(context, ref, recipe),
           borderRadius: Radii.lgAll,
           child: Padding(

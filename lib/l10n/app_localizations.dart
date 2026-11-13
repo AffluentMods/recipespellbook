@@ -10435,6 +10435,24 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to delete \"{name}\"?'**
   String cookbookDeleteConfirmNamed(String name);
 
+  /// Menu item and dialog title for a cookbook someone else shares with you: stop being a member instead of deleting it.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave cookbook'**
+  String get cookbookLeave;
+
+  /// Confirmation before leaving a shared cookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave \"{name}\"? It goes from this device, and the owner keeps every recipe in it. To get it back, ask for a new invite.'**
+  String cookbookLeaveConfirm(String name);
+
+  /// Shown when leaving a shared cookbook did not reach the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not leave the cookbook. Check your connection and try again.'**
+  String get cookbookLeaveFailed;
+
   /// No description provided for @shareCookbook.
   ///
   /// In en, this message translates to:
@@ -11284,7 +11302,7 @@ abstract class AppLocalizations {
   /// No description provided for @mealPlanThisWeekend.
   ///
   /// In en, this message translates to:
-  /// **'This Weekend'**
+  /// **'This weekend'**
   String get mealPlanThisWeekend;
 
   /// No description provided for @menuKitchenBuddy.
@@ -13554,6 +13572,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your recipes are synced, but some photos can\'t upload right now. They keep trying on their own.'**
   String get syncPhotosStuckDetail;
+
+  /// Cloud Sync settings, under Sync now: the last sync could not send edits made to cookbooks someone else shares with you.
+  ///
+  /// In en, this message translates to:
+  /// **'Your edits to shared cookbooks have not gone out yet. The next sync sends them.'**
+  String get syncHealthSharedPush;
+
+  /// Cloud Sync settings, under Sync now: the last sync could not fetch the cookbooks and lists shared with you.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared cookbooks and lists could not be updated. The next sync tries again.'**
+  String get syncHealthSharedPull;
+
+  /// Cloud Sync settings, under Sync now: the last sync could not sync the pantry.
+  ///
+  /// In en, this message translates to:
+  /// **'The pantry did not sync. The next sync tries again.'**
+  String get syncHealthPantry;
 
   /// No description provided for @syncSuccess.
   ///
@@ -19639,6 +19675,30 @@ abstract class AppLocalizations {
   /// **'Notifications are off for Recipe Spellbook. Turn them on in your device settings.'**
   String get notifPermissionDenied;
 
+  /// Shown when notifications were allowed but the device got no push token (for example the Push setup is missing), so the switch stays off.
+  ///
+  /// In en, this message translates to:
+  /// **'This device could not be registered for notifications. Try again later.'**
+  String get notifPushUnavailable;
+
+  /// Google or Apple sign-in, or the server, refused the sign-in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in failed. Please try again.'**
+  String get signInFailed;
+
+  /// A transfer from another device carried a sign-in that the server no longer accepts.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in from your other device has expired. Sign in again on this device.'**
+  String get signInTransferExpired;
+
+  /// After a store purchase that went through but is not confirmed yet (for example a pending payment), so the plan is still Free.
+  ///
+  /// In en, this message translates to:
+  /// **'Your purchase is being processed. Premium unlocks as soon as the store confirms it.'**
+  String get paywallPurchasePending;
+
   /// No description provided for @syncNotInPlan.
   ///
   /// In en, this message translates to:
@@ -22020,6 +22080,1098 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No ingredient was recognized'**
   String get bulkNutritionNoMatch;
+
+  /// Shown after the first Android back press on Home; a second press within two seconds closes the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Press back again to exit'**
+  String get pressBackAgainToExit;
+
+  /// Quick date pick in Add to meal plan on a Saturday or Sunday: next week's Saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Next weekend'**
+  String get mealPlanNextWeekend;
+
+  /// Under "Also add to meal plan" when the recipe is already planned. The placeholder is a day (Today, Tomorrow, Sat, Nov 14), or recipe names each with their day.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in your meal plan: {when}'**
+  String shoppingAlreadyPlanned(String when);
+
+  /// Button in the Community recipe preview that opens the whole recipe.
+  ///
+  /// In en, this message translates to:
+  /// **'View full recipe'**
+  String get communityPreviewViewFullRecipe;
+
+  /// A span of days in the planner, both ends included: under the week's title, and under Add week to shopping list and Clear this week. The placeholders are short dates such as Nov 10.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String plannerDateRange(String start, String end);
+
+  /// Body of the Clear this week? dialog in the planner. The placeholders are the first and last day of the week, short dates such as Nov 10.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove all meals planned from {start} to {end}. This cannot be undone.'**
+  String clearWeekRangeWarning(String start, String end);
+
+  /// Delete list dialog for a shopping list shared with other people. The placeholder is how many people it is shared with.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This list is shared with 1 person. Deleting it stops syncing for everyone.} other{This list is shared with {count} people. Deleting it stops syncing for everyone.}}'**
+  String shoppingDeleteSharedListConfirm(int count);
+
+  /// Under a recipe in What can I make?: the pantry items it uses, separated by commas.
+  ///
+  /// In en, this message translates to:
+  /// **'From your pantry: {items}'**
+  String pantryCookFromPantry(String items);
+
+  /// One line of the tooltip on From your pantry in What can I make?: a recipe's ingredient and the pantry item that covers it.
+  ///
+  /// In en, this message translates to:
+  /// **'{ingredient}: {items}'**
+  String pantryCookLineFrom(String ingredient, String items);
+
+  /// Tooltip of the stop button on a running timer in cooking mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop timer'**
+  String get cookingStopTimer;
+
+  /// Tooltip of a one-tap timer under a cooking mode step, for a time the step names. The placeholder is the time, such as 10 min.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a {duration} timer'**
+  String cookingStartTimerFor(String duration);
+
+  /// A length of time under a minute, as a cooking mode timer shows it.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sec'**
+  String durationSeconds(int count);
+
+  /// No description provided for @notifChannelCookingTimers.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking timers'**
+  String get notifChannelCookingTimers;
+
+  /// No description provided for @notifChannelCookingTimersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When a timer in cooking mode finishes'**
+  String get notifChannelCookingTimersDesc;
+
+  /// Snackbar on a creator's profile when following or unfollowing did not go through.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change who you follow. Check your connection and try again.'**
+  String get communityFollowFailed;
+
+  /// On the publish screen once published: some photos were in a format the device cannot read (HEIC or AVIF) and were left out. The recipe titles follow in a list.
+  ///
+  /// In en, this message translates to:
+  /// **'Some photos are in a format this device cannot read (such as HEIC), so they were left out of:'**
+  String get communityPublishPhotosUnsupported;
+
+  /// Switch on the Community publish screen: also publish the notes the person wrote on their recipes. Off by default.
+  ///
+  /// In en, this message translates to:
+  /// **'Include my notes'**
+  String get communityPublishIncludeNotes;
+
+  /// Under the "Include my notes" switch on the publish screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish the notes you wrote on each recipe. Your own star ratings are never published.'**
+  String get communityPublishIncludeNotesSubtitle;
+
+  /// Body of the confirmation before Update all in My Publications. Each publication is updated with the photo and notes choices it was published with.
+  ///
+  /// In en, this message translates to:
+  /// **'Each one gets the recipes from its cookbook on this device. Photos go only to the ones published with photos, and your notes only where you chose to include them. Ratings and downloads are kept.'**
+  String get publicationsUpdateAllConfirmBody;
+
+  /// Snackbar after updating a published cookbook from the publish screen: the recipes went in but the edited title, description or tags did not.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipes were updated, but the new title, description or tags were not saved. Try again from My Publications.'**
+  String get communityRepublishDetailsNotSaved;
+
+  /// On the publish screen when updating a publication whose title, description and tags could not be loaded: those fields are locked and kept as they are.
+  ///
+  /// In en, this message translates to:
+  /// **'The publication\'s title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.'**
+  String get communityRepublishDetailsUnavailable;
+
+  /// Error when saving a Community or shared recipe into a cookbook did not work (for example offline).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the recipe. Check your connection and try again.'**
+  String get communitySaveRecipeFailed;
+
+  /// A Community recipe that was removed, unpublished or put under review since it was shown.
+  ///
+  /// In en, this message translates to:
+  /// **'This recipe is no longer available in the Community.'**
+  String get communityRecipeNoLongerAvailable;
+
+  /// Shown with a Retry button when a Community page (feed, cookbook, recipe, My Publications) could not load.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this. Check your connection and try again.'**
+  String get communityLoadFailed;
+
+  /// In the update sheet of a downloaded Community cookbook whose publication was unpublished, removed or put under review.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.'**
+  String get cookbookUpdateSourceGone;
+
+  /// Saving picked recipes of a Community cookbook found that the creator changed it since it was shown; it is reloaded so the person can pick again.
+  ///
+  /// In en, this message translates to:
+  /// **'The creator just changed this cookbook. Check your selection and try again.'**
+  String get communityDownloadSelectionChanged;
+
+  /// Error when a report of Community content did not go through (the person is signed in).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the report. Check your connection and try again.'**
+  String get communityReportFailed;
+
+  /// After a one-time share link was made: some photos were left out because they took too long to upload.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{The link leaves out 1 photo that took too long to upload.} other{The link leaves out {count} photos that took too long to upload.}}'**
+  String shareLinkPhotosLeftOut(int count);
+
+  /// Title of the dialog when a recipe share link could not be made.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the link'**
+  String get shareLinkFailedTitle;
+
+  /// Body of the dialog when a recipe share link could not be made; the buttons are Retry and Share as text.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again, or share the recipe as text instead.'**
+  String get shareLinkFailedBody;
+
+  /// Button in the dialog when a share link could not be made: share the recipe as text instead.
+  ///
+  /// In en, this message translates to:
+  /// **'Share as text'**
+  String get shareLinkShareAsText;
+
+  /// Error when a cookbook is too large to send as a one-time share link.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is too big for a one-time link. Share its recipes one at a time, or post the cookbook to the Community.'**
+  String get shareCookbookTooLarge;
+
+  /// Nutrition sheet, in brackets after an ingredient whose food was found but whose amount or unit could not be turned into grams, so it adds nothing yet.
+  ///
+  /// In en, this message translates to:
+  /// **'check the amount'**
+  String get nutriSheetAmountNotWeighed;
+
+  /// Nutrition sheet, the status of an ingredient whose nutrition lookup failed with an error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not be looked up'**
+  String get nutriSheetLookupFailed;
+
+  /// Import > File: the picked file holds nothing.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is empty.'**
+  String get fileImportEmpty;
+
+  /// Import > File: a photo, a video, a Word document or another kind of file the app does not read.
+  ///
+  /// In en, this message translates to:
+  /// **'This file type is not supported.'**
+  String get fileImportUnsupported;
+
+  /// Import > File: a file with a recipe extension that holds something other than text.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is damaged or is not a text file.'**
+  String get fileImportNotText;
+
+  /// Import > File: an RTF document.
+  ///
+  /// In en, this message translates to:
+  /// **'Rich text files are not supported. Save the recipe as plain text and retry.'**
+  String get fileImportRichText;
+
+  /// Import > File: XML that is none of the recipe exports the app reads.
+  ///
+  /// In en, this message translates to:
+  /// **'This XML file is not a recipe export the app can read.'**
+  String get fileImportUnknownXml;
+
+  /// Import > File: a ZIP file that does not open.
+  ///
+  /// In en, this message translates to:
+  /// **'This ZIP file is damaged or incomplete. Export it again and retry.'**
+  String get fileImportDamagedZip;
+
+  /// Import > File: a backup of this app found where single recipes were expected.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a Recipe Spellbook backup. Restore it from Settings, Import Data.'**
+  String get fileImportOwnBackup;
+
+  /// Import > File: an export of another recipe app that is damaged or cut short.
+  ///
+  /// In en, this message translates to:
+  /// **'This {app} file is damaged or incomplete. Export it again and retry.'**
+  String fileImportDamaged(String app);
+
+  /// Import > File: an archive with the name of another app's export that holds none of its recipes.
+  ///
+  /// In en, this message translates to:
+  /// **'This file does not contain any {app} recipes.'**
+  String fileImportNoRecipes(String app);
+
+  /// Import > File: an archive that unpacks to far more than any recipe export (a zip bomb, or an entry of gigabytes).
+  ///
+  /// In en, this message translates to:
+  /// **'This file unpacks to more than the app can read at once. Export fewer recipes at a time and retry.'**
+  String get fileImportTooLarge;
+
+  /// Title of a recipe read from a PDF of several recipes whose own title could not be read: the PDF's file name and the recipe's place in it.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, recipe {number}'**
+  String importPdfRecipeNumbered(String name, int number);
+
+  /// AI import: Preview was tapped with nothing pasted.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste or load the AI response first.'**
+  String get aiImportPasteFirst;
+
+  /// AI import: several recipes were imported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} recipe imported successfully!} other{{count} recipes imported successfully!}}'**
+  String aiImportedCount(int count);
+
+  /// AI import: a problem in one recipe of the pasted answer, counted from 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe {number}: {problem}'**
+  String aiImportErrInRecipe(int number, String problem);
+
+  /// AI import: the pasted answer holds no recipe.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found. The answer needs at least one recipe.'**
+  String get aiImportErrNoRecipes;
+
+  /// AI import: the pasted text cannot be read as JSON.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not valid recipe JSON. Check that the whole answer was copied.'**
+  String get aiImportErrInvalidJson;
+
+  /// AI import: the pasted JSON ends before a bracket is closed.
+  ///
+  /// In en, this message translates to:
+  /// **'A bracket is opened and never closed. The answer may have been cut off.'**
+  String get aiImportErrCutOff;
+
+  /// AI import: a recipe field name stands outside any recipe object in the pasted JSON.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{field}\" stands outside the brackets of a recipe. A bracket or a quote may be missing, or it is a remark to take out.'**
+  String aiImportErrOutsideBrackets(String field);
+
+  /// AI import: the answer holds several JSON blocks and one meant as a recipe cannot be read.
+  ///
+  /// In en, this message translates to:
+  /// **'Block {block} of {count} could not be read. A bracket or a quote may be missing.'**
+  String aiImportErrBlockUnreadable(int block, int count);
+
+  /// AI import: a recipe without a title. The field name stays in English.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"title\" field is missing.'**
+  String get aiImportErrMissingTitle;
+
+  /// AI import: a recipe without an ingredients list. The field name stays in English.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"ingredients\" list is missing.'**
+  String get aiImportErrMissingIngredients;
+
+  /// AI import: a recipe with an empty ingredients list.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"ingredients\" list is empty. A recipe needs at least one ingredient.'**
+  String get aiImportErrNoIngredients;
+
+  /// AI import: an ingredient entry that is not a JSON object.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient {number} is not a valid object.'**
+  String aiImportErrIngredientInvalid(int number);
+
+  /// AI import: an ingredient without a name. The field name stays in English.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient {number} has no \"name\".'**
+  String aiImportErrIngredientNoName(int number);
+
+  /// AI import: a recipe without a steps list. The field name stays in English.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"steps\" list is missing.'**
+  String get aiImportErrMissingSteps;
+
+  /// AI import: a recipe with an empty steps list.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"steps\" list is empty. A recipe needs at least one step.'**
+  String get aiImportErrNoSteps;
+
+  /// AI import: a step entry that is not a JSON object.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {number} is not a valid object.'**
+  String aiImportErrStepInvalid(int number);
+
+  /// AI import: a step without its instruction text. The field name stays in English.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {number} has no \"instruction\".'**
+  String aiImportErrStepNoInstruction(int number);
+
+  /// Barcode scan result: where the product data comes from.
+  ///
+  /// In en, this message translates to:
+  /// **'Data from Open Food Facts (community-sourced)'**
+  String get barcodeDataSource;
+
+  /// Barcode scan result, after the data source: when the product record was last changed, a month and a year.
+  ///
+  /// In en, this message translates to:
+  /// **'updated {date}'**
+  String barcodeDataUpdated(String date);
+
+  /// Barcode scan result: the product record has few fields filled in.
+  ///
+  /// In en, this message translates to:
+  /// **'This record looks incomplete. Some details may be missing or out of date.'**
+  String get barcodeRecordIncomplete;
+
+  /// Import guides: tag on the guides of the most used apps.
+  ///
+  /// In en, this message translates to:
+  /// **'POPULAR'**
+  String get importGuidePopularTag;
+
+  /// Import guides: title of the step that picks the exported file in this app.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Recipe Spellbook'**
+  String get importGuideOpenInApp;
+
+  /// Import guides: title of the last step.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & Import'**
+  String get importGuideReviewImport;
+
+  /// Import guides: title of the step that exports from the other app.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Recipes'**
+  String get importGuideExportRecipes;
+
+  /// Import guides: title of the first step, with the other app's name.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {app}'**
+  String importGuideOpenApp(String app);
+
+  /// Import guides: step title, with a file format such as ZIP or CSV.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as {format}'**
+  String importGuideExportAs(String format);
+
+  /// Import guides: step title, with a website.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to {site}'**
+  String importGuideGoToSite(String site);
+
+  /// Import guides: how to pick the exported file in this app. 'File' is the button of the add recipe sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Recipe Spellbook, tap +, choose \"File\", and select the {file} file.'**
+  String importGuidePickFile(String file);
+
+  /// Import guides: first step for an app whose export is in its settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {app} and go to Settings.'**
+  String importGuideOpenSettings(String app);
+
+  /// Import guides: first step for a self-hosted recipe manager.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to your {app} instance on a computer.'**
+  String importGuideLogIn(String app);
+
+  /// No description provided for @importGuidePaprikaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import all recipes from Paprika 3 with photos'**
+  String get importGuidePaprikaSubtitle;
+
+  /// No description provided for @importGuidePaprikaStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Paprika 3 on your device. Go to Settings or the File menu.'**
+  String get importGuidePaprikaStep1;
+
+  /// No description provided for @importGuidePaprikaStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Export All Recipes'**
+  String get importGuidePaprikaStep2Title;
+
+  /// No description provided for @importGuidePaprikaStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Export\" and choose \"Paprika Export Format\" (.paprikarecipes). This creates a file with all your recipes and photos.'**
+  String get importGuidePaprikaStep2;
+
+  /// No description provided for @importGuidePaprikaStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'On iOS/Android: Settings > Export. On Desktop: File > Export.'**
+  String get importGuidePaprikaStep2Tip;
+
+  /// No description provided for @importGuidePaprikaStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview your recipes, deselect any you don\'t want, then tap Import. Photos will be included automatically.'**
+  String get importGuidePaprikaStep4;
+
+  /// No description provided for @importGuideMelaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import recipes from Mela recipe manager'**
+  String get importGuideMelaSubtitle;
+
+  /// No description provided for @importGuideMelaStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Export\" and choose to export all recipes. This creates a .melarecipes file.'**
+  String get importGuideMelaStep2;
+
+  /// No description provided for @importGuideMelaStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also share individual recipes as .melarecipe files.'**
+  String get importGuideMelaStep2Tip;
+
+  /// No description provided for @importGuideMelaStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview and import your recipes. Categories will be converted to tags.'**
+  String get importGuideMelaStep4;
+
+  /// No description provided for @importGuideCroutonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import recipes from Crouton app'**
+  String get importGuideCroutonSubtitle;
+
+  /// No description provided for @importGuideCroutonStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Data'**
+  String get importGuideCroutonStep2Title;
+
+  /// No description provided for @importGuideCroutonStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Export\" to create a .crumb file with all your recipes.'**
+  String get importGuideCroutonStep2;
+
+  /// No description provided for @importGuideCroutonStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview your recipes and import them. Ingredient sections are preserved.'**
+  String get importGuideCroutonStep4;
+
+  /// No description provided for @importGuideRecipeKeeperSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Recipe Keeper (ZIP or HTML)'**
+  String get importGuideRecipeKeeperSubtitle;
+
+  /// No description provided for @importGuideRecipeKeeperStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Recipe Keeper and go to Settings > Export.'**
+  String get importGuideRecipeKeeperStep1;
+
+  /// No description provided for @importGuideRecipeKeeperStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose \"Export as ZIP\" or \"Export as HTML\". The ZIP format includes photos.'**
+  String get importGuideRecipeKeeperStep2;
+
+  /// No description provided for @importGuideRecipeKeeperStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP export is recommended. It includes all your recipe photos.'**
+  String get importGuideRecipeKeeperStep2Tip;
+
+  /// No description provided for @importGuideRecipeKeeperStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Recipe Spellbook, tap +, choose \"File\", and select the exported ZIP or HTML file.'**
+  String get importGuideRecipeKeeperStep3;
+
+  /// No description provided for @importGuideRecipeKeeperStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes will be detected automatically. Review and import with photos.'**
+  String get importGuideRecipeKeeperStep4;
+
+  /// No description provided for @importGuideCopyMeThatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from CopyMeThat HTML export'**
+  String get importGuideCopyMeThatSubtitle;
+
+  /// No description provided for @importGuideCopyMeThatStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to CopyMeThat.com on your computer.'**
+  String get importGuideCopyMeThatStep1;
+
+  /// No description provided for @importGuideCopyMeThatStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Settings > Export and download the HTML file with all your recipes.'**
+  String get importGuideCopyMeThatStep2;
+
+  /// No description provided for @importGuideCopyMeThatStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes from the HTML file will be parsed and ready to import.'**
+  String get importGuideCopyMeThatStep4;
+
+  /// No description provided for @importGuideMealieSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Mealie self-hosted recipe manager'**
+  String get importGuideMealieSubtitle;
+
+  /// No description provided for @importGuideMealieStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Admin > Backups and create a new backup. Download the JSON export.'**
+  String get importGuideMealieStep2;
+
+  /// No description provided for @importGuideMealieStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also export individual recipes as JSON from the recipe page.'**
+  String get importGuideMealieStep2Tip;
+
+  /// No description provided for @importGuideMealieStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Mealie recipe data is well-structured. All fields will be imported accurately.'**
+  String get importGuideMealieStep4;
+
+  /// No description provided for @importGuideTandoorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Tandoor Recipes'**
+  String get importGuideTandoorSubtitle;
+
+  /// No description provided for @importGuideTandoorStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Admin > Export. Select your recipes and download as JSON.'**
+  String get importGuideTandoorStep2;
+
+  /// No description provided for @importGuideTandoorStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Keywords and ingredient details are preserved. Review and import.'**
+  String get importGuideTandoorStep4;
+
+  /// No description provided for @importGuideCookmateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Cookmate .mcb export'**
+  String get importGuideCookmateSubtitle;
+
+  /// No description provided for @importGuideCookmateStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Cookmate (previously \"My CookBook\") and go to Settings.'**
+  String get importGuideCookmateStep1;
+
+  /// No description provided for @importGuideCookmateStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Export and choose the .mcb format. This includes recipes and photos.'**
+  String get importGuideCookmateStep2;
+
+  /// No description provided for @importGuideCookmateStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes with categories and photos will be imported.'**
+  String get importGuideCookmateStep4;
+
+  /// No description provided for @importGuidePlanToEatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Plan to Eat CSV export'**
+  String get importGuidePlanToEatSubtitle;
+
+  /// No description provided for @importGuidePlanToEatStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to your Plan to Eat account on a computer.'**
+  String get importGuidePlanToEatStep1;
+
+  /// No description provided for @importGuidePlanToEatStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Settings > Export Data and download your recipes as a CSV file.'**
+  String get importGuidePlanToEatStep2;
+
+  /// No description provided for @importGuidePlanToEatStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'All columns are parsed: title, ingredients, directions, tags, times, and more.'**
+  String get importGuidePlanToEatStep4;
+
+  /// No description provided for @importGuideMasterCookSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import MasterCook .mxp files'**
+  String get importGuideMasterCookSubtitle;
+
+  /// No description provided for @importGuideMasterCookStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open MasterCook and select the recipes you want to export.'**
+  String get importGuideMasterCookStep1;
+
+  /// No description provided for @importGuideMasterCookStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to File > Export and choose the .mxp format.'**
+  String get importGuideMasterCookStep2;
+
+  /// No description provided for @importGuideMasterCookStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed-width formatting is parsed automatically. Review and import your recipes.'**
+  String get importGuideMasterCookStep4;
+
+  /// No description provided for @importGuideMealMasterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Meal-Master .mmf files'**
+  String get importGuideMealMasterSubtitle;
+
+  /// No description provided for @importGuideMealMasterStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Locate your files'**
+  String get importGuideMealMasterStep1Title;
+
+  /// No description provided for @importGuideMealMasterStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your Meal-Master .mmf or .mk files on your computer.'**
+  String get importGuideMealMasterStep1;
+
+  /// No description provided for @importGuideMealMasterStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal-Master files can contain hundreds of recipes in a single file.'**
+  String get importGuideMealMasterStep2Tip;
+
+  /// No description provided for @importGuideMealMasterStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes are parsed from the file. Two-column ingredient layouts are supported.'**
+  String get importGuideMealMasterStep3;
+
+  /// No description provided for @importGuideCooklangSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Cooklang .cook recipe files'**
+  String get importGuideCooklangSubtitle;
+
+  /// No description provided for @importGuideCooklangStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your .cook files'**
+  String get importGuideCooklangStep1Title;
+
+  /// No description provided for @importGuideCooklangStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Locate your Cooklang recipe files. They\'re plain text files with .cook extension.'**
+  String get importGuideCooklangStep1;
+
+  /// No description provided for @importGuideCooklangStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooklang markup (@ingredients, #cookware, ~timers) is automatically parsed.'**
+  String get importGuideCooklangStep2Tip;
+
+  /// No description provided for @importGuideCooklangStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients are extracted from the markup and steps are formatted as readable text.'**
+  String get importGuideCooklangStep3;
+
+  /// No description provided for @importGuideLivingCookbookSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Living Cookbook .fdx files'**
+  String get importGuideLivingCookbookSubtitle;
+
+  /// No description provided for @importGuideLivingCookbookStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Living Cookbook and go to File > Export.'**
+  String get importGuideLivingCookbookStep1;
+
+  /// No description provided for @importGuideLivingCookbookStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the FDX (Food Data Exchange) format and export your recipes.'**
+  String get importGuideLivingCookbookStep2;
+
+  /// No description provided for @importGuideLivingCookbookStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'XML data is parsed into structured recipes with ingredients and procedures.'**
+  String get importGuideLivingCookbookStep4;
+
+  /// No description provided for @importGuideSamsungFoodSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Samsung Food JSON export'**
+  String get importGuideSamsungFoodSubtitle;
+
+  /// No description provided for @importGuideSamsungFoodStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Request your data'**
+  String get importGuideSamsungFoodStep1Title;
+
+  /// No description provided for @importGuideSamsungFoodStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Samsung Food app or website and go to Settings > Privacy > Download My Data.'**
+  String get importGuideSamsungFoodStep1;
+
+  /// No description provided for @importGuideSamsungFoodStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the export'**
+  String get importGuideSamsungFoodStep2Title;
+
+  /// No description provided for @importGuideSamsungFoodStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll receive a download link (may take some time). Download the JSON file.'**
+  String get importGuideSamsungFoodStep2;
+
+  /// No description provided for @importGuideSamsungFoodStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'If you previously used Whisk, the format is the same.'**
+  String get importGuideSamsungFoodStep2Tip;
+
+  /// No description provided for @importGuideSamsungFoodStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Samsung Food recipe data will be parsed and ready to import.'**
+  String get importGuideSamsungFoodStep4;
+
+  /// Publish/update stopped part way because the server says today's photo upload allowance is used up. Not retried until tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached today\'s photo upload limit. Try again tomorrow.'**
+  String get communityPublishDailyLimitReached;
+
+  /// A publish or update went through, but the server did not keep some photos (they were not the publisher's own Community uploads). They are sent again with the next update.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The server did not keep 1 photo, so it was left out. It is sent again with the next update.} other{The server did not keep {count} photos, so they were left out. They are sent again with the next update.}}'**
+  String communityPublishPhotosDropped(int count);
+
+  /// Restore a backup: the file picker was closed without a file.
+  ///
+  /// In en, this message translates to:
+  /// **'No file selected.'**
+  String get backupRestoreNoFile;
+
+  /// Restore a backup: a file in the ZIP unpacks to more than the app can handle (a damaged file or a zip bomb). Nothing was imported.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup unpacks to more than the app can handle, so nothing was imported. It may be damaged.'**
+  String get backupRestoreTooLarge;
+
+  /// Restore a backup: it held nothing to import.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to import.'**
+  String get backupRestoreNothing;
+
+  /// Restore a backup: what came in. {items} is a comma-separated list such as '2 cookbooks, 40 recipes', possibly followed by '(3 duplicates skipped)'.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported: {items}'**
+  String backupRestoreImported(String items);
+
+  /// Restore a backup: part of the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cookbook} other{{count} cookbooks}}'**
+  String backupRestoreCookbooks(int count);
+
+  /// Restore a backup: part of the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe} other{{count} recipes}}'**
+  String backupRestoreRecipes(int count);
+
+  /// Restore a backup: part of the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 shopping list} other{{count} shopping lists}}'**
+  String backupRestoreShoppingLists(int count);
+
+  /// Restore a backup: part of the list in backupRestoreImported. Meals planned in the meal planner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 planned meal} other{{count} planned meals}}'**
+  String backupRestoreMealPlans(int count);
+
+  /// Restore a backup: part of the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tag} other{{count} tags}}'**
+  String backupRestoreTags(int count);
+
+  /// Restore a backup: recipes already in the library that were not added again. Follows the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{(1 duplicate skipped)} other{({count} duplicates skipped)}}'**
+  String backupRestoreSkipped(int count);
+
+  /// Import preview: where the recipes came from, for a JSON export of this app.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Recipe Spellbook export (1 recipe)} other{Recipe Spellbook export ({count} recipes)}}'**
+  String importPreviewOwnExport(int count);
+
+  /// Barcode result: NOVA group 1 (unprocessed or minimally processed food).
+  ///
+  /// In en, this message translates to:
+  /// **'Unprocessed'**
+  String get barcodeNovaUnprocessed;
+
+  /// Barcode result: NOVA group 2 (processed culinary ingredients such as oil or sugar).
+  ///
+  /// In en, this message translates to:
+  /// **'Processed ingredients'**
+  String get barcodeNovaProcessedIngredients;
+
+  /// Barcode result: NOVA group 3 (processed food).
+  ///
+  /// In en, this message translates to:
+  /// **'Processed food'**
+  String get barcodeNovaProcessedFood;
+
+  /// Barcode result: NOVA group 4 (ultra-processed food).
+  ///
+  /// In en, this message translates to:
+  /// **'Ultra-processed'**
+  String get barcodeNovaUltraProcessed;
+
+  /// Barcode result: a NOVA group the app does not know.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get barcodeScoreUnknown;
+
+  /// Barcode result: Nutri-Score A.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent'**
+  String get barcodeNutriScoreExcellent;
+
+  /// Barcode result: Nutri-Score B.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get barcodeNutriScoreGood;
+
+  /// Barcode result: Nutri-Score C.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get barcodeNutriScoreAverage;
+
+  /// Barcode result: Nutri-Score D.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor'**
+  String get barcodeNutriScorePoor;
+
+  /// Barcode result: Nutri-Score E.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad'**
+  String get barcodeNutriScoreBad;
+
+  /// Barcode result: heading of the food additives section.
+  ///
+  /// In en, this message translates to:
+  /// **'Additives'**
+  String get barcodeAdditives;
+
+  /// Barcode result: how many additives the product lists, beside the Additives heading.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} found'**
+  String barcodeAdditivesFound(int count);
+
+  /// Barcode result: how many of the additives call for caution.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} caution'**
+  String barcodeAdditivesCaution(int count);
+
+  /// Barcode result: how many of the additives are of moderate concern.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} moderate'**
+  String barcodeAdditivesModerate(int count);
+
+  /// Barcode result: an additive the app has no information on.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in database'**
+  String get barcodeAdditiveNotInDatabase;
+
+  /// Shopping list banner: a list shared with you where you may tick items but not add or remove them.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared list · you can tick items off, but not add or remove them'**
+  String get shoppingSharedCanTick;
+
+  /// Shopping list banner: a list shared with you that you can only look at.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared list · view only'**
+  String get shoppingSharedViewOnly;
+
+  /// Shopping: a shopping list file was imported with this many items.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Imported 1 item} other{Imported {count} items}}'**
+  String shoppingImportedItems(int count);
+
+  /// Shopping: the picked file is not a shopping list exported from this app.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a Recipe Spellbook shopping list export.'**
+  String get shoppingImportWrongFile;
+
+  /// Order online sheet: stores reachable through Instacart (store names stay as they are).
+  ///
+  /// In en, this message translates to:
+  /// **'Costco, Publix, Safeway, Aldi, Sprouts and 1,500+ more stores'**
+  String get groceryInstacartStores;
+
+  /// Order online sheet: stores reachable through Kroger (store names stay as they are).
+  ///
+  /// In en, this message translates to:
+  /// **'Kroger, Fred Meyer, Ralphs, Harris Teeter and more'**
+  String get groceryKrogerStores;
+
+  /// Import from a link: the site refused the request (HTTP 401, 403, 451).
+  ///
+  /// In en, this message translates to:
+  /// **'The site blocked our request. Copy the recipe text and paste it instead.'**
+  String get webImportBlocked;
+
+  /// Import from a link: the site answered 429 (too many requests).
+  ///
+  /// In en, this message translates to:
+  /// **'The site is turning away requests for now. Try again in a minute.'**
+  String get webImportRateLimited;
+
+  /// Import from a link: the site answered with a server error (HTTP 5xx).
+  ///
+  /// In en, this message translates to:
+  /// **'The site is having problems right now (HTTP {code}). Try again later.'**
+  String webImportSiteError(int code);
+
+  /// Import from a link: the page did not load, with this HTTP status.
+  ///
+  /// In en, this message translates to:
+  /// **'The page could not be loaded (HTTP {code}).'**
+  String webImportHttpError(int code);
+
+  /// Import from a link: the link is a file, not a web page. kind is pdf, image, video, audio, zip or other.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind, select, pdf{No recipe found: that link is a PDF, not a web page.} image{No recipe found: that link is an image, not a web page.} video{No recipe found: that link is a video, not a web page.} audio{No recipe found: that link is an audio file, not a web page.} zip{No recipe found: that link is a ZIP file, not a web page.} other{No recipe found: that link is a file, not a web page.}}'**
+  String webImportNotAWebPage(String kind);
+
+  /// Import from a link: the page is larger than the app reads.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found: that page is too large to read.'**
+  String get webImportPageTooLarge;
+
+  /// Import from a link: the page is in a character set the app has no table for.
+  ///
+  /// In en, this message translates to:
+  /// **'That page uses a text encoding ({charset}) this app cannot read.'**
+  String webImportUnreadableEncoding(String charset);
+
+  /// Import from a link: a YouTube page whose description holds no recipe.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in that video\'s description.'**
+  String get webImportNoRecipeInVideo;
+
+  /// Import from a link: the site did not answer in time.
+  ///
+  /// In en, this message translates to:
+  /// **'The website took too long to respond. Try again later.'**
+  String get webImportTimedOut;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

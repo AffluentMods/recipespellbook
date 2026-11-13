@@ -21,6 +21,7 @@ import '../../../utils/native_file_image.dart';
 import '../../../utils/planned_servings.dart' show plannedRecipeLocation;
 import '../../../utils/recipe_title.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../../utils/week_start.dart';
 import '../../shell/shell_navigation.dart';
 import '../../widgets/app_controls.dart';
 import '../../widgets/backup_reminder_banner.dart';
@@ -121,65 +122,71 @@ class DesktopHome extends ConsumerWidget {
                   const side = Space.xxxl - 4;
                   final width = constraints.maxWidth - side * 2;
                   final stackGlance = width < 760;
-                  return ListView(
+                  // Built up front and kept while scrolling, as on the phone:
+                  // a lazy list rebuilt the sections scrolled back into view
+                  // at their loading height and the page jumped.
+                  return SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(side, Space.xs, side, Space.huge),
-                    children: [
-                      CookbookUpdateBanner(
-                        cookbook: cookbook,
-                        padding: const EdgeInsets.only(bottom: Space.lg),
-                      ),
-                      const BackupReminderBanner(),
-                      if (stackGlance) ...[
-                        SizedBox(height: 232, child: _WeekGlanceCard()),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        CookbookUpdateBanner(
+                          cookbook: cookbook,
+                          padding: const EdgeInsets.only(bottom: Space.lg),
+                        ),
+                        const BackupReminderBanner(),
+                        if (stackGlance) ...[
+                          SizedBox(height: 232, child: _WeekGlanceCard()),
+                          const SizedBox(height: Space.lg),
+                          const SizedBox(height: 232, child: _ShoppingGlanceCard()),
+                        ] else
+                          SizedBox(
+                            height: 244,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(flex: 3, child: _WeekGlanceCard()),
+                                const SizedBox(width: Space.lg),
+                                const Expanded(flex: 2, child: _ShoppingGlanceCard()),
+                              ],
+                            ),
+                          ),
+                        // New here? The how-to guides, until closed.
+                        const GuidesTipCard(padding: EdgeInsets.only(top: Space.lg)),
+                        // Deciding dinner: what the pantry covers, then a few
+                        // suggestions with the reason for each.
                         const SizedBox(height: Space.lg),
-                        const SizedBox(height: 232, child: _ShoppingGlanceCard()),
-                      ] else
-                        SizedBox(
-                          height: 244,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(flex: 3, child: _WeekGlanceCard()),
-                              const SizedBox(width: Space.lg),
-                              const Expanded(flex: 2, child: _ShoppingGlanceCard()),
-                            ],
+                        const PantryCookingHomeCard(),
+                        DinnerSuggestionsSection(
+                          day: dinnerDay(),
+                          fitWidth: width,
+                          headerBuilder: (context, onShuffle) => _SectionTitle(
+                            title: l10n.dinnerTitle,
+                            onSeeAll: onShuffle,
+                            actionLabel: l10n.dinnerShowOthers,
                           ),
                         ),
-                      // New here? The how-to guides, until closed.
-                      const GuidesTipCard(padding: EdgeInsets.only(top: Space.lg)),
-                      // Deciding dinner: what the pantry covers, then a few
-                      // suggestions with the reason for each.
-                      const SizedBox(height: Space.lg),
-                      const PantryCookingHomeCard(),
-                      DinnerSuggestionsSection(
-                        day: dinnerDay(),
-                        fitWidth: width,
-                        headerBuilder: (context, onShuffle) => _SectionTitle(
-                          title: l10n.dinnerTitle,
-                          onSeeAll: onShuffle,
-                          actionLabel: l10n.dinnerShowOthers,
+                        // Same Quick Access sources and settings as the phone.
+                        _RecipeRowSection(
+                          title: l10n.homeJumpBackIn,
+                          recipes: [
+                            for (final i in ref.watch(jumpBackInProvider(cookbookId)).valueOrNull ??
+                                const <QuickAccessItem>[])
+                              i.recipe,
+                          ],
+                          width: width,
+                          onSeeAll: () => context.push('/recipes/quick-access'),
                         ),
-                      ),
-                      // Same Quick Access sources and settings as the phone.
-                      _RecipeRowSection(
-                        title: l10n.homeJumpBackIn,
-                        recipes: [
-                          for (final i in ref.watch(jumpBackInProvider(cookbookId)).valueOrNull ??
-                              const <QuickAccessItem>[])
-                            i.recipe,
-                        ],
-                        width: width,
-                        onSeeAll: () => context.push('/recipes/quick-access'),
-                      ),
-                      _RecipeRowSection(
-                        title: l10n.favoritesTitle,
-                        recipes: ref.watch(favoriteRecipesProvider).valueOrNull ?? const [],
-                        width: width,
-                        onSeeAll: () => goToDestination(ref, ShellDestination.favorites),
-                      ),
-                      _BrowseSection(recipes: recipes, cookbookId: cookbookId),
-                      _CookbookShelf(width: width),
-                    ],
+                        _RecipeRowSection(
+                          title: l10n.favoritesTitle,
+                          recipes: ref.watch(favoriteRecipesProvider).valueOrNull ?? const [],
+                          width: width,
+                          onSeeAll: () => goToDestination(ref, ShellDestination.favorites),
+                        ),
+                        _BrowseSection(recipes: recipes, cookbookId: cookbookId),
+                        _CookbookShelf(width: width),
+                      ],
+                    ),
                   );
                 }),
     );
@@ -359,14 +366,41 @@ class _SectionTitle extends StatelessWidget {
 
 // ── Next seven days ──
 
-class _WeekGlanceCard extends ConsumerWidget {
+class _WeekGlanceCard extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_WeekGlanceCard> createState() => _WeekGlanceCardState();
+}
+
+class _WeekGlanceCardState extends ConsumerState<_WeekGlanceCard> {
+  /// One stream for the life of the card, not a new one per build.
+  late DateTime _today;
+  late Stream<List<MealPlanWithRecipe>> _week;
+
+  @override
+  void initState() {
+    super.initState();
+    _watchWeek();
+  }
+
+  @override
+  void didUpdateWidget(covariant _WeekGlanceCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Left open past midnight: follow the new day.
+    final now = DateTime.now();
+    if (DateTime(now.year, now.month, now.day) != _today) _watchWeek();
+  }
+
+  void _watchWeek() {
+    final now = DateTime.now();
+    _today = DateTime(now.year, now.month, now.day);
+    _week = ref.read(mealPlanDaoProvider).watchMealPlansWithRecipesForRange(_today, addDays(_today, 7));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = context.appColors;
-    final dao = ref.watch(mealPlanDaoProvider);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = _today;
     final locale = Localizations.localeOf(context).toLanguageTag();
 
     return _Panel(
@@ -382,13 +416,14 @@ class _WeekGlanceCard extends ConsumerWidget {
         child: Text(l10n.navPlanner),
       ),
       child: StreamBuilder<List<MealPlanWithRecipe>>(
-        stream: dao.watchMealPlansWithRecipesForRange(today, today.add(const Duration(days: 7))),
+        stream: _week,
         builder: (context, snapshot) {
           final plans = snapshot.data ?? const <MealPlanWithRecipe>[];
           final byDay = <int, List<MealPlanWithRecipe>>{};
           for (final p in plans) {
-            final d = p.mealPlan.date;
-            final idx = DateTime(d.year, d.month, d.day).difference(today).inDays;
+            // Calendar days, not 24 hour periods (one short across a
+            // daylight saving change, which put meals in the wrong column).
+            final idx = calendarDaysBetween(today, p.mealPlan.date);
             if (idx >= 0 && idx < 7) byDay.putIfAbsent(idx, () => []).add(p);
           }
           // As many days as fit legibly (≥ ~104 px each, so a meal title's
@@ -402,7 +437,7 @@ class _WeekGlanceCard extends ConsumerWidget {
                   if (i > 0) const SizedBox(width: Space.xs + 2),
                   Expanded(
                     child: _DayColumn(
-                      date: today.add(Duration(days: i)),
+                      date: addDays(today, i),
                       isToday: i == 0,
                       meals: byDay[i] ?? const [],
                       locale: locale,
@@ -547,6 +582,18 @@ class _ShoppingGlanceCard extends ConsumerStatefulWidget {
 class _ShoppingGlanceCardState extends ConsumerState<_ShoppingGlanceCard> {
   String? _listId;
 
+  /// The list's items, one stream per list rather than a new one per build.
+  Stream<List<ShoppingListItem>>? _items;
+  String? _itemsListId;
+
+  Stream<List<ShoppingListItem>> _itemsOf(String listId) {
+    if (_items == null || _itemsListId != listId) {
+      _itemsListId = listId;
+      _items = ref.read(shoppingDaoProvider).watchItemsInList(listId);
+    }
+    return _items!;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -591,7 +638,7 @@ class _ShoppingGlanceCardState extends ConsumerState<_ShoppingGlanceCard> {
       child: listId == null
           ? const SizedBox.shrink()
           : StreamBuilder<List<ShoppingListItem>>(
-              stream: dao.watchItemsInList(listId),
+              stream: _itemsOf(listId),
               builder: (context, snapshot) {
                 final unchecked = (snapshot.data ?? const <ShoppingListItem>[])
                     .where((i) => !i.isChecked)

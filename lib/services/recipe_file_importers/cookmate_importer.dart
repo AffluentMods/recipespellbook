@@ -66,7 +66,8 @@ class CookmateImporter {
   /// Check if ZIP contents look like a Cookmate export.
   static bool canHandle(Uint8List bytes) {
     try {
-      return _cookbooksIn(ZipDecoder().decodeBytes(bytes)).isNotEmpty;
+      final archive = ZipDecoder().decodeBytes(bytes);
+      return _cookbooksIn(archive, BoundedUnzip.forArchive(bytes.length)).isNotEmpty;
     } catch (_) {
       return false;
     }
@@ -75,13 +76,13 @@ class CookmateImporter {
   /// The cookbook documents in [archive]. The app names its document after
   /// the day of the backup, so one is known by what it holds, not by what it
   /// is called.
-  static Iterable<String> _cookbooksIn(Archive archive) sync* {
+  static Iterable<String> _cookbooksIn(Archive archive, BoundedUnzip unzip) sync* {
     for (final file in archive.files) {
       if (!file.isFile || !file.name.toLowerCase().endsWith('.xml')) continue;
-      try {
-        final content = ImportSupport.decodeText(file.content as List<int>);
-        if (looksLikeCookbookXml(content)) yield content;
-      } catch (_) {}
+      final bytes = unzip.tryBytesOf(file);
+      if (bytes == null) continue;
+      final content = ImportSupport.decodeText(bytes);
+      if (looksLikeCookbookXml(content)) yield content;
     }
   }
 
@@ -102,22 +103,24 @@ class CookmateImporter {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException(
-          'This Cookmate file is damaged or incomplete. Export it again and retry.');
+      throw const FileImportException.damaged(_app);
     }
 
-    final photo = ImportSupport.photosIn(archive);
+    final unzip = BoundedUnzip.forArchive(bytes.length);
+    final photo = ImportSupport.photosIn(archive, unzip);
     final recipes = <ImportedRecipe>[];
     var documents = 0;
-    for (final content in _cookbooksIn(archive)) {
+    for (final content in _cookbooksIn(archive, unzip)) {
       documents++;
       recipes.addAll(importXml(content, filename, photo: photo));
     }
     if (documents == 0) {
-      throw const FormatException('This file does not contain a Cookmate cookbook.');
+      throw const FileImportException.noRecipes(_app, 'This file does not contain a Cookmate cookbook.');
     }
     return recipes;
   }
+
+  static const _app = 'Cookmate';
 
   /// Parse a Cookmate XML document: the one inside a .mcb, or the app's .xml
   /// export.

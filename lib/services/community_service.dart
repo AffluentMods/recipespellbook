@@ -659,6 +659,16 @@ class PublishProgress {
   /// was published. The publish screen offers to retry just those photos.
   final List<String> failedRecipes;
 
+  /// Recipes whose photos are in a format this device cannot read (HEIC or
+  /// AVIF without a decoder): left out of the publication.
+  final List<String> unsupportedRecipes;
+
+  /// With status 'done': photos the server did not keep (it only keeps the
+  /// publisher's own Community uploads), and the recipes they belong to.
+  /// They are sent again with the next update.
+  final int droppedPhotos;
+  final List<String> droppedRecipes;
+
   const PublishProgress({
     required this.status,
     this.uploadedImages = 0,
@@ -669,6 +679,9 @@ class PublishProgress {
     this.waitSeconds = 0,
     this.rejectedRecipes = const [],
     this.failedRecipes = const [],
+    this.unsupportedRecipes = const [],
+    this.droppedPhotos = 0,
+    this.droppedRecipes = const [],
   });
 
   PublishProgress copyWith({
@@ -681,6 +694,9 @@ class PublishProgress {
     int? waitSeconds,
     List<String>? rejectedRecipes,
     List<String>? failedRecipes,
+    List<String>? unsupportedRecipes,
+    int? droppedPhotos,
+    List<String>? droppedRecipes,
   }) => PublishProgress(
     status: status ?? this.status,
     uploadedImages: uploadedImages ?? this.uploadedImages,
@@ -691,8 +707,26 @@ class PublishProgress {
     waitSeconds: waitSeconds ?? this.waitSeconds,
     rejectedRecipes: rejectedRecipes ?? this.rejectedRecipes,
     failedRecipes: failedRecipes ?? this.failedRecipes,
+    unsupportedRecipes: unsupportedRecipes ?? this.unsupportedRecipes,
+    droppedPhotos: droppedPhotos ?? this.droppedPhotos,
+    droppedRecipes: droppedRecipes ?? this.droppedRecipes,
   );
 }
+
+/// How a POST /v1/community went. [replayed]: the server answered a publish
+/// key an earlier try already used with the publication that try made
+/// (200), so it carries what that try sent. [droppedImagePaths]: photo paths
+/// the server left out of the publication (it only keeps the publisher's
+/// own Community uploads).
+typedef CommunityPublishResult = ({
+  bool success,
+  String? error,
+  String? publicationId,
+  String? status,
+  Duration? retryAfter,
+  bool replayed,
+  List<String> droppedImagePaths,
+});
 
 /// Global publish progress notifier — listened to by publish screen and my publications.
 final publishProgressNotifier = ValueNotifier<PublishProgress?>(null);
@@ -872,16 +906,22 @@ class CommunityService {
   }
 
   /// Fetch full details of a publication.
-  Future<CommunityDetail?> getPublication(String id) async {
+  Future<CommunityDetail?> getPublication(String id) async => (await fetchPublication(id)).detail;
+
+  /// Full details of a publication, telling "it is not there" ([notFound]:
+  /// unpublished, removed or under review) apart from "it did not load"
+  /// (offline, server error), where both leave [detail] null.
+  Future<({CommunityDetail? detail, bool notFound})> fetchPublication(String id) async {
     try {
       final r = await _auth.get('/v1/community/$id');
       if (r.statusCode == 200) {
-        return CommunityDetail.fromJson(jsonDecode(r.body));
+        return (detail: CommunityDetail.fromJson(jsonDecode(r.body)), notFound: false);
       }
+      return (detail: null, notFound: r.statusCode == 404 || r.statusCode == 410);
     } catch (e) {
       debugPrint('[Community] getPublication: $e');
     }
-    return null;
+    return (detail: null, notFound: false);
   }
 
   // ────────────────────────────────────
@@ -905,32 +945,37 @@ class CommunityService {
   //  Follow / Unfollow
   // ────────────────────────────────────
 
-  /// Follow a creator. Returns updated follow state + follower count.
-  Future<({bool following, int followerCount})> followCreator(String userId) async {
+  /// Follow a creator. Returns the new follow state and follower count, or
+  /// null when it did not go through (offline, signed out, server error).
+  Future<({bool following, int followerCount})?> followCreator(String userId) async {
     try {
       final r = await _auth.post('/v1/community/creator/$userId/follow', {});
-      if (r.statusCode == 200) {
-        final data = jsonDecode(r.body);
-        return (following: data['following'] as bool, followerCount: data['followerCount'] as int);
-      }
+      if (r.statusCode == 200) return _followState(jsonDecode(r.body));
     } catch (e) {
       debugPrint('[Community] follow: $e');
     }
-    return (following: false, followerCount: 0);
+    return null;
   }
 
-  /// Unfollow a creator. Returns updated follow state + follower count.
-  Future<({bool following, int followerCount})> unfollowCreator(String userId) async {
+  /// Unfollow a creator. Returns the new follow state and follower count,
+  /// or null when it did not go through, so a failure never looks like a
+  /// successful unfollow.
+  Future<({bool following, int followerCount})?> unfollowCreator(String userId) async {
     try {
       final r = await _auth.delete('/v1/community/creator/$userId/follow');
-      if (r.statusCode == 200) {
-        final data = jsonDecode(r.body);
-        return (following: data['following'] as bool, followerCount: data['followerCount'] as int);
-      }
+      if (r.statusCode == 200) return _followState(jsonDecode(r.body));
     } catch (e) {
       debugPrint('[Community] unfollow: $e');
     }
-    return (following: false, followerCount: 0);
+    return null;
+  }
+
+  static ({bool following, int followerCount})? _followState(Object? data) {
+    if (data is! Map) return null;
+    final following = data['following'];
+    final count = data['followerCount'];
+    if (following is! bool || count is! num) return null;
+    return (following: following, followerCount: count.toInt());
   }
 
   // ────────────────────────────────────
@@ -1073,7 +1118,8 @@ class CommunityService {
 
   /// [replacePublicationRecipes], also telling a rate limit (429) apart:
   /// [retryAfter] is then how long until the server takes requests again.
-  Future<({bool ok, Duration? retryAfter})> replacePublicationRecipesResult(
+  /// [dropped] holds the photo paths the server left out of the update.
+  Future<({bool ok, Duration? retryAfter, List<String> dropped})> replacePublicationRecipesResult(
     String publicationId, {
     required List<Map<String, dynamic>> recipes,
     int? imageCount,
@@ -1087,18 +1133,37 @@ class CommunityService {
         if (totalImageBytes != null) 'totalImageBytes': totalImageBytes,
         if (imagePath != null) 'imagePath': imagePath,
       }, timeout: publishTimeout);
-      if (r.statusCode == 200) return (ok: true, retryAfter: null);
+      if (r.statusCode == 200) {
+        return (ok: true, retryAfter: null, dropped: droppedImagePathsIn(r.body));
+      }
       if (r.statusCode == 429) {
         // Retry-After, else the standard RateLimit-Reset, else a minute.
         final seconds = int.tryParse(r.headers['retry-after']?.trim() ?? '') ??
             int.tryParse(r.headers['ratelimit-reset']?.trim() ?? '') ??
             60;
-        return (ok: false, retryAfter: Duration(seconds: seconds.clamp(1, 3600)));
+        return (ok: false, retryAfter: Duration(seconds: seconds.clamp(1, 3600)), dropped: const <String>[]);
       }
     } catch (e) {
       debugPrint('[Community] replacePublicationRecipes: $e');
     }
-    return (ok: false, retryAfter: null);
+    return (ok: false, retryAfter: null, dropped: const <String>[]);
+  }
+
+  /// The `droppedImagePaths` of a publish or update answer: photos the
+  /// server would not keep, as they were sent. Empty when there are none.
+  @visibleForTesting
+  static List<String> droppedImagePathsIn(String body) {
+    try {
+      final data = jsonDecode(body);
+      final list = data is Map ? data['droppedImagePaths'] : null;
+      if (list is! List) return const [];
+      return [
+        for (final path in list)
+          if (path is String && path.isNotEmpty) path,
+      ];
+    } catch (_) {
+      return const [];
+    }
   }
 
   // ────────────────────────────────────
@@ -1232,8 +1297,51 @@ class CommunityService {
       if (map.remove(sourceKey) != null) {
         await prefs.setString(_publishKeysKey, jsonEncode(map));
       }
+      final sentRaw = prefs.getString(_publishKeySentKey);
+      if (sentRaw != null) {
+        final sent = jsonDecode(sentRaw) as Map<String, dynamic>;
+        if (sent.remove(sourceKey) != null) await prefs.setString(_publishKeySentKey, jsonEncode(sent));
+      }
     } catch (e) {
       debugPrint('[Community] clearPublishKey: $e');
+    }
+  }
+
+  // What went out under each key: the fingerprint of the content every try
+  // with it sent, or "*" once tries sent different content.
+  static const _publishKeySentKey = 'communityPublishKeySent';
+
+  /// The key for [sourceKey] for a try that sends [contentHash], and
+  /// whether every try under that key sent exactly this content. When not,
+  /// a "same key, here is the publication" answer may carry content from an
+  /// earlier try (one that timed out here but went through), so the caller
+  /// must bring the publication up to date.
+  static Future<({String key, bool sameContent})> publishKeyForContent(String sourceKey, String contentHash) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keysRaw = prefs.getString(_publishKeysKey);
+      final keys = keysRaw != null ? (jsonDecode(keysRaw) as Map<String, dynamic>) : <String, dynamic>{};
+      final sentRaw = prefs.getString(_publishKeySentKey);
+      final sent = sentRaw != null ? (jsonDecode(sentRaw) as Map<String, dynamic>) : <String, dynamic>{};
+      final existing = keys[sourceKey];
+      if (existing is String && existing.isNotEmpty) {
+        // A key from before this was recorded may have sent anything.
+        final same = sent[sourceKey] == contentHash;
+        if (!same && sent[sourceKey] != '*') {
+          sent[sourceKey] = '*';
+          await prefs.setString(_publishKeySentKey, jsonEncode(sent));
+        }
+        return (key: existing, sameContent: same);
+      }
+      final key = const Uuid().v4();
+      keys[sourceKey] = key;
+      sent[sourceKey] = contentHash;
+      await prefs.setString(_publishKeysKey, jsonEncode(keys));
+      await prefs.setString(_publishKeySentKey, jsonEncode(sent));
+      return (key: key, sameContent: true);
+    } catch (e) {
+      debugPrint('[Community] publishKeyForContent: $e');
+      return (key: const Uuid().v4(), sameContent: true);
     }
   }
 
@@ -1271,8 +1379,9 @@ class CommunityService {
   /// the publication it already made (200) instead of making another.
   /// A 429 that carries `Retry-After` is the account's upload lock (another
   /// publish still being processed) and comes back as [retryAfter]; one
-  /// without it (the daily limit) is a plain failure.
-  Future<({bool success, String? error, String? publicationId, String? status, Duration? retryAfter})> publish({
+  /// without it (the daily limit) is a plain failure. `replayed` is that 200:
+  /// the publication carries what the earlier try sent.
+  Future<CommunityPublishResult> publish({
     required String title,
     String? description,
     String? imagePath,
@@ -1306,6 +1415,8 @@ class CommunityService {
           publicationId: data['id'] as String?,
           status: data['status'] as String?,
           retryAfter: null,
+          replayed: r.statusCode == 200,
+          droppedImagePaths: droppedImagePathsIn(r.body),
         );
       }
       final retryAfter = r.statusCode == 429 ? int.tryParse(r.headers['retry-after']?.trim() ?? '') : null;
@@ -1315,9 +1426,21 @@ class CommunityService {
         publicationId: null,
         status: null,
         retryAfter: retryAfter != null && retryAfter > 0 ? Duration(seconds: retryAfter) : null,
+        replayed: false,
+        droppedImagePaths: const <String>[],
       );
     } catch (e) {
-      return (success: false, error: 'Connection error', publicationId: null, status: null, retryAfter: null);
+      debugPrint('[Community] publish: $e');
+      // No error text of its own: the screen says it in the user's language.
+      return (
+        success: false,
+        error: null,
+        publicationId: null,
+        status: null,
+        retryAfter: null,
+        replayed: false,
+        droppedImagePaths: const <String>[],
+      );
     }
   }
 
@@ -1405,8 +1528,12 @@ class CommunityService {
     return [];
   }
 
-  /// Get my published cookbooks.
-  Future<List<MyPublication>> getMyPublications() async {
+  /// Get my published cookbooks (empty when they can't be loaded).
+  Future<List<MyPublication>> getMyPublications() async => await fetchMyPublications() ?? [];
+
+  /// My published cookbooks, or null when they could not be loaded
+  /// (offline, server error), so a failure never reads as "none yet".
+  Future<List<MyPublication>?> fetchMyPublications() async {
     try {
       final r = await _auth.get('/v1/community/me/publications');
       if (r.statusCode == 200) {
@@ -1418,7 +1545,7 @@ class CommunityService {
     } catch (e) {
       debugPrint('[Community] getMyPublications: $e');
     }
-    return [];
+    return null;
   }
 
   /// Unpublish one of my cookbooks.
@@ -1445,9 +1572,10 @@ class CommunityService {
         final data = jsonDecode(r.body);
         return (success: false, error: data['error'] as String?);
       } catch (_) {}
-      return (success: false, error: 'Request failed');
+      // No error text of its own: the screen says it in the user's language.
+      return (success: false, error: null);
     } catch (_) {
-      return (success: false, error: 'Connection error');
+      return (success: false, error: null);
     }
   }
 
@@ -1491,6 +1619,11 @@ class PublishSnapshot {
   /// Whether photos were included.
   final bool includeImages;
 
+  /// Whether the person chose to include their own notes. Snapshots from
+  /// before that choice existed read as false: notes stay private unless
+  /// the person says otherwise.
+  final bool includeNotes;
+
   /// Sub-recipes from other cookbooks that were offered, and the ones of
   /// those that went in. A sub-recipe linked later is new and goes in, as
   /// the publish sheet would have it.
@@ -1503,6 +1636,7 @@ class PublishSnapshot {
     required this.hash,
     required this.name,
     required this.includeImages,
+    this.includeNotes = false,
     this.externalRecipeIds = const [],
     this.includedExternalIds = const [],
     required this.at,
@@ -1512,6 +1646,7 @@ class PublishSnapshot {
         'h': hash,
         if (name != null) 'n': name,
         'img': includeImages,
+        if (includeNotes) 'nt': true,
         if (externalRecipeIds.isNotEmpty) 'o': externalRecipeIds,
         if (includedExternalIds.isNotEmpty) 'x': includedExternalIds,
         't': at.millisecondsSinceEpoch,
@@ -1526,6 +1661,7 @@ class PublishSnapshot {
       hash: hash,
       name: json['n'] as String?,
       includeImages: json['img'] as bool? ?? true,
+      includeNotes: json['nt'] == true,
       externalRecipeIds: ids(json['o']),
       includedExternalIds: ids(json['x']),
       at: DateTime.fromMillisecondsSinceEpoch((json['t'] as num?)?.toInt() ?? 0),

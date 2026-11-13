@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
+import 'auth_error_message.dart';
 import 'sheet_chrome.dart';
 
 /// Shows the Google / Apple sign-in sheet with [message] explaining why, runs
@@ -86,7 +87,7 @@ Future<bool> promptSignIn(
   }
   final error = ref.read(authProvider).error;
   if (!AuthService.instance.isSignedIn && error != null && context.mounted) {
-    AppSnackbar.error(context, error);
+    AppSnackbar.error(context, authErrorMessage(AppLocalizations.of(context)!, error));
   }
   return AuthService.instance.isSignedIn;
 }

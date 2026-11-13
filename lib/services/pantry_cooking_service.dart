@@ -262,13 +262,23 @@ class PantryRecipeMatch {
   /// Counted lines the pantry lacks, in recipe order.
   final List<LibraryIngredient> missing;
 
+  /// Counted lines the pantry has, in recipe order, each with the pantry
+  /// items that cover it as the user wrote them.
+  final List<(LibraryIngredient, List<String>)> coveredBy;
+
   const PantryRecipeMatch({
     required this.recipe,
     required this.counted,
     required this.covered,
     required this.basics,
     required this.missing,
+    this.coveredBy = const [],
   });
+
+  /// The pantry items this recipe uses, each once, in recipe order.
+  List<String> get pantryItemsUsed => {
+        for (final (_, items) in coveredBy) ...items,
+      }.toList();
 
   /// Share of the counted lines in the pantry, 0 to 1.
   double get share => counted == 0 ? (basics > 0 ? 1 : 0) : covered / counted;
@@ -287,6 +297,7 @@ class PantryRecipeMatch {
 PantryRecipeMatch matchRecipe(LibraryRecipe recipe, PantryMatcher matcher) {
   var counted = 0, covered = 0, basics = 0;
   final missing = <LibraryIngredient>[];
+  final coveredBy = <(LibraryIngredient, List<String>)>[];
   final seen = <String>{};
   for (final ingredient in recipe.ingredients) {
     if (ingredient.key.isEmpty || !seen.add(ingredient.key.signature)) continue;
@@ -298,6 +309,7 @@ PantryRecipeMatch matchRecipe(LibraryRecipe recipe, PantryMatcher matcher) {
       case IngredientCover.covered:
         counted++;
         covered++;
+        coveredBy.add((ingredient, matcher.pantryItemsFor(ingredient.key)));
       case IngredientCover.missing:
         counted++;
         missing.add(ingredient);
@@ -309,6 +321,7 @@ PantryRecipeMatch matchRecipe(LibraryRecipe recipe, PantryMatcher matcher) {
     covered: covered,
     basics: basics,
     missing: missing,
+    coveredBy: coveredBy,
   );
 }
 
