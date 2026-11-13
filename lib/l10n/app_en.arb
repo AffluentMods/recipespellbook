@@ -5895,6 +5895,22 @@
   "notifDownloadsOffer": "Notify me about downloads",
   "notifDownloadsOn": "You'll get a notification when someone downloads it.",
   "notifPermissionDenied": "Notifications are off for Recipe Spellbook. Turn them on in your device settings.",
+  "notifPushUnavailable": "This device could not be registered for notifications. Try again later.",
+  "@notifPushUnavailable": {
+    "description": "Shown when notifications were allowed but the device got no push token (for example the Push setup is missing), so the switch stays off."
+  },
+  "signInFailed": "Sign-in failed. Please try again.",
+  "@signInFailed": {
+    "description": "Google or Apple sign-in, or the server, refused the sign-in."
+  },
+  "signInTransferExpired": "The sign-in from your other device has expired. Sign in again on this device.",
+  "@signInTransferExpired": {
+    "description": "A transfer from another device carried a sign-in that the server no longer accepts."
+  },
+  "paywallPurchasePending": "Your purchase is being processed. Premium unlocks as soon as the store confirms it.",
+  "@paywallPurchasePending": {
+    "description": "After a store purchase that went through but is not confirmed yet (for example a pending payment), so the plan is still Free."
+  },
   "syncNotInPlan": "Cloud Sync is not included in your plan",
   "transferRowsLeftOut": "{count, plural, =1{1 item could not be saved on this device.} other{{count} items could not be saved on this device.}} To try once more, enter the same code again within a day.",
   "@transferRowsLeftOut": {"placeholders": {"count": {"type": "int"}}},

@@ -11091,6 +11091,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get notifPermissionDenied => 'Benachrichtigungen für Recipe Spellbook sind aus. Schalte sie in den Geräteeinstellungen ein.';
 
   @override
+  String get notifPushUnavailable => 'Dieses Gerät konnte nicht für Benachrichtigungen registriert werden. Versuche es später erneut.';
+
+  @override
+  String get signInFailed => 'Die Anmeldung ist fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get signInTransferExpired => 'Die Anmeldung von deinem anderen Gerät ist abgelaufen. Melde dich auf diesem Gerät erneut an.';
+
+  @override
+  String get paywallPurchasePending => 'Dein Kauf wird bearbeitet. Premium wird freigeschaltet, sobald der Store ihn bestätigt.';
+
+  @override
   String get syncNotInPlan => 'Cloud-Synchronisierung ist in deinem Tarif nicht enthalten';
 
   @override

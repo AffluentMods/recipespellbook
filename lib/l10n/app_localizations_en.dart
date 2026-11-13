@@ -11103,6 +11103,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifPermissionDenied => 'Notifications are off for Recipe Spellbook. Turn them on in your device settings.';
 
   @override
+  String get notifPushUnavailable => 'This device could not be registered for notifications. Try again later.';
+
+  @override
+  String get signInFailed => 'Sign-in failed. Please try again.';
+
+  @override
+  String get signInTransferExpired => 'The sign-in from your other device has expired. Sign in again on this device.';
+
+  @override
+  String get paywallPurchasePending => 'Your purchase is being processed. Premium unlocks as soon as the store confirms it.';
+
+  @override
   String get syncNotInPlan => 'Cloud Sync is not included in your plan';
 
   @override

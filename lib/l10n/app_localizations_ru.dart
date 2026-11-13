@@ -11229,6 +11229,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifPermissionDenied => 'Уведомления Recipe Spellbook выключены. Включите их в настройках устройства.';
 
   @override
+  String get notifPushUnavailable => 'Не удалось зарегистрировать это устройство для уведомлений. Попробуйте позже.';
+
+  @override
+  String get signInFailed => 'Не удалось войти. Попробуйте ещё раз.';
+
+  @override
+  String get signInTransferExpired => 'Вход, переданный с другого устройства, истёк. Войдите снова на этом устройстве.';
+
+  @override
+  String get paywallPurchasePending => 'Покупка обрабатывается. Premium откроется, как только магазин её подтвердит.';
+
+  @override
   String get syncNotInPlan => 'Облачная синхронизация не входит в ваш тариф';
 
   @override

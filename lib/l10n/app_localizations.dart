@@ -19639,6 +19639,30 @@ abstract class AppLocalizations {
   /// **'Notifications are off for Recipe Spellbook. Turn them on in your device settings.'**
   String get notifPermissionDenied;
 
+  /// Shown when notifications were allowed but the device got no push token (for example the Push setup is missing), so the switch stays off.
+  ///
+  /// In en, this message translates to:
+  /// **'This device could not be registered for notifications. Try again later.'**
+  String get notifPushUnavailable;
+
+  /// Google or Apple sign-in, or the server, refused the sign-in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in failed. Please try again.'**
+  String get signInFailed;
+
+  /// A transfer from another device carried a sign-in that the server no longer accepts.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in from your other device has expired. Sign in again on this device.'**
+  String get signInTransferExpired;
+
+  /// After a store purchase that went through but is not confirmed yet (for example a pending payment), so the plan is still Free.
+  ///
+  /// In en, this message translates to:
+  /// **'Your purchase is being processed. Premium unlocks as soon as the store confirms it.'**
+  String get paywallPurchasePending;
+
   /// No description provided for @syncNotInPlan.
   ///
   /// In en, this message translates to:

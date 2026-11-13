@@ -11084,6 +11084,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notifPermissionDenied => 'Las notificaciones de Recipe Spellbook están desactivadas. Actívalas en los ajustes del dispositivo.';
 
   @override
+  String get notifPushUnavailable => 'No se pudo registrar este dispositivo para recibir notificaciones. Inténtalo más tarde.';
+
+  @override
+  String get signInFailed => 'No se pudo iniciar sesión. Inténtalo de nuevo.';
+
+  @override
+  String get signInTransferExpired => 'El inicio de sesión de tu otro dispositivo ha caducado. Vuelve a iniciar sesión en este dispositivo.';
+
+  @override
+  String get paywallPurchasePending => 'Tu compra se está procesando. Premium se desbloqueará en cuanto la tienda la confirme.';
+
+  @override
   String get syncNotInPlan => 'Tu plan no incluye la sincronización en la nube';
 
   @override

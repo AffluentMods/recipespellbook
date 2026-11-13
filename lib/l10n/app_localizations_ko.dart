@@ -10997,6 +10997,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notifPermissionDenied => 'Recipe Spellbook 알림이 꺼져 있습니다. 기기 설정에서 켜 주세요.';
 
   @override
+  String get notifPushUnavailable => '이 기기를 알림용으로 등록하지 못했습니다. 나중에 다시 시도해 주세요.';
+
+  @override
+  String get signInFailed => '로그인하지 못했습니다. 다시 시도해 주세요.';
+
+  @override
+  String get signInTransferExpired => '다른 기기에서 넘겨받은 로그인이 만료되었습니다. 이 기기에서 다시 로그인해 주세요.';
+
+  @override
+  String get paywallPurchasePending => '구매를 처리하고 있습니다. 스토어에서 확인되는 즉시 프리미엄이 활성화됩니다.';
+
+  @override
   String get syncNotInPlan => '현재 요금제에는 클라우드 동기화가 포함되어 있지 않습니다';
 
   @override

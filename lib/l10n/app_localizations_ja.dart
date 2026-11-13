@@ -10976,6 +10976,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notifPermissionDenied => 'Recipe Spellbook の通知がオフになっています。端末の設定でオンにしてください。';
 
   @override
+  String get notifPushUnavailable => 'この端末を通知用に登録できませんでした。しばらくしてからもう一度お試しください。';
+
+  @override
+  String get signInFailed => 'サインインできませんでした。もう一度お試しください。';
+
+  @override
+  String get signInTransferExpired => 'もう一方の端末からのサインインは期限切れです。この端末でもう一度サインインしてください。';
+
+  @override
+  String get paywallPurchasePending => '購入を処理しています。ストアで確認され次第、プレミアムが有効になります。';
+
+  @override
   String get syncNotInPlan => 'ご利用のプランにはクラウド同期が含まれていません';
 
   @override

@@ -10972,6 +10972,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notifPermissionDenied => 'Recipe Spellbook 的通知已关闭。请在设备设置中开启。';
 
   @override
+  String get notifPushUnavailable => '无法为此设备注册通知，请稍后再试。';
+
+  @override
+  String get signInFailed => '登录失败，请重试。';
+
+  @override
+  String get signInTransferExpired => '来自另一台设备的登录已过期，请在此设备上重新登录。';
+
+  @override
+  String get paywallPurchasePending => '你的购买正在处理中。商店确认后即可解锁高级版。';
+
+  @override
   String get syncNotInPlan => '你的套餐不包含云同步';
 
   @override

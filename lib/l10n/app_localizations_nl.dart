@@ -11103,6 +11103,18 @@ class AppLocalizationsNl extends AppLocalizations {
   String get notifPermissionDenied => 'Meldingen voor Recipe Spellbook staan uit. Zet ze aan in de instellingen van je apparaat.';
 
   @override
+  String get notifPushUnavailable => 'Dit apparaat kon niet worden aangemeld voor meldingen. Probeer het later opnieuw.';
+
+  @override
+  String get signInFailed => 'Inloggen is mislukt. Probeer het opnieuw.';
+
+  @override
+  String get signInTransferExpired => 'De aanmelding van je andere apparaat is verlopen. Log opnieuw in op dit apparaat.';
+
+  @override
+  String get paywallPurchasePending => 'Je aankoop wordt verwerkt. Premium wordt ontgrendeld zodra de store deze bevestigt.';
+
+  @override
   String get syncNotInPlan => 'Cloudsynchronisatie zit niet in je abonnement';
 
   @override
