@@ -615,7 +615,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
             final itemId = 'item_${DateTime.now().millisecondsSinceEpoch}';
             await shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
               id: itemId,
-              listId: 'list_default',
+              listId: await shoppingDao.defaultListId(),
               name: itemName,
               sortOrder: const drift.Value(0),
             ));

@@ -1219,15 +1219,7 @@ class SyncService {
                     foreignChanged = true;
                     continue;
                   }
-                  final exists = await (db.select(db.shoppingLists)..where((t) => t.id.equals(to))).getSingleOrNull();
-                  if (exists == null) {
-                    await db.customStatement('UPDATE shopping_lists SET id = ?, updated_at = ? WHERE id = ?',
-                        [to, _secs(now), from]);
-                  } else {
-                    await db.customStatement('DELETE FROM shopping_lists WHERE id = ?', [from]);
-                  }
-                  await db.customStatement('UPDATE shopping_list_items SET list_id = ?, updated_at = ? WHERE list_id = ?',
-                      [to, _secs(now), from]);
+                  await _moveList(db, from, to, now);
                   moves.add(SyncRekey('shoppingLists', from, to));
                 case 'shoppingListItems':
                   await db.customStatement('UPDATE shopping_list_items SET id = ?, updated_at = ? WHERE id = ?',
@@ -1252,6 +1244,40 @@ class SyncService {
       _rekeys.add(m);
     }
     return moves.length;
+  }
+
+  /// Move the list [from] (and its items) to the id [to].
+  Future<void> _moveList(AppDatabase db, String from, String to, DateTime now) async {
+    final exists = await (db.select(db.shoppingLists)..where((t) => t.id.equals(to))).getSingleOrNull();
+    if (exists == null) {
+      await db.customStatement('UPDATE shopping_lists SET id = ?, updated_at = ? WHERE id = ?', [to, _secs(now), from]);
+    } else {
+      await db.customStatement('DELETE FROM shopping_lists WHERE id = ?', [from]);
+    }
+    await db.customStatement(
+        'UPDATE shopping_list_items SET list_id = ?, updated_at = ? WHERE list_id = ?', [to, _secs(now), from]);
+  }
+
+  /// Move a shopping list of this account to an id of its own, the way a
+  /// clash in /sync is resolved (see "Re-keying"), and return that id; null
+  /// when nobody is signed in. Every install's default list has the same
+  /// id, so sharing it for collaboration clashed between accounts on the
+  /// server. The old id is recorded as deleted: where this account's
+  /// server copy had it, the other devices follow to the new one.
+  Future<String?> rekeyList(String listId) async {
+    final db = _db;
+    final userId = _auth.currentUser?.id;
+    if (db == null || userId == null) return null;
+    final suffix = _suffixFor(userId);
+    if (listId.endsWith('~$suffix')) return listId;
+    final to = '${SeededDefaults.seedIdOf(listId)}~$suffix';
+    await SyncJournal.applyingRemote(() => db.transaction(() async {
+          await _moveList(db, listId, to, DateTime.now().add(const Duration(seconds: 1)));
+          await SyncJournal.rekey(db, SyncJournal.shoppingLists, listId, to);
+        }));
+    await SyncJournal.recordDeletion(db, SyncJournal.shoppingLists, listId);
+    _rekeys.add(SyncRekey('shoppingLists', listId, to));
+    return to;
   }
 
   /// Drift's default DateTime storage: unix seconds.

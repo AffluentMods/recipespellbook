@@ -32,6 +32,7 @@ import '../../../services/home_widget_snapshot.dart' show shoppingLastListPrefKe
 import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/share_file.dart';
 import '../../../services/shopping_list_service.dart';
+import '../../../services/sync_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
 import '../../../utils/ingredient_utils.dart';
@@ -191,7 +192,16 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     _collabTimer = Timer.periodic(const Duration(seconds: 6), (_) {
       if (mounted) CollabService.instance.syncNow();
     });
+    // The list on screen can move to a new id (sharing the default list,
+    // a clash in sync): follow it.
+    _listMoves = SyncService.instance.rekeys
+        .where((m) => m.entity == 'shoppingLists')
+        .listen((m) {
+      if (mounted && m.from == _currentListId) setState(() => _currentListId = m.to);
+    });
   }
+
+  StreamSubscription<SyncRekey>? _listMoves;
 
   void _onCollabRevision() {
     if (mounted) setState(() {});
@@ -240,6 +250,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   @override
   void dispose() {
     _collabTimer?.cancel();
+    _listMoves?.cancel();
     CollabService.instance.revision.removeListener(_onCollabRevision);
     super.dispose();
   }

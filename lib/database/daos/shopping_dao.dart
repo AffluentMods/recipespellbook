@@ -36,6 +36,24 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
     return rows.isNotEmpty ? rows.first : null;
   }
 
+  /// The list things go on when no list is chosen: the one marked default,
+  /// else the built-in one, else the first. The built-in list can have moved
+  /// to an id of the account's own (sharing it, or a clash in sync), so its
+  /// id is looked up rather than assumed.
+  Future<String> defaultListId() async =>
+      (await getDefaultList())?.id ??
+      (await getListById('list_default'))?.id ??
+      (await getAllLists()).firstOrNull?.id ??
+      'list_default';
+
+  /// [defaultListId], as the lists change.
+  Stream<String> watchDefaultListId() => watchAllLists().map((lists) =>
+      (lists.where((l) => l.isDefault).firstOrNull ??
+              lists.where((l) => l.id == 'list_default').firstOrNull ??
+              lists.firstOrNull)
+          ?.id ??
+      'list_default').distinct();
+
   /// Mark [id] as the single default list, clearing the flag on every other.
   Future<void> setDefaultList(String id) async {
     await transaction(() async {
