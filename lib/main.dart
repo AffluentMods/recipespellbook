@@ -522,6 +522,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     final cookbookAsync = ref.read(selectedCookbookProvider);
     final cookbookId = cookbookAsync.valueOrNull?.id ?? 'starter';
+    final l10n = AppLocalizations.of(nav.context)!;
 
     // Show loading overlay
     showDialog(
@@ -540,8 +541,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
                 children: [
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
-                  Text('Scanning ${imagePaths.length} image${imagePaths.length > 1 ? 's' : ''}...',
-                    style: const TextStyle(fontWeight: FontWeight.w500)),
+                  Text(l10n.importingRecipe, style: const TextStyle(fontWeight: FontWeight.w500)),
                 ],
               ),
             ),
@@ -557,10 +557,11 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       if (nav.canPop()) nav.pop();
 
       if (ocrResult.isEmpty) {
-        if (nav.context.mounted) {
-          ScaffoldMessenger.of(nav.context).showSnackBar(
-            const SnackBar(
-              content: Text('No text found in the shared image. Try a clearer photo or paste text instead.'),
+        final ctx = nav.context;
+        if (ctx.mounted) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(
+              content: Text(l10n.scanNoTextImage),
               backgroundColor: Colors.orange,
             ),
           );
@@ -584,10 +585,11 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       );
     } catch (e) {
       if (nav.canPop()) nav.pop();
-      if (nav.context.mounted) {
-        ScaffoldMessenger.of(nav.context).showSnackBar(
+      final ctx = nav.context;
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(
-            content: Text('Failed to scan image: ${e.toString().replaceFirst("Exception: ", "")}'),
+            content: Text(l10n.failedToImport(e.toString().replaceFirst("Exception: ", ""))),
             backgroundColor: Colors.red,
           ),
         );
