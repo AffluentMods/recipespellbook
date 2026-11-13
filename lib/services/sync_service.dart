@@ -1186,6 +1186,9 @@ class SyncService {
   /// Drift's default DateTime storage: unix seconds.
   static int _secs(DateTime d) => d.millisecondsSinceEpoch ~/ 1000;
 
+  /// [d] cut to the whole second, the precision rows are stored with.
+  static DateTime _wholeSecond(DateTime d) => DateTime.fromMillisecondsSinceEpoch(_secs(d) * 1000);
+
   /// Ids from other accounts' namespaced rows ("user:produce") → "produce".
   static String? _bare(String? id) {
     if (id == null) return null;
@@ -1335,10 +1338,16 @@ class SyncService {
       // Only clear recipes that weren't edited again while the push was in
       // flight; a recipe whose updatedAt changed stays dirty and is re-pushed
       // next cycle (and is protected from the family pull by skipRecipeIds).
+      // Stored times have whole seconds: an edit in the second the push
+      // started looks the same as the copy that went out, so it stays dirty.
+      final startSecond = _wholeSecond(startedAt);
       final clear = <String>[];
       for (final id in pushIds) {
         final current = await (db.select(db.recipes)..where((r) => r.id.equals(id))).getSingleOrNull();
-        if (current == null || current.updatedAt == pushedStamp[id]) clear.add(id);
+        if (current == null ||
+            (current.updatedAt == pushedStamp[id] && current.updatedAt.isBefore(startSecond))) {
+          clear.add(id);
+        }
       }
       if (clear.isNotEmpty) await collab.unmarkRecipesDirty(clear);
       await _saveDate(_collabMarkPrefix, userId, startedAt);
@@ -1641,8 +1650,10 @@ class SyncService {
     final after = ctx.inflightAfter;
     if (after == null) return true;
     if (local != null) {
+      // Stored times have whole seconds; [after] has milliseconds. A row
+      // edited in the second the sync started counts as edited mid-sync.
       final at = local[id];
-      if (at != null && at.isAfter(after)) return false; // edited locally mid-sync
+      if (at != null && !at.isBefore(_wholeSecond(after))) return false; // edited locally mid-sync
     }
     final touched = ctx.touched[entity]?[id];
     if (touched != null && touched.isAfter(after)) return false;
