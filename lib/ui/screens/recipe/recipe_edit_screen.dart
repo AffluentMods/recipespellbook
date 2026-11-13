@@ -464,7 +464,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   bool get _hasUnsavedChanges =>
       _initialCaptured && _editSnapshot() != _initialSnapshot;
 
-  /// Our published discard guard, if any (desktop / large-tablet in-shell only).
+  /// Our published discard guard (see initState).
   DiscardGuard? _registeredGuard;
 
   /// Returns true when it's safe to leave this editor: nothing changed, or the
@@ -501,17 +501,17 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   void initState() {
     super.initState();
     _loadRecipe();
-    // On desktop / large tablet the editor lives inside the shell, so a
-    // sidebar / rail / command-palette / shortcut `context.go()` can unmount it
-    // WITHOUT firing PopScope. Publish a guard those paths await. Phones push
-    // the editor full-screen, where PopScope already covers the only exit.
-    if (!isMobile) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _registeredGuard = _confirmDiscardIfNeeded;
-        ref.read(unsavedEditorGuardProvider.notifier).state = _registeredGuard;
-      });
-    }
+    // Wherever the shell shows its navigation beside the editor (the desktop
+    // sidebar and the tablet rail, chosen by window width, so iPads and
+    // Android tablets too), a sidebar / rail / command-palette / shortcut
+    // `context.go()` can unmount it WITHOUT firing PopScope. Publish a guard
+    // those paths await. Always: whether there is a sidebar depends on the
+    // width, which can change while the editor is open, not on the platform.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _registeredGuard = _confirmDiscardIfNeeded;
+      ref.read(unsavedEditorGuardProvider.notifier).state = _registeredGuard;
+    });
   }
 
   @override
