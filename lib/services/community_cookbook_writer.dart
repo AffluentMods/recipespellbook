@@ -27,15 +27,20 @@ class CommunityPhotoPlan {
 
   /// The cover and step photos of [indexes] in [recipes]. A photo already in
   /// [onDevice] (server path to a local file that still exists) is used as
-  /// it is instead of being fetched again.
+  /// it is instead of being fetched again. Photos come from the publication
+  /// unless [urlFor] says where (a share link's photos); files are named
+  /// after [filePrefix], by default `community_<publicationId>`.
   factory CommunityPhotoPlan.forRecipes(
     String publicationId,
     List<CommunityRecipe> recipes,
     Iterable<int> indexes, {
     Map<String, String> onDevice = const {},
     Uuid uuid = const Uuid(),
+    String Function(String serverPath)? urlFor,
+    String? filePrefix,
   }) {
     final plan = CommunityPhotoPlan._();
+    final prefix = filePrefix ?? 'community_$publicationId';
     void want(String key, String? serverPath, String suffix) {
       if (serverPath == null || serverPath.isEmpty) return;
       plan._slot[key] = serverPath;
@@ -47,8 +52,8 @@ class CommunityPhotoPlan {
       }
       plan._jobOf[serverPath] = plan.jobs.length;
       plan.jobs.add((
-        url: CommunityService.communityImageUrl(publicationId, serverPath),
-        filename: 'community_${publicationId}_${uuid.v4()}_$suffix.jpg',
+        url: urlFor?.call(serverPath) ?? CommunityService.communityImageUrl(publicationId, serverPath),
+        filename: '${prefix}_${uuid.v4()}_$suffix.jpg',
       ));
     }
 
@@ -59,6 +64,25 @@ class CommunityPhotoPlan {
       for (var s = 0; s < recipe.steps.length; s++) {
         want('${i}_$s', recipe.steps[s].imagePath, 'step${recipe.steps[s].sortOrder}');
       }
+    }
+    return plan;
+  }
+
+  /// Photos that did not come down during an earlier download or update,
+  /// fetched again by their [serverPaths] (see [localFor]).
+  factory CommunityPhotoPlan.forPaths(
+    String publicationId,
+    Iterable<String> serverPaths, {
+    Uuid uuid = const Uuid(),
+  }) {
+    final plan = CommunityPhotoPlan._();
+    for (final path in serverPaths) {
+      if (path.isEmpty || plan._jobOf.containsKey(path)) continue;
+      plan._jobOf[path] = plan.jobs.length;
+      plan.jobs.add((
+        url: CommunityService.communityImageUrl(publicationId, path),
+        filename: 'community_${publicationId}_${uuid.v4()}_retry.jpg',
+      ));
     }
     return plan;
   }
@@ -93,8 +117,23 @@ class CommunityPhotoPlan {
   /// The local file for step [s] of recipe [i], or null.
   String? step(int i, int s) => _local(_slot['${i}_$s']);
 
+  /// The local file for the photo at [serverPath], or null.
+  String? localFor(String serverPath) => _local(serverPath);
+
   /// How many photos could not be fetched.
   int get failed => _saved.where((p) => p == null).length;
+
+  /// The photos that did not arrive, by where they belong: recipe [index],
+  /// its [step] (-1 for the recipe's own photo), and the server path.
+  List<({int index, int step, String serverPath})> get missing => [
+        for (final e in _slot.entries)
+          if (_local(e.value) == null)
+            (
+              index: int.parse(e.key.split('_').first),
+              step: e.key.contains('_') ? int.parse(e.key.split('_').last) : -1,
+              serverPath: e.value,
+            ),
+      ];
 
   /// Server path to local file for every photo of this plan now on the device.
   Map<String, String> get onDevice => {
@@ -250,6 +289,15 @@ class CommunityRecipeWriter {
   }
 }
 
+/// Start of the id of a cookbook made by downloading only some recipes of a
+/// publication. Such a cookbook takes no updates, and the update check never
+/// mistakes it for a whole download from before sources were recorded.
+const communityPartialCookbookPrefix = 'community_part_';
+
+/// The id for a new cookbook made by a Community download.
+String newCommunityCookbookId({required bool partial, Uuid uuid = const Uuid()}) =>
+    partial ? '$communityPartialCookbookPrefix${uuid.v4()}' : 'community_${uuid.v4()}';
+
 /// Phase 2 of a Community download: the recipes at [indexes] of [detail]
 /// into [cookbookId] (made first, named after the publication, when
 /// [newCookbook]), all in one transaction. A whole cookbook downloaded as a
@@ -269,7 +317,6 @@ Future<Map<int, String>> saveCommunityDownload({
   String? currentUserId,
   Uuid uuid = const Uuid(),
 }) {
-  final writer = CommunityRecipeWriter(db, uuid: uuid);
   final whole = indexes.toSet().length == detail.recipes.length;
   // Someone downloading their own publication keeps a plain copy: they
   // publish it, they don't take updates to it.
@@ -285,20 +332,7 @@ Future<Map<int, String>> saveCommunityDownload({
           ));
     }
 
-    final recipeIdByIndex = <int, String>{};
-    final ingredientIdsByIndex = <int, List<String>>{};
-    for (final i in indexes) {
-      final written = await writer.insert(cookbookId, detail.recipes[i], i, photos);
-      recipeIdByIndex[i] = written.id;
-      ingredientIdsByIndex[i] = written.ingredientIds;
-    }
-
-    // Restore recipe links (ingredient→sub-recipe references)
-    for (final i in indexes) {
-      final sourceRecipeId = recipeIdByIndex[i];
-      if (sourceRecipeId == null) continue;
-      await writer.writeLinks(detail.recipes[i], sourceRecipeId, ingredientIdsByIndex[i]!, (j) => recipeIdByIndex[j]);
-    }
+    final recipeIdByIndex = await _writeRecipes(db, uuid, cookbookId, detail.recipes, indexes, photos);
 
     if (recordSource) {
       final keys = communityRecipeKeys(detail.recipes);
@@ -315,6 +349,10 @@ Future<Map<int, String>> saveCommunityDownload({
             ),
         },
         photos: photos.onDevice,
+        // Photos that did not come down: the next update check tries again.
+        missing: [
+          for (final m in photos.missing) CommunityMissingPhoto(key: keys[m.index], step: m.step, serverPath: m.serverPath),
+        ],
       );
       await (db.update(db.cookbooks)..where((c) => c.id.equals(cookbookId))).write(CookbooksCompanion(
             communitySourceId: drift.Value(publicationId),
@@ -325,4 +363,65 @@ Future<Map<int, String>> saveCommunityDownload({
     }
     return recipeIdByIndex;
   });
+}
+
+/// Saves the recipes at [indexes] of [recipes] into the existing cookbook
+/// [cookbookId], in one transaction, exactly as a download writes them:
+/// text, nutrition, notes, source, tags, photos from [photos] and the
+/// sub-recipe links between the recipes saved. Every Community save goes
+/// through here (one recipe from the feed or its page, a shared recipe).
+/// Returns the local recipe id for each index.
+Future<Map<int, String>> saveCommunityRecipes({
+  required AppDatabase db,
+  required List<CommunityRecipe> recipes,
+  required Iterable<int> indexes,
+  required String cookbookId,
+  required CommunityPhotoPlan photos,
+  Uuid uuid = const Uuid(),
+}) {
+  final wanted = [for (final i in indexes.toSet()) if (i >= 0 && i < recipes.length) i]..sort();
+  return db.transaction(() => _writeRecipes(db, uuid, cookbookId, recipes, wanted, photos));
+}
+
+/// [indexes] with every recipe they use as a sub-recipe, at any depth, so
+/// saving them keeps their links whole.
+Set<int> withSubRecipes(List<CommunityRecipe> recipes, Iterable<int> indexes) {
+  final out = <int>{};
+  final queue = [...indexes];
+  while (queue.isNotEmpty) {
+    final i = queue.removeLast();
+    if (i < 0 || i >= recipes.length || !out.add(i)) continue;
+    for (final link in recipes[i].recipeLinks) {
+      queue.add(link.linkedRecipeIndex);
+    }
+  }
+  return out;
+}
+
+/// The recipes at [indexes] into [cookbookId], then their links to one
+/// another. Call inside a transaction.
+Future<Map<int, String>> _writeRecipes(
+  AppDatabase db,
+  Uuid uuid,
+  String cookbookId,
+  List<CommunityRecipe> recipes,
+  Iterable<int> indexes,
+  CommunityPhotoPlan photos,
+) async {
+  final writer = CommunityRecipeWriter(db, uuid: uuid);
+  final recipeIdByIndex = <int, String>{};
+  final ingredientIdsByIndex = <int, List<String>>{};
+  for (final i in indexes) {
+    final written = await writer.insert(cookbookId, recipes[i], i, photos);
+    recipeIdByIndex[i] = written.id;
+    ingredientIdsByIndex[i] = written.ingredientIds;
+  }
+
+  // Restore recipe links (ingredient→sub-recipe references)
+  for (final i in indexes) {
+    final sourceRecipeId = recipeIdByIndex[i];
+    if (sourceRecipeId == null) continue;
+    await writer.writeLinks(recipes[i], sourceRecipeId, ingredientIdsByIndex[i]!, (j) => recipeIdByIndex[j]);
+  }
+  return recipeIdByIndex;
 }

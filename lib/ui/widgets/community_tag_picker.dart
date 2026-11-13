@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 import '../../data/community_tags_data.dart';
 import '../../l10n/app_localizations.dart';
 
+/// A custom tag as typed, made into a tag: lower case, letters and digits of
+/// any script kept as they are ("суп", "crème", "和食"), and every run of
+/// spaces or punctuation in between turned into one hyphen.
+String normalizeCustomTag(String input) => input
+    .trim()
+    .toLowerCase()
+    .replaceAll(RegExp(r'[^\p{L}\p{M}\p{N}]+', unicode: true), '-')
+    .replaceAll(RegExp(r'^-+|-+$'), '');
+
 /// Tag picker widget for community publish/edit screens.
 ///
 /// Shows predefined tags as FilterChips in a Wrap, plus an "Add Custom" option.
@@ -53,7 +62,7 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
 
   void _addCustomTag() {
     if (_selected.length >= _maxTags) return;
-    final tag = _customController.text.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9-]'), '-');
+    final tag = normalizeCustomTag(_customController.text);
     if (tag.isNotEmpty && !_selected.contains(tag)) {
       setState(() => _selected.add(tag));
       widget.onChanged(_selected);

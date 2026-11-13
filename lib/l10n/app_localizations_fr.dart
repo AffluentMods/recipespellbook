@@ -12760,4 +12760,66 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => 'Quand un minuteur du mode cuisine se termine';
+
+  @override
+  String get communityFollowFailed => 'Impossible de modifier vos abonnements. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Certaines photos sont dans un format que cet appareil ne sait pas lire (comme HEIC) et ont été retirées de :';
+
+  @override
+  String get communityPublishIncludeNotes => 'Inclure mes notes';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Publie les notes que vous avez écrites sur chaque recette. Vos propres notes en étoiles ne sont jamais publiées.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Chacune reçoit les recettes de son livre sur cet appareil. Les photos ne vont qu\'à celles publiées avec des photos, et vos notes seulement là où vous avez choisi de les inclure. Les notes et les téléchargements sont conservés.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'Les recettes ont été mises à jour, mais le nouveau titre, la description ou les tags n\'ont pas été enregistrés. Réessayez depuis Mes publications.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'Le titre, la description et les tags de la publication n\'ont pas pu être chargés, ils restent donc tels quels. Les recettes sont quand même mises à jour.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Impossible d\'enregistrer la recette. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Cette recette n\'est plus disponible dans la Communauté.';
+
+  @override
+  String get communityLoadFailed => 'Impossible de charger le contenu. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Ce livre de recettes n\'est plus disponible dans la Communauté, il n\'y a donc rien à mettre à jour. Votre copie reste telle quelle.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'Le créateur vient de modifier ce livre de recettes. Vérifiez votre sélection et réessayez.';
+
+  @override
+  String get communityReportFailed => 'Impossible d\'envoyer le signalement. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Le lien ne contient pas $count photos, trop longues à envoyer.',
+      one: 'Le lien ne contient pas $count photo, trop longue à envoyer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Impossible de créer le lien';
+
+  @override
+  String get shareLinkFailedBody => 'Vérifiez votre connexion et réessayez, ou partagez plutôt la recette en texte.';
+
+  @override
+  String get shareLinkShareAsText => 'Partager en texte';
+
+  @override
+  String get shareCookbookTooLarge => 'Ce livre de recettes est trop volumineux pour un lien à usage unique. Partagez ses recettes une par une, ou publiez-le dans la Communauté.';
 }

@@ -22128,6 +22128,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When a timer in cooking mode finishes'**
   String get notifChannelCookingTimersDesc;
+
+  /// Snackbar on a creator's profile when following or unfollowing did not go through.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change who you follow. Check your connection and try again.'**
+  String get communityFollowFailed;
+
+  /// On the publish screen once published: some photos were in a format the device cannot read (HEIC or AVIF) and were left out. The recipe titles follow in a list.
+  ///
+  /// In en, this message translates to:
+  /// **'Some photos are in a format this device cannot read (such as HEIC), so they were left out of:'**
+  String get communityPublishPhotosUnsupported;
+
+  /// Switch on the Community publish screen: also publish the notes the person wrote on their recipes. Off by default.
+  ///
+  /// In en, this message translates to:
+  /// **'Include my notes'**
+  String get communityPublishIncludeNotes;
+
+  /// Under the "Include my notes" switch on the publish screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish the notes you wrote on each recipe. Your own star ratings are never published.'**
+  String get communityPublishIncludeNotesSubtitle;
+
+  /// Body of the confirmation before Update all in My Publications. Each publication is updated with the photo and notes choices it was published with.
+  ///
+  /// In en, this message translates to:
+  /// **'Each one gets the recipes from its cookbook on this device. Photos go only to the ones published with photos, and your notes only where you chose to include them. Ratings and downloads are kept.'**
+  String get publicationsUpdateAllConfirmBody;
+
+  /// Snackbar after updating a published cookbook from the publish screen: the recipes went in but the edited title, description or tags did not.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipes were updated, but the new title, description or tags were not saved. Try again from My Publications.'**
+  String get communityRepublishDetailsNotSaved;
+
+  /// On the publish screen when updating a publication whose title, description and tags could not be loaded: those fields are locked and kept as they are.
+  ///
+  /// In en, this message translates to:
+  /// **'The publication\'s title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.'**
+  String get communityRepublishDetailsUnavailable;
+
+  /// Error when saving a Community or shared recipe into a cookbook did not work (for example offline).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the recipe. Check your connection and try again.'**
+  String get communitySaveRecipeFailed;
+
+  /// A Community recipe that was removed, unpublished or put under review since it was shown.
+  ///
+  /// In en, this message translates to:
+  /// **'This recipe is no longer available in the Community.'**
+  String get communityRecipeNoLongerAvailable;
+
+  /// Shown with a Retry button when a Community page (feed, cookbook, recipe, My Publications) could not load.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this. Check your connection and try again.'**
+  String get communityLoadFailed;
+
+  /// In the update sheet of a downloaded Community cookbook whose publication was unpublished, removed or put under review.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.'**
+  String get cookbookUpdateSourceGone;
+
+  /// Saving picked recipes of a Community cookbook found that the creator changed it since it was shown; it is reloaded so the person can pick again.
+  ///
+  /// In en, this message translates to:
+  /// **'The creator just changed this cookbook. Check your selection and try again.'**
+  String get communityDownloadSelectionChanged;
+
+  /// Error when a report of Community content did not go through (the person is signed in).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the report. Check your connection and try again.'**
+  String get communityReportFailed;
+
+  /// After a one-time share link was made: some photos were left out because they took too long to upload.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{The link leaves out 1 photo that took too long to upload.} other{The link leaves out {count} photos that took too long to upload.}}'**
+  String shareLinkPhotosLeftOut(int count);
+
+  /// Title of the dialog when a recipe share link could not be made.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the link'**
+  String get shareLinkFailedTitle;
+
+  /// Body of the dialog when a recipe share link could not be made; the buttons are Retry and Share as text.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again, or share the recipe as text instead.'**
+  String get shareLinkFailedBody;
+
+  /// Button in the dialog when a share link could not be made: share the recipe as text instead.
+  ///
+  /// In en, this message translates to:
+  /// **'Share as text'**
+  String get shareLinkShareAsText;
+
+  /// Error when a cookbook is too large to send as a one-time share link.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is too big for a one-time link. Share its recipes one at a time, or post the cookbook to the Community.'**
+  String get shareCookbookTooLarge;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

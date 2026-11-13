@@ -12607,4 +12607,65 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => '調理モードのタイマーが終わったとき';
+
+  @override
+  String get communityFollowFailed => 'フォローを変更できませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String get communityPublishPhotosUnsupported => '一部の写真はこのデバイスで読み込めない形式（HEICなど）のため、次のレシピから除外されました:';
+
+  @override
+  String get communityPublishIncludeNotes => '自分のメモを含める';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => '各レシピに書いたメモを公開します。自分の星評価が公開されることはありません。';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'それぞれ、この端末にあるクックブックのレシピで更新されます。写真は写真付きで公開したものだけに、メモは含めると選んだものだけに入ります。評価とダウンロード数は保持されます。';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'レシピは更新されましたが、新しいタイトル、説明、タグは保存されませんでした。マイ出版物からもう一度お試しください。';
+
+  @override
+  String get communityRepublishDetailsUnavailable => '公開のタイトル、説明、タグを読み込めなかったため、そのままになります。レシピは更新されます。';
+
+  @override
+  String get communitySaveRecipeFailed => 'レシピを保存できませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'このレシピはコミュニティで公開されなくなりました。';
+
+  @override
+  String get communityLoadFailed => '読み込めませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String get cookbookUpdateSourceGone => 'このレシピ本はコミュニティで公開されなくなったため、更新はありません。お手元のコピーはそのまま残ります。';
+
+  @override
+  String get communityDownloadSelectionChanged => 'クリエイターがこのレシピ本を変更しました。選択内容を確認して、もう一度お試しください。';
+
+  @override
+  String get communityReportFailed => '報告を送信できませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'アップロードに時間がかかりすぎた写真$count枚はリンクに含まれていません。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'リンクを作成できませんでした';
+
+  @override
+  String get shareLinkFailedBody => '接続を確認してもう一度お試しいただくか、レシピをテキストで共有してください。';
+
+  @override
+  String get shareLinkShareAsText => 'テキストで共有';
+
+  @override
+  String get shareCookbookTooLarge => 'このレシピ本は1回限りのリンクには大きすぎます。レシピを1つずつ共有するか、レシピ本をコミュニティに投稿してください。';
 }

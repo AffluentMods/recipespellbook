@@ -12978,4 +12978,68 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => 'Когда заканчивается таймер в режиме готовки';
+
+  @override
+  String get communityFollowFailed => 'Не удалось изменить подписку. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Некоторые фото в формате, который это устройство не может прочитать (например, HEIC), поэтому они не вошли в:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Включить мои заметки';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Публикует заметки, которые вы написали к каждому рецепту. Ваши собственные оценки звёздами никогда не публикуются.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Каждая получит рецепты из своей книги на этом устройстве. Фото добавятся только к опубликованным с фото, а ваши заметки только там, где вы решили их включить. Оценки и скачивания сохраняются.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'Рецепты обновлены, но новое название, описание или теги не сохранились. Попробуйте ещё раз в разделе «Мои публикации».';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'Не удалось загрузить название, описание и теги публикации, поэтому они останутся прежними. Рецепты всё равно обновятся.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Не удалось сохранить рецепт. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Этот рецепт больше не доступен в сообществе.';
+
+  @override
+  String get communityLoadFailed => 'Не удалось загрузить. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Эта кулинарная книга больше не доступна в сообществе, поэтому обновлять нечего. Ваша копия остаётся как есть.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'Автор только что изменил эту кулинарную книгу. Проверьте выбор и попробуйте снова.';
+
+  @override
+  String get communityReportFailed => 'Не удалось отправить жалобу. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В ссылку не попали $count фотографии: они загружались слишком долго.',
+      many: 'В ссылку не попали $count фотографий: они загружались слишком долго.',
+      few: 'В ссылку не попали $count фотографии: они загружались слишком долго.',
+      one: 'В ссылку не попала $count фотография: она загружалась слишком долго.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Не удалось создать ссылку';
+
+  @override
+  String get shareLinkFailedBody => 'Проверьте подключение и попробуйте снова или поделитесь рецептом в виде текста.';
+
+  @override
+  String get shareLinkShareAsText => 'Поделиться текстом';
+
+  @override
+  String get shareCookbookTooLarge => 'Эта кулинарная книга слишком велика для одноразовой ссылки. Делитесь рецептами по одному или опубликуйте книгу в сообществе.';
 }

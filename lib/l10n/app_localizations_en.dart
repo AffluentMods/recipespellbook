@@ -12772,4 +12772,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => 'When a timer in cooking mode finishes';
+
+  @override
+  String get communityFollowFailed => 'Could not change who you follow. Check your connection and try again.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Some photos are in a format this device cannot read (such as HEIC), so they were left out of:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Include my notes';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Publish the notes you wrote on each recipe. Your own star ratings are never published.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Each one gets the recipes from its cookbook on this device. Photos go only to the ones published with photos, and your notes only where you chose to include them. Ratings and downloads are kept.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'The recipes were updated, but the new title, description or tags were not saved. Try again from My Publications.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'The publication\'s title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Could not save the recipe. Check your connection and try again.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'This recipe is no longer available in the Community.';
+
+  @override
+  String get communityLoadFailed => 'Could not load this. Check your connection and try again.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'The creator just changed this cookbook. Check your selection and try again.';
+
+  @override
+  String get communityReportFailed => 'Could not send the report. Check your connection and try again.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The link leaves out $count photos that took too long to upload.',
+      one: 'The link leaves out 1 photo that took too long to upload.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Could not create the link';
+
+  @override
+  String get shareLinkFailedBody => 'Check your connection and try again, or share the recipe as text instead.';
+
+  @override
+  String get shareLinkShareAsText => 'Share as text';
+
+  @override
+  String get shareCookbookTooLarge => 'This cookbook is too big for a one-time link. Share its recipes one at a time, or post the cookbook to the Community.';
 }

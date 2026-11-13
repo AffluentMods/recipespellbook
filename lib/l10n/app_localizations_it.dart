@@ -12766,4 +12766,66 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => 'Quando finisce un timer della modalità cucina';
+
+  @override
+  String get communityFollowFailed => 'Impossibile aggiornare chi segui. Controlla la connessione e riprova.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Alcune foto sono in un formato che questo dispositivo non sa leggere (come HEIC) e sono state escluse da:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Includi le mie note';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Pubblica le note che hai scritto su ogni ricetta. Le tue valutazioni a stelle non vengono mai pubblicate.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Ognuna riceve le ricette dal suo libro su questo dispositivo. Le foto vanno solo a quelle pubblicate con foto, e le tue note solo dove hai scelto di includerle. Valutazioni e download vengono mantenuti.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'Le ricette sono state aggiornate, ma il nuovo titolo, la descrizione o i tag non sono stati salvati. Riprova da Le mie pubblicazioni.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'Non è stato possibile caricare titolo, descrizione e tag della pubblicazione, quindi restano come sono. Le ricette vengono comunque aggiornate.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Impossibile salvare la ricetta. Controlla la connessione e riprova.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Questa ricetta non è più disponibile nella Community.';
+
+  @override
+  String get communityLoadFailed => 'Impossibile caricare. Controlla la connessione e riprova.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Questo ricettario non è più disponibile nella Community, quindi non c\'è nulla da aggiornare. La tua copia resta com\'è.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'Il creatore ha appena modificato questo ricettario. Controlla la selezione e riprova.';
+
+  @override
+  String get communityReportFailed => 'Impossibile inviare la segnalazione. Controlla la connessione e riprova.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il link non include $count foto che impiegavano troppo a caricarsi.',
+      one: 'Il link non include 1 foto che impiegava troppo a caricarsi.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Impossibile creare il link';
+
+  @override
+  String get shareLinkFailedBody => 'Controlla la connessione e riprova, oppure condividi la ricetta come testo.';
+
+  @override
+  String get shareLinkShareAsText => 'Condividi come testo';
+
+  @override
+  String get shareCookbookTooLarge => 'Questo ricettario è troppo grande per un link monouso. Condividi le ricette una alla volta o pubblica il ricettario nella Community.';
 }

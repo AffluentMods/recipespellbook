@@ -12772,4 +12772,66 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => 'Als een timer in de kookmodus afloopt';
+
+  @override
+  String get communityFollowFailed => 'Volgen kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Sommige foto\'s hebben een formaat dat dit apparaat niet kan lezen (zoals HEIC) en zijn daarom weggelaten bij:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Mijn notities toevoegen';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Publiceert de notities die je bij elk recept hebt geschreven. Je eigen sterrenbeoordelingen worden nooit gepubliceerd.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Elk krijgt de recepten uit het kookboek op dit apparaat. Foto\'s alleen bij de publicaties met foto\'s, en je notities alleen waar je ervoor koos ze toe te voegen. Beoordelingen en downloads blijven behouden.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'De recepten zijn bijgewerkt, maar de nieuwe titel, beschrijving of tags zijn niet opgeslagen. Probeer het opnieuw via Mijn publicaties.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'De titel, beschrijving en tags van de publicatie konden niet worden geladen en blijven dus zoals ze zijn. De recepten worden wel bijgewerkt.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Het recept kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Dit recept is niet meer beschikbaar in de Community.';
+
+  @override
+  String get communityLoadFailed => 'Dit kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Dit kookboek is niet meer beschikbaar in de Community, dus er is niets om bij te werken. Je kopie blijft zoals ze is.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'De maker heeft dit kookboek net gewijzigd. Controleer je selectie en probeer het opnieuw.';
+
+  @override
+  String get communityReportFailed => 'De melding kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'De link bevat $count foto\'s niet, omdat het uploaden te lang duurde.',
+      one: 'De link bevat 1 foto niet, omdat het uploaden te lang duurde.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'De link kon niet worden gemaakt';
+
+  @override
+  String get shareLinkFailedBody => 'Controleer je verbinding en probeer het opnieuw, of deel het recept als tekst.';
+
+  @override
+  String get shareLinkShareAsText => 'Als tekst delen';
+
+  @override
+  String get shareCookbookTooLarge => 'Dit kookboek is te groot voor een eenmalige link. Deel de recepten één voor één, of publiceer het kookboek in de Community.';
 }

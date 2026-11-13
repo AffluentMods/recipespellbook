@@ -1,17 +1,15 @@
-import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/ingredient_images.dart';
-import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
-import '../../../providers/database_provider.dart';
 import '../../../services/community_service.dart';
-import '../../../services/image_service.dart';
+import '../../../services/community_recipe_saver.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/native_file_image.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/community/community_recipe_save.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
@@ -25,18 +23,39 @@ import '../../widgets/sheet_chrome.dart';
 // Displays the complete recipe in read-only mode:
 //   hero image, title, description, stats, ingredients, steps, notes.
 
-/// Loads a community recipe by publication id + index, then renders
-/// [CommunityRecipeFullScreen]. Used when the route is entered by URL
-/// only (deep link, or the detail screen's single-recipe redirect) and
-/// no CommunityRecipe object was passed via router extra.
+/// What a push to the Community recipe page carries to show at once: the
+/// recipe, and whether it is whole (taken from the publication) or only the
+/// feed's preview of it, which leaves out nutrition, notes, the source and
+/// more, so the page fetches the rest.
+class CommunityRecipeRouteExtra {
+  final CommunityRecipe recipe;
+  final bool complete;
+  const CommunityRecipeRouteExtra(this.recipe, {this.complete = true});
+}
+
+/// The page of [recipe], number [index] of publication [publicationId]. By
+/// the recipe's id when it has one, so the page shows the same recipe after
+/// a reload or from a shared link; by its position otherwise.
+String communityRecipeLocation(String publicationId, CommunityRecipe recipe, int index) =>
+    '/community/$publicationId/recipe/${Uri.encodeComponent(recipe.id ?? '$index')}';
+
+/// Loads a community recipe by publication id and recipe id (or, for older
+/// links, its position), then renders [CommunityRecipeFullScreen]. Used
+/// when the route is entered by URL only (deep link, a reload, the detail
+/// screen's single-recipe redirect) or with only the feed's [preview] of
+/// the recipe, which shows while the whole of it loads.
 class CommunityRecipeLoaderScreen extends StatefulWidget {
   final String publicationId;
+  final String? recipeId;
   final int recipeIndex;
+  final CommunityRecipe? preview;
 
   const CommunityRecipeLoaderScreen({
     super.key,
     required this.publicationId,
-    required this.recipeIndex,
+    this.recipeId,
+    this.recipeIndex = 0,
+    this.preview,
   });
 
   @override
@@ -46,42 +65,77 @@ class CommunityRecipeLoaderScreen extends StatefulWidget {
 class _CommunityRecipeLoaderScreenState extends State<CommunityRecipeLoaderScreen> {
   CommunityRecipe? _recipe;
   bool _loading = true;
+  bool _notFound = false;
 
   @override
   void initState() {
     super.initState();
+    _recipe = widget.preview;
     _load();
   }
 
   Future<void> _load() async {
-    final detail = await CommunityService.instance.getPublication(widget.publicationId);
+    if (!_loading) setState(() => _loading = true);
+    final fetched = await CommunityService.instance.fetchPublication(widget.publicationId);
     if (!mounted) return;
+    final recipes = fetched.detail?.recipes;
+    CommunityRecipe? found;
+    if (recipes != null) {
+      final index = widget.recipeId != null
+          ? indexOfCommunityRecipe(recipes, recipeId: widget.recipeId, title: widget.preview?.title)
+          : (widget.recipeIndex >= 0 && widget.recipeIndex < recipes.length ? widget.recipeIndex : null);
+      if (index != null) found = recipes[index];
+    }
     setState(() {
-      _recipe = (detail != null &&
-              widget.recipeIndex >= 0 &&
-              widget.recipeIndex < detail.recipes.length)
-          ? detail.recipes[widget.recipeIndex]
-          : null;
       _loading = false;
+      // A preview stays on screen when the rest does not load.
+      if (found != null) _recipe = found;
+      _notFound = found == null && (fetched.notFound || recipes != null);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final recipe = _recipe;
+    if (recipe != null) {
+      return CommunityRecipeFullScreen(
+        publicationId: widget.publicationId,
+        recipe: recipe,
+      );
+    }
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final recipe = _recipe;
-    if (recipe == null) {
-      final l10n = AppLocalizations.of(context)!;
-      return Scaffold(
-        appBar: AppBar(),
-        body: Center(child: Text(l10n.errorGeneric)),
-      );
-    }
-    return CommunityRecipeFullScreen(
-      publicationId: widget.publicationId,
-      recipe: recipe,
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(_notFound ? Icons.search_off_rounded : Icons.cloud_off_rounded,
+                  size: 48, color: theme.colorScheme.outline),
+              const SizedBox(height: 16),
+              Text(
+                _notFound ? l10n.communityRecipeNoLongerAvailable : l10n.communityLoadFailed,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium,
+              ),
+              if (!_notFound) ...[
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: _load,
+                  icon: const Icon(Icons.refresh),
+                  label: Text(l10n.actionRetry),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -413,93 +467,17 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
     );
   }
 
+  /// Saves the whole recipe through the same writer as a cookbook download:
+  /// photos, tags, nutrition, notes, source and its sub-recipes with links.
   static Future<void> _saveRecipe(BuildContext context, WidgetRef ref, CommunityRecipe recipe, String cookbookId, String publicationId) async {
-    final l10n = AppLocalizations.of(context)!;
-    final db = ref.read(databaseProvider);
-    final id = 'cr_${DateTime.now().millisecondsSinceEpoch}';
-
-    try {
-      AppSnackbar.loading(context, l10n.communitySavingRecipe);
-
-      // Download images to local storage BEFORE the DB transaction (network I/O
-      // must not run inside a transaction). The community image paths are
-      // server-side; resolve them to URLs, then save locally. A failed download
-      // just leaves that image null — the recipe still saves.
-      final imageService = ImageService.instance;
-      String? coverLocalPath;
-      if (recipe.imagePath != null && recipe.imagePath!.isNotEmpty) {
-        coverLocalPath = await imageService.downloadAndSaveImage(
-          CommunityService.communityImageUrl(publicationId, recipe.imagePath!),
-          '${id}_cover.jpg',
-        );
-      }
-      final stepLocalPaths = <int, String?>{};
-      for (var i = 0; i < recipe.steps.length; i++) {
-        final sp = recipe.steps[i].imagePath;
-        if (sp != null && sp.isNotEmpty) {
-          stepLocalPaths[i] = await imageService.downloadAndSaveImage(
-            CommunityService.communityImageUrl(publicationId, sp),
-            '${id}_step_$i.jpg',
-          );
-        }
-      }
-
-      await db.transaction(() async {
-        await db.into(db.recipes).insert(RecipesCompanion.insert(
-          id: id,
-          cookbookId: cookbookId,
-          title: recipe.title,
-          description: drift.Value(recipe.description),
-          servings: drift.Value(recipe.servings),
-          prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
-          cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
-          sourceUrl: drift.Value(recipe.sourceUrl),
-          courseId: drift.Value(recipe.courseId),
-          categoryId: drift.Value(recipe.categoryId),
-          rating: drift.Value(recipe.rating),
-          notes: drift.Value(recipe.notes),
-          nutritionJson: drift.Value(recipe.nutritionJson),
-          imagePath: drift.Value(coverLocalPath),
-          lastViewedAt: drift.Value(DateTime.now()),
-        ));
-
-        for (var i = 0; i < recipe.ingredients.length; i++) {
-          final ing = recipe.ingredients[i];
-          await db.into(db.ingredients).insert(IngredientsCompanion.insert(
-            id: '${id}_ing_$i',
-            recipeId: id,
-            sortOrder: ing.sortOrder,
-            name: ing.name,
-            amount: drift.Value(ing.amount),
-            unit: drift.Value(ing.unit),
-            notes: drift.Value(ing.notes),
-          ));
-        }
-
-        for (var i = 0; i < recipe.steps.length; i++) {
-          final step = recipe.steps[i];
-          await db.into(db.steps).insert(StepsCompanion.insert(
-            id: '${id}_step_$i',
-            recipeId: id,
-            sortOrder: step.sortOrder,
-            instruction: step.instruction,
-            durationMinutes: drift.Value(step.durationMinutes),
-            notes: drift.Value(step.notes),
-            imagePath: drift.Value(stepLocalPaths[i]),
-          ));
-        }
-      });
-
-      if (context.mounted) {
-        AppSnackbar.dismiss(context);
-        AppSnackbar.success(context, l10n.communityRecipeSaved(recipe.title));
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppSnackbar.dismiss(context);
-        AppSnackbar.error(context, l10n.communityFailedToSave(e.toString()));
-      }
-    }
+    await saveCommunityRecipeWithFeedback(
+      context,
+      ref,
+      publicationId: publicationId,
+      recipeId: recipe.id,
+      title: recipe.title,
+      cookbookId: cookbookId,
+    );
   }
 }
 

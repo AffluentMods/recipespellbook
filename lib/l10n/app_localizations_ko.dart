@@ -12635,4 +12635,65 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => '요리 모드 타이머가 끝나면';
+
+  @override
+  String get communityFollowFailed => '팔로우를 변경하지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get communityPublishPhotosUnsupported => '일부 사진은 이 기기에서 읽을 수 없는 형식(HEIC 등)이라 다음 레시피에서 제외되었습니다:';
+
+  @override
+  String get communityPublishIncludeNotes => '내 메모 포함';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => '각 레시피에 작성한 메모를 게시합니다. 내 별점은 게시되지 않습니다.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => '각각 이 기기에 있는 요리책의 레시피로 업데이트됩니다. 사진은 사진과 함께 게시한 것에만, 메모는 포함하기로 선택한 것에만 들어갑니다. 평점과 다운로드 수는 유지됩니다.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => '레시피는 업데이트되었지만 새 제목, 설명 또는 태그는 저장되지 않았습니다. 내 출판물에서 다시 시도하세요.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => '게시물의 제목, 설명, 태그를 불러오지 못해 그대로 유지됩니다. 레시피는 계속 업데이트됩니다.';
+
+  @override
+  String get communitySaveRecipeFailed => '레시피를 저장하지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => '이 레시피는 더 이상 커뮤니티에서 볼 수 없습니다.';
+
+  @override
+  String get communityLoadFailed => '불러오지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get cookbookUpdateSourceGone => '이 요리책은 더 이상 커뮤니티에서 볼 수 없어 업데이트할 내용이 없습니다. 내 사본은 그대로 유지됩니다.';
+
+  @override
+  String get communityDownloadSelectionChanged => '크리에이터가 방금 이 요리책을 변경했습니다. 선택 항목을 확인하고 다시 시도하세요.';
+
+  @override
+  String get communityReportFailed => '신고를 보내지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '업로드가 너무 오래 걸린 사진 $count장은 링크에 포함되지 않았습니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => '링크를 만들지 못했습니다';
+
+  @override
+  String get shareLinkFailedBody => '연결을 확인하고 다시 시도하거나 레시피를 텍스트로 공유하세요.';
+
+  @override
+  String get shareLinkShareAsText => '텍스트로 공유';
+
+  @override
+  String get shareCookbookTooLarge => '이 요리책은 일회용 링크로 보내기에는 너무 큽니다. 레시피를 하나씩 공유하거나 요리책을 커뮤니티에 게시하세요.';
 }

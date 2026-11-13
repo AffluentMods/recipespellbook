@@ -15,6 +15,7 @@ import '../../../services/bulk_nutrition_service.dart';
 import '../../../services/community_cookbook_updates.dart';
 import '../../../services/family_service.dart';
 import '../../../services/revenuecat_service.dart';
+import '../../../services/share_snapshot.dart';
 import '../../shell/app_shell.dart';
 import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_refresh_indicator.dart';
@@ -590,14 +591,20 @@ class _CookbookGrid extends ConsumerWidget {
     AppSnackbar.loading(context, AppLocalizations.of(context)!.generatingLink);
 
     try {
-      final link = await FamilyService.instance.createShareLink(
-        'cookbook', cookbook.id,
-      );
+      // The link carries a copy of the cookbook (recipes and photos), so it
+      // works without cloud sync and shows the cookbook as it is now.
+      final result = await createCookbookShareLink(ref.read(databaseProvider), cookbook);
       if (!context.mounted) return;
       AppSnackbar.dismiss(context);
 
+      final link = result.link;
       if (link != null) {
         _showLinkResult(context, link);
+        if (result.photosLeftOut > 0) {
+          AppSnackbar.info(context, AppLocalizations.of(context)!.shareLinkPhotosLeftOut(result.photosLeftOut));
+        }
+      } else if (result.tooLarge) {
+        AppSnackbar.error(context, AppLocalizations.of(context)!.shareCookbookTooLarge);
       } else {
         AppSnackbar.error(context, AppLocalizations.of(context)!.failedToCreateLink);
       }

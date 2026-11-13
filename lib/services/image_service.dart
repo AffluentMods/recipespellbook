@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
@@ -44,6 +46,11 @@ enum CommunityUploadFailure {
 
   /// Anything else: offline, timed out, server error, file too large.
   failed,
+
+  /// A format no decoder on this device can read (HEIC or AVIF where the
+  /// platform has no decoder for it). It is never sent as it is, so it is
+  /// not retried either: the publish goes ahead without it.
+  unsupported,
 }
 
 /// What [ImageService.communityUploadFile] did with one photo.
@@ -145,19 +152,30 @@ class ImageService {
 
     try {
       var bytes = await file.readAsBytes();
-      var contentType = _contentTypeFromPath(file.path);
+      const contentType = 'image/jpeg';
 
       // Always re-encode, so no photo goes up with its camera metadata
       // (GPS location included). Over 1MB it is also compressed. Both paths
-      // produce a real JPEG, so contentType follows.
-      final reencoded = bytes.length > 1024 * 1024
+      // produce a real JPEG. A format the image package cannot read (HEIC,
+      // AVIF) goes through the platform's own decoder; one nothing here can
+      // read is never sent as it is.
+      var reencoded = bytes.length > 1024 * 1024
           ? await compressImageBytes(bytes)
           : await _decodeResizeJpeg(bytes, maxDimension: maxDimension, quality: 90);
-      if (reencoded != null && reencoded.isNotEmpty) {
-        debugPrint('[ImageService] Re-encoded ${bytes.length} → ${reencoded.length} bytes');
-        bytes = reencoded;
-        contentType = 'image/jpeg';
+      if (reencoded == null || reencoded.isEmpty) {
+        final viaPlatform = await _platformReencodeJpeg(bytes, maxDimension: maxDimension, quality: 90);
+        reencoded = viaPlatform != null && viaPlatform.length > 1024 * 1024
+            ? await compressImageBytes(viaPlatform) ?? viaPlatform
+            : viaPlatform;
       }
+      if (reencoded == null || reencoded.isEmpty) {
+        // It would fail the same way every time: as good as refused.
+        _lastUploadRefused = true;
+        debugPrint('[ImageService] Photo format cannot be read here; not uploaded');
+        return null;
+      }
+      debugPrint('[ImageService] Re-encoded ${bytes.length} → ${reencoded.length} bytes');
+      bytes = reencoded;
 
       if (bytes.length > maxFileSize) {
         // It will be just as large next time: as good as refused.
@@ -308,7 +326,7 @@ class ImageService {
 
     try {
       var bytes = await file.readAsBytes();
-      var contentType = _contentTypeFromPath(file.path);
+      const contentType = 'image/jpeg';
       final origLen = bytes.length;
 
       // Always re-encode as JPEG: published photos must not carry camera
@@ -318,12 +336,15 @@ class ImageService {
       // resolution. The previous implementation forced every image up
       // to 1920px wide via `instantiateImageCodec(targetWidth:…)`,
       // which is what made uploaded photos look "zoomed and stretched".
-      final reencoded = await _decodeResizeJpeg(bytes,
-          maxDimension: maxDimension, quality: bytes.length > 500 * 1024 ? 82 : 90);
-      if (reencoded != null && reencoded.isNotEmpty) {
-        bytes = reencoded;
-        contentType = 'image/jpeg';
+      // A photo nothing here can decode (HEIC or AVIF where the platform
+      // has no decoder) is never sent as it is: its original bytes keep the
+      // camera metadata, and the server only takes JPEG, PNG, WebP and GIF.
+      final reencoded = await reencodeJpeg(bytes, quality: bytes.length > 500 * 1024 ? 82 : 90);
+      if (reencoded == null || reencoded.isEmpty) {
+        debugPrint('[ImageService] Community upload: photo format cannot be read here');
+        return const CommunityUploadOutcome.failed(CommunityUploadFailure.unsupported);
       }
+      bytes = reencoded;
 
       if (bytes.length > maxFileSize) {
         // One last pass at lower quality if we're still over the cap.
@@ -331,7 +352,6 @@ class ImageService {
             maxDimension: maxDimension, quality: 65);
         if (shrunk != null && shrunk.length < bytes.length) {
           bytes = shrunk;
-          contentType = 'image/jpeg';
         }
       }
 
@@ -485,6 +505,34 @@ class ImageService {
     }
   }
 
+  /// Whether [path] is a photo this device does not hold but can fetch: a
+  /// cloud path ("userId/hash.jpg", synced from another device) or an https
+  /// address. (Photos are never fetched over plain http.)
+  static bool isRemotePhoto(String? path) => path != null && (isServerPath(path) || path.startsWith('https://'));
+
+  /// A file on this device with the photo at [path], a cloud path or an
+  /// https address ([isRemotePhoto]), for sending it on (a Community
+  /// publish, a share link) through the same upload as a local photo. It is
+  /// kept in the temporary folder under a name made from [path], so asking
+  /// again returns the same file instead of fetching it again. Null when it
+  /// cannot be fetched.
+  Future<String?> localCopyOfRemotePhoto(String path) async {
+    if (!supportsLocalFileSystem || !isRemotePhoto(path)) return null;
+    try {
+      final dir = Directory(p.join((await getTemporaryDirectory()).path, 'remote_photos'));
+      final name = 'remote_${sha1.convert(utf8.encode(path)).toString().substring(0, 32)}.jpg';
+      final file = File(p.join(dir.path, name));
+      if (await file.exists() && await file.length() > 0) return file.path;
+      final url = isServerPath(path) ? await getImageUrl(path) : path;
+      if (url == null) return null;
+      if (!await dir.exists()) await dir.create(recursive: true);
+      return await downloadAndSaveImage(url, name, directory: dir);
+    } catch (e) {
+      debugPrint('[ImageService] Remote photo fetch failed: $e');
+      return null;
+    }
+  }
+
   /// GET [uri] as image bytes, or null for a bad status, an oversize body or
   /// something that is not an image.
   Future<Uint8List?> _fetchImageBytes(http.Client client, Uri uri) async {
@@ -598,6 +646,68 @@ class ImageService {
     }
   }
 
+  /// [bytes] as a JPEG with no metadata, at most [maxDimension] on its
+  /// longer side (never upscaled). Formats the image package cannot read
+  /// (HEIC, AVIF) go through the platform's own decoder. Null when nothing
+  /// on this device can read them: such a photo must not be sent as it is.
+  static Future<Uint8List?> reencodeJpeg(
+    Uint8List bytes, {
+    int maxDimension = ImageService.maxDimension,
+    required int quality,
+  }) async {
+    final out = await _decodeResizeJpeg(bytes, maxDimension: maxDimension, quality: quality);
+    if (out != null && out.isNotEmpty) return out;
+    return _platformReencodeJpeg(bytes, maxDimension: maxDimension, quality: quality);
+  }
+
+  /// [bytes] decoded by the platform's image decoder (which reads HEIC and
+  /// AVIF on the phones and Macs that support them), scaled down to at most
+  /// [maxDimension] on its longer side, then encoded as a JPEG. The decoded
+  /// pixels carry no metadata. Null when the platform cannot read it either.
+  static Future<Uint8List?> _platformReencodeJpeg(
+    Uint8List bytes, {
+    required int maxDimension,
+    required int quality,
+  }) async {
+    ui.ImmutableBuffer? buffer;
+    ui.ImageDescriptor? descriptor;
+    ui.Codec? codec;
+    ui.Image? image;
+    try {
+      buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      descriptor = await ui.ImageDescriptor.encoded(buffer);
+      final width = descriptor.width;
+      final height = descriptor.height;
+      if (width <= 0 || height <= 0) return null;
+      final longer = width > height ? width : height;
+      final scale = longer > maxDimension ? maxDimension / longer : 1.0;
+      codec = await descriptor.instantiateCodec(
+        targetWidth: (width * scale).round().clamp(1, width),
+        targetHeight: (height * scale).round().clamp(1, height),
+      );
+      image = (await codec.getNextFrame()).image;
+      final rgba = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+      if (rgba == null) return null;
+      return await compute(
+        _encodeRgbaJpegSync,
+        _RgbaWork(
+          rgba: rgba.buffer.asUint8List(rgba.offsetInBytes, rgba.lengthInBytes),
+          width: image.width,
+          height: image.height,
+          quality: quality,
+        ),
+      );
+    } catch (e) {
+      debugPrint('[ImageService] Platform decode failed: $e');
+      return null;
+    } finally {
+      image?.dispose();
+      codec?.dispose();
+      descriptor?.dispose();
+      buffer?.dispose();
+    }
+  }
+
   /// Compress image bytes to fit under ~2MB by re-encoding as JPEG with
   /// progressively lower quality. Used by the download path.
   static Future<Uint8List?> compressImageBytes(
@@ -637,17 +747,6 @@ class ImageService {
     }
   }
 
-  /// Determine MIME content type from file extension.
-  String _contentTypeFromPath(String filePath) {
-    final ext = p.extension(filePath).toLowerCase();
-    return switch (ext) {
-      '.png' => 'image/png',
-      '.webp' => 'image/webp',
-      '.gif' => 'image/gif',
-      '.heic' || '.heif' => 'image/heic',
-      _ => 'image/jpeg',
-    };
-  }
 }
 
 // ════════════════════════════════════════════
@@ -664,6 +763,27 @@ class _ImgWork {
     required this.maxDimension,
     required this.quality,
   });
+}
+
+/// Decoded pixels (straight RGBA) for [_encodeRgbaJpegSync].
+class _RgbaWork {
+  final Uint8List rgba;
+  final int width;
+  final int height;
+  final int quality;
+  const _RgbaWork({required this.rgba, required this.width, required this.height, required this.quality});
+}
+
+/// Pixels the platform decoded, encoded as a JPEG. Top-level for `compute()`.
+Uint8List _encodeRgbaJpegSync(_RgbaWork work) {
+  final image = img.Image.fromBytes(
+    width: work.width,
+    height: work.height,
+    bytes: work.rgba.buffer,
+    bytesOffset: work.rgba.offsetInBytes,
+    numChannels: 4,
+  );
+  return Uint8List.fromList(img.encodeJpg(image, quality: work.quality));
 }
 
 /// Synchronous decode → optional downscale → JPEG encode.

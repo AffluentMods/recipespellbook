@@ -77,6 +77,39 @@ void main() {
       expect(limited.retryAfter, const Duration(seconds: 42));
     });
 
+    test('a photo no decoder here can read is never sent as it is', () async {
+      // A HEIC-like file the image package and the test platform cannot read.
+      final heic = File('${dir.path}${Platform.pathSeparator}photo.heic')
+        ..writeAsBytesSync([0, 0, 0, 24, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63, ...List.filled(64, 7)]);
+      var requests = 0;
+      final outcome = await http.runWithClient(
+        () => ImageService.instance.communityUploadLocalPath(heic.path),
+        () => MockClient((_) async {
+          requests++;
+          return http.Response('{"error":"Invalid content type"}', 400);
+        }),
+      );
+      expect(outcome.failure, CommunityUploadFailure.unsupported);
+      expect(requests, 0);
+    });
+
+    test('any other format goes up re-encoded, as a real JPEG', () async {
+      final bmp = File('${dir.path}${Platform.pathSeparator}photo.bmp')
+        ..writeAsBytesSync(img.encodeBmp(img.Image(width: 6, height: 4)));
+      late List<int> sent;
+      final outcome = await http.runWithClient(
+        () => ImageService.instance.communityUploadLocalPath(bmp.path),
+        () => MockClient((request) async {
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(body['contentType'], 'image/jpeg');
+          sent = base64Decode(body['base64'] as String);
+          return http.Response(jsonEncode({'path': 'cook1/b.jpg', 'url': 'https://x/b.jpg'}), 200);
+        }),
+      );
+      expect(outcome.ok, isTrue);
+      expect(sent.take(3), [0xFF, 0xD8, 0xFF]);
+    });
+
     test('a missing photo is a plain failure, not a crash', () async {
       final outcome = await ImageService.instance.communityUploadLocalPath('${dir.path}/gone.png');
       expect(outcome.failure, CommunityUploadFailure.failed);
@@ -107,6 +140,7 @@ void main() {
     const reject = 'reject';
     const limit = 'limit';
     const fail = 'fail';
+    const unreadable = 'unreadable';
 
     /// Answers each upload of a photo with the next of its [script] entries
     /// (the last one repeats) and records every call and every wait.
@@ -130,6 +164,8 @@ void main() {
               );
             case reject:
               return const CommunityUploadOutcome.failed(CommunityUploadFailure.rejected);
+            case unreadable:
+              return const CommunityUploadOutcome.failed(CommunityUploadFailure.unsupported);
             case limit:
               return const CommunityUploadOutcome.failed(
                 CommunityUploadFailure.rateLimited,
@@ -156,6 +192,20 @@ void main() {
       expect(u.calls, [a, b]);
       expect(report.rejected, [a]);
       expect(report.failed, isEmpty);
+      expect(report.uploaded.keys, [b]);
+    });
+
+    test('leaves out a photo in a format it cannot read, without retrying', () async {
+      final a = photo();
+      final b = photo();
+      final u = uploaderFor({a: [unreadable], b: [ok]});
+      final report = await u.uploader.run([a, b],
+          token: PublishRunToken(), store: await CommunityUploadedPhotos.load('cook1'));
+      expect(u.calls, [a, b]);
+      expect(u.waits, isEmpty);
+      expect(report.unsupported, [a]);
+      expect(report.failed, isEmpty);
+      expect(report.rejected, isEmpty);
       expect(report.uploaded.keys, [b]);
     });
 
@@ -245,7 +295,27 @@ void main() {
       expect(await CommunityService.publishKeyFor('cookbook:book'), isNot(key));
     });
 
-    Future<({bool success, String? error, String? publicationId, String? status, Duration? retryAfter})> publish(
+    test('knows whether every try under a key sent the same content', () async {
+      final first = await CommunityService.publishKeyForContent('cookbook:book', 'content-a');
+      expect(first.sameContent, isTrue);
+      final again = await CommunityService.publishKeyForContent('cookbook:book', 'content-a');
+      expect(again, (key: first.key, sameContent: true));
+      // Edited after a try that timed out: the same key, other content.
+      final edited = await CommunityService.publishKeyForContent('cookbook:book', 'content-b');
+      expect(edited, (key: first.key, sameContent: false));
+      // And it stays mixed, even back at the first content.
+      expect((await CommunityService.publishKeyForContent('cookbook:book', 'content-a')).sameContent, isFalse);
+      // A key from before this was recorded may have sent anything.
+      final old = await CommunityService.publishKeyFor('cookbook:old');
+      expect(await CommunityService.publishKeyForContent('cookbook:old', 'content-a'), (key: old, sameContent: false));
+      // Once published, the next publish starts fresh.
+      await CommunityService.clearPublishKey('cookbook:book');
+      final fresh = await CommunityService.publishKeyForContent('cookbook:book', 'content-b');
+      expect(fresh.key, isNot(first.key));
+      expect(fresh.sameContent, isTrue);
+    });
+
+    Future<CommunityPublishResult> publish(
       http.Response Function(Map<String, dynamic> body) answer,
     ) =>
         http.runWithClient(
@@ -266,6 +336,7 @@ void main() {
       expect(sent, ['key-1']);
       expect(result.success, isTrue);
       expect(result.publicationId, 'pub1');
+      expect(result.replayed, isTrue);
     });
 
     test('tells the upload lock (Retry-After) from the daily limit', () async {

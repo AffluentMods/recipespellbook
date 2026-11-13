@@ -12988,4 +12988,68 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => 'Gdy skończy się minutnik w trybie gotowania';
+
+  @override
+  String get communityFollowFailed => 'Nie udało się zmienić obserwowanych. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get communityPublishPhotosUnsupported => 'Niektóre zdjęcia mają format, którego to urządzenie nie odczyta (np. HEIC), więc pominięto je w:';
+
+  @override
+  String get communityPublishIncludeNotes => 'Dołącz moje notatki';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => 'Publikuje notatki dodane do każdego przepisu. Twoje oceny w gwiazdkach nigdy nie są publikowane.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Każda dostaje przepisy ze swojej książki na tym urządzeniu. Zdjęcia trafiają tylko do tych opublikowanych ze zdjęciami, a Twoje notatki tylko tam, gdzie je dołączono. Oceny i pobrania zostają zachowane.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'Przepisy zostały zaktualizowane, ale nowy tytuł, opis lub tagi nie zostały zapisane. Spróbuj ponownie w sekcji Moje publikacje.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'Nie udało się wczytać tytułu, opisu i tagów publikacji, więc pozostaną bez zmian. Przepisy zostaną mimo to zaktualizowane.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Nie udało się zapisać przepisu. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Ten przepis nie jest już dostępny w Społeczności.';
+
+  @override
+  String get communityLoadFailed => 'Nie udało się wczytać. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Ta książka kucharska nie jest już dostępna w Społeczności, więc nie ma czego aktualizować. Twoja kopia pozostaje bez zmian.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'Twórca właśnie zmienił tę książkę kucharską. Sprawdź wybór i spróbuj ponownie.';
+
+  @override
+  String get communityReportFailed => 'Nie udało się wysłać zgłoszenia. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Link nie zawiera zdjęć ($count), których przesyłanie trwało zbyt długo.',
+      many: 'Link nie zawiera $count zdjęć, których przesyłanie trwało zbyt długo.',
+      few: 'Link nie zawiera $count zdjęć, których przesyłanie trwało zbyt długo.',
+      one: 'Link nie zawiera $count zdjęcia, którego przesyłanie trwało zbyt długo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => 'Nie udało się utworzyć linku';
+
+  @override
+  String get shareLinkFailedBody => 'Sprawdź połączenie i spróbuj ponownie albo udostępnij przepis jako tekst.';
+
+  @override
+  String get shareLinkShareAsText => 'Udostępnij jako tekst';
+
+  @override
+  String get shareCookbookTooLarge => 'Ta książka kucharska jest za duża na jednorazowy link. Udostępniaj przepisy pojedynczo albo opublikuj książkę w Społeczności.';
 }

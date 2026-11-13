@@ -66,6 +66,47 @@ void main() {
   testWidgets('on a phone, as a bottom sheet, taking the new version of an edited recipe', (tester) async {
     await _review(tester, const Size(390, 844), takeNewTiramisu: true);
   });
+
+  testWidgets('one the creator took down says so, not an error, and loses its badge', (tester) async {
+    final published = _publication(1, [_recipe('Lasagne'), _recipe('Ragu')]);
+    // Unpublished meanwhile: the server no longer has it.
+    final client = MockClient((_) async => http.Response('{"error":"Publication not found"}', 404));
+    await http.runWithClient(() async {
+      final db = (await tester.runAsync(() async {
+        final db = AppDatabase.forTesting(NativeDatabase.memory());
+        await saveCommunityDownload(
+          db: db,
+          publicationId: 'pub1',
+          detail: CommunityDetail.fromJson(published),
+          indexes: [0, 1],
+          cookbookId: 'community_1',
+          newCookbook: true,
+          photos: CommunityPhotoPlan.none(),
+          withImages: false,
+        );
+        await (db.update(db.cookbooks)..where((c) => c.id.equals('community_1'))).write(
+          const CookbooksCompanion(communityUpdateVersion: drift.Value(2)),
+        );
+        return db;
+      }))!;
+      await tester.pumpWidget(ProviderScope(
+        overrides: [databaseProvider.overrideWithValue(db)],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: CookbookUpdateSheet(cookbookId: 'community_1', updates: CommunityCookbookUpdates(db)),
+          ),
+        ),
+      ));
+      await settleUntil(tester, () => find.textContaining('no longer available').evaluate().isNotEmpty);
+      expect(find.textContaining('no longer available in the Community'), findsOneWidget);
+      expect(find.textContaining('Could not load'), findsNothing);
+      final book = (await tester.runAsync(() => db.cookbookDao.getCookbookById('community_1')))!;
+      expect(book.communityUpdateVersion, isNull);
+      await tester.runAsync(db.close);
+    }, () => client);
+  });
 }
 
 Future<void> _review(WidgetTester tester, Size size, {required bool takeNewTiramisu}) async {

@@ -12603,4 +12603,65 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notifChannelCookingTimersDesc => '烹饪模式中的计时器结束时';
+
+  @override
+  String get communityFollowFailed => '无法更改关注状态。请检查网络连接后重试。';
+
+  @override
+  String get communityPublishPhotosUnsupported => '部分照片的格式（如 HEIC）无法在此设备上读取，已从以下食谱中移除：';
+
+  @override
+  String get communityPublishIncludeNotes => '包含我的备注';
+
+  @override
+  String get communityPublishIncludeNotesSubtitle => '发布你在每个食谱上写的备注。你自己的星级评分永远不会发布。';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => '每个都会使用此设备上对应食谱书中的食谱更新。照片只会加到发布时带照片的出版物，备注只会加到你选择包含备注的出版物。评分和下载次数将保留。';
+
+  @override
+  String get communityRepublishDetailsNotSaved => '食谱已更新，但新的标题、描述或标签未能保存。请在“我的发布”中重试。';
+
+  @override
+  String get communityRepublishDetailsUnavailable => '无法加载该发布的标题、描述和标签，因此它们保持不变。食谱仍会更新。';
+
+  @override
+  String get communitySaveRecipeFailed => '无法保存食谱。请检查网络连接后重试。';
+
+  @override
+  String get communityRecipeNoLongerAvailable => '此食谱已不在社区中提供。';
+
+  @override
+  String get communityLoadFailed => '无法加载。请检查网络连接后重试。';
+
+  @override
+  String get cookbookUpdateSourceGone => '此食谱书已不在社区中提供，因此没有可更新的内容。你的副本保持不变。';
+
+  @override
+  String get communityDownloadSelectionChanged => '创作者刚刚修改了这本食谱书。请检查你的选择后重试。';
+
+  @override
+  String get communityReportFailed => '无法发送举报。请检查网络连接后重试。';
+
+  @override
+  String shareLinkPhotosLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 张照片上传时间过长，未包含在链接中。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareLinkFailedTitle => '无法创建链接';
+
+  @override
+  String get shareLinkFailedBody => '请检查网络连接后重试，或改为以文本形式分享食谱。';
+
+  @override
+  String get shareLinkShareAsText => '以文本分享';
+
+  @override
+  String get shareCookbookTooLarge => '这本食谱书太大，无法通过一次性链接分享。请逐个分享食谱，或将食谱书发布到社区。';
 }
