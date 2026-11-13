@@ -12,10 +12,13 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/providers/database_provider.dart';
 import 'package:recipespellbook/providers/pantry_cooking_provider.dart' show cookHistoryProvider;
 import 'package:recipespellbook/services/cook_history_service.dart';
+import 'package:recipespellbook/services/cooking_timer_alerts.dart';
 
 import '../../../ui/widgets/nutrition_widgets.dart';
 import '../../ui/widgets/font_size_control.dart';
-import '../../utils/platform_utils.dart' show supportsSpeechRecognition;
+import '../../utils/duration_format.dart' show formatTimerLength;
+import '../../utils/platform_utils.dart' show isMobile, supportsSpeechRecognition;
+import '../../utils/step_durations.dart';
 import '../../utils/responsive_utils.dart';
 import '../../utils/ingredient_utils.dart'
     show scaleInstructionText, scaledIngredientLabel;
@@ -49,7 +52,8 @@ class CookingModeScreen extends ConsumerStatefulWidget {
   ConsumerState<CookingModeScreen> createState() => _CookingModeScreenState();
 }
 
-class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
+class _CookingModeScreenState extends ConsumerState<CookingModeScreen>
+    with WidgetsBindingObserver {
   Recipe? _recipe;
   List<Ingredient> _ingredients = [];
   List<Step> _steps = [];
@@ -59,11 +63,16 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   bool _showIngredients = false;
   bool _showNutrition = false;
 
-  // Timer state
-  Timer? _timer;
-  int _timerSeconds = 0;
-  bool _timerRunning = false;
-  int _timerSetSeconds = 0;
+  // Timers. Several can run at once (the pasta and the sauce). Each keeps
+  // the moment it ends, so time in the background (a locked phone, another
+  // app) counts; the ticker only redraws them and rings the finished ones.
+  // A notification is scheduled for each end, for when the app is away.
+  final List<_CookTimer> _timers = [];
+  Timer? _ticker;
+  int _timerSerial = 0;
+
+  /// Notification ids of cooking timers: this number up, one per timer.
+  static const _timerNotificationBase = 7300000;
 
   // Checked ingredients
   final Set<String> _checkedIngredients = {};
@@ -84,6 +93,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pageController = PageController();
     _loadRecipe();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -94,12 +104,23 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _ticker?.cancel();
+    // Leaving cooking mode ends its timers, the scheduled alerts too.
+    for (final t in _timers) {
+      CookingTimerAlerts.cancel(t.id);
+    }
     _pageController.dispose();
     if (_voiceListening) _speech.stop();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     WakelockPlus.disable();
     super.dispose();
+  }
+
+  /// Back on screen: catch up at once with what ran out meanwhile.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _tick();
   }
 
   // ── Voice control ────────────────────────────────────────────────
@@ -178,7 +199,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
       return;
     }
     if (_matches(text, const ['pause', 'stop', 'stop timer', 'cancel timer'])) {
-      if (_timerRunning) _stopTimer();
+      if (_timers.isNotEmpty) _stopTimer(_timers.last);
       return;
     }
     // "set timer for 5 minutes" / "timer 90 seconds"
@@ -234,7 +255,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   }
 
   void _nextStep() {
-    if (_currentStepIndex < _steps.length - 1) {
+    if (_currentStepIndex < _steps.length - 1 && _pageController.hasClients) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -244,7 +265,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   }
 
   void _previousStep() {
-    if (_currentStepIndex > 0) {
+    if (_currentStepIndex > 0 && _pageController.hasClients) {
       _pageController.previousPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -253,44 +274,87 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
     }
   }
 
-  void _startTimer(int seconds) {
-    _timer?.cancel();
-    setState(() {
-      _timerSetSeconds = seconds;
-      _timerSeconds = seconds;
-      _timerRunning = true;
-    });
+  /// Start a timer of [seconds], called [label] (its length by default),
+  /// beside any already running.
+  void _startTimer(int seconds, {String? label}) {
+    if (seconds <= 0) return;
+    final l10n = AppLocalizations.of(context)!;
+    final timer = _CookTimer(
+      id: _timerNotificationBase + (_timerSerial++ % 1000),
+      label: label ?? formatTimerLength(l10n, seconds),
+      totalSeconds: seconds,
+      endsAt: DateTime.now().add(Duration(seconds: seconds)),
+    );
+    setState(() => _timers.add(timer));
+    _ticker ??= Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    CookingTimerAlerts.schedule(
+      id: timer.id,
+      at: timer.endsAt,
+      title: l10n.cookingTimerDone,
+      body: [?_recipe?.title, timer.label].join(' · '),
+    );
+  }
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_timerSeconds > 0) {
-        setState(() => _timerSeconds--);
-        if (_timerSeconds == 10) HapticFeedback.mediumImpact();
-      } else {
-        timer.cancel();
-        setState(() => _timerRunning = false);
-        HapticFeedback.heavyImpact();
-        _showTimerDoneDialog();
+  /// Redraw the timers and ring the ones that ran out. A phone that is not
+  /// showing the app leaves that to the scheduled notification, and rings
+  /// them here once it is back (see didChangeAppLifecycleState).
+  void _tick() {
+    if (!mounted || _timers.isEmpty) return;
+    final now = DateTime.now();
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    final away = isMobile && lifecycle != null && lifecycle != AppLifecycleState.resumed;
+    final done = <_CookTimer>[];
+    for (final t in _timers) {
+      final left = t.secondsLeft(now);
+      if (left <= 0) {
+        if (!away) done.add(t);
+      } else if (left <= 10 && !t.warned) {
+        t.warned = true;
+        HapticFeedback.mediumImpact();
       }
-    });
+    }
+    setState(() => _timers.removeWhere(done.contains));
+    if (_timers.isEmpty) {
+      _ticker?.cancel();
+      _ticker = null;
+    }
+    if (done.isEmpty) return;
+    for (final t in done) {
+      // Rung here, on screen: take its notification back (also from the
+      // notification shade, when it was shown while the app was away).
+      CookingTimerAlerts.cancel(t.id);
+    }
+    HapticFeedback.heavyImpact();
+    _showTimerDoneDialog(done);
   }
 
-  void _stopTimer() {
-    _timer?.cancel();
-    setState(() {
-      _timerRunning = false;
-      _timerSeconds = 0;
-    });
+  void _stopTimer(_CookTimer timer) {
+    CookingTimerAlerts.cancel(timer.id);
+    setState(() => _timers.remove(timer));
+    if (_timers.isEmpty) {
+      _ticker?.cancel();
+      _ticker = null;
+    }
   }
 
-  void _showTimerDoneDialog() {
+  void _showTimerDoneDialog(List<_CookTimer> done) {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('⏰ ${l10n.cookingTimerDone}'),
-        content: Text(l10n.cookingTimerFinished),
+        content: Text([for (final t in done) t.label, l10n.cookingTimerFinished].join('\n')),
         actions: [FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionOk))],
       ),
+    );
+  }
+
+  /// A timer started from step [stepIndex]'s text: "Step 3 · 10 min".
+  void _startStepTimer(int stepIndex, int seconds) {
+    final l10n = AppLocalizations.of(context)!;
+    _startTimer(
+      seconds,
+      label: '${l10n.stepNumber(stepIndex + 1)} · ${formatTimerLength(l10n, seconds)}',
     );
   }
 
@@ -352,7 +416,18 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
       );
     }
 
-    return Scaffold(
+    // Keyboards (desktop, a tablet's): arrows and Space for the steps, Esc
+    // to leave.
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowRight): _nextStep,
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): _previousStep,
+        const SingleActivator(LogicalKeyboardKey.space): _nextStep,
+        const SingleActivator(LogicalKeyboardKey.escape): _confirmExit,
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
       backgroundColor: context.appColors.surface,
       // Voice control toggle floats above the bottom bar so the user
       // can find it without leaving the recipe view. Hidden where speech
@@ -417,43 +492,51 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
             if (_showNutrition && _nutrition != null && _nutrition!.hasAnyData)
               NutritionBanner(nutrition: _nutrition!),
 
-            // Timer bar
-            if (_timerRunning || _timerSeconds > 0)
-              _TimerBar(seconds: _timerSeconds, totalSeconds: _timerSetSeconds, onStop: _stopTimer),
+            // Running timers, one row each.
+            for (final t in _timers)
+              _TimerBar(timer: t, onStop: () => _stopTimer(t)),
 
-            // Main content
+            // Main content. The steps stay mounted under the ingredient list,
+            // so closing the list comes back to the step the arrows are on
+            // (they used to show step 1 while the arrows were on step 5).
             Expanded(
-              child: _showIngredients
-                  ? _IngredientsView(
-                ingredients: _ingredients,
-                scaleFactor: widget.scaleFactor,
-                checkedIds: _checkedIngredients,
-                onToggle: (id) => setState(() {
-                  if (_checkedIngredients.contains(id)) {
-                    _checkedIngredients.remove(id);
-                  } else {
-                    _checkedIngredients.add(id);
-                  }
-                }),
-              )
-                  : _steps.isEmpty
-                  ? Center(child: Text(l10n.instructionsEmpty, style: TextStyle(color: context.appColors.textPrimary)))
-                  : PageView.builder(
-                controller: _pageController,
-                itemCount: _steps.length,
-                onPageChanged: (index) {
-                  setState(() => _currentStepIndex = index);
-                  HapticFeedback.selectionClick();
-                },
-                itemBuilder: (context, index) => _StepView(
-                  step: _steps[index],
-                  stepNumber: index + 1,
-                  totalSteps: _steps.length,
-                  allIngredients: _ingredients,
-                  allSteps: _steps,
-                  stepIndex: index,
-                  scaleFactor: widget.scaleFactor,
-                ),
+              child: IndexedStack(
+                index: _showIngredients ? 1 : 0,
+                sizing: StackFit.expand,
+                children: [
+                  _steps.isEmpty
+                      ? Center(child: Text(l10n.instructionsEmpty, style: TextStyle(color: context.appColors.textPrimary)))
+                      : PageView.builder(
+                          controller: _pageController,
+                          itemCount: _steps.length,
+                          onPageChanged: (index) {
+                            setState(() => _currentStepIndex = index);
+                            HapticFeedback.selectionClick();
+                          },
+                          itemBuilder: (context, index) => _StepView(
+                            step: _steps[index],
+                            stepNumber: index + 1,
+                            totalSteps: _steps.length,
+                            allIngredients: _ingredients,
+                            allSteps: _steps,
+                            stepIndex: index,
+                            scaleFactor: widget.scaleFactor,
+                            onStartTimer: (seconds) => _startStepTimer(index, seconds),
+                          ),
+                        ),
+                  _IngredientsView(
+                    ingredients: _ingredients,
+                    scaleFactor: widget.scaleFactor,
+                    checkedIds: _checkedIngredients,
+                    onToggle: (id) => setState(() {
+                      if (_checkedIngredients.contains(id)) {
+                        _checkedIngredients.remove(id);
+                      } else {
+                        _checkedIngredients.add(id);
+                      }
+                    }),
+                  ),
+                ],
               ),
             ),
 
@@ -469,7 +552,33 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
           ],
         ),
       ),
+        ),
+      ),
     );
+  }
+}
+
+/// One running timer: what it is called, how long it was set for and the
+/// moment it ends.
+class _CookTimer {
+  final int id;
+  final String label;
+  final int totalSeconds;
+  final DateTime endsAt;
+
+  /// Whether the "ten seconds left" buzz was given.
+  bool warned = false;
+
+  _CookTimer({
+    required this.id,
+    required this.label,
+    required this.totalSeconds,
+    required this.endsAt,
+  });
+
+  int secondsLeft(DateTime now) {
+    final ms = endsAt.difference(now).inMilliseconds;
+    return ms <= 0 ? 0 : (ms / 1000).ceil();
   }
 }
 
@@ -502,6 +611,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
@@ -527,6 +637,8 @@ class _TopBar extends StatelessWidget {
                 Icons.local_fire_department,
                 color: showNutrition ? context.appColors.accent : context.appColors.textSecondary,
               ),
+              tooltip: l10n.nutritionTitle,
+              isSelected: showNutrition,
               onPressed: onToggleNutrition,
             ),
           if (onToggleVoice != null)
@@ -535,20 +647,22 @@ class _TopBar extends StatelessWidget {
                 voiceListening ? Icons.mic : Icons.mic_none,
                 color: voiceListening ? context.appColors.accent : context.appColors.textSecondary,
               ),
-              tooltip: AppLocalizations.of(context)!.cookModeVoiceTitle,
+              tooltip: l10n.cookModeVoiceTitle,
               onPressed: onToggleVoice,
             ),
           // Font size
           IconButton(
             icon: Icon(Icons.text_fields, color: context.appColors.textPrimary, size: 20),
+            tooltip: l10n.fontSizeTitle,
             onPressed: onFontSize,
           ),
-          // Ingredients toggle
+          // Ingredients toggle: the list, or back to the steps.
           IconButton(
             icon: Icon(
               showIngredients ? Icons.format_list_numbered : Icons.list,
               color: showIngredients ? context.appColors.accent : context.appColors.textSecondary,
             ),
+            tooltip: showIngredients ? l10n.instructionsTitle : l10n.ingredientsTitle,
             onPressed: onToggleIngredients,
           ),
         ],
@@ -558,43 +672,66 @@ class _TopBar extends StatelessWidget {
 }
 
 class _TimerBar extends StatelessWidget {
-  final int seconds;
-  final int totalSeconds;
+  final _CookTimer timer;
   final VoidCallback onStop;
 
-  const _TimerBar({required this.seconds, required this.totalSeconds, required this.onStop});
+  const _TimerBar({required this.timer, required this.onStop});
 
   @override
   Widget build(BuildContext context) {
+    final seconds = timer.secondsLeft(DateTime.now());
+    final totalSeconds = timer.totalSeconds;
     final progress = totalSeconds > 0 ? seconds / totalSeconds : 0.0;
     final isLow = seconds <= 10;
+    final color = isLow ? context.appColors.destructive : context.appColors.textPrimary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       color: isLow ? context.appColors.destructive.withValues(alpha: 0.3) : context.appColors.surfaceRaised,
       child: Row(
         children: [
-          Icon(Icons.timer, color: isLow ? context.appColors.destructive : context.appColors.textPrimary),
+          Icon(Icons.timer, color: color),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_formatTime(seconds), style: TextStyle(color: isLow ? context.appColors.destructive : context.appColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold)),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(_formatTime(seconds), style: TextStyle(color: color, fontSize: 22, fontWeight: FontWeight.bold, fontFeatures: const [FontFeature.tabularFigures()])),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        timer.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: context.appColors.textSecondary, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
                 LinearProgressIndicator(value: progress, backgroundColor: context.appColors.outline, valueColor: AlwaysStoppedAnimation(isLow ? context.appColors.destructive : context.appColors.accent)),
               ],
             ),
           ),
-          IconButton(icon: Icon(Icons.stop, color: context.appColors.textPrimary), onPressed: onStop),
+          IconButton(
+            icon: Icon(Icons.stop, color: context.appColors.textPrimary),
+            tooltip: AppLocalizations.of(context)!.cookingStopTimer,
+            onPressed: onStop,
+          ),
         ],
       ),
     );
   }
 
   String _formatTime(int seconds) {
-    final mins = seconds ~/ 60;
+    final hours = seconds ~/ 3600;
+    final mins = (seconds % 3600) ~/ 60;
     final secs = seconds % 60;
-    return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    final mmss = '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    return hours > 0 ? '$hours:$mmss' : mmss;
   }
 }
 
@@ -607,7 +744,24 @@ class _StepView extends ConsumerWidget {
   final int stepIndex;
   final double scaleFactor;
 
-  const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients, required this.allSteps, required this.stepIndex, this.scaleFactor = 1.0});
+  /// Start a timer of so many seconds (a time the step names).
+  final ValueChanged<int> onStartTimer;
+
+  const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients, required this.allSteps, required this.stepIndex, this.scaleFactor = 1.0, required this.onStartTimer});
+
+  /// The times this step names, in seconds: its own duration, if it has one,
+  /// then those in its text ("simmer for 10 minutes").
+  List<int> _timerLengths() {
+    final own = step.durationMinutes;
+    final lengths = [
+      if (own != null && own > 0) own * 60,
+      ...stepDurations(step.instruction),
+    ];
+    return [
+      for (final (i, s) in lengths.indexed)
+        if (lengths.indexOf(s) == i) s,
+    ];
+  }
 
   /// Returns the ingredients to show for THIS step. Two-tier logic:
   ///   1. Direct match (NOT exclusive) — if the step's text names the
@@ -852,6 +1006,7 @@ class _StepView extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final fontScale = ref.watch(recipeFontScaleProvider);
     final matched = _matchIngredients();
+    final timers = _timerLengths();
     // Ingredient names anchor bare-count scaling in the step text ("3 jalapeños").
     final ingredientNames = allIngredients
         .where((i) => i.notes != '__header__')
@@ -934,6 +1089,28 @@ class _StepView extends ConsumerWidget {
               ),
             ),
           ),
+
+          // A one-tap timer for each time the step names.
+          if (timers.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final seconds in timers)
+                    Tooltip(
+                      message: l10n.cookingStartTimerFor(formatTimerLength(l10n, seconds)),
+                      child: ActionChip(
+                        avatar: Icon(Icons.timer_outlined, size: 18, color: context.appColors.accent),
+                        label: Text(formatTimerLength(l10n, seconds)),
+                        onPressed: () => onStartTimer(seconds),
+                      ),
+                    ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -960,8 +1137,14 @@ class _IngredientsView extends ConsumerWidget {
         itemBuilder: (context, index) {
           final ing = ingredients[index];
           final isChecked = checkedIds.contains(ing.id);
+          final isHeader = ing.notes == '__header__';
 
-          return GestureDetector(
+          // One node for a screen reader: the line, ticked or not.
+          return MergeSemantics(
+            child: Semantics(
+              checked: isHeader ? null : isChecked,
+              header: isHeader,
+              child: GestureDetector(
             onTap: () => onToggle(ing.id),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -980,6 +1163,8 @@ class _IngredientsView extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
               ),
             ),
           );
@@ -1009,12 +1194,12 @@ class _BottomBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            IconButton(icon: const Icon(Icons.arrow_back, size: 32), color: onPrevious != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onPrevious),
-            IconButton(icon: const Icon(Icons.timer, size: 32), color: context.appColors.textPrimary, onPressed: onTimer),
+            IconButton(icon: const Icon(Icons.arrow_back, size: 32), tooltip: l10n.cookingModePrevious, color: onPrevious != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onPrevious),
+            IconButton(icon: const Icon(Icons.timer, size: 32), tooltip: l10n.cookingSetTimer, color: context.appColors.textPrimary, onPressed: onTimer),
             if (onFinish != null)
               FilledButton.icon(onPressed: onFinish, icon: const Icon(Icons.check), label: Text(l10n.cookingFinish), style: FilledButton.styleFrom(backgroundColor: context.appColors.accent, foregroundColor: context.appColors.onAccent, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)))
             else
-              IconButton(icon: const Icon(Icons.arrow_forward, size: 32), color: onNext != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onNext),
+              IconButton(icon: const Icon(Icons.arrow_forward, size: 32), tooltip: l10n.cookingModeNext, color: onNext != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onNext),
           ],
         ),
       ),
