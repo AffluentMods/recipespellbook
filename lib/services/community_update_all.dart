@@ -215,6 +215,7 @@ class CommunityPublicationUpdater {
       kind: 'cookbook',
       sourceId: cookbook.id,
       coverPath: cookbook.imagePath,
+      coverCloudPath: cookbook.imageServerPath,
       sourceName: cookbook.name,
       externalRecipeIds: external.toList(),
       includedExternalIds: included,

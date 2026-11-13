@@ -638,6 +638,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         // For cookbook mode use the cookbook cover; for single-recipe mode
         // the recipe's own image.
         coverPath: _isSingleRecipeMode ? _singleRecipe!.imagePath : _selectedCookbook!.imagePath,
+        coverCloudPath: _isSingleRecipeMode ? null : _selectedCookbook!.imageServerPath,
         sourceName: _isSingleRecipeMode ? null : _selectedCookbook!.name,
         externalRecipeIds: externalSubRecipeIds.toList(),
         includedExternalIds: includedExternalIds,

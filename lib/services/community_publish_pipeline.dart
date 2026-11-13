@@ -8,7 +8,7 @@ import '../data/course_category_data.dart' as taxonomy;
 import '../database/daos/tags_dao.dart';
 import '../database/database.dart';
 import '../l10n/app_localizations.dart';
-import '../ui/widgets/recipe_image.dart' show FileExistsCache;
+import '../utils/platform_utils.dart' show supportsLocalFileSystem;
 import 'auth_service.dart';
 import 'community_photo_uploader.dart';
 import 'community_service.dart';
@@ -35,10 +35,13 @@ class PreparedPublish {
   final List<String> tagList;
   final List<Map<String, dynamic>> recipeMaps;
 
-  /// Unique local photos to upload, in order.
+  /// Every photo to send, each once, in order: local files, and photos only
+  /// in the cloud (a cloud path or an https address) that are fetched first.
+  /// All of them go through the Community upload; nothing is published by
+  /// its own path.
   final List<String> photoPaths;
 
-  /// Local photo → titles of the recipes (or the cookbook) that use it.
+  /// Photo → titles of the recipes (or the cookbook) that use it.
   final Map<String, List<String>> photoRecipes;
   final String? coverPath;
 
@@ -165,17 +168,46 @@ class CommunityPublishPipeline {
     CommunityService? community,
     CommunityPhotoUploader Function()? uploader,
     Future<void> Function(Duration)? wait,
+    Future<String?> Function(String remotePhoto)? fetchRemotePhoto,
   })  : _recipeDao = recipeDao,
         _tagsDao = tagsDao,
         _community = community ?? CommunityService.instance,
         _uploader = uploader ?? CommunityPhotoUploader.new,
-        _wait = wait ?? Future<void>.delayed;
+        _wait = wait ?? Future<void>.delayed,
+        _fetchRemotePhoto = fetchRemotePhoto ?? ImageService.instance.localCopyOfRemotePhoto;
 
   final RecipeDao _recipeDao;
   final TagsDao _tagsDao;
   final CommunityService _community;
   final CommunityPhotoUploader Function() _uploader;
   final Future<void> Function(Duration) _wait;
+  final Future<String?> Function(String) _fetchRemotePhoto;
+
+  /// Fetches photos only in the cloud this many at a time.
+  static const _fetchConcurrency = 4;
+
+  /// Asks the file system each time: what a publish sends must not depend
+  /// on a cache made for drawing thumbnails.
+  static bool _fileExists(String path) {
+    if (!supportsLocalFileSystem) return false;
+    try {
+      return File(path).existsSync();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// The photo a publish sends for a picture shown from [path] whose cloud
+  /// copy is [cloudPath]: the local file while it is there, else the cloud
+  /// copy (or [path] itself when that is a cloud path or an https address).
+  /// Null when there is none to send.
+  static String? photoToSend(String? path, String? cloudPath) {
+    if (path != null && path.isNotEmpty) {
+      if (ImageService.isRemotePhoto(path)) return path;
+      if (!path.startsWith('http') && _fileExists(path)) return path;
+    }
+    return ImageService.isServerPath(cloudPath) ? cloudPath : null;
+  }
 
   /// Sub-recipes the [recipes] link to that are not among them (they live
   /// in other cookbooks). Without them those links break once published.
@@ -202,14 +234,15 @@ class CommunityPublishPipeline {
     required String kind,
     required String sourceId,
     String? coverPath,
+    String? coverCloudPath,
     String? sourceName,
     List<String> externalRecipeIds = const [],
     List<String> includedExternalIds = const [],
   }) async {
     final singleRecipe = kind == 'recipe';
     final recipeMaps = <Map<String, dynamic>>[];
-    // Local photo → titles of the recipes that use it, for telling the
-    // person which recipes a failed or rejected photo belongs to.
+    // Photo → titles of the recipes that use it, for telling the person
+    // which recipes a failed or rejected photo belongs to.
     final photoRecipes = <String, List<String>>{};
     void trackPhoto(String? path, String owner) {
       if (!includeImages || path == null || path.isEmpty) return;
@@ -218,8 +251,10 @@ class CommunityPublishPipeline {
     }
 
     // Collect cookbook cover (only in cookbook mode: single-recipe
-    // publications use the recipe's image as the cover).
-    if (!singleRecipe) trackPhoto(coverPath, title);
+    // publications use the recipe's image as the cover). A photo whose
+    // file is not on this device is sent from its cloud copy.
+    final cookbookCover = singleRecipe ? null : photoToSend(coverPath, coverCloudPath);
+    trackPhoto(cookbookCover, title);
 
     // Build a map of recipe ID → index for recipe link references
     final recipeIdToIndex = <String, int>{};
@@ -233,9 +268,11 @@ class CommunityPublishPipeline {
       final recipeTagRows = await _tagsDao.getTagsForRecipe(r.id);
 
       // Track recipe and step images
-      trackPhoto(r.imagePath, r.title);
-      for (final s in steps) {
-        trackPhoto(s.imagePath, r.title);
+      final photo = photoToSend(r.imagePath, r.imageServerPath);
+      final stepPhotos = [for (final s in steps) photoToSend(s.imagePath, s.imageServerPath)];
+      trackPhoto(photo, r.title);
+      for (final stepPhoto in stepPhotos) {
+        trackPhoto(stepPhoto, r.title);
       }
 
       // Gather recipe links (ingredient→sub-recipe references)
@@ -265,7 +302,7 @@ class CommunityPublishPipeline {
         'prepTimeMinutes': r.prepTimeMinutes,
         'cookTimeMinutes': r.cookTimeMinutes,
         'sourceUrl': r.sourceUrl,
-        'imagePath': r.imagePath, // Replaced with the server path per run
+        'imagePath': photo, // Replaced with the server path per run
         'categoryId': r.categoryId,
         'courseId': r.courseId,
         'rating': r.rating,
@@ -278,13 +315,16 @@ class CommunityPublishPipeline {
           'name': i.name,
           'notes': i.notes,
         }).toList(),
-        'steps': steps.map((s) => {
-          'sortOrder': s.sortOrder,
-          'instruction': s.instruction,
-          'durationMinutes': s.durationMinutes,
-          'notes': s.notes,
-          'imagePath': s.imagePath, // Replaced with the server path per run
-        }).toList(),
+        'steps': <Map<String, dynamic>>[
+          for (var i = 0; i < steps.length; i++)
+            {
+              'sortOrder': steps[i].sortOrder,
+              'instruction': steps[i].instruction,
+              'durationMinutes': steps[i].durationMinutes,
+              'notes': steps[i].notes,
+              'imagePath': stepPhotos[i], // Replaced with the server path per run
+            },
+        ],
         'tags': recipeTagRows.map((t) => t.name).toList(),
         if (recipeLinksData.isNotEmpty) 'recipeLinks': recipeLinksData,
       });
@@ -345,17 +385,16 @@ class CommunityPublishPipeline {
     }
 
     final desc = description?.trim() ?? '';
-    final cover = singleRecipe ? (recipes.isEmpty ? null : recipes.first.imagePath) : coverPath;
+    final cover = singleRecipe
+        ? (recipes.isEmpty ? null : photoToSend(recipes.first.imagePath, recipes.first.imageServerPath))
+        : cookbookCover;
     return PreparedPublish(
       title: title,
       description: desc.isNotEmpty ? desc : null,
       tags: selectedTags.isNotEmpty ? selectedTags.join(',') : null,
       tagList: selectedTags,
       recipeMaps: recipeMaps,
-      // Unique local files only; server paths need no upload.
-      photoPaths: photoRecipes.keys
-          .where((p) => !ImageService.isServerPath(p) && FileExistsCache.exists(p))
-          .toList(),
+      photoPaths: photoRecipes.keys.toList(),
       photoRecipes: photoRecipes,
       // For cookbook mode use the cookbook cover; for single-recipe mode
       // fall back to the recipe's own image.
@@ -368,7 +407,7 @@ class CommunityPublishPipeline {
       includedExternalIds: includedExternalIds,
       contentHash: await fingerprint(
         recipeMaps: recipeMaps,
-        coverPath: singleRecipe ? null : coverPath,
+        coverPath: cookbookCover,
         includeImages: includeImages,
       ),
     );
@@ -461,6 +500,31 @@ class CommunityPublishPipeline {
     return null;
   }
 
+  /// Each of [photos] as a file on this device: a local one as it is, one
+  /// only in the cloud fetched first, a few at a time. Null for a photo that
+  /// could not be fetched.
+  Future<Map<String, String?>> _localFiles(List<String> photos, PublishRunToken token) async {
+    final out = <String, String?>{};
+    final remote = <String>[];
+    for (final photo in photos) {
+      if (ImageService.isRemotePhoto(photo)) {
+        remote.add(photo);
+      } else {
+        out[photo] = photo;
+      }
+    }
+    var next = 0;
+    Future<void> worker() async {
+      while (next < remote.length && !token.cancelled) {
+        final photo = remote[next++];
+        out[photo] = await _fetchRemotePhoto(photo);
+      }
+    }
+
+    await Future.wait([for (var w = 0; w < _fetchConcurrency && w < remote.length; w++) worker()]);
+    return out;
+  }
+
   /// Uploads [job]'s photos (skipping ones already on the server) and
   /// publishes it, or with [republishPublicationId] replaces that
   /// publication's recipes (downloads and ratings stay). Runs again as-is
@@ -480,7 +544,7 @@ class CommunityPublishPipeline {
 
     try {
       // ── Upload images (if enabled) ──
-      var pathMapping = <String, String>{}; // local path → server path
+      var pathMapping = <String, String>{}; // photo → server path
       var totalImageBytes = 0;
       var rejected = <String>[];
       var unsupported = <String>[];
@@ -491,12 +555,33 @@ class CommunityPublishPipeline {
 
       if (job.includeImages && job.photoPaths.isNotEmpty) {
         report(PublishProgress(status: 'uploading', totalImages: job.photoPaths.length));
+
+        // Photos only in the cloud (taken on another device) come down
+        // first and then go up like the rest, through the Community upload:
+        // the moderation scan, the metadata strip and the publisher's own
+        // copy. A cloud path is never published as it is.
+        final fileOf = await _localFiles(job.photoPaths, token);
+        if (!live()) return PublishRunResult._cancelled;
+        final unreachable = [
+          for (final photo in job.photoPaths)
+            if (fileOf[photo] == null) photo,
+        ];
+        final files = [
+          for (final photo in job.photoPaths)
+            if (fileOf[photo] != null) fileOf[photo]!,
+        ];
+        final photoOf = {
+          for (final e in fileOf.entries)
+            if (e.value != null) e.value!: e.key,
+        };
+        List<String> photosFor(List<String> uploaded) => [for (final file in uploaded) photoOf[file] ?? file];
+
         store = await CommunityUploadedPhotos.load(AuthService.instance.currentUser?.id ?? '');
         // An update reuses the photos the publication already shows.
         final reuse = republishPublicationId != null
             ? await PublishedPhotos.load(republishPublicationId)
             : const <String, ({String serverPath, int bytes})>{};
-        final blocked = await _uploadBlockedReason(job.photoPaths, store, reuse, l10n);
+        final blocked = await _uploadBlockedReason(files, store, reuse, l10n);
         if (!live()) return PublishRunResult._cancelled;
         if (blocked != null) {
           report(PublishProgress(status: 'error', errorMessage: blocked));
@@ -504,7 +589,7 @@ class CommunityPublishPipeline {
         }
 
         final photos = await _uploader().run(
-          job.photoPaths,
+          files,
           token: token,
           store: store,
           reuse: reuse,
@@ -518,40 +603,43 @@ class CommunityPublishPipeline {
         );
         if (!live()) return PublishRunResult._cancelled;
 
-        // A photo that did not upload must not quietly drop out of the
-        // publication: stop here and let the person retry just those.
-        if (photos.failed.isNotEmpty) {
+        // A photo that did not upload (or could not be fetched) must not
+        // quietly drop out of the publication: stop here and let the person
+        // retry just those.
+        final failed = [...unreachable, ...photosFor(photos.failed)];
+        if (failed.isNotEmpty) {
           report(PublishProgress(
             status: 'error',
             errorMessage: l10n.communityPublishPhotosFailedTitle,
             uploadedImages: photos.uploaded.length,
             totalImages: job.photoPaths.length,
-            skippedImages: photos.rejected.length + photos.unsupported.length + photos.failed.length,
-            failedRecipes: job.recipesFor(photos.failed),
-            rejectedRecipes: job.recipesFor(photos.rejected),
-            unsupportedRecipes: job.recipesFor(photos.unsupported),
+            skippedImages: photos.rejected.length + photos.unsupported.length + failed.length,
+            failedRecipes: job.recipesFor(failed),
+            rejectedRecipes: job.recipesFor(photosFor(photos.rejected)),
+            unsupportedRecipes: job.recipesFor(photosFor(photos.unsupported)),
           ));
           return PublishRunResult._(
             error: l10n.communityPublishPhotosFailedTitle,
             photosFailed: true,
             rateLimited: photos.rateLimited.isNotEmpty,
-            failedRecipes: job.recipesFor(photos.failed),
+            failedRecipes: job.recipesFor(failed),
           );
         }
-        pathMapping = photos.uploaded;
+        pathMapping = {
+          for (final e in photos.uploaded.entries) photoOf[e.key] ?? e.key: e.value,
+        };
         totalImageBytes = photos.bytesSent;
-        rejected = photos.rejected;
-        unsupported = photos.unsupported;
+        rejected = photosFor(photos.rejected);
+        unsupported = photosFor(photos.unsupported);
         storeKeys = photos.storeKeys;
         photoKeys = photos.photoKeys;
         reused = photos.reused;
       }
 
-      // ── Replace local paths with server paths (on a copy) ──
-      String? serverPath(String? path) {
-        if (!job.includeImages || path == null) return null;
-        return pathMapping[path] ?? (ImageService.isServerPath(path) ? path : null);
-      }
+      // ── Replace photos with their Community upload (on a copy) ──
+      // Only a photo that went up through the Community upload is sent;
+      // one moderation turned down, or nothing here can read, is left out.
+      String? serverPath(String? path) => job.includeImages && path != null ? pathMapping[path] : null;
 
       final recipeMaps = [
         for (final recipe in job.recipeMaps)

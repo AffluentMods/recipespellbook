@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
@@ -501,6 +502,34 @@ class ImageService {
       return null;
     } finally {
       client.close();
+    }
+  }
+
+  /// Whether [path] is a photo this device does not hold but can fetch: a
+  /// cloud path ("userId/hash.jpg", synced from another device) or an https
+  /// address. (Photos are never fetched over plain http.)
+  static bool isRemotePhoto(String? path) => path != null && (isServerPath(path) || path.startsWith('https://'));
+
+  /// A file on this device with the photo at [path], a cloud path or an
+  /// https address ([isRemotePhoto]), for sending it on (a Community
+  /// publish, a share link) through the same upload as a local photo. It is
+  /// kept in the temporary folder under a name made from [path], so asking
+  /// again returns the same file instead of fetching it again. Null when it
+  /// cannot be fetched.
+  Future<String?> localCopyOfRemotePhoto(String path) async {
+    if (!supportsLocalFileSystem || !isRemotePhoto(path)) return null;
+    try {
+      final dir = Directory(p.join((await getTemporaryDirectory()).path, 'remote_photos'));
+      final name = 'remote_${sha1.convert(utf8.encode(path)).toString().substring(0, 32)}.jpg';
+      final file = File(p.join(dir.path, name));
+      if (await file.exists() && await file.length() > 0) return file.path;
+      final url = isServerPath(path) ? await getImageUrl(path) : path;
+      if (url == null) return null;
+      if (!await dir.exists()) await dir.create(recursive: true);
+      return await downloadAndSaveImage(url, name, directory: dir);
+    } catch (e) {
+      debugPrint('[ImageService] Remote photo fetch failed: $e');
+      return null;
     }
   }
 
