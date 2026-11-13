@@ -4229,11 +4229,14 @@ class RecipeImportEngine {
     final (sourceUrl, sourceNote) =
         _sourceAndNote(_jsonString(json['source_url']), _jsonString(json['source']));
 
+    final (ingredients, linkedTitles) = _paprikaLinks(_jsonLines(json['ingredients']));
+    final (directions, _) = _paprikaLinks(_jsonLines(json['directions']));
     return ImportedRecipe(
       title: _jsonString(json['name']) ?? _jsonString(json['title']) ?? 'Paprika Recipe',
       description: _jsonString(json['description']),
-      ingredients: _jsonLines(json['ingredients']),
-      instructions: _withoutStepNumbers(_jsonLines(json['directions'])),
+      ingredients: ingredients,
+      linkedTitles: linkedTitles.isEmpty ? null : linkedTitles,
+      instructions: _withoutStepNumbers(directions),
       prepTimeMinutes: prepTime,
       cookTimeMinutes: cookTime,
       servings: _jsonServings(json['servings']),
@@ -4252,6 +4255,27 @@ class RecipeImportEngine {
       rating: _jsonRating(json['rating']),
       sourceApp: 'paprika',
     );
+  }
+
+  /// Paprika's link to another recipe in a line: "[recipe:Pizza Dough]".
+  static final _paprikaLink = RegExp(r'\[recipe:\s*([^\]\n]+?)\s*\]', caseSensitive: false);
+
+  /// [lines] without Paprika's link syntax ("1 batch [recipe:Pizza Dough]"
+  /// is "1 batch Pizza Dough"), and the title each line links to, by its
+  /// place in the list.
+  static (List<String>, Map<int, String>) _paprikaLinks(List<String> lines) {
+    final titles = <int, String>{};
+    final out = <String>[];
+    for (final line in lines) {
+      final first = _paprikaLink.firstMatch(line);
+      if (first == null) {
+        out.add(line);
+        continue;
+      }
+      titles[out.length] = first.group(1)!;
+      out.add(line.replaceAllMapped(_paprikaLink, (m) => m.group(1)!).replaceAll(RegExp(r'\s{2,}'), ' ').trim());
+    }
+    return (out, titles);
   }
 
   /// What a Mela recipe is known by: a title and a short text next to the

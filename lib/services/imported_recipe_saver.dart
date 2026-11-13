@@ -138,7 +138,7 @@ class ImportedRecipeSaver {
           }
           return;
         }
-        for (final raw in recipe.ingredients) {
+        for (final (index, raw) in recipe.ingredients.indexed) {
           final line = raw.trim();
           if (line.isEmpty) continue;
 
@@ -181,10 +181,20 @@ class ImportedRecipeSaver {
               !_cutMidway(text, name) &&
               !_groupedThousands.hasMatch(text) &&
               !(amount == null && _startsWithUnitSign(text, name));
+          final ingredientId = 'ing_${_uuid.v4()}';
+          final linkedTitle = recipe.linkedTitles?[index];
+          if (linkedTitle != null && linkedTitle.trim().isNotEmpty) {
+            links.add((
+              recipeId: recipeId,
+              ingredientId: ingredientId,
+              linked: ImportLibrary._titleLink(linkedTitle),
+              scale: _linkScale(parsed),
+            ));
+          }
           batch.insert(
             db.ingredients,
             IngredientsCompanion.insert(
-              id: 'ing_${_uuid.v4()}',
+              id: ingredientId,
               recipeId: recipeId,
               sortOrder: order++,
               name: _clamp(split ? name : line),
@@ -274,8 +284,20 @@ class ImportedRecipeSaver {
 
     // Only now do the new tags exist: a save that was rolled back made none.
     known._remember(newTags);
-    known._saved(recipe.exportId, recipeId, links);
+    known._saved(recipe.exportId, recipeId, links, title: title);
     return recipeId;
+  }
+
+  /// How much of a linked recipe a line takes: "2 batches [recipe:Dough]"
+  /// is twice the recipe, "1/2 recipe" half of it. Anything else is the
+  /// whole recipe once.
+  static double _linkScale(ParsedIngredient parsed) {
+    final amount = parsed.amount;
+    if (amount == null || !amount.isFinite || amount <= 0) return 1.0;
+    final words = parsed.name.toLowerCase().split(_whitespace);
+    final unit = (parsed.unit ?? (words.isEmpty ? '' : words.first)).toLowerCase();
+    const wholes = {'batch', 'batches', 'recipe', 'recipes', 'x', 'portion', 'portions'};
+    return wholes.contains(unit) ? amount : 1.0;
   }
 
   /// Ties the recipes of an import together again. An ingredient that stood
@@ -289,8 +311,30 @@ class ImportedRecipeSaver {
 
     final elsewhere = {
       for (final link in links)
-        if (!library._savedAs.containsKey(link.linked)) link.linked,
+        if (!library._savedAs.containsKey(link.linked) && !ImportLibrary._isTitleLink(link.linked)) link.linked,
     }.toList();
+    // A link by title (Paprika's "[recipe:Pizza Dough]") to a recipe not in
+    // this import goes to the library's recipe of that title, when it has
+    // exactly one.
+    final byTitle = <String, String>{};
+    final titles = {
+      for (final link in links)
+        if (ImportLibrary._isTitleLink(link.linked) && !library._savedAs.containsKey(link.linked)) link.linked,
+    };
+    if (titles.isNotEmpty) {
+      final found = <String, List<String>>{};
+      final rows = await (db.selectOnly(db.recipes)
+            ..addColumns([db.recipes.id, db.recipes.title])
+            ..where(db.recipes.deletedAt.isNull()))
+          .get();
+      for (final row in rows) {
+        final key = ImportLibrary._titleLink(row.read(db.recipes.title)!);
+        if (titles.contains(key)) found.putIfAbsent(key, () => []).add(row.read(db.recipes.id)!);
+      }
+      for (final MapEntry(:key, :value) in found.entries) {
+        if (value.length == 1) byTitle[key] = value.single;
+      }
+    }
     final inLibrary = <String>{};
     // Asked for in portions, the database takes only so many values at once.
     for (var start = 0; start < elsewhere.length; start += 500) {
@@ -307,7 +351,9 @@ class ImportedRecipeSaver {
       final order = <String, int>{};
       await db.batch((batch) {
         for (final link in links) {
-          final target = library._savedAs[link.linked] ?? (inLibrary.contains(link.linked) ? link.linked : null);
+          final target = library._savedAs[link.linked] ??
+              byTitle[link.linked] ??
+              (inLibrary.contains(link.linked) ? link.linked : null);
           if (target == null || target == link.recipeId) continue;
           batch.insert(
             db.recipeLinks,
@@ -874,10 +920,18 @@ class ImportLibrary {
     _nextTagOrder += newTags.length;
   }
 
-  void _saved(String? exportId, String recipeId, List<_PendingLink> links) {
+  void _saved(String? exportId, String recipeId, List<_PendingLink> links, {String? title}) {
     if (exportId != null && exportId.isNotEmpty) _savedAs[exportId] = recipeId;
+    // The first recipe of a title is the one a link by that title means.
+    if (title != null && title.trim().isNotEmpty) _savedAs.putIfAbsent(_titleLink(title), () => recipeId);
     _links.addAll(links);
   }
+
+  /// What a link by title is filed under among [_savedAs]. Capitals,
+  /// accents and spacing do not count.
+  static String _titleLink(String title) => 'title:${foldAccents(title).trim().replaceAll(RegExp(r'\s+'), ' ')}';
+
+  static bool _isTitleLink(String linked) => linked.startsWith('title:');
 
   List<_PendingLink> _takeLinks() {
     final links = List.of(_links);
