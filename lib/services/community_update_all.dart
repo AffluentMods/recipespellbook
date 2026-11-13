@@ -341,10 +341,14 @@ class CommunityPublicationUpdater {
       control._current = null;
 
       if (result.success) {
-        if (result.renamed) {
-          updated.add(title);
-        } else {
+        if (!result.renamed) {
           failed.add((title: title, reason: l10n.publicationsUpdateAllNameNotSaved));
+        } else if (result.photosDropped > 0) {
+          // Live, but without photos the server did not keep: the next
+          // update sends them again.
+          failed.add((title: title, reason: l10n.communityPublishPhotosDropped(result.photosDropped)));
+        } else {
+          updated.add(title);
         }
         continue;
       }

@@ -154,6 +154,10 @@ class CommunityPhotoUploadReport {
   /// they are.
   final List<String> unsupported;
 
+  /// The server's limit for today was reached. The photo it turned away and
+  /// every one after it are in [failed]; none of them was tried again.
+  final bool dailyLimitReached;
+
   const CommunityPhotoUploadReport({
     required this.uploaded,
     required this.bytesSent,
@@ -165,12 +169,14 @@ class CommunityPhotoUploadReport {
     this.photoKeys = const {},
     this.reused = 0,
     this.unsupported = const [],
+    this.dailyLimitReached = false,
   });
 }
 
 /// Uploads a publish's photos one at a time. A moderation rejection is not
 /// retried, a rate limit is waited out (counting down so the screen can show
 /// it), anything else is tried [maxAttempts] times with a growing pause.
+/// Today's limit stops the run: no photo would go up before tomorrow.
 class CommunityPhotoUploader {
   CommunityPhotoUploader({
     Future<CommunityUploadOutcome> Function(String localPath)? upload,
@@ -207,6 +213,7 @@ class CommunityPhotoUploader {
     var bytesSent = 0;
     var unsaved = 0;
     var reused = 0;
+    var dailyLimitReached = false;
 
     void progress(int done, {int waitSeconds = 0}) => onProgress?.call(CommunityPhotoUploadProgress(
           done: done,
@@ -243,10 +250,12 @@ class CommunityPhotoUploader {
       var waits = 0;
       while (!token.cancelled) {
         outcome = await _upload(path);
-        // Moderation and an unreadable format answer the same every time.
+        // Moderation and an unreadable format answer the same every time,
+        // and today's limit until tomorrow.
         if (outcome.ok ||
             outcome.failure == CommunityUploadFailure.rejected ||
-            outcome.failure == CommunityUploadFailure.unsupported) {
+            outcome.failure == CommunityUploadFailure.unsupported ||
+            outcome.failure == CommunityUploadFailure.dailyLimit) {
           break;
         }
         if (outcome.failure == CommunityUploadFailure.rateLimited && waits < maxRateLimitWaits) {
@@ -286,6 +295,12 @@ class CommunityPhotoUploader {
         rejected.add(path);
       } else if (outcome?.failure == CommunityUploadFailure.unsupported) {
         unsupported.add(path);
+      } else if (outcome?.failure == CommunityUploadFailure.dailyLimit) {
+        // The rest would be turned away the same way: none is sent.
+        dailyLimitReached = true;
+        failed.addAll(paths.skip(i));
+        progress(paths.length);
+        break;
       } else {
         debugPrint('[Publish] Image failed after $maxAttempts attempts');
         failed.add(path);
@@ -306,6 +321,7 @@ class CommunityPhotoUploader {
       photoKeys: photoKeys,
       reused: reused,
       unsupported: unsupported,
+      dailyLimitReached: dailyLimitReached,
     );
   }
 }

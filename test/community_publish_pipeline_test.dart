@@ -34,6 +34,18 @@ class _Server {
   /// Every PUT fails with a server error.
   var putFails = false;
 
+  /// How the [uploads]th photo upload is answered; null stores it.
+  http.Response? Function(int n)? uploadAnswer;
+
+  /// Photo paths the server leaves out of the next publish or update.
+  var dropNext = <String>[];
+
+  List<String> _takeDropped() {
+    final dropped = dropNext;
+    dropNext = [];
+    return dropped;
+  }
+
   http.Client get client => MockClient((request) async {
         final path = request.url.path;
         if (path.endsWith('/v1/community/me/upload-status')) {
@@ -41,20 +53,28 @@ class _Server {
         }
         if (path.endsWith('/v1/images/community-upload')) {
           final n = ++uploads;
+          final answer = uploadAnswer?.call(n);
+          if (answer != null) return answer;
           return _json({'path': 'cook1/community$n.jpg', 'url': 'https://example.com/community$n.jpg'});
         }
         final put = RegExp(r'/v1/community/([^/]+)/recipes$').firstMatch(path);
         if (request.method == 'PUT' && put != null) {
           if (putFails) return http.Response('{"error":"boom"}', 500);
           puts.putIfAbsent(put.group(1)!, () => []).add(jsonDecode(request.body) as Map<String, dynamic>);
-          return _json({'ok': true, 'status': 'published'});
+          final dropped = _takeDropped();
+          return _json({'ok': true, 'status': 'published', if (dropped.isNotEmpty) 'droppedImagePaths': dropped});
         }
         if (request.method == 'POST' && path.endsWith('/v1/community')) {
           final body = jsonDecode(request.body) as Map<String, dynamic>;
           posts.add(body);
           final answer = postAnswer?.call(body);
           if (answer != null) return answer;
-          return _json({'id': 'pub${++nextId}', 'status': 'published'}, status: 201);
+          final dropped = _takeDropped();
+          return _json({
+            'id': 'pub${++nextId}',
+            'status': 'published',
+            if (dropped.isNotEmpty) 'droppedImagePaths': dropped,
+          }, status: 201);
         }
         final patch = RegExp(r'/v1/community/([^/]+)$').firstMatch(path);
         if (request.method == 'PATCH' && patch != null) {
@@ -223,6 +243,70 @@ void main() {
       expect(result.success, isTrue, reason: result.error);
       expect(fetched, isEmpty);
       expect((server.posts.single['recipes'] as List)[0]['imagePath'], isNull);
+    });
+  });
+
+  group('the server\'s answers about photos', () {
+    test('today\'s limit part way stops the publish with its message, without retrying', () async {
+      await addCookbook(
+        recipe0: (path: photo(), cloud: null),
+        step0: (path: photo(), cloud: null),
+      );
+      server.uploadAnswer = (n) => n == 1
+          ? null
+          : http.Response(
+              jsonEncode({'error': 'Daily upload limit reached', 'code': 'daily_upload_limit', 'dailyLimitBytes': 100}),
+              413,
+            );
+      final result = await run(await prepare());
+      expect(result.success, isFalse);
+      expect(result.blocked, isTrue);
+      expect(result.error, l10n.communityPublishDailyLimitReached);
+      // No "retry failed photos" list: retrying today would be turned away.
+      expect(result.failedRecipes, isEmpty);
+      expect(server.uploads, 2, reason: 'the refused photo is not sent again');
+      expect(server.posts, isEmpty);
+    });
+
+    test('photos the server did not keep are reported, and the next update sends them again', () async {
+      await addCookbook(
+        recipe0: (path: photo(), cloud: null),
+        step0: (path: photo(), cloud: null),
+      );
+      // The recipe photo goes up first, as community1.
+      server.dropNext = ['cook1/community1.jpg'];
+      final job = await prepare();
+      final result = await run(job);
+      expect(result.success, isTrue, reason: result.error);
+      expect(result.photosDropped, 1);
+      expect(result.droppedRecipes, ['Soup 0']);
+      final id = result.publicationId!;
+      // It shows as changed, and the dropped photo is not taken as in use.
+      expect((await PublishSnapshot.lookup(id))!.hash, isNot(job.contentHash));
+      expect((await PublishedPhotos.load(id)).values.map((p) => p.serverPath), ['cook1/community2.jpg']);
+
+      final update = await run(await prepare(), republish: id);
+      expect(update.success, isTrue, reason: update.error);
+      expect(update.photosDropped, 0);
+      expect(server.uploads, 3, reason: 'only the dropped photo goes up again');
+      final recipes = (server.puts[id]!.single['recipes'] as List).cast<Map<String, dynamic>>();
+      expect(recipes[0]['imagePath'], 'cook1/community3.jpg');
+      expect((recipes[0]['steps'] as List)[0]['imagePath'], 'cook1/community2.jpg');
+      expect((await PublishSnapshot.lookup(id))!.hash, job.contentHash);
+    });
+
+    test('an update the server left photos out of shows as changed too', () async {
+      await addCookbook(recipe0: (path: photo(), cloud: null));
+      final job = await prepare();
+      final id = (await run(job)).publicationId!;
+      expect((await PublishSnapshot.lookup(id))!.hash, job.contentHash);
+
+      server.dropNext = ['cook1/community1.jpg'];
+      final update = await run(await prepare(), republish: id);
+      expect(update.success, isTrue, reason: update.error);
+      expect(update.photosDropped, 1);
+      expect((await PublishSnapshot.lookup(id))!.hash, isNot(job.contentHash));
+      expect(await PublishedPhotos.load(id), isEmpty);
     });
   });
 

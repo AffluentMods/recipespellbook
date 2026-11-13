@@ -537,6 +537,18 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     const SizedBox(height: 8),
                     _RecipeTitleList(titles: unsupported),
                   ],
+                  if ((progress?.droppedPhotos ?? 0) > 0) ...[
+                    // Photos the server did not keep: sent again with the
+                    // next update.
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.communityPublishPhotosDropped(progress!.droppedPhotos),
+                      style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    _RecipeTitleList(titles: progress.droppedRecipes),
+                  ],
                   if (offerNotifications) ...[
                     const SizedBox(height: 16),
                     OutlinedButton.icon(

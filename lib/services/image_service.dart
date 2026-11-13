@@ -40,8 +40,9 @@ enum CommunityUploadFailure {
   /// photo again gets the same answer, so it is not retried.
   rejected,
 
-  /// Too many uploads for now (429). [CommunityUploadOutcome.retryAfter]
-  /// says when the limit resets.
+  /// Too many uploads for now (429), or the server's photo check is down
+  /// for a moment (503 `scan_unavailable`). [CommunityUploadOutcome.retryAfter]
+  /// says when to try again.
   rateLimited,
 
   /// Anything else: offline, timed out, server error, file too large.
@@ -51,6 +52,11 @@ enum CommunityUploadFailure {
   /// platform has no decoder for it). It is never sent as it is, so it is
   /// not retried either: the publish goes ahead without it.
   unsupported,
+
+  /// Today's upload allowance is used up (413 `daily_upload_limit`). It
+  /// resets at midnight, so neither this photo nor the ones after it are
+  /// tried again today.
+  dailyLimit,
 }
 
 /// What [ImageService.communityUploadFile] did with one photo.
@@ -61,7 +67,8 @@ class CommunityUploadOutcome {
   /// Set when it was not.
   final CommunityUploadFailure? failure;
 
-  /// For [CommunityUploadFailure.rateLimited]: time until the limit resets.
+  /// For [CommunityUploadFailure.rateLimited]: time until it can be tried
+  /// again.
   final Duration? retryAfter;
 
   /// Size of the photo as it was sent (after re-encoding), 0 if not stored.
@@ -117,6 +124,34 @@ class ImageService {
   bool get lastUploadRefused => _lastUploadRefused;
   bool _lastUploadRefused = false;
 
+  /// Set when the server said the account's photos for today are used up
+  /// (429 `daily_upload_limit`): until the next day [uploadFile] does not ask
+  /// again, so a sync does not send a photo only to have it turned away.
+  ({String userId, DateTime until})? _dailyLimit;
+
+  /// The time, for the daily limit. Tests replace it.
+  @visibleForTesting
+  static DateTime Function() now = DateTime.now;
+
+  /// When the server's upload day after [time] starts. It counts uploads per
+  /// calendar day in UTC.
+  @visibleForTesting
+  static DateTime nextUploadDay(DateTime time) {
+    final utc = time.toUtc();
+    return DateTime.utc(utc.year, utc.month, utc.day + 1);
+  }
+
+  /// The `code` of a JSON error answer, or null.
+  static String? _errorCode(String body) {
+    try {
+      final data = jsonDecode(body);
+      final code = data is Map ? data['code'] : null;
+      return code is String ? code : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   // ════════════════════════════════════════════
   //  PICK + UPLOAD (convenience)
   // ════════════════════════════════════════════
@@ -148,6 +183,17 @@ class ImageService {
     if (!_auth.isSignedIn) {
       debugPrint('[ImageService] Not signed in — cannot upload');
       return null;
+    }
+    final userId = _auth.currentUser?.id ?? '';
+    final limit = _dailyLimit;
+    if (limit != null) {
+      if (limit.userId == userId && now().isBefore(limit.until)) {
+        // It would be turned away the same way until the day is over.
+        _lastUploadRefused = true;
+        debugPrint('[ImageService] Daily upload limit reached; not uploading until ${limit.until.toIso8601String()}');
+        return null;
+      }
+      _dailyLimit = null;
     }
 
     try {
@@ -201,6 +247,9 @@ class ImageService {
       }
 
       _lastUploadRefused = true;
+      if (response.statusCode == 429 && _errorCode(response.body) == 'daily_upload_limit') {
+        _dailyLimit = (userId: userId, until: nextUploadDay(now()));
+      }
       debugPrint('[ImageService] Upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
       return null;
     } catch (e) {
@@ -491,6 +540,21 @@ class ImageService {
         return CommunityUploadOutcome.failed(CommunityUploadFailure.rateLimited, retryAfter: wait);
       }
 
+      final code = _errorCode(response.body);
+      if (response.statusCode == 503 && code == 'scan_unavailable') {
+        // The photo check is down for a moment: waited out like a rate
+        // limit. Its Retry-After counts, not the RateLimit-Reset of the
+        // upload limiter that comes with every answer.
+        final wait = retryAfterOf(response.headers);
+        debugPrint('[ImageService] Community upload: photo check unavailable, trying again in ${wait.inSeconds}s');
+        return CommunityUploadOutcome.failed(CommunityUploadFailure.rateLimited, retryAfter: wait);
+      }
+
+      if (response.statusCode == 413 && code == 'daily_upload_limit') {
+        debugPrint('[ImageService] Community upload: daily upload limit reached');
+        return const CommunityUploadOutcome.failed(CommunityUploadFailure.dailyLimit);
+      }
+
       debugPrint('[ImageService] Community upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
       return failed;
     } catch (e) {
@@ -536,6 +600,18 @@ class ImageService {
       if (combined != null) seconds = int.tryParse(combined.group(1)!);
     }
     return Duration(seconds: (seconds ?? 60).clamp(1, 3600));
+  }
+
+  /// The `Retry-After` of an answer (seconds), or [fallback] when it has
+  /// none that can be read; between a second and an hour.
+  @visibleForTesting
+  static Duration retryAfterOf(Map<String, String> headers, {Duration fallback = const Duration(seconds: 30)}) {
+    for (final e in headers.entries) {
+      if (e.key.toLowerCase() != 'retry-after') continue;
+      final seconds = int.tryParse(e.value.trim());
+      if (seconds != null) return Duration(seconds: seconds.clamp(1, 3600));
+    }
+    return fallback;
   }
 
   // ════════════════════════════════════════════

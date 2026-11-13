@@ -77,6 +77,37 @@ void main() {
       expect(limited.retryAfter, const Duration(seconds: 42));
     });
 
+    test('waits out a photo check that is down by its Retry-After, like a rate limit', () async {
+      final down = await upload((_) => http.Response(
+            '{"error":"The photo check is unavailable right now.","code":"scan_unavailable"}',
+            503,
+            // The upload limiter's headers come with every answer: its
+            // window is not what to wait for.
+            headers: {'retry-after': '30', 'ratelimit-reset': '840'},
+          ));
+      expect(down.failure, CommunityUploadFailure.rateLimited);
+      expect(down.retryAfter, const Duration(seconds: 30));
+
+      final noHeader = await upload((_) => http.Response('{"code":"scan_unavailable"}', 503));
+      expect(noHeader.retryAfter, const Duration(seconds: 30));
+
+      // Any other 503 is a plain failure, retried a few times.
+      final other = await upload((_) => http.Response('Service Unavailable', 503));
+      expect(other.failure, CommunityUploadFailure.failed);
+    });
+
+    test('tells today\'s limit (413 daily_upload_limit) from a plain failure', () async {
+      final daily = await upload((_) => http.Response(
+            '{"error":"Daily upload limit reached (2 GB/day). Try again tomorrow.","code":"daily_upload_limit","dailyLimitBytes":2147483648}',
+            413,
+          ));
+      expect(daily.failure, CommunityUploadFailure.dailyLimit);
+      expect(daily.retryAfter, isNull);
+
+      final tooLarge = await upload((_) => http.Response('{"error":"Payload too large"}', 413));
+      expect(tooLarge.failure, CommunityUploadFailure.failed);
+    });
+
     test('a photo no decoder here can read is never sent as it is', () async {
       // A HEIC-like file the image package and the test platform cannot read.
       final heic = File('${dir.path}${Platform.pathSeparator}photo.heic')
@@ -135,12 +166,84 @@ void main() {
     });
   });
 
+  group('a personal photo upload (Cloud Sync)', () {
+    tearDown(() => ImageService.now = DateTime.now);
+
+    test('over the daily limit, it is not sent again until the next day', () async {
+      var requests = 0;
+      var answer = http.Response(
+        '{"error":"Daily upload limit reached (2 GB/day)","code":"daily_upload_limit"}',
+        429,
+      );
+      Future<ImageUploadResult?> send() => http.runWithClient(
+            // The platform's File, which the analyzer reads as the web stub's.
+            () => ImageService.instance.uploadFile(File(photo()) as dynamic),
+            () => MockClient((_) async {
+              requests++;
+              return answer;
+            }),
+          );
+
+      ImageService.now = () => DateTime.utc(2026, 11, 13, 22);
+      expect(await send(), isNull);
+      expect(ImageService.instance.lastUploadRefused, isTrue, reason: 'shows as photos not uploading');
+      expect(requests, 1);
+
+      // The next sync, the same day: not asked again.
+      ImageService.now = () => DateTime.utc(2026, 11, 13, 23, 59);
+      expect(await send(), isNull);
+      expect(ImageService.instance.lastUploadRefused, isTrue);
+      expect(requests, 1);
+
+      // A new day: it goes up.
+      ImageService.now = () => DateTime.utc(2026, 11, 14, 0, 1);
+      answer = http.Response(jsonEncode({'path': 'cook1/a.jpg', 'url': 'https://x/a.jpg'}), 200);
+      expect((await send())?.path, 'cook1/a.jpg');
+      expect(requests, 2);
+    });
+
+    test('another refusal is tried again at the next sync', () async {
+      var requests = 0;
+      Future<ImageUploadResult?> send() => http.runWithClient(
+            // The platform's File, which the analyzer reads as the web stub's.
+            () => ImageService.instance.uploadFile(File(photo()) as dynamic),
+            () => MockClient((_) async {
+              requests++;
+              return http.Response('{"error":"Too many requests"}', 429);
+            }),
+          );
+      await send();
+      await send();
+      expect(requests, 2);
+    });
+
+    test('the upload day ends at midnight UTC, as the server counts it', () {
+      expect(ImageService.nextUploadDay(DateTime.utc(2026, 11, 13, 23, 59)), DateTime.utc(2026, 11, 14));
+      expect(ImageService.nextUploadDay(DateTime.utc(2026, 12, 31, 0, 0)), DateTime.utc(2027, 1, 1));
+    });
+  });
+
+  group('photos the server left out of a publication', () {
+    test('are read from the answer, and an answer without them has none', () {
+      expect(
+        CommunityService.droppedImagePathsIn(jsonEncode({
+          'id': 'pub1',
+          'droppedImagePaths': ['cook1/a.jpg', '', 7, 'cook1/b.jpg'],
+        })),
+        ['cook1/a.jpg', 'cook1/b.jpg'],
+      );
+      expect(CommunityService.droppedImagePathsIn(jsonEncode({'ok': true})), isEmpty);
+      expect(CommunityService.droppedImagePathsIn('not json'), isEmpty);
+    });
+  });
+
   group('the photo uploader', () {
     const ok = 'ok';
     const reject = 'reject';
     const limit = 'limit';
     const fail = 'fail';
     const unreadable = 'unreadable';
+    const daily = 'daily';
 
     /// Answers each upload of a photo with the next of its [script] entries
     /// (the last one repeats) and records every call and every wait.
@@ -166,6 +269,8 @@ void main() {
               return const CommunityUploadOutcome.failed(CommunityUploadFailure.rejected);
             case unreadable:
               return const CommunityUploadOutcome.failed(CommunityUploadFailure.unsupported);
+            case daily:
+              return const CommunityUploadOutcome.failed(CommunityUploadFailure.dailyLimit);
             case limit:
               return const CommunityUploadOutcome.failed(
                 CommunityUploadFailure.rateLimited,
@@ -224,6 +329,21 @@ void main() {
       expect(report.failed, isEmpty);
       expect(report.uploaded.length, 2);
       expect(report.bytesSent, 200);
+    });
+
+    test('stops at today\'s limit without retrying, and reports the rest as not sent', () async {
+      final a = photo();
+      final b = photo();
+      final c = photo();
+      final u = uploaderFor({a: [ok], b: [daily], c: [ok]});
+      final report = await u.uploader.run([a, b, c],
+          token: PublishRunToken(), store: await CommunityUploadedPhotos.load('cook1'));
+      expect(u.calls, [a, b]);
+      expect(u.waits, isEmpty);
+      expect(report.dailyLimitReached, isTrue);
+      expect(report.uploaded.keys, [a]);
+      expect(report.failed, [b, c]);
+      expect(report.rateLimited, isEmpty);
     });
 
     test('retries other failures three times, then reports the photo', () async {

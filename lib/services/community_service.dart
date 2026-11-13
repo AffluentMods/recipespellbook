@@ -663,6 +663,12 @@ class PublishProgress {
   /// AVIF without a decoder): left out of the publication.
   final List<String> unsupportedRecipes;
 
+  /// With status 'done': photos the server did not keep (it only keeps the
+  /// publisher's own Community uploads), and the recipes they belong to.
+  /// They are sent again with the next update.
+  final int droppedPhotos;
+  final List<String> droppedRecipes;
+
   const PublishProgress({
     required this.status,
     this.uploadedImages = 0,
@@ -674,6 +680,8 @@ class PublishProgress {
     this.rejectedRecipes = const [],
     this.failedRecipes = const [],
     this.unsupportedRecipes = const [],
+    this.droppedPhotos = 0,
+    this.droppedRecipes = const [],
   });
 
   PublishProgress copyWith({
@@ -687,6 +695,8 @@ class PublishProgress {
     List<String>? rejectedRecipes,
     List<String>? failedRecipes,
     List<String>? unsupportedRecipes,
+    int? droppedPhotos,
+    List<String>? droppedRecipes,
   }) => PublishProgress(
     status: status ?? this.status,
     uploadedImages: uploadedImages ?? this.uploadedImages,
@@ -698,12 +708,16 @@ class PublishProgress {
     rejectedRecipes: rejectedRecipes ?? this.rejectedRecipes,
     failedRecipes: failedRecipes ?? this.failedRecipes,
     unsupportedRecipes: unsupportedRecipes ?? this.unsupportedRecipes,
+    droppedPhotos: droppedPhotos ?? this.droppedPhotos,
+    droppedRecipes: droppedRecipes ?? this.droppedRecipes,
   );
 }
 
 /// How a POST /v1/community went. [replayed]: the server answered a publish
 /// key an earlier try already used with the publication that try made
-/// (200), so it carries what that try sent.
+/// (200), so it carries what that try sent. [droppedImagePaths]: photo paths
+/// the server left out of the publication (it only keeps the publisher's
+/// own Community uploads).
 typedef CommunityPublishResult = ({
   bool success,
   String? error,
@@ -711,6 +725,7 @@ typedef CommunityPublishResult = ({
   String? status,
   Duration? retryAfter,
   bool replayed,
+  List<String> droppedImagePaths,
 });
 
 /// Global publish progress notifier — listened to by publish screen and my publications.
@@ -1103,7 +1118,8 @@ class CommunityService {
 
   /// [replacePublicationRecipes], also telling a rate limit (429) apart:
   /// [retryAfter] is then how long until the server takes requests again.
-  Future<({bool ok, Duration? retryAfter})> replacePublicationRecipesResult(
+  /// [dropped] holds the photo paths the server left out of the update.
+  Future<({bool ok, Duration? retryAfter, List<String> dropped})> replacePublicationRecipesResult(
     String publicationId, {
     required List<Map<String, dynamic>> recipes,
     int? imageCount,
@@ -1117,18 +1133,37 @@ class CommunityService {
         if (totalImageBytes != null) 'totalImageBytes': totalImageBytes,
         if (imagePath != null) 'imagePath': imagePath,
       }, timeout: publishTimeout);
-      if (r.statusCode == 200) return (ok: true, retryAfter: null);
+      if (r.statusCode == 200) {
+        return (ok: true, retryAfter: null, dropped: droppedImagePathsIn(r.body));
+      }
       if (r.statusCode == 429) {
         // Retry-After, else the standard RateLimit-Reset, else a minute.
         final seconds = int.tryParse(r.headers['retry-after']?.trim() ?? '') ??
             int.tryParse(r.headers['ratelimit-reset']?.trim() ?? '') ??
             60;
-        return (ok: false, retryAfter: Duration(seconds: seconds.clamp(1, 3600)));
+        return (ok: false, retryAfter: Duration(seconds: seconds.clamp(1, 3600)), dropped: const <String>[]);
       }
     } catch (e) {
       debugPrint('[Community] replacePublicationRecipes: $e');
     }
-    return (ok: false, retryAfter: null);
+    return (ok: false, retryAfter: null, dropped: const <String>[]);
+  }
+
+  /// The `droppedImagePaths` of a publish or update answer: photos the
+  /// server would not keep, as they were sent. Empty when there are none.
+  @visibleForTesting
+  static List<String> droppedImagePathsIn(String body) {
+    try {
+      final data = jsonDecode(body);
+      final list = data is Map ? data['droppedImagePaths'] : null;
+      if (list is! List) return const [];
+      return [
+        for (final path in list)
+          if (path is String && path.isNotEmpty) path,
+      ];
+    } catch (_) {
+      return const [];
+    }
   }
 
   // ────────────────────────────────────
@@ -1381,6 +1416,7 @@ class CommunityService {
           status: data['status'] as String?,
           retryAfter: null,
           replayed: r.statusCode == 200,
+          droppedImagePaths: droppedImagePathsIn(r.body),
         );
       }
       final retryAfter = r.statusCode == 429 ? int.tryParse(r.headers['retry-after']?.trim() ?? '') : null;
@@ -1391,15 +1427,19 @@ class CommunityService {
         status: null,
         retryAfter: retryAfter != null && retryAfter > 0 ? Duration(seconds: retryAfter) : null,
         replayed: false,
+        droppedImagePaths: const <String>[],
       );
     } catch (e) {
+      debugPrint('[Community] publish: $e');
+      // No error text of its own: the screen says it in the user's language.
       return (
         success: false,
-        error: 'Connection error',
+        error: null,
         publicationId: null,
         status: null,
         retryAfter: null,
         replayed: false,
+        droppedImagePaths: const <String>[],
       );
     }
   }

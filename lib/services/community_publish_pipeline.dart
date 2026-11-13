@@ -128,8 +128,9 @@ class PublishRunResult {
   /// Photos did not upload; nothing was published.
   final bool photosFailed;
 
-  /// Stopped before any photo went up: today's limit, or another upload
-  /// still being processed.
+  /// Stopped on today's limit (before any photo went up, or when the server
+  /// said so part way), or on another upload still being processed: trying
+  /// again now would be turned away the same way.
   final bool blocked;
 
   /// Ended on the server's rate limit (after waiting it out a few times).
@@ -156,6 +157,12 @@ class PublishRunResult {
   /// went in but the title, description or tags did not.
   final bool detailsSaved;
 
+  /// Photos the server did not keep, though the publish went through, and
+  /// the recipes they belong to. They count as not uploaded: the next
+  /// update sends them again through the Community upload.
+  final int photosDropped;
+  final List<String> droppedRecipes;
+
   const PublishRunResult._({
     this.success = false,
     this.cancelled = false,
@@ -172,6 +179,8 @@ class PublishRunResult {
     this.failedRecipes = const [],
     this.unsupportedRecipes = const [],
     this.detailsSaved = true,
+    this.photosDropped = 0,
+    this.droppedRecipes = const [],
   });
 
   static const _cancelled = PublishRunResult._(cancelled: true);
@@ -643,6 +652,19 @@ class CommunityPublishPipeline {
         );
         if (!live()) return PublishRunResult._cancelled;
 
+        // Today's limit: no photo goes up before tomorrow, so retrying the
+        // failed ones now would only be turned away again.
+        if (photos.dailyLimitReached) {
+          final message = l10n.communityPublishDailyLimitReached;
+          report(PublishProgress(
+            status: 'error',
+            errorMessage: message,
+            uploadedImages: photos.uploaded.length,
+            totalImages: job.photoPaths.length,
+          ));
+          return PublishRunResult._(error: message, photosFailed: true, blocked: true);
+        }
+
         // A photo that did not upload (or could not be fetched) must not
         // quietly drop out of the publication: stop here and let the person
         // retry just those.
@@ -702,6 +724,19 @@ class CommunityPublishPipeline {
         await store?.save();
       }
 
+      // Photos the server left out though the publish went through (it only
+      // keeps the publisher's own Community uploads). They count as not
+      // uploaded: they are not remembered as in use, and the publication
+      // shows as changed, so the next update sends them again.
+      List<String> droppedPhotosOf(Set<String> dropped) => [
+            for (final e in pathMapping.entries)
+              if (dropped.contains(e.value)) e.key,
+          ];
+      Map<String, ({String serverPath, int bytes})> keptPhotoKeys(Set<String> dropped) => {
+            for (final e in photoKeys.entries)
+              if (!dropped.contains(e.value.serverPath)) e.key: e.value,
+          };
+
       // ── Publish ──
       // Last check before anything is published: a cancelled run stops here.
       if (!live()) return PublishRunResult._cancelled;
@@ -718,7 +753,8 @@ class CommunityPublishPipeline {
       if (republishPublicationId != null) {
         // A 429 is the server's rate limit: wait it out a few times. The
         // replacement is the same every time, so a retry is safe.
-        Future<({bool ok, Duration? retryAfter})> replaceOnce() => _community.replacePublicationRecipesResult(
+        Future<({bool ok, Duration? retryAfter, List<String> dropped})> replaceOnce() =>
+            _community.replacePublicationRecipesResult(
               republishPublicationId,
               recipes: recipeMaps,
               imageCount: pathMapping.length,
@@ -744,6 +780,9 @@ class CommunityPublishPipeline {
         }
 
         await forgetUploadedPhotos();
+        final dropped = result.dropped.toSet();
+        final droppedPhotos = droppedPhotosOf(dropped);
+        final droppedRecipes = job.recipesFor(droppedPhotos);
         // The title, description and tags edited on the publish screen.
         final detailsSaved = details == null ||
             await _community.updatePublication(
@@ -755,10 +794,11 @@ class CommunityPublishPipeline {
         final renamed = await _remember(
           republishPublicationId,
           job,
-          photoKeys,
+          keptPhotoKeys(dropped),
           update: true,
           // A title just set by the person is theirs, not the cookbook's.
           publishedTitle: details == null ? publishedTitle : null,
+          photosMissing: dropped.isNotEmpty,
         );
         report(PublishProgress(
           status: 'done',
@@ -768,6 +808,8 @@ class CommunityPublishPipeline {
           rejectedRecipes: rejectedRecipes,
           unsupportedRecipes: unsupportedRecipes,
           publicationId: republishPublicationId,
+          droppedPhotos: droppedPhotos.length,
+          droppedRecipes: droppedRecipes,
         ));
         return PublishRunResult._(
           success: true,
@@ -778,6 +820,8 @@ class CommunityPublishPipeline {
           photosReused: reused,
           rejectedRecipes: rejectedRecipes,
           unsupportedRecipes: unsupportedRecipes,
+          photosDropped: droppedPhotos.length,
+          droppedRecipes: droppedRecipes,
         );
       }
 
@@ -813,6 +857,7 @@ class CommunityPublishPipeline {
       // other content: bring the publication up to what is published now,
       // or it would be recorded as this content while showing the old one.
       final publicationId = result.publicationId;
+      final dropped = result.droppedImagePaths.toSet();
       if (result.success && result.replayed && !attempt.sameContent && publicationId != null) {
         final brought = await _bringUpToDate(
           publicationId,
@@ -824,7 +869,7 @@ class CommunityPublishPipeline {
           live: live,
         );
         if (!live()) return PublishRunResult._cancelled;
-        if (!brought) {
+        if (brought == null) {
           // It is live with the earlier content. Remember it as changed, so
           // My Publications offers the update; the key stays, so publishing
           // again brings it up to date instead of making another.
@@ -835,11 +880,18 @@ class CommunityPublishPipeline {
           report(PublishProgress(status: 'error', errorMessage: l10n.communityPublishingFailed));
           return PublishRunResult._(error: l10n.communityPublishingFailed, publicationId: publicationId);
         }
+        // It now shows what this run sent: what the server left out of that
+        // is what counts.
+        dropped
+          ..clear()
+          ..addAll(brought);
       }
 
       if (result.success) {
         await CommunityService.clearPublishKey(job.sourceKey);
         await forgetUploadedPhotos();
+        final droppedPhotos = droppedPhotosOf(dropped);
+        final droppedRecipes = job.recipesFor(droppedPhotos);
 
         // Remember which local recipe/cookbook this publication came
         // from so "Update published version" can push the right content
@@ -853,7 +905,13 @@ class CommunityPublishPipeline {
               sourceId: job.sourceId,
             );
           }
-          await _remember(result.publicationId!, job, photoKeys, update: false);
+          await _remember(
+            result.publicationId!,
+            job,
+            keptPhotoKeys(dropped),
+            update: false,
+            photosMissing: dropped.isNotEmpty,
+          );
         }
 
         report(PublishProgress(
@@ -864,6 +922,8 @@ class CommunityPublishPipeline {
           rejectedRecipes: rejectedRecipes,
           unsupportedRecipes: unsupportedRecipes,
           publicationId: result.publicationId,
+          droppedPhotos: droppedPhotos.length,
+          droppedRecipes: droppedRecipes,
         ));
         return PublishRunResult._(
           success: true,
@@ -873,6 +933,8 @@ class CommunityPublishPipeline {
           photosReused: reused,
           rejectedRecipes: rejectedRecipes,
           unsupportedRecipes: unsupportedRecipes,
+          photosDropped: droppedPhotos.length,
+          droppedRecipes: droppedRecipes,
         );
       }
 
@@ -896,7 +958,9 @@ class CommunityPublishPipeline {
   /// ([publishedTitle]): a title of its own stays. Returns false when the
   /// rename failed (the old name stays in the snapshot, so it still shows as
   /// changed). An [outdated] publication is live with other content than
-  /// [job]: it is kept as changed, and its photos are not [job]'s.
+  /// [job]: it is kept as changed, and its photos are not [job]'s. One with
+  /// [photosMissing] went out without photos the server left out: it is
+  /// kept as changed too, so the next update sends them again.
   Future<bool> _remember(
     String publicationId,
     PreparedPublish job,
@@ -904,6 +968,7 @@ class CommunityPublishPipeline {
     required bool update,
     String? publishedTitle,
     bool outdated = false,
+    bool photosMissing = false,
   }) async {
     if (!outdated) await PublishedPhotos.save(publicationId, photoKeys);
 
@@ -922,7 +987,11 @@ class CommunityPublishPipeline {
       publicationId,
       PublishSnapshot(
         // A hash nothing matches: the publication shows as changed.
-        hash: outdated ? 'outdated:${job.contentHash}' : job.contentHash,
+        hash: outdated
+            ? 'outdated:${job.contentHash}'
+            : photosMissing
+                ? 'photos-missing:${job.contentHash}'
+                : job.contentHash,
         name: name,
         includeImages: job.includeImages,
         includeNotes: job.includeNotes,
@@ -935,9 +1004,10 @@ class CommunityPublishPipeline {
   }
 
   /// Replaces what publication [publicationId] shows with [job]: its
-  /// recipes, photos and cover, then its title, description and tags. True
-  /// when both went through.
-  Future<bool> _bringUpToDate(
+  /// recipes, photos and cover, then its title, description and tags. When
+  /// both went through, the photo paths the server left out (often none);
+  /// null when either did not.
+  Future<List<String>?> _bringUpToDate(
     String publicationId,
     PreparedPublish job, {
     required List<Map<String, dynamic>> recipes,
@@ -946,7 +1016,8 @@ class CommunityPublishPipeline {
     required String? imagePath,
     required bool Function() live,
   }) async {
-    Future<({bool ok, Duration? retryAfter})> replaceOnce() => _community.replacePublicationRecipesResult(
+    Future<({bool ok, Duration? retryAfter, List<String> dropped})> replaceOnce() =>
+        _community.replacePublicationRecipesResult(
           publicationId,
           recipes: recipes,
           imageCount: imageCount,
@@ -958,12 +1029,13 @@ class CommunityPublishPipeline {
       await _wait(Duration(seconds: replaced.retryAfter!.inSeconds.clamp(1, 60)));
       replaced = await replaceOnce();
     }
-    if (!replaced.ok) return false;
-    return _community.updatePublication(
+    if (!replaced.ok) return null;
+    final detailsSaved = await _community.updatePublication(
       publicationId,
       title: job.title,
       description: job.description ?? '',
       tags: job.tags ?? '',
     );
+    return detailsSaved ? replaced.dropped : null;
   }
 }
