@@ -294,27 +294,37 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     // 1. Wire services to database
     final db = ref.read(databaseProvider);
-    SyncService.instance.setDatabase(db);
-    TransferService.instance.setDatabase(db);
-    CollabService.instance.setDatabase(db);
-    CollabService.instance.load();
-    // Photos saved before an iOS update point into the old app folder:
-    // point them at the same files in the current one. Not awaited.
-    PhotoPathRepair.run(db).catchError((Object e) {
-      debugPrint('[PhotoPathRepair] failed: $e');
-      return 0;
-    });
-    // Home screen widgets: first snapshot now, then whenever meals or the
-    // shopping list change. Not awaited: the widgets can wait for auth.
-    if (HomeWidgetService.isSupported) {
-      HomeWidgetService.instance.start(
-        db,
-        languageCode: () => ref.read(settingsProvider).languageCode,
-      );
+    try {
+      SyncService.instance.setDatabase(db);
+      TransferService.instance.setDatabase(db);
+      CollabService.instance.setDatabase(db);
+      CollabService.instance.load();
+      // Photos saved before an iOS update point into the old app folder:
+      // point them at the same files in the current one. Not awaited.
+      PhotoPathRepair.run(db).catchError((Object e) {
+        debugPrint('[PhotoPathRepair] failed: $e');
+        return 0;
+      });
+      // Home screen widgets: first snapshot now, then whenever meals or the
+      // shopping list change. Not awaited: the widgets can wait for auth.
+      if (HomeWidgetService.isSupported) {
+        HomeWidgetService.instance.start(
+          db,
+          languageCode: () => ref.read(settingsProvider).languageCode,
+        );
+      }
+    } catch (e) {
+      debugPrint('[Init] Wiring services failed: $e');
     }
 
-    // 2. Restore auth session (must be first — determines signed-in state)
-    await ref.read(authProvider.notifier).initialize();
+    // 2. Restore auth session (must be first — determines signed-in state).
+    //    It settles on signed out when the keychain cannot be read; a failure
+    //    here must still let every later step run.
+    try {
+      await ref.read(authProvider.notifier).initialize();
+    } catch (e) {
+      debugPrint('[Init] Auth restore failed: $e');
+    }
 
     // 3. Remove splash screen — show the app while the rest loads in background.
     // Unguarded: on web this removes the static HTML splash overlay from

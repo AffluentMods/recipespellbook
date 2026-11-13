@@ -14,6 +14,7 @@ import '../../../services/sync_service.dart';
 import '../../../utils/platform_utils.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/auth_error_message.dart';
 import '../../widgets/sheet_chrome.dart';
 
 // ════════════════════════════════════════════════════════════
@@ -43,7 +44,7 @@ class AccountScreen extends ConsumerWidget {
 
 class _SignedOutBody extends ConsumerWidget {
   final bool isLoading;
-  final String? error;
+  final AuthError? error;
   const _SignedOutBody({required this.isLoading, this.error});
 
   @override
@@ -94,7 +95,10 @@ class _SignedOutBody extends ConsumerWidget {
                     Icon(Icons.error_outline, size: 18, color: theme.colorScheme.error),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(error!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                      child: Text(
+                        authErrorMessage(l10n, error!),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                      ),
                     ),
                     GestureDetector(
                       onTap: () => ref.read(authProvider.notifier).clearError(),
@@ -130,6 +134,16 @@ class _SignedOutBody extends ConsumerWidget {
                 ),
               ),
             ),
+
+            // Desktop: the sign-in waits for the browser. Let the user stop
+            // waiting (closed tab, wrong account) instead of a long spinner.
+            if (isLoading && isDesktop) ...[
+              const SizedBox(height: 6),
+              TextButton(
+                onPressed: () => ref.read(authProvider.notifier).cancelSignIn(),
+                child: Text(l10n.actionCancel),
+              ),
+            ],
 
             // Apple Sign-In
             if (supportsAppleSignIn) ...[

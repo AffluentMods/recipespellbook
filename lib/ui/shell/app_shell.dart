@@ -14,6 +14,7 @@ import '../../theme/tokens.dart';
 import '../../utils/platform_utils.dart';
 import '../../utils/responsive_utils.dart';
 import '../widgets/app_snackbar.dart';
+import '../widgets/auth_error_message.dart';
 import '../widgets/selection_action_bar.dart';
 import 'desktop_sidebar.dart';
 import 'shell_navigation.dart';
@@ -97,7 +98,7 @@ class _AppShellState extends ConsumerState<AppShell> {
 
       if (next.error != null && !next.isLoading && wasLoading) {
         if (mounted) {
-          AppSnackbar.error(context, next.error!);
+          AppSnackbar.error(context, authErrorMessage(AppLocalizations.of(context)!, next.error!));
           ref.read(authProvider.notifier).clearError();
         }
       }
