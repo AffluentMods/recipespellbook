@@ -12542,4 +12542,47 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => '查看完整食谱';
+
+  @override
+  String plannerDateRange(String start, String end) {
+    return '$start至$end';
+  }
+
+  @override
+  String clearWeekRangeWarning(String start, String end) {
+    return '将删除$start至$end的所有计划餐食。此操作无法撤销。';
+  }
+
+  @override
+  String shoppingDeleteSharedListConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此清单已与 $count 人共享。删除后，所有人都将停止同步。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookFromPantry(String items) {
+    return '来自你的储藏室：$items';
+  }
+
+  @override
+  String pantryCookLineFrom(String ingredient, String items) {
+    return '$ingredient：$items';
+  }
+
+  @override
+  String get cookingStopTimer => '停止计时器';
+
+  @override
+  String cookingStartTimerFor(String duration) {
+    return '开始$duration计时';
+  }
+
+  @override
+  String durationSeconds(int count) {
+    return '$count秒';
+  }
 }

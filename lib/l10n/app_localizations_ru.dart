@@ -12914,4 +12914,50 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityPreviewViewFullRecipe => 'Посмотреть полный рецепт';
+
+  @override
+  String plannerDateRange(String start, String end) {
+    return 'С $start по $end';
+  }
+
+  @override
+  String clearWeekRangeWarning(String start, String end) {
+    return 'Это удалит все блюда, запланированные с $start по $end. Это действие нельзя отменить.';
+  }
+
+  @override
+  String shoppingDeleteSharedListConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Доступ к этому списку есть у $count человека. Если удалить его, синхронизация прекратится для всех.',
+      many: 'Доступ к этому списку есть у $count человек. Если удалить его, синхронизация прекратится для всех.',
+      few: 'Доступ к этому списку есть у $count человек. Если удалить его, синхронизация прекратится для всех.',
+      one: 'Доступ к этому списку есть у $count человека. Если удалить его, синхронизация прекратится для всех.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryCookFromPantry(String items) {
+    return 'Из вашей кладовой: $items';
+  }
+
+  @override
+  String pantryCookLineFrom(String ingredient, String items) {
+    return '$ingredient: $items';
+  }
+
+  @override
+  String get cookingStopTimer => 'Остановить таймер';
+
+  @override
+  String cookingStartTimerFor(String duration) {
+    return 'Запустить таймер на $duration';
+  }
+
+  @override
+  String durationSeconds(int count) {
+    return '$count сек';
+  }
 }

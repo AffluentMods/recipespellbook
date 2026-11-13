@@ -4869,5 +4869,13 @@
   "pressBackAgainToExit": "再按一次返回键退出",
   "mealPlanNextWeekend": "下周末",
   "shoppingAlreadyPlanned": "已在膳食计划中：{when}",
-  "communityPreviewViewFullRecipe": "查看完整食谱"
+  "communityPreviewViewFullRecipe": "查看完整食谱",
+  "plannerDateRange": "{start}至{end}",
+  "clearWeekRangeWarning": "将删除{start}至{end}的所有计划餐食。此操作无法撤销。",
+  "shoppingDeleteSharedListConfirm": "{count, plural, other{此清单已与 {count} 人共享。删除后，所有人都将停止同步。}}",
+  "pantryCookFromPantry": "来自你的储藏室：{items}",
+  "pantryCookLineFrom": "{ingredient}：{items}",
+  "cookingStopTimer": "停止计时器",
+  "cookingStartTimerFor": "开始{duration}计时",
+  "durationSeconds": "{count}秒"
 }

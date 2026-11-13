@@ -4869,5 +4869,13 @@
   "pressBackAgainToExit": "Druk nogmaals op Terug om af te sluiten",
   "mealPlanNextWeekend": "Volgend weekend",
   "shoppingAlreadyPlanned": "Staat al in je maaltijdplan: {when}",
-  "communityPreviewViewFullRecipe": "Volledig recept bekijken"
+  "communityPreviewViewFullRecipe": "Volledig recept bekijken",
+  "plannerDateRange": "{start} t/m {end}",
+  "clearWeekRangeWarning": "Dit verwijdert alle maaltijden die van {start} tot en met {end} gepland zijn. Dit kan niet ongedaan worden gemaakt.",
+  "shoppingDeleteSharedListConfirm": "{count, plural, =1{Deze lijst is gedeeld met 1 persoon. Als je hem verwijdert, stopt de synchronisatie voor iedereen.} other{Deze lijst is gedeeld met {count} personen. Als je hem verwijdert, stopt de synchronisatie voor iedereen.}}",
+  "pantryCookFromPantry": "Uit je voorraadkast: {items}",
+  "pantryCookLineFrom": "{ingredient}: {items}",
+  "cookingStopTimer": "Timer stoppen",
+  "cookingStartTimerFor": "Timer van {duration} starten",
+  "durationSeconds": "{count} sec"
 }

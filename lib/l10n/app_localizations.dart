@@ -22044,6 +22044,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View full recipe'**
   String get communityPreviewViewFullRecipe;
+
+  /// A span of days in the planner, both ends included: under the week's title, and under Add week to shopping list and Clear this week. The placeholders are short dates such as Nov 10.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String plannerDateRange(String start, String end);
+
+  /// Body of the Clear this week? dialog in the planner. The placeholders are the first and last day of the week, short dates such as Nov 10.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove all meals planned from {start} to {end}. This cannot be undone.'**
+  String clearWeekRangeWarning(String start, String end);
+
+  /// Delete list dialog for a shopping list shared with other people. The placeholder is how many people it is shared with.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This list is shared with 1 person. Deleting it stops syncing for everyone.} other{This list is shared with {count} people. Deleting it stops syncing for everyone.}}'**
+  String shoppingDeleteSharedListConfirm(int count);
+
+  /// Under a recipe in What can I make?: the pantry items it uses, separated by commas.
+  ///
+  /// In en, this message translates to:
+  /// **'From your pantry: {items}'**
+  String pantryCookFromPantry(String items);
+
+  /// One line of the tooltip on From your pantry in What can I make?: a recipe's ingredient and the pantry item that covers it.
+  ///
+  /// In en, this message translates to:
+  /// **'{ingredient}: {items}'**
+  String pantryCookLineFrom(String ingredient, String items);
+
+  /// Tooltip of the stop button on a running timer in cooking mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop timer'**
+  String get cookingStopTimer;
+
+  /// Tooltip of a one-tap timer under a cooking mode step, for a time the step names. The placeholder is the time, such as 10 min.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a {duration} timer'**
+  String cookingStartTimerFor(String duration);
+
+  /// A length of time under a minute, as a cooking mode timer shows it.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sec'**
+  String durationSeconds(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -4869,5 +4869,13 @@
   "pressBackAgainToExit": "Нажмите «Назад» ещё раз, чтобы выйти",
   "mealPlanNextWeekend": "В следующие выходные",
   "shoppingAlreadyPlanned": "Уже в плане питания: {when}",
-  "communityPreviewViewFullRecipe": "Посмотреть полный рецепт"
+  "communityPreviewViewFullRecipe": "Посмотреть полный рецепт",
+  "plannerDateRange": "С {start} по {end}",
+  "clearWeekRangeWarning": "Это удалит все блюда, запланированные с {start} по {end}. Это действие нельзя отменить.",
+  "shoppingDeleteSharedListConfirm": "{count, plural, one{Доступ к этому списку есть у {count} человека. Если удалить его, синхронизация прекратится для всех.} few{Доступ к этому списку есть у {count} человек. Если удалить его, синхронизация прекратится для всех.} many{Доступ к этому списку есть у {count} человек. Если удалить его, синхронизация прекратится для всех.} other{Доступ к этому списку есть у {count} человека. Если удалить его, синхронизация прекратится для всех.}}",
+  "pantryCookFromPantry": "Из вашей кладовой: {items}",
+  "pantryCookLineFrom": "{ingredient}: {items}",
+  "cookingStopTimer": "Остановить таймер",
+  "cookingStartTimerFor": "Запустить таймер на {duration}",
+  "durationSeconds": "{count} сек"
 }

@@ -6476,5 +6476,81 @@
   "communityPreviewViewFullRecipe": "View full recipe",
   "@communityPreviewViewFullRecipe": {
     "description": "Button in the Community recipe preview that opens the whole recipe."
+  },
+  "plannerDateRange": "{start} to {end}",
+  "@plannerDateRange": {
+    "description": "A span of days in the planner, both ends included: under the week's title, and under Add week to shopping list and Clear this week. The placeholders are short dates such as Nov 10.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "clearWeekRangeWarning": "This will remove all meals planned from {start} to {end}. This cannot be undone.",
+  "@clearWeekRangeWarning": {
+    "description": "Body of the Clear this week? dialog in the planner. The placeholders are the first and last day of the week, short dates such as Nov 10.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingDeleteSharedListConfirm": "{count, plural, =1{This list is shared with 1 person. Deleting it stops syncing for everyone.} other{This list is shared with {count} people. Deleting it stops syncing for everyone.}}",
+  "@shoppingDeleteSharedListConfirm": {
+    "description": "Delete list dialog for a shopping list shared with other people. The placeholder is how many people it is shared with.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pantryCookFromPantry": "From your pantry: {items}",
+  "@pantryCookFromPantry": {
+    "description": "Under a recipe in What can I make?: the pantry items it uses, separated by commas.",
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "pantryCookLineFrom": "{ingredient}: {items}",
+  "@pantryCookLineFrom": {
+    "description": "One line of the tooltip on From your pantry in What can I make?: a recipe's ingredient and the pantry item that covers it.",
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "cookingStopTimer": "Stop timer",
+  "@cookingStopTimer": {
+    "description": "Tooltip of the stop button on a running timer in cooking mode."
+  },
+  "cookingStartTimerFor": "Start a {duration} timer",
+  "@cookingStartTimerFor": {
+    "description": "Tooltip of a one-tap timer under a cooking mode step, for a time the step names. The placeholder is the time, such as 10 min.",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "durationSeconds": "{count} sec",
+  "@durationSeconds": {
+    "description": "A length of time under a minute, as a cooking mode timer shows it.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }
