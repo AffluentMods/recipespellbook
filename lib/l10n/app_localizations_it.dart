@@ -12690,4 +12690,18 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => 'Nessun ingrediente riconosciuto';
+
+  @override
+  String get pressBackAgainToExit => 'Premi di nuovo Indietro per uscire';
+
+  @override
+  String get mealPlanNextWeekend => 'Prossimo fine settimana';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return 'Già nel piano dei pasti: $when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => 'Vedi ricetta completa';
 }

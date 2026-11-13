@@ -12696,4 +12696,18 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => 'Geen enkel ingrediënt herkend';
+
+  @override
+  String get pressBackAgainToExit => 'Druk nogmaals op Terug om af te sluiten';
+
+  @override
+  String get mealPlanNextWeekend => 'Volgend weekend';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return 'Staat al in je maaltijdplan: $when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => 'Volledig recept bekijken';
 }
