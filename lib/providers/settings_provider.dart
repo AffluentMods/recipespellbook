@@ -5,14 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/allergen_data.dart';
 import '../data/app_enums.dart';
 
-/// Recipe edit layout mode
-enum RecipeEditLayoutMode { stacked, tabbed }
-
-enum NutritionDisplayMode {
-  perServing,
-  total,
-}
-
 enum NutritionChartStyle {
   /// Horizontal macro bars (calories on top, protein/carbs/fat as filled bars).
   bars,
@@ -117,13 +109,9 @@ class AppSettings {
   final PlaceholderImageMode recipePlaceholderMode;
   final PlaceholderImageMode cookbookPlaceholderMode;
 
-  final RecipeEditLayoutMode recipeEditLayoutMode;
-
   // Nutrition display settings
-  final NutritionDisplayMode defaultNutritionView;
   final NutritionChartStyle nutritionChartStyle;
   final NutritionPalette nutritionPalette;
-  final bool showExpandedNutrition;
   final Set<String> enabledNutrients;
 
   // Accessibility — text scale factor (0.8 to 1.3)
@@ -172,11 +160,8 @@ class AppSettings {
     this.recipePlaceholderMode = PlaceholderImageMode.custom,
     this.cookbookPlaceholderMode = PlaceholderImageMode.custom,
     this.allergens = const [],
-    this.recipeEditLayoutMode = RecipeEditLayoutMode.stacked,
-    this.defaultNutritionView = NutritionDisplayMode.perServing,
     this.nutritionChartStyle = NutritionChartStyle.donut,
     this.nutritionPalette = NutritionPalette.classic,
-    this.showExpandedNutrition = false,
     this.textScaleFactor = 1.0,
     this.weekStartDay = 1,
     this.householdServings = 0,
@@ -207,11 +192,8 @@ class AppSettings {
     PlaceholderImageMode? recipePlaceholderMode,
     PlaceholderImageMode? cookbookPlaceholderMode,
     List<Allergen>? allergens,
-    RecipeEditLayoutMode? recipeEditLayoutMode,
-    NutritionDisplayMode? defaultNutritionView,
     NutritionChartStyle? nutritionChartStyle,
     NutritionPalette? nutritionPalette,
-    bool? showExpandedNutrition,
     Set<String>? enabledNutrients,
     double? textScaleFactor,
     int? weekStartDay,
@@ -240,11 +222,8 @@ class AppSettings {
       recipePlaceholderMode: recipePlaceholderMode ?? this.recipePlaceholderMode,
       cookbookPlaceholderMode: cookbookPlaceholderMode ?? this.cookbookPlaceholderMode,
       allergens: allergens ?? this.allergens,
-      recipeEditLayoutMode: recipeEditLayoutMode ?? this.recipeEditLayoutMode,
-      defaultNutritionView: defaultNutritionView ?? this.defaultNutritionView,
       nutritionChartStyle: nutritionChartStyle ?? this.nutritionChartStyle,
       nutritionPalette: nutritionPalette ?? this.nutritionPalette,
-      showExpandedNutrition: showExpandedNutrition ?? this.showExpandedNutrition,
       enabledNutrients: enabledNutrients ?? this.enabledNutrients,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       weekStartDay: weekStartDay ?? this.weekStartDay,
@@ -364,12 +343,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
       orElse: () => AppColorTheme.spellbook,
     );
 
-    final nutritionViewString = prefs.getString('defaultNutritionView') ?? 'perServing';
-    final nutritionView = NutritionDisplayMode.values.firstWhere(
-          (e) => e.name == nutritionViewString,
-      orElse: () => NutritionDisplayMode.perServing,
-    );
-
+    // Older versions also kept 'defaultNutritionView', 'showExpandedNutrition'
+    // and 'recipe_edit_layout', settings no screen ever offered. They are no
+    // longer read; what is still saved is ignored (and removed by a reset).
     final chartStyleString = prefs.getString('nutritionChartStyle') ?? 'donut';
     final chartStyle = NutritionChartStyle.values.firstWhere(
           (e) => e.name == chartStyleString,
@@ -381,8 +357,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
           (e) => e.name == paletteString,
       orElse: () => NutritionPalette.classic,
     );
-
-    final showExpandedNutrition = prefs.getBool('showExpandedNutrition') ?? false;
 
     // Load theme mode
     final modeString = prefs.getString(_themeModeKey);
@@ -445,8 +419,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
         .whereType<Allergen>()
         .toList();
 
-    final editLayoutIndex = prefs.getInt(_recipeEditLayoutKey) ?? 0;
-
     // Load enabled nutrients
     final enabledNutrientsStrings = prefs.getStringList('enabledNutrients');
     var enabledNutrients = enabledNutrientsStrings != null
@@ -508,11 +480,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
       recipePlaceholderMode: recipePlaceholderMode,
       cookbookPlaceholderMode: cookbookPlaceholderMode,
       allergens: allergens,
-      recipeEditLayoutMode: RecipeEditLayoutMode.values[editLayoutIndex],
-      defaultNutritionView: nutritionView,
       nutritionChartStyle: chartStyle,
       nutritionPalette: palette,
-      showExpandedNutrition: showExpandedNutrition,
       enabledNutrients: enabledNutrients,
       textScaleFactor: textScaleFactor,
       weekStartDay: weekStartDay,
@@ -535,12 +504,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(showSurpriseMe: show);
   }
 
-  Future<void> setDefaultNutritionView(NutritionDisplayMode mode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('defaultNutritionView', mode.name);
-    state = state.copyWith(defaultNutritionView: mode);
-  }
-
   Future<void> setNutritionChartStyle(NutritionChartStyle style) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('nutritionChartStyle', style.name);
@@ -551,12 +514,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('nutritionPalette', palette.name);
     state = state.copyWith(nutritionPalette: palette);
-  }
-
-  Future<void> setShowExpandedNutrition(bool show) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('showExpandedNutrition', show);
-    state = state.copyWith(showExpandedNutrition: show);
   }
 
   Future<void> setEnabledNutrients(Set<String> nutrients) async {
@@ -754,12 +711,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final dg = (a.g * 255).round() - (b.g * 255).round();
     final db = (a.b * 255).round() - (b.b * 255).round();
     return (dr * dr + dg * dg + db * db).toDouble();
-  }
-
-  Future<void> setRecipeEditLayout(RecipeEditLayoutMode mode) async {
-    state = state.copyWith(recipeEditLayoutMode: mode);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_recipeEditLayoutKey, mode.index);
   }
 
   /// Every preference this notifier keeps, including ones older versions
