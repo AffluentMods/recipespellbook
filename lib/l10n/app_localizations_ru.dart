@@ -13427,4 +13427,250 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get importGuideSamsungFoodStep4 => 'Данные рецептов Samsung Food будут прочитаны и готовы к импорту.';
+
+  @override
+  String get communityPublishDailyLimitReached => 'Дневной лимит загрузки фото исчерпан. Попробуйте завтра.';
+
+  @override
+  String communityPublishPhotosDropped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Сервер не сохранил $count фото, поэтому они не вошли в публикацию. Они будут отправлены снова при следующем обновлении.',
+      many: 'Сервер не сохранил $count фото, поэтому они не вошли в публикацию. Они будут отправлены снова при следующем обновлении.',
+      few: 'Сервер не сохранил $count фото, поэтому они не вошли в публикацию. Они будут отправлены снова при следующем обновлении.',
+      one: 'Сервер не сохранил $count фото, поэтому оно не вошло в публикацию. Оно будет отправлено снова при следующем обновлении.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestoreNoFile => 'Файл не выбран.';
+
+  @override
+  String get backupRestoreTooLarge => 'В распакованном виде эта резервная копия больше, чем может обработать приложение, поэтому ничего не импортировано. Возможно, она повреждена.';
+
+  @override
+  String get backupRestoreNothing => 'Нечего импортировать.';
+
+  @override
+  String backupRestoreImported(String items) {
+    return 'Импортировано: $items';
+  }
+
+  @override
+  String backupRestoreCookbooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count книги',
+      many: '$count книг',
+      few: '$count книги',
+      one: '$count книга',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count рецепта',
+      many: '$count рецептов',
+      few: '$count рецепта',
+      one: '$count рецепт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreShoppingLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count списка покупок',
+      many: '$count списков покупок',
+      few: '$count списка покупок',
+      one: '$count список покупок',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreMealPlans(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count запланированного блюда',
+      many: '$count запланированных блюд',
+      few: '$count запланированных блюда',
+      one: '$count запланированное блюдо',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count тега',
+      many: '$count тегов',
+      few: '$count тега',
+      one: '$count тег',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '(пропущено $count дубликата)',
+      many: '(пропущено $count дубликатов)',
+      few: '(пропущено $count дубликата)',
+      one: '(пропущен $count дубликат)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importPreviewOwnExport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Экспорт Recipe Spellbook ($count рецепта)',
+      many: 'Экспорт Recipe Spellbook ($count рецептов)',
+      few: 'Экспорт Recipe Spellbook ($count рецепта)',
+      one: 'Экспорт Recipe Spellbook ($count рецепт)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get barcodeNovaUnprocessed => 'Без обработки';
+
+  @override
+  String get barcodeNovaProcessedIngredients => 'Обработанные ингредиенты';
+
+  @override
+  String get barcodeNovaProcessedFood => 'Обработанный продукт';
+
+  @override
+  String get barcodeNovaUltraProcessed => 'Ультраобработанный';
+
+  @override
+  String get barcodeScoreUnknown => 'Неизвестно';
+
+  @override
+  String get barcodeNutriScoreExcellent => 'Отлично';
+
+  @override
+  String get barcodeNutriScoreGood => 'Хорошо';
+
+  @override
+  String get barcodeNutriScoreAverage => 'Средне';
+
+  @override
+  String get barcodeNutriScorePoor => 'Плохо';
+
+  @override
+  String get barcodeNutriScoreBad => 'Очень плохо';
+
+  @override
+  String get barcodeAdditives => 'Пищевые добавки';
+
+  @override
+  String barcodeAdditivesFound(int count) {
+    return 'Найдено: $count';
+  }
+
+  @override
+  String barcodeAdditivesCaution(int count) {
+    return 'Осторожно: $count';
+  }
+
+  @override
+  String barcodeAdditivesModerate(int count) {
+    return 'Умеренно: $count';
+  }
+
+  @override
+  String get barcodeAdditiveNotInDatabase => 'Нет в базе данных';
+
+  @override
+  String get shoppingSharedCanTick => 'Общий список · можно отмечать позиции, но нельзя добавлять или удалять их';
+
+  @override
+  String get shoppingSharedViewOnly => 'Общий список · только просмотр';
+
+  @override
+  String shoppingImportedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Импортировано $count позиции',
+      many: 'Импортировано $count позиций',
+      few: 'Импортировано $count позиции',
+      one: 'Импортирована $count позиция',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingImportWrongFile => 'Этот файл не является экспортом списка покупок Recipe Spellbook.';
+
+  @override
+  String get groceryInstacartStores => 'Costco, Publix, Safeway, Aldi, Sprouts и ещё более 1500 магазинов';
+
+  @override
+  String get groceryKrogerStores => 'Kroger, Fred Meyer, Ralphs, Harris Teeter и другие';
+
+  @override
+  String get webImportBlocked => 'Сайт заблокировал наш запрос. Вместо этого скопируйте текст рецепта и вставьте его.';
+
+  @override
+  String get webImportRateLimited => 'Сайт сейчас отклоняет запросы. Попробуйте ещё раз через минуту.';
+
+  @override
+  String webImportSiteError(int code) {
+    return 'На сайте сейчас неполадки (HTTP $code). Попробуйте позже.';
+  }
+
+  @override
+  String webImportHttpError(int code) {
+    return 'Не удалось загрузить страницу (HTTP $code).';
+  }
+
+  @override
+  String webImportNotAWebPage(String kind) {
+    String _temp0 = intl.Intl.selectLogic(
+      kind,
+      {
+        'pdf': 'Рецепт не найден: эта ссылка ведёт на PDF, а не на веб-страницу.',
+        'image': 'Рецепт не найден: эта ссылка ведёт на изображение, а не на веб-страницу.',
+        'video': 'Рецепт не найден: эта ссылка ведёт на видео, а не на веб-страницу.',
+        'audio': 'Рецепт не найден: эта ссылка ведёт на аудиофайл, а не на веб-страницу.',
+        'zip': 'Рецепт не найден: эта ссылка ведёт на ZIP-файл, а не на веб-страницу.',
+        'other': 'Рецепт не найден: эта ссылка ведёт на файл, а не на веб-страницу.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get webImportPageTooLarge => 'Рецепт не найден: эта страница слишком велика для чтения.';
+
+  @override
+  String webImportUnreadableEncoding(String charset) {
+    return 'Эта страница использует кодировку текста ($charset), которую приложение не может прочитать.';
+  }
+
+  @override
+  String get webImportNoRecipeInVideo => 'В описании этого видео рецепт не найден.';
+
+  @override
+  String get webImportTimedOut => 'Сайт слишком долго не отвечал. Попробуйте позже.';
 }

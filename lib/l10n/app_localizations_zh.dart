@@ -13046,4 +13046,223 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get importGuideSamsungFoodStep4 => 'Samsung Food 的食谱数据会被读取，随时可以导入。';
+
+  @override
+  String get communityPublishDailyLimitReached => '已达到今天的照片上传上限。请明天再试。';
+
+  @override
+  String communityPublishPhotosDropped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '服务器未保留 $count 张照片，因此已将其排除。下次更新时会重新发送。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestoreNoFile => '未选择文件。';
+
+  @override
+  String get backupRestoreTooLarge => '此备份解压后超出了应用可处理的大小，因此未导入任何内容。它可能已损坏。';
+
+  @override
+  String get backupRestoreNothing => '没有可导入的内容。';
+
+  @override
+  String backupRestoreImported(String items) {
+    return '已导入：$items';
+  }
+
+  @override
+  String backupRestoreCookbooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 本食谱书',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个食谱',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreShoppingLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个购物清单',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreMealPlans(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个餐食计划',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个标签',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '（跳过了 $count 个重复项）',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importPreviewOwnExport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Recipe Spellbook 导出（$count 个食谱）',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get barcodeNovaUnprocessed => '未加工';
+
+  @override
+  String get barcodeNovaProcessedIngredients => '加工配料';
+
+  @override
+  String get barcodeNovaProcessedFood => '加工食品';
+
+  @override
+  String get barcodeNovaUltraProcessed => '超加工';
+
+  @override
+  String get barcodeScoreUnknown => '未知';
+
+  @override
+  String get barcodeNutriScoreExcellent => '优秀';
+
+  @override
+  String get barcodeNutriScoreGood => '良好';
+
+  @override
+  String get barcodeNutriScoreAverage => '一般';
+
+  @override
+  String get barcodeNutriScorePoor => '较差';
+
+  @override
+  String get barcodeNutriScoreBad => '差';
+
+  @override
+  String get barcodeAdditives => '添加剂';
+
+  @override
+  String barcodeAdditivesFound(int count) {
+    return '找到 $count 种';
+  }
+
+  @override
+  String barcodeAdditivesCaution(int count) {
+    return '需注意 $count 种';
+  }
+
+  @override
+  String barcodeAdditivesModerate(int count) {
+    return '中等 $count 种';
+  }
+
+  @override
+  String get barcodeAdditiveNotInDatabase => '不在数据库中';
+
+  @override
+  String get shoppingSharedCanTick => '共享清单 · 你可以勾选项目，但不能添加或删除';
+
+  @override
+  String get shoppingSharedViewOnly => '共享清单 · 仅查看';
+
+  @override
+  String shoppingImportedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已导入 $count 个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingImportWrongFile => '此文件不是Recipe Spellbook购物清单导出文件。';
+
+  @override
+  String get groceryInstacartStores => 'Costco、Publix、Safeway、Aldi、Sprouts 等 1,500 多家商店';
+
+  @override
+  String get groceryKrogerStores => 'Kroger、Fred Meyer、Ralphs、Harris Teeter 等';
+
+  @override
+  String get webImportBlocked => '该网站拦截了我们的请求。请改为复制食谱文本并粘贴。';
+
+  @override
+  String get webImportRateLimited => '该网站暂时拒绝请求。请一分钟后再试。';
+
+  @override
+  String webImportSiteError(int code) {
+    return '该网站目前出现问题（HTTP $code）。请稍后再试。';
+  }
+
+  @override
+  String webImportHttpError(int code) {
+    return '无法加载该页面（HTTP $code）。';
+  }
+
+  @override
+  String webImportNotAWebPage(String kind) {
+    String _temp0 = intl.Intl.selectLogic(
+      kind,
+      {
+        'pdf': '未找到食谱：该链接是 PDF，而不是网页。',
+        'image': '未找到食谱：该链接是图片，而不是网页。',
+        'video': '未找到食谱：该链接是视频，而不是网页。',
+        'audio': '未找到食谱：该链接是音频文件，而不是网页。',
+        'zip': '未找到食谱：该链接是 ZIP 文件，而不是网页。',
+        'other': '未找到食谱：该链接是文件，而不是网页。',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get webImportPageTooLarge => '未找到食谱：该页面太大，无法读取。';
+
+  @override
+  String webImportUnreadableEncoding(String charset) {
+    return '该页面使用了本应用无法读取的文本编码（$charset）。';
+  }
+
+  @override
+  String get webImportNoRecipeInVideo => '该视频的描述中未找到食谱。';
+
+  @override
+  String get webImportTimedOut => '网站响应时间过长。请稍后再试。';
 }

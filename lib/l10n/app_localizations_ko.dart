@@ -13078,4 +13078,223 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get importGuideSamsungFoodStep4 => 'Samsung Food의 레시피 데이터를 읽어 가져올 준비를 합니다.';
+
+  @override
+  String get communityPublishDailyLimitReached => '오늘의 사진 업로드 한도에 도달했습니다. 내일 다시 시도하세요.';
+
+  @override
+  String communityPublishPhotosDropped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '서버가 사진 $count장을 보관하지 않아 제외되었습니다. 다음 업데이트 때 다시 전송됩니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestoreNoFile => '선택한 파일이 없습니다.';
+
+  @override
+  String get backupRestoreTooLarge => '이 백업은 압축을 풀면 앱이 처리할 수 있는 양을 넘어서 아무것도 가져오지 않았습니다. 손상되었을 수 있습니다.';
+
+  @override
+  String get backupRestoreNothing => '가져올 항목이 없습니다.';
+
+  @override
+  String backupRestoreImported(String items) {
+    return '가져옴: $items';
+  }
+
+  @override
+  String backupRestoreCookbooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '요리책 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '레시피 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreShoppingLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '장보기 목록 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreMealPlans(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '계획된 식사 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '태그 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '(중복 $count개 건너뜀)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importPreviewOwnExport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Recipe Spellbook 내보내기(레시피 $count개)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get barcodeNovaUnprocessed => '비가공';
+
+  @override
+  String get barcodeNovaProcessedIngredients => '가공된 재료';
+
+  @override
+  String get barcodeNovaProcessedFood => '가공식품';
+
+  @override
+  String get barcodeNovaUltraProcessed => '초가공';
+
+  @override
+  String get barcodeScoreUnknown => '알 수 없음';
+
+  @override
+  String get barcodeNutriScoreExcellent => '매우 좋음';
+
+  @override
+  String get barcodeNutriScoreGood => '좋음';
+
+  @override
+  String get barcodeNutriScoreAverage => '보통';
+
+  @override
+  String get barcodeNutriScorePoor => '나쁨';
+
+  @override
+  String get barcodeNutriScoreBad => '매우 나쁨';
+
+  @override
+  String get barcodeAdditives => '첨가물';
+
+  @override
+  String barcodeAdditivesFound(int count) {
+    return '$count개 발견';
+  }
+
+  @override
+  String barcodeAdditivesCaution(int count) {
+    return '주의 $count개';
+  }
+
+  @override
+  String barcodeAdditivesModerate(int count) {
+    return '보통 $count개';
+  }
+
+  @override
+  String get barcodeAdditiveNotInDatabase => '데이터베이스에 없음';
+
+  @override
+  String get shoppingSharedCanTick => '공유 목록 · 항목을 체크할 수는 있지만 추가하거나 삭제할 수는 없습니다';
+
+  @override
+  String get shoppingSharedViewOnly => '공유 목록 · 보기 전용';
+
+  @override
+  String shoppingImportedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개를 가져왔습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingImportWrongFile => '이 파일은 Recipe Spellbook 장보기 목록 내보내기 파일이 아닙니다.';
+
+  @override
+  String get groceryInstacartStores => 'Costco, Publix, Safeway, Aldi, Sprouts 외 1,500개 이상의 매장';
+
+  @override
+  String get groceryKrogerStores => 'Kroger, Fred Meyer, Ralphs, Harris Teeter 등';
+
+  @override
+  String get webImportBlocked => '사이트에서 요청을 차단했습니다. 대신 레시피 텍스트를 복사해 붙여넣으세요.';
+
+  @override
+  String get webImportRateLimited => '사이트가 지금은 요청을 받지 않고 있습니다. 1분 후에 다시 시도하세요.';
+
+  @override
+  String webImportSiteError(int code) {
+    return '사이트에 현재 문제가 있습니다(HTTP $code). 나중에 다시 시도하세요.';
+  }
+
+  @override
+  String webImportHttpError(int code) {
+    return '페이지를 불러올 수 없습니다(HTTP $code).';
+  }
+
+  @override
+  String webImportNotAWebPage(String kind) {
+    String _temp0 = intl.Intl.selectLogic(
+      kind,
+      {
+        'pdf': '레시피를 찾을 수 없습니다. 이 링크는 웹페이지가 아니라 PDF입니다.',
+        'image': '레시피를 찾을 수 없습니다. 이 링크는 웹페이지가 아니라 이미지입니다.',
+        'video': '레시피를 찾을 수 없습니다. 이 링크는 웹페이지가 아니라 동영상입니다.',
+        'audio': '레시피를 찾을 수 없습니다. 이 링크는 웹페이지가 아니라 오디오 파일입니다.',
+        'zip': '레시피를 찾을 수 없습니다. 이 링크는 웹페이지가 아니라 ZIP 파일입니다.',
+        'other': '레시피를 찾을 수 없습니다. 이 링크는 웹페이지가 아니라 파일입니다.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get webImportPageTooLarge => '레시피를 찾을 수 없습니다. 이 페이지는 너무 커서 읽을 수 없습니다.';
+
+  @override
+  String webImportUnreadableEncoding(String charset) {
+    return '이 페이지는 앱에서 읽을 수 없는 텍스트 인코딩($charset)을 사용합니다.';
+  }
+
+  @override
+  String get webImportNoRecipeInVideo => '이 동영상 설명에서 레시피를 찾을 수 없습니다.';
+
+  @override
+  String get webImportTimedOut => '웹사이트 응답이 너무 오래 걸렸습니다. 나중에 다시 시도하세요.';
 }

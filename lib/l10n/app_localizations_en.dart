@@ -13217,4 +13217,232 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importGuideSamsungFoodStep4 => 'Samsung Food recipe data will be parsed and ready to import.';
+
+  @override
+  String get communityPublishDailyLimitReached => 'You\'ve reached today\'s photo upload limit. Try again tomorrow.';
+
+  @override
+  String communityPublishPhotosDropped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The server did not keep $count photos, so they were left out. They are sent again with the next update.',
+      one: 'The server did not keep 1 photo, so it was left out. It is sent again with the next update.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestoreNoFile => 'No file selected.';
+
+  @override
+  String get backupRestoreTooLarge => 'This backup unpacks to more than the app can handle, so nothing was imported. It may be damaged.';
+
+  @override
+  String get backupRestoreNothing => 'Nothing to import.';
+
+  @override
+  String backupRestoreImported(String items) {
+    return 'Imported: $items';
+  }
+
+  @override
+  String backupRestoreCookbooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cookbooks',
+      one: '1 cookbook',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes',
+      one: '1 recipe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreShoppingLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count shopping lists',
+      one: '1 shopping list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreMealPlans(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count planned meals',
+      one: '1 planned meal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tags',
+      one: '1 tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '($count duplicates skipped)',
+      one: '(1 duplicate skipped)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importPreviewOwnExport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Recipe Spellbook export ($count recipes)',
+      one: 'Recipe Spellbook export (1 recipe)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get barcodeNovaUnprocessed => 'Unprocessed';
+
+  @override
+  String get barcodeNovaProcessedIngredients => 'Processed ingredients';
+
+  @override
+  String get barcodeNovaProcessedFood => 'Processed food';
+
+  @override
+  String get barcodeNovaUltraProcessed => 'Ultra-processed';
+
+  @override
+  String get barcodeScoreUnknown => 'Unknown';
+
+  @override
+  String get barcodeNutriScoreExcellent => 'Excellent';
+
+  @override
+  String get barcodeNutriScoreGood => 'Good';
+
+  @override
+  String get barcodeNutriScoreAverage => 'Average';
+
+  @override
+  String get barcodeNutriScorePoor => 'Poor';
+
+  @override
+  String get barcodeNutriScoreBad => 'Bad';
+
+  @override
+  String get barcodeAdditives => 'Additives';
+
+  @override
+  String barcodeAdditivesFound(int count) {
+    return '$count found';
+  }
+
+  @override
+  String barcodeAdditivesCaution(int count) {
+    return '$count caution';
+  }
+
+  @override
+  String barcodeAdditivesModerate(int count) {
+    return '$count moderate';
+  }
+
+  @override
+  String get barcodeAdditiveNotInDatabase => 'Not in database';
+
+  @override
+  String get shoppingSharedCanTick => 'Shared list · you can tick items off, but not add or remove them';
+
+  @override
+  String get shoppingSharedViewOnly => 'Shared list · view only';
+
+  @override
+  String shoppingImportedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Imported $count items',
+      one: 'Imported 1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingImportWrongFile => 'This file is not a Recipe Spellbook shopping list export.';
+
+  @override
+  String get groceryInstacartStores => 'Costco, Publix, Safeway, Aldi, Sprouts and 1,500+ more stores';
+
+  @override
+  String get groceryKrogerStores => 'Kroger, Fred Meyer, Ralphs, Harris Teeter and more';
+
+  @override
+  String get webImportBlocked => 'The site blocked our request. Copy the recipe text and paste it instead.';
+
+  @override
+  String get webImportRateLimited => 'The site is turning away requests for now. Try again in a minute.';
+
+  @override
+  String webImportSiteError(int code) {
+    return 'The site is having problems right now (HTTP $code). Try again later.';
+  }
+
+  @override
+  String webImportHttpError(int code) {
+    return 'The page could not be loaded (HTTP $code).';
+  }
+
+  @override
+  String webImportNotAWebPage(String kind) {
+    String _temp0 = intl.Intl.selectLogic(
+      kind,
+      {
+        'pdf': 'No recipe found: that link is a PDF, not a web page.',
+        'image': 'No recipe found: that link is an image, not a web page.',
+        'video': 'No recipe found: that link is a video, not a web page.',
+        'audio': 'No recipe found: that link is an audio file, not a web page.',
+        'zip': 'No recipe found: that link is a ZIP file, not a web page.',
+        'other': 'No recipe found: that link is a file, not a web page.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get webImportPageTooLarge => 'No recipe found: that page is too large to read.';
+
+  @override
+  String webImportUnreadableEncoding(String charset) {
+    return 'That page uses a text encoding ($charset) this app cannot read.';
+  }
+
+  @override
+  String get webImportNoRecipeInVideo => 'No recipe found in that video\'s description.';
+
+  @override
+  String get webImportTimedOut => 'The website took too long to respond. Try again later.';
 }

@@ -13205,4 +13205,232 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get importGuideSamsungFoodStep4 => 'Die Rezeptdaten von Samsung Food werden gelesen und sind bereit zum Import.';
+
+  @override
+  String get communityPublishDailyLimitReached => 'Du hast das heutige Limit für Foto-Uploads erreicht. Versuche es morgen erneut.';
+
+  @override
+  String communityPublishPhotosDropped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Der Server hat $count Fotos nicht übernommen, sie fehlen deshalb. Sie werden bei der nächsten Aktualisierung erneut gesendet.',
+      one: 'Der Server hat 1 Foto nicht übernommen, es fehlt deshalb. Es wird bei der nächsten Aktualisierung erneut gesendet.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestoreNoFile => 'Keine Datei ausgewählt.';
+
+  @override
+  String get backupRestoreTooLarge => 'Dieses Backup entpackt sich zu mehr, als die App verarbeiten kann, daher wurde nichts importiert. Es ist möglicherweise beschädigt.';
+
+  @override
+  String get backupRestoreNothing => 'Nichts zu importieren.';
+
+  @override
+  String backupRestoreImported(String items) {
+    return 'Importiert: $items';
+  }
+
+  @override
+  String backupRestoreCookbooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Kochbücher',
+      one: '1 Kochbuch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Rezepte',
+      one: '1 Rezept',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreShoppingLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einkaufslisten',
+      one: '1 Einkaufsliste',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreMealPlans(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count geplante Mahlzeiten',
+      one: '1 geplante Mahlzeit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tags',
+      one: '1 Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupRestoreSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '($count Duplikate übersprungen)',
+      one: '(1 Duplikat übersprungen)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importPreviewOwnExport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Recipe Spellbook-Export ($count Rezepte)',
+      one: 'Recipe Spellbook-Export (1 Rezept)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get barcodeNovaUnprocessed => 'Unverarbeitet';
+
+  @override
+  String get barcodeNovaProcessedIngredients => 'Verarbeitete Zutaten';
+
+  @override
+  String get barcodeNovaProcessedFood => 'Verarbeitetes Lebensmittel';
+
+  @override
+  String get barcodeNovaUltraProcessed => 'Hochverarbeitet';
+
+  @override
+  String get barcodeScoreUnknown => 'Unbekannt';
+
+  @override
+  String get barcodeNutriScoreExcellent => 'Ausgezeichnet';
+
+  @override
+  String get barcodeNutriScoreGood => 'Gut';
+
+  @override
+  String get barcodeNutriScoreAverage => 'Mittel';
+
+  @override
+  String get barcodeNutriScorePoor => 'Mäßig';
+
+  @override
+  String get barcodeNutriScoreBad => 'Schlecht';
+
+  @override
+  String get barcodeAdditives => 'Zusatzstoffe';
+
+  @override
+  String barcodeAdditivesFound(int count) {
+    return '$count gefunden';
+  }
+
+  @override
+  String barcodeAdditivesCaution(int count) {
+    return '$count bedenklich';
+  }
+
+  @override
+  String barcodeAdditivesModerate(int count) {
+    return '$count mäßig bedenklich';
+  }
+
+  @override
+  String get barcodeAdditiveNotInDatabase => 'Nicht in der Datenbank';
+
+  @override
+  String get shoppingSharedCanTick => 'Geteilte Liste · du kannst Einträge abhaken, aber keine hinzufügen oder entfernen';
+
+  @override
+  String get shoppingSharedViewOnly => 'Geteilte Liste · nur ansehen';
+
+  @override
+  String shoppingImportedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge importiert',
+      one: '1 Eintrag importiert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingImportWrongFile => 'Diese Datei ist kein Einkaufslisten-Export von Recipe Spellbook.';
+
+  @override
+  String get groceryInstacartStores => 'Costco, Publix, Safeway, Aldi, Sprouts und über 1.500 weitere Geschäfte';
+
+  @override
+  String get groceryKrogerStores => 'Kroger, Fred Meyer, Ralphs, Harris Teeter und mehr';
+
+  @override
+  String get webImportBlocked => 'Die Website hat unsere Anfrage blockiert. Kopiere stattdessen den Rezepttext und füge ihn ein.';
+
+  @override
+  String get webImportRateLimited => 'Die Website lehnt Anfragen gerade ab. Versuche es in einer Minute erneut.';
+
+  @override
+  String webImportSiteError(int code) {
+    return 'Die Website hat gerade Probleme (HTTP $code). Versuche es später erneut.';
+  }
+
+  @override
+  String webImportHttpError(int code) {
+    return 'Die Seite konnte nicht geladen werden (HTTP $code).';
+  }
+
+  @override
+  String webImportNotAWebPage(String kind) {
+    String _temp0 = intl.Intl.selectLogic(
+      kind,
+      {
+        'pdf': 'Kein Rezept gefunden: Dieser Link ist ein PDF, keine Webseite.',
+        'image': 'Kein Rezept gefunden: Dieser Link ist ein Bild, keine Webseite.',
+        'video': 'Kein Rezept gefunden: Dieser Link ist ein Video, keine Webseite.',
+        'audio': 'Kein Rezept gefunden: Dieser Link ist eine Audiodatei, keine Webseite.',
+        'zip': 'Kein Rezept gefunden: Dieser Link ist eine ZIP-Datei, keine Webseite.',
+        'other': 'Kein Rezept gefunden: Dieser Link ist eine Datei, keine Webseite.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get webImportPageTooLarge => 'Kein Rezept gefunden: Diese Seite ist zu groß zum Lesen.';
+
+  @override
+  String webImportUnreadableEncoding(String charset) {
+    return 'Diese Seite verwendet eine Textkodierung ($charset), die die App nicht lesen kann.';
+  }
+
+  @override
+  String get webImportNoRecipeInVideo => 'In der Beschreibung dieses Videos wurde kein Rezept gefunden.';
+
+  @override
+  String get webImportTimedOut => 'Die Website hat zu lange nicht geantwortet. Versuche es später erneut.';
 }

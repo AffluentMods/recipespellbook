@@ -22914,6 +22914,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Samsung Food recipe data will be parsed and ready to import.'**
   String get importGuideSamsungFoodStep4;
+
+  /// Publish/update stopped part way because the server says today's photo upload allowance is used up. Not retried until tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached today\'s photo upload limit. Try again tomorrow.'**
+  String get communityPublishDailyLimitReached;
+
+  /// A publish or update went through, but the server did not keep some photos (they were not the publisher's own Community uploads). They are sent again with the next update.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The server did not keep 1 photo, so it was left out. It is sent again with the next update.} other{The server did not keep {count} photos, so they were left out. They are sent again with the next update.}}'**
+  String communityPublishPhotosDropped(int count);
+
+  /// Restore a backup: the file picker was closed without a file.
+  ///
+  /// In en, this message translates to:
+  /// **'No file selected.'**
+  String get backupRestoreNoFile;
+
+  /// Restore a backup: a file in the ZIP unpacks to more than the app can handle (a damaged file or a zip bomb). Nothing was imported.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup unpacks to more than the app can handle, so nothing was imported. It may be damaged.'**
+  String get backupRestoreTooLarge;
+
+  /// Restore a backup: it held nothing to import.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to import.'**
+  String get backupRestoreNothing;
+
+  /// Restore a backup: what came in. {items} is a comma-separated list such as '2 cookbooks, 40 recipes', possibly followed by '(3 duplicates skipped)'.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported: {items}'**
+  String backupRestoreImported(String items);
+
+  /// Restore a backup: part of the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cookbook} other{{count} cookbooks}}'**
+  String backupRestoreCookbooks(int count);
+
+  /// Restore a backup: part of the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe} other{{count} recipes}}'**
+  String backupRestoreRecipes(int count);
+
+  /// Restore a backup: part of the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 shopping list} other{{count} shopping lists}}'**
+  String backupRestoreShoppingLists(int count);
+
+  /// Restore a backup: part of the list in backupRestoreImported. Meals planned in the meal planner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 planned meal} other{{count} planned meals}}'**
+  String backupRestoreMealPlans(int count);
+
+  /// Restore a backup: part of the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tag} other{{count} tags}}'**
+  String backupRestoreTags(int count);
+
+  /// Restore a backup: recipes already in the library that were not added again. Follows the list in backupRestoreImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{(1 duplicate skipped)} other{({count} duplicates skipped)}}'**
+  String backupRestoreSkipped(int count);
+
+  /// Import preview: where the recipes came from, for a JSON export of this app.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Recipe Spellbook export (1 recipe)} other{Recipe Spellbook export ({count} recipes)}}'**
+  String importPreviewOwnExport(int count);
+
+  /// Barcode result: NOVA group 1 (unprocessed or minimally processed food).
+  ///
+  /// In en, this message translates to:
+  /// **'Unprocessed'**
+  String get barcodeNovaUnprocessed;
+
+  /// Barcode result: NOVA group 2 (processed culinary ingredients such as oil or sugar).
+  ///
+  /// In en, this message translates to:
+  /// **'Processed ingredients'**
+  String get barcodeNovaProcessedIngredients;
+
+  /// Barcode result: NOVA group 3 (processed food).
+  ///
+  /// In en, this message translates to:
+  /// **'Processed food'**
+  String get barcodeNovaProcessedFood;
+
+  /// Barcode result: NOVA group 4 (ultra-processed food).
+  ///
+  /// In en, this message translates to:
+  /// **'Ultra-processed'**
+  String get barcodeNovaUltraProcessed;
+
+  /// Barcode result: a NOVA group the app does not know.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get barcodeScoreUnknown;
+
+  /// Barcode result: Nutri-Score A.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent'**
+  String get barcodeNutriScoreExcellent;
+
+  /// Barcode result: Nutri-Score B.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get barcodeNutriScoreGood;
+
+  /// Barcode result: Nutri-Score C.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get barcodeNutriScoreAverage;
+
+  /// Barcode result: Nutri-Score D.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor'**
+  String get barcodeNutriScorePoor;
+
+  /// Barcode result: Nutri-Score E.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad'**
+  String get barcodeNutriScoreBad;
+
+  /// Barcode result: heading of the food additives section.
+  ///
+  /// In en, this message translates to:
+  /// **'Additives'**
+  String get barcodeAdditives;
+
+  /// Barcode result: how many additives the product lists, beside the Additives heading.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} found'**
+  String barcodeAdditivesFound(int count);
+
+  /// Barcode result: how many of the additives call for caution.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} caution'**
+  String barcodeAdditivesCaution(int count);
+
+  /// Barcode result: how many of the additives are of moderate concern.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} moderate'**
+  String barcodeAdditivesModerate(int count);
+
+  /// Barcode result: an additive the app has no information on.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in database'**
+  String get barcodeAdditiveNotInDatabase;
+
+  /// Shopping list banner: a list shared with you where you may tick items but not add or remove them.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared list · you can tick items off, but not add or remove them'**
+  String get shoppingSharedCanTick;
+
+  /// Shopping list banner: a list shared with you that you can only look at.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared list · view only'**
+  String get shoppingSharedViewOnly;
+
+  /// Shopping: a shopping list file was imported with this many items.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Imported 1 item} other{Imported {count} items}}'**
+  String shoppingImportedItems(int count);
+
+  /// Shopping: the picked file is not a shopping list exported from this app.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a Recipe Spellbook shopping list export.'**
+  String get shoppingImportWrongFile;
+
+  /// Order online sheet: stores reachable through Instacart (store names stay as they are).
+  ///
+  /// In en, this message translates to:
+  /// **'Costco, Publix, Safeway, Aldi, Sprouts and 1,500+ more stores'**
+  String get groceryInstacartStores;
+
+  /// Order online sheet: stores reachable through Kroger (store names stay as they are).
+  ///
+  /// In en, this message translates to:
+  /// **'Kroger, Fred Meyer, Ralphs, Harris Teeter and more'**
+  String get groceryKrogerStores;
+
+  /// Import from a link: the site refused the request (HTTP 401, 403, 451).
+  ///
+  /// In en, this message translates to:
+  /// **'The site blocked our request. Copy the recipe text and paste it instead.'**
+  String get webImportBlocked;
+
+  /// Import from a link: the site answered 429 (too many requests).
+  ///
+  /// In en, this message translates to:
+  /// **'The site is turning away requests for now. Try again in a minute.'**
+  String get webImportRateLimited;
+
+  /// Import from a link: the site answered with a server error (HTTP 5xx).
+  ///
+  /// In en, this message translates to:
+  /// **'The site is having problems right now (HTTP {code}). Try again later.'**
+  String webImportSiteError(int code);
+
+  /// Import from a link: the page did not load, with this HTTP status.
+  ///
+  /// In en, this message translates to:
+  /// **'The page could not be loaded (HTTP {code}).'**
+  String webImportHttpError(int code);
+
+  /// Import from a link: the link is a file, not a web page. kind is pdf, image, video, audio, zip or other.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind, select, pdf{No recipe found: that link is a PDF, not a web page.} image{No recipe found: that link is an image, not a web page.} video{No recipe found: that link is a video, not a web page.} audio{No recipe found: that link is an audio file, not a web page.} zip{No recipe found: that link is a ZIP file, not a web page.} other{No recipe found: that link is a file, not a web page.}}'**
+  String webImportNotAWebPage(String kind);
+
+  /// Import from a link: the page is larger than the app reads.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found: that page is too large to read.'**
+  String get webImportPageTooLarge;
+
+  /// Import from a link: the page is in a character set the app has no table for.
+  ///
+  /// In en, this message translates to:
+  /// **'That page uses a text encoding ({charset}) this app cannot read.'**
+  String webImportUnreadableEncoding(String charset);
+
+  /// Import from a link: a YouTube page whose description holds no recipe.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in that video\'s description.'**
+  String get webImportNoRecipeInVideo;
+
+  /// Import from a link: the site did not answer in time.
+  ///
+  /// In en, this message translates to:
+  /// **'The website took too long to respond. Try again later.'**
+  String get webImportTimedOut;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
