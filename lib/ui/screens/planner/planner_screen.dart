@@ -115,6 +115,13 @@ final mealCountsForWeekProvider = StreamProvider.family<Map<DateTime, int>, Date
   return dao.watchMealCountsForDateRangeAlt(weekStart, weekEnd);
 });
 
+/// "Nov 10 to Nov 16": the seven days from [weekStart], in the app's language.
+String plannerWeekRange(AppLocalizations l10n, String locale, DateTime weekStart) =>
+    l10n.plannerDateRange(
+      DateFormat.MMMd(locale).format(weekStart),
+      DateFormat.MMMd(locale).format(addDays(weekStart, 6)),
+    );
+
 // ============ MAIN SCREEN ============
 
 class PlannerScreen extends ConsumerStatefulWidget {
@@ -125,9 +132,18 @@ class PlannerScreen extends ConsumerStatefulWidget {
 }
 
 class _PlannerScreenState extends ConsumerState<PlannerScreen> {
-  late DateTime _weekStart;
+  /// The selected day. The week and the month on screen are always the ones
+  /// it falls in, never kept apart from it: Day and Month view moved only the
+  /// day or the month, and "Clear this week" then cleared a week that was
+  /// not showing.
+  DateTime get _selectedDay => ref.read(selectedPlannerDateProvider);
+
+  /// First day of the week the selected day is in.
+  DateTime get _weekStart => _getWeekStart(_selectedDay);
+
   /// First day of the month shown in Month view.
-  late DateTime _monthAnchor;
+  DateTime get _monthAnchor => DateTime(_selectedDay.year, _selectedDay.month, 1);
+
   /// Chosen zoom level; null until restored / first pick, at which point width
   /// picks the default (Month on desktop, Week elsewhere) via [_effectiveMode].
   PlannerViewMode? _viewMode;
@@ -139,11 +155,6 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   @override
   void initState() {
     super.initState();
-    // Open on the week / month of the selected day — Home can hand over a day
-    // later in the week (or next week).
-    final selected = ref.read(selectedPlannerDateProvider);
-    _weekStart = _getWeekStart(selected);
-    _monthAnchor = DateTime(selected.year, selected.month, 1);
     _restoreViewMode();
   }
 
@@ -161,79 +172,51 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   }
 
   /// Resolved zoom level: the saved/picked mode, else Month on desktop and Week
-  /// on narrower widths.
-  PlannerViewMode get _effectiveMode =>
-      _viewMode ??
-      (Responsive.isDesktopLayout(context)
-          ? PlannerViewMode.month
-          : PlannerViewMode.week);
+  /// on narrower widths. Below the nav rail there is no view switcher, and the
+  /// week strip with its day timeline is the Week view, whatever was picked
+  /// on a wider window: prev/next must not move a month or a day there.
+  PlannerViewMode get _effectiveMode {
+    if (!Responsive.useNavRail(context)) return PlannerViewMode.week;
+    return _viewMode ??
+        (Responsive.isDesktopLayout(context)
+            ? PlannerViewMode.month
+            : PlannerViewMode.week);
+  }
 
+  /// The week and the month follow the selected day, so zooming out always
+  /// lands on the span that holds it (drill into Aug from a July grid, then
+  /// tap Month: August, not July).
   void _setViewMode(PlannerViewMode mode) {
-    // Zooming out re-anchors to the span that contains the selected day, so the
-    // three anchors never drift apart (e.g. drill into Aug from a July grid,
-    // then tap Month → shows August, not stale July).
-    final selected = ref.read(selectedPlannerDateProvider);
-    setState(() {
-      _viewMode = mode;
-      if (mode == PlannerViewMode.week) _weekStart = _getWeekStart(selected);
-      if (mode == PlannerViewMode.month) {
-        _monthAnchor = DateTime(selected.year, selected.month, 1);
-      }
-    });
+    setState(() => _viewMode = mode);
     SharedPreferences.getInstance()
         .then((p) => p.setString(_viewModeKey, mode.name));
   }
 
-  /// Header prev/next shift by the active zoom level. Week/Day also move the
-  /// selected day so the tablet rail highlight + detail timeline stay coherent,
-  /// and Month moves the selection into the new month.
-  void _goPrev() {
+  void _select(DateTime day) =>
+      ref.read(selectedPlannerDateProvider.notifier).state = day;
+
+  /// Header prev/next shift by the active zoom level, by moving the selected
+  /// day: a week or a day, or into the next month (its first day).
+  void _goPrev() => _shift(-1);
+
+  void _goNext() => _shift(1);
+
+  void _shift(int direction) {
+    final d = _selectedDay;
     switch (_effectiveMode) {
       case PlannerViewMode.month:
-        final m = DateTime(_monthAnchor.year, _monthAnchor.month - 1, 1);
-        setState(() => _monthAnchor = m);
-        ref.read(selectedPlannerDateProvider.notifier).state = m;
+        _select(DateTime(d.year, d.month + direction, 1));
       case PlannerViewMode.week:
-        setState(() =>
-            _weekStart = addDays(_weekStart, -7));
-        final d = ref.read(selectedPlannerDateProvider);
-        ref.read(selectedPlannerDateProvider.notifier).state =
-            addDays(d, -7);
+        _select(addDays(d, 7 * direction));
       case PlannerViewMode.day:
-        final d = ref.read(selectedPlannerDateProvider);
-        ref.read(selectedPlannerDateProvider.notifier).state =
-            addDays(d, -1);
+        _select(addDays(d, direction));
     }
   }
 
-  void _goNext() {
-    switch (_effectiveMode) {
-      case PlannerViewMode.month:
-        final m = DateTime(_monthAnchor.year, _monthAnchor.month + 1, 1);
-        setState(() => _monthAnchor = m);
-        ref.read(selectedPlannerDateProvider.notifier).state = m;
-      case PlannerViewMode.week:
-        setState(() => _weekStart = addDays(_weekStart, 7));
-        final d = ref.read(selectedPlannerDateProvider);
-        ref.read(selectedPlannerDateProvider.notifier).state =
-            addDays(d, 7);
-      case PlannerViewMode.day:
-        final d = ref.read(selectedPlannerDateProvider);
-        ref.read(selectedPlannerDateProvider.notifier).state =
-            addDays(d, 1);
-    }
-  }
-
-  /// Drill into a specific day (from a month cell / week header) → Day view,
-  /// re-anchoring the month/week so zoom-out lands on the same span.
+  /// Drill into a specific day (from a month cell / week header): Day view.
   void _openDay(DateTime date) {
-    final d = DateTime(date.year, date.month, date.day);
-    ref.read(selectedPlannerDateProvider.notifier).state = d;
-    setState(() {
-      _monthAnchor = DateTime(d.year, d.month, 1);
-      _weekStart = _getWeekStart(d);
-      _viewMode = PlannerViewMode.day;
-    });
+    _select(DateTime(date.year, date.month, date.day));
+    setState(() => _viewMode = PlannerViewMode.day);
     SharedPreferences.getInstance()
         .then((p) => p.setString(_viewModeKey, PlannerViewMode.day.name));
   }
@@ -242,26 +225,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   DateTime _getWeekStart(DateTime date) =>
       startOfWeek(date, ref.read(settingsProvider).weekStartDay);
 
-  void _goToPreviousWeek() {
-    setState(() {
-      _weekStart = addDays(_weekStart, -7);
-    });
-  }
+  /// The week strip's swipe: the same weekday a week earlier or later.
+  void _goToPreviousWeek() => _select(addDays(_selectedDay, -7));
 
-  void _goToNextWeek() {
-    setState(() {
-      _weekStart = addDays(_weekStart, 7);
-    });
-  }
+  void _goToNextWeek() => _select(addDays(_selectedDay, 7));
 
   void _goToToday() {
     final today = DateTime.now();
-    setState(() {
-      _weekStart = _getWeekStart(today);
-      _monthAnchor = DateTime(today.year, today.month, 1);
-    });
-    ref.read(selectedPlannerDateProvider.notifier).state =
-        DateTime(today.year, today.month, today.day);
+    _select(DateTime(today.year, today.month, today.day));
   }
 
   @override
@@ -269,16 +240,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     // The week start can change in Settings while the planner is open.
-    ref.listen(settingsProvider.select((s) => s.weekStartDay), (_, _) {
-      setState(() => _weekStart = _getWeekStart(ref.read(selectedPlannerDateProvider)));
-    });
+    ref.watch(settingsProvider.select((s) => s.weekStartDay));
     final selectedDate = ref.watch(selectedPlannerDateProvider);
     final mealPlansAsync = ref.watch(mealPlansForDateProvider(selectedDate));
     final mealCountsAsync = ref.watch(mealCountsForWeekProvider(_weekStart));
     final isDesktop = Responsive.isDesktopLayout(context);
     final isTablet = Responsive.isMedium(context);
     // The Month/Week/Day switcher + Month & Day modes are a wide-viewport
-    // feature; compact keeps its strip + timeline (which is already day-focused).
+    // feature; compact keeps its strip + timeline (Week, see _effectiveMode).
     final wide = Responsive.useNavRail(context);
     final mode = _effectiveMode;
 
@@ -726,10 +695,8 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 firstDate: DateTime(2020),
                 lastDate: DateTime(2030),
                 onDateChanged: (date) {
-                  ref.read(selectedPlannerDateProvider.notifier).state = date;
-                  setState(() {
-                    _weekStart = _getWeekStart(date);
-                  });
+                  // The week and the month (Month view) follow the day.
+                  _select(DateTime(date.year, date.month, date.day));
                   Navigator.pop(ctx);
                 },
               ),
@@ -743,6 +710,10 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   void _showMoreOptions(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
+    // Both act on the week the selected day is in: say which.
+    final weekStart = _weekStart;
+    final range = plannerWeekRange(
+        l10n, Localizations.localeOf(context).toString(), weekStart);
 
     Responsive.showAdaptiveSheet(
       context,
@@ -755,7 +726,8 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
               ? BorderRadius.circular(16)
               : const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: SafeArea(
+        // The list tiles draw on a Material, not on the decorated box.
+        child: Material(type: MaterialType.transparency, child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -769,12 +741,13 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
               ListTile(
                 leading: const Icon(Icons.add_shopping_cart),
                 title: Text(l10n.addWeekToShoppingList),
+                subtitle: Text(range),
                 onTap: () async {
                   Navigator.pop(ctx);
                   // This week's meals with their recipes: each recipe goes on
                   // the list scaled to the people its meals are planned for.
-                  final weekEnd = addDays(_weekStart, 7);
-                  final meals = await mealPlanDao.getMealPlansWithRecipesInRange(_weekStart, weekEnd);
+                  final weekEnd = addDays(weekStart, 7);
+                  final meals = await mealPlanDao.getMealPlansWithRecipesInRange(weekStart, weekEnd);
 
                   if (!meals.any((m) => m.recipe != null)) {
                     if (context.mounted) {
@@ -795,35 +768,39 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
               ListTile(
                 leading: Icon(Icons.delete_sweep, color: context.appColors.destructive),
                 title: Text(l10n.clearThisWeek, style: TextStyle(color: context.appColors.destructive)),
+                subtitle: Text(range),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _confirmClearWeek(context);
+                  _confirmClearWeek(context, weekStart);
                 },
               ),
               const SizedBox(height: 16),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
 
-  void _confirmClearWeek(BuildContext context) {
+  /// Clear the week starting [weekStart], the one the sheet named.
+  void _confirmClearWeek(BuildContext context, DateTime weekStart) {
     final l10n = AppLocalizations.of(context)!;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
+    final day = DateFormat.MMMd(Localizations.localeOf(context).toString());
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.clearThisWeek),
-        content: Text(l10n.clearWeekWarning),
+        content: Text(l10n.clearWeekRangeWarning(
+            day.format(weekStart), day.format(addDays(weekStart, 6)))),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final weekEnd = addDays(_weekStart, 7);
-              final meals = await mealPlanDao.getMealPlansInRange('', _weekStart, weekEnd);
+              final weekEnd = addDays(weekStart, 7);
+              final meals = await mealPlanDao.getMealPlansInRange('', weekStart, weekEnd);
               for (final meal in meals) {
                 await mealPlanDao.deleteMealPlan(meal.id);
               }
@@ -1290,10 +1267,8 @@ class _PlannerHeader extends StatelessWidget {
       case PlannerViewMode.month:
         title = '${DateFormat.MMMM(locale).format(monthAnchor)} ${monthAnchor.year}';
       case PlannerViewMode.week:
-        final weekEnd = addDays(weekStart, 6);
         title = '${DateFormat.MMMM(locale).format(weekStart)} ${weekStart.year}';
-        subtitle =
-            '${DateFormat.MMMd(locale).format(weekStart)} – ${DateFormat.MMMd(locale).format(weekEnd)}';
+        subtitle = plannerWeekRange(l10n, locale, weekStart);
       case PlannerViewMode.day:
         title = '${DateFormat.MMMM(locale).format(date)} ${date.year}';
         subtitle = DateFormat.MMMMEEEEd(locale).format(date);
