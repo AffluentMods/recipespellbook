@@ -3898,5 +3898,6 @@
   "communityFollowFailed": "Impossible de modifier vos abonnements. Vérifiez votre connexion et réessayez.",
   "communityPublishPhotosUnsupported": "Certaines photos sont dans un format que cet appareil ne sait pas lire (comme HEIC) et ont été retirées de :",
   "communityPublishIncludeNotes": "Inclure mes notes",
-  "communityPublishIncludeNotesSubtitle": "Publie les notes que vous avez écrites sur chaque recette. Vos propres notes en étoiles ne sont jamais publiées."
+  "communityPublishIncludeNotesSubtitle": "Publie les notes que vous avez écrites sur chaque recette. Vos propres notes en étoiles ne sont jamais publiées.",
+  "publicationsUpdateAllConfirmBody": "Chacune reçoit les recettes de son livre sur cet appareil. Les photos ne vont qu'à celles publiées avec des photos, et vos notes seulement là où vous avez choisi de les inclure. Les notes et les téléchargements sont conservés."
 }

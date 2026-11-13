@@ -12554,4 +12554,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => '发布你在每个食谱上写的备注。你自己的星级评分永远不会发布。';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => '每个都会使用此设备上对应食谱书中的食谱更新。照片只会加到发布时带照片的出版物，备注只会加到你选择包含备注的出版物。评分和下载次数将保留。';
 }

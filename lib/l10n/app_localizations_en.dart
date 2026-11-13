@@ -12722,4 +12722,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => 'Publish the notes you wrote on each recipe. Your own star ratings are never published.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Each one gets the recipes from its cookbook on this device. Photos go only to the ones published with photos, and your notes only where you chose to include them. Ratings and downloads are kept.';
 }

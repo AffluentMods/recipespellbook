@@ -400,6 +400,34 @@ void main() {
       expect(await PublishSnapshot.lookup('pub-old'), isNull, reason: 'a changed one gets no snapshot yet');
     });
 
+    test('a publication from before snapshots keeps its photos choice: text only stays text only', () async {
+      await addCookbook('plain', 'Plain', edited: DateTime(2026, 4, 1));
+      await addCookbook('pictures', 'Pictures', edited: DateTime(2026, 4, 1));
+      for (final id in ['plain', 'pictures']) {
+        await CommunityService.recordPublishSource('pub-$id', kind: 'cookbook', sourceId: id);
+      }
+      // Both changed after publishing; only one was published with photos.
+      final plain = pub('pub-plain', 'Plain', created: DateTime(2026, 3, 1));
+      final pictures = MyPublication(
+        id: 'pub-pictures',
+        title: 'Pictures',
+        recipeCount: kMinPublishRecipes,
+        downloadCount: 0,
+        imageCount: 3,
+        isRemoved: false,
+        createdAt: DateTime(2026, 3, 1),
+      );
+
+      final summary =
+          await withServer(() => updater.updateAll([plain, pictures], l10n: l10n, control: UpdateAllControl()));
+      expect(summary.updated, ['Plain', 'Pictures']);
+      expect(server.puts['pub-plain']!.single['imageCount'], 0);
+      expect(server.puts['pub-plain']!.single.containsKey('imagePath'), isFalse);
+      expect(server.puts['pub-pictures']!.single['imageCount'], 3);
+      expect(server.uploadRequests, 3, reason: 'only the cookbook published with photos sends any');
+      expect((await PublishSnapshot.lookup('pub-plain'))!.includeImages, isFalse);
+    });
+
     test('a cookbook renamed since publishing takes the new name along', () async {
       await addCookbook('soups', 'Soups');
       final soups = await publish('soups');

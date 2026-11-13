@@ -12586,4 +12586,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => '각 레시피에 작성한 메모를 게시합니다. 내 별점은 게시되지 않습니다.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => '각각 이 기기에 있는 요리책의 레시피로 업데이트됩니다. 사진은 사진과 함께 게시한 것에만, 메모는 포함하기로 선택한 것에만 들어갑니다. 평점과 다운로드 수는 유지됩니다.';
 }

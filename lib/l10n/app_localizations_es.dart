@@ -12703,4 +12703,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => 'Publica las notas que escribiste en cada receta. Tus propias valoraciones con estrellas nunca se publican.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Cada una recibe las recetas de su libro en este dispositivo. Las fotos solo van a las que se publicaron con fotos, y tus notas solo donde elegiste incluirlas. Se conservan las valoraciones y las descargas.';
 }

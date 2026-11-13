@@ -12722,4 +12722,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => 'Publiceert de notities die je bij elk recept hebt geschreven. Je eigen sterrenbeoordelingen worden nooit gepubliceerd.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Elk krijgt de recepten uit het kookboek op dit apparaat. Foto\'s alleen bij de publicaties met foto\'s, en je notities alleen waar je ervoor koos ze toe te voegen. Beoordelingen en downloads blijven behouden.';
 }

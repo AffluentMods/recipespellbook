@@ -12926,4 +12926,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => 'Публикует заметки, которые вы написали к каждому рецепту. Ваши собственные оценки звёздами никогда не публикуются.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Каждая получит рецепты из своей книги на этом устройстве. Фото добавятся только к опубликованным с фото, а ваши заметки только там, где вы решили их включить. Оценки и скачивания сохраняются.';
 }

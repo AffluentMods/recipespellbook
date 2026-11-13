@@ -22068,6 +22068,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Publish the notes you wrote on each recipe. Your own star ratings are never published.'**
   String get communityPublishIncludeNotesSubtitle;
+
+  /// Body of the confirmation before Update all in My Publications. Each publication is updated with the photo and notes choices it was published with.
+  ///
+  /// In en, this message translates to:
+  /// **'Each one gets the recipes from its cookbook on this device. Photos go only to the ones published with photos, and your notes only where you chose to include them. Ratings and downloads are kept.'**
+  String get publicationsUpdateAllConfirmBody;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -4435,5 +4435,6 @@
   "communityFollowFailed": "Folgen konnte nicht geändert werden. Prüfe deine Verbindung und versuche es erneut.",
   "communityPublishPhotosUnsupported": "Einige Fotos haben ein Format, das dieses Gerät nicht lesen kann (etwa HEIC), und fehlen deshalb bei:",
   "communityPublishIncludeNotes": "Meine Notizen einbeziehen",
-  "communityPublishIncludeNotesSubtitle": "Veröffentlicht die Notizen, die du zu jedem Rezept geschrieben hast. Deine eigenen Sternebewertungen werden nie veröffentlicht."
+  "communityPublishIncludeNotesSubtitle": "Veröffentlicht die Notizen, die du zu jedem Rezept geschrieben hast. Deine eigenen Sternebewertungen werden nie veröffentlicht.",
+  "publicationsUpdateAllConfirmBody": "Jede erhält die Rezepte aus ihrem Kochbuch auf diesem Gerät. Fotos nur, wenn sie mit Fotos veröffentlicht wurde, und deine Notizen nur, wo du sie einbezogen hast. Bewertungen und Downloads bleiben erhalten."
 }

@@ -12936,4 +12936,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => 'Publikuje notatki dodane do każdego przepisu. Twoje oceny w gwiazdkach nigdy nie są publikowane.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Każda dostaje przepisy ze swojej książki na tym urządzeniu. Zdjęcia trafiają tylko do tych opublikowanych ze zdjęciami, a Twoje notatki tylko tam, gdzie je dołączono. Oceny i pobrania zostają zachowane.';
 }

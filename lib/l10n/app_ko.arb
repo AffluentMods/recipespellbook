@@ -4873,5 +4873,6 @@
   "communityFollowFailed": "팔로우를 변경하지 못했습니다. 연결을 확인하고 다시 시도하세요.",
   "communityPublishPhotosUnsupported": "일부 사진은 이 기기에서 읽을 수 없는 형식(HEIC 등)이라 다음 레시피에서 제외되었습니다:",
   "communityPublishIncludeNotes": "내 메모 포함",
-  "communityPublishIncludeNotesSubtitle": "각 레시피에 작성한 메모를 게시합니다. 내 별점은 게시되지 않습니다."
+  "communityPublishIncludeNotesSubtitle": "각 레시피에 작성한 메모를 게시합니다. 내 별점은 게시되지 않습니다.",
+  "publicationsUpdateAllConfirmBody": "각각 이 기기에 있는 요리책의 레시피로 업데이트됩니다. 사진은 사진과 함께 게시한 것에만, 메모는 포함하기로 선택한 것에만 들어갑니다. 평점과 다운로드 수는 유지됩니다."
 }

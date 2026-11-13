@@ -159,7 +159,7 @@ class _CommunityMyPublicationsScreenState extends ConsumerState<CommunityMyPubli
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.publicationsUpdateAllConfirmTitle(_changedCount)),
-        content: Text(l10n.communityRepublishRecipesBody),
+        content: Text(l10n.publicationsUpdateAllConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

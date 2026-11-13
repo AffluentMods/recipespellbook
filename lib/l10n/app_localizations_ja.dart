@@ -12558,4 +12558,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => '各レシピに書いたメモを公開します。自分の星評価が公開されることはありません。';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'それぞれ、この端末にあるクックブックのレシピで更新されます。写真は写真付きで公開したものだけに、メモは含めると選んだものだけに入ります。評価とダウンロード数は保持されます。';
 }

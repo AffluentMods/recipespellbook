@@ -4873,5 +4873,6 @@
   "communityFollowFailed": "Nie udało się zmienić obserwowanych. Sprawdź połączenie i spróbuj ponownie.",
   "communityPublishPhotosUnsupported": "Niektóre zdjęcia mają format, którego to urządzenie nie odczyta (np. HEIC), więc pominięto je w:",
   "communityPublishIncludeNotes": "Dołącz moje notatki",
-  "communityPublishIncludeNotesSubtitle": "Publikuje notatki dodane do każdego przepisu. Twoje oceny w gwiazdkach nigdy nie są publikowane."
+  "communityPublishIncludeNotesSubtitle": "Publikuje notatki dodane do każdego przepisu. Twoje oceny w gwiazdkach nigdy nie są publikowane.",
+  "publicationsUpdateAllConfirmBody": "Każda dostaje przepisy ze swojej książki na tym urządzeniu. Zdjęcia trafiają tylko do tych opublikowanych ze zdjęciami, a Twoje notatki tylko tam, gdzie je dołączono. Oceny i pobrania zostają zachowane."
 }

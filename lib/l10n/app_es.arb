@@ -4400,5 +4400,6 @@
   "communityFollowFailed": "No se pudo cambiar a quién sigues. Comprueba tu conexión e inténtalo de nuevo.",
   "communityPublishPhotosUnsupported": "Algunas fotos tienen un formato que este dispositivo no puede leer (como HEIC), así que se omitieron en:",
   "communityPublishIncludeNotes": "Incluir mis notas",
-  "communityPublishIncludeNotesSubtitle": "Publica las notas que escribiste en cada receta. Tus propias valoraciones con estrellas nunca se publican."
+  "communityPublishIncludeNotesSubtitle": "Publica las notas que escribiste en cada receta. Tus propias valoraciones con estrellas nunca se publican.",
+  "publicationsUpdateAllConfirmBody": "Cada una recibe las recetas de su libro en este dispositivo. Las fotos solo van a las que se publicaron con fotos, y tus notas solo donde elegiste incluirlas. Se conservan las valoraciones y las descargas."
 }

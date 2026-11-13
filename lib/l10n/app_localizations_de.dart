@@ -12710,4 +12710,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get communityPublishIncludeNotesSubtitle => 'Veröffentlicht die Notizen, die du zu jedem Rezept geschrieben hast. Deine eigenen Sternebewertungen werden nie veröffentlicht.';
+
+  @override
+  String get publicationsUpdateAllConfirmBody => 'Jede erhält die Rezepte aus ihrem Kochbuch auf diesem Gerät. Fotos nur, wenn sie mit Fotos veröffentlicht wurde, und deine Notizen nur, wo du sie einbezogen hast. Bewertungen und Downloads bleiben erhalten.';
 }
