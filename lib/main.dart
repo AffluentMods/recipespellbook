@@ -40,6 +40,7 @@ import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/screens/import/video_import_ui.dart';
 import 'ui/widgets/app_shortcuts.dart';
+import 'ui/widgets/new_recipe_dialog.dart' show friendlyImportError;
 
 /// Scroll behaviour: touch, stylus and trackpad drag-scroll everywhere. A
 /// MOUSE only drags on phones/tablets — on desktop and web a mouse drag must
@@ -688,12 +689,12 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       // Dismiss loading dialog
       if (nav.canPop()) nav.pop();
 
-      // Show error snackbar
+      // Show error snackbar: why, in the user's language.
       final ctx = nav.context;
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(
-            content: Text(l10n.failedToImport(e.toString().replaceFirst("Exception: ", ""))),
+            content: Text(friendlyImportError(e, l10n)),
             backgroundColor: Colors.red,
           ),
         );

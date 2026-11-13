@@ -44,6 +44,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/family_share_sheet.dart';
 import '../../widgets/join_with_link_dialog.dart';
+import '../../widgets/new_recipe_dialog.dart' show friendlyImportError;
 import '../../widgets/sheet_chrome.dart';
 import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_controls.dart';
@@ -1439,7 +1440,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         if (!mounted) return;
         messenger.hideCurrentSnackBar();
         messenger.showSnackBar(SnackBar(
-          content: Text(l10n.failedToImport(e.toString().replaceFirst('Exception: ', ''))),
+          content: Text(friendlyImportError(e, l10n)),
         ));
       }
     }

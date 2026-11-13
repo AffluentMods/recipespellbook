@@ -30,6 +30,8 @@ import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_guides_screen.dart';
 import '../screens/import/import_preview_screen.dart';
 import '../screens/import/video_import_ui.dart';
+import '../screens/import/web_import_ui.dart';
+import '../../services/web_import_error.dart';
 import 'app_snackbar.dart';
 import 'backup_restore.dart';
 import 'platform_brand.dart';
@@ -56,8 +58,11 @@ Future<void> showImportDialog(BuildContext context, String cookbookId, {bool aut
   );
 }
 
-/// Turns a failed import from a link into a plain-English message.
+/// Turns a failed import from a link into a message in the user's language.
+/// The engine's own failures say why with a code; anything else (no
+/// connection, an unexpected error) is told by what it says.
 String friendlyImportError(Object e, AppLocalizations l10n) {
+  if (e is WebImportException) return webImportErrorMessage(l10n, e);
   final s = e.toString().toLowerCase();
   if (s.contains('socketexception') || s.contains('failed host lookup') ||
       s.contains('network') || s.contains('timeout') || s.contains('timed out') ||

@@ -4,6 +4,7 @@ import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 import 'limited_fetch.dart';
+import 'web_import_error.dart';
 import 'web_page_decoder.dart';
 import '../models/imported_recipe.dart';
 import '../utils/ingredient_utils.dart' show mealMasterIngredient;
@@ -570,30 +571,32 @@ class RecipeImportEngine {
       return _parseFromUrlInternal(url, isRecursiveCall: isRecursiveCall);
     }).timeout(
       const Duration(seconds: 30),
-      onTimeout: () => throw Exception('Import timed out — the website took too long to respond.'),
+      onTimeout: () => throw const WebImportException(
+        WebImportProblem.timedOut,
+        'Import timed out: the website took too long to respond.',
+      ),
     );
   }
 
   static Future<ImportedRecipe> _parseFromUrlInternal(String url, {bool isRecursiveCall = false}) async {
-    final (ImportedRecipe?, String?) result;
+    final (ImportedRecipe?, WebImportException?) result;
     try {
       result = await _importFromUrl(url, isRecursiveCall);
     } catch (e) {
       throw Exception('Failed to parse recipe: $e');
     }
-    // The engine's own failures are already one sentence for the person
-    // importing, so they go out as they are instead of being wrapped like
-    // the unexpected errors above.
+    // The engine's own failures say why with a code, which the screen says
+    // in the user's language; they go out as they are instead of being
+    // wrapped like the unexpected errors above.
     final (recipe, failure) = result;
-    if (recipe == null) throw Exception(failure ?? _noRecipeFound);
+    if (recipe == null) throw failure ?? _noRecipeFound;
     return recipe;
   }
 
-  static const _noRecipeFound = 'No recipe found on that page.';
+  static const _noRecipeFound = WebImportException(WebImportProblem.noRecipe, 'No recipe found on that page.');
 
-  /// Does the import. Returns the recipe, or the sentence that tells the
-  /// person why there is none.
-  static Future<(ImportedRecipe?, String?)> _importFromUrl(String url, bool isRecursiveCall) async {
+  /// Does the import. Returns the recipe, or why there is none.
+  static Future<(ImportedRecipe?, WebImportException?)> _importFromUrl(String url, bool isRecursiveCall) async {
     var normalized = _normalizeUrl(url);
     var platform = _detectPlatform(normalized);
 
@@ -654,7 +657,11 @@ class RecipeImportEngine {
     // recipe it yields holds text that could not be read, or it yields none.
     final unreadable = page.unreadableCharset == null
         ? null
-        : 'That page uses a text encoding (${page.unreadableCharset}) this app cannot read.';
+        : WebImportException(
+            WebImportProblem.unreadableEncoding,
+            'That page uses a text encoding (${page.unreadableCharset}) this app cannot read.',
+            charset: page.unreadableCharset,
+          );
 
     if (_isPlainText(response, page.text)) {
       final recipe = _recipeFromPlainText(page.text);
@@ -721,17 +728,23 @@ class RecipeImportEngine {
   }
 
   /// Give the user a clue what went wrong rather than a raw status code.
-  static String _statusFailure(int code) {
+  static WebImportException _statusFailure(int code) {
     if (code == 403 || code == 401 || code == 451 || code == 455) {
-      return 'The site blocked our request. Try copying the recipe text and using "Paste" instead.';
+      return const WebImportException(WebImportProblem.blocked,
+          'The site blocked our request. Try copying the recipe text and using "Paste" instead.');
     } else if (code == 404 || code == 410) {
-      return 'Page not found. Check the URL.';
+      return const WebImportException(WebImportProblem.notFound, 'Page not found. Check the URL.');
     } else if (code == 429) {
-      return 'The site is rate-limiting us. Try again in a minute.';
+      return const WebImportException(
+          WebImportProblem.rateLimited, 'The site is rate-limiting us. Try again in a minute.');
     } else if (code >= 500 && code < 600) {
-      return 'The site is having issues right now (HTTP $code). Try again later.';
+      return WebImportException(
+        WebImportProblem.siteError,
+        'The site is having issues right now (HTTP $code). Try again later.',
+        statusCode: code,
+      );
     }
-    return 'Failed to fetch URL (HTTP $code)';
+    return WebImportException(WebImportProblem.httpError, 'Failed to fetch URL (HTTP $code)', statusCode: code);
   }
 
   /// Why a response cannot be a recipe page (it is a PDF, a photo, an
@@ -739,7 +752,7 @@ class RecipeImportEngine {
   ///
   /// Decided by what the bytes are, not by a list of allowed content types:
   /// plenty of recipe pages are served with a wrong one.
-  static String? _notAWebPage(http.Response response) {
+  static WebImportException? _notAWebPage(http.Response response) {
     final bytes = response.bodyBytes;
     final type = (response.headers['content-type'] ?? '').toLowerCase();
     bool startsWith(List<int> magic) {
@@ -750,25 +763,40 @@ class RecipeImportEngine {
       return true;
     }
 
-    String? kind;
+    WebImportFileKind? kind;
     if (type.startsWith('application/pdf') || startsWith(const [0x25, 0x50, 0x44, 0x46, 0x2D])) {
-      kind = 'a PDF';
+      kind = WebImportFileKind.pdf;
     } else if (type.startsWith('image/')) {
-      kind = 'an image';
+      kind = WebImportFileKind.image;
     } else if (type.startsWith('video/')) {
-      kind = 'a video';
+      kind = WebImportFileKind.video;
     } else if (type.startsWith('audio/')) {
-      kind = 'an audio file';
+      kind = WebImportFileKind.audio;
     } else if (type.startsWith('application/zip') || startsWith(const [0x50, 0x4B, 0x03, 0x04])) {
-      kind = 'a ZIP file';
+      kind = WebImportFileKind.zip;
     } else if (bytes.take(1024).contains(0)) {
       // Text never holds a zero byte. Photos, videos and documents do.
-      kind = 'a file';
+      kind = WebImportFileKind.file;
     }
-    if (kind != null) return 'No recipe found because that link is $kind, not a web page.';
+    if (kind != null) {
+      final named = switch (kind) {
+        WebImportFileKind.pdf => 'a PDF',
+        WebImportFileKind.image => 'an image',
+        WebImportFileKind.video => 'a video',
+        WebImportFileKind.audio => 'an audio file',
+        WebImportFileKind.zip => 'a ZIP file',
+        WebImportFileKind.file => 'a file',
+      };
+      return WebImportException(
+        WebImportProblem.notAWebPage,
+        'No recipe found because that link is $named, not a web page.',
+        fileKind: kind,
+      );
+    }
 
     if (isOverLimit(response, _maxPageBytes)) {
-      return 'No recipe found because that page is too large to read.';
+      return const WebImportException(
+          WebImportProblem.tooLarge, 'No recipe found because that page is too large to read.');
     }
     return null;
   }
@@ -790,12 +818,13 @@ class RecipeImportEngine {
       ].any((text) => text != null && text.contains(_unreadableMark));
 
   /// What to tell the person when a page was read and held no recipe.
-  static String _noRecipeFailure(Document document, _Platform platform) {
+  static WebImportException _noRecipeFailure(Document document, _Platform platform) {
     if (_isLoginWall(document)) {
-      return 'That page needs a login, so we could not read the recipe.';
+      return const WebImportException(
+          WebImportProblem.needsLogin, 'That page needs a login, so we could not read the recipe.');
     }
     if (platform == _Platform.youtube) {
-      return "No recipe found in that video's description.";
+      return const WebImportException(WebImportProblem.noRecipeInVideo, "No recipe found in that video's description.");
     }
     return _noRecipeFound;
   }
