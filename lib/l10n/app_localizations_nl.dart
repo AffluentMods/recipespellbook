@@ -5876,6 +5876,17 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Kookboek verlaten';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '\"$name\" verlaten? Het verdwijnt van dit apparaat en de eigenaar houdt alle recepten. Vraag om een nieuwe uitnodiging om het terug te krijgen.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Kon het kookboek niet verlaten. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
   String get shareCookbook => 'Kookboek delen';
 
   @override
@@ -7708,6 +7719,15 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => 'Je recepten zijn gesynchroniseerd, maar sommige foto\'s kunnen nu niet worden geüpload. Ze worden automatisch opnieuw geprobeerd.';
+
+  @override
+  String get syncHealthSharedPush => 'Je wijzigingen in gedeelde kookboeken zijn nog niet verstuurd. De volgende synchronisatie verstuurt ze.';
+
+  @override
+  String get syncHealthSharedPull => 'Gedeelde kookboeken en lijsten konden niet worden bijgewerkt. De volgende synchronisatie probeert het opnieuw.';
+
+  @override
+  String get syncHealthPantry => 'De voorraadkast is niet gesynchroniseerd. De volgende synchronisatie probeert het opnieuw.';
 
   @override
   String syncSuccess(int pushed, int pulled) {

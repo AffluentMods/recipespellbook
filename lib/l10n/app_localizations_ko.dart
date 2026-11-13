@@ -5803,6 +5803,17 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => '요리책에서 나가기';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '\"$name\"에서 나갈까요? 이 기기에서 사라지며, 모든 레시피는 소유자에게 남습니다. 다시 참여하려면 새 초대를 요청하세요.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => '요리책에서 나가지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
   String get shareCookbook => '요리책 공유';
 
   @override
@@ -7625,6 +7636,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => '레시피는 동기화되었지만 일부 사진을 지금 업로드할 수 없습니다. 자동으로 다시 시도합니다.';
+
+  @override
+  String get syncHealthSharedPush => '공유 요리책의 변경 사항이 아직 전송되지 않았습니다. 다음 동기화 때 전송됩니다.';
+
+  @override
+  String get syncHealthSharedPull => '공유 요리책과 목록을 업데이트하지 못했습니다. 다음 동기화 때 다시 시도합니다.';
+
+  @override
+  String get syncHealthPantry => '식료품 저장소를 동기화하지 못했습니다. 다음 동기화 때 다시 시도합니다.';
 
   @override
   String syncSuccess(int pushed, int pulled) {

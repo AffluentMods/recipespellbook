@@ -2870,6 +2870,23 @@
       }
     }
   },
+  "cookbookLeave": "Leave cookbook",
+  "@cookbookLeave": {
+    "description": "Menu item and dialog title for a cookbook someone else shares with you: stop being a member instead of deleting it."
+  },
+  "cookbookLeaveConfirm": "Leave \"{name}\"? It goes from this device, and the owner keeps every recipe in it. To get it back, ask for a new invite.",
+  "@cookbookLeaveConfirm": {
+    "description": "Confirmation before leaving a shared cookbook.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookLeaveFailed": "Could not leave the cookbook. Check your connection and try again.",
+  "@cookbookLeaveFailed": {
+    "description": "Shown when leaving a shared cookbook did not reach the server."
+  },
   "shareCookbook": "Share Cookbook",
   "cookbookEmpty": "This cookbook has no recipes to share",
   "recipes": "recipes",
@@ -4016,6 +4033,18 @@
   "syncFailed": "Sync failed",
   "syncPhotosStuck": "Photos not uploading",
   "syncPhotosStuckDetail": "Your recipes are synced, but some photos can't upload right now. They keep trying on their own.",
+  "syncHealthSharedPush": "Your edits to shared cookbooks have not gone out yet. The next sync sends them.",
+  "@syncHealthSharedPush": {
+    "description": "Cloud Sync settings, under Sync now: the last sync could not send edits made to cookbooks someone else shares with you."
+  },
+  "syncHealthSharedPull": "Shared cookbooks and lists could not be updated. The next sync tries again.",
+  "@syncHealthSharedPull": {
+    "description": "Cloud Sync settings, under Sync now: the last sync could not fetch the cookbooks and lists shared with you."
+  },
+  "syncHealthPantry": "The pantry did not sync. The next sync tries again.",
+  "@syncHealthPantry": {
+    "description": "Cloud Sync settings, under Sync now: the last sync could not sync the pantry."
+  },
   "syncSuccess": "Synced: {pushed} pushed, {pulled} pulled",
   "@syncSuccess": {
     "placeholders": {

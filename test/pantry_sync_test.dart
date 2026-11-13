@@ -1,5 +1,6 @@
 // Pantry sync between devices of one account: the first sync of a device
-// merges, after that the copy changed last wins; a server without the
+// merges, after that each item goes by what changed on either side since
+// the last sync, so edits on two devices both stay; a server without the
 // pantry routes is skipped.
 import 'dart:convert';
 
@@ -19,8 +20,12 @@ class FakeServer {
       ? http.Response('{"error":"Not found"}', 404)
       : http.Response(jsonEncode({'pantry': pantry, 'updatedAt': updatedAt}), 200);
 
+  /// The clientTime of every PUT.
+  final clientTimes = <Object?>[];
+
   Future<http.Response> put(String path, Map<String, dynamic> body) async {
     if (missing) return http.Response('{"error":"Not found"}', 404);
+    clientTimes.add(body['clientTime']);
     final at = body['updatedAt'] as int;
     final accepted = updatedAt == null || updatedAt! < at;
     if (accepted) {
@@ -84,21 +89,121 @@ void main() {
     expect(await laptop.getBasics(), contains('flour'));
   });
 
-  test('a push that lost to a newer copy takes the newer copy', () async {
+  test('edits on two devices both stay, whichever synced last', () async {
     final phone = await on('phone');
-    await phone.addItems(['eggs']);
+    await phone.addItems(['eggs', 'milk']);
     await sync();
-    // Another device wrote later than anything here.
+    // Another device took the eggs out and put cheese in, and synced.
+    final milk = (server.pantry!['items'] as List).firstWhere((i) => i['name'] == 'milk');
     server.pantry = {
       'items': [
+        milk,
         {'name': 'cheese', 'added': 1},
       ],
       'basics': ['salt'],
     };
     server.updatedAt = clock.add(const Duration(days: 1)).millisecondsSinceEpoch;
-    await phone.addItems(['bread']); // a local edit, older than the server's
+    // Meanwhile, here: bread in, milk out.
+    await phone.addItems(['bread']);
+    await phone.removeItem('milk');
     await sync();
-    expect(await phone.getAll(), ['cheese']);
+    expect(await phone.getAll(), ['bread', 'cheese']);
+    expect(server.pantry!['items'].map((i) => i['name']), ['bread', 'cheese']);
+    expect(await phone.getBasics(), ['salt'], reason: 'water and pepper were taken off the basics there');
+    expect(server.clientTimes.last, isA<String>(), reason: 'the server corrects for this clock');
+  });
+
+  test('an item changed on both keeps the later change', () {
+    final both = PantrySync.merge(
+      base: {
+        'items': [
+          {'name': 'eggs', 'added': 10},
+        ],
+      },
+      local: {
+        'items': [
+          {'name': 'eggs', 'added': 30, 'frozen': true},
+        ],
+      },
+      server: {
+        'items': [
+          {'name': 'eggs', 'added': 20},
+        ],
+      },
+    );
+    expect(both['items'], [
+      {'name': 'eggs', 'added': 30, 'frozen': true},
+    ]);
+  });
+
+  test('an item made a basic on the other device is a basic', () {
+    final merged = PantrySync.merge(
+      base: {
+        'items': [
+          {'name': 'eggs', 'added': 10},
+        ],
+        'basics': <String>[],
+      },
+      local: {
+        'items': [
+          {'name': 'eggs', 'added': 30, 'frozen': true},
+        ],
+        'basics': <String>[],
+      },
+      server: {
+        'items': [
+          {'name': 'eggs', 'added': 20},
+        ],
+        'basics': ['eggs'],
+      },
+    );
+    expect(merged['items'], isEmpty, reason: 'made a basic there, which wins over an item');
+    expect(merged['basics'], ['eggs']);
+  });
+
+  test('a push that lost to another device merges with that copy too', () async {
+    final phone = await on('phone');
+    await phone.addItems(['eggs']);
+    await sync();
+    await phone.addItems(['bread']);
+    // Another device writes between this one's read and its write.
+    final realPut = server.put;
+    var raced = false;
+    Future<http.Response> racingPut(String path, Map<String, dynamic> body) async {
+      if (!raced) {
+        raced = true;
+        server.pantry = {
+          'items': [
+            ...(server.pantry!['items'] as List),
+            {'name': 'jam', 'added': 2},
+          ],
+          'basics': server.pantry!['basics'],
+        };
+        server.updatedAt = DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch;
+      }
+      return realPut(path, body);
+    }
+
+    await PantrySync(server.get, racingPut).run('user1');
+    expect(await phone.getAll(), ['bread', 'eggs', 'jam']);
+    expect(server.pantry!['items'].map((i) => i['name']), ['bread', 'eggs', 'jam']);
+  });
+
+  test('a device that synced with an older version goes on from its own copy', () async {
+    final phone = await on('phone');
+    await phone.addItems(['eggs']);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('pantry_synced_user1', true); // no copy to merge from yet
+    server.pantry = {
+      'items': [
+        {'name': 'tofu', 'added': 1},
+      ],
+      'basics': <String>[],
+    };
+    server.updatedAt = 1;
+    await sync(); // the change here is newer: it goes up whole, once
+    expect(server.pantry!['items'].map((i) => i['name']), ['eggs']);
+    expect(prefs.getString('pantry_sync_base_user1'), isNotNull);
   });
 
   test('a server without the pantry routes changes nothing', () async {

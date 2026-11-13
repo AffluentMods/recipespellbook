@@ -13,6 +13,7 @@ import '../../../services/revenuecat_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../utils/platform_utils.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/sync_health_tile.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/auth_error_message.dart';
 import '../../widgets/sheet_chrome.dart';
@@ -993,6 +994,8 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   child: Text(l10n.sync),
                 ),
         ),
+        // Shared cookbooks, shared lists and the pantry can fail on their own.
+        if (!_syncing) const SyncHealthTiles(),
       ],
     );
   }

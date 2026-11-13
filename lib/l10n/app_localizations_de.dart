@@ -5864,6 +5864,17 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Kochbuch verlassen';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '\"$name\" verlassen? Es verschwindet von diesem Gerät, und der Besitzer behält alle Rezepte darin. Um es wiederzubekommen, bitte um eine neue Einladung.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Das Kochbuch konnte nicht verlassen werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
   String get shareCookbook => 'Kochbuch teilen';
 
   @override
@@ -7696,6 +7707,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => 'Deine Rezepte sind synchronisiert, aber einige Fotos lassen sich gerade nicht hochladen. Sie werden automatisch erneut versucht.';
+
+  @override
+  String get syncHealthSharedPush => 'Deine Änderungen an geteilten Kochbüchern wurden noch nicht gesendet. Die nächste Synchronisierung sendet sie.';
+
+  @override
+  String get syncHealthSharedPull => 'Geteilte Kochbücher und Listen konnten nicht aktualisiert werden. Die nächste Synchronisierung versucht es erneut.';
+
+  @override
+  String get syncHealthPantry => 'Die Vorratskammer wurde nicht synchronisiert. Die nächste Synchronisierung versucht es erneut.';
 
   @override
   String syncSuccess(int pushed, int pulled) {

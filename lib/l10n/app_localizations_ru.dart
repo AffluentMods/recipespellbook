@@ -5964,6 +5964,17 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Покинуть книгу';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Покинуть \"$name\"? Книга исчезнет с этого устройства, а все рецепты останутся у владельца. Чтобы вернуться, попросите новое приглашение.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Не удалось покинуть книгу. Проверьте подключение и попробуйте снова.';
+
+  @override
   String get shareCookbook => 'Поделиться книгой';
 
   @override
@@ -7826,6 +7837,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => 'Рецепты синхронизированы, но некоторые фото сейчас не удаётся загрузить. Приложение будет пробовать снова автоматически.';
+
+  @override
+  String get syncHealthSharedPush => 'Ваши изменения в общих книгах ещё не отправлены. Следующая синхронизация отправит их.';
+
+  @override
+  String get syncHealthSharedPull => 'Не удалось обновить общие книги и списки. Следующая синхронизация попробует снова.';
+
+  @override
+  String get syncHealthPantry => 'Кладовая не синхронизировалась. Следующая синхронизация попробует снова.';
 
   @override
   String syncSuccess(int pushed, int pulled) {

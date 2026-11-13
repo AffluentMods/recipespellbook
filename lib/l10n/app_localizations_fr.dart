@@ -5864,6 +5864,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Quitter le livre';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Quitter \"$name\" ? Il disparaît de cet appareil, et son propriétaire garde toutes ses recettes. Pour le retrouver, demandez une nouvelle invitation.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Impossible de quitter le livre. Vérifiez votre connexion et réessayez.';
+
+  @override
   String get shareCookbook => 'Partager le livre';
 
   @override
@@ -7696,6 +7707,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => 'Vos recettes sont synchronisées, mais certaines photos ne peuvent pas être envoyées pour le moment. L\'envoi sera réessayé automatiquement.';
+
+  @override
+  String get syncHealthSharedPush => 'Vos modifications des livres partagés ne sont pas encore parties. La prochaine synchronisation les enverra.';
+
+  @override
+  String get syncHealthSharedPull => 'Les livres et listes partagés n\'ont pas pu être mis à jour. La prochaine synchronisation réessaiera.';
+
+  @override
+  String get syncHealthPantry => 'Le garde-manger n\'a pas été synchronisé. La prochaine synchronisation réessaiera.';
 
   @override
   String syncSuccess(int pushed, int pulled) {

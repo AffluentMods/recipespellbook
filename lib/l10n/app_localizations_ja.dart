@@ -5792,6 +5792,17 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'レシピ本から退出';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '「$name」から退出しますか？このデバイスから消えますが、レシピはすべて所有者の元に残ります。戻るには新しい招待をもらってください。';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'レシピ本から退出できませんでした。接続を確認してもう一度お試しください。';
+
+  @override
   String get shareCookbook => 'レシピ本を共有';
 
   @override
@@ -7611,6 +7622,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => 'レシピは同期済みですが、一部の写真を今はアップロードできません。自動的に再試行します。';
+
+  @override
+  String get syncHealthSharedPush => '共有レシピ本への変更はまだ送信されていません。次の同期で送信されます。';
+
+  @override
+  String get syncHealthSharedPull => '共有レシピ本とリストを更新できませんでした。次の同期で再試行します。';
+
+  @override
+  String get syncHealthPantry => 'パントリーを同期できませんでした。次の同期で再試行します。';
 
   @override
   String syncSuccess(int pushed, int pulled) {

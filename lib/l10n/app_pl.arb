@@ -2470,6 +2470,9 @@
       }
     }
   },
+  "cookbookLeave": "Opuść książkę",
+  "cookbookLeaveConfirm": "Opuścić \"{name}\"? Zniknie z tego urządzenia, a właściciel zachowa wszystkie przepisy. Aby ją odzyskać, poproś o nowe zaproszenie.",
+  "cookbookLeaveFailed": "Nie udało się opuścić książki. Sprawdź połączenie i spróbuj ponownie.",
   "shareCookbook": "Udostępnij książkę",
   "cookbookEmpty": "Ta książka nie ma przepisów do udostępnienia",
   "recipes": "przepisy",
@@ -2884,6 +2887,9 @@
   "syncFailed": "Synchronizacja nie powiodła się",
   "syncPhotosStuck": "Zdjęcia się nie przesyłają",
   "syncPhotosStuckDetail": "Przepisy są zsynchronizowane, ale niektórych zdjęć nie można teraz przesłać. Aplikacja spróbuje ponownie automatycznie.",
+  "syncHealthSharedPush": "Twoje zmiany w udostępnionych książkach nie zostały jeszcze wysłane. Następna synchronizacja je wyśle.",
+  "syncHealthSharedPull": "Nie udało się zaktualizować udostępnionych książek i list. Następna synchronizacja spróbuje ponownie.",
+  "syncHealthPantry": "Spiżarnia nie została zsynchronizowana. Następna synchronizacja spróbuje ponownie.",
   "syncSuccess": "Zsynchronizowano: {pushed} wysłanych, {pulled} pobranych",
   "textSizePreview": "Podgląd",
   "transferDeviceDesktop": "komputer",

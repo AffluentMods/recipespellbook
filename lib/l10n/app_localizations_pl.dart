@@ -5974,6 +5974,17 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Opuść książkę';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Opuścić \"$name\"? Zniknie z tego urządzenia, a właściciel zachowa wszystkie przepisy. Aby ją odzyskać, poproś o nowe zaproszenie.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Nie udało się opuścić książki. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
   String get shareCookbook => 'Udostępnij książkę';
 
   @override
@@ -7836,6 +7847,15 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => 'Przepisy są zsynchronizowane, ale niektórych zdjęć nie można teraz przesłać. Aplikacja spróbuje ponownie automatycznie.';
+
+  @override
+  String get syncHealthSharedPush => 'Twoje zmiany w udostępnionych książkach nie zostały jeszcze wysłane. Następna synchronizacja je wyśle.';
+
+  @override
+  String get syncHealthSharedPull => 'Nie udało się zaktualizować udostępnionych książek i list. Następna synchronizacja spróbuje ponownie.';
+
+  @override
+  String get syncHealthPantry => 'Spiżarnia nie została zsynchronizowana. Następna synchronizacja spróbuje ponownie.';
 
   @override
   String syncSuccess(int pushed, int pulled) {

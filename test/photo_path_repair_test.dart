@@ -59,6 +59,26 @@ void main() {
     expect(await PhotoPathRepair.run(db, documentsDir: docs.path), 0, reason: 'nothing left to fix');
   });
 
+  test('a large library is fixed in one go: one write, not one per photo', () async {
+    const oldDocs = '/var/mobile/Containers/Data/Application/OLD-ID/Documents';
+    await db.batch((batch) {
+      for (var i = 0; i < 300; i++) {
+        batch.insert(
+            db.recipes,
+            RecipesCompanion.insert(
+                id: 'r$i', cookbookId: 'cb', title: 'r$i', imagePath: const Value('$oldDocs/images/community/cover.jpg')));
+      }
+    });
+    var writes = 0;
+    final sub = db.tableUpdates(TableUpdateQuery.onTable(db.recipes)).listen((_) => writes++);
+    addTearDown(sub.cancel);
+
+    expect(await PhotoPathRepair.run(db, documentsDir: docs.path), 300);
+    await Future<void>.delayed(Duration.zero);
+    expect(writes, 1);
+    expect(await imageOf('r299'), p.join(docs.path, 'images', 'community', 'cover.jpg'));
+  });
+
   test('Windows paths with backslashes are understood too', () {
     final old = r'D:\OldUser\Documents\images\community\cover.jpg';
     expect(PhotoPathRepair.relocated(old, docs.path), p.join(docs.path, 'images', 'community', 'cover.jpg'));

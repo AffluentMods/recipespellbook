@@ -5787,6 +5787,17 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => '退出食谱书';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return '退出\"$name\"？它会从此设备上移除，所有食谱仍归所有者。若要重新加入，请索取新的邀请。';
+  }
+
+  @override
+  String get cookbookLeaveFailed => '无法退出食谱书。请检查网络连接后重试。';
+
+  @override
   String get shareCookbook => '分享食谱书';
 
   @override
@@ -7606,6 +7617,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => '你的食谱已同步，但部分照片暂时无法上传。应用会自动重试。';
+
+  @override
+  String get syncHealthSharedPush => '你对共享食谱书的修改尚未发送。下次同步时会发送。';
+
+  @override
+  String get syncHealthSharedPull => '无法更新共享的食谱书和清单。下次同步时会重试。';
+
+  @override
+  String get syncHealthPantry => '食材柜未能同步。下次同步时会重试。';
 
   @override
   String syncSuccess(int pushed, int pulled) {

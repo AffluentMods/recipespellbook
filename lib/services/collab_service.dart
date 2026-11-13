@@ -100,6 +100,16 @@ class CollabService {
   /// Recipe ids edited locally in a shared cookbook, awaiting a collab push.
   Set<String> get dirtyCookbookRecipeIds => Set.unmodifiable(_dirtyCookbookRecipeIds);
 
+  /// Forget every membership and pending edit (tests start each case clean).
+  @visibleForTesting
+  void resetForTesting() {
+    _collabListIds = {};
+    _permissions = {};
+    _cookbookPermissions = {};
+    _cookbookOwners = {};
+    _dirtyCookbookRecipeIds = {};
+  }
+
   /// Restore the known collab list ids on launch so we push their edits even
   /// before the first pull returns.
   Future<void> load() async {
@@ -190,12 +200,40 @@ class CollabService {
     if (bump) revision.value++;
   }
 
+  /// Leave a cookbook someone else shares with this account: the server
+  /// stops sharing it with me, and it goes from this device with everything
+  /// in it. Nothing is trashed or sent back: the recipes stay the owner's.
+  /// False when the server could not be told; then nothing changes here.
+  Future<bool> leaveSharedCookbook(String cookbookId) async {
+    final db = _db;
+    if (db == null) return false;
+    if (!await _family.leaveSharedResource('cookbook', cookbookId)) return false;
+    final recipeIds = await (db.select(db.recipes)..where((r) => r.cookbookId.equals(cookbookId)))
+        .map((r) => r.id)
+        .get();
+    await SyncService.instance.runAsRemote(() => db.cookbookDao.removeSharedCookbookLocally(cookbookId));
+    _cookbookPermissions = {..._cookbookPermissions}..remove(cookbookId);
+    _cookbookOwners = {..._cookbookOwners}..remove(cookbookId);
+    await _persistCookbookAccess(await SharedPreferences.getInstance());
+    await unmarkRecipesDirty(recipeIds);
+    return true;
+  }
+
   /// Flag a recipe as locally edited in a shared cookbook so the next sync
   /// pushes it through the /collab cookbook channel. No-op for non-shared
   /// cookbooks (only shared-in recipes need the write-back channel).
   Future<void> markRecipeDirty(String recipeId) async {
     if (_dirtyCookbookRecipeIds.contains(recipeId)) return;
     _dirtyCookbookRecipeIds = {..._dirtyCookbookRecipeIds, recipeId};
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_dirtyRecipesKey, _dirtyCookbookRecipeIds.toList());
+  }
+
+  /// Flag several recipes at once (see [markRecipeDirty]).
+  Future<void> markRecipesDirty(Iterable<String> recipeIds) async {
+    final next = {..._dirtyCookbookRecipeIds, ...recipeIds};
+    if (next.length == _dirtyCookbookRecipeIds.length) return;
+    _dirtyCookbookRecipeIds = next;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_dirtyRecipesKey, _dirtyCookbookRecipeIds.toList());
   }

@@ -2470,6 +2470,9 @@
       }
     }
   },
+  "cookbookLeave": "退出食谱书",
+  "cookbookLeaveConfirm": "退出\"{name}\"？它会从此设备上移除，所有食谱仍归所有者。若要重新加入，请索取新的邀请。",
+  "cookbookLeaveFailed": "无法退出食谱书。请检查网络连接后重试。",
   "shareCookbook": "分享食谱书",
   "cookbookEmpty": "此食谱书没有可分享的食谱",
   "recipes": "食谱",
@@ -2884,6 +2887,9 @@
   "syncFailed": "同步失败",
   "syncPhotosStuck": "照片无法上传",
   "syncPhotosStuckDetail": "你的食谱已同步，但部分照片暂时无法上传。应用会自动重试。",
+  "syncHealthSharedPush": "你对共享食谱书的修改尚未发送。下次同步时会发送。",
+  "syncHealthSharedPull": "无法更新共享的食谱书和清单。下次同步时会重试。",
+  "syncHealthPantry": "食材柜未能同步。下次同步时会重试。",
   "syncSuccess": "已同步：{pushed}个已推送，{pulled}个已拉取",
   "textSizePreview": "预览",
   "transferDeviceDesktop": "桌面端",

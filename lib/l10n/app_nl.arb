@@ -2470,6 +2470,9 @@
       }
     }
   },
+  "cookbookLeave": "Kookboek verlaten",
+  "cookbookLeaveConfirm": "\"{name}\" verlaten? Het verdwijnt van dit apparaat en de eigenaar houdt alle recepten. Vraag om een nieuwe uitnodiging om het terug te krijgen.",
+  "cookbookLeaveFailed": "Kon het kookboek niet verlaten. Controleer je verbinding en probeer het opnieuw.",
   "shareCookbook": "Kookboek delen",
   "cookbookEmpty": "Dit kookboek heeft geen recepten om te delen",
   "recipes": "recepten",
@@ -2884,6 +2887,9 @@
   "syncFailed": "Synchronisatie mislukt",
   "syncPhotosStuck": "Foto's worden niet geüpload",
   "syncPhotosStuckDetail": "Je recepten zijn gesynchroniseerd, maar sommige foto's kunnen nu niet worden geüpload. Ze worden automatisch opnieuw geprobeerd.",
+  "syncHealthSharedPush": "Je wijzigingen in gedeelde kookboeken zijn nog niet verstuurd. De volgende synchronisatie verstuurt ze.",
+  "syncHealthSharedPull": "Gedeelde kookboeken en lijsten konden niet worden bijgewerkt. De volgende synchronisatie probeert het opnieuw.",
+  "syncHealthPantry": "De voorraadkast is niet gesynchroniseerd. De volgende synchronisatie probeert het opnieuw.",
   "syncSuccess": "Gesynchroniseerd: {pushed} verzonden, {pulled} ontvangen",
   "textSizePreview": "Voorbeeld",
   "transferDeviceDesktop": "desktop",

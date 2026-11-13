@@ -5870,6 +5870,17 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get cookbookLeave => 'Lascia il ricettario';
+
+  @override
+  String cookbookLeaveConfirm(String name) {
+    return 'Lasciare \"$name\"? Sparisce da questo dispositivo e il proprietario mantiene tutte le ricette. Per riaverlo, chiedi un nuovo invito.';
+  }
+
+  @override
+  String get cookbookLeaveFailed => 'Impossibile lasciare il ricettario. Controlla la connessione e riprova.';
+
+  @override
   String get shareCookbook => 'Condividi ricettario';
 
   @override
@@ -7702,6 +7713,15 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get syncPhotosStuckDetail => 'Le tue ricette sono sincronizzate, ma alcune foto non si possono caricare ora. Il caricamento verrà ritentato automaticamente.';
+
+  @override
+  String get syncHealthSharedPush => 'Le tue modifiche ai ricettari condivisi non sono ancora state inviate. La prossima sincronizzazione le invierà.';
+
+  @override
+  String get syncHealthSharedPull => 'Non è stato possibile aggiornare ricettari e liste condivisi. La prossima sincronizzazione riproverà.';
+
+  @override
+  String get syncHealthPantry => 'La dispensa non è stata sincronizzata. La prossima sincronizzazione riproverà.';
 
   @override
   String syncSuccess(int pushed, int pulled) {

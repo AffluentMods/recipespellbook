@@ -95,6 +95,9 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   bool _creatingCollab = false;
   bool _creatingLink = false;   // one-time link being made (photos going up)
 
+  /// The shared list's id, which sharing can move (see createCollabLink).
+  late String _resourceId = widget.resourceId;
+
   bool get _isCookbook => widget.resourceType == 'cookbook';
   bool get _hasFamilyTier {
     // Sharing a shopping list is free; sharing a cookbook requires a paid plan.
@@ -118,7 +121,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     // collaboration is just per-resource FamilyShare grants created via link).
     List<FamilyShareInfo> shares = [];
     if (_auth.isSignedIn) {
-      shares = await _family.getSharesForResource(widget.resourceType, widget.resourceId);
+      shares = await _family.getSharesForResource(widget.resourceType, _resourceId);
     }
 
     if (mounted) {
@@ -302,7 +305,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     var photosLeftOut = 0;
     try {
       if (_isCookbook) {
-        final cookbook = await ref.read(cookbookDaoProvider).getCookbookById(widget.resourceId);
+        final cookbook = await ref.read(cookbookDaoProvider).getCookbookById(_resourceId);
         if (cookbook != null) {
           final result = await createCookbookShareLink(ref.read(databaseProvider), cookbook);
           link = result.link;
@@ -310,8 +313,8 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
           photosLeftOut = result.photosLeftOut;
         }
       } else {
-        final snapshot = await CollabService.instance.buildListSnapshot(widget.resourceId);
-        link = await _family.createShareLink(widget.resourceType, widget.resourceId, snapshot: snapshot);
+        final snapshot = await CollabService.instance.buildListSnapshot(_resourceId);
+        link = await _family.createShareLink(widget.resourceType, _resourceId, snapshot: snapshot);
       }
     } catch (e) {
       debugPrint('[Share] one-time link: $e');
@@ -336,9 +339,9 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     setState(() => _creatingCollab = true);
     final snapshot = _isCookbook
         ? null
-        : await CollabService.instance.buildListSnapshot(widget.resourceId);
+        : await CollabService.instance.buildListSnapshot(_resourceId);
     final link = await _family.createCollabLink(
-        widget.resourceType, widget.resourceId, _collabPermission,
+        widget.resourceType, _resourceId, _collabPermission,
         snapshot: snapshot);
     if (!mounted) return;
     if (link == null) {
@@ -350,7 +353,9 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     // The owner always has full rights — _collabPermission is what INVITEES
     // get; using it here locked the owner out of their own list (e.g. a
     // "check only" link made the owner check-only until the next pull).
-    if (!_isCookbook) await CollabService.instance.markCollab(widget.resourceId, 'full');
+    // A shared list can have moved to an id of its own (see createCollabLink).
+    if (link.resourceId.isNotEmpty) _resourceId = link.resourceId;
+    if (!_isCookbook) await CollabService.instance.markCollab(_resourceId, 'full');
     if (!mounted) return;
     setState(() {
       _collabLink = link;
