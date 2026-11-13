@@ -6484,5 +6484,344 @@
   "nutriSheetLookupFailed": "Could not be looked up",
   "@nutriSheetLookupFailed": {
     "description": "Nutrition sheet, the status of an ingredient whose nutrition lookup failed with an error."
-  }
+  },
+  "fileImportEmpty": "This file is empty.",
+  "@fileImportEmpty": {
+    "description": "Import > File: the picked file holds nothing."
+  },
+  "fileImportUnsupported": "This file type is not supported.",
+  "@fileImportUnsupported": {
+    "description": "Import > File: a photo, a video, a Word document or another kind of file the app does not read."
+  },
+  "fileImportNotText": "This file is damaged or is not a text file.",
+  "@fileImportNotText": {
+    "description": "Import > File: a file with a recipe extension that holds something other than text."
+  },
+  "fileImportRichText": "Rich text files are not supported. Save the recipe as plain text and retry.",
+  "@fileImportRichText": {
+    "description": "Import > File: an RTF document."
+  },
+  "fileImportUnknownXml": "This XML file is not a recipe export the app can read.",
+  "@fileImportUnknownXml": {
+    "description": "Import > File: XML that is none of the recipe exports the app reads."
+  },
+  "fileImportDamagedZip": "This ZIP file is damaged or incomplete. Export it again and retry.",
+  "@fileImportDamagedZip": {
+    "description": "Import > File: a ZIP file that does not open."
+  },
+  "fileImportOwnBackup": "This is a Recipe Spellbook backup. Restore it from Settings, Import Data.",
+  "@fileImportOwnBackup": {
+    "description": "Import > File: a backup of this app found where single recipes were expected."
+  },
+  "fileImportDamaged": "This {app} file is damaged or incomplete. Export it again and retry.",
+  "@fileImportDamaged": {
+    "description": "Import > File: an export of another recipe app that is damaged or cut short.",
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "example": "Paprika"
+      }
+    }
+  },
+  "fileImportNoRecipes": "This file does not contain any {app} recipes.",
+  "@fileImportNoRecipes": {
+    "description": "Import > File: an archive with the name of another app's export that holds none of its recipes.",
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "example": "MasterCook"
+      }
+    }
+  },
+  "fileImportTooLarge": "This file unpacks to more than the app can read at once. Export fewer recipes at a time and retry.",
+  "@fileImportTooLarge": {
+    "description": "Import > File: an archive that unpacks to far more than any recipe export (a zip bomb, or an entry of gigabytes)."
+  },
+  "importPdfRecipeNumbered": "{name}, recipe {number}",
+  "@importPdfRecipeNumbered": {
+    "description": "Title of a recipe read from a PDF of several recipes whose own title could not be read: the PDF's file name and the recipe's place in it.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Holiday cookies"
+      },
+      "number": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "aiImportPasteFirst": "Paste or load the AI response first.",
+  "@aiImportPasteFirst": {
+    "description": "AI import: Preview was tapped with nothing pasted."
+  },
+  "aiImportedCount": "{count, plural, one{{count} recipe imported successfully!} other{{count} recipes imported successfully!}}",
+  "@aiImportedCount": {
+    "description": "AI import: several recipes were imported.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiImportErrInRecipe": "Recipe {number}: {problem}",
+  "@aiImportErrInRecipe": {
+    "description": "AI import: a problem in one recipe of the pasted answer, counted from 1.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
+  "aiImportErrNoRecipes": "No recipes found. The answer needs at least one recipe.",
+  "@aiImportErrNoRecipes": {
+    "description": "AI import: the pasted answer holds no recipe."
+  },
+  "aiImportErrInvalidJson": "This is not valid recipe JSON. Check that the whole answer was copied.",
+  "@aiImportErrInvalidJson": {
+    "description": "AI import: the pasted text cannot be read as JSON."
+  },
+  "aiImportErrCutOff": "A bracket is opened and never closed. The answer may have been cut off.",
+  "@aiImportErrCutOff": {
+    "description": "AI import: the pasted JSON ends before a bracket is closed."
+  },
+  "aiImportErrOutsideBrackets": "\"{field}\" stands outside the brackets of a recipe. A bracket or a quote may be missing, or it is a remark to take out.",
+  "@aiImportErrOutsideBrackets": {
+    "description": "AI import: a recipe field name stands outside any recipe object in the pasted JSON.",
+    "placeholders": {
+      "field": {
+        "type": "String",
+        "example": "ingredients"
+      }
+    }
+  },
+  "aiImportErrBlockUnreadable": "Block {block} of {count} could not be read. A bracket or a quote may be missing.",
+  "@aiImportErrBlockUnreadable": {
+    "description": "AI import: the answer holds several JSON blocks and one meant as a recipe cannot be read.",
+    "placeholders": {
+      "block": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiImportErrMissingTitle": "The \"title\" field is missing.",
+  "@aiImportErrMissingTitle": {
+    "description": "AI import: a recipe without a title. The field name stays in English."
+  },
+  "aiImportErrMissingIngredients": "The \"ingredients\" list is missing.",
+  "@aiImportErrMissingIngredients": {
+    "description": "AI import: a recipe without an ingredients list. The field name stays in English."
+  },
+  "aiImportErrNoIngredients": "The \"ingredients\" list is empty. A recipe needs at least one ingredient.",
+  "@aiImportErrNoIngredients": {
+    "description": "AI import: a recipe with an empty ingredients list."
+  },
+  "aiImportErrIngredientInvalid": "Ingredient {number} is not a valid object.",
+  "@aiImportErrIngredientInvalid": {
+    "description": "AI import: an ingredient entry that is not a JSON object.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "aiImportErrIngredientNoName": "Ingredient {number} has no \"name\".",
+  "@aiImportErrIngredientNoName": {
+    "description": "AI import: an ingredient without a name. The field name stays in English.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "aiImportErrMissingSteps": "The \"steps\" list is missing.",
+  "@aiImportErrMissingSteps": {
+    "description": "AI import: a recipe without a steps list. The field name stays in English."
+  },
+  "aiImportErrNoSteps": "The \"steps\" list is empty. A recipe needs at least one step.",
+  "@aiImportErrNoSteps": {
+    "description": "AI import: a recipe with an empty steps list."
+  },
+  "aiImportErrStepInvalid": "Step {number} is not a valid object.",
+  "@aiImportErrStepInvalid": {
+    "description": "AI import: a step entry that is not a JSON object.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "aiImportErrStepNoInstruction": "Step {number} has no \"instruction\".",
+  "@aiImportErrStepNoInstruction": {
+    "description": "AI import: a step without its instruction text. The field name stays in English.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "barcodeDataSource": "Data from Open Food Facts (community-sourced)",
+  "@barcodeDataSource": {
+    "description": "Barcode scan result: where the product data comes from."
+  },
+  "barcodeDataUpdated": "updated {date}",
+  "@barcodeDataUpdated": {
+    "description": "Barcode scan result, after the data source: when the product record was last changed, a month and a year.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Mar 2026"
+      }
+    }
+  },
+  "barcodeRecordIncomplete": "This record looks incomplete. Some details may be missing or out of date.",
+  "@barcodeRecordIncomplete": {
+    "description": "Barcode scan result: the product record has few fields filled in."
+  },
+  "importGuidePopularTag": "POPULAR",
+  "@importGuidePopularTag": {
+    "description": "Import guides: tag on the guides of the most used apps."
+  },
+  "importGuideOpenInApp": "Open in Recipe Spellbook",
+  "@importGuideOpenInApp": {
+    "description": "Import guides: title of the step that picks the exported file in this app."
+  },
+  "importGuideReviewImport": "Review & Import",
+  "@importGuideReviewImport": {
+    "description": "Import guides: title of the last step."
+  },
+  "importGuideExportRecipes": "Export Recipes",
+  "@importGuideExportRecipes": {
+    "description": "Import guides: title of the step that exports from the other app."
+  },
+  "importGuideOpenApp": "Open {app}",
+  "@importGuideOpenApp": {
+    "description": "Import guides: title of the first step, with the other app's name.",
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "example": "Mela"
+      }
+    }
+  },
+  "importGuideExportAs": "Export as {format}",
+  "@importGuideExportAs": {
+    "description": "Import guides: step title, with a file format such as ZIP or CSV.",
+    "placeholders": {
+      "format": {
+        "type": "String",
+        "example": "CSV"
+      }
+    }
+  },
+  "importGuideGoToSite": "Go to {site}",
+  "@importGuideGoToSite": {
+    "description": "Import guides: step title, with a website.",
+    "placeholders": {
+      "site": {
+        "type": "String",
+        "example": "plantoeat.com"
+      }
+    }
+  },
+  "importGuidePickFile": "Open Recipe Spellbook, tap +, choose \"File\", and select the {file} file.",
+  "@importGuidePickFile": {
+    "description": "Import guides: how to pick the exported file in this app. 'File' is the button of the add recipe sheet.",
+    "placeholders": {
+      "file": {
+        "type": "String",
+        "example": ".melarecipes"
+      }
+    }
+  },
+  "importGuideOpenSettings": "Open {app} and go to Settings.",
+  "@importGuideOpenSettings": {
+    "description": "Import guides: first step for an app whose export is in its settings.",
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "example": "Mela"
+      }
+    }
+  },
+  "importGuideLogIn": "Log in to your {app} instance on a computer.",
+  "@importGuideLogIn": {
+    "description": "Import guides: first step for a self-hosted recipe manager.",
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "example": "Mealie"
+      }
+    }
+  },
+  "importGuidePaprikaSubtitle": "Import all recipes from Paprika 3 with photos",
+  "importGuidePaprikaStep1": "Open Paprika 3 on your device. Go to Settings or the File menu.",
+  "importGuidePaprikaStep2Title": "Export All Recipes",
+  "importGuidePaprikaStep2": "Tap \"Export\" and choose \"Paprika Export Format\" (.paprikarecipes). This creates a file with all your recipes and photos.",
+  "importGuidePaprikaStep2Tip": "On iOS/Android: Settings > Export. On Desktop: File > Export.",
+  "importGuidePaprikaStep4": "Preview your recipes, deselect any you don't want, then tap Import. Photos will be included automatically.",
+  "importGuideMelaSubtitle": "Import recipes from Mela recipe manager",
+  "importGuideMelaStep2": "Tap \"Export\" and choose to export all recipes. This creates a .melarecipes file.",
+  "importGuideMelaStep2Tip": "You can also share individual recipes as .melarecipe files.",
+  "importGuideMelaStep4": "Preview and import your recipes. Categories will be converted to tags.",
+  "importGuideCroutonSubtitle": "Import recipes from Crouton app",
+  "importGuideCroutonStep2Title": "Export Data",
+  "importGuideCroutonStep2": "Tap \"Export\" to create a .crumb file with all your recipes.",
+  "importGuideCroutonStep4": "Preview your recipes and import them. Ingredient sections are preserved.",
+  "importGuideRecipeKeeperSubtitle": "Import from Recipe Keeper (ZIP or HTML)",
+  "importGuideRecipeKeeperStep1": "Open Recipe Keeper and go to Settings > Export.",
+  "importGuideRecipeKeeperStep2": "Choose \"Export as ZIP\" or \"Export as HTML\". The ZIP format includes photos.",
+  "importGuideRecipeKeeperStep2Tip": "ZIP export is recommended. It includes all your recipe photos.",
+  "importGuideRecipeKeeperStep3": "Open Recipe Spellbook, tap +, choose \"File\", and select the exported ZIP or HTML file.",
+  "importGuideRecipeKeeperStep4": "All recipes will be detected automatically. Review and import with photos.",
+  "importGuideCopyMeThatSubtitle": "Import from CopyMeThat HTML export",
+  "importGuideCopyMeThatStep1": "Log in to CopyMeThat.com on your computer.",
+  "importGuideCopyMeThatStep2": "Go to Settings > Export and download the HTML file with all your recipes.",
+  "importGuideCopyMeThatStep4": "All recipes from the HTML file will be parsed and ready to import.",
+  "importGuideMealieSubtitle": "Import from Mealie self-hosted recipe manager",
+  "importGuideMealieStep2": "Go to Admin > Backups and create a new backup. Download the JSON export.",
+  "importGuideMealieStep2Tip": "You can also export individual recipes as JSON from the recipe page.",
+  "importGuideMealieStep4": "Mealie recipe data is well-structured. All fields will be imported accurately.",
+  "importGuideTandoorSubtitle": "Import from Tandoor Recipes",
+  "importGuideTandoorStep2": "Go to Admin > Export. Select your recipes and download as JSON.",
+  "importGuideTandoorStep4": "Keywords and ingredient details are preserved. Review and import.",
+  "importGuideCookmateSubtitle": "Import from Cookmate .mcb export",
+  "importGuideCookmateStep1": "Open Cookmate (previously \"My CookBook\") and go to Settings.",
+  "importGuideCookmateStep2": "Tap Export and choose the .mcb format. This includes recipes and photos.",
+  "importGuideCookmateStep4": "All recipes with categories and photos will be imported.",
+  "importGuidePlanToEatSubtitle": "Import from Plan to Eat CSV export",
+  "importGuidePlanToEatStep1": "Log in to your Plan to Eat account on a computer.",
+  "importGuidePlanToEatStep2": "Go to Settings > Export Data and download your recipes as a CSV file.",
+  "importGuidePlanToEatStep4": "All columns are parsed: title, ingredients, directions, tags, times, and more.",
+  "importGuideMasterCookSubtitle": "Import MasterCook .mxp files",
+  "importGuideMasterCookStep1": "Open MasterCook and select the recipes you want to export.",
+  "importGuideMasterCookStep2": "Go to File > Export and choose the .mxp format.",
+  "importGuideMasterCookStep4": "Fixed-width formatting is parsed automatically. Review and import your recipes.",
+  "importGuideMealMasterSubtitle": "Import Meal-Master .mmf files",
+  "importGuideMealMasterStep1Title": "Locate your files",
+  "importGuideMealMasterStep1": "Find your Meal-Master .mmf or .mk files on your computer.",
+  "importGuideMealMasterStep2Tip": "Meal-Master files can contain hundreds of recipes in a single file.",
+  "importGuideMealMasterStep3": "All recipes are parsed from the file. Two-column ingredient layouts are supported.",
+  "importGuideCooklangSubtitle": "Import Cooklang .cook recipe files",
+  "importGuideCooklangStep1Title": "Find your .cook files",
+  "importGuideCooklangStep1": "Locate your Cooklang recipe files. They're plain text files with .cook extension.",
+  "importGuideCooklangStep2Tip": "Cooklang markup (@ingredients, #cookware, ~timers) is automatically parsed.",
+  "importGuideCooklangStep3": "Ingredients are extracted from the markup and steps are formatted as readable text.",
+  "importGuideLivingCookbookSubtitle": "Import Living Cookbook .fdx files",
+  "importGuideLivingCookbookStep1": "Open Living Cookbook and go to File > Export.",
+  "importGuideLivingCookbookStep2": "Choose the FDX (Food Data Exchange) format and export your recipes.",
+  "importGuideLivingCookbookStep4": "XML data is parsed into structured recipes with ingredients and procedures.",
+  "importGuideSamsungFoodSubtitle": "Import from Samsung Food JSON export",
+  "importGuideSamsungFoodStep1Title": "Request your data",
+  "importGuideSamsungFoodStep1": "Open Samsung Food app or website and go to Settings > Privacy > Download My Data.",
+  "importGuideSamsungFoodStep2Title": "Download the export",
+  "importGuideSamsungFoodStep2": "You'll receive a download link (may take some time). Download the JSON file.",
+  "importGuideSamsungFoodStep2Tip": "If you previously used Whisk, the format is the same.",
+  "importGuideSamsungFoodStep4": "Samsung Food recipe data will be parsed and ready to import."
 }

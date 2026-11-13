@@ -12548,4 +12548,360 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get nutriSheetLookupFailed => '无法查询';
+
+  @override
+  String get fileImportEmpty => '此文件为空。';
+
+  @override
+  String get fileImportUnsupported => '不支持此文件类型。';
+
+  @override
+  String get fileImportNotText => '此文件已损坏或不是文本文件。';
+
+  @override
+  String get fileImportRichText => '不支持富文本文件。请将食谱另存为纯文本后重试。';
+
+  @override
+  String get fileImportUnknownXml => '此 XML 文件不是本应用可读取的食谱导出文件。';
+
+  @override
+  String get fileImportDamagedZip => '此 ZIP 文件已损坏或不完整。请重新导出后重试。';
+
+  @override
+  String get fileImportOwnBackup => '这是 Recipe Spellbook 的备份。请在“设置”的“导入数据”中恢复。';
+
+  @override
+  String fileImportDamaged(String app) {
+    return '此 $app 文件已损坏或不完整。请重新导出后重试。';
+  }
+
+  @override
+  String fileImportNoRecipes(String app) {
+    return '此文件中没有 $app 食谱。';
+  }
+
+  @override
+  String get fileImportTooLarge => '此文件解压后超出了应用一次可读取的大小。请每次导出更少的食谱后重试。';
+
+  @override
+  String importPdfRecipeNumbered(String name, int number) {
+    return '$name 食谱 $number';
+  }
+
+  @override
+  String get aiImportPasteFirst => '请先粘贴或载入 AI 的回答。';
+
+  @override
+  String aiImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已导入 $count 个食谱。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String aiImportErrInRecipe(int number, String problem) {
+    return '食谱 $number：$problem';
+  }
+
+  @override
+  String get aiImportErrNoRecipes => '未找到食谱。回答中至少需要一个食谱。';
+
+  @override
+  String get aiImportErrInvalidJson => '这不是有效的食谱 JSON。请确认已复制完整的回答。';
+
+  @override
+  String get aiImportErrCutOff => '有括号打开后未关闭。回答可能被截断了。';
+
+  @override
+  String aiImportErrOutsideBrackets(String field) {
+    return '“$field”位于食谱的括号之外。可能缺少括号或引号，或者是需要删除的说明文字。';
+  }
+
+  @override
+  String aiImportErrBlockUnreadable(int block, int count) {
+    return '无法读取第 $block 块（共 $count 块）。可能缺少括号或引号。';
+  }
+
+  @override
+  String get aiImportErrMissingTitle => '缺少“title”字段。';
+
+  @override
+  String get aiImportErrMissingIngredients => '缺少“ingredients”列表。';
+
+  @override
+  String get aiImportErrNoIngredients => '“ingredients”列表为空。食谱至少需要一种食材。';
+
+  @override
+  String aiImportErrIngredientInvalid(int number) {
+    return '第 $number 种食材不是有效的对象。';
+  }
+
+  @override
+  String aiImportErrIngredientNoName(int number) {
+    return '第 $number 种食材没有“name”。';
+  }
+
+  @override
+  String get aiImportErrMissingSteps => '缺少“steps”列表。';
+
+  @override
+  String get aiImportErrNoSteps => '“steps”列表为空。食谱至少需要一个步骤。';
+
+  @override
+  String aiImportErrStepInvalid(int number) {
+    return '第 $number 步不是有效的对象。';
+  }
+
+  @override
+  String aiImportErrStepNoInstruction(int number) {
+    return '第 $number 步没有“instruction”。';
+  }
+
+  @override
+  String get barcodeDataSource => '数据来自 Open Food Facts（社区提供）';
+
+  @override
+  String barcodeDataUpdated(String date) {
+    return '$date更新';
+  }
+
+  @override
+  String get barcodeRecordIncomplete => '此记录似乎不完整。部分信息可能缺失或已过时。';
+
+  @override
+  String get importGuidePopularTag => '热门';
+
+  @override
+  String get importGuideOpenInApp => '在 Recipe Spellbook 中打开';
+
+  @override
+  String get importGuideReviewImport => '检查并导入';
+
+  @override
+  String get importGuideExportRecipes => '导出食谱';
+
+  @override
+  String importGuideOpenApp(String app) {
+    return '打开 $app';
+  }
+
+  @override
+  String importGuideExportAs(String format) {
+    return '导出为 $format';
+  }
+
+  @override
+  String importGuideGoToSite(String site) {
+    return '前往 $site';
+  }
+
+  @override
+  String importGuidePickFile(String file) {
+    return '打开 Recipe Spellbook，点按 +，选择“文件”，然后选择 $file 文件。';
+  }
+
+  @override
+  String importGuideOpenSettings(String app) {
+    return '打开 $app 并进入设置。';
+  }
+
+  @override
+  String importGuideLogIn(String app) {
+    return '在电脑上登录你的 $app 实例。';
+  }
+
+  @override
+  String get importGuidePaprikaSubtitle => '从 Paprika 3 导入所有食谱及照片';
+
+  @override
+  String get importGuidePaprikaStep1 => '在设备上打开 Paprika 3，进入设置或“文件”菜单。';
+
+  @override
+  String get importGuidePaprikaStep2Title => '导出所有食谱';
+
+  @override
+  String get importGuidePaprikaStep2 => '点按“Export”并选择“Paprika Export Format”（.paprikarecipes）。这会生成一个包含所有食谱和照片的文件。';
+
+  @override
+  String get importGuidePaprikaStep2Tip => 'iOS/Android：设置 > Export。电脑：文件 > Export。';
+
+  @override
+  String get importGuidePaprikaStep4 => '预览食谱，取消勾选不需要的，然后点按“导入”。照片会自动包含在内。';
+
+  @override
+  String get importGuideMelaSubtitle => '从食谱管理应用 Mela 导入食谱';
+
+  @override
+  String get importGuideMelaStep2 => '点按“Export”并选择导出所有食谱。这会生成一个 .melarecipes 文件。';
+
+  @override
+  String get importGuideMelaStep2Tip => '你也可以将单个食谱分享为 .melarecipe 文件。';
+
+  @override
+  String get importGuideMelaStep4 => '预览并导入食谱。分类会转换为标签。';
+
+  @override
+  String get importGuideCroutonSubtitle => '从 Crouton 应用导入食谱';
+
+  @override
+  String get importGuideCroutonStep2Title => '导出数据';
+
+  @override
+  String get importGuideCroutonStep2 => '点按“Export”，生成包含所有食谱的 .crumb 文件。';
+
+  @override
+  String get importGuideCroutonStep4 => '预览并导入食谱。食材分组会保留。';
+
+  @override
+  String get importGuideRecipeKeeperSubtitle => '从 Recipe Keeper 导入（ZIP 或 HTML）';
+
+  @override
+  String get importGuideRecipeKeeperStep1 => '打开 Recipe Keeper，进入设置 > Export。';
+
+  @override
+  String get importGuideRecipeKeeperStep2 => '选择“Export as ZIP”或“Export as HTML”。ZIP 格式包含照片。';
+
+  @override
+  String get importGuideRecipeKeeperStep2Tip => '建议导出为 ZIP。它包含你所有的食谱照片。';
+
+  @override
+  String get importGuideRecipeKeeperStep3 => '打开 Recipe Spellbook，点按 +，选择“文件”，然后选择导出的 ZIP 或 HTML 文件。';
+
+  @override
+  String get importGuideRecipeKeeperStep4 => '所有食谱都会被自动识别。检查后连同照片一起导入。';
+
+  @override
+  String get importGuideCopyMeThatSubtitle => '从 CopyMeThat 的 HTML 导出导入';
+
+  @override
+  String get importGuideCopyMeThatStep1 => '在电脑上登录 CopyMeThat.com。';
+
+  @override
+  String get importGuideCopyMeThatStep2 => '进入 Settings > Export，下载包含所有食谱的 HTML 文件。';
+
+  @override
+  String get importGuideCopyMeThatStep4 => 'HTML 文件中的所有食谱都会被读取，随时可以导入。';
+
+  @override
+  String get importGuideMealieSubtitle => '从自托管食谱管理器 Mealie 导入';
+
+  @override
+  String get importGuideMealieStep2 => '进入 Admin > Backups 创建新的备份，然后下载 JSON 导出文件。';
+
+  @override
+  String get importGuideMealieStep2Tip => '你也可以在食谱页面将单个食谱导出为 JSON。';
+
+  @override
+  String get importGuideMealieStep4 => 'Mealie 的食谱数据结构清晰，所有字段都会被准确导入。';
+
+  @override
+  String get importGuideTandoorSubtitle => '从 Tandoor Recipes 导入';
+
+  @override
+  String get importGuideTandoorStep2 => '进入 Admin > Export，选择食谱并以 JSON 格式下载。';
+
+  @override
+  String get importGuideTandoorStep4 => '关键词和食材详情都会保留。检查后导入。';
+
+  @override
+  String get importGuideCookmateSubtitle => '从 Cookmate 的 .mcb 导出导入';
+
+  @override
+  String get importGuideCookmateStep1 => '打开 Cookmate（原名“My CookBook”）并进入设置。';
+
+  @override
+  String get importGuideCookmateStep2 => '点按 Export 并选择 .mcb 格式。其中包含食谱和照片。';
+
+  @override
+  String get importGuideCookmateStep4 => '所有食谱都会连同分类和照片一起导入。';
+
+  @override
+  String get importGuidePlanToEatSubtitle => '从 Plan to Eat 的 CSV 导出导入';
+
+  @override
+  String get importGuidePlanToEatStep1 => '在电脑上登录你的 Plan to Eat 账户。';
+
+  @override
+  String get importGuidePlanToEatStep2 => '进入 Settings > Export Data，将食谱下载为 CSV 文件。';
+
+  @override
+  String get importGuidePlanToEatStep4 => '所有列都会被读取：标题、食材、做法、标签、时间等。';
+
+  @override
+  String get importGuideMasterCookSubtitle => '导入 MasterCook 的 .mxp 文件';
+
+  @override
+  String get importGuideMasterCookStep1 => '打开 MasterCook，选择要导出的食谱。';
+
+  @override
+  String get importGuideMasterCookStep2 => '进入文件 > Export，选择 .mxp 格式。';
+
+  @override
+  String get importGuideMasterCookStep4 => '固定宽度的排版会被自动读取。检查并导入食谱。';
+
+  @override
+  String get importGuideMealMasterSubtitle => '导入 Meal-Master 的 .mmf 文件';
+
+  @override
+  String get importGuideMealMasterStep1Title => '找到你的文件';
+
+  @override
+  String get importGuideMealMasterStep1 => '在电脑上找到 Meal-Master 的 .mmf 或 .mk 文件。';
+
+  @override
+  String get importGuideMealMasterStep2Tip => '一个 Meal-Master 文件可以包含数百个食谱。';
+
+  @override
+  String get importGuideMealMasterStep3 => '文件中的所有食谱都会被读取。支持两栏排列的食材。';
+
+  @override
+  String get importGuideCooklangSubtitle => '导入 Cooklang 的 .cook 食谱文件';
+
+  @override
+  String get importGuideCooklangStep1Title => '找到你的 .cook 文件';
+
+  @override
+  String get importGuideCooklangStep1 => '找到 Cooklang 食谱文件。它们是扩展名为 .cook 的纯文本文件。';
+
+  @override
+  String get importGuideCooklangStep2Tip => 'Cooklang 标记（@食材、#厨具、~计时器）会被自动读取。';
+
+  @override
+  String get importGuideCooklangStep3 => '会从标记中提取食材，并将步骤整理成易读的文字。';
+
+  @override
+  String get importGuideLivingCookbookSubtitle => '导入 Living Cookbook 的 .fdx 文件';
+
+  @override
+  String get importGuideLivingCookbookStep1 => '打开 Living Cookbook，进入文件 > Export。';
+
+  @override
+  String get importGuideLivingCookbookStep2 => '选择 FDX（Food Data Exchange）格式并导出食谱。';
+
+  @override
+  String get importGuideLivingCookbookStep4 => 'XML 数据会被整理成包含食材和步骤的食谱。';
+
+  @override
+  String get importGuideSamsungFoodSubtitle => '从 Samsung Food 的 JSON 导出导入';
+
+  @override
+  String get importGuideSamsungFoodStep1Title => '申请你的数据';
+
+  @override
+  String get importGuideSamsungFoodStep1 => '打开 Samsung Food 应用或网站，进入 Settings > Privacy > Download My Data。';
+
+  @override
+  String get importGuideSamsungFoodStep2Title => '下载导出文件';
+
+  @override
+  String get importGuideSamsungFoodStep2 => '你会收到一个下载链接（可能需要一些时间）。下载 JSON 文件。';
+
+  @override
+  String get importGuideSamsungFoodStep2Tip => '如果你以前用过 Whisk，格式是一样的。';
+
+  @override
+  String get importGuideSamsungFoodStep4 => 'Samsung Food 的食谱数据会被读取，随时可以导入。';
 }

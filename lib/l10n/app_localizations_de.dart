@@ -12704,4 +12704,361 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutriSheetLookupFailed => 'Konnte nicht nachgeschlagen werden';
+
+  @override
+  String get fileImportEmpty => 'Diese Datei ist leer.';
+
+  @override
+  String get fileImportUnsupported => 'Dieser Dateityp wird nicht unterstützt.';
+
+  @override
+  String get fileImportNotText => 'Diese Datei ist beschädigt oder keine Textdatei.';
+
+  @override
+  String get fileImportRichText => 'RTF-Dateien werden nicht unterstützt. Speichere das Rezept als reinen Text und versuche es erneut.';
+
+  @override
+  String get fileImportUnknownXml => 'Diese XML-Datei ist kein Rezeptexport, den die App lesen kann.';
+
+  @override
+  String get fileImportDamagedZip => 'Diese ZIP-Datei ist beschädigt oder unvollständig. Exportiere sie erneut und versuche es noch einmal.';
+
+  @override
+  String get fileImportOwnBackup => 'Das ist ein Recipe Spellbook-Backup. Stelle es unter Einstellungen, Daten importieren wieder her.';
+
+  @override
+  String fileImportDamaged(String app) {
+    return 'Diese $app-Datei ist beschädigt oder unvollständig. Exportiere sie erneut und versuche es noch einmal.';
+  }
+
+  @override
+  String fileImportNoRecipes(String app) {
+    return 'Diese Datei enthält keine $app-Rezepte.';
+  }
+
+  @override
+  String get fileImportTooLarge => 'Diese Datei entpackt sich zu mehr, als die App auf einmal lesen kann. Exportiere weniger Rezepte auf einmal und versuche es erneut.';
+
+  @override
+  String importPdfRecipeNumbered(String name, int number) {
+    return '$name, Rezept $number';
+  }
+
+  @override
+  String get aiImportPasteFirst => 'Füge zuerst die Antwort der KI ein oder lade sie.';
+
+  @override
+  String aiImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Rezepte importiert.',
+      one: '$count Rezept importiert.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String aiImportErrInRecipe(int number, String problem) {
+    return 'Rezept $number: $problem';
+  }
+
+  @override
+  String get aiImportErrNoRecipes => 'Keine Rezepte gefunden. Die Antwort braucht mindestens ein Rezept.';
+
+  @override
+  String get aiImportErrInvalidJson => 'Das ist kein gültiges Rezept-JSON. Prüfe, ob die ganze Antwort kopiert wurde.';
+
+  @override
+  String get aiImportErrCutOff => 'Eine Klammer wird geöffnet, aber nie geschlossen. Die Antwort wurde vielleicht abgeschnitten.';
+
+  @override
+  String aiImportErrOutsideBrackets(String field) {
+    return '„$field“ steht außerhalb der Klammern eines Rezepts. Vielleicht fehlt eine Klammer oder ein Anführungszeichen, oder es ist eine Bemerkung, die entfernt werden muss.';
+  }
+
+  @override
+  String aiImportErrBlockUnreadable(int block, int count) {
+    return 'Block $block von $count konnte nicht gelesen werden. Vielleicht fehlt eine Klammer oder ein Anführungszeichen.';
+  }
+
+  @override
+  String get aiImportErrMissingTitle => 'Das Feld „title“ fehlt.';
+
+  @override
+  String get aiImportErrMissingIngredients => 'Die Liste „ingredients“ fehlt.';
+
+  @override
+  String get aiImportErrNoIngredients => 'Die Liste „ingredients“ ist leer. Ein Rezept braucht mindestens eine Zutat.';
+
+  @override
+  String aiImportErrIngredientInvalid(int number) {
+    return 'Zutat $number ist kein gültiges Objekt.';
+  }
+
+  @override
+  String aiImportErrIngredientNoName(int number) {
+    return 'Zutat $number hat keinen „name“.';
+  }
+
+  @override
+  String get aiImportErrMissingSteps => 'Die Liste „steps“ fehlt.';
+
+  @override
+  String get aiImportErrNoSteps => 'Die Liste „steps“ ist leer. Ein Rezept braucht mindestens einen Schritt.';
+
+  @override
+  String aiImportErrStepInvalid(int number) {
+    return 'Schritt $number ist kein gültiges Objekt.';
+  }
+
+  @override
+  String aiImportErrStepNoInstruction(int number) {
+    return 'Schritt $number hat keine „instruction“.';
+  }
+
+  @override
+  String get barcodeDataSource => 'Daten von Open Food Facts (aus der Community)';
+
+  @override
+  String barcodeDataUpdated(String date) {
+    return 'aktualisiert $date';
+  }
+
+  @override
+  String get barcodeRecordIncomplete => 'Dieser Eintrag wirkt unvollständig. Manche Angaben fehlen vielleicht oder sind veraltet.';
+
+  @override
+  String get importGuidePopularTag => 'BELIEBT';
+
+  @override
+  String get importGuideOpenInApp => 'In Recipe Spellbook öffnen';
+
+  @override
+  String get importGuideReviewImport => 'Prüfen und importieren';
+
+  @override
+  String get importGuideExportRecipes => 'Rezepte exportieren';
+
+  @override
+  String importGuideOpenApp(String app) {
+    return '$app öffnen';
+  }
+
+  @override
+  String importGuideExportAs(String format) {
+    return 'Als $format exportieren';
+  }
+
+  @override
+  String importGuideGoToSite(String site) {
+    return 'Zu $site gehen';
+  }
+
+  @override
+  String importGuidePickFile(String file) {
+    return 'Öffne Recipe Spellbook, tippe auf +, wähle „Datei“ und wähle die $file-Datei aus.';
+  }
+
+  @override
+  String importGuideOpenSettings(String app) {
+    return 'Öffne $app und gehe zu den Einstellungen.';
+  }
+
+  @override
+  String importGuideLogIn(String app) {
+    return 'Melde dich am Computer bei deiner $app-Instanz an.';
+  }
+
+  @override
+  String get importGuidePaprikaSubtitle => 'Alle Rezepte aus Paprika 3 mit Fotos importieren';
+
+  @override
+  String get importGuidePaprikaStep1 => 'Öffne Paprika 3 auf deinem Gerät. Gehe zu den Einstellungen oder ins Menü „Datei“.';
+
+  @override
+  String get importGuidePaprikaStep2Title => 'Alle Rezepte exportieren';
+
+  @override
+  String get importGuidePaprikaStep2 => 'Tippe auf „Export“ und wähle „Paprika Export Format“ (.paprikarecipes). So entsteht eine Datei mit all deinen Rezepten und Fotos.';
+
+  @override
+  String get importGuidePaprikaStep2Tip => 'Auf iOS/Android: Einstellungen > Export. Am Computer: Datei > Export.';
+
+  @override
+  String get importGuidePaprikaStep4 => 'Sieh dir die Rezepte an, wähle ab, was du nicht willst, und tippe auf Importieren. Fotos kommen automatisch mit.';
+
+  @override
+  String get importGuideMelaSubtitle => 'Rezepte aus der Rezeptverwaltung Mela importieren';
+
+  @override
+  String get importGuideMelaStep2 => 'Tippe auf „Export“ und wähle, alle Rezepte zu exportieren. So entsteht eine .melarecipes-Datei.';
+
+  @override
+  String get importGuideMelaStep2Tip => 'Du kannst auch einzelne Rezepte als .melarecipe-Dateien teilen.';
+
+  @override
+  String get importGuideMelaStep4 => 'Sieh dir die Rezepte an und importiere sie. Kategorien werden zu Tags.';
+
+  @override
+  String get importGuideCroutonSubtitle => 'Rezepte aus der App Crouton importieren';
+
+  @override
+  String get importGuideCroutonStep2Title => 'Daten exportieren';
+
+  @override
+  String get importGuideCroutonStep2 => 'Tippe auf „Export“, um eine .crumb-Datei mit all deinen Rezepten zu erstellen.';
+
+  @override
+  String get importGuideCroutonStep4 => 'Sieh dir die Rezepte an und importiere sie. Zutatenabschnitte bleiben erhalten.';
+
+  @override
+  String get importGuideRecipeKeeperSubtitle => 'Aus Recipe Keeper importieren (ZIP oder HTML)';
+
+  @override
+  String get importGuideRecipeKeeperStep1 => 'Öffne Recipe Keeper und gehe zu Einstellungen > Export.';
+
+  @override
+  String get importGuideRecipeKeeperStep2 => 'Wähle „Export as ZIP“ oder „Export as HTML“. Das ZIP-Format enthält die Fotos.';
+
+  @override
+  String get importGuideRecipeKeeperStep2Tip => 'Der ZIP-Export wird empfohlen. Er enthält alle deine Rezeptfotos.';
+
+  @override
+  String get importGuideRecipeKeeperStep3 => 'Öffne Recipe Spellbook, tippe auf +, wähle „Datei“ und wähle die exportierte ZIP- oder HTML-Datei aus.';
+
+  @override
+  String get importGuideRecipeKeeperStep4 => 'Alle Rezepte werden automatisch erkannt. Prüfe sie und importiere sie mit Fotos.';
+
+  @override
+  String get importGuideCopyMeThatSubtitle => 'Aus dem HTML-Export von CopyMeThat importieren';
+
+  @override
+  String get importGuideCopyMeThatStep1 => 'Melde dich am Computer bei CopyMeThat.com an.';
+
+  @override
+  String get importGuideCopyMeThatStep2 => 'Gehe zu Settings > Export und lade die HTML-Datei mit all deinen Rezepten herunter.';
+
+  @override
+  String get importGuideCopyMeThatStep4 => 'Alle Rezepte aus der HTML-Datei werden gelesen und sind bereit zum Import.';
+
+  @override
+  String get importGuideMealieSubtitle => 'Aus der selbst gehosteten Rezeptverwaltung Mealie importieren';
+
+  @override
+  String get importGuideMealieStep2 => 'Gehe zu Admin > Backups und erstelle ein neues Backup. Lade den JSON-Export herunter.';
+
+  @override
+  String get importGuideMealieStep2Tip => 'Du kannst einzelne Rezepte auch auf der Rezeptseite als JSON exportieren.';
+
+  @override
+  String get importGuideMealieStep4 => 'Die Rezeptdaten von Mealie sind gut strukturiert. Alle Felder werden genau übernommen.';
+
+  @override
+  String get importGuideTandoorSubtitle => 'Aus Tandoor Recipes importieren';
+
+  @override
+  String get importGuideTandoorStep2 => 'Gehe zu Admin > Export. Wähle deine Rezepte aus und lade sie als JSON herunter.';
+
+  @override
+  String get importGuideTandoorStep4 => 'Stichwörter und Zutatendetails bleiben erhalten. Prüfen und importieren.';
+
+  @override
+  String get importGuideCookmateSubtitle => 'Aus dem .mcb-Export von Cookmate importieren';
+
+  @override
+  String get importGuideCookmateStep1 => 'Öffne Cookmate (früher „My CookBook“) und gehe zu den Einstellungen.';
+
+  @override
+  String get importGuideCookmateStep2 => 'Tippe auf Export und wähle das Format .mcb. Es enthält Rezepte und Fotos.';
+
+  @override
+  String get importGuideCookmateStep4 => 'Alle Rezepte werden mit Kategorien und Fotos importiert.';
+
+  @override
+  String get importGuidePlanToEatSubtitle => 'Aus dem CSV-Export von Plan to Eat importieren';
+
+  @override
+  String get importGuidePlanToEatStep1 => 'Melde dich am Computer bei deinem Plan to Eat-Konto an.';
+
+  @override
+  String get importGuidePlanToEatStep2 => 'Gehe zu Settings > Export Data und lade deine Rezepte als CSV-Datei herunter.';
+
+  @override
+  String get importGuidePlanToEatStep4 => 'Alle Spalten werden gelesen: Titel, Zutaten, Anleitung, Tags, Zeiten und mehr.';
+
+  @override
+  String get importGuideMasterCookSubtitle => 'MasterCook-Dateien (.mxp) importieren';
+
+  @override
+  String get importGuideMasterCookStep1 => 'Öffne MasterCook und wähle die Rezepte aus, die du exportieren willst.';
+
+  @override
+  String get importGuideMasterCookStep2 => 'Gehe zu Datei > Export und wähle das Format .mxp.';
+
+  @override
+  String get importGuideMasterCookStep4 => 'Die Spaltenformatierung wird automatisch gelesen. Prüfe und importiere deine Rezepte.';
+
+  @override
+  String get importGuideMealMasterSubtitle => 'Meal-Master-Dateien (.mmf) importieren';
+
+  @override
+  String get importGuideMealMasterStep1Title => 'Dateien finden';
+
+  @override
+  String get importGuideMealMasterStep1 => 'Suche deine Meal-Master-Dateien (.mmf oder .mk) auf deinem Computer.';
+
+  @override
+  String get importGuideMealMasterStep2Tip => 'Eine Meal-Master-Datei kann Hunderte Rezepte enthalten.';
+
+  @override
+  String get importGuideMealMasterStep3 => 'Alle Rezepte werden aus der Datei gelesen. Zutaten in zwei Spalten werden unterstützt.';
+
+  @override
+  String get importGuideCooklangSubtitle => 'Cooklang-Rezeptdateien (.cook) importieren';
+
+  @override
+  String get importGuideCooklangStep1Title => 'Finde deine .cook-Dateien';
+
+  @override
+  String get importGuideCooklangStep1 => 'Suche deine Cooklang-Rezeptdateien. Es sind reine Textdateien mit der Endung .cook.';
+
+  @override
+  String get importGuideCooklangStep2Tip => 'Cooklang-Auszeichnungen (@Zutaten, #Kochgeschirr, ~Timer) werden automatisch gelesen.';
+
+  @override
+  String get importGuideCooklangStep3 => 'Die Zutaten werden aus den Auszeichnungen gelesen und die Schritte als lesbarer Text aufbereitet.';
+
+  @override
+  String get importGuideLivingCookbookSubtitle => 'Living Cookbook-Dateien (.fdx) importieren';
+
+  @override
+  String get importGuideLivingCookbookStep1 => 'Öffne Living Cookbook und gehe zu Datei > Export.';
+
+  @override
+  String get importGuideLivingCookbookStep2 => 'Wähle das Format FDX (Food Data Exchange) und exportiere deine Rezepte.';
+
+  @override
+  String get importGuideLivingCookbookStep4 => 'Die XML-Daten werden zu geordneten Rezepten mit Zutaten und Arbeitsschritten.';
+
+  @override
+  String get importGuideSamsungFoodSubtitle => 'Aus dem JSON-Export von Samsung Food importieren';
+
+  @override
+  String get importGuideSamsungFoodStep1Title => 'Daten anfordern';
+
+  @override
+  String get importGuideSamsungFoodStep1 => 'Öffne die App oder Website von Samsung Food und gehe zu Settings > Privacy > Download My Data.';
+
+  @override
+  String get importGuideSamsungFoodStep2Title => 'Export herunterladen';
+
+  @override
+  String get importGuideSamsungFoodStep2 => 'Du bekommst einen Download-Link (das kann etwas dauern). Lade die JSON-Datei herunter.';
+
+  @override
+  String get importGuideSamsungFoodStep2Tip => 'Wenn du früher Whisk genutzt hast: Das Format ist dasselbe.';
+
+  @override
+  String get importGuideSamsungFoodStep4 => 'Die Rezeptdaten von Samsung Food werden gelesen und sind bereit zum Import.';
 }
