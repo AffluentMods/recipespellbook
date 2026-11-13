@@ -126,14 +126,20 @@ class FileImportDispatcher {
     return compute(_parseInIsolate, _ImportTask(bytes, filename));
   }
 
-  // What the user is told when a file cannot be imported.
-  static const _empty = 'This file is empty.';
-  static const _unsupported = 'This file type is not supported.';
-  static const _notText = 'This file is damaged or is not a text file.';
-  static const _richText = 'Rich text files are not supported. Save the recipe as plain text and retry.';
-  static const _unknownXml = 'This XML file is not a recipe export the app can read.';
-  static const _damagedZip = 'This ZIP file is damaged or incomplete. Export it again and retry.';
-  static const _ownBackup = 'This is a Recipe Spellbook backup. Restore it from Settings, Import Data.';
+  // Why a file cannot be imported. The screen says it in the user's
+  // language; the English is for logs.
+  static const _empty = FileImportException(FileImportProblem.empty, 'This file is empty.');
+  static const _unsupported = FileImportException(FileImportProblem.unsupported, 'This file type is not supported.');
+  static const _notText =
+      FileImportException(FileImportProblem.notText, 'This file is damaged or is not a text file.');
+  static const _richText = FileImportException(FileImportProblem.richText,
+      'Rich text files are not supported. Save the recipe as plain text and retry.');
+  static const _unknownXml = FileImportException(
+      FileImportProblem.unknownXml, 'This XML file is not a recipe export the app can read.');
+  static const _damagedZip = FileImportException(
+      FileImportProblem.damagedZip, 'This ZIP file is damaged or incomplete. Export it again and retry.');
+  static const _ownBackup = FileImportException(
+      FileImportProblem.ownBackup, 'This is a Recipe Spellbook backup. Restore it from Settings, Import Data.');
 
   /// Import dispatcher, runs inside isolate.
   /// All parsing happens here off the main thread.
@@ -147,7 +153,7 @@ class FileImportDispatcher {
     int depth = 0,
     ImportPhotoLookup? photo,
   }) async {
-    if (bytes.isEmpty) throw const FormatException(_empty);
+    if (bytes.isEmpty) throw _empty;
     final ext = _extension(filename);
     final isZip = ImportSupport.isZip(bytes);
     // An archive inside the picked one is opened: some exports pack every
@@ -188,10 +194,10 @@ class FileImportDispatcher {
 
     // Every other file should be text. One that is not is refused, unless it
     // is an export whose name lost its extension or was given another.
-    final refusal = supportedExtensions.contains(ext) ? _notText : _unsupported;
+    final FileImportException refusal = supportedExtensions.contains(ext) ? _notText : _unsupported;
     if (isZip) {
       final recipes = await _importZip(bytes, filename, depth);
-      if (recipes.isEmpty) throw FormatException(refusal);
+      if (recipes.isEmpty) throw refusal;
       return recipes;
     }
     if (ImportSupport.isGzip(bytes)) {
@@ -204,13 +210,13 @@ class FileImportDispatcher {
           // Not a recipe of that app.
         }
       }
-      throw FormatException(refusal);
+      throw refusal;
     }
     final text = _withoutPadding(bytes);
-    if (_isBinary(text)) throw FormatException(refusal);
+    if (_isBinary(text)) throw refusal;
 
     final content = ImportSupport.decodeText(text);
-    if (content.trim().isEmpty) throw const FormatException(_empty);
+    if (content.trim().isEmpty) throw _empty;
     return _importText(ext, content, filename, photo);
   }
 
@@ -274,7 +280,7 @@ class FileImportDispatcher {
         return _importCrumbJson(content, filename);
       case 'xml':
         final recipes = _importXml(content, filename, photo);
-        if (recipes == null) throw const FormatException(_unknownXml);
+        if (recipes == null) throw _unknownXml;
         return recipes;
       case 'html':
       case 'htm':
@@ -304,13 +310,13 @@ class FileImportDispatcher {
   ) {
     final text = content.trimLeft();
     final start = text.length > 512 ? text.substring(0, 512) : text;
-    if (start.startsWith(r'{\rtf')) throw const FormatException(_richText);
+    if (start.startsWith(r'{\rtf')) throw _richText;
 
     if (start.startsWith('<')) {
       final recipes = _importXml(content, filename, photo);
       if (recipes != null) return recipes;
       if (_htmlStart.hasMatch(start)) return _importHtml(content, filename, photo);
-      if (start.startsWith('<?xml')) throw const FormatException(_unknownXml);
+      if (start.startsWith('<?xml')) throw _unknownXml;
     }
     if (start.startsWith('{') || start.startsWith('[')) {
       final recipes = _importJson(content, filename);
@@ -433,25 +439,28 @@ class FileImportDispatcher {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException(_damagedZip);
+      throw _damagedZip;
     }
     // A backup holds the whole library and is restored as one, by Settings
     // and by the Add a recipe sheet before it gets here. Read here as loose
     // recipe files, most of what it holds is lost.
-    if (BackupZip.isBackup(archive)) throw const FormatException(_ownBackup);
+    if (BackupZip.isBackup(archive)) throw _ownBackup;
 
     // Try each ZIP-based importer in order of specificity. One that finds
-    // no recipe, or fails, leaves the archive to the next.
+    // no recipe, or fails, leaves the archive to the next. One that finds
+    // the archive unpacks to too much ends the import.
     for (final (canHandle, import_) in _zipImporters) {
       try {
         if (!canHandle(bytes)) continue;
         final recipes = await import_(bytes, filename);
         if (recipes.isNotEmpty) return recipes;
+      } on ZipTooLargeException {
+        rethrow;
       } catch (_) {}
     }
 
     // Fallback: extract and parse individual files from the ZIP
-    return _importGenericZip(archive, depth);
+    return _importGenericZip(archive, depth, BoundedUnzip.forArchive(bytes.length));
   }
 
   /// The importers of the exports that are a zip: how each knows its own,
@@ -466,9 +475,9 @@ class FileImportDispatcher {
 
   /// Generic ZIP fallback: every recipe file in the archive is read the way
   /// it is when picked on its own.
-  static Future<List<ImportedRecipe>> _importGenericZip(Archive archive, int depth) async {
+  static Future<List<ImportedRecipe>> _importGenericZip(Archive archive, int depth, BoundedUnzip unzip) async {
     final recipes = <ImportedRecipe>[];
-    final photo = ImportSupport.photosIn(archive);
+    final photo = ImportSupport.photosIn(archive, unzip);
 
     for (final file in archive.files) {
       if (!file.isFile || file.size == 0) continue;
@@ -482,8 +491,9 @@ class FileImportDispatcher {
 
       final List<ImportedRecipe> parsed;
       try {
-        final bytes = Uint8List.fromList(file.content as List<int>);
-        parsed = await _import(bytes, name, depth: depth + 1, photo: photo);
+        parsed = await _import(unzip.bytesOf(file), name, depth: depth + 1, photo: photo);
+      } on ZipTooLargeException {
+        rethrow;
       } catch (_) {
         // Not a recipe file after all, or one that does not unpack.
         continue;
@@ -529,7 +539,7 @@ class FileImportDispatcher {
     // One recipe and one photo in an archive belong together. Tandoor packs
     // every recipe of its export that way.
     if (recipes.length == 1 && recipes.single.imageData == null && recipes.single.imageUrl == null) {
-      final bytes = ImportSupport.onlyPhotoIn(archive);
+      final bytes = ImportSupport.onlyPhotoIn(archive, unzip);
       if (bytes != null) recipes.single.imageData = base64Encode(bytes);
     }
 
