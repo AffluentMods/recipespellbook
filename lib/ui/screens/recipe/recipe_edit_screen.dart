@@ -1646,22 +1646,18 @@ class _ImprovedNutritionSectionState extends State<ImprovedNutritionSection> {
       );
     }
 
-    final nutrition = widget.nutrition!;
     final servings = widget.servingsCount > 0 ? widget.servingsCount : 1;
+    // Stored as the recipe's total or, entered by hand before 2.1.1, as one
+    // serving: read both ways the recipe page reads them.
+    final perServing = widget.nutrition!.perServingOf(servings);
+    final total = widget.nutrition!.totalOf(servings);
+    final shown = _showPerServing ? perServing : total;
 
     // Calculate display values based on toggle
-    final displayCalories = _showPerServing
-        ? nutrition.calories
-        : (nutrition.calories ?? 0) * servings;
-    final displayProtein = _showPerServing
-        ? nutrition.protein
-        : (nutrition.protein ?? 0) * servings;
-    final displayCarbs = _showPerServing
-        ? nutrition.carbohydrates
-        : (nutrition.carbohydrates ?? 0) * servings;
-    final displayFat = _showPerServing
-        ? nutrition.fat
-        : (nutrition.fat ?? 0) * servings;
+    final displayCalories = shown.calories ?? (_showPerServing ? null : 0);
+    final displayProtein = shown.protein ?? (_showPerServing ? null : 0);
+    final displayCarbs = shown.carbohydrates ?? (_showPerServing ? null : 0);
+    final displayFat = shown.fat ?? (_showPerServing ? null : 0);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1676,8 +1672,8 @@ class _ImprovedNutritionSectionState extends State<ImprovedNutritionSection> {
           // Header with all 3 values summary
           _NutritionSummaryHeader(
             servingsCount: servings,
-            totalCalories: (nutrition.calories ?? 0) * servings,
-            caloriesPerServing: nutrition.calories ?? 0,
+            totalCalories: total.calories ?? 0,
+            caloriesPerServing: perServing.calories ?? 0,
             theme: theme,
           ),
 
@@ -1739,8 +1735,8 @@ class _ImprovedNutritionSectionState extends State<ImprovedNutritionSection> {
             const Divider(),
             const SizedBox(height: 12),
             _ExpandedNutritionInfo(
-              nutrition: nutrition,
-              multiplier: _showPerServing ? 1.0 : servings.toDouble(),
+              nutrition: shown,
+              multiplier: 1.0,
               theme: theme,
               l10n: l10n,
             ),
