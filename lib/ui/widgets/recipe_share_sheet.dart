@@ -13,6 +13,7 @@ import '../../providers/database_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/family_service.dart';
 import '../../services/image_service.dart';
+import '../../services/pdf_fonts.dart';
 import '../../services/share_file.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_colors.dart';
@@ -30,30 +31,10 @@ String _stripEmojiForPdf(String text) {
   ), '').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
 }
 
-/// Cached Unicode fonts for PDF rendering.
-pw.Font? _pdfRegular;
-pw.Font? _pdfBold;
-pw.Font? _pdfItalic;
-pw.Font? _pdfBoldItalic;
-
-/// Load Noto Sans fonts for full Unicode support in PDFs.
-Future<pw.ThemeData> _loadPdfTheme() async {
-  try {
-    _pdfRegular ??= await PdfGoogleFonts.notoSansRegular();
-    _pdfBold ??= await PdfGoogleFonts.notoSansBold();
-    _pdfItalic ??= await PdfGoogleFonts.notoSansItalic();
-    _pdfBoldItalic ??= await PdfGoogleFonts.notoSansBoldItalic();
-
-    return pw.ThemeData.withFont(
-      base: _pdfRegular!,
-      bold: _pdfBold!,
-      italic: _pdfItalic!,
-      boldItalic: _pdfBoldItalic!,
-    );
-  } catch (_) {
-    return pw.ThemeData.base();
-  }
-}
+/// Noto Sans for the recipe PDF, plus a CJK font when [text] or the app's
+/// language needs one (see PdfFonts, shared with printing).
+Future<pw.ThemeData> _loadPdfTheme(String text, AppLocalizations l10n) =>
+    PdfFonts.themeFor(text, languageCode: l10n.localeName);
 
 /// Shows a share sheet for a recipe with multiple options
 void showRecipeShareSheet(
@@ -688,7 +669,11 @@ class _RecipeShareSheet extends StatelessWidget {
       AppLocalizations l10n, {
         List<_LinkedRecipeData> linkedRecipes = const [],
       }) async {
-    final theme = await _loadPdfTheme();
+    final theme = await _loadPdfTheme([
+      for (final r in [recipe, for (final l in linkedRecipes) l.recipe]) ...[r.title, r.description ?? '', r.notes ?? ''],
+      for (final i in [...ingredients, for (final l in linkedRecipes) ...l.ingredients]) i.name,
+      for (final s in [...steps, for (final l in linkedRecipes) ...l.steps]) s.instruction,
+    ].join('\n'), l10n);
     final pdf = pw.Document(theme: theme);
 
     pdf.addPage(
