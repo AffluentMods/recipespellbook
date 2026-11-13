@@ -762,22 +762,27 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.setInt(_recipeEditLayoutKey, mode.index);
   }
 
+  /// Every preference this notifier keeps, including ones older versions
+  /// kept (the nerd mode switch, settings that no longer have a screen).
+  static const _ownKeys = [
+    _themeKey, _themeModeKey, _kitchenBuddyKey, _legacyNerdModeKey, _measurementKey, _cookbookKey,
+    _languageKey, _quickAccessHistoryKey, _quickAccessHistoryCountKey, _quickAccessMealPlanKey,
+    _quickAccessPinnedKey, _recipePlaceholderKey, _cookbookPlaceholderKey, _allergensKey,
+    _recipeEditLayoutKey, _textScaleKey, _weekStartDayKey, _householdServingsKey, _ingredientLayoutKey,
+    _showSurpriseMeKey, _customBgKey, _customPrimaryKey, _customAccentKey, _customDarkLinkedKey,
+    _customDarkBgKey, _customDarkPrimaryKey, _customDarkAccentKey,
+    'defaultNutritionView', 'nutritionChartStyle', 'nutritionPalette', 'showExpandedNutrition',
+    'enabledNutrients',
+  ];
+
+  /// Back to the first-run settings: every setting this notifier keeps is
+  /// removed (measurement, nutrition, placeholder, custom theme and Kitchen
+  /// Buddy included).
   Future<void> resetToDefaults() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_themeKey);
-    await prefs.remove(_themeModeKey);
-    await prefs.remove(_cookbookKey);
-    await prefs.remove(_languageKey);
-    await prefs.remove(_quickAccessHistoryKey);
-    await prefs.remove(_quickAccessHistoryCountKey);
-    await prefs.remove(_quickAccessMealPlanKey);
-    await prefs.remove(_quickAccessPinnedKey);
-    await prefs.remove(_allergensKey);
-    await prefs.remove(_textScaleKey);
-    await prefs.remove(_weekStartDayKey);
-    await prefs.remove(_householdServingsKey);
-    await prefs.remove(_ingredientLayoutKey);
-    await prefs.remove(_showSurpriseMeKey);
+    for (final key in _ownKeys) {
+      await prefs.remove(key);
+    }
     state = AppSettings();
   }
 
