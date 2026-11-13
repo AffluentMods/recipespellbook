@@ -159,7 +159,9 @@ msix_config:
   identity_name: AffluentLabs.RecipeSpellbook
   publisher: CN=0DD23BD3-21D8-4FFB-9634-06D26A8DFA90
   logo_path: assets/images/icon.png
-  capabilities: internetClient
+  # microphone: cooking mode's voice control (speech_to_text, SAPI) listens
+  # on Windows too; a packaged app without it is refused the microphone.
+  capabilities: internetClient,microphone
   install_certificate: false
   languages: en-us,de-de,es-es,fr-fr,it-it,ja-jp,ko-kr,nl-nl,pl-pl,pt-br,ru-ru,zh-cn
   # recipespellbook:// links open the Store copy; Windows passes the link as
