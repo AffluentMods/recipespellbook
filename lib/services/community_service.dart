@@ -701,6 +701,18 @@ class PublishProgress {
   );
 }
 
+/// How a POST /v1/community went. [replayed]: the server answered a publish
+/// key an earlier try already used with the publication that try made
+/// (200), so it carries what that try sent.
+typedef CommunityPublishResult = ({
+  bool success,
+  String? error,
+  String? publicationId,
+  String? status,
+  Duration? retryAfter,
+  bool replayed,
+});
+
 /// Global publish progress notifier — listened to by publish screen and my publications.
 final publishProgressNotifier = ValueNotifier<PublishProgress?>(null);
 
@@ -1244,8 +1256,51 @@ class CommunityService {
       if (map.remove(sourceKey) != null) {
         await prefs.setString(_publishKeysKey, jsonEncode(map));
       }
+      final sentRaw = prefs.getString(_publishKeySentKey);
+      if (sentRaw != null) {
+        final sent = jsonDecode(sentRaw) as Map<String, dynamic>;
+        if (sent.remove(sourceKey) != null) await prefs.setString(_publishKeySentKey, jsonEncode(sent));
+      }
     } catch (e) {
       debugPrint('[Community] clearPublishKey: $e');
+    }
+  }
+
+  // What went out under each key: the fingerprint of the content every try
+  // with it sent, or "*" once tries sent different content.
+  static const _publishKeySentKey = 'communityPublishKeySent';
+
+  /// The key for [sourceKey] for a try that sends [contentHash], and
+  /// whether every try under that key sent exactly this content. When not,
+  /// a "same key, here is the publication" answer may carry content from an
+  /// earlier try (one that timed out here but went through), so the caller
+  /// must bring the publication up to date.
+  static Future<({String key, bool sameContent})> publishKeyForContent(String sourceKey, String contentHash) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keysRaw = prefs.getString(_publishKeysKey);
+      final keys = keysRaw != null ? (jsonDecode(keysRaw) as Map<String, dynamic>) : <String, dynamic>{};
+      final sentRaw = prefs.getString(_publishKeySentKey);
+      final sent = sentRaw != null ? (jsonDecode(sentRaw) as Map<String, dynamic>) : <String, dynamic>{};
+      final existing = keys[sourceKey];
+      if (existing is String && existing.isNotEmpty) {
+        // A key from before this was recorded may have sent anything.
+        final same = sent[sourceKey] == contentHash;
+        if (!same && sent[sourceKey] != '*') {
+          sent[sourceKey] = '*';
+          await prefs.setString(_publishKeySentKey, jsonEncode(sent));
+        }
+        return (key: existing, sameContent: same);
+      }
+      final key = const Uuid().v4();
+      keys[sourceKey] = key;
+      sent[sourceKey] = contentHash;
+      await prefs.setString(_publishKeysKey, jsonEncode(keys));
+      await prefs.setString(_publishKeySentKey, jsonEncode(sent));
+      return (key: key, sameContent: true);
+    } catch (e) {
+      debugPrint('[Community] publishKeyForContent: $e');
+      return (key: const Uuid().v4(), sameContent: true);
     }
   }
 
@@ -1283,8 +1338,9 @@ class CommunityService {
   /// the publication it already made (200) instead of making another.
   /// A 429 that carries `Retry-After` is the account's upload lock (another
   /// publish still being processed) and comes back as [retryAfter]; one
-  /// without it (the daily limit) is a plain failure.
-  Future<({bool success, String? error, String? publicationId, String? status, Duration? retryAfter})> publish({
+  /// without it (the daily limit) is a plain failure. `replayed` is that 200:
+  /// the publication carries what the earlier try sent.
+  Future<CommunityPublishResult> publish({
     required String title,
     String? description,
     String? imagePath,
@@ -1318,6 +1374,7 @@ class CommunityService {
           publicationId: data['id'] as String?,
           status: data['status'] as String?,
           retryAfter: null,
+          replayed: r.statusCode == 200,
         );
       }
       final retryAfter = r.statusCode == 429 ? int.tryParse(r.headers['retry-after']?.trim() ?? '') : null;
@@ -1327,9 +1384,17 @@ class CommunityService {
         publicationId: null,
         status: null,
         retryAfter: retryAfter != null && retryAfter > 0 ? Duration(seconds: retryAfter) : null,
+        replayed: false,
       );
     } catch (e) {
-      return (success: false, error: 'Connection error', publicationId: null, status: null, retryAfter: null);
+      return (
+        success: false,
+        error: 'Connection error',
+        publicationId: null,
+        status: null,
+        retryAfter: null,
+        replayed: false,
+      );
     }
   }
 

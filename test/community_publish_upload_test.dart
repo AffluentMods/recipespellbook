@@ -295,7 +295,27 @@ void main() {
       expect(await CommunityService.publishKeyFor('cookbook:book'), isNot(key));
     });
 
-    Future<({bool success, String? error, String? publicationId, String? status, Duration? retryAfter})> publish(
+    test('knows whether every try under a key sent the same content', () async {
+      final first = await CommunityService.publishKeyForContent('cookbook:book', 'content-a');
+      expect(first.sameContent, isTrue);
+      final again = await CommunityService.publishKeyForContent('cookbook:book', 'content-a');
+      expect(again, (key: first.key, sameContent: true));
+      // Edited after a try that timed out: the same key, other content.
+      final edited = await CommunityService.publishKeyForContent('cookbook:book', 'content-b');
+      expect(edited, (key: first.key, sameContent: false));
+      // And it stays mixed, even back at the first content.
+      expect((await CommunityService.publishKeyForContent('cookbook:book', 'content-a')).sameContent, isFalse);
+      // A key from before this was recorded may have sent anything.
+      final old = await CommunityService.publishKeyFor('cookbook:old');
+      expect(await CommunityService.publishKeyForContent('cookbook:old', 'content-a'), (key: old, sameContent: false));
+      // Once published, the next publish starts fresh.
+      await CommunityService.clearPublishKey('cookbook:book');
+      final fresh = await CommunityService.publishKeyForContent('cookbook:book', 'content-b');
+      expect(fresh.key, isNot(first.key));
+      expect(fresh.sameContent, isTrue);
+    });
+
+    Future<CommunityPublishResult> publish(
       http.Response Function(Map<String, dynamic> body) answer,
     ) =>
         http.runWithClient(
@@ -316,6 +336,7 @@ void main() {
       expect(sent, ['key-1']);
       expect(result.success, isTrue);
       expect(result.publicationId, 'pub1');
+      expect(result.replayed, isTrue);
     });
 
     test('tells the upload lock (Retry-After) from the daily limit', () async {

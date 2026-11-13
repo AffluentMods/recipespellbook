@@ -31,6 +31,9 @@ class _Server {
   /// How a POST is answered; null is a new publication (201).
   http.Response? Function(Map<String, dynamic> body)? postAnswer;
 
+  /// Every PUT fails with a server error.
+  var putFails = false;
+
   http.Client get client => MockClient((request) async {
         final path = request.url.path;
         if (path.endsWith('/v1/community/me/upload-status')) {
@@ -42,6 +45,7 @@ class _Server {
         }
         final put = RegExp(r'/v1/community/([^/]+)/recipes$').firstMatch(path);
         if (request.method == 'PUT' && put != null) {
+          if (putFails) return http.Response('{"error":"boom"}', 500);
           puts.putIfAbsent(put.group(1)!, () => []).add(jsonDecode(request.body) as Map<String, dynamic>);
           return _json({'ok': true, 'status': 'published'});
         }
@@ -244,6 +248,67 @@ void main() {
 
     test('a snapshot from before the choice existed keeps notes private', () {
       expect(PublishSnapshot.fromJson({'h': 'abc', 'img': true, 't': 0})!.includeNotes, isFalse);
+    });
+  });
+
+  group('a retry after a timeout', () {
+    /// The first try times out here, but the server made the publication.
+    void firstTryTimesOut() {
+      var n = 0;
+      server.postAnswer = (_) {
+        if (++n == 1) throw http.ClientException('timed out');
+        // The same key again: the server answers with what it made.
+        return http.Response(jsonEncode({'id': 'pub9', 'status': 'published'}), 200);
+      };
+    }
+
+    test('after an edit, brings the publication the first try made up to date', () async {
+      await addCookbook();
+      firstTryTimesOut();
+      expect((await run(await prepare())).success, isFalse);
+
+      await (db.update(db.ingredients)..where((t) => t.id.equals('r1-i0')))
+          .write(const IngredientsCompanion(name: drift.Value('stock')));
+      final job = await prepare();
+      final result = await run(job);
+      expect(result.success, isTrue, reason: result.error);
+      expect(result.publicationId, 'pub9');
+      expect(server.posts, hasLength(2));
+      expect(server.posts[0]['publishKey'], server.posts[1]['publishKey'], reason: 'never published twice');
+      // The edited content went to the publication the first try made.
+      final replaced = server.puts['pub9']!.single['recipes'] as List;
+      expect(((replaced[1] as Map)['ingredients'] as List).first['name'], 'stock');
+      expect(server.patches['pub9'], [
+        {'title': 'Soups', 'description': '', 'tags': ''},
+      ]);
+      expect((await PublishSnapshot.lookup('pub9'))!.hash, job.contentHash);
+    });
+
+    test('with nothing edited, the answer is taken as it is', () async {
+      await addCookbook();
+      firstTryTimesOut();
+      expect((await run(await prepare())).success, isFalse);
+      final job = await prepare();
+      final result = await run(job);
+      expect(result.success, isTrue, reason: result.error);
+      expect(server.puts, isEmpty);
+      expect(server.patches, isEmpty);
+      expect((await PublishSnapshot.lookup('pub9'))!.hash, job.contentHash);
+    });
+
+    test('when bringing it up to date fails, it shows as changed and the key stays', () async {
+      await addCookbook();
+      firstTryTimesOut();
+      await run(await prepare());
+      await (db.update(db.ingredients)..where((t) => t.id.equals('r1-i0')))
+          .write(const IngredientsCompanion(name: drift.Value('stock')));
+      final job = await prepare();
+      server.putFails = true;
+      final result = await run(job);
+      expect(result.success, isFalse);
+      expect(result.publicationId, 'pub9');
+      expect((await PublishSnapshot.lookup('pub9'))!.hash, isNot(job.contentHash));
+      expect(await CommunityService.lookupPublishSource('pub9'), (kind: 'cookbook', sourceId: 'book'));
     });
   });
 

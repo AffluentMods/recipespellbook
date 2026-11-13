@@ -90,6 +90,11 @@ class PreparedPublish {
   /// `cookbook:<id>` or `recipe:<id>`, for the publish key.
   String get sourceKey => '$kind:$sourceId';
 
+  /// Fingerprint of everything a new publication carries: [contentHash]
+  /// plus its title, description, tags and kind.
+  String get sendHash =>
+      sha256.convert(utf8.encode(jsonEncode([contentHash, title, description, tags, kind]))).toString();
+
   bool get isSingleRecipe => kind == 'recipe';
 
   /// Titles that use any of [photos], each once, in publish order.
@@ -777,21 +782,20 @@ class CommunityPublishPipeline {
 
       // Same key on every try for this cookbook until one succeeds, so a
       // retry after a timeout cannot publish it twice.
-      final publishKey = await CommunityService.publishKeyFor(job.sourceKey);
+      final attempt = await CommunityService.publishKeyForContent(job.sourceKey, job.sendHash);
       if (!live()) return PublishRunResult._cancelled;
 
-      Future<({bool success, String? error, String? publicationId, String? status, Duration? retryAfter})>
-          publishOnce() => _community.publish(
-                title: job.title,
-                description: job.description,
-                imagePath: cookbookImagePath,
-                recipes: recipeMaps,
-                imageCount: pathMapping.length,
-                totalImageBytes: totalImageBytes,
-                tags: job.tags,
-                kind: job.kind,
-                publishKey: publishKey,
-              );
+      Future<CommunityPublishResult> publishOnce() => _community.publish(
+            title: job.title,
+            description: job.description,
+            imagePath: cookbookImagePath,
+            recipes: recipeMaps,
+            imageCount: pathMapping.length,
+            totalImageBytes: totalImageBytes,
+            tags: job.tags,
+            kind: job.kind,
+            publishKey: attempt.key,
+          );
 
       // A 429 with Retry-After is the account's upload lock (an earlier try
       // may still be processing): wait it out a few times. The same key
@@ -801,6 +805,35 @@ class CommunityPublishPipeline {
         await _wait(Duration(seconds: result.retryAfter!.inSeconds.clamp(1, 60)));
         if (!live()) return PublishRunResult._cancelled;
         result = await publishOnce();
+      }
+
+      // The server answered with the publication an earlier try under this
+      // key made (it timed out here but went through), and that try sent
+      // other content: bring the publication up to what is published now,
+      // or it would be recorded as this content while showing the old one.
+      final publicationId = result.publicationId;
+      if (result.success && result.replayed && !attempt.sameContent && publicationId != null) {
+        final brought = await _bringUpToDate(
+          publicationId,
+          job,
+          recipes: recipeMaps,
+          imageCount: pathMapping.length,
+          totalImageBytes: totalImageBytes,
+          imagePath: cookbookImagePath,
+          live: live,
+        );
+        if (!live()) return PublishRunResult._cancelled;
+        if (!brought) {
+          // It is live with the earlier content. Remember it as changed, so
+          // My Publications offers the update; the key stays, so publishing
+          // again brings it up to date instead of making another.
+          if (job.sourceId.isNotEmpty) {
+            await CommunityService.recordPublishSource(publicationId, kind: job.kind, sourceId: job.sourceId);
+          }
+          await _remember(publicationId, job, photoKeys, update: false, outdated: true);
+          report(PublishProgress(status: 'error', errorMessage: l10n.communityPublishingFailed));
+          return PublishRunResult._(error: l10n.communityPublishingFailed, publicationId: publicationId);
+        }
       }
 
       if (result.success) {
@@ -861,15 +894,17 @@ class CommunityPublishPipeline {
   /// publication's title, but only while that title is still the old name
   /// ([publishedTitle]): a title of its own stays. Returns false when the
   /// rename failed (the old name stays in the snapshot, so it still shows as
-  /// changed).
+  /// changed). An [outdated] publication is live with other content than
+  /// [job]: it is kept as changed, and its photos are not [job]'s.
   Future<bool> _remember(
     String publicationId,
     PreparedPublish job,
     Map<String, ({String serverPath, int bytes})> photoKeys, {
     required bool update,
     String? publishedTitle,
+    bool outdated = false,
   }) async {
-    await PublishedPhotos.save(publicationId, photoKeys);
+    if (!outdated) await PublishedPhotos.save(publicationId, photoKeys);
 
     var name = job.sourceName;
     var renamed = true;
@@ -885,7 +920,8 @@ class CommunityPublishPipeline {
     await PublishSnapshot.save(
       publicationId,
       PublishSnapshot(
-        hash: job.contentHash,
+        // A hash nothing matches: the publication shows as changed.
+        hash: outdated ? 'outdated:${job.contentHash}' : job.contentHash,
         name: name,
         includeImages: job.includeImages,
         includeNotes: job.includeNotes,
@@ -895,5 +931,38 @@ class CommunityPublishPipeline {
       ),
     );
     return renamed;
+  }
+
+  /// Replaces what publication [publicationId] shows with [job]: its
+  /// recipes, photos and cover, then its title, description and tags. True
+  /// when both went through.
+  Future<bool> _bringUpToDate(
+    String publicationId,
+    PreparedPublish job, {
+    required List<Map<String, dynamic>> recipes,
+    required int imageCount,
+    required int totalImageBytes,
+    required String? imagePath,
+    required bool Function() live,
+  }) async {
+    Future<({bool ok, Duration? retryAfter})> replaceOnce() => _community.replacePublicationRecipesResult(
+          publicationId,
+          recipes: recipes,
+          imageCount: imageCount,
+          totalImageBytes: totalImageBytes,
+          imagePath: imagePath,
+        );
+    var replaced = await replaceOnce();
+    for (var tries = 0; !replaced.ok && replaced.retryAfter != null && tries < 5 && live(); tries++) {
+      await _wait(Duration(seconds: replaced.retryAfter!.inSeconds.clamp(1, 60)));
+      replaced = await replaceOnce();
+    }
+    if (!replaced.ok) return false;
+    return _community.updatePublication(
+      publicationId,
+      title: job.title,
+      description: job.description ?? '',
+      tags: job.tags ?? '',
+    );
   }
 }
