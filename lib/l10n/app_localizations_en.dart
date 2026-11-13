@@ -12731,4 +12731,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityRepublishDetailsUnavailable => 'The publication\'s title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Could not save the recipe. Check your connection and try again.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'This recipe is no longer available in the Community.';
+
+  @override
+  String get communityLoadFailed => 'Could not load this. Check your connection and try again.';
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/community_service.dart';
 import '../../widgets/community_image.dart';
+import 'community_recipe_full_screen.dart' show communityRecipeLocation;
 
 // ════════════════════════════════════════════
 //  QUICK-GLANCE RECIPE PREVIEW DIALOG
@@ -92,7 +93,7 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                               onPressed: () {
                                 Navigator.pop(context);
                                 context.push(
-                                  '/community/$publicationId/recipe/$recipeIndex',
+                                  communityRecipeLocation(publicationId, recipe, recipeIndex),
                                   extra: recipe,
                                 );
                               },
@@ -121,7 +122,7 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                       onPressed: () {
                         Navigator.pop(context);
                         context.push(
-                          '/community/$publicationId/recipe/$recipeIndex',
+                          communityRecipeLocation(publicationId, recipe, recipeIndex),
                           extra: recipe,
                         );
                       },
@@ -216,7 +217,7 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                         onPressed: () {
                           Navigator.pop(context);
                           context.push(
-                            '/community/$publicationId/recipe/$recipeIndex',
+                            communityRecipeLocation(publicationId, recipe, recipeIndex),
                             extra: recipe,
                           );
                         },

@@ -12945,4 +12945,13 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityRepublishDetailsUnavailable => 'Nie udało się wczytać tytułu, opisu i tagów publikacji, więc pozostaną bez zmian. Przepisy zostaną mimo to zaktualizowane.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Nie udało się zapisać przepisu. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Ten przepis nie jest już dostępny w Społeczności.';
+
+  @override
+  String get communityLoadFailed => 'Nie udało się wczytać. Sprawdź połączenie i spróbuj ponownie.';
 }

@@ -891,16 +891,22 @@ class CommunityService {
   }
 
   /// Fetch full details of a publication.
-  Future<CommunityDetail?> getPublication(String id) async {
+  Future<CommunityDetail?> getPublication(String id) async => (await fetchPublication(id)).detail;
+
+  /// Full details of a publication, telling "it is not there" ([notFound]:
+  /// unpublished, removed or under review) apart from "it did not load"
+  /// (offline, server error), where both leave [detail] null.
+  Future<({CommunityDetail? detail, bool notFound})> fetchPublication(String id) async {
     try {
       final r = await _auth.get('/v1/community/$id');
       if (r.statusCode == 200) {
-        return CommunityDetail.fromJson(jsonDecode(r.body));
+        return (detail: CommunityDetail.fromJson(jsonDecode(r.body)), notFound: false);
       }
+      return (detail: null, notFound: r.statusCode == 404 || r.statusCode == 410);
     } catch (e) {
       debugPrint('[Community] getPublication: $e');
     }
-    return null;
+    return (detail: null, notFound: false);
   }
 
   // ────────────────────────────────────

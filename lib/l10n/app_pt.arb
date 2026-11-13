@@ -4876,5 +4876,8 @@
   "communityPublishIncludeNotesSubtitle": "Publica as notas que você escreveu em cada receita. Suas avaliações com estrelas nunca são publicadas.",
   "publicationsUpdateAllConfirmBody": "Cada uma recebe as receitas do seu livro neste dispositivo. As fotos vão só para as publicadas com fotos, e suas notas só onde você escolheu incluí-las. As avaliações e os downloads são mantidos.",
   "communityRepublishDetailsNotSaved": "As receitas foram atualizadas, mas o novo título, a descrição ou as tags não foram salvos. Tente novamente em Minhas Publicações.",
-  "communityRepublishDetailsUnavailable": "Não foi possível carregar o título, a descrição e as tags da publicação, então eles ficam como estão. As receitas são atualizadas mesmo assim."
+  "communityRepublishDetailsUnavailable": "Não foi possível carregar o título, a descrição e as tags da publicação, então eles ficam como estão. As receitas são atualizadas mesmo assim.",
+  "communitySaveRecipeFailed": "Não foi possível salvar a receita. Verifique sua conexão e tente novamente.",
+  "communityRecipeNoLongerAvailable": "Esta receita não está mais disponível na Comunidade.",
+  "communityLoadFailed": "Não foi possível carregar. Verifique sua conexão e tente novamente."
 }

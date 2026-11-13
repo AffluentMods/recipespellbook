@@ -12719,4 +12719,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get communityRepublishDetailsUnavailable => 'Le titre, la description et les tags de la publication n\'ont pas pu être chargés, ils restent donc tels quels. Les recettes sont quand même mises à jour.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Impossible d\'enregistrer la recette. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Cette recette n\'est plus disponible dans la Communauté.';
+
+  @override
+  String get communityLoadFailed => 'Impossible de charger le contenu. Vérifiez votre connexion et réessayez.';
 }

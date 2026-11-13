@@ -12567,4 +12567,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityRepublishDetailsUnavailable => '公開のタイトル、説明、タグを読み込めなかったため、そのままになります。レシピは更新されます。';
+
+  @override
+  String get communitySaveRecipeFailed => 'レシピを保存できませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'このレシピはコミュニティで公開されなくなりました。';
+
+  @override
+  String get communityLoadFailed => '読み込めませんでした。接続を確認して、もう一度お試しください。';
 }

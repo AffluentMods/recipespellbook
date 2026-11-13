@@ -12731,4 +12731,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get communityRepublishDetailsUnavailable => 'De titel, beschrijving en tags van de publicatie konden niet worden geladen en blijven dus zoals ze zijn. De recepten worden wel bijgewerkt.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Het recept kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Dit recept is niet meer beschikbaar in de Community.';
+
+  @override
+  String get communityLoadFailed => 'Dit kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.';
 }

@@ -12595,4 +12595,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get communityRepublishDetailsUnavailable => '게시물의 제목, 설명, 태그를 불러오지 못해 그대로 유지됩니다. 레시피는 계속 업데이트됩니다.';
+
+  @override
+  String get communitySaveRecipeFailed => '레시피를 저장하지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => '이 레시피는 더 이상 커뮤니티에서 볼 수 없습니다.';
+
+  @override
+  String get communityLoadFailed => '불러오지 못했습니다. 연결을 확인하고 다시 시도하세요.';
 }

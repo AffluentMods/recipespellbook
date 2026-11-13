@@ -22086,6 +22086,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The publication\'s title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.'**
   String get communityRepublishDetailsUnavailable;
+
+  /// Error when saving a Community or shared recipe into a cookbook did not work (for example offline).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the recipe. Check your connection and try again.'**
+  String get communitySaveRecipeFailed;
+
+  /// A Community recipe that was removed, unpublished or put under review since it was shown.
+  ///
+  /// In en, this message translates to:
+  /// **'This recipe is no longer available in the Community.'**
+  String get communityRecipeNoLongerAvailable;
+
+  /// Shown with a Retry button when a Community page (feed, cookbook, recipe, My Publications) could not load.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this. Check your connection and try again.'**
+  String get communityLoadFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

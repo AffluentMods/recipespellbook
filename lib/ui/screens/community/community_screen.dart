@@ -6,10 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:drift/drift.dart' as drift;
-
 import '../../../data/community_tags_data.dart';
-import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
@@ -19,10 +16,11 @@ import '../../../services/community_service.dart';
 import '../../../theme/app_colors.dart';
 import '../admin/admin_moderation_screen.dart';
 import '../../../utils/responsive_utils.dart';
-import '../../widgets/app_snackbar.dart';
 import '../../widgets/community/community_cookbook_card.dart';
 import '../../widgets/community/community_feed_card.dart';
 import '../../widgets/community/community_recipe_preview_sheet.dart';
+import '../../widgets/community/community_recipe_save.dart';
+import 'community_recipe_full_screen.dart' show CommunityRecipeRouteExtra, communityRecipeLocation;
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import 'community_publish_screen.dart';
@@ -834,7 +832,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       // feed card's bookmark fills.
       onSaveRecipe: (closePreview) => _saveRecipeFromPreview(context, recipe, closePreview),
       onExpandRecipe: () {
-        final communityRecipe = CommunityRecipe(
+        // The feed only has a preview of the recipe: it shows at once while
+        // the page loads the whole of it (nutrition, notes, source and so
+        // on), found by its id, which also survives a reload.
+        final preview = CommunityRecipe(
           id: recipe.id,
           cookCount: recipe.cookCount,
           title: recipe.title,
@@ -843,19 +844,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           servings: recipe.servings,
           prepTimeMinutes: recipe.prepTimeMinutes,
           cookTimeMinutes: recipe.cookTimeMinutes,
-          sourceUrl: null,
           courseId: recipe.courseId,
-          categoryId: null,
-          rating: null,
-          notes: null,
-          nutritionJson: null,
           ingredients: recipe.ingredients,
           steps: recipe.steps,
           tags: recipe.tags,
         );
         context.push(
-          '/community/${recipe.cookbook.id}/recipe/0',
-          extra: communityRecipe,
+          communityRecipeLocation(recipe.cookbook.id, preview, 0),
+          extra: CommunityRecipeRouteExtra(preview, complete: false),
         );
       },
     );
@@ -1051,71 +1047,20 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     );
   }
 
+  /// Saves the whole recipe, not the feed's preview of it: the publication
+  /// is fetched and the recipe written as a cookbook download writes it
+  /// (photos, step photos, tags, nutrition, notes, source, sub-recipes).
   Future<void> _saveRecipeToCookbook(BuildContext context, CommunityRecipeFeedItem recipe, String cookbookId) async {
-    final l10n = AppLocalizations.of(context)!;
-    final db = ref.read(databaseProvider);
-    final uuid = 'cr_${DateTime.now().millisecondsSinceEpoch}';
-
-    try {
-      AppSnackbar.loading(context, l10n.communitySavingRecipe);
-
-      await db.transaction(() async {
-        await db.into(db.recipes).insert(RecipesCompanion.insert(
-          id: uuid,
-          cookbookId: cookbookId,
-          title: recipe.title,
-          description: drift.Value(recipe.description),
-          servings: drift.Value(recipe.servings),
-          prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
-          cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
-          courseId: drift.Value(recipe.courseId),
-          lastViewedAt: drift.Value(DateTime.now()),
-        ));
-
-        for (var i = 0; i < recipe.ingredients.length; i++) {
-          final ing = recipe.ingredients[i];
-          await db.into(db.ingredients).insert(IngredientsCompanion.insert(
-            id: '${uuid}_ing_$i',
-            recipeId: uuid,
-            sortOrder: ing.sortOrder,
-            name: ing.name,
-            amount: drift.Value(ing.amount),
-            unit: drift.Value(ing.unit),
-            notes: drift.Value(ing.notes),
-          ));
-        }
-
-        for (var i = 0; i < recipe.steps.length; i++) {
-          final step = recipe.steps[i];
-          await db.into(db.steps).insert(StepsCompanion.insert(
-            id: '${uuid}_step_$i',
-            recipeId: uuid,
-            sortOrder: step.sortOrder,
-            instruction: step.instruction,
-            durationMinutes: drift.Value(step.durationMinutes),
-            notes: drift.Value(step.notes),
-          ));
-        }
-      });
-
-      // Track download on backend (fire-and-forget)
-      if (recipe.id != null) {
-        CommunityService.instance.trackRecipeDownload(recipe.id!);
-      }
-
-      if (mounted && recipe.id != null) {
-        setState(() => _savedRecipeIds.add(recipe.id!));
-      }
-
-      if (context.mounted) {
-        AppSnackbar.dismiss(context);
-        AppSnackbar.success(context, l10n.communityRecipeSaved(recipe.title));
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppSnackbar.dismiss(context);
-        AppSnackbar.error(context, l10n.communityFailedToSave(e.toString()));
-      }
+    final saved = await saveCommunityRecipeWithFeedback(
+      context,
+      ref,
+      publicationId: recipe.cookbook.id,
+      recipeId: recipe.id,
+      title: recipe.title,
+      cookbookId: cookbookId,
+    );
+    if (saved && mounted && recipe.id != null) {
+      setState(() => _savedRecipeIds.add(recipe.id!));
     }
   }
 

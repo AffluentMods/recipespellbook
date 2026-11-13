@@ -13,8 +13,9 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/collab_service.dart';
+import '../../../services/community_cookbook_writer.dart';
+import '../../../services/community_recipe_saver.dart';
 import '../../../services/family_service.dart';
-import '../../../services/image_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
@@ -528,9 +529,22 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
   /// Let the user choose which cookbook to save the shared recipe into.
   Future<void> _promptSave(Map<String, dynamic> recipe) async {
     final l10n = AppLocalizations.of(context)!;
-    final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? const [];
-    if (cookbooks.length <= 1) {
-      await _saveRecipe(recipe, cookbooks.isNotEmpty ? cookbooks.first.id : 'starter');
+    // From the database, not the provider: a list still loading must not
+    // read as "no cookbooks".
+    final cookbooks = await ref.read(cookbookDaoProvider).getAllCookbooks();
+    if (!mounted) return;
+    if (cookbooks.isEmpty) {
+      // Nowhere to save yet: make the person's first cookbook for it.
+      final id = 'cb_${DateTime.now().millisecondsSinceEpoch}';
+      await ref.read(cookbookDaoProvider).insertCookbook(
+            CookbooksCompanion.insert(id: id, name: l10n.defaultCookbookName),
+          );
+      ref.invalidate(cookbooksProvider);
+      await _saveRecipe(recipe, id);
+      return;
+    }
+    if (cookbooks.length == 1) {
+      await _saveRecipe(recipe, cookbooks.first.id);
       return;
     }
     final chosen = await showModalBottomSheet<String>(
@@ -567,126 +581,42 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
     if (chosen != null) await _saveRecipe(recipe, chosen);
   }
 
-  /// Import a shared recipe into [cookbookId], downloading its photos from the
-  /// share so the saved copy keeps them.
+  /// Import a shared recipe into [cookbookId] through the same writer as a
+  /// Community download: its photos (fetched from the share), tags,
+  /// nutrition, notes, source, and the sub-recipes that travel with it,
+  /// linked as they were.
   Future<void> _saveRecipe(Map<String, dynamic> recipe, String cookbookId) async {
     final l10n = AppLocalizations.of(context)!;
     final db = ref.read(databaseProvider);
-    final images = ImageService.instance;
     setState(() => _saving = true);
     try {
-      final mainId = await _insertSnapshot(db, images, recipe, cookbookId, 'main');
-
-      // Linked sub-recipes travel with the share — recreate them + wire links.
-      // Keyed on each sub's stable snapshot id (not its title, which isn't unique).
-      final linked = (recipe['linkedRecipes'] as List?) ?? const [];
-      final snapIdToNewId = <String, String>{};
-      for (var s = 0; s < linked.length; s++) {
-        final m = Map<String, dynamic>.from(linked[s] as Map);
-        final newSubId = await _insertSnapshot(db, images, m, cookbookId, 's$s');
-        final origId = (m['id'] as String?) ?? '';
-        if (origId.isNotEmpty) snapIdToNewId[origId] = newSubId;
-      }
-
-      final links = (recipe['links'] as List?) ?? const [];
-      if (links.isNotEmpty && snapIdToNewId.isNotEmpty) {
-        final mainIngs =
-            await (db.select(db.ingredients)..where((t) => t.recipeId.equals(mainId))).get();
-        await db.transaction(() async {
-          for (final raw in links) {
-            final l = raw as Map;
-            final ingName = (l['ingredientName'] as String?)?.toLowerCase().trim();
-            final newSubId = snapIdToNewId[(l['subId'] as String?) ?? ''];
-            if (ingName == null || ingName.isEmpty || newSubId == null) continue;
-            final matches = mainIngs.where((i) => i.name.toLowerCase().trim() == ingName);
-            if (matches.isEmpty) continue;
-            await db.into(db.recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
-              sourceRecipeId: mainId,
-              ingredientId: matches.first.id,
-              linkedRecipeId: newSubId,
-            ));
-          }
-        });
-      }
+      final recipes = sharedRecipeAsCommunity(recipe);
+      final all = [for (var i = 0; i < recipes.length; i++) i];
+      final photos = CommunityPhotoPlan.forRecipes(
+        widget.code,
+        recipes,
+        all,
+        urlFor: _shareImageUrl,
+        filePrefix: 'shared_${widget.code}',
+      );
+      await photos.fetch();
+      await saveCommunityRecipes(db: db, recipes: recipes, indexes: all, cookbookId: cookbookId, photos: photos);
+      ref.invalidate(cookbooksProvider);
 
       if (mounted) {
-        AppSnackbar.success(context, l10n.communityRecipeSaved((recipe['title'] as String?) ?? ''));
+        final message = l10n.communityRecipeSaved((recipe['title'] as String?) ?? '');
+        if (photos.failed > 0) {
+          AppSnackbar.warning(context, '$message\n${l10n.communityPhotosNotDownloaded(photos.failed)}');
+        } else {
+          AppSnackbar.success(context, message);
+        }
       }
     } catch (e) {
-      if (mounted) AppSnackbar.error(context, l10n.communityFailedToSave(e.toString()));
+      debugPrint('[Share] save: $e');
+      if (mounted) AppSnackbar.error(context, l10n.communitySaveRecipeFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-  }
-
-  /// Insert one snapshot recipe (downloading its photos) and return its new id.
-  Future<String> _insertSnapshot(
-    AppDatabase db,
-    ImageService images,
-    Map<String, dynamic> recipe,
-    String cookbookId,
-    String idSuffix,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final id = 'shr_${DateTime.now().millisecondsSinceEpoch}_$idSuffix';
-
-    String? coverLocal;
-    final coverServer = recipe['imagePath'] as String?;
-    if (coverServer != null && coverServer.isNotEmpty) {
-      coverLocal = await images.downloadAndSaveImage(_shareImageUrl(coverServer), '${id}_cover.jpg');
-    }
-    final steps = (recipe['steps'] as List?) ?? [];
-    final stepLocal = <int, String?>{};
-    for (var i = 0; i < steps.length; i++) {
-      final sp = steps[i]['imagePath'] as String?;
-      if (sp != null && sp.isNotEmpty) {
-        stepLocal[i] = await images.downloadAndSaveImage(_shareImageUrl(sp), '${id}_step_$i.jpg');
-      }
-    }
-    final ings = (recipe['ingredients'] as List?) ?? [];
-
-    await db.transaction(() async {
-      await db.into(db.recipes).insert(RecipesCompanion.insert(
-        id: id,
-        cookbookId: cookbookId,
-        title: (recipe['title'] as String?) ?? l10n.shareViewerUntitled,
-        description: drift.Value(recipe['description'] as String?),
-        servings: drift.Value(recipe['servings'] as String?),
-        prepTimeMinutes: drift.Value((recipe['prepTimeMinutes'] as num?)?.toInt()),
-        cookTimeMinutes: drift.Value((recipe['cookTimeMinutes'] as num?)?.toInt()),
-        sourceUrl: drift.Value(recipe['sourceUrl'] as String?),
-        courseId: drift.Value(recipe['courseId'] as String?),
-        categoryId: drift.Value(recipe['categoryId'] as String?),
-        rating: drift.Value((recipe['rating'] as num?)?.toInt()),
-        notes: drift.Value(recipe['notes'] as String?),
-        nutritionJson: drift.Value(recipe['nutritionJson'] as String?),
-        imagePath: drift.Value(coverLocal),
-        lastViewedAt: drift.Value(DateTime.now()),
-      ));
-      for (var i = 0; i < ings.length; i++) {
-        await db.into(db.ingredients).insert(IngredientsCompanion.insert(
-          id: '${id}_ing_$i',
-          recipeId: id,
-          sortOrder: (ings[i]['sortOrder'] as num?)?.toInt() ?? i,
-          name: (ings[i]['name'] as String?) ?? '',
-          amount: drift.Value(ings[i]['amount'] as String?),
-          unit: drift.Value(ings[i]['unit'] as String?),
-          notes: drift.Value(ings[i]['notes'] as String?),
-        ));
-      }
-      for (var i = 0; i < steps.length; i++) {
-        await db.into(db.steps).insert(StepsCompanion.insert(
-          id: '${id}_step_$i',
-          recipeId: id,
-          sortOrder: (steps[i]['sortOrder'] as num?)?.toInt() ?? i,
-          instruction: (steps[i]['instruction'] as String?) ?? '',
-          durationMinutes: drift.Value((steps[i]['durationMinutes'] as num?)?.toInt()),
-          notes: drift.Value(steps[i]['notes'] as String?),
-          imagePath: drift.Value(stepLocal[i]),
-        ));
-      }
-    });
-    return id;
   }
 }
 

@@ -12935,4 +12935,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityRepublishDetailsUnavailable => 'Не удалось загрузить название, описание и теги публикации, поэтому они останутся прежними. Рецепты всё равно обновятся.';
+
+  @override
+  String get communitySaveRecipeFailed => 'Не удалось сохранить рецепт. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get communityRecipeNoLongerAvailable => 'Этот рецепт больше не доступен в сообществе.';
+
+  @override
+  String get communityLoadFailed => 'Не удалось загрузить. Проверьте подключение и попробуйте снова.';
 }

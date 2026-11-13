@@ -12563,4 +12563,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityRepublishDetailsUnavailable => '无法加载该发布的标题、描述和标签，因此它们保持不变。食谱仍会更新。';
+
+  @override
+  String get communitySaveRecipeFailed => '无法保存食谱。请检查网络连接后重试。';
+
+  @override
+  String get communityRecipeNoLongerAvailable => '此食谱已不在社区中提供。';
+
+  @override
+  String get communityLoadFailed => '无法加载。请检查网络连接后重试。';
 }

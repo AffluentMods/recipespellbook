@@ -20,6 +20,7 @@ import '../../widgets/community/meta_line.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/community_tag_picker.dart';
 import '../../widgets/sheet_chrome.dart';
+import 'community_recipe_full_screen.dart' show communityRecipeLocation;
 import 'community_recipe_preview_dialog.dart';
 import 'community_screen.dart'; // StarRating
 
@@ -114,7 +115,10 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     // open the recipe full-screen view instead of this detail screen.
     if (detail != null && detail.isSingleRecipe && detail.recipes.isNotEmpty && mounted) {
       // Use replace so back arrow returns to the feed, not this stub.
-      context.pushReplacement('/community/${detail.id}/recipe/0');
+      context.pushReplacement(
+        communityRecipeLocation(detail.id, detail.recipes.first, 0),
+        extra: detail.recipes.first,
+      );
       return;
     }
 

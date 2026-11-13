@@ -6504,5 +6504,17 @@
   "communityRepublishDetailsUnavailable": "The publication's title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.",
   "@communityRepublishDetailsUnavailable": {
     "description": "On the publish screen when updating a publication whose title, description and tags could not be loaded: those fields are locked and kept as they are."
+  },
+  "communitySaveRecipeFailed": "Could not save the recipe. Check your connection and try again.",
+  "@communitySaveRecipeFailed": {
+    "description": "Error when saving a Community or shared recipe into a cookbook did not work (for example offline)."
+  },
+  "communityRecipeNoLongerAvailable": "This recipe is no longer available in the Community.",
+  "@communityRecipeNoLongerAvailable": {
+    "description": "A Community recipe that was removed, unpublished or put under review since it was shown."
+  },
+  "communityLoadFailed": "Could not load this. Check your connection and try again.",
+  "@communityLoadFailed": {
+    "description": "Shown with a Retry button when a Community page (feed, cookbook, recipe, My Publications) could not load."
   }
 }

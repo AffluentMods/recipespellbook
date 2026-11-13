@@ -14,6 +14,7 @@ import '../../../utils/responsive_utils.dart';
 import '../../../utils/recipe_title.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/community_image.dart';
+import '../community/community_recipe_full_screen.dart' show CommunityRecipeRouteExtra, communityRecipeLocation;
 
 // ═══════════════════════════════════════════════════════════════
 // "WHAT ARE YOU CRAVING?" — FULL-SCREEN DISCOVERY FLOW
@@ -563,7 +564,9 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
     final src = result.communitySource;
     if (src != null && result.cookbookId != null) {
       // Navigate to the specific recipe in the community cookbook
+      // (a preview from the feed: the page loads the rest by the recipe's id)
       final communityRecipe = CommunityRecipe(
+        id: src.id,
         title: src.title,
         description: src.description,
         imagePath: src.imagePath,
@@ -581,8 +584,8 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
         tags: src.tags,
       );
       context.push(
-        '/community/${result.cookbookId}/recipe/0',
-        extra: communityRecipe,
+        communityRecipeLocation(result.cookbookId!, communityRecipe, 0),
+        extra: CommunityRecipeRouteExtra(communityRecipe, complete: false),
       );
     } else if (result.cookbookId != null) {
       // Fallback — open cookbook detail
