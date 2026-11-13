@@ -120,7 +120,8 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                   } else if (result.error == 'Cannot report yourself') {
                     AppSnackbar.info(context, l10n.cannotReportSelf);
                   } else {
-                    AppSnackbar.error(context, result.error ?? l10n.accountProfileUpdateFailed);
+                    // The server's own text is English: say it in the user's language.
+                    AppSnackbar.error(context, l10n.communityReportFailed);
                   }
                 }
               },

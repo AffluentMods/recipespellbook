@@ -4,6 +4,7 @@ import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
 import '../../../services/collab_service.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -229,6 +230,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   Widget _collabBanner(ThemeData theme, String? perm) {
     final isCheck = perm == 'check';
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -242,9 +244,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            isCheck
-                ? 'Shared list · you can tick items off, but not add or remove them'
-                : 'Shared list · view only',
+            isCheck ? l10n.shoppingSharedCanTick : l10n.shoppingSharedViewOnly,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSecondaryContainer),
           ),
         ),
@@ -1665,15 +1665,19 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
+        // Said in the user's language; the result's message is the English.
+        final message = importResult.success
+            ? l10n.shoppingImportedItems(importResult.itemCount)
+            : importResult.wrongFile
+                ? l10n.shoppingImportWrongFile
+                : l10n.importFailed(importResult.error ?? importResult.message);
         if (importResult.success && importResult.listId != null) {
           setState(() {
             _currentListId = importResult.listId!;
             _currentListName = importResult.listName ?? l10n.shoppingImportedList;
           });
-          AppSnackbar.info(context, importResult.message);
-        } else {
-          AppSnackbar.info(context, importResult.message);
         }
+        AppSnackbar.info(context, message);
       }
     } catch (e) {
       if (mounted) {
@@ -2135,13 +2139,11 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
       assetIcon: 'assets/images/3rd-party/instacart_carrot.png',
       name: 'Instacart',
       color: Color(0xFF43B02A),
-      subtitle: 'Costco, Publix, Safeway, Aldi, Sprouts & 1,500+ retailers',
     ),
     GroceryProvider.kroger: _ProviderDisplay(
       emoji: '\u{1F3EA}',
       name: 'Kroger',
       color: Color(0xFF0056A4),
-      subtitle: 'Kroger, Fred Meyer, Ralphs, Harris Teeter & more',
     ),
   };
 
@@ -2327,13 +2329,11 @@ class _ProviderDisplay {
   final String? assetIcon;
   final String name;
   final Color color;
-  final String subtitle;
   const _ProviderDisplay({
     required this.emoji,
     this.assetIcon,
     required this.name,
     required this.color,
-    required this.subtitle,
   });
 }
 
@@ -2406,7 +2406,9 @@ class _ProviderTile extends StatelessWidget {
                           ? (display.name == 'Instacart'
                           ? l10n.shoppingTapToCreateShoppableList
                           : l10n.shoppingTapToAddToCart)
-                          : display.subtitle,
+                          : (display.name == 'Instacart'
+                          ? l10n.groceryInstacartStores
+                          : l10n.groceryKrogerStores),
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.outline, fontSize: 11),
                     ),
@@ -2574,8 +2576,9 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               textAlign: TextAlign.center,
             ),
-            // Show API message for debugging
-            if (_result?.message != null && _result!.message!.isNotEmpty) ...[
+            // The service's own English message, for debugging only: the
+            // lines above say it in the user's language.
+            if (kDebugMode && _result?.message != null && _result!.message!.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 _result!.message!,

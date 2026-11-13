@@ -947,7 +947,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
     } else if (result.notEntitled) {
       AppSnackbar.error(context, l10n.syncNotInPlan);
     } else {
-      AppSnackbar.error(context, result.error ?? l10n.syncFailed);
+      // The result's error is English for the log: say it in the user's
+      // language, telling a missing connection apart.
+      AppSnackbar.error(context, result.offline ? l10n.errorNetworkMessage : l10n.syncFailed);
     }
   }
 

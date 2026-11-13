@@ -600,6 +600,17 @@ void main() {
       });
     });
 
+    testWidgets('names the Nutri-Score in the language of the app', (tester) async {
+      tester.platformDispatcher.localesTestValue = const [Locale('de')];
+      addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+      await _scanning(tester, (app, camera, databases) async {
+        await _scan(tester, camera, _nutella);
+        expect(find.text('Nutri-Score'), findsOneWidget);
+        expect(find.text('Schlecht'), findsOneWidget);
+        expect(find.text('Bad'), findsNothing);
+      });
+    });
+
     testWidgets('a record with nothing filled in is shown as an unknown product, not as a blank', (tester) async {
       await _scanning(tester, (app, camera, databases) async {
         await _scan(tester, camera, '0083078113131');

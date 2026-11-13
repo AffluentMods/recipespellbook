@@ -248,11 +248,13 @@ class SyncNotifier extends StateNotifier<SyncState> {
     }
 
     if (!_hasCloudSync) {
+      // Not in the plan: the screens say so in the user's language.
       state = state.copyWith(
         status: SyncStatus.error,
         error: 'Upgrade to Cloud Sync to enable syncing',
+        notEntitled: true,
       );
-      return const SyncResult.failure('Cloud Sync required');
+      return const SyncResult.failure('Cloud Sync required', notEntitled: true);
     }
 
     state = state.copyWith(status: SyncStatus.syncing, error: null);

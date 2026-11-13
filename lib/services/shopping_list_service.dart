@@ -181,7 +181,11 @@ class ShoppingListService {
   Future<ImportListResult> importFromJson(Map<String, dynamic> data) async {
     try {
       if (data['type'] != 'shopping_list') {
-        return ImportListResult(success: false, message: 'Invalid file type — expected a Recipe Spellbook shopping list export.');
+        return ImportListResult(
+          success: false,
+          message: 'Invalid file type: expected a Recipe Spellbook shopping list export.',
+          wrongFile: true,
+        );
       }
 
       final listData = data['list'] as Map<String, dynamic>;
@@ -213,23 +217,38 @@ class ShoppingListService {
         message: 'Imported ${items.length} items',
         listId: newListId,
         listName: '${listData['name']} (imported)',
+        itemCount: items.length,
       );
     } catch (e) {
-      return ImportListResult(success: false, message: 'Import failed: $e');
+      return ImportListResult(success: false, message: 'Import failed: $e', error: '$e');
     }
   }
 }
 
+/// How a shopping list import went. [message] says it in English for the
+/// log; the screen says it from the other fields in the user's language.
 class ImportListResult {
   final bool success;
   final String message;
   final String? listId;
   final String? listName;
 
+  /// Items imported.
+  final int itemCount;
+
+  /// The file is not a shopping list exported from this app.
+  final bool wrongFile;
+
+  /// What went wrong, for an import that failed part way.
+  final String? error;
+
   ImportListResult({
     required this.success,
     required this.message,
     this.listId,
     this.listName,
+    this.itemCount = 0,
+    this.wrongFile = false,
+    this.error,
   });
 }

@@ -1572,9 +1572,10 @@ class CommunityService {
         final data = jsonDecode(r.body);
         return (success: false, error: data['error'] as String?);
       } catch (_) {}
-      return (success: false, error: 'Request failed');
+      // No error text of its own: the screen says it in the user's language.
+      return (success: false, error: null);
     } catch (_) {
-      return (success: false, error: 'Connection error');
+      return (success: false, error: null);
     }
   }
 

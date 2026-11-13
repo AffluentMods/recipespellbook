@@ -1225,11 +1225,12 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   /// a backup. Its [recipes] go through the preview like any others, into the
   /// cookbook that is open, and keep everything the file says about them.
   void _processOwnExportFormat(List<ImportedRecipe> recipes, {required String nothingFound}) {
+    if (!mounted) return;
     if (!recipes.any(hasRecipeContent)) {
       _showError(nothingFound);
       return;
     }
-    _showImportPreview(recipes, sourceText: 'Recipe Spellbook export (${recipes.length} recipes)');
+    _showImportPreview(recipes, sourceText: AppLocalizations.of(context)!.importPreviewOwnExport(recipes.length));
   }
 
   /// Opens the preview of [recipes]. False when it could not be shown, and

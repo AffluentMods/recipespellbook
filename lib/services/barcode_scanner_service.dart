@@ -1141,13 +1141,6 @@ class _NovaBadge extends StatelessWidget {
   final int group;
   const _NovaBadge({required this.group});
 
-  static const _labels = {
-    1: 'Unprocessed',
-    2: 'Processed ingredients',
-    3: 'Processed food',
-    4: 'Ultra-processed',
-  };
-
   static const _colors = {
     1: Color(0xFF2E7D32), // green
     2: Color(0xFF558B2F), // light green
@@ -1157,8 +1150,16 @@ class _NovaBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final color = _colors[group] ?? Colors.grey;
-    final label = _labels[group] ?? 'Unknown';
+    final label = switch (group) {
+      1 => l10n.barcodeNovaUnprocessed,
+      2 => l10n.barcodeNovaProcessedIngredients,
+      3 => l10n.barcodeNovaProcessedFood,
+      4 => l10n.barcodeNovaUltraProcessed,
+      _ => l10n.barcodeScoreUnknown,
+    };
+    // NOVA and Nutri-Score are names, the same in every language.
     return _ScoreBadge(title: 'NOVA', mark: '$group', label: label, color: color);
   }
 }
@@ -1179,19 +1180,19 @@ class _NutriScoreBadge extends StatelessWidget {
     'e': Color(0xFFC62828),
   };
 
-  static const _gradeLabels = {
-    'a': 'Excellent',
-    'b': 'Good',
-    'c': 'Average',
-    'd': 'Poor',
-    'e': 'Bad',
-  };
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final g = grade.toLowerCase();
     final color = _gradeColors[g] ?? Colors.grey;
-    final label = _gradeLabels[g] ?? '';
+    final label = switch (g) {
+      'a' => l10n.barcodeNutriScoreExcellent,
+      'b' => l10n.barcodeNutriScoreGood,
+      'c' => l10n.barcodeNutriScoreAverage,
+      'd' => l10n.barcodeNutriScorePoor,
+      'e' => l10n.barcodeNutriScoreBad,
+      _ => '',
+    };
     return _ScoreBadge(title: 'Nutri-Score', mark: grade.toUpperCase(), label: label, color: color);
   }
 }
@@ -1272,6 +1273,7 @@ class _AdditivesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final c = context.appColors;
     final matched = getAdditives(tags);
     final unmatched = tags.where((t) => lookupAdditive(t) == null).toList();
@@ -1322,7 +1324,7 @@ class _AdditivesSection extends StatelessWidget {
       ...unmatched.map((tag) => item(
             dot: c.textTertiary,
             name: tag.replaceAll('en:', '').toUpperCase(),
-            description: 'Not in database',
+            description: l10n.barcodeAdditiveNotInDatabase,
           )),
     ];
 
@@ -1330,10 +1332,10 @@ class _AdditivesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         NutritionSectionTitle(
-          'Additives',
+          l10n.barcodeAdditives,
           icon: Icons.science_outlined,
           trailing: Text(
-            '${matched.length + unmatched.length} found',
+            l10n.barcodeAdditivesFound(matched.length + unmatched.length),
             style: theme.textTheme.bodySmall?.copyWith(color: c.textTertiary),
           ),
         ),
@@ -1348,12 +1350,12 @@ class _AdditivesSection extends StatelessWidget {
               children: [
                 if (cautionCount > 0)
                   _ConcernChip(
-                    label: '$cautionCount caution',
+                    label: l10n.barcodeAdditivesCaution(cautionCount),
                     color: const Color(0xFFC62828),
                   ),
                 if (moderateCount > 0)
                   _ConcernChip(
-                    label: '$moderateCount moderate',
+                    label: l10n.barcodeAdditivesModerate(moderateCount),
                     color: const Color(0xFFEF6C00),
                   ),
               ],
