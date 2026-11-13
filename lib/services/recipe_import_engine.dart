@@ -4,6 +4,7 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 import 'web_page_decoder.dart';
 import '../models/imported_recipe.dart';
+import '../utils/ingredient_utils.dart' show mealMasterIngredient;
 import 'recipe_file_importers/mastercook_importer.dart';
 
 /// Consolidated recipe import engine.
@@ -4344,19 +4345,33 @@ class RecipeImportEngine {
     return _mealMasterBanner.hasMatch(content) || _mealMasterFields.hasMatch(content);
   }
 
+  /// Where one Meal-Master recipe begins or ends: the line that opens it
+  /// ("MMMMM----- Recipe via Meal-Master (tm) v8.05", "---------- Recipe via
+  /// Meal-Master", MasterCook's "----- Exported from ...") and the bare
+  /// "MMMMM" or "-----" that closes it.
+  static final _mealMasterDelimiter = RegExp(
+    r'^(?:(?:MMMMM|-{5,})-*[ \t]*(?:Recipe via\b|[^\n]{0,40}Meal-?Master)[^\n]*'
+    r'|-{5,}[ \t]*Exported from[^\n]*'
+    r'|MMMMM[ \t]*\r?|-----[ \t]*\r?)$',
+    multiLine: true,
+    caseSensitive: false,
+  );
+
+  /// A section header inside a Meal-Master recipe. Group 1 is its name.
+  static final _mealMasterSection = RegExp(r'^(?:MMMMM-*|-{5,})\s*(.*?)\s*-*$');
+
   /// Parse MealMaster format (*.mmf, *.mk).
   /// Format: recipes delimited by MMMMM markers or ----- Recipe via Meal-Master headers.
   /// Each recipe has: Title, Categories, Yield, then ingredients, then directions.
   static List<ImportedRecipe> _parseMealMaster(String content) {
     final recipes = <ImportedRecipe>[];
 
-    // Split into recipe blocks.
-    // MealMaster uses MMMMM lines or "---------- Recipe via Meal-Master" as delimiters
-    final blocks = content.split(RegExp(
-      r'(?:^MMMMM.*$|^-{5,}\s*Recipe via Meal-Master.*$|^-{5,}\s*Exported from.*$)',
-      multiLine: true,
-      caseSensitive: false,
-    ));
+    // Split into recipe blocks. A recipe opens with "MMMMM----- Recipe via
+    // Meal-Master" (or "---------- Recipe via Meal-Master") and ends with a
+    // bare "MMMMM" (or "-----"). The other MMMMM lines are the headers of
+    // sections inside a recipe ("MMMMM-----FOR THE SAUCE-----"), and stay
+    // in it.
+    final blocks = content.split(_mealMasterDelimiter);
 
     for (final block in blocks) {
       final trimmed = block.trim();
@@ -4371,6 +4386,9 @@ class RecipeImportEngine {
       final lines = trimmed.split('\n');
       var inIngredients = true; // MealMaster: ingredients come before directions
       var hitBlankAfterIngredients = false;
+      // A section header was the last line: a blank line under it does not
+      // end the ingredients.
+      var afterHeader = false;
 
       for (final rawLine in lines) {
         final line = rawLine.trimRight();
@@ -4389,22 +4407,29 @@ class RecipeImportEngine {
           continue;
         }
 
-        // Skip MMMMM section markers within block
-        if (RegExp(r'^MMMMM-+').hasMatch(line.trim())) {
-          // This is a sub-section marker (e.g., "MMMMM----- FOR THE SAUCE")
-          final sectionName = line.replaceAll(RegExp(r'^MMMMM-+\s*'), '').replaceAll(RegExp(r'-+$'), '').trim();
-          if (sectionName.isNotEmpty) ingredients.add('— $sectionName —');
+        // A section header inside the recipe ("MMMMM-----FOR THE SAUCE-----",
+        // or in dashes alone). The ingredients go on under it.
+        final section = _mealMasterSection.firstMatch(line.trim());
+        if (section != null) {
+          final sectionName = section.group(1)!.trim();
+          if (sectionName.isNotEmpty) {
+            ingredients.add('— $sectionName —');
+            inIngredients = true;
+            hitBlankAfterIngredients = false;
+            afterHeader = true;
+          }
           continue;
         }
 
         final trimmedLine = line.trim();
         if (trimmedLine.isEmpty) {
           // Blank line after ingredients = switch to instructions
-          if (inIngredients && ingredients.isNotEmpty) {
+          if (inIngredients && ingredients.isNotEmpty && !afterHeader) {
             hitBlankAfterIngredients = true;
           }
           continue;
         }
+        afterHeader = false;
 
         // MealMaster ingredient format: "  1 1/2 c  Flour, all-purpose" or "           -- sifted"
         // Columns: amount (1-7), unit (8-9), ingredient name (11+)
@@ -4415,14 +4440,15 @@ class RecipeImportEngine {
               RegExp(r'^\s{7,}').hasMatch(line) && trimmedLine.length > 2) {
             // MealMaster two-column: ingredient | ingredient
             // Each column is ~41 chars
+            // Its unit codes ("T", "t", "pn", "ea") are written out.
             if (line.length > 42 && RegExp(r'\d').hasMatch(line.substring(41))) {
               // Two-column
               final col1 = line.substring(0, 41).trim();
               final col2 = line.substring(41).trim();
-              if (col1.isNotEmpty) ingredients.add(col1);
-              if (col2.isNotEmpty) ingredients.add(col2);
+              if (col1.isNotEmpty) ingredients.add(mealMasterIngredient(col1));
+              if (col2.isNotEmpty) ingredients.add(mealMasterIngredient(col2));
             } else {
-              ingredients.add(trimmedLine);
+              ingredients.add(mealMasterIngredient(trimmedLine));
             }
           } else if (trimmedLine.startsWith('--') || trimmedLine.startsWith('-')) {
             // Continuation or note for previous ingredient
