@@ -12947,4 +12947,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cookbookUpdateSourceGone => 'Эта кулинарная книга больше не доступна в сообществе, поэтому обновлять нечего. Ваша копия остаётся как есть.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'Автор только что изменил эту кулинарную книгу. Проверьте выбор и попробуйте снова.';
+
+  @override
+  String get communityReportFailed => 'Не удалось отправить жалобу. Проверьте подключение и попробуйте снова.';
 }

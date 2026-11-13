@@ -12957,4 +12957,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get cookbookUpdateSourceGone => 'Ta książka kucharska nie jest już dostępna w Społeczności, więc nie ma czego aktualizować. Twoja kopia pozostaje bez zmian.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'Twórca właśnie zmienił tę książkę kucharską. Sprawdź wybór i spróbuj ponownie.';
+
+  @override
+  String get communityReportFailed => 'Nie udało się wysłać zgłoszenia. Sprawdź połączenie i spróbuj ponownie.';
 }

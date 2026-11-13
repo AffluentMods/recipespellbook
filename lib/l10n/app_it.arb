@@ -3904,5 +3904,7 @@
   "communitySaveRecipeFailed": "Impossibile salvare la ricetta. Controlla la connessione e riprova.",
   "communityRecipeNoLongerAvailable": "Questa ricetta non è più disponibile nella Community.",
   "communityLoadFailed": "Impossibile caricare. Controlla la connessione e riprova.",
-  "cookbookUpdateSourceGone": "Questo ricettario non è più disponibile nella Community, quindi non c'è nulla da aggiornare. La tua copia resta com'è."
+  "cookbookUpdateSourceGone": "Questo ricettario non è più disponibile nella Community, quindi non c'è nulla da aggiornare. La tua copia resta com'è.",
+  "communityDownloadSelectionChanged": "Il creatore ha appena modificato questo ricettario. Controlla la selezione e riprova.",
+  "communityReportFailed": "Impossibile inviare la segnalazione. Controlla la connessione e riprova."
 }

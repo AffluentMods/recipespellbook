@@ -6520,5 +6520,13 @@
   "cookbookUpdateSourceGone": "This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.",
   "@cookbookUpdateSourceGone": {
     "description": "In the update sheet of a downloaded Community cookbook whose publication was unpublished, removed or put under review."
+  },
+  "communityDownloadSelectionChanged": "The creator just changed this cookbook. Check your selection and try again.",
+  "@communityDownloadSelectionChanged": {
+    "description": "Saving picked recipes of a Community cookbook found that the creator changed it since it was shown; it is reloaded so the person can pick again."
+  },
+  "communityReportFailed": "Could not send the report. Check your connection and try again.",
+  "@communityReportFailed": {
+    "description": "Error when a report of Community content did not go through (the person is signed in)."
   }
 }

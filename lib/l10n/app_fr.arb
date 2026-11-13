@@ -3905,5 +3905,7 @@
   "communitySaveRecipeFailed": "Impossible d'enregistrer la recette. Vérifiez votre connexion et réessayez.",
   "communityRecipeNoLongerAvailable": "Cette recette n'est plus disponible dans la Communauté.",
   "communityLoadFailed": "Impossible de charger le contenu. Vérifiez votre connexion et réessayez.",
-  "cookbookUpdateSourceGone": "Ce livre de recettes n'est plus disponible dans la Communauté, il n'y a donc rien à mettre à jour. Votre copie reste telle quelle."
+  "cookbookUpdateSourceGone": "Ce livre de recettes n'est plus disponible dans la Communauté, il n'y a donc rien à mettre à jour. Votre copie reste telle quelle.",
+  "communityDownloadSelectionChanged": "Le créateur vient de modifier ce livre de recettes. Vérifiez votre sélection et réessayez.",
+  "communityReportFailed": "Impossible d'envoyer le signalement. Vérifiez votre connexion et réessayez."
 }

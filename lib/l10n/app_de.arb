@@ -4442,5 +4442,7 @@
   "communitySaveRecipeFailed": "Das Rezept konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.",
   "communityRecipeNoLongerAvailable": "Dieses Rezept ist in der Community nicht mehr verfügbar.",
   "communityLoadFailed": "Das konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
-  "cookbookUpdateSourceGone": "Dieses Kochbuch ist in der Community nicht mehr verfügbar, es gibt also nichts zu aktualisieren. Deine Kopie bleibt, wie sie ist."
+  "cookbookUpdateSourceGone": "Dieses Kochbuch ist in der Community nicht mehr verfügbar, es gibt also nichts zu aktualisieren. Deine Kopie bleibt, wie sie ist.",
+  "communityDownloadSelectionChanged": "Der Ersteller hat dieses Kochbuch gerade geändert. Prüfe deine Auswahl und versuche es erneut.",
+  "communityReportFailed": "Die Meldung konnte nicht gesendet werden. Prüfe deine Verbindung und versuche es erneut."
 }

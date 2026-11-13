@@ -12724,4 +12724,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cookbookUpdateSourceGone => 'Este recetario ya no está disponible en la Comunidad, así que no hay nada que actualizar. Tu copia se queda como está.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'El creador acaba de cambiar este recetario. Revisa tu selección e inténtalo de nuevo.';
+
+  @override
+  String get communityReportFailed => 'No se pudo enviar el informe. Comprueba tu conexión e inténtalo de nuevo.';
 }

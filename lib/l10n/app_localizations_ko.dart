@@ -12607,4 +12607,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cookbookUpdateSourceGone => '이 요리책은 더 이상 커뮤니티에서 볼 수 없어 업데이트할 내용이 없습니다. 내 사본은 그대로 유지됩니다.';
+
+  @override
+  String get communityDownloadSelectionChanged => '크리에이터가 방금 이 요리책을 변경했습니다. 선택 항목을 확인하고 다시 시도하세요.';
+
+  @override
+  String get communityReportFailed => '신고를 보내지 못했습니다. 연결을 확인하고 다시 시도하세요.';
 }

@@ -12575,4 +12575,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cookbookUpdateSourceGone => '此食谱书已不在社区中提供，因此没有可更新的内容。你的副本保持不变。';
+
+  @override
+  String get communityDownloadSelectionChanged => '创作者刚刚修改了这本食谱书。请检查你的选择后重试。';
+
+  @override
+  String get communityReportFailed => '无法发送举报。请检查网络连接后重试。';
 }

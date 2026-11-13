@@ -4880,5 +4880,7 @@
   "communitySaveRecipeFailed": "レシピを保存できませんでした。接続を確認して、もう一度お試しください。",
   "communityRecipeNoLongerAvailable": "このレシピはコミュニティで公開されなくなりました。",
   "communityLoadFailed": "読み込めませんでした。接続を確認して、もう一度お試しください。",
-  "cookbookUpdateSourceGone": "このレシピ本はコミュニティで公開されなくなったため、更新はありません。お手元のコピーはそのまま残ります。"
+  "cookbookUpdateSourceGone": "このレシピ本はコミュニティで公開されなくなったため、更新はありません。お手元のコピーはそのまま残ります。",
+  "communityDownloadSelectionChanged": "クリエイターがこのレシピ本を変更しました。選択内容を確認して、もう一度お試しください。",
+  "communityReportFailed": "報告を送信できませんでした。接続を確認して、もう一度お試しください。"
 }

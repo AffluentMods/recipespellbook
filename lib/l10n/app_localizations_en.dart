@@ -12743,4 +12743,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cookbookUpdateSourceGone => 'This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'The creator just changed this cookbook. Check your selection and try again.';
+
+  @override
+  String get communityReportFailed => 'Could not send the report. Check your connection and try again.';
 }

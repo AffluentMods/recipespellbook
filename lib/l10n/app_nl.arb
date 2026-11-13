@@ -4880,5 +4880,7 @@
   "communitySaveRecipeFailed": "Het recept kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.",
   "communityRecipeNoLongerAvailable": "Dit recept is niet meer beschikbaar in de Community.",
   "communityLoadFailed": "Dit kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.",
-  "cookbookUpdateSourceGone": "Dit kookboek is niet meer beschikbaar in de Community, dus er is niets om bij te werken. Je kopie blijft zoals ze is."
+  "cookbookUpdateSourceGone": "Dit kookboek is niet meer beschikbaar in de Community, dus er is niets om bij te werken. Je kopie blijft zoals ze is.",
+  "communityDownloadSelectionChanged": "De maker heeft dit kookboek net gewijzigd. Controleer je selectie en probeer het opnieuw.",
+  "communityReportFailed": "De melding kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw."
 }

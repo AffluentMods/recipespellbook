@@ -22110,6 +22110,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.'**
   String get cookbookUpdateSourceGone;
+
+  /// Saving picked recipes of a Community cookbook found that the creator changed it since it was shown; it is reloaded so the person can pick again.
+  ///
+  /// In en, this message translates to:
+  /// **'The creator just changed this cookbook. Check your selection and try again.'**
+  String get communityDownloadSelectionChanged;
+
+  /// Error when a report of Community content did not go through (the person is signed in).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the report. Check your connection and try again.'**
+  String get communityReportFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

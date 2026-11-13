@@ -12579,4 +12579,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cookbookUpdateSourceGone => 'このレシピ本はコミュニティで公開されなくなったため、更新はありません。お手元のコピーはそのまま残ります。';
+
+  @override
+  String get communityDownloadSelectionChanged => 'クリエイターがこのレシピ本を変更しました。選択内容を確認して、もう一度お試しください。';
+
+  @override
+  String get communityReportFailed => '報告を送信できませんでした。接続を確認して、もう一度お試しください。';
 }

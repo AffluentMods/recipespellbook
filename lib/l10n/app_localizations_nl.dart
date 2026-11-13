@@ -12743,4 +12743,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get cookbookUpdateSourceGone => 'Dit kookboek is niet meer beschikbaar in de Community, dus er is niets om bij te werken. Je kopie blijft zoals ze is.';
+
+  @override
+  String get communityDownloadSelectionChanged => 'De maker heeft dit kookboek net gewijzigd. Controleer je selectie en probeer het opnieuw.';
+
+  @override
+  String get communityReportFailed => 'De melding kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw.';
 }
