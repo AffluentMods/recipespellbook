@@ -167,6 +167,30 @@ void main() {
     expect(state.isSignedIn, isFalse);
   });
 
+  test('the session is checked with the server once at startup, however many ask', () async {
+    _saveSession();
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    var checks = 0;
+    // A token the server no longer takes: the check is easy to count, and
+    // the session ends without push or store sign-ins following it.
+    final server = MockClient((request) async {
+      if (request.url.path.endsWith('/v1/auth/me')) checks++;
+      return http.Response('{"error":"Token expired"}', 401);
+    });
+
+    await http.runWithClient(() async {
+      // main.dart starts it; the app shell waits for it, then again later.
+      final notifier = container.read(authProvider.notifier);
+      await Future.wait([notifier.initialize(), notifier.initialize()]);
+      await notifier.initialize();
+    }, () => server);
+
+    expect(checks, 1);
+    final state = container.read(authProvider);
+    expect((state.isLoading, state.isSignedIn), (false, false));
+  });
+
   test('a refused sign-in gives a code, not the server text', () async {
     final state = await http.runWithClient(
       () => AuthService.instance.restoreFromTransfer(token: 'old', userId: 'u1'),

@@ -76,6 +76,10 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (_servicesInitialized) return;
     _servicesInitialized = true;
 
+    // main.dart has started both. Each runs once, so these wait for those
+    // same runs instead of starting them again (the session used to be
+    // checked with the server twice at every launch). Either one that fails
+    // still settles, and the listener below is set up all the same.
     await ref.read(authProvider.notifier).initialize();
     await ref.read(subscriptionProvider.notifier).initialize();
 

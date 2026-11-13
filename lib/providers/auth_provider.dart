@@ -34,10 +34,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   final _service = AuthService.instance;
 
-  /// Call once at app startup to restore saved session. Always ends in a
-  /// settled state: if restoring fails in a way nobody expected, the app
-  /// starts signed out instead of waiting on "loading" for ever.
-  Future<void> initialize() async {
+  /// The one restore of the session, once it has started.
+  Future<void>? _initializing;
+
+  /// Restores the saved session at app startup. Always ends in a settled
+  /// state: if restoring fails in a way nobody expected, the app starts
+  /// signed out instead of waiting on "loading" for ever.
+  ///
+  /// It runs once: main.dart starts it and the app shell waits for the same
+  /// run, so the session is checked with the server (/v1/auth/me) once per
+  /// launch. A call after that returns the same, finished, run.
+  Future<void> initialize() => _initializing ??= _initialize();
+
+  Future<void> _initialize() async {
     state = const AuthState.loading();
     try {
       // Web: detect OAuth bridge token in URL fragment (from /app-auth/callback)

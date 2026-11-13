@@ -153,8 +153,18 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
 
   // ── Lifecycle ──
 
+  /// The one start of the subscription state, once it has begun.
+  Future<void>? _initializing;
+
   /// Initialize subscription state. Call after auth is ready.
-  Future<void> initialize() async {
+  ///
+  /// It runs once: main.dart starts it and the app shell waits for the same
+  /// run, so the store and the server are asked once per launch. A call
+  /// after that returns the same, finished, run. Signing in and out later
+  /// goes through [login] and [logout].
+  Future<void> initialize() => _initializing ??= _initialize();
+
+  Future<void> _initialize() async {
     state = state.copyWith(isLoading: true);
 
     try {
