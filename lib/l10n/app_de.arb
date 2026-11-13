@@ -4436,5 +4436,7 @@
   "communityPublishPhotosUnsupported": "Einige Fotos haben ein Format, das dieses Gerät nicht lesen kann (etwa HEIC), und fehlen deshalb bei:",
   "communityPublishIncludeNotes": "Meine Notizen einbeziehen",
   "communityPublishIncludeNotesSubtitle": "Veröffentlicht die Notizen, die du zu jedem Rezept geschrieben hast. Deine eigenen Sternebewertungen werden nie veröffentlicht.",
-  "publicationsUpdateAllConfirmBody": "Jede erhält die Rezepte aus ihrem Kochbuch auf diesem Gerät. Fotos nur, wenn sie mit Fotos veröffentlicht wurde, und deine Notizen nur, wo du sie einbezogen hast. Bewertungen und Downloads bleiben erhalten."
+  "publicationsUpdateAllConfirmBody": "Jede erhält die Rezepte aus ihrem Kochbuch auf diesem Gerät. Fotos nur, wenn sie mit Fotos veröffentlicht wurde, und deine Notizen nur, wo du sie einbezogen hast. Bewertungen und Downloads bleiben erhalten.",
+  "communityRepublishDetailsNotSaved": "Die Rezepte wurden aktualisiert, aber der neue Titel, die Beschreibung oder die Tags wurden nicht gespeichert. Versuche es in Meine Veröffentlichungen erneut.",
+  "communityRepublishDetailsUnavailable": "Titel, Beschreibung und Tags der Veröffentlichung konnten nicht geladen werden und bleiben daher, wie sie sind. Die Rezepte werden trotzdem aktualisiert."
 }

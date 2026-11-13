@@ -333,6 +333,9 @@ class CommunityPublicationUpdater {
         token: token,
         l10n: l10n,
         republishPublicationId: check.publication.id,
+        // A renamed cookbook renames the publication only while its title
+        // is still the cookbook's old name.
+        publishedTitle: check.publication.title,
         onProgress: progress,
       );
       control._current = null;

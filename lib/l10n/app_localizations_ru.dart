@@ -12929,4 +12929,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get publicationsUpdateAllConfirmBody => 'Каждая получит рецепты из своей книги на этом устройстве. Фото добавятся только к опубликованным с фото, а ваши заметки только там, где вы решили их включить. Оценки и скачивания сохраняются.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'Рецепты обновлены, но новое название, описание или теги не сохранились. Попробуйте ещё раз в разделе «Мои публикации».';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'Не удалось загрузить название, описание и теги публикации, поэтому они останутся прежними. Рецепты всё равно обновятся.';
 }

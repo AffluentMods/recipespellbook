@@ -12939,4 +12939,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get publicationsUpdateAllConfirmBody => 'Każda dostaje przepisy ze swojej książki na tym urządzeniu. Zdjęcia trafiają tylko do tych opublikowanych ze zdjęciami, a Twoje notatki tylko tam, gdzie je dołączono. Oceny i pobrania zostają zachowane.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'Przepisy zostały zaktualizowane, ale nowy tytuł, opis lub tagi nie zostały zapisane. Spróbuj ponownie w sekcji Moje publikacje.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'Nie udało się wczytać tytułu, opisu i tagów publikacji, więc pozostaną bez zmian. Przepisy zostaną mimo to zaktualizowane.';
 }

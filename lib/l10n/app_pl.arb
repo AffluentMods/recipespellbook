@@ -4874,5 +4874,7 @@
   "communityPublishPhotosUnsupported": "Niektóre zdjęcia mają format, którego to urządzenie nie odczyta (np. HEIC), więc pominięto je w:",
   "communityPublishIncludeNotes": "Dołącz moje notatki",
   "communityPublishIncludeNotesSubtitle": "Publikuje notatki dodane do każdego przepisu. Twoje oceny w gwiazdkach nigdy nie są publikowane.",
-  "publicationsUpdateAllConfirmBody": "Każda dostaje przepisy ze swojej książki na tym urządzeniu. Zdjęcia trafiają tylko do tych opublikowanych ze zdjęciami, a Twoje notatki tylko tam, gdzie je dołączono. Oceny i pobrania zostają zachowane."
+  "publicationsUpdateAllConfirmBody": "Każda dostaje przepisy ze swojej książki na tym urządzeniu. Zdjęcia trafiają tylko do tych opublikowanych ze zdjęciami, a Twoje notatki tylko tam, gdzie je dołączono. Oceny i pobrania zostają zachowane.",
+  "communityRepublishDetailsNotSaved": "Przepisy zostały zaktualizowane, ale nowy tytuł, opis lub tagi nie zostały zapisane. Spróbuj ponownie w sekcji Moje publikacje.",
+  "communityRepublishDetailsUnavailable": "Nie udało się wczytać tytułu, opisu i tagów publikacji, więc pozostaną bez zmian. Przepisy zostaną mimo to zaktualizowane."
 }

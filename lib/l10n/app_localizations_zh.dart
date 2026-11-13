@@ -12557,4 +12557,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get publicationsUpdateAllConfirmBody => '每个都会使用此设备上对应食谱书中的食谱更新。照片只会加到发布时带照片的出版物，备注只会加到你选择包含备注的出版物。评分和下载次数将保留。';
+
+  @override
+  String get communityRepublishDetailsNotSaved => '食谱已更新，但新的标题、描述或标签未能保存。请在“我的发布”中重试。';
+
+  @override
+  String get communityRepublishDetailsUnavailable => '无法加载该发布的标题、描述和标签，因此它们保持不变。食谱仍会更新。';
 }

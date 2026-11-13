@@ -1417,8 +1417,12 @@ class CommunityService {
     return [];
   }
 
-  /// Get my published cookbooks.
-  Future<List<MyPublication>> getMyPublications() async {
+  /// Get my published cookbooks (empty when they can't be loaded).
+  Future<List<MyPublication>> getMyPublications() async => await fetchMyPublications() ?? [];
+
+  /// My published cookbooks, or null when they could not be loaded
+  /// (offline, server error), so a failure never reads as "none yet".
+  Future<List<MyPublication>?> fetchMyPublications() async {
     try {
       final r = await _auth.get('/v1/community/me/publications');
       if (r.statusCode == 200) {
@@ -1430,7 +1434,7 @@ class CommunityService {
     } catch (e) {
       debugPrint('[Community] getMyPublications: $e');
     }
-    return [];
+    return null;
   }
 
   /// Unpublish one of my cookbooks.

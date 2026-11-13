@@ -146,6 +146,10 @@ class PublishRunResult {
   /// Recipes whose photos are in a format this device cannot read (left out).
   final List<String> unsupportedRecipes;
 
+  /// For an update with new [PublicationDetails]: false when the recipes
+  /// went in but the title, description or tags did not.
+  final bool detailsSaved;
+
   const PublishRunResult._({
     this.success = false,
     this.cancelled = false,
@@ -161,9 +165,22 @@ class PublishRunResult {
     this.rejectedRecipes = const [],
     this.failedRecipes = const [],
     this.unsupportedRecipes = const [],
+    this.detailsSaved = true,
   });
 
   static const _cancelled = PublishRunResult._(cancelled: true);
+}
+
+/// A publication's public title, description and tags as the person set
+/// them on the publish screen, saved with an update.
+class PublicationDetails {
+  final String title;
+  final String? description;
+
+  /// Comma-separated; null or empty for none.
+  final String? tags;
+
+  const PublicationDetails({required this.title, this.description, this.tags});
 }
 
 class CommunityPublishPipeline {
@@ -538,11 +555,20 @@ class CommunityPublishPipeline {
   /// publication's recipes (downloads and ratings stay). Runs again as-is
   /// for "Retry failed photos". [onProgress] gets every step, ending in
   /// 'done' or 'error', until [token] is cancelled.
+  ///
+  /// For an update, [details] are the title, description and tags the
+  /// person set on the publish screen, saved along with the recipes; without
+  /// them those stay as they are. [publishedTitle] is the publication's
+  /// title now: a cookbook renamed since the last publish passes its new
+  /// name on only while the public title is still the old name, so a title
+  /// the person chose for the Community is never overwritten.
   Future<PublishRunResult> run(
     PreparedPublish job, {
     required PublishRunToken token,
     required AppLocalizations l10n,
     String? republishPublicationId,
+    PublicationDetails? details,
+    String? publishedTitle,
     void Function(PublishProgress)? onProgress,
   }) async {
     bool live() => !token.cancelled;
@@ -712,7 +738,22 @@ class CommunityPublishPipeline {
         }
 
         await forgetUploadedPhotos();
-        final renamed = await _remember(republishPublicationId, job, photoKeys, update: true);
+        // The title, description and tags edited on the publish screen.
+        final detailsSaved = details == null ||
+            await _community.updatePublication(
+              republishPublicationId,
+              title: details.title,
+              description: details.description ?? '',
+              tags: details.tags ?? '',
+            );
+        final renamed = await _remember(
+          republishPublicationId,
+          job,
+          photoKeys,
+          update: true,
+          // A title just set by the person is theirs, not the cookbook's.
+          publishedTitle: details == null ? publishedTitle : null,
+        );
         report(PublishProgress(
           status: 'done',
           uploadedImages: pathMapping.length,
@@ -726,6 +767,7 @@ class CommunityPublishPipeline {
           success: true,
           publicationId: republishPublicationId,
           renamed: renamed,
+          detailsSaved: detailsSaved,
           photosSent: photosSent,
           photosReused: reused,
           rejectedRecipes: rejectedRecipes,
@@ -816,13 +858,16 @@ class CommunityPublishPipeline {
   /// the next update and a [PublishSnapshot] (what was sent, and the
   /// person's choices for photos and notes). An update of a cookbook renamed
   /// since the last snapshot also takes the new name over as the
-  /// publication's title; returns false when that failed (the old name stays
-  /// in the snapshot, so it still shows as changed).
+  /// publication's title, but only while that title is still the old name
+  /// ([publishedTitle]): a title of its own stays. Returns false when the
+  /// rename failed (the old name stays in the snapshot, so it still shows as
+  /// changed).
   Future<bool> _remember(
     String publicationId,
     PreparedPublish job,
     Map<String, ({String serverPath, int bytes})> photoKeys, {
     required bool update,
+    String? publishedTitle,
   }) async {
     await PublishedPhotos.save(publicationId, photoKeys);
 
@@ -831,7 +876,8 @@ class CommunityPublishPipeline {
     if (update && name != null && !job.isSingleRecipe) {
       final previous = await PublishSnapshot.lookup(publicationId);
       final oldName = previous?.name;
-      if (oldName != null && oldName != name) {
+      final titleFollowsName = oldName != null && publishedTitle != null && publishedTitle.trim() == oldName.trim();
+      if (oldName != null && oldName != name && titleFollowsName) {
         renamed = await _community.updatePublication(publicationId, title: name);
         if (!renamed) name = oldName;
       }

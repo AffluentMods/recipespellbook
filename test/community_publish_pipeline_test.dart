@@ -164,8 +164,20 @@ void main() {
     );
   }
 
-  Future<PublishRunResult> run(PreparedPublish job, {String? republish}) =>
-      withServer(() => pipeline.run(job, token: PublishRunToken(), l10n: l10n, republishPublicationId: republish));
+  Future<PublishRunResult> run(
+    PreparedPublish job, {
+    String? republish,
+    PublicationDetails? details,
+    String? publishedTitle,
+  }) =>
+      withServer(() => pipeline.run(
+            job,
+            token: PublishRunToken(),
+            l10n: l10n,
+            republishPublicationId: republish,
+            details: details,
+            publishedTitle: publishedTitle,
+          ));
 
   group('photos only in the cloud', () {
     test('are fetched, then go through the Community upload and count', () async {
@@ -232,6 +244,51 @@ void main() {
 
     test('a snapshot from before the choice existed keeps notes private', () {
       expect(PublishSnapshot.fromJson({'h': 'abc', 'img': true, 't': 0})!.includeNotes, isFalse);
+    });
+  });
+
+  group('updating a publication', () {
+    test('saves the title, description and tags edited on the publish screen', () async {
+      await addCookbook();
+      final first = await run(await prepare());
+      final id = first.publicationId!;
+
+      final result = await run(
+        await prepare(),
+        republish: id,
+        details: const PublicationDetails(title: 'Winter Soups', description: 'Warm bowls.', tags: 'soup,winter'),
+        publishedTitle: 'Soups',
+      );
+      expect(result.success, isTrue, reason: result.error);
+      expect(result.detailsSaved, isTrue);
+      expect(server.puts[id], hasLength(1));
+      expect(server.patches[id], [
+        {'title': 'Winter Soups', 'description': 'Warm bowls.', 'tags': 'soup,winter'},
+      ]);
+    });
+
+    test('a renamed cookbook renames a publication still under the old name', () async {
+      await addCookbook();
+      final id = (await run(await prepare())).publicationId!;
+      await db.cookbookDao.updateCookbookName('book', 'Winter Soups');
+
+      final result = await run(await prepare(), republish: id, publishedTitle: 'Soups');
+      expect(result.renamed, isTrue);
+      expect(server.patches[id], [
+        {'title': 'Winter Soups'},
+      ]);
+    });
+
+    test('a title the person chose for the Community is never overwritten by the cookbook name', () async {
+      await addCookbook();
+      final id = (await run(await prepare())).publicationId!;
+      await db.cookbookDao.updateCookbookName('book', 'Winter Soups');
+
+      final result = await run(await prepare(), republish: id, publishedTitle: 'Grandma\'s Soup Collection');
+      expect(result.success, isTrue);
+      expect(server.patches[id], isNull);
+      // Still counts as up to date: the new name is what was last sent.
+      expect((await PublishSnapshot.lookup(id))!.name, 'Winter Soups');
     });
   });
 }

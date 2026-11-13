@@ -12589,4 +12589,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get publicationsUpdateAllConfirmBody => '각각 이 기기에 있는 요리책의 레시피로 업데이트됩니다. 사진은 사진과 함께 게시한 것에만, 메모는 포함하기로 선택한 것에만 들어갑니다. 평점과 다운로드 수는 유지됩니다.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => '레시피는 업데이트되었지만 새 제목, 설명 또는 태그는 저장되지 않았습니다. 내 출판물에서 다시 시도하세요.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => '게시물의 제목, 설명, 태그를 불러오지 못해 그대로 유지됩니다. 레시피는 계속 업데이트됩니다.';
 }

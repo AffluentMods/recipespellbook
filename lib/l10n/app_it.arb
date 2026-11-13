@@ -3898,5 +3898,7 @@
   "communityPublishPhotosUnsupported": "Alcune foto sono in un formato che questo dispositivo non sa leggere (come HEIC) e sono state escluse da:",
   "communityPublishIncludeNotes": "Includi le mie note",
   "communityPublishIncludeNotesSubtitle": "Pubblica le note che hai scritto su ogni ricetta. Le tue valutazioni a stelle non vengono mai pubblicate.",
-  "publicationsUpdateAllConfirmBody": "Ognuna riceve le ricette dal suo libro su questo dispositivo. Le foto vanno solo a quelle pubblicate con foto, e le tue note solo dove hai scelto di includerle. Valutazioni e download vengono mantenuti."
+  "publicationsUpdateAllConfirmBody": "Ognuna riceve le ricette dal suo libro su questo dispositivo. Le foto vanno solo a quelle pubblicate con foto, e le tue note solo dove hai scelto di includerle. Valutazioni e download vengono mantenuti.",
+  "communityRepublishDetailsNotSaved": "Le ricette sono state aggiornate, ma il nuovo titolo, la descrizione o i tag non sono stati salvati. Riprova da Le mie pubblicazioni.",
+  "communityRepublishDetailsUnavailable": "Non è stato possibile caricare titolo, descrizione e tag della pubblicazione, quindi restano come sono. Le ricette vengono comunque aggiornate."
 }

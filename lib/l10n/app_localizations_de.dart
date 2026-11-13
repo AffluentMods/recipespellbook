@@ -12713,4 +12713,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get publicationsUpdateAllConfirmBody => 'Jede erhält die Rezepte aus ihrem Kochbuch auf diesem Gerät. Fotos nur, wenn sie mit Fotos veröffentlicht wurde, und deine Notizen nur, wo du sie einbezogen hast. Bewertungen und Downloads bleiben erhalten.';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'Die Rezepte wurden aktualisiert, aber der neue Titel, die Beschreibung oder die Tags wurden nicht gespeichert. Versuche es in Meine Veröffentlichungen erneut.';
+
+  @override
+  String get communityRepublishDetailsUnavailable => 'Titel, Beschreibung und Tags der Veröffentlichung konnten nicht geladen werden und bleiben daher, wie sie sind. Die Rezepte werden trotzdem aktualisiert.';
 }

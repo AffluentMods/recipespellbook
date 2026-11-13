@@ -6496,5 +6496,13 @@
   "publicationsUpdateAllConfirmBody": "Each one gets the recipes from its cookbook on this device. Photos go only to the ones published with photos, and your notes only where you chose to include them. Ratings and downloads are kept.",
   "@publicationsUpdateAllConfirmBody": {
     "description": "Body of the confirmation before Update all in My Publications. Each publication is updated with the photo and notes choices it was published with."
+  },
+  "communityRepublishDetailsNotSaved": "The recipes were updated, but the new title, description or tags were not saved. Try again from My Publications.",
+  "@communityRepublishDetailsNotSaved": {
+    "description": "Snackbar after updating a published cookbook from the publish screen: the recipes went in but the edited title, description or tags did not."
+  },
+  "communityRepublishDetailsUnavailable": "The publication's title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.",
+  "@communityRepublishDetailsUnavailable": {
+    "description": "On the publish screen when updating a publication whose title, description and tags could not be loaded: those fields are locked and kept as they are."
   }
 }

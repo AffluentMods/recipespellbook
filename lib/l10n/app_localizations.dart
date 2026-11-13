@@ -22074,6 +22074,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Each one gets the recipes from its cookbook on this device. Photos go only to the ones published with photos, and your notes only where you chose to include them. Ratings and downloads are kept.'**
   String get publicationsUpdateAllConfirmBody;
+
+  /// Snackbar after updating a published cookbook from the publish screen: the recipes went in but the edited title, description or tags did not.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipes were updated, but the new title, description or tags were not saved. Try again from My Publications.'**
+  String get communityRepublishDetailsNotSaved;
+
+  /// On the publish screen when updating a publication whose title, description and tags could not be loaded: those fields are locked and kept as they are.
+  ///
+  /// In en, this message translates to:
+  /// **'The publication\'s title, description and tags could not be loaded, so they stay as they are. The recipes are still updated.'**
+  String get communityRepublishDetailsUnavailable;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

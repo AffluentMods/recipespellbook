@@ -12561,4 +12561,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get publicationsUpdateAllConfirmBody => 'それぞれ、この端末にあるクックブックのレシピで更新されます。写真は写真付きで公開したものだけに、メモは含めると選んだものだけに入ります。評価とダウンロード数は保持されます。';
+
+  @override
+  String get communityRepublishDetailsNotSaved => 'レシピは更新されましたが、新しいタイトル、説明、タグは保存されませんでした。マイ出版物からもう一度お試しください。';
+
+  @override
+  String get communityRepublishDetailsUnavailable => '公開のタイトル、説明、タグを読み込めなかったため、そのままになります。レシピは更新されます。';
 }
