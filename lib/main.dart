@@ -11,7 +11,6 @@ import 'utils/share_handler_stub.dart' if (dart.library.io) 'package:share_handl
 import 'l10n/app_localizations.dart';
 import 'utils/invite_link_parser.dart';
 import 'utils/platform_utils.dart';
-import 'utils/pending_deep_link.dart';
 import 'utils/widget_links.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cookbook_provider.dart';
@@ -19,6 +18,7 @@ import 'providers/database_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'providers/sync_provider.dart';
+import 'router/link_navigation.dart';
 import 'router/router.dart';
 import 'ui/shell/desktop_title_bar.dart';
 import 'ui/widgets/command_palette.dart';
@@ -278,11 +278,16 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     WidgetsBinding.instance.addObserver(this);
     // Delay to avoid modifying providers during widget tree build
     WidgetsBinding.instance.addPostFrameCallback((_) => _initServices());
-    // The home screen widgets use the app's language: redraw them when it
-    // changes.
+    // The home screen widgets and the Android notification channel use the
+    // app's language: update them when it changes (or is first loaded).
     ref.listenManual(
       settingsProvider.select((s) => s.languageCode),
-      (_, _) => HomeWidgetService.instance.scheduleRefresh(),
+      (_, languageCode) {
+        HomeWidgetService.instance.scheduleRefresh();
+        if (supportsFirebaseMessaging) {
+          NotificationService.instance.localizeChannels(languageCode);
+        }
+      },
     );
   }
 
@@ -424,19 +429,10 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     return WidgetLinks.routeFor(uri) ?? InviteLinkParser.parseUri(uri)?.route;
   }
 
-  void _navigateToLinkTarget(String target) {
-    // On cold start the splash navigates Home when its intro finishes, which
-    // would clobber a push here. While the splash owns navigation, hand it the
-    // target (it opens it on top of Home); once warm, navigate directly.
-    if (splashActive) {
-      pendingDeepLink = target;
-    } else if (WidgetLinks.isTabRoute(target)) {
-      // A main tab (from a home screen widget) is switched to, not stacked.
-      router.go(target);
-    } else {
-      router.push(target);
-    }
-  }
+  // On cold start the splash navigates Home when its intro finishes, which
+  // would clobber a push here: openLinkTarget hands it the target while it
+  // owns navigation. Notification taps go the same way.
+  void _navigateToLinkTarget(String target) => openLinkTarget(target);
 
   /// Initialize subscription + notifications in background (non-blocking).
   /// These don't need to complete before the user sees the app.

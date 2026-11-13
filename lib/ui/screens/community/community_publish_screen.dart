@@ -535,17 +535,18 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   /// iOS) then registers this device for download notifications.
   Future<void> _turnOnDownloadNotifications() async {
     final l10n = AppLocalizations.of(context)!;
-    var ok = false;
+    var result = NotificationSwitch.unavailable;
     try {
-      ok = await ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(true);
+      result = await ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(true);
     } catch (e) {
       debugPrint('[Publish] Could not turn on notifications: $e');
     }
     if (!mounted) return;
-    if (ok) {
+    final message = notificationSwitchMessage(l10n, result);
+    if (message == null) {
       AppSnackbar.success(context, l10n.notifDownloadsOn);
     } else {
-      AppSnackbar.info(context, l10n.notifPermissionDenied);
+      AppSnackbar.info(context, message);
     }
   }
 

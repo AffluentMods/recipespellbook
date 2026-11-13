@@ -37,6 +37,7 @@ class FirebaseMessaging {
   Future<NotificationSettings> getNotificationSettings() async =>
       NotificationSettings._(AuthorizationStatus.denied);
   Future<String?> getToken() async => null;
+  Future<String?> getAPNSToken() async => null;
   Future<void> deleteToken() async {}
   Future<void> subscribeToTopic(String topic) async {}
   Future<void> unsubscribeFromTopic(String topic) async {}
@@ -90,6 +91,7 @@ class InitializationSettings {
 
 class AndroidFlutterLocalNotificationsPlugin {
   Future<void> createNotificationChannel(AndroidNotificationChannel channel) async {}
+  Future<void> deleteNotificationChannel(String channelId) async {}
 }
 
 class NotificationDetails {

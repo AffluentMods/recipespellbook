@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 import '../services/notification_service.dart';
+
+export '../services/notification_service.dart' show NotificationSwitch;
 
 /// User's notification preferences on this device.
 ///
@@ -42,18 +46,34 @@ class NotificationPreferencesNotifier extends Notifier<NotificationPreferences> 
   /// Download notifications for this device. Turning them on asks for
   /// permission (a prompt on Android 13+ and iOS) and registers the device
   /// with the server; turning them off unregisters it, so nothing is sent
-  /// here. Returns false when the system refused permission; the switch
-  /// then stays off.
-  Future<bool> setCommunityUpdates(bool v) async {
-    final service = NotificationService.instance;
-    if (v && !await service.enableCommunityNotifications()) return false;
+  /// here. When the system refused permission, or no push token came back,
+  /// the switch is saved off and the result says which.
+  Future<NotificationSwitch> setCommunityUpdates(bool v) async {
+    final result = v ? await enablePush() : NotificationSwitch.done;
+    final on = v && result == NotificationSwitch.done;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_communityKey, v);
-    state = state.copyWith(communityUpdates: v);
-    if (!v) await service.disableCommunityNotifications();
-    return true;
+    await prefs.setBool(_communityKey, on);
+    state = state.copyWith(communityUpdates: on);
+    if (!v) await disablePush();
+    return result;
   }
+
+  /// Asks the system and registers this device. A test stands in for it.
+  @visibleForTesting
+  Future<NotificationSwitch> enablePush() => NotificationService.instance.enableCommunityNotifications();
+
+  /// Unregisters this device. A test stands in for it.
+  @visibleForTesting
+  Future<void> disablePush() => NotificationService.instance.disableCommunityNotifications();
 }
+
+/// What to tell the user after switching download notifications on, or null
+/// when it worked.
+String? notificationSwitchMessage(AppLocalizations l10n, NotificationSwitch result) => switch (result) {
+      NotificationSwitch.done => null,
+      NotificationSwitch.denied => l10n.notifPermissionDenied,
+      NotificationSwitch.unavailable => l10n.notifPushUnavailable,
+    };
 
 final notificationPrefsProvider =
     NotifierProvider<NotificationPreferencesNotifier, NotificationPreferences>(

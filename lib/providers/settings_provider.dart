@@ -323,6 +323,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _measurementKey = 'measurement_system';
   static const _cookbookKey = 'current_cookbook_id';
   static const _languageKey = 'language_code';
+
+  /// Where the app's language is kept, for code that runs before (or
+  /// outside) the settings provider, such as the notification channel.
+  static const languagePrefKey = _languageKey;
   static const _quickAccessHistoryKey = 'quick_access_show_history';
   static const _quickAccessHistoryCountKey = 'quick_access_history_count';
   static const _quickAccessMealPlanKey = 'quick_access_show_meal_plan';
