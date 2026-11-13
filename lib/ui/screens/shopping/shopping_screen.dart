@@ -274,20 +274,41 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final savedId = prefs.getString(_lastListKey);
     final shoppingDao = ref.read(shoppingDaoProvider);
     // Prefer the last-viewed list; otherwise the user's marked default list;
-    // otherwise the built-in default.
+    // otherwise the built-in default, any list, or a new one.
     ShoppingList? resolved;
     if (savedId != null) resolved = await shoppingDao.getListById(savedId);
-    resolved ??= await shoppingDao.getDefaultList();
-    resolved ??= await shoppingDao.getListById('list_default');
-    final list = resolved; // final → promotes inside the setState closure
-    if (mounted && list != null) {
-      setState(() {
-        _currentListId = list.id;
-        _currentListName = list.name;
-      });
-    } else {
-      _loadCurrentListName();
+    final list = resolved ?? await _fallbackList(); // final → promotes in setState
+    if (!mounted) return;
+    setState(() {
+      _currentListId = list.id;
+      _currentListName = list.name;
+    });
+  }
+
+  /// The list to show when there is no (other) chosen one: the user's default
+  /// list, else the built-in one, else any list, else a new empty one, so
+  /// the screen never points at a list that is gone. [excluding] is a list
+  /// being deleted.
+  Future<ShoppingList> _fallbackList({String? excluding}) async {
+    final dao = ref.read(shoppingDaoProvider);
+    bool usable(ShoppingList? l) => l != null && l.id != excluding;
+    final byDefault = await dao.getDefaultList();
+    if (usable(byDefault)) return byDefault!;
+    final builtIn = await dao.getListById('list_default');
+    if (usable(builtIn)) return builtIn!;
+    for (final l in await dao.getAllLists()) {
+      if (usable(l)) return l;
     }
+    final name = mounted
+        ? AppLocalizations.of(context)!.defaultShoppingListName
+        : 'Shopping List';
+    final id = 'list_${DateTime.now().millisecondsSinceEpoch}';
+    await dao.insertList(ShoppingListsCompanion.insert(
+      id: id,
+      name: name,
+      isDefault: const drift.Value(true),
+    ));
+    return (await dao.getListById(id))!;
   }
 
   /// Switch the active list AND persist the choice.
@@ -346,14 +367,6 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       setState(() {
         _userMappings = {for (var m in mappings) m.ingredient: m.shoppingCategoryId};
       });
-    }
-  }
-
-  Future<void> _loadCurrentListName() async {
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    final list = await shoppingDao.getListById(_currentListId);
-    if (mounted && list != null) {
-      setState(() => _currentListName = list.name);
     }
   }
 
@@ -1190,13 +1203,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final shareCount = _sharedListCounts[list.id] ?? 0;
     final isShared = shareCount > 0;
 
-    String message;
-    if (isShared) {
-      message = 'This list is currently shared with $shareCount ${shareCount == 1 ? 'person' : 'people'}. '
-          'Deleting it will stop syncing for everyone.';
-    } else {
-      message = l10n.shoppingDeleteListConfirm(list.name);
-    }
+    final message = isShared
+        ? l10n.shoppingDeleteSharedListConfirm(shareCount)
+        : l10n.shoppingDeleteListConfirm(list.name);
 
     showDialog(
       context: context,
@@ -1230,12 +1239,12 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 }
                 _sharedListCounts.remove(list.id);
               }
-              shoppingDao.deleteList(list.id);
+              await shoppingDao.deleteList(list.id);
               if (list.id == _currentListId) {
-                setState(() {
-                  _currentListId = 'list_default';
-                  _loadCurrentListName();
-                });
+                // The built-in list may be the one just deleted (or gone
+                // long ago): pick one that is there, and save the choice.
+                final next = await _fallbackList(excluding: list.id);
+                if (mounted) _setCurrentList(next.id, next.name);
               }
             },
             style: FilledButton.styleFrom(backgroundColor: context.appColors.destructive),
