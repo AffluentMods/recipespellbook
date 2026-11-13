@@ -4879,5 +4879,6 @@
   "communityRepublishDetailsUnavailable": "Não foi possível carregar o título, a descrição e as tags da publicação, então eles ficam como estão. As receitas são atualizadas mesmo assim.",
   "communitySaveRecipeFailed": "Não foi possível salvar a receita. Verifique sua conexão e tente novamente.",
   "communityRecipeNoLongerAvailable": "Esta receita não está mais disponível na Comunidade.",
-  "communityLoadFailed": "Não foi possível carregar. Verifique sua conexão e tente novamente."
+  "communityLoadFailed": "Não foi possível carregar. Verifique sua conexão e tente novamente.",
+  "cookbookUpdateSourceGone": "Este livro de receitas não está mais disponível na Comunidade, então não há nada para atualizar. Sua cópia fica como está."
 }

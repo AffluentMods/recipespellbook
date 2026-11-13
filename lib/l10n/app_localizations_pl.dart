@@ -12954,4 +12954,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get communityLoadFailed => 'Nie udało się wczytać. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Ta książka kucharska nie jest już dostępna w Społeczności, więc nie ma czego aktualizować. Twoja kopia pozostaje bez zmian.';
 }

@@ -4879,5 +4879,6 @@
   "communityRepublishDetailsUnavailable": "Nie udało się wczytać tytułu, opisu i tagów publikacji, więc pozostaną bez zmian. Przepisy zostaną mimo to zaktualizowane.",
   "communitySaveRecipeFailed": "Nie udało się zapisać przepisu. Sprawdź połączenie i spróbuj ponownie.",
   "communityRecipeNoLongerAvailable": "Ten przepis nie jest już dostępny w Społeczności.",
-  "communityLoadFailed": "Nie udało się wczytać. Sprawdź połączenie i spróbuj ponownie."
+  "communityLoadFailed": "Nie udało się wczytać. Sprawdź połączenie i spróbuj ponownie.",
+  "cookbookUpdateSourceGone": "Ta książka kucharska nie jest już dostępna w Społeczności, więc nie ma czego aktualizować. Twoja kopia pozostaje bez zmian."
 }

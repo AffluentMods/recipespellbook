@@ -12576,4 +12576,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get communityLoadFailed => '読み込めませんでした。接続を確認して、もう一度お試しください。';
+
+  @override
+  String get cookbookUpdateSourceGone => 'このレシピ本はコミュニティで公開されなくなったため、更新はありません。お手元のコピーはそのまま残ります。';
 }

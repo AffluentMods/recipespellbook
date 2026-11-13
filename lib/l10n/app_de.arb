@@ -4441,5 +4441,6 @@
   "communityRepublishDetailsUnavailable": "Titel, Beschreibung und Tags der Veröffentlichung konnten nicht geladen werden und bleiben daher, wie sie sind. Die Rezepte werden trotzdem aktualisiert.",
   "communitySaveRecipeFailed": "Das Rezept konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.",
   "communityRecipeNoLongerAvailable": "Dieses Rezept ist in der Community nicht mehr verfügbar.",
-  "communityLoadFailed": "Das konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut."
+  "communityLoadFailed": "Das konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "cookbookUpdateSourceGone": "Dieses Kochbuch ist in der Community nicht mehr verfügbar, es gibt also nichts zu aktualisieren. Deine Kopie bleibt, wie sie ist."
 }

@@ -6516,5 +6516,9 @@
   "communityLoadFailed": "Could not load this. Check your connection and try again.",
   "@communityLoadFailed": {
     "description": "Shown with a Retry button when a Community page (feed, cookbook, recipe, My Publications) could not load."
+  },
+  "cookbookUpdateSourceGone": "This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.",
+  "@cookbookUpdateSourceGone": {
+    "description": "In the update sheet of a downloaded Community cookbook whose publication was unpublished, removed or put under review."
   }
 }

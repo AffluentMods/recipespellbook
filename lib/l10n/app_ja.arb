@@ -4879,5 +4879,6 @@
   "communityRepublishDetailsUnavailable": "公開のタイトル、説明、タグを読み込めなかったため、そのままになります。レシピは更新されます。",
   "communitySaveRecipeFailed": "レシピを保存できませんでした。接続を確認して、もう一度お試しください。",
   "communityRecipeNoLongerAvailable": "このレシピはコミュニティで公開されなくなりました。",
-  "communityLoadFailed": "読み込めませんでした。接続を確認して、もう一度お試しください。"
+  "communityLoadFailed": "読み込めませんでした。接続を確認して、もう一度お試しください。",
+  "cookbookUpdateSourceGone": "このレシピ本はコミュニティで公開されなくなったため、更新はありません。お手元のコピーはそのまま残ります。"
 }

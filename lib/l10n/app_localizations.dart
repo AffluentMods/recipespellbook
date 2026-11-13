@@ -22104,6 +22104,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load this. Check your connection and try again.'**
   String get communityLoadFailed;
+
+  /// In the update sheet of a downloaded Community cookbook whose publication was unpublished, removed or put under review.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.'**
+  String get cookbookUpdateSourceGone;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

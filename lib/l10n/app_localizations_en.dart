@@ -12740,4 +12740,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityLoadFailed => 'Could not load this. Check your connection and try again.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'This cookbook is no longer available in the Community, so there is nothing to update from. Your copy stays as it is.';
 }

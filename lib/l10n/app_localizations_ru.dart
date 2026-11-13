@@ -12944,4 +12944,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get communityLoadFailed => 'Не удалось загрузить. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Эта кулинарная книга больше не доступна в сообществе, поэтому обновлять нечего. Ваша копия остаётся как есть.';
 }

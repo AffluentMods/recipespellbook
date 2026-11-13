@@ -12572,4 +12572,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get communityLoadFailed => '无法加载。请检查网络连接后重试。';
+
+  @override
+  String get cookbookUpdateSourceGone => '此食谱书已不在社区中提供，因此没有可更新的内容。你的副本保持不变。';
 }

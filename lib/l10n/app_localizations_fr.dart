@@ -12728,4 +12728,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get communityLoadFailed => 'Impossible de charger le contenu. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get cookbookUpdateSourceGone => 'Ce livre de recettes n\'est plus disponible dans la Communauté, il n\'y a donc rien à mettre à jour. Votre copie reste telle quelle.';
 }

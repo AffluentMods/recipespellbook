@@ -4406,5 +4406,6 @@
   "communityRepublishDetailsUnavailable": "No se pudieron cargar el título, la descripción y las etiquetas de la publicación, así que se quedan como están. Las recetas se actualizan igualmente.",
   "communitySaveRecipeFailed": "No se pudo guardar la receta. Comprueba tu conexión e inténtalo de nuevo.",
   "communityRecipeNoLongerAvailable": "Esta receta ya no está disponible en la Comunidad.",
-  "communityLoadFailed": "No se pudo cargar. Comprueba tu conexión e inténtalo de nuevo."
+  "communityLoadFailed": "No se pudo cargar. Comprueba tu conexión e inténtalo de nuevo.",
+  "cookbookUpdateSourceGone": "Este recetario ya no está disponible en la Comunidad, así que no hay nada que actualizar. Tu copia se queda como está."
 }

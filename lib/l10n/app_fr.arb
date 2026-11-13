@@ -3904,5 +3904,6 @@
   "communityRepublishDetailsUnavailable": "Le titre, la description et les tags de la publication n'ont pas pu être chargés, ils restent donc tels quels. Les recettes sont quand même mises à jour.",
   "communitySaveRecipeFailed": "Impossible d'enregistrer la recette. Vérifiez votre connexion et réessayez.",
   "communityRecipeNoLongerAvailable": "Cette recette n'est plus disponible dans la Communauté.",
-  "communityLoadFailed": "Impossible de charger le contenu. Vérifiez votre connexion et réessayez."
+  "communityLoadFailed": "Impossible de charger le contenu. Vérifiez votre connexion et réessayez.",
+  "cookbookUpdateSourceGone": "Ce livre de recettes n'est plus disponible dans la Communauté, il n'y a donc rien à mettre à jour. Votre copie reste telle quelle."
 }
