@@ -42,6 +42,25 @@ class AccountScreen extends ConsumerWidget {
 //  SIGNED OUT — Sign-in flow
 // ════════════════════════════════════════════
 
+/// Restores purchases and says what came of it: found, nothing found, or
+/// that it could not be checked (offline).
+Future<void> _restorePurchases(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  try {
+    final found = await ref.read(subscriptionProvider.notifier).restorePurchases();
+    if (!context.mounted) return;
+    if (found) {
+      AppSnackbar.success(context, l10n.purchasesRestored);
+    } else {
+      AppSnackbar.info(context, l10n.noPurchasesFound);
+    }
+  } on PurchaseCheckFailed {
+    if (context.mounted) AppSnackbar.error(context, l10n.errorNetwork);
+  } catch (_) {
+    if (context.mounted) AppSnackbar.error(context, l10n.restoreFailed);
+  }
+}
+
 class _SignedOutBody extends ConsumerWidget {
   final bool isLoading;
   final AuthError? error;
@@ -174,23 +193,7 @@ class _SignedOutBody extends ConsumerWidget {
 
             // Restore purchases
             TextButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      try {
-                        await ref.read(subscriptionProvider.notifier).restorePurchases();
-                        if (context.mounted) {
-                          final isPro = ref.read(subscriptionProvider).isPro;
-                          if (isPro) {
-                            AppSnackbar.success(context, l10n.purchasesRestored);
-                          } else {
-                            AppSnackbar.info(context, l10n.noPurchasesFound);
-                          }
-                        }
-                      } catch (e) {
-                        if (context.mounted) AppSnackbar.error(context, l10n.restoreFailed);
-                      }
-                    },
+              onPressed: isLoading ? null : () => _restorePurchases(context, ref),
               child: Text(l10n.restorePurchases),
             ),
           ],
@@ -855,16 +858,7 @@ class _SubscriptionCard extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Center(
                   child: TextButton(
-                    onPressed: () async {
-                      try {
-                        await ref.read(subscriptionProvider.notifier).restorePurchases();
-                        if (context.mounted) {
-                          AppSnackbar.success(context, l10n.purchasesRestored);
-                        }
-                      } catch (e) {
-                        if (context.mounted) AppSnackbar.error(context, l10n.restoreFailed);
-                      }
-                    },
+                    onPressed: () => _restorePurchases(context, ref),
                     child: Text(l10n.restorePurchases),
                   ),
                 ),
@@ -908,21 +902,7 @@ class _SubscriptionCard extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               TextButton(
-                onPressed: () async {
-                  try {
-                    await ref.read(subscriptionProvider.notifier).restorePurchases();
-                    if (context.mounted) {
-                      final isPro = ref.read(subscriptionProvider).isPro;
-                      if (isPro) {
-                        AppSnackbar.success(context, l10n.purchasesRestored);
-                      } else {
-                        AppSnackbar.info(context, l10n.noPurchasesFound);
-                      }
-                    }
-                  } catch (e) {
-                    if (context.mounted) AppSnackbar.error(context, l10n.restoreFailed);
-                  }
-                },
+                onPressed: () => _restorePurchases(context, ref),
                 child: Text(l10n.restorePurchases),
               ),
             ]),
