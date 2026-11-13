@@ -387,15 +387,17 @@ class ImportedRecipeSaver {
   /// ([ImportedRecipe.imageUrl]). An export that carries its photos needs no
   /// network that way, and a dead link does not cost the recipe its picture.
   /// [client] is used for the download; without one a client is opened and
-  /// closed here.
+  /// closed here. A photo inside [temporaryFolder], which is deleted after
+  /// the import, is always copied, wherever that folder is.
   static Future<String?> storeImage(
     ImportedRecipe recipe, {
     required String documentsDir,
     http.Client? client,
+    String? temporaryFolder,
   }) async {
     final local = _blankToNull(recipe.imagePath);
     if (local != null) {
-      final kept = await _keepLocalImage(local, documentsDir);
+      final kept = await _keepLocalImage(local, documentsDir, temporaryFolder);
       if (kept != null) return kept;
     }
     final embedded = _blankToNull(recipe.imageData);
@@ -440,11 +442,12 @@ class ImportedRecipeSaver {
   /// documents directory (a page cut out of a PDF) is used where it is. A
   /// picked or freshly taken photo lives in a temp folder the system empties
   /// when it likes, so that one is copied.
-  static Future<String?> _keepLocalImage(String path, String documentsDir) async {
+  static Future<String?> _keepLocalImage(String path, String documentsDir, String? temporaryFolder) async {
     try {
       final file = File(path);
       if (!await file.exists()) return null;
-      if (p.isWithin(documentsDir, path)) return path;
+      final temporary = temporaryFolder != null && p.isWithin(temporaryFolder, path);
+      if (p.isWithin(documentsDir, path) && !temporary) return path;
       final folder = Directory(p.join(documentsDir, imageFolder));
       await folder.create(recursive: true);
       final extension = p.extension(path).toLowerCase();

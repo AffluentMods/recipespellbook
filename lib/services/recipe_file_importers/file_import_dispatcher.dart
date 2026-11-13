@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import '../../models/imported_recipe.dart';
+import '../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../backup_zip.dart';
 import 'paprika_importer.dart';
 import 'mela_importer.dart';
@@ -16,15 +18,33 @@ import '../recipe_import_engine.dart';
 
 /// Top-level function for compute() isolate.
 /// Must be top-level (not a method) for Dart isolate serialization.
+///
+/// The file is read here, from its path, so it is not copied over from the
+/// screen's isolate. The photos it carries as text are written to the photo
+/// folder here too, so they do not travel back as text either.
 Future<List<ImportedRecipe>> _parseInIsolate(_ImportTask task) async {
-  return FileImportDispatcher._import(task.bytes, task.filename);
+  var bytes = task.bytes;
+  if (bytes == null) {
+    try {
+      bytes = await File(task.path!).readAsBytes();
+    } catch (_) {
+      throw const FileImportException(FileImportProblem.unreadable, 'That file could not be read.');
+    }
+  }
+  final recipes = await FileImportDispatcher._import(bytes, task.filename);
+  final folder = task.photoFolder;
+  if (folder != null) await FileImportDispatcher.photosToFiles(recipes, folder);
+  return recipes;
 }
 
-/// Serializable task for passing to compute().
+/// Serializable task for passing to compute(): the file's [bytes], or the
+/// [path] to read them from.
 class _ImportTask {
-  final Uint8List bytes;
+  final Uint8List? bytes;
+  final String? path;
   final String filename;
-  const _ImportTask(this.bytes, this.filename);
+  final String? photoFolder;
+  const _ImportTask(this.filename, {this.bytes, this.path, this.photoFolder});
 }
 
 /// Dispatches file imports based on filename extension, and on what the file
@@ -123,7 +143,75 @@ class FileImportDispatcher {
     Uint8List bytes,
     String filename,
   ) {
-    return compute(_parseInIsolate, _ImportTask(bytes, filename));
+    return compute(_parseInIsolate, _ImportTask(filename, bytes: bytes));
+  }
+
+  /// Import the file at [path], or in [bytes] where there is no path (in the
+  /// browser). A path is read in the background, so a large export is not
+  /// held in memory on the screen's side and copied over.
+  ///
+  /// With [photoFolder], every photo the file carries inside it is written
+  /// there and the recipe points at it ([ImportedRecipe.imagePath]) instead
+  /// of holding it as text. The folder is the caller's to delete once the
+  /// recipes are saved; saving copies the photos it keeps.
+  static Future<List<ImportedRecipe>> importFile(
+    String filename, {
+    String? path,
+    Uint8List? bytes,
+    String? photoFolder,
+  }) {
+    assert(path != null || bytes != null);
+    return compute(_parseInIsolate, _ImportTask(filename, bytes: bytes, path: path, photoFolder: photoFolder));
+  }
+
+  /// Writes the photo each of [recipes] carries as text into [folder] and
+  /// points the recipe at the file. Data that is no picture is left as it
+  /// is, for the save to turn down.
+  @visibleForTesting
+  static Future<void> photosToFiles(List<ImportedRecipe> recipes, String folder) async {
+    var made = false;
+    for (var i = 0; i < recipes.length; i++) {
+      final recipe = recipes[i];
+      final data = recipe.imageData;
+      if (data == null || data.trim().isEmpty || (recipe.imagePath ?? '').isNotEmpty) continue;
+      final Uint8List bytes;
+      try {
+        final comma = data.indexOf(',');
+        final body = (comma >= 0 ? data.substring(comma + 1) : data).replaceAll(RegExp(r'\s'), '');
+        bytes = base64.decode(base64.normalize(body));
+      } catch (_) {
+        continue;
+      }
+      final extension = _photoExtension(bytes);
+      if (extension == null) continue;
+      if (!made) {
+        await Directory(folder).create(recursive: true);
+        made = true;
+      }
+      final path = p.join(folder, 'photo_$i$extension');
+      await File(path).writeAsBytes(bytes);
+      recipe
+        ..imagePath = path
+        ..imageData = null;
+    }
+  }
+
+  /// The file extension of a photo by how its bytes start, or null.
+  static String? _photoExtension(List<int> bytes) {
+    bool has(int offset, List<int> signature) {
+      if (bytes.length < offset + signature.length) return false;
+      for (var i = 0; i < signature.length; i++) {
+        if (bytes[offset + i] != signature[i]) return false;
+      }
+      return true;
+    }
+
+    if (has(0, const [0xFF, 0xD8, 0xFF])) return '.jpg';
+    if (has(0, const [0x89, 0x50, 0x4E, 0x47])) return '.png';
+    if (has(0, 'GIF8'.codeUnits)) return '.gif';
+    if (has(0, 'RIFF'.codeUnits) && has(8, 'WEBP'.codeUnits)) return '.webp';
+    if (has(0, 'BM'.codeUnits)) return '.bmp';
+    return null;
   }
 
   // Why a file cannot be imported. The screen says it in the user's
