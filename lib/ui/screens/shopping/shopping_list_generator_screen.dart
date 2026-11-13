@@ -1295,10 +1295,16 @@ class _RecipeCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            Text(
-                              AppLocalizations.of(context)!.listGenSelectedOf(selectedCount, totalCount),
-                              style: theme.textTheme.bodySmall
-                                  ?.copyWith(color: theme.colorScheme.outline),
+                            // Gives way on a narrow phone or in a long
+                            // language instead of running off the card.
+                            Flexible(
+                              child: Text(
+                                AppLocalizations.of(context)!.listGenSelectedOf(selectedCount, totalCount),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodySmall
+                                    ?.copyWith(color: theme.colorScheme.outline),
+                              ),
                             ),
                             if (!recipe.isRoot) ...[
                               const SizedBox(width: 8),
@@ -1396,29 +1402,38 @@ class _RecipeCard extends StatelessWidget {
                     color:
                     theme.colorScheme.outline.withValues(alpha: 0.1)),
 
-                // Select all / none + scale
+                // Select all / none + scale. One line where it fits, the
+                // scale on a line of its own where it does not (a narrow
+                // phone, a long language), and None below All on the
+                // narrowest.
                 Padding(
                   padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  child: Row(
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      TextButton.icon(
-                        onPressed: onSelectAll,
-                        icon:
-                        const Icon(Icons.check_box_outlined, size: 16),
-                        label: Text(l10n.all),
-                        style: TextButton.styleFrom(
-                            visualDensity: VisualDensity.compact),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          TextButton.icon(
+                            onPressed: onSelectAll,
+                            icon:
+                            const Icon(Icons.check_box_outlined, size: 16),
+                            label: Text(l10n.all),
+                            style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact),
+                          ),
+                          TextButton.icon(
+                            onPressed: onUnselectAll,
+                            icon: const Icon(Icons.check_box_outline_blank,
+                                size: 16),
+                            label: Text(l10n.none),
+                            style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact),
+                          ),
+                        ],
                       ),
-                      TextButton.icon(
-                        onPressed: onUnselectAll,
-                        icon: const Icon(Icons.check_box_outline_blank,
-                            size: 16),
-                        label: Text(l10n.none),
-                        style: TextButton.styleFrom(
-                            visualDensity: VisualDensity.compact),
-                      ),
-                      const Spacer(),
                       // Scale selector
                       _ScaleSelector(
                         scale: userScale,
