@@ -23,9 +23,10 @@ import 'image_service.dart';
 // an existing publication. Used by the publish screen and by "Update all
 // changed" in My Publications, so both send exactly the same thing.
 
-/// Everything a publish sends, built once from the local cookbook. Image
-/// paths in [recipeMaps] stay local; each run swaps in server paths on a
-/// copy, so a retry starts from the same data.
+/// Everything a publish sends, built once from the local cookbook. Photos in
+/// [recipeMaps] stay as found (a local file, or a cloud path when only the
+/// cloud has it); each run swaps in its Community uploads on a copy, so a
+/// retry starts from the same data.
 class PreparedPublish {
   final String title;
   final String? description;
