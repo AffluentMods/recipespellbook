@@ -73,9 +73,15 @@ class _ShoppingListGeneratorScreenState
   // Step 2: also-add-to-meal-plan toggle. Pre-checked because the
   // common case for "I'm shopping from these recipes" is "I plan to
   // cook them soon"; user can untick if they're just stocking up.
+  // Starts off when a recipe is already planned (see _checkAlreadyPlanned).
   bool _alsoAddToMealPlan = true;
+  bool _mealPlanToggled = false;
   late DateTime _mealPlanDate = _todayMidnight();
   String _mealPlanMealType = 'Dinner';
+
+  /// Root recipes already in the meal plan today or later: the first day
+  /// each is planned for.
+  Map<String, DateTime> _alreadyPlanned = const {};
 
   static DateTime _todayMidnight() {
     final n = DateTime.now();
@@ -107,6 +113,47 @@ class _ShoppingListGeneratorScreenState
     _initSelections();
     _loadLists();
     _loadPantryAndFilter();
+    if (!widget.fromMealPlan) _checkAlreadyPlanned();
+  }
+
+  /// A recipe that is already planned (today or later) is rarely meant to be
+  /// planned again just because its groceries are being added: the switch
+  /// starts off, with a line saying which day it is planned for.
+  Future<void> _checkAlreadyPlanned() async {
+    final ids = [for (final r in _result.rootRecipes) r.recipeId];
+    final planned = await ref
+        .read(mealPlanDaoProvider)
+        .nextPlannedDays(ids, _todayMidnight());
+    if (!mounted || planned.isEmpty) return;
+    setState(() {
+      _alreadyPlanned = planned;
+      if (!_mealPlanToggled) _alsoAddToMealPlan = false;
+    });
+  }
+
+  /// "Already in your meal plan: Sat, Nov 14" (with each recipe's name when
+  /// there are several), or null when none of them is planned.
+  String? _alreadyPlannedNote(AppLocalizations l10n) {
+    if (_alreadyPlanned.isEmpty) return null;
+    final locale = Localizations.localeOf(context).toString();
+    final today = _todayMidnight();
+    String day(DateTime d) {
+      if (d == today) return l10n.today;
+      if (d == DateTime(today.year, today.month, today.day + 1)) {
+        return l10n.dateTomorrow;
+      }
+      return DateFormat.MMMEd(locale).format(d);
+    }
+
+    final planned = [
+      for (final r in _result.rootRecipes)
+        if (_alreadyPlanned[r.recipeId] case final d?) (r.title, day(d)),
+    ];
+    if (planned.isEmpty) return null;
+    final when = _result.rootRecipes.length == 1
+        ? planned.single.$2
+        : planned.map((p) => '${p.$1} (${p.$2})').join(', ');
+    return l10n.shoppingAlreadyPlanned(when);
   }
 
   void _initSelections() {
@@ -799,7 +846,11 @@ class _ShoppingListGeneratorScreenState
             enabled: _alsoAddToMealPlan,
             date: _mealPlanDate,
             mealType: _mealPlanMealType,
-            onEnabledChanged: (v) => setState(() => _alsoAddToMealPlan = v),
+            plannedNote: _alreadyPlannedNote(AppLocalizations.of(context)!),
+            onEnabledChanged: (v) => setState(() {
+              _mealPlanToggled = true;
+              _alsoAddToMealPlan = v;
+            }),
             onDateChanged: (d) => setState(() => _mealPlanDate = d),
             onMealTypeChanged: (t) => setState(() => _mealPlanMealType = t),
           ),
@@ -943,7 +994,8 @@ class _ShoppingListGeneratorScreenState
       // ── Optionally add the root recipes to the meal plan ──
       // We only schedule the user-picked (root) recipes — sub-recipes
       // shouldn't show up as separate meals. We also skip any recipe
-      // that ended up with zero selected ingredients.
+      // that ended up with zero selected ingredients, and any that is
+      // already planned for that day and meal.
       int mealPlansAdded = 0;
       if (_alsoAddToMealPlan) {
         final mealPlanDao = ref.read(mealPlanDaoProvider);
@@ -955,6 +1007,13 @@ class _ShoppingListGeneratorScreenState
         for (final recipe in _result.rootRecipes) {
           final selected = _selections[recipe.recipeId] ?? const <String>{};
           if (selected.isEmpty) continue;
+          if (await mealPlanDao.isRecipePlanned(
+            recipeId: recipe.recipeId,
+            date: normalizedDate,
+            mealType: _mealPlanMealType,
+          )) {
+            continue;
+          }
           await mealPlanDao.insertMealPlan(MealPlansCompanion.insert(
             id: 'meal_${now}_${i++}',
             date: normalizedDate,
@@ -1881,6 +1940,9 @@ class _MealPlanToggleCard extends StatelessWidget {
   final bool enabled;
   final DateTime date;
   final String mealType;
+
+  /// "Already in your meal plan: ...", shown under the switch, or null.
+  final String? plannedNote;
   final ValueChanged<bool> onEnabledChanged;
   final ValueChanged<DateTime> onDateChanged;
   final ValueChanged<String> onMealTypeChanged;
@@ -1889,6 +1951,7 @@ class _MealPlanToggleCard extends StatelessWidget {
     required this.enabled,
     required this.date,
     required this.mealType,
+    this.plannedNote,
     required this.onEnabledChanged,
     required this.onDateChanged,
     required this.onMealTypeChanged,
@@ -1952,6 +2015,16 @@ class _MealPlanToggleCard extends StatelessWidget {
               ),
             ),
           ),
+          if (plannedNote case final note?)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(46, 0, 12, 10),
+              child: Text(
+                note,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
           // Date + meal type row, only when enabled
           if (enabled)
             Padding(

@@ -12900,4 +12900,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => 'Ни один ингредиент не распознан';
+
+  @override
+  String get pressBackAgainToExit => 'Нажмите «Назад» ещё раз, чтобы выйти';
+
+  @override
+  String get mealPlanNextWeekend => 'В следующие выходные';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return 'Уже в плане питания: $when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => 'Посмотреть полный рецепт';
 }

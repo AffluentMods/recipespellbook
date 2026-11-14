@@ -31,6 +31,7 @@ import '../../../theme/tokens.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../utils/recipe_title.dart';
+import '../../../utils/recipe_view_timer.dart';
 import '../../shell/shell_navigation.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
 import '../../widgets/app_controls.dart';
@@ -199,6 +200,12 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
 
   late TabController _tabController;
 
+  /// The recipe counts as viewed ("Jump back in", recently viewed) only once
+  /// it has been open for [recipeViewedAfter], not on a quick look.
+  late final RecipeViewTimer _viewTimer = RecipeViewTimer(
+    (id) => ref.read(recipeDaoProvider).updateLastViewed(id),
+  );
+
   @override
   void initState() {
     super.initState();
@@ -211,11 +218,18 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
         : _UnitConversion.toImperial;
 
     _loadRecipe();
-    _markAsViewed();
+    _viewTimer.start(widget.recipeId);
+  }
+
+  @override
+  void didUpdateWidget(covariant RecipeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.recipeId != widget.recipeId) _viewTimer.start(widget.recipeId);
   }
 
   @override
   void dispose() {
+    _viewTimer.cancel();
     _tabController.dispose();
     super.dispose();
   }
@@ -268,10 +282,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       _ingredientLinksMap = ingredientLinksMap;
       _isLoading = false;
     });
-  }
-
-  Future<void> _markAsViewed() async {
-    await ref.read(recipeDaoProvider).updateLastViewed(widget.recipeId);
   }
 
   Future<void> _navigateToEdit() async {

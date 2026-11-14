@@ -72,6 +72,49 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
     return into(mealPlans).insert(mealPlan);
   }
 
+  /// Whether [recipeId] is already planned as [mealType] on [date]'s day.
+  Future<bool> isRecipePlanned({
+    required String recipeId,
+    required DateTime date,
+    required String mealType,
+  }) async {
+    final day = DateTime(date.year, date.month, date.day);
+    final next = DateTime(date.year, date.month, date.day + 1);
+    final row = await (select(mealPlans)
+          ..where((t) =>
+              t.recipeId.equals(recipeId) &
+              t.mealType.equals(mealType) &
+              t.date.isBiggerOrEqualValue(day) &
+              t.date.isSmallerThanValue(next) &
+              t.deletedAt.isNull())
+          ..limit(1))
+        .getSingleOrNull();
+    return row != null;
+  }
+
+  /// For each of [recipeIds] that is planned on [from]'s day or later, the
+  /// first day it is planned for (at midnight). Recipes with nothing planned
+  /// from then on are left out.
+  Future<Map<String, DateTime>> nextPlannedDays(
+      Iterable<String> recipeIds, DateTime from) async {
+    final ids = recipeIds.toSet();
+    if (ids.isEmpty) return const {};
+    final start = DateTime(from.year, from.month, from.day);
+    final rows = await (select(mealPlans)
+          ..where((t) =>
+              t.recipeId.isIn(ids) &
+              t.date.isBiggerOrEqualValue(start) &
+              t.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm(expression: t.date)]))
+        .get();
+    final firstDay = <String, DateTime>{};
+    for (final r in rows) {
+      final d = r.date;
+      firstDay.putIfAbsent(r.recipeId!, () => DateTime(d.year, d.month, d.day));
+    }
+    return firstDay;
+  }
+
   Future<void> deleteMealPlan(String id) async {
     await (delete(mealPlans)..where((t) => t.id.equals(id))).go();
     await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.mealPlans, id);

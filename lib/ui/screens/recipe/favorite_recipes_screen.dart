@@ -44,10 +44,7 @@ class FavoriteRecipesScreen extends ConsumerWidget {
                 : RecipeCardGrid(
                     storageKey: 'favorites_grid',
                     recipes: recipes,
-                    onTap: (r) {
-                      ref.read(recipeDaoProvider).updateLastViewed(r.id);
-                      context.pushNamed('recipe', pathParameters: {'id': r.id});
-                    },
+                    onTap: (r) => context.pushNamed('recipe', pathParameters: {'id': r.id}),
                     onToggleFavorite: (r) =>
                         ref.read(recipeDaoProvider).toggleFavorite(r.id, !r.isFavorite),
                   ),
@@ -91,10 +88,7 @@ class FavoriteRecipesScreen extends ConsumerWidget {
             maxTileWidth: wide ? 230 : 250,
             gap: wide ? Space.lg : Space.md,
             padding: EdgeInsets.fromLTRB(side, Space.xs, side, 104),
-            onTap: (r) {
-              ref.read(recipeDaoProvider).updateLastViewed(r.id);
-              context.pushNamed('recipe', pathParameters: {'id': r.id});
-            },
+            onTap: (r) => context.pushNamed('recipe', pathParameters: {'id': r.id}),
             onToggleFavorite: (r) {
               final dao = ref.read(recipeDaoProvider);
               dao.toggleFavorite(r.id, false);

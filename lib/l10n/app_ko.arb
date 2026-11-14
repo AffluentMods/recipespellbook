@@ -4865,5 +4865,9 @@
   "bulkNutritionLowMatchCount": "{count, plural, other{재료 인식률이 70% 미만인 레시피 {count}개}}",
   "bulkNutritionNotCalculatedCount": "{count, plural, other{계산하지 못한 레시피 {count}개}}",
   "bulkNutritionNoIngredients": "재료 없음",
-  "bulkNutritionNoMatch": "인식된 재료 없음"
+  "bulkNutritionNoMatch": "인식된 재료 없음",
+  "pressBackAgainToExit": "뒤로 버튼을 한 번 더 누르면 종료됩니다",
+  "mealPlanNextWeekend": "다음 주말",
+  "shoppingAlreadyPlanned": "이미 식단 계획에 있습니다: {when}",
+  "communityPreviewViewFullRecipe": "전체 레시피 보기"
 }

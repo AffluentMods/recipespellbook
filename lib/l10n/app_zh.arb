@@ -4865,5 +4865,9 @@
   "bulkNutritionLowMatchCount": "{count, plural, other{{count} 个食谱识别出的食材不到 70%}}",
   "bulkNutritionNotCalculatedCount": "{count, plural, other{{count} 个食谱无法计算}}",
   "bulkNutritionNoIngredients": "没有食材",
-  "bulkNutritionNoMatch": "没有识别出任何食材"
+  "bulkNutritionNoMatch": "没有识别出任何食材",
+  "pressBackAgainToExit": "再按一次返回键退出",
+  "mealPlanNextWeekend": "下周末",
+  "shoppingAlreadyPlanned": "已在膳食计划中：{when}",
+  "communityPreviewViewFullRecipe": "查看完整食谱"
 }

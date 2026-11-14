@@ -33,8 +33,10 @@ class AppSnackbar {
   static void error(BuildContext context, String message) =>
       _show(context, message, Icons.error_rounded, _errorAccent);
 
-  static void info(BuildContext context, String message) =>
-      _show(context, message, Icons.info_rounded, _infoAccent);
+  static void info(BuildContext context, String message,
+          {Duration duration = const Duration(seconds: 3)}) =>
+      _show(context, message, Icons.info_rounded, _infoAccent,
+          duration: duration);
 
   static void warning(BuildContext context, String message) =>
       _show(context, message, Icons.warning_rounded, _warningAccent);

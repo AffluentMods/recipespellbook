@@ -4865,5 +4865,9 @@
   "bulkNutritionLowMatchCount": "{count, plural, =1{W 1 przepisie rozpoznano mniej niż 70% składników} few{W {count} przepisach rozpoznano mniej niż 70% składników} many{W {count} przepisach rozpoznano mniej niż 70% składników} other{W {count} przepisu rozpoznano mniej niż 70% składników}}",
   "bulkNutritionNotCalculatedCount": "{count, plural, =1{Nie udało się obliczyć 1 przepisu} few{Nie udało się obliczyć {count} przepisów} many{Nie udało się obliczyć {count} przepisów} other{Nie udało się obliczyć {count} przepisu}}",
   "bulkNutritionNoIngredients": "Brak składników",
-  "bulkNutritionNoMatch": "Nie rozpoznano żadnego składnika"
+  "bulkNutritionNoMatch": "Nie rozpoznano żadnego składnika",
+  "pressBackAgainToExit": "Naciśnij ponownie Wstecz, aby wyjść",
+  "mealPlanNextWeekend": "W przyszły weekend",
+  "shoppingAlreadyPlanned": "Już w planie posiłków: {when}",
+  "communityPreviewViewFullRecipe": "Zobacz pełny przepis"
 }

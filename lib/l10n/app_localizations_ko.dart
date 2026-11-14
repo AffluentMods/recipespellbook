@@ -12560,4 +12560,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => '인식된 재료 없음';
+
+  @override
+  String get pressBackAgainToExit => '뒤로 버튼을 한 번 더 누르면 종료됩니다';
+
+  @override
+  String get mealPlanNextWeekend => '다음 주말';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return '이미 식단 계획에 있습니다: $when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => '전체 레시피 보기';
 }

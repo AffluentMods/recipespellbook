@@ -6325,7 +6325,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mealPlanDate => 'Date';
 
   @override
-  String get mealPlanThisWeekend => 'This Weekend';
+  String get mealPlanThisWeekend => 'This weekend';
 
   @override
   String get menuKitchenBuddy => 'Kitchen Buddy';
@@ -12696,4 +12696,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => 'No ingredient was recognized';
+
+  @override
+  String get pressBackAgainToExit => 'Press back again to exit';
+
+  @override
+  String get mealPlanNextWeekend => 'Next weekend';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return 'Already in your meal plan: $when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => 'View full recipe';
 }

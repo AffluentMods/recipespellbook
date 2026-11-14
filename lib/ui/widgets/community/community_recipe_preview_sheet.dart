@@ -11,9 +11,10 @@ import '../sheet_chrome.dart';
 import '../../../utils/responsive_utils.dart';
 
 /// The Community recipe preview: a bottom sheet at 70% height, draggable to
-/// full (community handoff, preview sheet). This is the conversion point of
-/// the tab — Save is the only primary control, the full title always fits,
-/// and the ingredient list fades instead of cutting an item mid-row.
+/// full (community handoff, preview sheet). The full title always fits and
+/// the ingredient list fades instead of cutting an item mid-row. The photo,
+/// the recipe's text and a full-width "View full recipe" button all open the
+/// whole recipe; View cookbook and Save recipe sit side by side below it.
 ///
 /// The sheet closes itself before [onViewCookbook] and [onExpandRecipe] run,
 /// and hands [onSaveRecipe] a way to close it. Callers must not pop it with
@@ -97,6 +98,78 @@ class _PreviewSheetState extends State<_PreviewSheet> {
     final prep = formatDurationMinutes(l10n, recipe.prepTimeMinutes);
     final cook = formatDurationMinutes(l10n, recipe.cookTimeMinutes);
     final servingsInt = int.tryParse(recipe.servings ?? '');
+    final openRecipe = _closeThen(widget.onExpandRecipe);
+
+    // Title, byline, meta line and ingredients. Tapping any of it opens the
+    // full recipe (the byline keeps opening the cookbook).
+    Widget details = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          display.title,
+          style: TextStyle(
+            fontSize: 19,
+            height: 1.25,
+            fontWeight: FontWeight.w600,
+            color: colors.textPrimary,
+          ),
+        ),
+        if (display.qualifier != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              display.qualifier!,
+              style: TextStyle(fontSize: 12, color: colors.textTertiary),
+            ),
+          ),
+        const SizedBox(height: 10),
+        _bylineRow(context),
+        const SizedBox(height: 10),
+        MetaLine([
+          MetaSeg.maybe(prep == null ? null : l10n.durationPrep(prep)),
+          MetaSeg.maybe(cook == null ? null : l10n.durationCook(cook)),
+          if (servingsInt != null && servingsInt > 0)
+            MetaSeg(l10n.countServings(servingsInt)),
+          MetaSeg.maybe(countOrNull(
+              recipe.ingredients.length, l10n.countIngredients)),
+        ]),
+        const SizedBox(height: 12),
+        _FadingIngredientList(ingredients: recipe.ingredients),
+      ],
+    );
+    if (openRecipe != null) {
+      details = Semantics(
+        container: true,
+        button: true,
+        onTapHint: l10n.communityPreviewViewFullRecipe,
+        onTap: openRecipe,
+        child: InkWell(
+          key: const ValueKey('preview-recipe-details'),
+          onTap: openRecipe,
+          excludeFromSemantics: true,
+          borderRadius: BorderRadius.circular(8),
+          child: details,
+        ),
+      );
+    }
+
+    final saveButton = _saved
+        ? OutlinedButton.icon(
+            onPressed: null,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 48),
+              disabledForegroundColor: colors.textSecondary,
+            ),
+            icon: const Icon(Icons.check, size: 18),
+            label: Text(l10n.previewSavedRecipe),
+          )
+        : _SaveButton(
+            // Second to "View full recipe" when that is shown.
+            tonal: openRecipe != null,
+            saving: _saving,
+            onPressed: _saving ? null : _save,
+            label: l10n.communitySaveRecipe,
+          );
 
     return AdaptiveDraggableSheet(
       initialChildSize: 0.7,
@@ -123,7 +196,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 children: [
                   GestureDetector(
-                    onTap: _closeThen(widget.onExpandRecipe),
+                    onTap: openRecipe,
                     child: CommunityMedia(
                       publicationId: recipe.cookbook.id,
                       imagePath: recipe.imagePath,
@@ -133,83 +206,50 @@ class _PreviewSheetState extends State<_PreviewSheet> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    display.title,
-                    style: TextStyle(
-                      fontSize: 19,
-                      height: 1.25,
-                      fontWeight: FontWeight.w600,
-                      color: colors.textPrimary,
-                    ),
-                  ),
-                  if (display.qualifier != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        display.qualifier!,
-                        style: TextStyle(fontSize: 12, color: colors.textTertiary),
-                      ),
-                    ),
-                  const SizedBox(height: 10),
-                  _bylineRow(context),
-                  const SizedBox(height: 10),
-                  MetaLine([
-                    MetaSeg.maybe(prep == null ? null : l10n.durationPrep(prep)),
-                    MetaSeg.maybe(cook == null ? null : l10n.durationCook(cook)),
-                    if (servingsInt != null && servingsInt > 0)
-                      MetaSeg(l10n.countServings(servingsInt)),
-                    MetaSeg.maybe(countOrNull(
-                        recipe.ingredients.length, l10n.countIngredients)),
-                  ]),
-                  const SizedBox(height: 12),
-                  _FadingIngredientList(ingredients: recipe.ingredients),
+                  details,
                 ],
               ),
             ),
-            // Actions: Save is the only primary-tier control in the sheet.
+            // Actions: "View full recipe" across the width, then View
+            // cookbook and Save recipe side by side (fits a narrow phone).
             SafeArea(
               top: false,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
-                child: Row(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (widget.onViewCookbook != null) ...[
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: _closeThen(widget.onViewCookbook),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 48),
-                          ),
-                          child: Text(l10n.communityViewCookbook),
+                    if (openRecipe != null) ...[
+                      FilledButton.icon(
+                        onPressed: openRecipe,
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 48),
                         ),
+                        icon: const Icon(Icons.menu_book_outlined, size: 18),
+                        label: Text(l10n.communityPreviewViewFullRecipe),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(height: 8),
                     ],
-                    Expanded(
-                      child: _saved
-                          ? OutlinedButton.icon(
-                              onPressed: null,
+                    Row(
+                      children: [
+                        if (widget.onViewCookbook != null) ...[
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: _closeThen(widget.onViewCookbook),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size(0, 48),
-                                disabledForegroundColor: colors.textSecondary,
                               ),
-                              icon: const Icon(Icons.check, size: 18),
-                              label: Text(l10n.previewSavedRecipe),
-                            )
-                          : FilledButton.icon(
-                              onPressed: _saving ? null : _save,
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size(0, 48),
+                              child: Text(
+                                l10n.communityViewCookbook,
+                                textAlign: TextAlign.center,
                               ),
-                              icon: _saving
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    )
-                                  : const Icon(Icons.bookmark_outline, size: 18),
-                              label: Text(l10n.communitySaveRecipe),
                             ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Expanded(child: saveButton),
+                      ],
                     ),
                   ],
                 ),
@@ -272,11 +312,55 @@ class _PreviewSheetState extends State<_PreviewSheet> {
     );
 
     if (widget.onViewCookbook == null) return row;
-    return GestureDetector(
+    // An ink response of its own inside the recipe's: pressing it lights
+    // only the byline and opens the cookbook, not the recipe.
+    return InkWell(
       onTap: _closeThen(widget.onViewCookbook),
-      behavior: HitTestBehavior.opaque,
+      borderRadius: BorderRadius.circular(6),
       child: row,
     );
+  }
+}
+
+/// Save recipe: filled when it is the sheet's main action, tonal when it sits
+/// under "View full recipe".
+class _SaveButton extends StatelessWidget {
+  final bool tonal;
+  final bool saving;
+  final VoidCallback? onPressed;
+  final String label;
+
+  const _SaveButton({
+    required this.tonal,
+    required this.saving,
+    required this.onPressed,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final style = FilledButton.styleFrom(minimumSize: const Size(0, 48));
+    final icon = saving
+        ? const SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : const Icon(Icons.bookmark_outline, size: 18);
+    final text = Text(label, textAlign: TextAlign.center);
+    return tonal
+        ? FilledButton.tonalIcon(
+            onPressed: onPressed,
+            style: style,
+            icon: icon,
+            label: text,
+          )
+        : FilledButton.icon(
+            onPressed: onPressed,
+            style: style,
+            icon: icon,
+            label: text,
+          );
   }
 }
 

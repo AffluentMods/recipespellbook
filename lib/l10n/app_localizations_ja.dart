@@ -12532,4 +12532,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get bulkNutritionNoMatch => '認識できた材料がありません';
+
+  @override
+  String get pressBackAgainToExit => 'もう一度「戻る」を押すと終了します';
+
+  @override
+  String get mealPlanNextWeekend => '来週末';
+
+  @override
+  String shoppingAlreadyPlanned(String when) {
+    return 'すでに献立にあります：$when';
+  }
+
+  @override
+  String get communityPreviewViewFullRecipe => 'レシピ全体を表示';
 }

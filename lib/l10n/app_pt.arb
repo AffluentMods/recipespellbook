@@ -4865,5 +4865,9 @@
   "bulkNutritionLowMatchCount": "{count, plural, =1{Em 1 receita, menos de 70% dos ingredientes foram reconhecidos} other{Em {count} receitas, menos de 70% dos ingredientes foram reconhecidos}}",
   "bulkNutritionNotCalculatedCount": "{count, plural, =1{Não foi possível calcular 1 receita} other{Não foi possível calcular {count} receitas}}",
   "bulkNutritionNoIngredients": "Sem ingredientes",
-  "bulkNutritionNoMatch": "Nenhum ingrediente reconhecido"
+  "bulkNutritionNoMatch": "Nenhum ingrediente reconhecido",
+  "pressBackAgainToExit": "Pressione voltar novamente para sair",
+  "mealPlanNextWeekend": "Próximo Fim de Semana",
+  "shoppingAlreadyPlanned": "Já está no plano de refeições: {when}",
+  "communityPreviewViewFullRecipe": "Ver receita completa"
 }

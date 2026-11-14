@@ -4865,5 +4865,9 @@
   "bulkNutritionLowMatchCount": "{count, plural, other{材料の認識が70%未満のレシピ: {count}件}}",
   "bulkNutritionNotCalculatedCount": "{count, plural, other{計算できなかったレシピ: {count}件}}",
   "bulkNutritionNoIngredients": "材料がありません",
-  "bulkNutritionNoMatch": "認識できた材料がありません"
+  "bulkNutritionNoMatch": "認識できた材料がありません",
+  "pressBackAgainToExit": "もう一度「戻る」を押すと終了します",
+  "mealPlanNextWeekend": "来週末",
+  "shoppingAlreadyPlanned": "すでに献立にあります：{when}",
+  "communityPreviewViewFullRecipe": "レシピ全体を表示"
 }
