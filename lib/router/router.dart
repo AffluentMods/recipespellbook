@@ -396,29 +396,34 @@ final router = GoRouter(
           },
         ),
         GoRoute(
-          path: '/community/:id/recipe/:index',
+          path: '/community/:id/recipe/:recipe',
           name: 'community-recipe',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
-            final index = int.tryParse(state.pathParameters['index'] ?? '') ?? 0;
+            // The recipe's id; older links carry its position instead.
+            final ref = state.pathParameters['recipe'] ?? '';
+            final index = int.tryParse(ref);
             // The recipe object is passed via extra when navigating from a
             // screen that already has it. URL-only navigation (deep links,
-            // pushReplacement redirects for single-recipe publications)
-            // has no extra — the old unconditional cast crashed with
-            // "type 'Null' is not a subtype of type 'CommunityRecipe'".
-            // Fall back to fetching by publication id + index instead.
-            final recipe = state.extra is CommunityRecipe
-                ? state.extra as CommunityRecipe
-                : null;
-            if (recipe != null) {
+            // a reload, pushReplacement redirects for single-recipe
+            // publications) has no extra: fetch the publication and find
+            // the recipe by its id. The feed's extra is only a preview of
+            // the recipe, shown while the whole of it loads.
+            final extra = state.extra;
+            final shown = extra is CommunityRecipeRouteExtra
+                ? extra
+                : (extra is CommunityRecipe ? CommunityRecipeRouteExtra(extra) : null);
+            if (shown != null && shown.complete) {
               return CommunityRecipeFullScreen(
                 publicationId: id,
-                recipe: recipe,
+                recipe: shown.recipe,
               );
             }
             return CommunityRecipeLoaderScreen(
               publicationId: id,
-              recipeIndex: index,
+              recipeId: index == null && ref.isNotEmpty ? ref : null,
+              recipeIndex: index ?? 0,
+              preview: shown?.recipe,
             );
           },
         ),

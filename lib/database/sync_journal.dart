@@ -27,6 +27,12 @@ class SyncJournal {
   static const shoppingListItems = 'shoppingListItems';
   static const shoppingCategories = 'shoppingCategories';
 
+  /// The tags of a recipe in a cookbook someone else shares with this
+  /// account were changed here. Read and cleared by the collab cookbook
+  /// push only, which sends a recipe's tags only then: a member's edit
+  /// sent bare local ids that replaced the owner's tags.
+  static const recipeTags = 'recipeTags';
+
   static const _applyingKey = #syncJournalApplying;
 
   /// Runs [body] with journaling off — used while applying server data, whose
@@ -128,7 +134,18 @@ class SyncJournal {
         [ms, shoppingListItems, ...sharedLists, sharedSentUntil?.millisecondsSinceEpoch ?? -1],
       );
     }
-    await db.customStatement('DELETE FROM sync_touched WHERE touched_at <= ?', [ms]);
+    // Shared-cookbook tag changes are the collab push's, which runs after.
+    await db.customStatement('DELETE FROM sync_touched WHERE touched_at <= ? AND entity <> ?', [ms, recipeTags]);
+  }
+
+  /// Drop [entity] edits of [ids] made up to [upTo] (a later edit stays).
+  static Future<void> untouch(DatabaseConnectionUser db, String entity, Iterable<String> ids, {DateTime? upTo}) async {
+    for (final id in ids) {
+      await db.customStatement(
+        'DELETE FROM sync_touched WHERE entity = ? AND entity_id = ? AND touched_at <= ?',
+        [entity, id, (upTo ?? DateTime.now()).millisecondsSinceEpoch],
+      );
+    }
   }
 
   static Future<void> clear(DatabaseConnectionUser db) async {

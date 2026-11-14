@@ -15,3 +15,11 @@ DateTime addDays(DateTime date, int days) {
   return make(date.year, date.month, date.day + days, date.hour, date.minute,
       date.second, date.millisecond, date.microsecond);
 }
+
+/// Calendar days from [from]'s day to [to]'s day, negative when [to] is
+/// earlier; times of day do not count. `to.difference(from).inDays` counts
+/// 24 hour periods instead, one short across the spring clock change.
+int calendarDaysBetween(DateTime from, DateTime to) =>
+    DateTime.utc(to.year, to.month, to.day)
+        .difference(DateTime.utc(from.year, from.month, from.day))
+        .inDays;

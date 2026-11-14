@@ -10,6 +10,7 @@ import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
+import '../../../services/community_cookbook_fingerprint.dart' show communityRecipeKeys;
 import '../../../services/community_cookbook_writer.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
@@ -20,12 +21,30 @@ import '../../widgets/community/meta_line.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/community_tag_picker.dart';
 import '../../widgets/sheet_chrome.dart';
+import 'community_recipe_full_screen.dart' show communityRecipeLocation;
 import 'community_recipe_preview_dialog.dart';
 import 'community_screen.dart'; // StarRating
 
 // ════════════════════════════════════════════
 //  COMMUNITY DETAIL — View, Rate & Download
 // ════════════════════════════════════════════
+
+/// The recipes picked by position in [shown] (the cookbook as it was on
+/// screen), found in [now] (what a download just brought) by their title
+/// keys. Null when one of them is no longer there (removed or renamed).
+Set<int>? pickedInNewVersion(List<CommunityRecipe> shown, Set<int> picked, List<CommunityRecipe> now) {
+  final shownKeys = communityRecipeKeys(shown);
+  final wanted = {
+    for (final i in picked)
+      if (i >= 0 && i < shownKeys.length) shownKeys[i],
+  };
+  final nowKeys = communityRecipeKeys(now);
+  final found = {
+    for (var i = 0; i < nowKeys.length; i++)
+      if (wanted.contains(nowKeys[i])) i,
+  };
+  return found.length == wanted.length && wanted.length == picked.length ? found : null;
+}
 
 /// One row of the detail screen's recipe list. [usedIn] is how many other
 /// recipes use this one as a sub-recipe.
@@ -88,6 +107,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
   CommunityDetail? _detail;
   bool _loading = true;
+  // The publication is gone (unpublished, removed, under review), as
+  // opposed to not loading.
+  bool _notFound = false;
   bool _downloading = false;
   String _downloadStatus = '';
 
@@ -108,22 +130,30 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   }
 
   Future<void> _load() async {
-    final detail = await _community.getPublication(widget.publicationId);
+    if (_detail == null && !_loading) setState(() => _loading = true);
+    final fetched = await _community.fetchPublication(widget.publicationId);
+    final detail = fetched.detail;
+    // "Not found" only when it really is gone; a failed load offers a retry.
+    _notFound = fetched.notFound;
 
     // Single-recipe publications skip the cookbook framing entirely:
     // open the recipe full-screen view instead of this detail screen.
     if (detail != null && detail.isSingleRecipe && detail.recipes.isNotEmpty && mounted) {
       // Use replace so back arrow returns to the feed, not this stub.
-      context.pushReplacement('/community/${detail.id}/recipe/0');
+      context.pushReplacement(
+        communityRecipeLocation(detail.id, detail.recipes.first, 0),
+        extra: detail.recipes.first,
+      );
       return;
     }
 
     if (mounted) {
       setState(() {
-        _detail = detail;
+        // A refresh that fails keeps what is on screen.
+        _detail = detail ?? (_notFound ? null : _detail);
         _loading = false;
-        _displayRating = detail?.averageRating ?? 0;
-        _displayRatingCount = detail?.ratingCount ?? 0;
+        _displayRating = _detail?.averageRating ?? 0;
+        _displayRatingCount = _detail?.ratingCount ?? 0;
       });
     }
     // Load user's own rating
@@ -178,26 +208,26 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         return;
       }
 
+      // The selection was made on the cookbook as it was shown; the
+      // publisher may have changed it since. Find the same recipes in what
+      // came down now by their title (as updates follow recipes), never by
+      // position. When one of them is gone, show the cookbook as it is now
+      // and let the person pick again.
+      final picked = selectedIndices == null
+          ? null
+          : pickedInNewVersion(_detail?.recipes ?? const [], selectedIndices, result.recipes);
+      if (selectedIndices != null && picked == null) {
+        if (mounted) AppSnackbar.warning(context, l10n.communityDownloadSelectionChanged);
+        await _load();
+        return;
+      }
+
       // Filter to selected recipes if partial download.
       // Auto-include any sub-recipes referenced by the user's selection so links don't break.
-      var effectiveSelection = selectedIndices;
-      if (selectedIndices != null) {
-        final expanded = Set<int>.from(selectedIndices);
-        bool added = true;
-        while (added) {
-          added = false;
-          for (final idx in expanded.toList()) {
-            if (idx < 0 || idx >= result.recipes.length) continue;
-            for (final link in result.recipes[idx].recipeLinks) {
-              final subIdx = link.linkedRecipeIndex;
-              if (subIdx >= 0 && subIdx < result.recipes.length && !expanded.contains(subIdx)) {
-                expanded.add(subIdx);
-                added = true;
-              }
-            }
-          }
-        }
-        final extraCount = expanded.length - selectedIndices.length;
+      var effectiveSelection = picked;
+      if (picked != null) {
+        final expanded = withSubRecipes(result.recipes, picked);
+        final extraCount = expanded.length - picked.length;
         if (extraCount > 0 && mounted) {
           // Quick confirmation — sub-recipes auto-included so links don't break
           final include = await showDialog<bool>(
@@ -228,7 +258,10 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           : List.generate(result.recipes.length, (i) => i);
 
       final db = ref.read(databaseProvider);
-      final cookbookId = targetCookbookId ?? 'community_${uuid.v4()}';
+      // A partial download into a new cookbook is marked as one, so it is
+      // never taken for a whole download from before sources were recorded.
+      final cookbookId = targetCookbookId ??
+          newCommunityCookbookId(partial: recipesToDownload.length != result.recipes.length, uuid: uuid);
 
       // --- Phase 1: Download images (before DB writes) ---
       // Every photo of the selection, a few at a time, each with a timeout
@@ -458,12 +491,18 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     if (mounted) AppSnackbar.info(context, l10n.communityCannotReportOwn);
                     return;
                   }
+                  // Reporting needs an account; any other failure is just
+                  // a failure, not a reason to sign in.
+                  if (!AuthService.instance.isSignedIn) {
+                    if (mounted) AppSnackbar.info(context, l10n.communitySignInToReport);
+                    return;
+                  }
                   final ok = await _community.report(widget.publicationId, r.$1);
                   if (mounted) {
                     if (ok) {
                       AppSnackbar.success(context, l10n.communityReportSuccess);
                     } else {
-                      AppSnackbar.error(context, l10n.communitySignInToReport);
+                      AppSnackbar.error(context, l10n.communityReportFailed);
                     }
                   }
                 },
@@ -585,7 +624,32 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     if (_detail == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text(l10n.communityPublicationNotFound)),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(_notFound ? Icons.search_off_rounded : Icons.cloud_off_rounded,
+                    size: 48, color: theme.colorScheme.outline),
+                const SizedBox(height: 16),
+                Text(
+                  _notFound ? l10n.communityPublicationNotFound : l10n.communityLoadFailed,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium,
+                ),
+                if (!_notFound) ...[
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _load,
+                    icon: const Icon(Icons.refresh),
+                    label: Text(l10n.actionRetry),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
       );
     }
 

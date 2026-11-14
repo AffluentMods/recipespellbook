@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import '../../models/imported_recipe.dart';
+import '../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../backup_zip.dart';
 import 'paprika_importer.dart';
 import 'mela_importer.dart';
@@ -16,15 +18,33 @@ import '../recipe_import_engine.dart';
 
 /// Top-level function for compute() isolate.
 /// Must be top-level (not a method) for Dart isolate serialization.
+///
+/// The file is read here, from its path, so it is not copied over from the
+/// screen's isolate. The photos it carries as text are written to the photo
+/// folder here too, so they do not travel back as text either.
 Future<List<ImportedRecipe>> _parseInIsolate(_ImportTask task) async {
-  return FileImportDispatcher._import(task.bytes, task.filename);
+  var bytes = task.bytes;
+  if (bytes == null) {
+    try {
+      bytes = await File(task.path!).readAsBytes();
+    } catch (_) {
+      throw const FileImportException(FileImportProblem.unreadable, 'That file could not be read.');
+    }
+  }
+  final recipes = await FileImportDispatcher._import(bytes, task.filename);
+  final folder = task.photoFolder;
+  if (folder != null) await FileImportDispatcher.photosToFiles(recipes, folder);
+  return recipes;
 }
 
-/// Serializable task for passing to compute().
+/// Serializable task for passing to compute(): the file's [bytes], or the
+/// [path] to read them from.
 class _ImportTask {
-  final Uint8List bytes;
+  final Uint8List? bytes;
+  final String? path;
   final String filename;
-  const _ImportTask(this.bytes, this.filename);
+  final String? photoFolder;
+  const _ImportTask(this.filename, {this.bytes, this.path, this.photoFolder});
 }
 
 /// Dispatches file imports based on filename extension, and on what the file
@@ -123,17 +143,91 @@ class FileImportDispatcher {
     Uint8List bytes,
     String filename,
   ) {
-    return compute(_parseInIsolate, _ImportTask(bytes, filename));
+    return compute(_parseInIsolate, _ImportTask(filename, bytes: bytes));
   }
 
-  // What the user is told when a file cannot be imported.
-  static const _empty = 'This file is empty.';
-  static const _unsupported = 'This file type is not supported.';
-  static const _notText = 'This file is damaged or is not a text file.';
-  static const _richText = 'Rich text files are not supported. Save the recipe as plain text and retry.';
-  static const _unknownXml = 'This XML file is not a recipe export the app can read.';
-  static const _damagedZip = 'This ZIP file is damaged or incomplete. Export it again and retry.';
-  static const _ownBackup = 'This is a Recipe Spellbook backup. Restore it from Settings, Import Data.';
+  /// Import the file at [path], or in [bytes] where there is no path (in the
+  /// browser). A path is read in the background, so a large export is not
+  /// held in memory on the screen's side and copied over.
+  ///
+  /// With [photoFolder], every photo the file carries inside it is written
+  /// there and the recipe points at it ([ImportedRecipe.imagePath]) instead
+  /// of holding it as text. The folder is the caller's to delete once the
+  /// recipes are saved; saving copies the photos it keeps.
+  static Future<List<ImportedRecipe>> importFile(
+    String filename, {
+    String? path,
+    Uint8List? bytes,
+    String? photoFolder,
+  }) {
+    assert(path != null || bytes != null);
+    return compute(_parseInIsolate, _ImportTask(filename, bytes: bytes, path: path, photoFolder: photoFolder));
+  }
+
+  /// Writes the photo each of [recipes] carries as text into [folder] and
+  /// points the recipe at the file. Data that is no picture is left as it
+  /// is, for the save to turn down.
+  @visibleForTesting
+  static Future<void> photosToFiles(List<ImportedRecipe> recipes, String folder) async {
+    var made = false;
+    for (var i = 0; i < recipes.length; i++) {
+      final recipe = recipes[i];
+      final data = recipe.imageData;
+      if (data == null || data.trim().isEmpty || (recipe.imagePath ?? '').isNotEmpty) continue;
+      final Uint8List bytes;
+      try {
+        final comma = data.indexOf(',');
+        final body = (comma >= 0 ? data.substring(comma + 1) : data).replaceAll(RegExp(r'\s'), '');
+        bytes = base64.decode(base64.normalize(body));
+      } catch (_) {
+        continue;
+      }
+      final extension = _photoExtension(bytes);
+      if (extension == null) continue;
+      if (!made) {
+        await Directory(folder).create(recursive: true);
+        made = true;
+      }
+      final path = p.join(folder, 'photo_$i$extension');
+      await File(path).writeAsBytes(bytes);
+      recipe
+        ..imagePath = path
+        ..imageData = null;
+    }
+  }
+
+  /// The file extension of a photo by how its bytes start, or null.
+  static String? _photoExtension(List<int> bytes) {
+    bool has(int offset, List<int> signature) {
+      if (bytes.length < offset + signature.length) return false;
+      for (var i = 0; i < signature.length; i++) {
+        if (bytes[offset + i] != signature[i]) return false;
+      }
+      return true;
+    }
+
+    if (has(0, const [0xFF, 0xD8, 0xFF])) return '.jpg';
+    if (has(0, const [0x89, 0x50, 0x4E, 0x47])) return '.png';
+    if (has(0, 'GIF8'.codeUnits)) return '.gif';
+    if (has(0, 'RIFF'.codeUnits) && has(8, 'WEBP'.codeUnits)) return '.webp';
+    if (has(0, 'BM'.codeUnits)) return '.bmp';
+    return null;
+  }
+
+  // Why a file cannot be imported. The screen says it in the user's
+  // language; the English is for logs.
+  static const _empty = FileImportException(FileImportProblem.empty, 'This file is empty.');
+  static const _unsupported = FileImportException(FileImportProblem.unsupported, 'This file type is not supported.');
+  static const _notText =
+      FileImportException(FileImportProblem.notText, 'This file is damaged or is not a text file.');
+  static const _richText = FileImportException(FileImportProblem.richText,
+      'Rich text files are not supported. Save the recipe as plain text and retry.');
+  static const _unknownXml = FileImportException(
+      FileImportProblem.unknownXml, 'This XML file is not a recipe export the app can read.');
+  static const _damagedZip = FileImportException(
+      FileImportProblem.damagedZip, 'This ZIP file is damaged or incomplete. Export it again and retry.');
+  static const _ownBackup = FileImportException(
+      FileImportProblem.ownBackup, 'This is a Recipe Spellbook backup. Restore it from Settings, Import Data.');
 
   /// Import dispatcher, runs inside isolate.
   /// All parsing happens here off the main thread.
@@ -147,7 +241,7 @@ class FileImportDispatcher {
     int depth = 0,
     ImportPhotoLookup? photo,
   }) async {
-    if (bytes.isEmpty) throw const FormatException(_empty);
+    if (bytes.isEmpty) throw _empty;
     final ext = _extension(filename);
     final isZip = ImportSupport.isZip(bytes);
     // An archive inside the picked one is opened: some exports pack every
@@ -188,10 +282,10 @@ class FileImportDispatcher {
 
     // Every other file should be text. One that is not is refused, unless it
     // is an export whose name lost its extension or was given another.
-    final refusal = supportedExtensions.contains(ext) ? _notText : _unsupported;
+    final FileImportException refusal = supportedExtensions.contains(ext) ? _notText : _unsupported;
     if (isZip) {
       final recipes = await _importZip(bytes, filename, depth);
-      if (recipes.isEmpty) throw FormatException(refusal);
+      if (recipes.isEmpty) throw refusal;
       return recipes;
     }
     if (ImportSupport.isGzip(bytes)) {
@@ -204,13 +298,13 @@ class FileImportDispatcher {
           // Not a recipe of that app.
         }
       }
-      throw FormatException(refusal);
+      throw refusal;
     }
     final text = _withoutPadding(bytes);
-    if (_isBinary(text)) throw FormatException(refusal);
+    if (_isBinary(text)) throw refusal;
 
     final content = ImportSupport.decodeText(text);
-    if (content.trim().isEmpty) throw const FormatException(_empty);
+    if (content.trim().isEmpty) throw _empty;
     return _importText(ext, content, filename, photo);
   }
 
@@ -274,7 +368,7 @@ class FileImportDispatcher {
         return _importCrumbJson(content, filename);
       case 'xml':
         final recipes = _importXml(content, filename, photo);
-        if (recipes == null) throw const FormatException(_unknownXml);
+        if (recipes == null) throw _unknownXml;
         return recipes;
       case 'html':
       case 'htm':
@@ -304,13 +398,13 @@ class FileImportDispatcher {
   ) {
     final text = content.trimLeft();
     final start = text.length > 512 ? text.substring(0, 512) : text;
-    if (start.startsWith(r'{\rtf')) throw const FormatException(_richText);
+    if (start.startsWith(r'{\rtf')) throw _richText;
 
     if (start.startsWith('<')) {
       final recipes = _importXml(content, filename, photo);
       if (recipes != null) return recipes;
       if (_htmlStart.hasMatch(start)) return _importHtml(content, filename, photo);
-      if (start.startsWith('<?xml')) throw const FormatException(_unknownXml);
+      if (start.startsWith('<?xml')) throw _unknownXml;
     }
     if (start.startsWith('{') || start.startsWith('[')) {
       final recipes = _importJson(content, filename);
@@ -433,25 +527,28 @@ class FileImportDispatcher {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException(_damagedZip);
+      throw _damagedZip;
     }
     // A backup holds the whole library and is restored as one, by Settings
     // and by the Add a recipe sheet before it gets here. Read here as loose
     // recipe files, most of what it holds is lost.
-    if (BackupZip.isBackup(archive)) throw const FormatException(_ownBackup);
+    if (BackupZip.isBackup(archive)) throw _ownBackup;
 
     // Try each ZIP-based importer in order of specificity. One that finds
-    // no recipe, or fails, leaves the archive to the next.
+    // no recipe, or fails, leaves the archive to the next. One that finds
+    // the archive unpacks to too much ends the import.
     for (final (canHandle, import_) in _zipImporters) {
       try {
         if (!canHandle(bytes)) continue;
         final recipes = await import_(bytes, filename);
         if (recipes.isNotEmpty) return recipes;
+      } on ZipTooLargeException {
+        rethrow;
       } catch (_) {}
     }
 
     // Fallback: extract and parse individual files from the ZIP
-    return _importGenericZip(archive, depth);
+    return _importGenericZip(archive, depth, BoundedUnzip.forArchive(bytes.length));
   }
 
   /// The importers of the exports that are a zip: how each knows its own,
@@ -466,9 +563,9 @@ class FileImportDispatcher {
 
   /// Generic ZIP fallback: every recipe file in the archive is read the way
   /// it is when picked on its own.
-  static Future<List<ImportedRecipe>> _importGenericZip(Archive archive, int depth) async {
+  static Future<List<ImportedRecipe>> _importGenericZip(Archive archive, int depth, BoundedUnzip unzip) async {
     final recipes = <ImportedRecipe>[];
-    final photo = ImportSupport.photosIn(archive);
+    final photo = ImportSupport.photosIn(archive, unzip);
 
     for (final file in archive.files) {
       if (!file.isFile || file.size == 0) continue;
@@ -482,8 +579,9 @@ class FileImportDispatcher {
 
       final List<ImportedRecipe> parsed;
       try {
-        final bytes = Uint8List.fromList(file.content as List<int>);
-        parsed = await _import(bytes, name, depth: depth + 1, photo: photo);
+        parsed = await _import(unzip.bytesOf(file), name, depth: depth + 1, photo: photo);
+      } on ZipTooLargeException {
+        rethrow;
       } catch (_) {
         // Not a recipe file after all, or one that does not unpack.
         continue;
@@ -529,7 +627,7 @@ class FileImportDispatcher {
     // One recipe and one photo in an archive belong together. Tandoor packs
     // every recipe of its export that way.
     if (recipes.length == 1 && recipes.single.imageData == null && recipes.single.imageUrl == null) {
-      final bytes = ImportSupport.onlyPhotoIn(archive);
+      final bytes = ImportSupport.onlyPhotoIn(archive, unzip);
       if (bytes != null) recipes.single.imageData = base64Encode(bytes);
     }
 

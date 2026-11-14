@@ -13,10 +13,13 @@ import 'package:uuid/uuid.dart';
 
 import '../data/default_recipes.dart';
 import '../database/database.dart';
+import '../database/seeded_defaults.dart';
 import '../utils/platform_utils.dart';
 import '../utils/zip_stream_stub.dart' if (dart.library.io) '../utils/zip_stream_io.dart';
 import 'backup_reminder_service.dart';
 import 'image_service.dart';
+import 'recipe_file_importers/file_import_error.dart' show ZipTooLargeException;
+import 'recipe_file_importers/import_support.dart' show BoundedUnzip;
 import 'share_file.dart';
 import 'pantry_service.dart';
 
@@ -153,6 +156,8 @@ class ExportImportService {
 
   Future<List<Map<String, dynamic>>> _exportAllCookbooks({bool embedImages = true}) async {
     final cookbooks = await db.select(db.cookbooks).get();
+    // Each table read once for the whole library, not four queries a recipe.
+    final children = await _RecipeChildren.read(db);
     final result = <Map<String, dynamic>>[];
     for (final cb in cookbooks) {
       result.add({
@@ -163,39 +168,30 @@ class ExportImportService {
         // lost them. Same embed-vs-path split as recipe images.
         if (embedImages) 'imageBase64': await _encodeImage(cb.imagePath)
         else ...{'localImagePath': cb.imagePath, 'cloudImagePath': _cloudCopy(cb.imagePath, cb.imageServerPath)},
-        'recipes': await _exportRecipesForCookbook(cb.id, embedImages: embedImages),
+        'recipes': await _exportRecipesForCookbook(cb.id, embedImages: embedImages, children: children),
       });
     }
     return result;
   }
 
-  Future<List<Map<String, dynamic>>> _exportRecipesForCookbook(String cookbookId, {bool embedImages = true}) async {
+  /// [children]: what the recipes hold, read beforehand; read here for this
+  /// cookbook's recipes when null.
+  Future<List<Map<String, dynamic>>> _exportRecipesForCookbook(String cookbookId,
+      {bool embedImages = true, _RecipeChildren? children}) async {
     // Recipes in the trash stay behind. A restore used to bring them back
     // as live recipes, and a shared cookbook handed them to someone else.
     final recipes = await (db.select(db.recipes)
       ..where((t) => t.cookbookId.equals(cookbookId) & t.deletedAt.isNull()))
         .get();
+    children ??= await _RecipeChildren.read(db, recipeIds: [for (final r in recipes) r.id]);
 
     final recipesData = <Map<String, dynamic>>[];
 
     for (final recipe in recipes) {
-      final ingredients = await (db.select(db.ingredients)
-        ..where((t) => t.recipeId.equals(recipe.id))
-        ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
-          .get();
-
-      final steps = await (db.select(db.steps)
-        ..where((t) => t.recipeId.equals(recipe.id))
-        ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
-          .get();
-
-      final links = await (db.select(db.recipeLinks)
-        ..where((t) => t.sourceRecipeId.equals(recipe.id)))
-          .get();
-
-      final tagAssocs = await (db.select(db.recipeTags)
-        ..where((t) => t.recipeId.equals(recipe.id)))
-          .get();
+      final ingredients = children.ingredients[recipe.id] ?? const <Ingredient>[];
+      final steps = children.steps[recipe.id] ?? const <Step>[];
+      final links = children.links[recipe.id] ?? const <RecipeLink>[];
+      final tagIds = children.tagIds[recipe.id] ?? const <String>[];
 
       // Encode step images (or pass local paths for the streamed zip export)
       final stepMaps = <Map<String, dynamic>>[];
@@ -228,7 +224,7 @@ class ExportImportService {
         'lastViewedAt': recipe.lastViewedAt?.toIso8601String(),
         if (embedImages) 'imageBase64': await _encodeImage(recipe.imagePath)
         else ...{'localImagePath': recipe.imagePath, 'cloudImagePath': _cloudCopy(recipe.imagePath, recipe.imageServerPath)},
-        'tagIds': tagAssocs.map((t) => t.tagId).toList(),
+        'tagIds': tagIds,
         'ingredients': ingredients.map((i) => {
           'id': i.id, 'sortOrder': i.sortOrder, 'amount': i.amount,
           'unit': i.unit, 'name': i.name, 'notes': i.notes,
@@ -366,77 +362,56 @@ class ExportImportService {
   ///   data.json      — full native data (all tables, image refs as relative paths)
   ///   images/        — all recipe/cookbook/step images
   ///   recipes/       — individual schema.org Recipe JSON-LD files (for other apps)
+  ///
+  /// Built in memory, for the web, which has no file system. See
+  /// [exportFullZipWithReport].
   Future<Uint8List> exportFullZip({
+    ExportOptions options = const ExportOptions.all(),
+    void Function(String status)? onProgress,
+  }) async =>
+      (await exportFullZipWithReport(options: options, onProgress: onProgress)).bytes;
+
+  /// [exportFullZip], and how many photos the backup could not take. On the
+  /// web every photo is in the cloud: they are fetched as bytes, and one
+  /// that cannot be fetched is counted. Such backups used to hold no photos
+  /// at all and say none were left out.
+  Future<({Uint8List bytes, int photosLeftOut})> exportFullZipWithReport({
     ExportOptions options = const ExportOptions.all(),
     void Function(String status)? onProgress,
   }) async {
     final archive = Archive();
 
     onProgress?.call('Collecting data...');
-    final data = await exportSelective(options);
+    final data = await exportSelective(options, embedImages: false);
     final cookbooks = data['cookbooks'] as List? ?? [];
+    final images = _collectZipImages(cookbooks);
 
-    // Track image paths we've added to avoid duplicates
-    final addedImages = <String>{};
-    int imageCount = 0;
-
-    // ── Rewrite image paths: replace base64 with relative zip paths, collect files ──
-    for (final cbData in cookbooks) {
-      final cbMap = cbData as Map<String, dynamic>;
-      final recipes = cbMap['recipes'] as List? ?? [];
-
-      // Cookbook cover
-      final cbId = cbMap['id'] as String? ?? 'cb';
-      final cbBase64 = cbMap.remove('imageBase64') as String?;
-      if (cbBase64 != null && cbBase64.isNotEmpty) {
-        final imgPath = 'images/cookbooks/${cbId}_cover.jpg';
-        if (addedImages.add(imgPath)) {
-          try {
-            archive.addFile(ArchiveFile(imgPath, 0, base64Decode(cbBase64)));
-            imageCount++;
-          } catch (_) {}
-        }
-        cbMap['imagePath'] = imgPath;
-      } else {
-        cbMap['imagePath'] = null;
+    var imageCount = 0;
+    var leftOut = 0;
+    for (final MapEntry(key: local, value: zipPath) in images.files) {
+      try {
+        archive.addFile(ArchiveFile(zipPath, 0, await File(local).readAsBytes()));
+        imageCount++;
+      } catch (_) {
+        leftOut++;
       }
-      for (final recData in recipes) {
-        final r = recData as Map<String, dynamic>;
-        final recipeId = r['id'] as String? ?? 'unknown';
-
-        // Cover image
-        final coverBase64 = r.remove('imageBase64') as String?;
-        if (coverBase64 != null && coverBase64.isNotEmpty) {
-          final imgPath = 'images/recipes/${recipeId}_cover.jpg';
-          if (addedImages.add(imgPath)) {
-            try {
-              archive.addFile(ArchiveFile(imgPath, 0, base64Decode(coverBase64)));
-              imageCount++;
-            } catch (_) {}
+    }
+    if (images.inCloud.isNotEmpty) {
+      onProgress?.call('Downloading ${images.inCloud.length} photos...');
+      final cloudPaths = images.inCloud.keys.toList();
+      final fetched = await _fetchCloudPhotoBytes(cloudPaths);
+      for (final (i, path) in cloudPaths.indexed) {
+        final photo = images.inCloud[path]!;
+        final bytes = fetched[i];
+        if (bytes == null) {
+          leftOut++;
+          for (final holder in photo.holders) {
+            holder['imagePath'] = null;
           }
-          r['imagePath'] = imgPath;
-        } else {
-          r['imagePath'] = null;
+          continue;
         }
-
-        // Step images
-        final steps = r['steps'] as List? ?? [];
-        for (final stepData in steps) {
-          final s = stepData as Map<String, dynamic>;
-          final stepBase64 = s.remove('imageBase64') as String?;
-          if (stepBase64 != null && stepBase64.isNotEmpty) {
-            final imgPath = 'images/recipes/${recipeId}_step_${s['sortOrder']}.jpg';
-            if (addedImages.add(imgPath)) {
-              try {
-                archive.addFile(ArchiveFile(imgPath, 0, base64Decode(stepBase64)));
-                imageCount++;
-              } catch (_) {}
-            }
-            s['imagePath'] = imgPath;
-          } else {
-            s['imagePath'] = null;
-          }
-        }
+        archive.addFile(ArchiveFile(photo.zipPath, 0, bytes));
+        imageCount++;
       }
     }
 
@@ -488,7 +463,50 @@ class ExportImportService {
 
     onProgress?.call('Compressing...');
     final zipBytes = ZipEncoder().encode(archive);
-    return Uint8List.fromList(zipBytes!);
+    return (bytes: Uint8List.fromList(zipBytes!), photosLeftOut: leftOut);
+  }
+
+  /// Rewrites the image fields of an export made with `embedImages: false`
+  /// to their place in the zip, and says where each photo comes from: a file
+  /// on this device, or the cloud (one path may be shown by several rows).
+  _ZipImages _collectZipImages(List cookbooks) {
+    final images = _ZipImages();
+
+    void collectImage(Map<String, dynamic> holder, String? localPath, String zipPath) {
+      final cloudPath = holder.remove('cloudImagePath') as String?;
+      if (!isWeb && _isFileHere(localPath) && File(localPath!).existsSync()) {
+        holder['imagePath'] = zipPath;
+        if (images.added.add(zipPath)) {
+          images.files.add(MapEntry(localPath, zipPath));
+        }
+      } else if (cloudPath != null) {
+        holder['imagePath'] = images.inCloud.putIfAbsent(cloudPath, () => (zipPath: zipPath, holders: [])).zipPath;
+        images.inCloud[cloudPath]!.holders.add(holder);
+      } else {
+        holder['imagePath'] = null;
+      }
+    }
+
+    for (final cbData in cookbooks) {
+      final cbMap = cbData as Map<String, dynamic>;
+      // Cookbook cover
+      final cbId = cbMap['id'] as String? ?? 'cb';
+      collectImage(cbMap, cbMap.remove('localImagePath') as String?, 'images/cookbooks/${cbId}_cover.jpg');
+
+      final recipes = cbMap['recipes'] as List? ?? [];
+      for (final recData in recipes) {
+        final r = recData as Map<String, dynamic>;
+        final recipeId = r['id'] as String? ?? 'unknown';
+        collectImage(r, r.remove('localImagePath') as String?, 'images/recipes/${recipeId}_cover.jpg');
+
+        final steps = r['steps'] as List? ?? [];
+        for (final stepData in steps) {
+          final s = stepData as Map<String, dynamic>;
+          collectImage(s, s.remove('localImagePath') as String?, 'images/recipes/${recipeId}_step_${s['sortOrder']}.jpg');
+        }
+      }
+    }
+    return images;
   }
 
   /// STREAMED full backup export — writes the zip directly to [outPath]
@@ -514,47 +532,12 @@ class ExportImportService {
     final cookbooks = data['cookbooks'] as List? ?? [];
 
     // Rewrite local image paths to zip-relative ones, collecting the
-    // (local file → zip entry) pairs to stream in afterwards.
-    final imageFiles = <MapEntry<String, String>>[]; // local → zip path
-    final addedImages = <String>{};
-    // Photos only in the cloud: where each one goes in the zip, and the rows
-    // that show it.
-    final inCloud = <String, ({String zipPath, List<Map<String, dynamic>> holders})>{};
-
-    void collectImage(Map<String, dynamic> holder, String? localPath, String zipPath) {
-      final cloudPath = holder.remove('cloudImagePath') as String?;
-      if (_isFileHere(localPath) && File(localPath!).existsSync()) {
-        holder['imagePath'] = zipPath;
-        if (addedImages.add(zipPath)) {
-          imageFiles.add(MapEntry(localPath, zipPath));
-        }
-      } else if (cloudPath != null) {
-        holder['imagePath'] = inCloud.putIfAbsent(cloudPath, () => (zipPath: zipPath, holders: [])).zipPath;
-        inCloud[cloudPath]!.holders.add(holder);
-      } else {
-        holder['imagePath'] = null;
-      }
-    }
-
-    for (final cbData in cookbooks) {
-      final cbMap = cbData as Map<String, dynamic>;
-      // Cookbook cover
-      final cbId = cbMap['id'] as String? ?? 'cb';
-      collectImage(cbMap, cbMap.remove('localImagePath') as String?, 'images/cookbooks/${cbId}_cover.jpg');
-
-      final recipes = cbMap['recipes'] as List? ?? [];
-      for (final recData in recipes) {
-        final r = recData as Map<String, dynamic>;
-        final recipeId = r['id'] as String? ?? 'unknown';
-        collectImage(r, r.remove('localImagePath') as String?, 'images/recipes/${recipeId}_cover.jpg');
-
-        final steps = r['steps'] as List? ?? [];
-        for (final stepData in steps) {
-          final s = stepData as Map<String, dynamic>;
-          collectImage(s, s.remove('localImagePath') as String?, 'images/recipes/${recipeId}_step_${s['sortOrder']}.jpg');
-        }
-      }
-    }
+    // (local file → zip entry) pairs to stream in afterwards, and the photos
+    // only in the cloud.
+    final images = _collectZipImages(cookbooks);
+    final imageFiles = images.files;
+    final addedImages = images.added;
+    final inCloud = images.inCloud;
 
     // Fetch the photos only in the cloud before data.json is written: one
     // that cannot be fetched is left out of it as well.
@@ -633,17 +616,31 @@ class ExportImportService {
 
   /// Fetches the photos at these cloud paths into [dir], a few at a time.
   /// The result lines up with [cloudPaths]; null is a photo that could not
-  /// be fetched.
+  /// be fetched. The links come in batches (see ImageService.getImageUrls):
+  /// one request a photo ran into the server's rate limit.
   Future<List<String?>> _fetchCloudPhotos(List<String> cloudPaths, Directory dir) async {
-    final results = List<String?>.filled(cloudPaths.length, null);
+    final urls = await ImageService.instance.getImageUrls(cloudPaths);
+    return _eachFetched(cloudPaths, (i, url) =>
+        ImageService.instance.downloadAndSaveImage(url, 'photo_$i${p.extension(cloudPaths[i])}', directory: dir), urls);
+  }
+
+  /// [_fetchCloudPhotos] as bytes, where there are no files (the web).
+  Future<List<Uint8List?>> _fetchCloudPhotoBytes(List<String> cloudPaths) async {
+    final urls = await ImageService.instance.getImageUrls(cloudPaths);
+    return _eachFetched(cloudPaths, (_, url) => ImageService.instance.downloadImageBytes(url), urls);
+  }
+
+  /// [fetch] for each cloud path that has a link in [urls], four at a time.
+  Future<List<T?>> _eachFetched<T>(
+      List<String> cloudPaths, Future<T?> Function(int i, String url) fetch, Map<String, String> urls) async {
+    final results = List<T?>.filled(cloudPaths.length, null);
     var next = 0;
     Future<void> worker() async {
       while (next < cloudPaths.length) {
         final i = next++;
-        final url = await ImageService.instance.getImageUrl(cloudPaths[i]);
+        final url = urls[cloudPaths[i]];
         if (url == null) continue;
-        results[i] = await ImageService.instance
-            .downloadAndSaveImage(url, 'photo_$i${p.extension(cloudPaths[i])}', directory: dir);
+        results[i] = await fetch(i, url);
       }
     }
 
@@ -693,15 +690,15 @@ class ExportImportService {
 
     if (isWeb) {
       // Web has no file system — in-memory is the only option there.
-      final zipBytes = await exportFullZip(options: options, onProgress: onProgress);
+      final zip = await exportFullZipWithReport(options: options, onProgress: onProgress);
       final result = await FilePicker.platform.saveFile(
         dialogTitle: 'Save full backup',
         fileName: filename,
         type: FileType.custom,
         allowedExtensions: ['zip'],
-        bytes: zipBytes,
+        bytes: zip.bytes,
       );
-      return BackupExportResult(done: result != null);
+      return BackupExportResult(done: result != null, photosLeftOut: zip.photosLeftOut);
     }
 
     if (isDesktop) {
@@ -759,9 +756,10 @@ class ExportImportService {
     final bool done;
     var leftOut = 0;
     if (isWeb) {
-      final zipBytes = await exportFullZip(options: options, onProgress: onProgress);
+      final zip = await exportFullZipWithReport(options: options, onProgress: onProgress);
+      leftOut = zip.photosLeftOut;
       final result = await SharePlus.instance.share(ShareParams(
-        files: [XFile.fromData(zipBytes, name: filename, mimeType: 'application/zip')],
+        files: [XFile.fromData(zip.bytes, name: filename, mimeType: 'application/zip')],
         subject: 'Recipe Spellbook Full Backup',
       ));
       done = result.status != ShareResultStatus.dismissed;
@@ -888,7 +886,7 @@ class ExportImportService {
         withData: isWeb,
       );
       if (result == null || result.files.isEmpty) {
-        return (null, ImportResult(success: false, message: 'No file selected'));
+        return (null, ImportResult(success: false, message: 'No file selected', failure: ImportFailure.noFile));
       }
       return (result.files.single, null);
     } catch (e) {
@@ -917,8 +915,10 @@ class ExportImportService {
         // No file streams on this platform (web), so read it into memory.
         return await importFromZipBytes(await File(path).readAsBytes(), onProgress: onProgress);
       }
+      // Reads the list of files only: nothing is unpacked until asked for,
+      // and then within the limits of [restoreLimits].
       final archive = ZipDecoder().decodeBuffer(input);
-      return await _importFromArchive(archive, onProgress: onProgress);
+      return await _importFromArchive(archive, unzip: restoreLimits(input.length), onProgress: onProgress);
     } catch (e) {
       return _unreadableBackup(e);
     } finally {
@@ -930,11 +930,30 @@ class ExportImportService {
   Future<ImportResult> importFromZipBytes(Uint8List zipBytes, {ImportProgressCallback? onProgress}) async {
     try {
       final archive = ZipDecoder().decodeBytes(zipBytes);
-      return await _importFromArchive(archive, onProgress: onProgress);
+      return await _importFromArchive(archive, unzip: restoreLimits(zipBytes.length), onProgress: onProgress);
     } catch (e) {
       return _unreadableBackup(e);
     }
   }
+
+  /// How much a backup of [packedLength] bytes may unpack to: no file over
+  /// [BoundedUnzip.defaultMaxEntryBytes], and all of them together no more
+  /// than fifty times the backup and some room on top. Photos hardly pack
+  /// and data.json packs to a tenth or so, so a real backup stays far below
+  /// that, and a zip bomb is stopped long before it fills the memory or the
+  /// disk. Unlike a file import, a restore writes each photo out and lets it
+  /// go, so a large library is not held to the import's total of 1 GB.
+  @visibleForTesting
+  static BoundedUnzip restoreLimits(int packedLength) =>
+      BoundedUnzip(maxTotalBytes: packedLength * 50 + 64 * 1024 * 1024);
+
+  /// What the user is told when a backup unpacks to more than
+  /// [restoreLimits] allow.
+  static ImportResult _tooLargeBackup() => ImportResult(
+        success: false,
+        message: 'This backup unpacks to more than the app can handle. Nothing was imported.',
+        failure: ImportFailure.tooLarge,
+      );
 
   /// What the user is told when the picked file cannot be read at all: cut
   /// short by a failed download, empty, or not a backup in the first place.
@@ -951,7 +970,13 @@ class ExportImportService {
   /// Shared archive import: extracts images to disk (releasing each
   /// entry's decompressed bytes immediately) and runs the standard data
   /// import, telling it which file each image name in data.json became.
-  Future<ImportResult> _importFromArchive(Archive archive, {ImportProgressCallback? onProgress}) async {
+  /// Every file is unpacked through [unzip]: one over its limits stops the
+  /// restore before anything is imported.
+  Future<ImportResult> _importFromArchive(
+    Archive archive, {
+    required BoundedUnzip unzip,
+    ImportProgressCallback? onProgress,
+  }) async {
     // Find data.json. A backup that was unzipped and zipped again (Finder,
     // Explorer) holds everything one folder down, so look there too.
     var root = '';
@@ -978,7 +1003,13 @@ class ExportImportService {
       );
     }
 
-    final dataStr = utf8.decode(dataFile.content as List<int>);
+    final List<int> dataBytes;
+    try {
+      dataBytes = unzip.bytesOf(dataFile);
+    } on ZipTooLargeException {
+      return _tooLargeBackup();
+    }
+    final dataStr = utf8.decode(dataBytes);
     dataFile.clear(); // release decompressed bytes
     final data = jsonDecode(dataStr);
     if (data is! Map<String, dynamic>) {
@@ -1009,8 +1040,17 @@ class ExportImportService {
         );
         if (target == null) continue;
         try {
-          await File(target).writeAsBytes(file.content as List<int>);
+          await File(target).writeAsBytes(unzip.bytesOf(file));
           photos.files[file.name.substring(root.length)] = target;
+        } on ZipTooLargeException {
+          // No photo is this large, and a backup this large is no backup:
+          // stop before anything is imported, and remove what was unpacked.
+          debugPrint('[Import] ${file.name} unpacks past the limit; restore stopped');
+          await _discard(File(target));
+          for (final path in photos.files.values) {
+            await _discard(File(path));
+          }
+          return _tooLargeBackup();
         } catch (e) {
           // One photo that cannot be unpacked must not stop the restore.
           debugPrint('[Import] Skipped image ${file.name}: $e');
@@ -1235,7 +1275,10 @@ class ExportImportService {
 
         // Tags
         if (data.containsKey('tags')) {
-          tagsImported = await _importTags(data['tags'] as List, ids);
+          tagsImported = await _importTags(data['tags'] as List, ids, usedTagIds: {
+            for (final cookbook in cookbooks)
+              for (final recipe in cookbook.recipes.whereType<Map>()) ...?(recipe['tagIds'] as List?),
+          });
         }
         final knownTagIds = {for (final tag in await db.select(db.tags).get()) tag.id};
 
@@ -1292,8 +1335,13 @@ class ExportImportService {
       return ImportResult(
         success: parts.isNotEmpty,
         message: parts.isNotEmpty ? 'Imported ${parts.join(', ')}$skipMsg' : 'Nothing to import',
+        failure: parts.isNotEmpty ? null : ImportFailure.nothingToImport,
         cookbooksImported: cookbooksImported,
         recipesImported: recipesImported,
+        shoppingListsImported: shoppingListsImported,
+        mealPlansImported: mealPlansImported,
+        tagsImported: tagsImported,
+        recipesSkipped: recipesSkipped,
         importedCookbookId: cookbookWithNew ?? cookbookWithKnown ?? lastCookbookId,
       );
     } catch (e) {
@@ -2052,7 +2100,11 @@ class ExportImportService {
   /// [ids] remembers it, and the recipes that carry it in the backup are
   /// given the one here. A cookbook shared by someone who also has a
   /// "Holiday" tag used to leave two of them.
-  Future<int> _importTags(List data, _RestoredIds ids) async {
+  ///
+  /// A built-in tag the backup holds as the app seeded it, on no recipe of
+  /// the backup, is not added either: this device does not have it because
+  /// the user deleted it here (see [SeededDefaults]).
+  Future<int> _importTags(List data, _RestoredIds ids, {Set<Object?> usedTagIds = const {}}) async {
     int count = 0;
     final existing = await db.select(db.tags).get();
     final existingIds = {for (final t in existing) t.id};
@@ -2066,6 +2118,7 @@ class ExportImportService {
       final tag = tagData as Map<String, dynamic>;
       final id = tag['id'] as String;
       if (existingIds.contains(id)) continue;
+      if (!usedTagIds.contains(id) && SeededDefaults.untouched(SeededDefaults.tagRows, id, _tagRow(tag))) continue;
       final name = (tag['name'] as String).trim().toLowerCase();
       final sameName = idByName[name];
       if (sameName != null) {
@@ -2095,6 +2148,13 @@ class ExportImportService {
     }
     return count;
   }
+
+  static TagsCompanion _tagRow(Map<String, dynamic> tag) => TagsCompanion(
+        name: Value(tag['name'] as String),
+        color: Value(tag['color'] as String?),
+        icon: Value(tag['icon'] as String?),
+        sortOrder: Value(tag['sortOrder'] as int? ?? 0),
+      );
 
   /// Custom categories belong to a cookbook, and recipes name them by id.
   /// Each one goes under the cookbook its own was restored into, and
@@ -2354,6 +2414,16 @@ enum ImportFailure {
 
   /// Restoring failed part way. Nothing of the backup was kept.
   restoreFailed,
+
+  /// The picker was closed without a file.
+  noFile,
+
+  /// A file in the backup unpacks to more than the app allows (a damaged
+  /// file or a zip bomb). Nothing was imported.
+  tooLarge,
+
+  /// The backup held nothing that could be imported.
+  nothingToImport,
 }
 
 class ImportResult {
@@ -2365,6 +2435,12 @@ class ImportResult {
   final ImportFailure? failure;
   final int cookbooksImported;
   final int recipesImported;
+  final int shoppingListsImported;
+  final int mealPlansImported;
+  final int tagsImported;
+
+  /// Recipes already in the library, not added a second time.
+  final int recipesSkipped;
   final String? importedCookbookId; // A cookbook that received or holds what was imported
 
   ImportResult({
@@ -2373,11 +2449,65 @@ class ImportResult {
     this.failure,
     this.cookbooksImported = 0,
     this.recipesImported = 0,
+    this.shoppingListsImported = 0,
+    this.mealPlansImported = 0,
+    this.tagsImported = 0,
+    this.recipesSkipped = 0,
     this.importedCookbookId,
   });
 }
 
 /// What saving or sharing a full backup came to.
+/// The photos of a zip backup: files on this device (file, zip entry) and
+/// photos only in the cloud (cloud path to zip entry and the rows showing it).
+class _ZipImages {
+  final files = <MapEntry<String, String>>[];
+  final added = <String>{};
+  final inCloud = <String, ({String zipPath, List<Map<String, dynamic>> holders})>{};
+}
+
+/// The ingredients, steps, links and tag ids of recipes, read with one
+/// query a table and handed out by recipe.
+class _RecipeChildren {
+  final ingredients = <String, List<Ingredient>>{};
+  final steps = <String, List<Step>>{};
+  final links = <String, List<RecipeLink>>{};
+  final tagIds = <String, List<String>>{};
+
+  /// Of [recipeIds], or of every recipe when null.
+  static Future<_RecipeChildren> read(AppDatabase db, {List<String>? recipeIds}) async {
+    final out = _RecipeChildren();
+    final chunks = recipeIds == null
+        ? const <List<String>?>[null]
+        : [for (var i = 0; i < recipeIds.length; i += 500) recipeIds.sublist(i, (i + 500).clamp(0, recipeIds.length))];
+    for (final ids in chunks) {
+      for (final i in await (db.select(db.ingredients)
+            ..where((t) => ids == null ? const Constant(true) : t.recipeId.isIn(ids))
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+          .get()) {
+        (out.ingredients[i.recipeId] ??= []).add(i);
+      }
+      for (final s in await (db.select(db.steps)
+            ..where((t) => ids == null ? const Constant(true) : t.recipeId.isIn(ids))
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+          .get()) {
+        (out.steps[s.recipeId] ??= []).add(s);
+      }
+      for (final l in await (db.select(db.recipeLinks)
+            ..where((t) => ids == null ? const Constant(true) : t.sourceRecipeId.isIn(ids)))
+          .get()) {
+        (out.links[l.sourceRecipeId] ??= []).add(l);
+      }
+      for (final t in await (db.select(db.recipeTags)
+            ..where((t) => ids == null ? const Constant(true) : t.recipeId.isIn(ids)))
+          .get()) {
+        (out.tagIds[t.recipeId] ??= []).add(t.tagId);
+      }
+    }
+    return out;
+  }
+}
+
 class BackupExportResult {
   const BackupExportResult({required this.done, this.photosLeftOut = 0});
 

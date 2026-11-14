@@ -106,4 +106,42 @@ void main() {
       await db.close();
     }, () => client);
   });
+
+  testWidgets('a feed that does not load says so and offers a retry, not "no recipes yet"', (tester) async {
+    var down = true;
+    final client = MockClient((request) async {
+      if (request.url.path != '/v1/community/recipes') return http.Response('{"error":"not found"}', 404);
+      if (down) return http.Response('{"error":"busy"}', 503);
+      return http.Response(jsonEncode(_page(1, [0, 1])), 200);
+    });
+
+    await http.runWithClient(() async {
+      final db = (await tester.runAsync(() async => AppDatabase.forTesting(NativeDatabase.memory())))!;
+      final router = GoRouter(
+        initialLocation: '/community',
+        routes: [GoRoute(path: '/community', builder: (_, __) => const CommunityScreen())],
+      );
+      await tester.pumpWidget(ProviderScope(
+        overrides: [databaseProvider.overrideWithValue(db)],
+        child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ));
+      await settle(tester);
+      expect(find.text('Could not load this. Check your connection and try again.'), findsOneWidget);
+      expect(find.text('No community recipes yet'), findsNothing);
+
+      down = false;
+      await tester.tap(find.text('Retry'));
+      await settle(tester);
+      expect(find.text('Recipe 0'), findsOneWidget);
+      expect(find.text('Retry'), findsNothing);
+
+      router.dispose();
+      await tester.pumpWidget(const SizedBox());
+      await db.close();
+    }, () => client);
+  });
 }

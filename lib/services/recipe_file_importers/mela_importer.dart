@@ -38,8 +38,9 @@ class MelaImporter {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException(_damaged);
+      throw const FileImportException.damaged(_app);
     }
+    final unzip = BoundedUnzip.forArchive(bytes.length);
 
     var unreadable = 0;
     for (final file in archive.files) {
@@ -47,8 +48,10 @@ class MelaImporter {
       if (!file.name.toLowerCase().endsWith('.melarecipe')) continue;
 
       try {
-        final recipe = _parseMelaFile(file.content as List<int>, file.name);
+        final recipe = _parseMelaFile(unzip.bytesOf(file), file.name);
         if (recipe != null) recipes.add(recipe);
+      } on ZipTooLargeException {
+        rethrow;
       } catch (_) {
         // Skip malformed files
         unreadable++;
@@ -57,7 +60,7 @@ class MelaImporter {
 
     // An export may lose a recipe or two and still be worth importing. One
     // with no readable recipe at all is a damaged file.
-    if (recipes.isEmpty && unreadable > 0) throw const FormatException(_damaged);
+    if (recipes.isEmpty && unreadable > 0) throw const FileImportException.damaged(_app);
     return recipes;
   }
 
@@ -73,12 +76,12 @@ class MelaImporter {
     try {
       recipe = _parseMelaFile(bytes, filename);
     } catch (_) {
-      throw const FormatException(_damaged);
+      throw const FileImportException.damaged(_app);
     }
     return recipe != null ? [recipe] : [];
   }
 
-  static const _damaged = 'This Mela file is damaged or incomplete. Export it again and retry.';
+  static const _app = 'Mela';
 
   /// Parse a single Mela recipe from bytes (may be gzip-compressed). Null
   /// when the bytes are JSON but no recipe. Throws a FormatException when
@@ -87,7 +90,7 @@ class MelaImporter {
     var plain = data;
     if (ImportSupport.isGzip(data)) {
       final unpacked = ImportSupport.gunzip(data);
-      if (unpacked == null) throw const FormatException(_damaged);
+      if (unpacked == null) throw const FileImportException.damaged(_app);
       plain = unpacked;
     }
 

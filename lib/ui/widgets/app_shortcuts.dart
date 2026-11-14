@@ -66,10 +66,13 @@ class AppShortcuts extends ConsumerWidget {
           ref.read(sidebarCollapsedProvider.notifier).toggle(),
       primaryShortcut(LogicalKeyboardKey.comma): () =>
           go(ShellDestination.settings),
-      // ⌘[ — back (desktop convention).
+      // ⌘[: back (desktop convention). The router's popRoute is what the
+      // system back button does: it asks the page first (maybePop), so the
+      // recipe editor's PopScope can offer to keep unsaved changes. A plain
+      // pop() skipped PopScope and threw the edits away.
       primaryShortcut(LogicalKeyboardKey.bracketLeft): () {
         final ctx = navContext();
-        if (ctx.canPop()) ctx.pop();
+        if (ctx.canPop()) GoRouter.of(ctx).routerDelegate.popRoute();
       },
       for (final d in ShellDestination.numbered)
         primaryShortcut(d.shortcutKey!): () => go(d),

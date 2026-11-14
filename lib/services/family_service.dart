@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../database/seeded_defaults.dart';
 import 'auth_service.dart';
+import 'collab_service.dart';
+import 'sync_service.dart';
 
 const _apiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://api.recipespellbook.app');
 
@@ -456,6 +459,29 @@ class FamilyService {
     return false;
   }
 
+  /// Stop being a member of a cookbook or list someone else shares with me
+  /// (a family share or a joined invite link alike). True when no share of
+  /// it is left for me, also when there was none; false when the server
+  /// could not be reached or would not remove it.
+  Future<bool> leaveSharedResource(String resourceType, String resourceId) async {
+    try {
+      final r = await _auth.get('/v1/family/shares');
+      if (r.statusCode != 200) return false;
+      final received = ((jsonDecode(r.body) as Map)['received'] as List? ?? const []).whereType<Map>();
+      for (final share in received) {
+        if (share['resourceType'] != resourceType || share['resourceId'] != resourceId) continue;
+        final id = share['id'];
+        if (id is! String) continue;
+        final d = await _auth.delete('/v1/family/shares/${Uri.encodeComponent(id)}');
+        if (d.statusCode != 200 && d.statusCode != 404) return false;
+      }
+      return true;
+    } catch (e) {
+      debugPrint('[Family] leaveSharedResource: $e');
+      return false;
+    }
+  }
+
   /// Fetch shared content from family members (for sync).
   Future<Map<String, dynamic>?> getSharedContent({DateTime? since}) async {
     try {
@@ -496,19 +522,44 @@ class FamilyService {
   /// [permission]: list → 'read' | 'check' | 'full'; cookbook → 'read' | 'edit'.
   /// For shopping lists, pass [snapshot] ({name, color, items:[...]}) so the
   /// list is published server-side (works on any tier).
+  ///
+  /// A shopping list can move to a new id on the way (the link's
+  /// [ShareLinkInfo.resourceId] says which): every install's default list
+  /// has the same id, so an unshared one is first moved to an id of this
+  /// account's own, and so is any list the server says another account
+  /// holds (409 list_id_taken).
   Future<ShareLinkInfo?> createCollabLink(
       String resourceType, String resourceId, String permission,
       {Map<String, dynamic>? snapshot}) async {
     try {
-      final body = <String, dynamic>{
-        'resourceType': resourceType,
-        'resourceId': resourceId,
-        'kind': 'collab',
-        'permission': permission,
-        if (snapshot != null) 'snapshot': snapshot,
-      };
-      final r = await _auth.post('/v1/share', body);
-      if (r.statusCode == 201) return ShareLinkInfo.fromJson(jsonDecode(r.body));
+      final isList = resourceType == 'shopping_list';
+      var id = resourceId;
+      if (isList &&
+          SeededDefaults.seedIdOf(id) == SeededDefaults.defaultListId &&
+          !id.contains('~') &&
+          !CollabService.instance.isCollab(id)) {
+        id = await SyncService.instance.rekeyList(id) ?? id;
+      }
+      Future<http.Response> send() => _auth.post('/v1/share', <String, dynamic>{
+            'resourceType': resourceType,
+            'resourceId': id,
+            'kind': 'collab',
+            'permission': permission,
+            if (snapshot != null) 'snapshot': snapshot,
+          });
+      var r = await send();
+      if (isList && r.statusCode == 409 && _errorBody(r)?['error'] == 'list_id_taken') {
+        final moved = await SyncService.instance.rekeyList(id);
+        if (moved != null && moved != id) {
+          id = moved;
+          r = await send();
+        }
+      }
+      if (r.statusCode == 201) {
+        final link = ShareLinkInfo.fromJson(jsonDecode(r.body));
+        return ShareLinkInfo(
+            code: link.code, url: link.url, resourceType: resourceType, resourceId: id, expiresAt: link.expiresAt);
+      }
       debugPrint('[Share] createCollabLink failed: ${_parseError(r)}');
     } catch (e) { debugPrint('[Share] createCollabLink: $e'); }
     return null;

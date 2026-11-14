@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'connection.dart';
+import 'seeded_defaults.dart';
 import 'sync_journal.dart';
 import 'daos/category_dao.dart';
 import 'daos/cookbook_dao.dart';
@@ -398,70 +399,38 @@ class AppDatabase extends _$AppDatabase {
     // Default cookbook
     await into(cookbooks).insert(
       CookbooksCompanion.insert(
-        id: 'starter',
+        id: SeededDefaults.starterCookbookId,
         name: 'My Recipes',
       ),
       mode: InsertMode.insertOrIgnore,
     );
 
-    // Default categories
-    final defaultCategories = [
-      ('cat_appetizer', 'Appetizer', 0),
-      ('cat_beverage', 'Beverages', 1),
-      ('cat_dessert', 'Desserts', 2),
-      ('cat_entree', 'Entrée', 3),
-      ('cat_side', 'Sides', 4),
-      ('cat_sauce', 'Sauces', 5),
-    ];
+    // Default categories, tags and aisles. Dated as untouched: on the first
+    // sync of a new install they never take the place of what the user
+    // changed (or deleted) on another device.
+    await TagsDao(this).seedDefaultTags(install: true);
 
-    await TagsDao(this).seedDefaultTags();
-
-    for (final cat in defaultCategories) {
+    for (final (id, name, sortOrder) in SeededDefaults.categories) {
       await into(categories).insert(
         CategoriesCompanion.insert(
-          id: cat.$1,
-          name: cat.$2,
-          sortOrder: Value(cat.$3),
+          id: id,
+          name: name,
+          sortOrder: Value(sortOrder),
           isDefault: const Value(true),
+          createdAt: Value(SeededDefaults.epoch),
         ),
         mode: InsertMode.insertOrIgnore,
       );
     }
 
-    // Default shopping categories — IDs match ingredient_utils & LocalizedDefaults
-    final defaultShoppingCategories = [
-      ('produce', 'Produce', 1),
-      ('bakery', 'Bakery', 2),
-      ('deli', 'Deli', 3),
-      ('dairy', 'Dairy & Eggs', 4),
-      ('meat', 'Meat & Poultry', 5),
-      ('seafood', 'Seafood', 6),
-      ('frozen', 'Frozen', 7),
-      ('breakfastCereal', 'Breakfast & Cereal', 8),
-      ('grainsAndPasta', 'Grains, Pasta & Rice', 9),
-      ('cannedGoods', 'Canned Goods', 10),
-      ('condiments', 'Condiments & Sauces', 11),
-      ('spices', 'Spices & Seasonings', 12),
-      ('cookingAndBaking', 'Cooking & Baking', 13),
-      ('snacks', 'Snacks', 14),
-      ('beverages', 'Beverages', 15),
-      ('beerWineSpirits', 'Beer, Wine & Spirits', 16),
-      ('international', 'International', 17),
-      ('baby', 'Baby', 18),
-      ('pet', 'Pet Supplies', 19),
-      ('household', 'Household', 20),
-      ('personalCare', 'Personal Care', 21),
-      ('pantry', 'Pantry', 22),
-      ('other', 'Other', 99),
-    ];
-
-    for (final cat in defaultShoppingCategories) {
+    for (final (id, name, sortOrder) in SeededDefaults.shoppingCategories) {
       await into(shoppingCategories).insert(
         ShoppingCategoriesCompanion.insert(
-          id: cat.$1,
-          name: cat.$2,
-          sortOrder: Value(cat.$3),
+          id: id,
+          name: name,
+          sortOrder: Value(sortOrder),
           isDefault: const Value(true),
+          createdAt: Value(SeededDefaults.epoch),
         ),
         mode: InsertMode.insertOrIgnore,
       );
@@ -470,7 +439,7 @@ class AppDatabase extends _$AppDatabase {
     // Default shopping list
     await into(shoppingLists).insert(
       ShoppingListsCompanion.insert(
-        id: 'list_default',
+        id: SeededDefaults.defaultListId,
         name: 'Shopping List',
         isDefault: const Value(true),
       ),

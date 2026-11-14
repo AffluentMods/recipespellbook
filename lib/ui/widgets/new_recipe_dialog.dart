@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import '../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
@@ -10,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../utils/platform_utils.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import '../../data/nutrition_data.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
@@ -28,6 +30,8 @@ import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_guides_screen.dart';
 import '../screens/import/import_preview_screen.dart';
 import '../screens/import/video_import_ui.dart';
+import '../screens/import/web_import_ui.dart';
+import '../../services/web_import_error.dart';
 import 'app_snackbar.dart';
 import 'backup_restore.dart';
 import 'platform_brand.dart';
@@ -54,8 +58,11 @@ Future<void> showImportDialog(BuildContext context, String cookbookId, {bool aut
   );
 }
 
-/// Turns a failed import from a link into a plain-English message.
+/// Turns a failed import from a link into a message in the user's language.
+/// The engine's own failures say why with a code; anything else (no
+/// connection, an unexpected error) is told by what it says.
 String friendlyImportError(Object e, AppLocalizations l10n) {
+  if (e is WebImportException) return webImportErrorMessage(l10n, e);
   final s = e.toString().toLowerCase();
   if (s.contains('socketexception') || s.contains('failed host lookup') ||
       s.contains('network') || s.contains('timeout') || s.contains('timed out') ||
@@ -180,6 +187,34 @@ class _OptionCard extends StatelessWidget {
 }
 
 // ============ IMPORT SHEET ============
+
+/// What to tell the user when a file could not be imported, in their
+/// language.
+String fileImportMessage(FileImportException e, AppLocalizations l10n) => switch (e.problem) {
+      FileImportProblem.unreadable => l10n.importFileUnreadable,
+      FileImportProblem.empty => l10n.fileImportEmpty,
+      FileImportProblem.unsupported => l10n.fileImportUnsupported,
+      FileImportProblem.notText => l10n.fileImportNotText,
+      FileImportProblem.richText => l10n.fileImportRichText,
+      FileImportProblem.unknownXml => l10n.fileImportUnknownXml,
+      FileImportProblem.damagedZip => l10n.fileImportDamagedZip,
+      FileImportProblem.ownBackup => l10n.fileImportOwnBackup,
+      FileImportProblem.damaged => l10n.fileImportDamaged(e.app ?? 'ZIP'),
+      FileImportProblem.noRecipes => l10n.fileImportNoRecipes(e.app ?? ''),
+      FileImportProblem.tooLarge => l10n.fileImportTooLarge,
+    };
+
+/// [_ownExportIn] of the file at [file.path], or of [file.bytes] where
+/// there is no path. Read in the background, so the file is not copied
+/// over from the screen. Null also when the file cannot be read: the
+/// importer then says so.
+Future<List<ImportedRecipe>?> _ownExportOf(({String? path, Uint8List? bytes}) file) async {
+  try {
+    return _ownExportIn(file.bytes ?? await File(file.path!).readAsBytes());
+  } catch (_) {
+    return null;
+  }
+}
 
 /// The recipes of the app's own export, when that is what the [bytes] of a
 /// JSON file hold, or null when they hold anything else. Runs in the
@@ -615,7 +650,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
             final itemId = 'item_${DateTime.now().millisecondsSinceEpoch}';
             await shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
               id: itemId,
-              listId: 'list_default',
+              listId: await shoppingDao.defaultListId(),
               name: itemName,
               sortOrder: const drift.Value(0),
             ));
@@ -769,10 +804,16 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.readingImage);
+    // The photos cut out of the pages wait in a temporary folder. The
+    // preview deletes it once the recipes are saved; until it is shown,
+    // giving up here deletes it.
+    String? workFolder;
+    var handedOver = false;
     try {
       final result = await OcrService.instance.processPdf(path, onProgress: (current, total) {
         if (mounted) _showLoading(l10n.scanProgress(current, total));
       });
+      workFolder = result.workFolder;
 
       if (result.isEmpty) {
         _hideLoading();
@@ -839,16 +880,18 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
           final r = recipes[i];
           if (RecipeImportEngine.isTitleSuspicious(r.title)) {
             final base = p.basenameWithoutExtension(path).replaceAll(RegExp(r'[-_]'), ' ');
-            r.title = '$base — Recipe ${i + 1}';
+            r.title = l10n.importPdfRecipeNumbered(base, i + 1);
           }
         }
       }
 
       _hideLoading();
-      _showImportPreview(recipes, sourceText: result.text);
+      handedOver = _showImportPreview(recipes, sourceText: result.text, temporaryFolder: workFolder);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
+    } finally {
+      if (!handedOver && workFolder != null) unawaited(ImportPreviewScreen.deleteTemporaryFolder(workFolder));
     }
   }
 
@@ -1125,22 +1168,21 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   Future<void> _processFileWithDispatcher(String filename, {Uint8List? bytes, String? path}) async {
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.importProcessing);
-    if (bytes == null && path != null) {
-      try {
-        bytes = await File(path).readAsBytes();
-      } catch (_) {
-        // Told below, like a file that came with nothing to read.
-      }
-    }
-    if (bytes == null) {
+    if (bytes == null && path == null) {
       _hideLoading();
       _showError(l10n.importFileUnreadable);
       return;
     }
+    // The file is read in the background from its path, not here and then
+    // copied over, and the photos it carries go to a temporary folder there
+    // instead of coming back as text. The preview deletes the folder once
+    // the recipes are saved.
+    final photoFolder = await _importPhotoFolder();
+    var handedOver = false;
     try {
       // JSON might be our own export format: check first
       if (p.extension(filename).toLowerCase() == '.json') {
-        final exported = await compute(_ownExportIn, bytes);
+        final exported = await compute(_ownExportOf, (path: path, bytes: bytes));
         if (exported != null) {
           _hideLoading();
           _processOwnExportFormat(exported, nothingFound: l10n.importNoRecipeInFile);
@@ -1148,19 +1190,34 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         }
       }
 
-      final recipes = await FileImportDispatcher.importFromBytes(bytes, filename);
+      final recipes = await FileImportDispatcher.importFile(filename, path: path, bytes: bytes, photoFolder: photoFolder);
 
       _hideLoading();
       if (!recipes.any(hasRecipeContent)) {
         _showError(l10n.importNoRecipeInFile);
         return;
       }
-      _showImportPreview(recipes);
+      handedOver = _showImportPreview(recipes, temporaryFolder: photoFolder);
+    } on FileImportException catch (e) {
+      _hideLoading();
+      _showError(fileImportMessage(e, l10n));
     } catch (e) {
       _hideLoading();
-      // What an importer could not read, it says in a sentence of its own,
-      // and that sentence is the message.
-      _showError(e is FormatException && e.message.trim().isNotEmpty ? e.message : l10n.failedToImport(e.toString()));
+      _showError(l10n.failedToImport(e.toString()));
+    } finally {
+      if (!handedOver && photoFolder != null) unawaited(ImportPreviewScreen.deleteTemporaryFolder(photoFolder));
+    }
+  }
+
+  /// A new temporary folder for the photos of one file import, or null where
+  /// there is no file system (in the browser).
+  static Future<String?> _importPhotoFolder() async {
+    if (isWeb) return null;
+    try {
+      final temp = await getTemporaryDirectory();
+      return p.join(temp.path, 'import_photos', '${DateTime.now().microsecondsSinceEpoch}');
+    } catch (_) {
+      return null;
     }
   }
 
@@ -1168,18 +1225,27 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   /// a backup. Its [recipes] go through the preview like any others, into the
   /// cookbook that is open, and keep everything the file says about them.
   void _processOwnExportFormat(List<ImportedRecipe> recipes, {required String nothingFound}) {
+    if (!mounted) return;
     if (!recipes.any(hasRecipeContent)) {
       _showError(nothingFound);
       return;
     }
-    _showImportPreview(recipes, sourceText: 'Recipe Spellbook export (${recipes.length} recipes)');
+    _showImportPreview(recipes, sourceText: AppLocalizations.of(context)!.importPreviewOwnExport(recipes.length));
   }
 
-  void _showImportPreview(List<ImportedRecipe> recipes, {String? sourceUrl, String? sourceText, VideoTextSource? videoTextSource}) {
+  /// Opens the preview of [recipes]. False when it could not be shown, and
+  /// [temporaryFolder] is then still the caller's to delete.
+  bool _showImportPreview(
+    List<ImportedRecipe> recipes, {
+    String? sourceUrl,
+    String? sourceText,
+    VideoTextSource? videoTextSource,
+    String? temporaryFolder,
+  }) {
     // Only while this sheet is still on top: if it was swiped away while the
     // import finished, pop would close the page under it instead (a blank
     // screen on phones).
-    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return false;
     // Navigate to the full import preview screen
     Navigator.of(context).pop(); // Close the new recipe dialog first
     Navigator.of(context).push(
@@ -1191,9 +1257,11 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
           sourceUrl: sourceUrl,
           sourceText: sourceText,
           videoTextSource: videoTextSource,
+          temporaryFolder: temporaryFolder,
         ),
       ),
     );
+    return true;
   }
 
   @override

@@ -545,7 +545,8 @@ void main() {
 
       expect(prompt, startsWith(AiImportService.generateRecipePrompt()));
       expect(prompt, contains('Set "sourceUrl" to "https://www.tiktok.com/@spudlife/video/7309876543210987654".'));
-      expect(prompt, endsWith(result.textForAi));
+      // The text goes between its markers, as data the AI only reads.
+      expect(prompt, endsWith('${AiImportService.videoTextStart}\n${result.textForAi}\n${AiImportService.videoTextEnd}'));
     });
 
     test('recipes from the AI answer keep the video as their source', () async {

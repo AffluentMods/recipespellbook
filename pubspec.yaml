@@ -2,7 +2,7 @@ name: recipespellbook
 description: "An advanced recipe app for all uses."
 publish_to: 'none'
 
-version: 2.1.0+64
+version: 2.1.1+65
 
 environment:
   sdk: ^3.10.7
@@ -36,6 +36,8 @@ dependencies:
   firebase_core: ^3.12.1
   firebase_messaging: ^15.2.4
   flutter_local_notifications: ^18.0.1
+  # Absolute times for scheduled notifications (cooking mode timers).
+  timezone: ^0.10.1
 
   # Utilities
   intl: ^0.20.2
@@ -69,6 +71,9 @@ dependencies:
   device_info_plus: ^9.1.2
   video_player: ^2.9.2
   window_manager: ^0.4.3
+  # The connected displays, so a saved window position on a display that is
+  # gone is not restored off-screen (already a window_manager dependency).
+  screen_retriever: ^0.2.0
 
   flutter_native_splash: ^2.3.8
 
@@ -156,7 +161,9 @@ msix_config:
   identity_name: AffluentLabs.RecipeSpellbook
   publisher: CN=0DD23BD3-21D8-4FFB-9634-06D26A8DFA90
   logo_path: assets/images/icon.png
-  capabilities: internetClient
+  # microphone: cooking mode's voice control (speech_to_text, SAPI) listens
+  # on Windows too; a packaged app without it is refused the microphone.
+  capabilities: internetClient,microphone
   install_certificate: false
   languages: en-us,de-de,es-es,fr-fr,it-it,ja-jp,ko-kr,nl-nl,pl-pl,pt-br,ru-ru,zh-cn
   # recipespellbook:// links open the Store copy; Windows passes the link as

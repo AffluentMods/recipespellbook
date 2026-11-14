@@ -57,8 +57,26 @@ class _Server {
           return _json({'id': 'pub1', 'title': 'Tomato Soup', 'recipeCount': 1, 'downloadCount': 0, 'status': 'published'},
               status: 201);
         }
+        if (path.endsWith('/v1/community/me/publications')) {
+          return _json({'publications': myPublications});
+        }
+        final put = RegExp(r'/v1/community/([^/]+)/recipes$').firstMatch(path);
+        if (request.method == 'PUT' && put != null) {
+          replaced.add(put.group(1)!);
+          return _json({'ok': true, 'status': 'published'});
+        }
+        final patch = RegExp(r'/v1/community/([^/]+)$').firstMatch(path);
+        if (request.method == 'PATCH' && patch != null) {
+          patches.add(jsonDecode(request.body) as Map<String, dynamic>);
+          return _json({'ok': true});
+        }
         return http.Response('{"error":"not found"}', 404);
       });
+
+  /// GET /me/publications, and the updates and edits made to them.
+  final myPublications = <Map<String, dynamic>>[];
+  final replaced = <String>[];
+  final patches = <Map<String, dynamic>>[];
 
   static http.Response _json(Object body, {int status = 200}) => http.Response(jsonEncode(body), status);
 }
@@ -227,6 +245,51 @@ void main() {
       await settle(tester, rounds: 8);
       expect(server.publishes, hasLength(1));
       expect(server.uploadRequests, 3);
+
+      await tester.pump(const Duration(seconds: 6));
+      await db.close();
+    }, () => server.client);
+  });
+
+  testWidgets('an update shows the publication\'s own title and tags and saves edits to them', (tester) async {
+    await http.runWithClient(() async {
+      final db = await openDb(tester);
+      server.myPublications.add({
+        'id': 'pub7',
+        'title': 'Roasted Tomato Soup',
+        'description': 'Smoky and sweet.',
+        'tags': 'soup,vegan',
+        'recipeCount': 1,
+        'downloadCount': 3,
+        'imageCount': 2,
+        'kind': 'recipe',
+        'createdAt': '2026-10-01T10:00:00.000Z',
+      });
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          authProvider.overrideWith((ref) => _SignedIn(ref, cook)),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: CommunityPublishScreen(singleRecipeId: 'r1', republishPublicationId: 'pub7'),
+        ),
+      ));
+      await settleUntil(tester, () => showing('Roasted Tomato Soup'));
+      // The publication's title, not the recipe's.
+      expect(find.text('Roasted Tomato Soup'), findsOneWidget);
+      expect(find.text('Smoky and sweet.'), findsOneWidget);
+
+      await tester.enterText(find.widgetWithText(TextField, 'Roasted Tomato Soup'), 'Best Tomato Soup');
+      await tapPublish(tester);
+      await settleUntil(tester, () => showing('Published!'));
+
+      expect(server.replaced, ['pub7']);
+      expect(server.patches, [
+        {'title': 'Best Tomato Soup', 'description': 'Smoky and sweet.', 'tags': 'soup,vegan'},
+      ]);
+      expect(server.publishes, isEmpty);
 
       await tester.pump(const Duration(seconds: 6));
       await db.close();

@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/services/export_import_service.dart';
+import 'package:recipespellbook/ui/widgets/backup_restore.dart';
 
 import 'backup_restore_support.dart';
 
@@ -362,7 +363,7 @@ void main() {
         'cut short.json': (json.sublist(0, 2000), unreadable, cannotRead),
         'empty.json': (const [], unreadable, cannotRead),
         'a list.json': (utf8.encode('[1,2,3]'), 'This file is not a Recipe Spellbook backup', ImportFailure.notABackup),
-        'not a backup.json': (utf8.encode('{"name":"Soup"}'), 'Nothing to import', null),
+        'not a backup.json': (utf8.encode('{"name":"Soup"}'), 'Nothing to import', ImportFailure.nothingToImport),
         'wrong shape.json': (
           utf8.encode('{"version":2,"cookbooks":{"id":"cb1"}}'),
           'This backup could not be restored. Nothing was imported.',
@@ -401,19 +402,52 @@ void main() {
 
     test('every reason a restore can fail has a sentence a screen can show in the language of the user', () {
       final l10n = lookupAppLocalizations(const Locale('en'));
-      String sentence(ImportFailure failure) => switch (failure) {
-            ImportFailure.noPicker => l10n.importErrorNoPicker,
-            ImportFailure.unreadable => l10n.importErrorUnreadable,
-            ImportFailure.notABackup => l10n.importErrorNotABackup,
-            ImportFailure.missingData => l10n.importErrorMissingData,
-            ImportFailure.restoreFailed => l10n.importErrorRestoreFailed,
-          };
+      String sentence(ImportFailure failure) => backupRestoreFailureMessage(failure, l10n);
 
       expect(ImportFailure.values.map(sentence).toSet(), hasLength(ImportFailure.values.length));
       // Where the service's own English is a whole sentence, it is the same one.
       expect(sentence(ImportFailure.noPicker), 'The file picker could not be opened. Try again.');
       expect(sentence(ImportFailure.unreadable), 'This backup file could not be read. It may be damaged or incomplete.');
       expect(sentence(ImportFailure.restoreFailed), 'This backup could not be restored. Nothing was imported.');
+
+      // And in another language, what came in is counted in its words.
+      final de = lookupAppLocalizations(const Locale('de'));
+      expect(
+        backupRestoreMessage(
+          ImportResult(success: true, message: '', cookbooksImported: 2, recipesImported: 1, recipesSkipped: 3),
+          de,
+        ),
+        'Importiert: 2 Kochbücher, 1 Rezept (3 Duplikate übersprungen)',
+      );
+      expect(backupRestoreMessage(ImportResult(success: false, message: '', failure: ImportFailure.tooLarge), de),
+          de.backupRestoreTooLarge);
+    });
+
+    test('a backup with a file that unpacks past the limit stops before anything is imported', () async {
+      final phone = phones('new_phone')..use();
+      final data = jsonBytes(_backup([
+        {'id': 'a', 'title': 'Toast', 'imagePath': 'images/recipes/a.jpg'},
+      ]));
+      final zip = zipOf({
+        'data.json': data,
+        'images/recipes/a.jpg': photo(1, 5000),
+        'images/recipes/b.jpg': photo(2, 5000),
+      });
+      // The second photo's entry says it unpacks to 3 GB: a zip bomb says
+      // so, or unpacks to it while saying less. Stopped by what it says.
+      final bomb = _withStatedSize(zip, 'images/recipes/b.jpg', 0xC0000000);
+
+      final result = await phone.pick('bomb.zip', bomb);
+      expect(result.success, isFalse);
+      expect(result.failure, ImportFailure.tooLarge);
+      expect(await phone.liveTitles(), isEmpty);
+      expect(filesUnder(phone.restoredImages), isEmpty, reason: 'the photo unpacked before it is removed again');
+
+      // What a restore may unpack grows with the backup: a large library
+      // of photos is not held to the 1 GB of a file import.
+      expect(ExportImportService.restoreLimits(2 * 1024 * 1024 * 1024).maxTotalBytes,
+          greaterThan(50 * 1024 * 1024 * 1024));
+      expect(ExportImportService.restoreLimits(1000).maxTotalBytes, lessThan(100 * 1024 * 1024));
     });
 
     test('a backup that was unzipped and zipped again still restores, photos included', () async {
@@ -456,4 +490,20 @@ void main() {
       expect(await phone.liveTitles(), isEmpty);
     });
   });
+}
+
+/// [zip] with its directory saying the entry [name] unpacks to [size] bytes.
+Uint8List _withStatedSize(List<int> zip, String name, int size) {
+  final bytes = Uint8List.fromList(zip);
+  final data = ByteData.sublistView(bytes);
+  for (var i = 0; i + 46 <= bytes.length; i++) {
+    // A central directory entry: its uncompressed size is at 24, the
+    // length of its name at 28, and the name at 46.
+    if (data.getUint32(i, Endian.little) != 0x02014b50) continue;
+    final nameLength = data.getUint16(i + 28, Endian.little);
+    if (utf8.decode(bytes.sublist(i + 46, i + 46 + nameLength)) != name) continue;
+    data.setUint32(i + 24, size, Endian.little);
+    return bytes;
+  }
+  throw StateError('No entry $name');
 }

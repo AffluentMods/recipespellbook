@@ -2,9 +2,13 @@
 // the person is told why in one sentence instead of getting an empty recipe.
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui' show Locale;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:recipespellbook/services/web_import_error.dart';
+import 'package:recipespellbook/ui/screens/import/web_import_ui.dart';
 
 import 'web_import_helpers.dart';
 
@@ -150,6 +154,45 @@ void main() {
       expect(await failureFor(429), 'Exception: The site is rate-limiting us. Try again in a minute.');
       expect(await failureFor(503), 'Exception: The site is having issues right now (HTTP 503). Try again later.');
       expect(await failureFor(418), 'Exception: Failed to fetch URL (HTTP 418)');
+    });
+
+    test('every failure carries a code, and the screen says it in the user\'s language', () async {
+      Future<WebImportException> failureOf(Future<http.Response> Function(http.Request) answer) async {
+        try {
+          await importUrl('https://blog.example/recipe', answer);
+        } on WebImportException catch (e) {
+          return e;
+        }
+        fail('imported');
+      }
+
+      final de = lookupAppLocalizations(const Locale('de'));
+      String german(WebImportException e) => webImportErrorMessage(de, e);
+
+      final blocked = await failureOf((_) async => http.Response('nope', 403));
+      expect(blocked.problem, WebImportProblem.blocked);
+      expect(german(blocked), de.webImportBlocked);
+
+      final down = await failureOf((_) async => http.Response('nope', 502));
+      expect((down.problem, down.statusCode), (WebImportProblem.siteError, 502));
+      expect(german(down), 'Die Website hat gerade Probleme (HTTP 502). Versuche es später erneut.');
+
+      final pdf = await failureOf((_) async =>
+          http.Response.bytes(ascii.encode('%PDF-1.4\n%%EOF\n'), 200, headers: {'content-type': 'application/pdf'}));
+      expect((pdf.problem, pdf.fileKind), (WebImportProblem.notAWebPage, WebImportFileKind.pdf));
+      expect(german(pdf), 'Kein Rezept gefunden: Dieser Link ist ein PDF, keine Webseite.');
+
+      final empty = await failureOf((_) async => http.Response('', 200));
+      expect(empty.problem, WebImportProblem.noRecipe);
+      expect(german(empty), de.importNoRecipeAtLink);
+
+      // Every code has its own sentence.
+      final en = lookupAppLocalizations(const Locale('en'));
+      final sentences = {
+        for (final problem in WebImportProblem.values)
+          webImportErrorMessage(en, WebImportException(problem, '', statusCode: 500, charset: 'x')),
+      };
+      expect(sentences, hasLength(WebImportProblem.values.length));
     });
 
     test('a missing page is not asked for twice, a blocked one is', () async {

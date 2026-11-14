@@ -398,17 +398,23 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
       }
 
       if (matchIdx >= 0) {
-        await service.purchasePackage(packages[matchIdx]);
+        // Null: the user closed the store sheet. Stay here, say nothing.
+        final bought = await service.purchasePackage(packages[matchIdx]);
+        if (bought == null) return;
         await ref.read(subscriptionProvider.notifier).refreshStatus();
-        if (mounted) {
+        if (!mounted) return;
+        if (ref.read(subscriptionProvider).isPaid) {
           // Brief success then dismiss
           AppSnackbar.success(context, '${l10n.paywallPurchaseSuccess} 🎉');
           await Future.delayed(const Duration(milliseconds: 800));
           if (mounted) Navigator.pop(context);
+        } else {
+          // Went through but not confirmed yet (a pending payment).
+          AppSnackbar.info(context, l10n.paywallPurchasePending);
         }
       } else {
-        await ref.read(subscriptionProvider.notifier).presentPaywall();
-        if (mounted) Navigator.pop(context);
+        final done = await ref.read(subscriptionProvider.notifier).presentPaywall();
+        if (done && mounted) Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) AppSnackbar.info(context, l10n.purchaseFailed(e.toString()));

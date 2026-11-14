@@ -12,6 +12,7 @@ import '../utils/ingredient_utils.dart';
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../utils/text_normalize.dart';
 import 'book_scan/book_page_splitter.dart' show isSectionHeading, sectionHeadingTitle;
+import 'limited_fetch.dart';
 import 'recipe_import_engine.dart';
 
 /// How the tables mark a section heading among the ingredients or the steps:
@@ -137,7 +138,7 @@ class ImportedRecipeSaver {
           }
           return;
         }
-        for (final raw in recipe.ingredients) {
+        for (final (index, raw) in recipe.ingredients.indexed) {
           final line = raw.trim();
           if (line.isEmpty) continue;
 
@@ -180,10 +181,20 @@ class ImportedRecipeSaver {
               !_cutMidway(text, name) &&
               !_groupedThousands.hasMatch(text) &&
               !(amount == null && _startsWithUnitSign(text, name));
+          final ingredientId = 'ing_${_uuid.v4()}';
+          final linkedTitle = recipe.linkedTitles?[index];
+          if (linkedTitle != null && linkedTitle.trim().isNotEmpty) {
+            links.add((
+              recipeId: recipeId,
+              ingredientId: ingredientId,
+              linked: ImportLibrary._titleLink(linkedTitle),
+              scale: _linkScale(parsed),
+            ));
+          }
           batch.insert(
             db.ingredients,
             IngredientsCompanion.insert(
-              id: 'ing_${_uuid.v4()}',
+              id: ingredientId,
               recipeId: recipeId,
               sortOrder: order++,
               name: _clamp(split ? name : line),
@@ -273,8 +284,20 @@ class ImportedRecipeSaver {
 
     // Only now do the new tags exist: a save that was rolled back made none.
     known._remember(newTags);
-    known._saved(recipe.exportId, recipeId, links);
+    known._saved(recipe.exportId, recipeId, links, title: title);
     return recipeId;
+  }
+
+  /// How much of a linked recipe a line takes: "2 batches [recipe:Dough]"
+  /// is twice the recipe, "1/2 recipe" half of it. Anything else is the
+  /// whole recipe once.
+  static double _linkScale(ParsedIngredient parsed) {
+    final amount = parsed.amount;
+    if (amount == null || !amount.isFinite || amount <= 0) return 1.0;
+    final words = parsed.name.toLowerCase().split(_whitespace);
+    final unit = (parsed.unit ?? (words.isEmpty ? '' : words.first)).toLowerCase();
+    const wholes = {'batch', 'batches', 'recipe', 'recipes', 'x', 'portion', 'portions'};
+    return wholes.contains(unit) ? amount : 1.0;
   }
 
   /// Ties the recipes of an import together again. An ingredient that stood
@@ -288,8 +311,30 @@ class ImportedRecipeSaver {
 
     final elsewhere = {
       for (final link in links)
-        if (!library._savedAs.containsKey(link.linked)) link.linked,
+        if (!library._savedAs.containsKey(link.linked) && !ImportLibrary._isTitleLink(link.linked)) link.linked,
     }.toList();
+    // A link by title (Paprika's "[recipe:Pizza Dough]") to a recipe not in
+    // this import goes to the library's recipe of that title, when it has
+    // exactly one.
+    final byTitle = <String, String>{};
+    final titles = {
+      for (final link in links)
+        if (ImportLibrary._isTitleLink(link.linked) && !library._savedAs.containsKey(link.linked)) link.linked,
+    };
+    if (titles.isNotEmpty) {
+      final found = <String, List<String>>{};
+      final rows = await (db.selectOnly(db.recipes)
+            ..addColumns([db.recipes.id, db.recipes.title])
+            ..where(db.recipes.deletedAt.isNull()))
+          .get();
+      for (final row in rows) {
+        final key = ImportLibrary._titleLink(row.read(db.recipes.title)!);
+        if (titles.contains(key)) found.putIfAbsent(key, () => []).add(row.read(db.recipes.id)!);
+      }
+      for (final MapEntry(:key, :value) in found.entries) {
+        if (value.length == 1) byTitle[key] = value.single;
+      }
+    }
     final inLibrary = <String>{};
     // Asked for in portions, the database takes only so many values at once.
     for (var start = 0; start < elsewhere.length; start += 500) {
@@ -306,7 +351,9 @@ class ImportedRecipeSaver {
       final order = <String, int>{};
       await db.batch((batch) {
         for (final link in links) {
-          final target = library._savedAs[link.linked] ?? (inLibrary.contains(link.linked) ? link.linked : null);
+          final target = library._savedAs[link.linked] ??
+              byTitle[link.linked] ??
+              (inLibrary.contains(link.linked) ? link.linked : null);
           if (target == null || target == link.recipeId) continue;
           batch.insert(
             db.recipeLinks,
@@ -340,15 +387,17 @@ class ImportedRecipeSaver {
   /// ([ImportedRecipe.imageUrl]). An export that carries its photos needs no
   /// network that way, and a dead link does not cost the recipe its picture.
   /// [client] is used for the download; without one a client is opened and
-  /// closed here.
+  /// closed here. A photo inside [temporaryFolder], which is deleted after
+  /// the import, is always copied, wherever that folder is.
   static Future<String?> storeImage(
     ImportedRecipe recipe, {
     required String documentsDir,
     http.Client? client,
+    String? temporaryFolder,
   }) async {
     final local = _blankToNull(recipe.imagePath);
     if (local != null) {
-      final kept = await _keepLocalImage(local, documentsDir);
+      final kept = await _keepLocalImage(local, documentsDir, temporaryFolder);
       if (kept != null) return kept;
     }
     final embedded = _blankToNull(recipe.imageData);
@@ -389,15 +438,32 @@ class ImportedRecipeSaver {
     }
   }
 
+  /// A copy of the picture at [path] in the image folder under
+  /// [documentsDir], for another recipe to own. Null when it cannot be made.
+  static Future<String?> copyImage(String path, {required String documentsDir}) async {
+    try {
+      final folder = Directory(p.join(documentsDir, imageFolder));
+      await folder.create(recursive: true);
+      final extension = p.extension(path).toLowerCase();
+      final copy = p.join(folder.path, 'img_${_uuid.v4()}${extension.isEmpty ? '.jpg' : extension}');
+      await File(path).copy(copy);
+      return copy;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// A photo the app itself put on this device. One that already sits in the
-  /// documents directory (a page cut out of a PDF) is used where it is. A
-  /// picked or freshly taken photo lives in a temp folder the system empties
-  /// when it likes, so that one is copied.
-  static Future<String?> _keepLocalImage(String path, String documentsDir) async {
+  /// documents directory is used where it is. A picked or freshly taken
+  /// photo lives in a temp folder the system empties when it likes, and the
+  /// photos of a PDF or an export wait in [temporaryFolder] until the import
+  /// is over, so those are copied.
+  static Future<String?> _keepLocalImage(String path, String documentsDir, String? temporaryFolder) async {
     try {
       final file = File(path);
       if (!await file.exists()) return null;
-      if (p.isWithin(documentsDir, path)) return path;
+      final temporary = temporaryFolder != null && p.isWithin(temporaryFolder, path);
+      if (p.isWithin(documentsDir, path) && !temporary) return path;
       final folder = Directory(p.join(documentsDir, imageFolder));
       await folder.create(recursive: true);
       final extension = p.extension(path).toLowerCase();
@@ -426,23 +492,39 @@ class ImportedRecipeSaver {
     // Only a web address is fetched. An import file can put anything in this
     // field, a path on this device included, and that must never be read.
     if (uri == null || !(uri.isScheme('http') || uri.isScheme('https')) || uri.host.isEmpty) return null;
-    final own = client == null ? http.Client() : null;
     try {
-      final response = await (client ?? own!).get(
+      // Read no further than a photo can be: a link to a film or a page
+      // that never ends is not downloaded whole first.
+      final response = await getLimited(
         uri,
         headers: const {
           'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
           'Accept': 'image/*,*/*;q=0.8',
         },
-      ).timeout(const Duration(seconds: 15));
-      if (response.statusCode != 200) return null;
+        maxBytes: maxDownloadedImageBytes,
+        timeout: const Duration(seconds: 15),
+        client: client,
+        skipBody: _notAnImageType,
+      );
+      if (response.statusCode != 200 || isOverLimit(response, maxDownloadedImageBytes)) return null;
       return await _writeImage(response.bodyBytes, documentsDir);
     } catch (_) {
       return null;
-    } finally {
-      own?.close();
     }
   }
+
+  /// The largest picture an import downloads.
+  static const maxDownloadedImageBytes = 25 * 1024 * 1024;
+
+  /// Answers that are plainly no picture, by their Content-Type: a web page
+  /// (what a dead link often answers with), JSON, a film or a sound. Other
+  /// types are read and told by their bytes, as servers often name a
+  /// picture wrongly.
+  static bool _notAnImageType(String type) =>
+      type.startsWith('text/html') ||
+      type.startsWith('application/json') ||
+      type.startsWith('video/') ||
+      type.startsWith('audio/');
 
   /// Writes [bytes] to a new file in the image folder, or returns null when
   /// they are not a picture worth keeping.
@@ -857,10 +939,18 @@ class ImportLibrary {
     _nextTagOrder += newTags.length;
   }
 
-  void _saved(String? exportId, String recipeId, List<_PendingLink> links) {
+  void _saved(String? exportId, String recipeId, List<_PendingLink> links, {String? title}) {
     if (exportId != null && exportId.isNotEmpty) _savedAs[exportId] = recipeId;
+    // The first recipe of a title is the one a link by that title means.
+    if (title != null && title.trim().isNotEmpty) _savedAs.putIfAbsent(_titleLink(title), () => recipeId);
     _links.addAll(links);
   }
+
+  /// What a link by title is filed under among [_savedAs]. Capitals,
+  /// accents and spacing do not count.
+  static String _titleLink(String title) => 'title:${foldAccents(title).trim().replaceAll(RegExp(r'\s+'), ' ')}';
+
+  static bool _isTitleLink(String linked) => linked.startsWith('title:');
 
   List<_PendingLink> _takeLinks() {
     final links = List.of(_links);

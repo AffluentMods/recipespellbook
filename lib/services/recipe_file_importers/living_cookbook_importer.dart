@@ -120,8 +120,9 @@ class LivingCookbookImporter {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException(_damaged);
+      throw const FileImportException.damaged(_app);
     }
+    final unzip = BoundedUnzip.forArchive(bytes.length);
 
     // Living Cookbook names the document Data.xml. An archive put together
     // by hand may hold one or more .fdx files instead, and all of them are read.
@@ -133,35 +134,34 @@ class LivingCookbookImporter {
       (name == 'data.xml' || name.endsWith('/data.xml') ? named : others).add(file);
     }
 
-    final photo = ImportSupport.photosIn(archive);
+    final photo = ImportSupport.photosIn(archive, unzip);
     final recipes = <ImportedRecipe>[];
     var documents = 0;
     var unreadable = false;
     for (final files in [named, others]) {
       if (documents > 0) break;
       for (final file in files) {
-        final String content;
-        try {
-          content = ImportSupport.decodeText(file.content as List<int>);
-        } catch (_) {
+        final bytes = unzip.tryBytesOf(file);
+        if (bytes == null) {
           // The archive lists the file but its data does not unpack.
           unreadable = true;
           continue;
         }
+        final content = ImportSupport.decodeText(bytes);
         if (!looksLikeFdx(content)) continue;
         documents++;
         recipes.addAll(import_(content, filename, photo: photo));
       }
     }
     if (documents == 0) {
-      throw FormatException(
-          unreadable ? _damaged : 'This .fdxz file does not contain a Living Cookbook document.');
+      throw unreadable
+          ? const FileImportException.damaged(_app)
+          : const FileImportException.noRecipes(_app, 'This .fdxz file does not contain a Living Cookbook document.');
     }
     return recipes;
   }
 
-  static const _damaged =
-      'This Living Cookbook file is damaged or incomplete. Export it again and retry.';
+  static const _app = 'Living Cookbook';
 
   /// A recipe whose values are attributes of its element.
   static ImportedRecipe _parseRecipe(

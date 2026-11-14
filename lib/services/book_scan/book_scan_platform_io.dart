@@ -149,7 +149,14 @@ class BookScanSession implements BookScanBackend {
       if (isAndroid) await note.create(recursive: true);
     } catch (_) {}
     try {
-      final picked = await ImagePicker().pickMultiImage(imageQuality: 92);
+      // A photo from the gallery can be of any size. The picker scales one
+      // larger than this down, so a page is never decoded at 100
+      // megapixels; text stays sharp enough to read at this size.
+      final picked = await ImagePicker().pickMultiImage(
+        imageQuality: 92,
+        maxWidth: galleryPhotoMaxSide,
+        maxHeight: galleryPhotoMaxSide,
+      );
       final paths = [for (final x in picked) x.path];
       if (copies) _pickerFiles.addAll(paths);
       return paths;
@@ -540,6 +547,7 @@ Uint8List? _cropAndEncode(_ImageJob job) => recipePicture(job.bytes, crop: job.c
 /// re-encoded as a JPEG that holds the pixels and nothing else. Null when
 /// [bytes] is not an image.
 Uint8List? recipePicture(Uint8List bytes, {PhotoRegion? crop, required int maxSide}) {
+  if (!decodableSize(bytes)) return null;
   final decoded = _decoded(img.decodeImage, bytes);
   if (decoded == null) return null;
   // Camera photos carry their rotation as metadata. Bake it in so the crop
@@ -585,6 +593,7 @@ bool _storeUpright((String, String) paths) {
 /// photo pickers all hand photos over as JPEG, so that is where the tag is.
 Uint8List? uprightPage(Uint8List bytes) {
   if (_storedOrientation(bytes) == 1) return null;
+  if (!decodableSize(bytes)) return null;
   final decoded = _decoded(img.decodeJpg, bytes);
   if (decoded == null) return null;
   // The decoder turns the pixels itself and drops the tag. Should a version
@@ -592,6 +601,27 @@ Uint8List? uprightPage(Uint8List bytes) {
   final image = decoded.exif.imageIfd.hasOrientation ? img.bakeOrientation(decoded) : decoded;
   image.exif = img.ExifData();
   return img.encodeJpg(image, quality: 92);
+}
+
+/// The longest side, in pixels, of a page photo picked from the gallery.
+const double galleryPhotoMaxSide = 4000;
+
+/// The most pixels a page photo is decoded with here. Decoded, every pixel
+/// takes four bytes, so this is 200 MB; a photo that says it is larger is
+/// passed over rather than run the app out of memory.
+const int maxDecodedPixels = 50 * 1000 * 1000;
+
+/// Whether the image in [bytes] is small enough to decode, by the size its
+/// header gives. Only the header is read. Bytes the decoders do not know
+/// are left to the decoder to turn down.
+bool decodableSize(Uint8List bytes) {
+  try {
+    final info = img.findDecoderForData(bytes)?.startDecode(bytes);
+    if (info == null) return true;
+    return info.width * info.height <= maxDecodedPixels;
+  } catch (_) {
+    return true;
+  }
 }
 
 /// What [decode] makes of [bytes], or null when they are not an image it can

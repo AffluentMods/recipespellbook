@@ -31,6 +31,29 @@ class DesktopGoogleAuthResult {
 class DesktopGoogleAuth {
   DesktopGoogleAuth._();
 
+  /// How long the app waits for the browser to come back. Enough to pick an
+  /// account and pass a second sign-in step; the user can cancel sooner.
+  static const timeout = Duration(minutes: 3);
+
+  /// Opens the sign-in page in the browser. A test stands in for it.
+  @visibleForTesting
+  static Future<bool> Function(Uri url) openBrowser =
+      (url) => launchUrl(url, mode: LaunchMode.externalApplication);
+
+  /// The local server of the sign-in in progress, if any.
+  static HttpServer? _server;
+
+  /// Whether a sign-in is waiting for the browser.
+  static bool get isWaiting => _server != null;
+
+  /// Stops waiting for the browser: closes the local server, so the sign-in
+  /// in progress returns null as if it had been cancelled.
+  static Future<void> cancel() async {
+    final server = _server;
+    _server = null;
+    await server?.close(force: true);
+  }
+
   /// Perform the full Google OAuth flow on desktop.
   ///
   /// Returns the auth code, code verifier, and redirect URI for
@@ -39,6 +62,9 @@ class DesktopGoogleAuth {
   static Future<DesktopGoogleAuthResult?> signIn({
     required String clientId,
   }) async {
+    // A sign-in left waiting is replaced by this one.
+    await cancel();
+
     // ── 1. Generate PKCE code verifier + challenge ──
     final codeVerifier = _generateCodeVerifier();
     final codeChallenge = _generateCodeChallenge(codeVerifier);
@@ -46,6 +72,7 @@ class DesktopGoogleAuth {
 
     // ── 2. Start localhost server on a random available port ──
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    _server = server;
     final port = server.port;
     final redirectUri = 'http://localhost:$port';
 
@@ -65,8 +92,15 @@ class DesktopGoogleAuth {
     });
 
     // ── 4. Open browser ──
-    final launched = await launchUrl(authUrl, mode: LaunchMode.externalApplication);
+    bool launched;
+    try {
+      launched = await openBrowser(authUrl);
+    } catch (e) {
+      debugPrint('[DesktopGoogleAuth] Could not open the browser: $e');
+      launched = false;
+    }
     if (!launched) {
+      if (identical(_server, server)) _server = null;
       await server.close();
       debugPrint('[DesktopGoogleAuth] Failed to launch browser');
       return null;
@@ -75,8 +109,8 @@ class DesktopGoogleAuth {
     // ── 5. Wait for the redirect ──
     String? authCode;
     try {
-      // Time out after 5 minutes (user may be slow)
-      final request = await server.first.timeout(const Duration(minutes: 5));
+      // Cancel closes the server, which ends this wait with a StateError.
+      final request = await server.first.timeout(timeout);
 
       final uri = request.requestedUri;
       final receivedState = uri.queryParameters['state'];
@@ -106,7 +140,11 @@ class DesktopGoogleAuth {
     } on TimeoutException {
       debugPrint('[DesktopGoogleAuth] Timed out waiting for redirect');
       return null;
+    } on StateError {
+      debugPrint('[DesktopGoogleAuth] Cancelled');
+      return null;
     } finally {
+      if (identical(_server, server)) _server = null;
       await server.close();
     }
 

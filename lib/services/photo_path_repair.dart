@@ -23,35 +23,58 @@ class PhotoPathRepair {
   static const _columns = [('recipes', 'image_path'), ('steps', 'image_path'), ('cookbooks', 'image_path')];
 
   /// Rewrites stale paths in [db]; returns how many were fixed.
+  ///
+  /// Runs at every launch over every photo, so the file checks happen on
+  /// another isolate (not the one drawing the app) and the fixes are
+  /// written in one transaction.
   static Future<int> run(AppDatabase db, {String? documentsDir}) async {
     if (kIsWeb) return 0;
     final docs = documentsDir ?? (await getApplicationDocumentsDirectory()).path;
-    var fixed = 0;
+    final rows = <(String table, String column, int rid, String path)>[];
     for (final (table, column) in _columns) {
-      final rows = await db
+      final found = await db
           .customSelect('SELECT rowid AS rid, $column AS path FROM $table WHERE $column IS NOT NULL AND $column != \'\'')
           .get();
-      for (final row in rows) {
+      for (final row in found) {
         final path = row.read<String>('path');
-        final moved = relocated(path, docs);
-        if (moved == null) continue;
-        await db.customUpdate(
-          'UPDATE $table SET $column = ?1 WHERE rowid = ?2',
-          variables: [Variable.withString(moved), Variable.withInt(row.read<int>('rid'))],
-          updates: {db.allTables.firstWhere((t) => t.actualTableName == table)},
-        );
-        fixed++;
+        if (_isRemote(path)) continue;
+        rows.add((table, column, row.read<int>('rid'), path));
       }
     }
-    if (fixed > 0) debugPrint('[PhotoPathRepair] Pointed $fixed photo path(s) at the current app folder');
-    return fixed;
+    if (rows.isEmpty) return 0;
+    final moved = await compute(_relocateAll, (<String>[for (final r in rows) r.$4], docs));
+    final fixes = [
+      for (var i = 0; i < rows.length; i++)
+        if (moved[i] != null) (rows[i], moved[i]!),
+    ];
+    if (fixes.isEmpty) return 0;
+    await db.transaction(() async {
+      for (final ((table, column, rid, _), path) in fixes) {
+        await db.customUpdate(
+          'UPDATE $table SET $column = ?1 WHERE rowid = ?2',
+          variables: [Variable.withString(path), Variable.withInt(rid)],
+          updates: {db.allTables.firstWhere((t) => t.actualTableName == table)},
+        );
+      }
+    });
+    debugPrint('[PhotoPathRepair] Pointed ${fixes.length} photo path(s) at the current app folder');
+    return fixes.length;
   }
+
+  /// [relocated] for each of the paths, on whatever isolate runs it.
+  static List<String?> _relocateAll((List<String>, String) job) {
+    final (paths, docs) = job;
+    return [for (final path in paths) relocated(path, docs)];
+  }
+
+  static bool _isRemote(String path) =>
+      path.startsWith('http://') || path.startsWith('https://') || ImageService.isServerPath(path);
 
   /// The same photo under [docs] when [path] is a local path that no longer
   /// exists and the file is there; otherwise null.
   @visibleForTesting
   static String? relocated(String path, String docs) {
-    if (path.startsWith('http://') || path.startsWith('https://') || ImageService.isServerPath(path)) return null;
+    if (_isRemote(path)) return null;
     if (_exists(path)) return null;
     final normalized = path.replaceAll('\\', '/');
     final at = normalized.lastIndexOf('/images/');

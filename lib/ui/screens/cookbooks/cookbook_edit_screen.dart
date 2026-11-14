@@ -10,12 +10,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 
 import '../../../database/database.dart';
+import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/bulk_nutrition_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../shell/shell_navigation.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/bulk_nutrition_sheet.dart';
+import '../../widgets/leave_cookbook_dialog.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 
@@ -164,6 +166,12 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
 
   Future<void> _delete() async {
     if (!_isEditing) return;
+    // Someone else's cookbook is left, never deleted.
+    final cookbook = _cookbook;
+    if (cookbook != null && isSharedInCookbook(cookbook)) {
+      if (await confirmLeaveCookbook(context, ref, cookbook) && mounted) popOrGo(context, '/cookbooks', true);
+      return;
+    }
     // Check if this is the only cookbook
     final dao = ref.read(cookbookDaoProvider);
     final cookbooks = await dao.getAllCookbooks();
@@ -205,7 +213,9 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
     );
 
     if (confirmed == true) {
-      await dao.deleteCookbook(widget.cookbookId!);
+      // Selects (and remembers) another cookbook when this one was the
+      // selected one; new recipes went into the deleted one before.
+      await deleteCookbookAndMoveOn(ref.read, widget.cookbookId!);
       if (mounted) {
         popOrGo(context, '/cookbooks', true);
       }

@@ -50,6 +50,7 @@ class LogInResult {
 
 class CustomerInfo {
   CustomerInfo._();
+  factory CustomerInfo.fromJson(Map<String, dynamic> json) => CustomerInfo._();
   Entitlements get entitlements => Entitlements._();
   List<String> get allPurchasedProductIdentifiers => const [];
 }
@@ -104,7 +105,12 @@ class PurchasesError implements Exception {
 }
 
 enum PurchasesErrorCode {
-  purchaseCancelledError, storeProblemError, unknownError, productAlreadyPurchasedError
+  purchaseCancelledError, storeProblemError, unknownError, productAlreadyPurchasedError,
+  networkError, offlineConnectionError
+}
+
+class PurchasesErrorHelper {
+  static PurchasesErrorCode getErrorCode(Object e) => PurchasesErrorCode.unknownError;
 }
 
 // purchases_ui_flutter stubs

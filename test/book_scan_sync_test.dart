@@ -611,6 +611,9 @@ void main() {
         expect(await withPicture(), 8);
 
         server.sharedPushFails = false;
+        // Rows keep whole seconds: one changed in the second a push starts
+        // stays dirty for one more push. Real syncs are seconds apart.
+        await Future<void>.delayed(const Duration(milliseconds: 1100));
         await sharedSync();
         expect(await withPicture(), 8);
         expect(server.shared.values.where((r) => r['imagePath'] != null), hasLength(8));

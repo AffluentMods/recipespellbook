@@ -992,6 +992,39 @@ const _unitWord = r'(?:'
 final _unitPattern =
     RegExp('^$_unitWord', caseSensitive: false, unicode: true);
 
+/// The unit codes of Meal-Master, a column of one or two letters between
+/// the amount and the name, with the unit [parseIngredient] reads for each.
+/// Empty for a code that is no unit: "x" (per serving) and "ea" (each). Case
+/// tells two of them apart: "T" is a tablespoon and "t" a teaspoon. The
+/// others are matched in any case.
+const _mealMasterUnits = {
+  'T': 'tbsp', 't': 'tsp',
+  'tb': 'tbsp', 'ts': 'tsp', 'c': 'cup', 'fl': 'fl oz', 'pt': 'pt', 'qt': 'qt', 'ga': 'gallon',
+  'oz': 'oz', 'lb': 'lb', 'ml': 'ml', 'cb': 'ml', 'cl': 'cl', 'dl': 'dl', 'l': 'l', 'mg': 'mg',
+  'g': 'g', 'kg': 'kg', 'pn': 'pinch', 'ds': 'dash', 'dr': 'drop', 'cn': 'can', 'pk': 'package',
+  'ct': 'carton', 'bn': 'bunch', 'sl': 'slice', 'sm': 'small', 'md': 'medium', 'lg': 'large',
+  'ea': '', 'x': '',
+};
+
+/// The amount, the unit code and the rest of a Meal-Master ingredient line.
+final _mealMasterLine = RegExp(r'^\s*(\d[\d ./-]*?)?\s*\b([A-Za-z]{1,2})\s+(\S.*)$');
+
+/// A Meal-Master ingredient line with its unit code written out, for
+/// [parseIngredient]: "1 T  butter" is "1 tbsp butter", "1 t  salt" is "1
+/// tsp salt", "2 ea Eggs" is "2 Eggs" and "pn Salt" is "pinch Salt". The
+/// spaces that line up the columns go too: "1    egg" is "1 egg".
+String mealMasterIngredient(String line) {
+  final match = _mealMasterLine.firstMatch(line);
+  final plain = line.trim().replaceAll(_spaces, ' ');
+  if (match == null) return plain;
+  final code = match.group(2)!;
+  final unit = _mealMasterUnits[code] ??
+      (code == 'T' || code == 't' ? null : _mealMasterUnits[code.toLowerCase()]);
+  if (unit == null) return plain;
+  final amount = match.group(1)?.trim() ?? '';
+  return [amount, unit, match.group(3)!.trim()].where((part) => part.isNotEmpty).join(' ');
+}
+
 /// A lone "c" that is some other spoon than a cup, at the start of the text.
 final _spoonWithC =
     RegExp('^c(?:$_otherSpoon)', caseSensitive: false, unicode: true);

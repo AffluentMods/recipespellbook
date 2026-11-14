@@ -428,30 +428,13 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   }
 
   NutritionData _getDisplayNutrition() {
-    var n = widget.nutrition!;
-    final originalServings = _parseServings() ?? 1;
-    final calcServings = n.calculatedServings;
-    final scale = widget.scaleFactor;
-
-    if (calcServings != null) {
-      // New format: stored values are TOTAL for the whole recipe
-      if (_showPerServing && originalServings > 1) {
-        // Per-serving = total / original servings (unaffected by recipe scale)
-        n = n.scaled(1.0 / originalServings);
-      } else if (!_showPerServing && scale != 1.0) {
-        // Total = stored total × scale factor
-        n = n.scaled(scale);
-      }
-    } else {
-      // Legacy format: stored values are per-serving
-      if (!_showPerServing) {
-        // Total = per-serving × original servings × scale
-        n = n.scaled(originalServings.toDouble() * scale);
-      }
-      // Per-serving stays as-is regardless of scale
-    }
-
-    return n;
+    final n = widget.nutrition!;
+    // Stored as the recipe's total (calculatedServings set) or as one
+    // serving (entered by hand before 2.1.1). One serving does not change
+    // with the recipe's scale; the total does.
+    if (_showPerServing) return n.perServingOf(_parseServings());
+    final total = n.totalOf(_parseServings());
+    return widget.scaleFactor == 1.0 ? total : total.scaled(widget.scaleFactor);
   }
 
   double? _getNutrientValue(NutritionData n, String key) {

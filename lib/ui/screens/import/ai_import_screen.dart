@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 
@@ -18,6 +19,66 @@ import '../../../services/imported_recipe_saver.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/sheet_chrome.dart';
+
+/// What is wrong with a pasted AI answer, in the user's language.
+String aiImportErrorMessage(AiImportError e, AppLocalizations l10n) {
+  final n = e.item ?? 0;
+  final problem = switch (e.problem) {
+    AiImportProblem.noRecipes => l10n.aiImportErrNoRecipes,
+    AiImportProblem.invalidJson => l10n.aiImportErrInvalidJson,
+    AiImportProblem.cutOff => l10n.aiImportErrCutOff,
+    AiImportProblem.outsideBrackets => l10n.aiImportErrOutsideBrackets(e.field ?? ''),
+    AiImportProblem.blockUnreadable => l10n.aiImportErrBlockUnreadable(n, e.count ?? 0),
+    AiImportProblem.missingTitle => l10n.aiImportErrMissingTitle,
+    AiImportProblem.missingIngredients => l10n.aiImportErrMissingIngredients,
+    AiImportProblem.noIngredients => l10n.aiImportErrNoIngredients,
+    AiImportProblem.ingredientInvalid => l10n.aiImportErrIngredientInvalid(n),
+    AiImportProblem.ingredientNoName => l10n.aiImportErrIngredientNoName(n),
+    AiImportProblem.missingSteps => l10n.aiImportErrMissingSteps,
+    AiImportProblem.noSteps => l10n.aiImportErrNoSteps,
+    AiImportProblem.stepInvalid => l10n.aiImportErrStepInvalid(n),
+    AiImportProblem.stepNoInstruction => l10n.aiImportErrStepNoInstruction(n),
+  };
+  final recipe = e.recipe;
+  return recipe == null ? problem : l10n.aiImportErrInRecipe(recipe, problem);
+}
+
+/// Downloads [photoUrl] and makes it the picture of each recipe of
+/// [recipeIds] that has none. A picture that cannot be had is left out.
+///
+/// It is downloaded once, with [client] when given. Every other recipe gets
+/// a copy of the file, so deleting one recipe's picture leaves the others
+/// theirs. [documentsDir] is the app's documents directory.
+Future<void> attachPhotoToRecipes(
+  AppDatabase db,
+  List<String> recipeIds,
+  String photoUrl, {
+  String? documentsDir,
+  http.Client? client,
+}) async {
+  try {
+    final without = await (db.select(db.recipes)..where((r) => r.id.isIn(recipeIds) & r.imagePath.isNull())).get();
+    final ids = [for (final id in recipeIds) if (without.any((r) => r.id == id)) id];
+    if (ids.isEmpty) return;
+    final folder = documentsDir ?? (await getApplicationDocumentsDirectory()).path;
+    final downloaded = await ImportedRecipeSaver.storeImage(
+      ImportedRecipe(title: '', ingredients: const [], instructions: const [], imageUrl: photoUrl),
+      documentsDir: folder,
+      client: client,
+    );
+    if (downloaded == null) return;
+    for (final (i, id) in ids.indexed) {
+      final path = i == 0 ? downloaded : await ImportedRecipeSaver.copyImage(downloaded, documentsDir: folder);
+      if (path == null) continue;
+      final written = await (db.update(db.recipes)..where((r) => r.id.equals(id) & r.imagePath.isNull()))
+          .write(RecipesCompanion(imagePath: drift.Value(path), updatedAt: drift.Value(DateTime.now())));
+      // Given a picture meanwhile: this copy belongs to no recipe.
+      if (written == 0) await ImportedRecipeSaver.discardImages([path], documentsDir: folder);
+    }
+  } catch (e) {
+    debugPrint('[Import] Could not add the video picture: $e');
+  }
+}
 
 /// Screen for importing recipes from AI-generated JSON.
 ///
@@ -84,7 +145,8 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
         _error = null;
       });
     } catch (e) {
-      setState(() => _error = 'Failed to read file: $e');
+      debugPrint('[AI import] Could not read the file: $e');
+      if (mounted) setState(() => _error = AppLocalizations.of(context)!.importFileUnreadable);
     }
   }
 
@@ -100,15 +162,16 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
   }
 
   Future<void> _validateAndPreview() async {
+    final l10n = AppLocalizations.of(context)!;
     final text = _jsonController.text.trim();
     if (text.isEmpty) {
-      setState(() => _error = 'Paste or load the AI response first.');
+      setState(() => _error = l10n.aiImportPasteFirst);
       return;
     }
 
-    final validationError = AiImportService.validate(text);
-    if (validationError != null) {
-      setState(() => _error = validationError);
+    final problem = AiImportService.check(text);
+    if (problem != null) {
+      setState(() => _error = aiImportErrorMessage(problem, l10n));
       return;
     }
 
@@ -316,7 +379,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
       // The video's picture goes on in the background: the recipes are in,
       // and a slow download must not hold the screen open.
       final photoUrl = widget.photoUrl;
-      if (photoUrl != null) unawaited(_attachPhoto(db, recipeIds, photoUrl));
+      if (photoUrl != null) unawaited(attachPhotoToRecipes(db, recipeIds, photoUrl));
 
       // Left while it was saving: the recipes are in, and nothing of this
       // screen is left to close.
@@ -331,7 +394,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
           ? l10n.aiImportedInto(count, cookbook.name)
           : count == 1
               ? l10n.recipeImportedSuccess
-              : '$count recipes imported successfully!';
+              : l10n.aiImportedCount(count);
       if (count == 1) {
         AppSnackbar.successWithAction(
           context,
@@ -363,25 +426,6 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
   List<Map<String, dynamic>>? _parsePreview(String jsonString) {
     final recipes = AiImportService.extractRecipes(jsonString);
     return recipes.isEmpty ? null : recipes;
-  }
-
-  /// Downloads [photoUrl] and makes it the picture of each recipe of
-  /// [recipeIds] that has none. A picture that cannot be had is left out.
-  static Future<void> _attachPhoto(AppDatabase db, List<String> recipeIds, String photoUrl) async {
-    try {
-      final documentsDir = (await getApplicationDocumentsDirectory()).path;
-      for (final id in recipeIds) {
-        final path = await ImportedRecipeSaver.storeImage(
-          ImportedRecipe(title: '', ingredients: const [], instructions: const [], imageUrl: photoUrl),
-          documentsDir: documentsDir,
-        );
-        if (path == null) return;
-        await (db.update(db.recipes)..where((r) => r.id.equals(id) & r.imagePath.isNull()))
-            .write(RecipesCompanion(imagePath: drift.Value(path), updatedAt: drift.Value(DateTime.now())));
-      }
-    } catch (e) {
-      debugPrint('[Import] Could not add the video picture: $e');
-    }
   }
 
   String get _prompt => widget.sourceText == null

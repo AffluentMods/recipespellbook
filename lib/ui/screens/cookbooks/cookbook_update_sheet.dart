@@ -149,6 +149,8 @@ class _CookbookUpdateSheetState extends State<CookbookUpdateSheet> {
   CookbookUpdatePlan? _plan;
   bool _loading = true;
   bool _failed = false;
+  // The publication is no longer in the Community.
+  bool _gone = false;
   bool _upToDate = false;
   bool _applying = false;
   String? _status;
@@ -167,6 +169,7 @@ class _CookbookUpdateSheetState extends State<CookbookUpdateSheet> {
   Future<void> _load() async {
     CookbookUpdatePlan? plan;
     var upToDate = false;
+    var gone = false;
     try {
       final cookbook = await widget.updates.db.cookbookDao.getCookbookById(widget.cookbookId);
       _name = cookbook?.name ?? '';
@@ -176,6 +179,11 @@ class _CookbookUpdateSheetState extends State<CookbookUpdateSheet> {
         await widget.updates.apply(plan);
         upToDate = true;
       }
+    } on CommunitySourceUnavailable {
+      // The creator took it out of the Community: "Update available" is
+      // cleared, and the copy here stays as it is.
+      gone = true;
+      plan = null;
     } catch (e) {
       debugPrint('[CookbookUpdateSheet] load: $e');
       plan = null;
@@ -184,7 +192,8 @@ class _CookbookUpdateSheetState extends State<CookbookUpdateSheet> {
     setState(() {
       _plan = plan;
       _loading = false;
-      _failed = plan == null;
+      _gone = gone;
+      _failed = plan == null && !gone;
       _upToDate = upToDate;
     });
   }
@@ -262,6 +271,8 @@ class _CookbookUpdateSheetState extends State<CookbookUpdateSheet> {
           ],
         ),
       );
+    } else if (_gone) {
+      body = message(Icons.link_off_rounded, l10n.cookbookUpdateSourceGone);
     } else if (_failed || plan == null) {
       body = message(Icons.cloud_off_rounded, l10n.cookbookUpdateLoadFailed);
     } else if (_upToDate) {

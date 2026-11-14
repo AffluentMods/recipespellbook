@@ -12,6 +12,16 @@ String? formatDurationMinutes(AppLocalizations l10n, int? minutes) {
   return m == 0 ? l10n.durationHours(h) : l10n.durationHoursMinutes(h, m);
 }
 
+/// A timer's length in [seconds]: "10 min", "1 hr 30 min", "45 sec", or
+/// minutes and seconds ("1:30") when it is not whole minutes.
+String formatTimerLength(AppLocalizations l10n, int seconds) {
+  if (seconds < 60) return l10n.durationSeconds(seconds);
+  if (seconds % 60 == 0) return formatDurationMinutes(l10n, seconds ~/ 60)!;
+  final m = seconds ~/ 60;
+  final s = seconds % 60;
+  return '$m:${s.toString().padLeft(2, '0')}';
+}
+
 /// Sum of prep + cook as a single formatted duration, or null when both are
 /// missing/zero.
 String? formatTotalDuration(AppLocalizations l10n, int? prep, int? cook) {

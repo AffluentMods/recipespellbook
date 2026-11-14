@@ -25,11 +25,6 @@ final isSignedInProvider = Provider<bool>((ref) {
   return ref.watch(authProvider).isSignedIn;
 });
 
-/// Convenience: whether user has an active subscription.
-final isSubscribedProvider = Provider<bool>((ref) {
-  return ref.watch(authProvider).user?.isSubscribed ?? false;
-});
-
 // ════════════════════════════════════════════
 //  NOTIFIER
 // ════════════════════════════════════════════
@@ -39,27 +34,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   final _service = AuthService.instance;
 
-  /// Call once at app startup to restore saved session.
-  Future<void> initialize() async {
+  /// The one restore of the session, once it has started.
+  Future<void>? _initializing;
+
+  /// Restores the saved session at app startup. Always ends in a settled
+  /// state: if restoring fails in a way nobody expected, the app starts
+  /// signed out instead of waiting on "loading" for ever.
+  ///
+  /// It runs once: main.dart starts it and the app shell waits for the same
+  /// run, so the session is checked with the server (/v1/auth/me) once per
+  /// launch. A call after that returns the same, finished, run.
+  Future<void> initialize() => _initializing ??= _initialize();
+
+  Future<void> _initialize() async {
     state = const AuthState.loading();
-
-    // Web: detect OAuth bridge token in URL fragment (from /app-auth/callback)
-    if (kIsWeb) {
-      final bridgeResult = await _tryWebBridgeSignIn();
-      if (bridgeResult != null && bridgeResult.isSignedIn) {
-        state = bridgeResult;
-        await _service.saveLastBoundUserId(bridgeResult.user!.id);
-        _syncAuthToServices();
-        return;
+    try {
+      // Web: detect OAuth bridge token in URL fragment (from /app-auth/callback)
+      if (kIsWeb) {
+        final bridgeResult = await _tryWebBridgeSignIn();
+        if (bridgeResult != null && bridgeResult.isSignedIn) {
+          state = bridgeResult;
+          await _service.saveLastBoundUserId(bridgeResult.user!.id);
+          _syncAuthToServices();
+          return;
+        }
       }
-    }
 
-    final result = await _service.initialize();
-    state = result;
-    if (result.isSignedIn) {
-      await _service.saveLastBoundUserId(result.user!.id);
+      final result = await _service.initialize();
+      state = result;
+      if (result.isSignedIn) {
+        await _service.saveLastBoundUserId(result.user!.id);
+      }
+      _syncAuthToServices();
+    } catch (e) {
+      debugPrint('[Auth] Restoring the session failed: $e');
+      if (state.isLoading) state = const AuthState.initial();
     }
-    _syncAuthToServices();
   }
 
   /// Parse URL fragment for OAuth bridge token and sign in.
@@ -102,7 +112,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     debugPrint('[Auth] Starting Google sign-in...');
     final result = await _service.signInWithGoogle();
-    debugPrint('[Auth] Result: isSignedIn=${result.isSignedIn}, error=${result.error}, user=${result.user?.displayName}');
+    debugPrint('[Auth] Result: isSignedIn=${result.isSignedIn}, error=${result.error}');
 
     if (result.isSignedIn) {
       await _handleSignInResult(result);
@@ -113,6 +123,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  /// Stop a desktop Google sign-in that is waiting for the browser.
+  Future<void> cancelSignIn() => _service.cancelGoogleSignIn();
 
   /// Sign in with Apple.
   Future<void> signInWithApple() async {
@@ -138,7 +151,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (lastBoundUserId != null && lastBoundUserId != newUserId) {
       // Different account — clear sync state so new account gets a full sync.
       // Local data is NEVER deleted. It stays on device for all accounts.
-      debugPrint('[Auth] Account switch: $lastBoundUserId → $newUserId (local data preserved)');
+      debugPrint('[Auth] Account switch (local data preserved)');
       await SyncService.instance.clearLastSyncAt();
     }
 
@@ -168,7 +181,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = const AuthState.initial();
       _clearAuthFromServices();
     } else {
-      state = state.copyWith(isLoading: false, error: 'Failed to delete account');
+      state = state.copyWith(isLoading: false, error: AuthError.deleteFailed);
     }
     return success;
   }

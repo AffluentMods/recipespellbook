@@ -4,6 +4,9 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 
 import '../recipe_import_engine.dart';
+import 'file_import_error.dart';
+
+export 'file_import_error.dart';
 
 /// Finds a photo by the file name a recipe document gives for it and returns
 /// the photo's bytes, or null when there is no such file.
@@ -192,34 +195,26 @@ class ImportSupport {
 
   /// The photos stored in [archive], found by file name whatever folder they
   /// are in and however the name is capitalised. A photo is only unpacked
-  /// when a recipe asks for it.
-  static ImportPhotoLookup photosIn(Archive archive) {
+  /// when a recipe asks for it, within the limits of [unzip].
+  static ImportPhotoLookup photosIn(Archive archive, BoundedUnzip unzip) {
     final byName = <String, ArchiveFile>{};
     for (final file in archive.files) {
       if (_isPhoto(file)) byName.putIfAbsent(_baseName(file.name), () => file);
     }
     return (fileName) {
       final file = byName[_baseName(fileName)];
-      return file == null ? null : _contentOf(file);
+      return file == null ? null : unzip.tryBytesOf(file);
     };
   }
 
   /// The photo in [archive] when it holds exactly one, otherwise null.
-  static List<int>? onlyPhotoIn(Archive archive) {
+  static List<int>? onlyPhotoIn(Archive archive, BoundedUnzip unzip) {
     final photos = archive.files.where((file) => _isPhoto(file) && !isHiddenEntry(file.name)).take(2).toList();
-    return photos.length == 1 ? _contentOf(photos.single) : null;
+    return photos.length == 1 ? unzip.tryBytesOf(photos.single) : null;
   }
 
   /// Anything as small as 1 KB is a placeholder, not a photo.
   static bool _isPhoto(ArchiveFile file) => file.isFile && file.size > 1024 && _isImage(file.name);
-
-  static List<int>? _contentOf(ArchiveFile file) {
-    try {
-      return file.content as List<int>;
-    } catch (_) {
-      return null;
-    }
-  }
 
   static String _baseName(String path) {
     final name = path.replaceAll(r'\', '/');
@@ -271,6 +266,151 @@ class ImportSupport {
       if (course != null) return course;
     }
     return null;
+  }
+}
+
+/// Unpacks the files of one archive, each no larger than [maxEntryBytes]
+/// and all of them together no more than [maxTotalBytes].
+///
+/// `ArchiveFile.content` unpacks a file whatever size it turns out to be. A
+/// zip of a few megabytes can hold a file of gigabytes (a zip bomb), and the
+/// import would run out of memory on it. Every importer unpacks through
+/// this instead, and a file over a limit stops the import with a
+/// [ZipTooLargeException]. The size a zip states for a file is checked
+/// first, and then what really comes out, as the statement can lie.
+class BoundedUnzip {
+  BoundedUnzip({this.maxEntryBytes = defaultMaxEntryBytes, this.maxTotalBytes = defaultMaxTotalBytes});
+
+  /// The limits for an archive of [packedLength] bytes. Recipe text packs to
+  /// a tenth of its size or so and photos hardly at all, so fifty times the
+  /// archive and some room on top is far more than an export holds, and far
+  /// less than a zip bomb.
+  factory BoundedUnzip.forArchive(int packedLength) {
+    final total = packedLength * 50 + 64 * _megabyte;
+    return BoundedUnzip(maxTotalBytes: total < defaultMaxTotalBytes ? total : defaultMaxTotalBytes);
+  }
+
+  static const _megabyte = 1024 * 1024;
+
+  /// No file of a recipe export comes near this.
+  static const defaultMaxEntryBytes = 200 * _megabyte;
+
+  /// A large library with its photos, read in one go.
+  static const defaultMaxTotalBytes = 1024 * _megabyte;
+
+  final int maxEntryBytes;
+  final int maxTotalBytes;
+
+  int _unpacked = 0;
+
+  /// What was unpacked so far.
+  int get unpacked => _unpacked;
+
+  /// The bytes of [file]. Throws [ZipTooLargeException] when it is over a
+  /// limit, and another exception when it does not unpack.
+  Uint8List bytesOf(ArchiveFile file) {
+    final room = _room();
+    if (file.size > room) throw const ZipTooLargeException();
+    final output = _LimitedOutput(room, () => const ZipTooLargeException());
+    _unpack(file, output);
+    final bytes = output.getBytes() as Uint8List;
+    _unpacked += bytes.length;
+    return bytes;
+  }
+
+  /// [bytesOf], or null when [file] does not unpack. Over a limit it still
+  /// throws: the archive is no recipe export.
+  Uint8List? tryBytesOf(ArchiveFile file) {
+    try {
+      return bytesOf(file);
+    } on ZipTooLargeException {
+      rethrow;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// The first [count] bytes of [file], unpacking no more of it than that.
+  /// Fewer when the file is shorter. Throws when it does not unpack.
+  static Uint8List startOf(ArchiveFile file, int count) {
+    final output = _LimitedOutput(count, () => const _Enough());
+    try {
+      _unpack(file, output);
+    } on _Enough {
+      // As much as was asked for.
+    }
+    final bytes = output.getBytes() as Uint8List;
+    return bytes.length > count ? Uint8List.sublistView(bytes, 0, count) : bytes;
+  }
+
+  int _room() {
+    final left = maxTotalBytes - _unpacked;
+    return left < maxEntryBytes ? left : maxEntryBytes;
+  }
+
+  /// Unpacks [file] into [output] from its packed bytes, as the zip stores
+  /// them, so nothing is unpacked past what [output] takes.
+  static void _unpack(ArchiveFile file, OutputStreamBase output) {
+    final raw = file.rawContent;
+    if (raw == null) {
+      // Made in memory rather than read from a zip: already unpacked.
+      output.writeBytes(file.content as List<int>);
+      return;
+    }
+    final input = InputStream(raw.toUint8List());
+    switch (file.compressionType) {
+      case ArchiveFile.STORE:
+        output.writeInputStream(input);
+      case ArchiveFile.DEFLATE:
+        Inflate.stream(input, output);
+      case 12: // bzip2
+        BZip2Decoder().decodeStream(input, output);
+      default:
+        throw ArchiveException('Unsupported zip compression method ${file.compressionType}');
+    }
+  }
+}
+
+/// Stops [BoundedUnzip.startOf] once it has what it asked for.
+class _Enough implements Exception {
+  const _Enough();
+}
+
+/// Output that throws [_overflow] when more than [_limit] bytes are written
+/// to it.
+class _LimitedOutput extends OutputStream {
+  _LimitedOutput(this._limit, this._overflow) : super(size: _limit < 65536 ? _limit + 1 : 65536);
+
+  final int _limit;
+  final Exception Function() _overflow;
+
+  @override
+  void writeByte(int value) {
+    if (length + 1 > _limit) {
+      if (length < _limit) super.writeByte(value);
+      throw _overflow();
+    }
+    super.writeByte(value);
+  }
+
+  @override
+  void writeBytes(List<int> bytes, [int? len]) {
+    final count = len ?? bytes.length;
+    if (length + count > _limit) {
+      // What fits is kept, for startOf.
+      super.writeBytes(bytes, _limit - length);
+      throw _overflow();
+    }
+    super.writeBytes(bytes, len);
+  }
+
+  @override
+  void writeInputStream(InputStreamBase stream) {
+    if (length + stream.length > _limit) {
+      writeBytes(stream.toUint8List());
+      return;
+    }
+    super.writeInputStream(stream);
   }
 }
 

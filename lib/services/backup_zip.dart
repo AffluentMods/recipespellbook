@@ -90,8 +90,9 @@ abstract final class BackupZip {
   /// be, holds a library that no other app put its name on.
   static bool _says(ArchiveFile file, {required bool isLibrary}) {
     try {
-      final content = file.content as List<int>;
-      var start = utf8.decode(content.length > _start ? content.sublist(0, _start) : content, allowMalformed: true);
+      // Only the start is unpacked: data.json can be hundreds of megabytes,
+      // and in a zip that is no backup it can be anything.
+      var start = utf8.decode(BoundedUnzip.startOf(file, _start), allowMalformed: true);
       // A byte order mark in front says nothing of what follows.
       if (start.isNotEmpty && start.codeUnitAt(0) == _byteOrderMark) start = start.substring(1);
       if (_appMark.hasMatch(start)) return true;

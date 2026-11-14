@@ -4,6 +4,7 @@ import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
 import '../../../services/collab_service.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,7 @@ import '../../../services/home_widget_snapshot.dart' show shoppingLastListPrefKe
 import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/share_file.dart';
 import '../../../services/shopping_list_service.dart';
+import '../../../services/sync_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
 import '../../../utils/ingredient_utils.dart';
@@ -43,6 +45,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/family_share_sheet.dart';
 import '../../widgets/join_with_link_dialog.dart';
+import '../../widgets/new_recipe_dialog.dart' show friendlyImportError;
 import '../../widgets/sheet_chrome.dart';
 import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_controls.dart';
@@ -164,7 +167,11 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   // Wide-viewport (nav-rail) slide-in add panel; compact keeps the full-screen
   // add flow. See [_openQuickAdd] / [_wrapWithQuickAdd].
   bool _quickAddOpen = false;
+
+  /// Items ticked in the last two seconds. The tick is already saved; they
+  /// only stay where they were for a moment before moving down to Checked.
   final Set<String> _recentlyCheckedIds = {};
+  final Map<String, Timer> _settleTimers = {};
   Map<String, int> _sharedListCounts = {}; // listId → share count
   Map<String, List<_ShopMember>> _sharedListMembers = {}; // listId → members
 
@@ -191,7 +198,16 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     _collabTimer = Timer.periodic(const Duration(seconds: 6), (_) {
       if (mounted) CollabService.instance.syncNow();
     });
+    // The list on screen can move to a new id (sharing the default list,
+    // a clash in sync): follow it.
+    _listMoves = SyncService.instance.rekeys
+        .where((m) => m.entity == 'shoppingLists')
+        .listen((m) {
+      if (mounted && m.from == _currentListId) setState(() => _currentListId = m.to);
+    });
   }
+
+  StreamSubscription<SyncRekey>? _listMoves;
 
   void _onCollabRevision() {
     if (mounted) setState(() {});
@@ -214,6 +230,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   Widget _collabBanner(ThemeData theme, String? perm) {
     final isCheck = perm == 'check';
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -227,9 +244,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            isCheck
-                ? 'Shared list · you can tick items off, but not add or remove them'
-                : 'Shared list · view only',
+            isCheck ? l10n.shoppingSharedCanTick : l10n.shoppingSharedViewOnly,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSecondaryContainer),
           ),
         ),
@@ -240,6 +255,10 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   @override
   void dispose() {
     _collabTimer?.cancel();
+    for (final t in _settleTimers.values) {
+      t.cancel();
+    }
+    _listMoves?.cancel();
     CollabService.instance.revision.removeListener(_onCollabRevision);
     super.dispose();
   }
@@ -267,20 +286,41 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final savedId = prefs.getString(_lastListKey);
     final shoppingDao = ref.read(shoppingDaoProvider);
     // Prefer the last-viewed list; otherwise the user's marked default list;
-    // otherwise the built-in default.
+    // otherwise the built-in default, any list, or a new one.
     ShoppingList? resolved;
     if (savedId != null) resolved = await shoppingDao.getListById(savedId);
-    resolved ??= await shoppingDao.getDefaultList();
-    resolved ??= await shoppingDao.getListById('list_default');
-    final list = resolved; // final → promotes inside the setState closure
-    if (mounted && list != null) {
-      setState(() {
-        _currentListId = list.id;
-        _currentListName = list.name;
-      });
-    } else {
-      _loadCurrentListName();
+    final list = resolved ?? await _fallbackList(); // final → promotes in setState
+    if (!mounted) return;
+    setState(() {
+      _currentListId = list.id;
+      _currentListName = list.name;
+    });
+  }
+
+  /// The list to show when there is no (other) chosen one: the user's default
+  /// list, else the built-in one, else any list, else a new empty one, so
+  /// the screen never points at a list that is gone. [excluding] is a list
+  /// being deleted.
+  Future<ShoppingList> _fallbackList({String? excluding}) async {
+    final dao = ref.read(shoppingDaoProvider);
+    bool usable(ShoppingList? l) => l != null && l.id != excluding;
+    final byDefault = await dao.getDefaultList();
+    if (usable(byDefault)) return byDefault!;
+    final builtIn = await dao.getListById('list_default');
+    if (usable(builtIn)) return builtIn!;
+    for (final l in await dao.getAllLists()) {
+      if (usable(l)) return l;
     }
+    final name = mounted
+        ? AppLocalizations.of(context)!.defaultShoppingListName
+        : 'Shopping List';
+    final id = 'list_${DateTime.now().millisecondsSinceEpoch}';
+    await dao.insertList(ShoppingListsCompanion.insert(
+      id: id,
+      name: name,
+      isDefault: const drift.Value(true),
+    ));
+    return (await dao.getListById(id))!;
   }
 
   /// Switch the active list AND persist the choice.
@@ -339,14 +379,6 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       setState(() {
         _userMappings = {for (var m in mappings) m.ingredient: m.shoppingCategoryId};
       });
-    }
-  }
-
-  Future<void> _loadCurrentListName() async {
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    final list = await shoppingDao.getListById(_currentListId);
-    if (mounted && list != null) {
-      setState(() => _currentListName = list.name);
     }
   }
 
@@ -1183,13 +1215,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final shareCount = _sharedListCounts[list.id] ?? 0;
     final isShared = shareCount > 0;
 
-    String message;
-    if (isShared) {
-      message = 'This list is currently shared with $shareCount ${shareCount == 1 ? 'person' : 'people'}. '
-          'Deleting it will stop syncing for everyone.';
-    } else {
-      message = l10n.shoppingDeleteListConfirm(list.name);
-    }
+    final message = isShared
+        ? l10n.shoppingDeleteSharedListConfirm(shareCount)
+        : l10n.shoppingDeleteListConfirm(list.name);
 
     showDialog(
       context: context,
@@ -1223,12 +1251,12 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 }
                 _sharedListCounts.remove(list.id);
               }
-              shoppingDao.deleteList(list.id);
+              await shoppingDao.deleteList(list.id);
               if (list.id == _currentListId) {
-                setState(() {
-                  _currentListId = 'list_default';
-                  _loadCurrentListName();
-                });
+                // The built-in list may be the one just deleted (or gone
+                // long ago): pick one that is there, and save the choice.
+                final next = await _fallbackList(excluding: list.id);
+                if (mounted) _setCurrentList(next.id, next.name);
               }
             },
             style: FilledButton.styleFrom(backgroundColor: context.appColors.destructive),
@@ -1412,7 +1440,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         if (!mounted) return;
         messenger.hideCurrentSnackBar();
         messenger.showSnackBar(SnackBar(
-          content: Text(l10n.failedToImport(e.toString().replaceFirst('Exception: ', ''))),
+          content: Text(friendlyImportError(e, l10n)),
         ));
       }
     }
@@ -1637,15 +1665,19 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
+        // Said in the user's language; the result's message is the English.
+        final message = importResult.success
+            ? l10n.shoppingImportedItems(importResult.itemCount)
+            : importResult.wrongFile
+                ? l10n.shoppingImportWrongFile
+                : l10n.importFailed(importResult.error ?? importResult.message);
         if (importResult.success && importResult.listId != null) {
           setState(() {
             _currentListId = importResult.listId!;
             _currentListName = importResult.listName ?? l10n.shoppingImportedList;
           });
-          AppSnackbar.info(context, importResult.message);
-        } else {
-          AppSnackbar.info(context, importResult.message);
         }
+        AppSnackbar.info(context, message);
       }
     } catch (e) {
       if (mounted) {
@@ -1708,31 +1740,32 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     );
   }
 
-  /// Delayed check: item stays in place for 2s with visual feedback
-  /// (checkbox filled, text struck through), then moves to checked section.
-  /// Tapping again during the delay cancels the check.
+  /// How long a ticked item stays in place before moving to Checked.
+  static const settleDelay = Duration(milliseconds: 2000);
+
+  /// A tick is saved at once, so leaving the tab (or the app) right after
+  /// never loses it. Only the move is delayed: the item stays in place for
+  /// [settleDelay] with its box filled and its name struck through, then
+  /// moves down to the checked section. Phone and desktop views both.
   void _onItemChecked(String itemId) {
+    ref.read(shoppingDaoProvider).toggleItemChecked(itemId, true);
+    _settleTimers.remove(itemId)?.cancel();
     setState(() => _recentlyCheckedIds.add(itemId));
-    Future.delayed(const Duration(milliseconds: 2000), () {
-      if (!mounted) return;
-      // If still in the "recently checked" set, persist it
-      if (_recentlyCheckedIds.contains(itemId)) {
-        final shoppingDao = ref.read(shoppingDaoProvider);
-        shoppingDao.toggleItemChecked(itemId, true);
+    _settleTimers[itemId] = Timer(settleDelay, () {
+      _settleTimers.remove(itemId);
+      if (mounted && _recentlyCheckedIds.contains(itemId)) {
         setState(() => _recentlyCheckedIds.remove(itemId));
       }
     });
   }
 
-  /// Instant uncheck — no delay needed
+  /// Untick at once, also during the settle window.
   void _onItemUnchecked(String itemId) {
-    // If the item is still in the delay window, just cancel it
+    _settleTimers.remove(itemId)?.cancel();
     if (_recentlyCheckedIds.contains(itemId)) {
       setState(() => _recentlyCheckedIds.remove(itemId));
-      return;
     }
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    shoppingDao.toggleItemChecked(itemId, false);
+    ref.read(shoppingDaoProvider).toggleItemChecked(itemId, false);
   }
 }
 
@@ -2106,13 +2139,11 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
       assetIcon: 'assets/images/3rd-party/instacart_carrot.png',
       name: 'Instacart',
       color: Color(0xFF43B02A),
-      subtitle: 'Costco, Publix, Safeway, Aldi, Sprouts & 1,500+ retailers',
     ),
     GroceryProvider.kroger: _ProviderDisplay(
       emoji: '\u{1F3EA}',
       name: 'Kroger',
       color: Color(0xFF0056A4),
-      subtitle: 'Kroger, Fred Meyer, Ralphs, Harris Teeter & more',
     ),
   };
 
@@ -2298,13 +2329,11 @@ class _ProviderDisplay {
   final String? assetIcon;
   final String name;
   final Color color;
-  final String subtitle;
   const _ProviderDisplay({
     required this.emoji,
     this.assetIcon,
     required this.name,
     required this.color,
-    required this.subtitle,
   });
 }
 
@@ -2377,7 +2406,9 @@ class _ProviderTile extends StatelessWidget {
                           ? (display.name == 'Instacart'
                           ? l10n.shoppingTapToCreateShoppableList
                           : l10n.shoppingTapToAddToCart)
-                          : display.subtitle,
+                          : (display.name == 'Instacart'
+                          ? l10n.groceryInstacartStores
+                          : l10n.groceryKrogerStores),
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.outline, fontSize: 11),
                     ),
@@ -2545,8 +2576,9 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               textAlign: TextAlign.center,
             ),
-            // Show API message for debugging
-            if (_result?.message != null && _result!.message!.isNotEmpty) ...[
+            // The service's own English message, for debugging only: the
+            // lines above say it in the user's language.
+            if (kDebugMode && _result?.message != null && _result!.message!.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 _result!.message!,

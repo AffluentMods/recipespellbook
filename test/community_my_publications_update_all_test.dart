@@ -213,4 +213,38 @@ void main() {
       }, () => server.client);
     });
   }
+
+  testWidgets('a list that does not load offers a retry, not "No publications yet"', (tester) async {
+    var down = true;
+    final client = MockClient((request) async {
+      if (!request.url.path.endsWith('/v1/community/me/publications')) {
+        return http.Response('{"error":"not found"}', 404);
+      }
+      if (down) return http.Response('{"error":"busy"}', 503);
+      return http.Response(jsonEncode({'publications': [_pubJson('pub-soups', 'Soups')]}), 200);
+    });
+    await http.runWithClient(() async {
+      final db = (await tester.runAsync(() async => AppDatabase.forTesting(NativeDatabase.memory())))!;
+      await tester.pumpWidget(ProviderScope(
+        overrides: [databaseProvider.overrideWithValue(db)],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: CommunityMyPublicationsScreen(),
+        ),
+      ));
+      await settleUntil(tester, () => showing('Retry'));
+      expect(find.text('Could not load this. Check your connection and try again.'), findsOneWidget);
+      expect(find.text('No publications yet'), findsNothing);
+
+      down = false;
+      await tester.tap(find.text('Retry'));
+      await settleUntil(tester, () => showing('Soups'));
+      expect(find.text('Retry'), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
+      await settleUntil(tester, () => false, rounds: 3);
+      await db.close();
+    }, () => client);
+  });
 }

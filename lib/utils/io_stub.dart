@@ -38,6 +38,7 @@ class Directory {
   bool existsSync() => false;
   Future<Directory> create({bool recursive = false}) async => this;
   Future<void> delete({bool recursive = false}) async {}
+  List<Object> listSync() => const [];
 }
 
 class SocketException implements Exception {

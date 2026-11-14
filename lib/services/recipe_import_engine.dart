@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
+import 'limited_fetch.dart';
+import 'web_import_error.dart';
 import 'web_page_decoder.dart';
 import '../models/imported_recipe.dart';
+import '../utils/ingredient_utils.dart' show mealMasterIngredient;
 import 'recipe_file_importers/mastercook_importer.dart';
 
 /// Consolidated recipe import engine.
@@ -127,14 +131,34 @@ class RecipeImportEngine {
       resp.bodyBytes,
       contentType: resp.headers['content-type']);
 
+  /// The most of a web page that is read. A recipe page is a few hundred
+  /// kilobytes; one larger than this is no recipe page, and is not
+  /// downloaded past it.
+  static const _maxPageBytes = 8 * 1024 * 1024;
+
+  /// Answers whose type says they are no page: their body is not read.
+  /// [_notAWebPage] says what they are, from the same header.
+  static bool _notPageType(String type) =>
+      type.startsWith('image/') ||
+      type.startsWith('video/') ||
+      type.startsWith('audio/') ||
+      type.startsWith('application/pdf') ||
+      type.startsWith('application/zip');
+
+  /// A page, read no further than [_maxPageBytes].
+  static Future<http.Response> _getPage(String url, Map<String, String> headers) => getLimited(
+        Uri.parse(url),
+        headers: headers,
+        maxBytes: _maxPageBytes,
+        skipBody: _notPageType,
+      );
+
   /// Fetch a URL with browser-like headers. If the response is rejected
   /// (4xx/5xx, often WAF bot detection like 403, 451, 455, 503), retry once
   /// with the mobile UA which more sites accept by default.
   static Future<http.Response> _fetchWithFallback(String url, _Platform platform) async {
     final primaryHeaders = _headersForPlatform(platform);
-    var resp = await http
-        .get(Uri.parse(url), headers: primaryHeaders)
-        .timeout(const Duration(seconds: 20));
+    var resp = await _getPage(url, primaryHeaders);
 
     // If primary succeeded or got a "real" non-bot error (404, 410), don't retry.
     if (resp.statusCode == 200) return resp;
@@ -147,13 +171,10 @@ class RecipeImportEngine {
     // Retry with mobile UA + browser headers. Sites blocking desktop crawlers
     // often let mobile Safari through.
     try {
-      final fallbackResp = await http.get(
-        Uri.parse(url),
-        headers: {
-          ..._browserHeaders,
-          'User-Agent': _mobileUserAgent,
-        },
-      ).timeout(const Duration(seconds: 20));
+      final fallbackResp = await _getPage(url, {
+        ..._browserHeaders,
+        'User-Agent': _mobileUserAgent,
+      });
       if (fallbackResp.statusCode == 200) return fallbackResp;
       // Return whichever has a body
       return fallbackResp.bodyBytes.isNotEmpty ? fallbackResp : resp;
@@ -310,8 +331,9 @@ class RecipeImportEngine {
   }
 
   /// Resolve a short URL to its final destination by following redirects.
-  /// Uses a HEAD request with manual redirect handling to avoid downloading
-  /// full JS-rendered pages.
+  /// Each answer's headers are all that is wanted: its body is not read, so
+  /// the page at the end is not downloaded here (it is fetched once more,
+  /// with a limit, by the import).
   static Future<String?> _resolveShortUrl(String url) async {
     try {
       final client = http.Client();
@@ -325,8 +347,9 @@ class RecipeImportEngine {
               'Accept': 'text/html',
             });
           final streamed = await client.send(request).timeout(const Duration(seconds: 10));
-          // Drain the response body to free resources
-          await streamed.stream.drain();
+          // The body is not wanted. Cancelling it closes the connection
+          // instead of downloading what it holds.
+          unawaited(streamed.stream.listen(null).cancel());
 
           if (streamed.statusCode >= 300 && streamed.statusCode < 400) {
             final location = streamed.headers['location'];
@@ -363,10 +386,14 @@ class RecipeImportEngine {
           return null;
       }
 
-      final response = await http.get(
+      // An oEmbed answer is a few kilobytes of JSON.
+      final response = await getLimited(
         Uri.parse(oembedUrl),
         headers: {'User-Agent': _userAgent, 'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 15));
+        maxBytes: 1024 * 1024,
+        timeout: const Duration(seconds: 15),
+      );
+      if (isOverLimit(response, 1024 * 1024)) return null;
 
       if (response.statusCode != 200) return null;
 
@@ -544,30 +571,32 @@ class RecipeImportEngine {
       return _parseFromUrlInternal(url, isRecursiveCall: isRecursiveCall);
     }).timeout(
       const Duration(seconds: 30),
-      onTimeout: () => throw Exception('Import timed out — the website took too long to respond.'),
+      onTimeout: () => throw const WebImportException(
+        WebImportProblem.timedOut,
+        'Import timed out: the website took too long to respond.',
+      ),
     );
   }
 
   static Future<ImportedRecipe> _parseFromUrlInternal(String url, {bool isRecursiveCall = false}) async {
-    final (ImportedRecipe?, String?) result;
+    final (ImportedRecipe?, WebImportException?) result;
     try {
       result = await _importFromUrl(url, isRecursiveCall);
     } catch (e) {
       throw Exception('Failed to parse recipe: $e');
     }
-    // The engine's own failures are already one sentence for the person
-    // importing, so they go out as they are instead of being wrapped like
-    // the unexpected errors above.
+    // The engine's own failures say why with a code, which the screen says
+    // in the user's language; they go out as they are instead of being
+    // wrapped like the unexpected errors above.
     final (recipe, failure) = result;
-    if (recipe == null) throw Exception(failure ?? _noRecipeFound);
+    if (recipe == null) throw failure ?? _noRecipeFound;
     return recipe;
   }
 
-  static const _noRecipeFound = 'No recipe found on that page.';
+  static const _noRecipeFound = WebImportException(WebImportProblem.noRecipe, 'No recipe found on that page.');
 
-  /// Does the import. Returns the recipe, or the sentence that tells the
-  /// person why there is none.
-  static Future<(ImportedRecipe?, String?)> _importFromUrl(String url, bool isRecursiveCall) async {
+  /// Does the import. Returns the recipe, or why there is none.
+  static Future<(ImportedRecipe?, WebImportException?)> _importFromUrl(String url, bool isRecursiveCall) async {
     var normalized = _normalizeUrl(url);
     var platform = _detectPlatform(normalized);
 
@@ -628,7 +657,11 @@ class RecipeImportEngine {
     // recipe it yields holds text that could not be read, or it yields none.
     final unreadable = page.unreadableCharset == null
         ? null
-        : 'That page uses a text encoding (${page.unreadableCharset}) this app cannot read.';
+        : WebImportException(
+            WebImportProblem.unreadableEncoding,
+            'That page uses a text encoding (${page.unreadableCharset}) this app cannot read.',
+            charset: page.unreadableCharset,
+          );
 
     if (_isPlainText(response, page.text)) {
       final recipe = _recipeFromPlainText(page.text);
@@ -695,17 +728,23 @@ class RecipeImportEngine {
   }
 
   /// Give the user a clue what went wrong rather than a raw status code.
-  static String _statusFailure(int code) {
+  static WebImportException _statusFailure(int code) {
     if (code == 403 || code == 401 || code == 451 || code == 455) {
-      return 'The site blocked our request. Try copying the recipe text and using "Paste" instead.';
+      return const WebImportException(WebImportProblem.blocked,
+          'The site blocked our request. Try copying the recipe text and using "Paste" instead.');
     } else if (code == 404 || code == 410) {
-      return 'Page not found. Check the URL.';
+      return const WebImportException(WebImportProblem.notFound, 'Page not found. Check the URL.');
     } else if (code == 429) {
-      return 'The site is rate-limiting us. Try again in a minute.';
+      return const WebImportException(
+          WebImportProblem.rateLimited, 'The site is rate-limiting us. Try again in a minute.');
     } else if (code >= 500 && code < 600) {
-      return 'The site is having issues right now (HTTP $code). Try again later.';
+      return WebImportException(
+        WebImportProblem.siteError,
+        'The site is having issues right now (HTTP $code). Try again later.',
+        statusCode: code,
+      );
     }
-    return 'Failed to fetch URL (HTTP $code)';
+    return WebImportException(WebImportProblem.httpError, 'Failed to fetch URL (HTTP $code)', statusCode: code);
   }
 
   /// Why a response cannot be a recipe page (it is a PDF, a photo, an
@@ -713,7 +752,7 @@ class RecipeImportEngine {
   ///
   /// Decided by what the bytes are, not by a list of allowed content types:
   /// plenty of recipe pages are served with a wrong one.
-  static String? _notAWebPage(http.Response response) {
+  static WebImportException? _notAWebPage(http.Response response) {
     final bytes = response.bodyBytes;
     final type = (response.headers['content-type'] ?? '').toLowerCase();
     bool startsWith(List<int> magic) {
@@ -724,25 +763,40 @@ class RecipeImportEngine {
       return true;
     }
 
-    String? kind;
+    WebImportFileKind? kind;
     if (type.startsWith('application/pdf') || startsWith(const [0x25, 0x50, 0x44, 0x46, 0x2D])) {
-      kind = 'a PDF';
+      kind = WebImportFileKind.pdf;
     } else if (type.startsWith('image/')) {
-      kind = 'an image';
+      kind = WebImportFileKind.image;
     } else if (type.startsWith('video/')) {
-      kind = 'a video';
+      kind = WebImportFileKind.video;
     } else if (type.startsWith('audio/')) {
-      kind = 'an audio file';
+      kind = WebImportFileKind.audio;
     } else if (type.startsWith('application/zip') || startsWith(const [0x50, 0x4B, 0x03, 0x04])) {
-      kind = 'a ZIP file';
+      kind = WebImportFileKind.zip;
     } else if (bytes.take(1024).contains(0)) {
       // Text never holds a zero byte. Photos, videos and documents do.
-      kind = 'a file';
+      kind = WebImportFileKind.file;
     }
-    if (kind != null) return 'No recipe found because that link is $kind, not a web page.';
+    if (kind != null) {
+      final named = switch (kind) {
+        WebImportFileKind.pdf => 'a PDF',
+        WebImportFileKind.image => 'an image',
+        WebImportFileKind.video => 'a video',
+        WebImportFileKind.audio => 'an audio file',
+        WebImportFileKind.zip => 'a ZIP file',
+        WebImportFileKind.file => 'a file',
+      };
+      return WebImportException(
+        WebImportProblem.notAWebPage,
+        'No recipe found because that link is $named, not a web page.',
+        fileKind: kind,
+      );
+    }
 
-    if (bytes.length > 8 * 1024 * 1024) {
-      return 'No recipe found because that page is too large to read.';
+    if (isOverLimit(response, _maxPageBytes)) {
+      return const WebImportException(
+          WebImportProblem.tooLarge, 'No recipe found because that page is too large to read.');
     }
     return null;
   }
@@ -764,12 +818,13 @@ class RecipeImportEngine {
       ].any((text) => text != null && text.contains(_unreadableMark));
 
   /// What to tell the person when a page was read and held no recipe.
-  static String _noRecipeFailure(Document document, _Platform platform) {
+  static WebImportException _noRecipeFailure(Document document, _Platform platform) {
     if (_isLoginWall(document)) {
-      return 'That page needs a login, so we could not read the recipe.';
+      return const WebImportException(
+          WebImportProblem.needsLogin, 'That page needs a login, so we could not read the recipe.');
     }
     if (platform == _Platform.youtube) {
-      return "No recipe found in that video's description.";
+      return const WebImportException(WebImportProblem.noRecipeInVideo, "No recipe found in that video's description.");
     }
     return _noRecipeFound;
   }
@@ -4203,11 +4258,14 @@ class RecipeImportEngine {
     final (sourceUrl, sourceNote) =
         _sourceAndNote(_jsonString(json['source_url']), _jsonString(json['source']));
 
+    final (ingredients, linkedTitles) = _paprikaLinks(_jsonLines(json['ingredients']));
+    final (directions, _) = _paprikaLinks(_jsonLines(json['directions']));
     return ImportedRecipe(
       title: _jsonString(json['name']) ?? _jsonString(json['title']) ?? 'Paprika Recipe',
       description: _jsonString(json['description']),
-      ingredients: _jsonLines(json['ingredients']),
-      instructions: _withoutStepNumbers(_jsonLines(json['directions'])),
+      ingredients: ingredients,
+      linkedTitles: linkedTitles.isEmpty ? null : linkedTitles,
+      instructions: _withoutStepNumbers(directions),
       prepTimeMinutes: prepTime,
       cookTimeMinutes: cookTime,
       servings: _jsonServings(json['servings']),
@@ -4226,6 +4284,27 @@ class RecipeImportEngine {
       rating: _jsonRating(json['rating']),
       sourceApp: 'paprika',
     );
+  }
+
+  /// Paprika's link to another recipe in a line: "[recipe:Pizza Dough]".
+  static final _paprikaLink = RegExp(r'\[recipe:\s*([^\]\n]+?)\s*\]', caseSensitive: false);
+
+  /// [lines] without Paprika's link syntax ("1 batch [recipe:Pizza Dough]"
+  /// is "1 batch Pizza Dough"), and the title each line links to, by its
+  /// place in the list.
+  static (List<String>, Map<int, String>) _paprikaLinks(List<String> lines) {
+    final titles = <int, String>{};
+    final out = <String>[];
+    for (final line in lines) {
+      final first = _paprikaLink.firstMatch(line);
+      if (first == null) {
+        out.add(line);
+        continue;
+      }
+      titles[out.length] = first.group(1)!;
+      out.add(line.replaceAllMapped(_paprikaLink, (m) => m.group(1)!).replaceAll(RegExp(r'\s{2,}'), ' ').trim());
+    }
+    return (out, titles);
   }
 
   /// What a Mela recipe is known by: a title and a short text next to the
@@ -4344,19 +4423,33 @@ class RecipeImportEngine {
     return _mealMasterBanner.hasMatch(content) || _mealMasterFields.hasMatch(content);
   }
 
+  /// Where one Meal-Master recipe begins or ends: the line that opens it
+  /// ("MMMMM----- Recipe via Meal-Master (tm) v8.05", "---------- Recipe via
+  /// Meal-Master", MasterCook's "----- Exported from ...") and the bare
+  /// "MMMMM" or "-----" that closes it.
+  static final _mealMasterDelimiter = RegExp(
+    r'^(?:(?:MMMMM|-{5,})-*[ \t]*(?:Recipe via\b|[^\n]{0,40}Meal-?Master)[^\n]*'
+    r'|-{5,}[ \t]*Exported from[^\n]*'
+    r'|MMMMM[ \t]*\r?|-----[ \t]*\r?)$',
+    multiLine: true,
+    caseSensitive: false,
+  );
+
+  /// A section header inside a Meal-Master recipe. Group 1 is its name.
+  static final _mealMasterSection = RegExp(r'^(?:MMMMM-*|-{5,})\s*(.*?)\s*-*$');
+
   /// Parse MealMaster format (*.mmf, *.mk).
   /// Format: recipes delimited by MMMMM markers or ----- Recipe via Meal-Master headers.
   /// Each recipe has: Title, Categories, Yield, then ingredients, then directions.
   static List<ImportedRecipe> _parseMealMaster(String content) {
     final recipes = <ImportedRecipe>[];
 
-    // Split into recipe blocks.
-    // MealMaster uses MMMMM lines or "---------- Recipe via Meal-Master" as delimiters
-    final blocks = content.split(RegExp(
-      r'(?:^MMMMM.*$|^-{5,}\s*Recipe via Meal-Master.*$|^-{5,}\s*Exported from.*$)',
-      multiLine: true,
-      caseSensitive: false,
-    ));
+    // Split into recipe blocks. A recipe opens with "MMMMM----- Recipe via
+    // Meal-Master" (or "---------- Recipe via Meal-Master") and ends with a
+    // bare "MMMMM" (or "-----"). The other MMMMM lines are the headers of
+    // sections inside a recipe ("MMMMM-----FOR THE SAUCE-----"), and stay
+    // in it.
+    final blocks = content.split(_mealMasterDelimiter);
 
     for (final block in blocks) {
       final trimmed = block.trim();
@@ -4371,6 +4464,9 @@ class RecipeImportEngine {
       final lines = trimmed.split('\n');
       var inIngredients = true; // MealMaster: ingredients come before directions
       var hitBlankAfterIngredients = false;
+      // A section header was the last line: a blank line under it does not
+      // end the ingredients.
+      var afterHeader = false;
 
       for (final rawLine in lines) {
         final line = rawLine.trimRight();
@@ -4389,22 +4485,29 @@ class RecipeImportEngine {
           continue;
         }
 
-        // Skip MMMMM section markers within block
-        if (RegExp(r'^MMMMM-+').hasMatch(line.trim())) {
-          // This is a sub-section marker (e.g., "MMMMM----- FOR THE SAUCE")
-          final sectionName = line.replaceAll(RegExp(r'^MMMMM-+\s*'), '').replaceAll(RegExp(r'-+$'), '').trim();
-          if (sectionName.isNotEmpty) ingredients.add('— $sectionName —');
+        // A section header inside the recipe ("MMMMM-----FOR THE SAUCE-----",
+        // or in dashes alone). The ingredients go on under it.
+        final section = _mealMasterSection.firstMatch(line.trim());
+        if (section != null) {
+          final sectionName = section.group(1)!.trim();
+          if (sectionName.isNotEmpty) {
+            ingredients.add('— $sectionName —');
+            inIngredients = true;
+            hitBlankAfterIngredients = false;
+            afterHeader = true;
+          }
           continue;
         }
 
         final trimmedLine = line.trim();
         if (trimmedLine.isEmpty) {
           // Blank line after ingredients = switch to instructions
-          if (inIngredients && ingredients.isNotEmpty) {
+          if (inIngredients && ingredients.isNotEmpty && !afterHeader) {
             hitBlankAfterIngredients = true;
           }
           continue;
         }
+        afterHeader = false;
 
         // MealMaster ingredient format: "  1 1/2 c  Flour, all-purpose" or "           -- sifted"
         // Columns: amount (1-7), unit (8-9), ingredient name (11+)
@@ -4415,14 +4518,15 @@ class RecipeImportEngine {
               RegExp(r'^\s{7,}').hasMatch(line) && trimmedLine.length > 2) {
             // MealMaster two-column: ingredient | ingredient
             // Each column is ~41 chars
+            // Its unit codes ("T", "t", "pn", "ea") are written out.
             if (line.length > 42 && RegExp(r'\d').hasMatch(line.substring(41))) {
               // Two-column
               final col1 = line.substring(0, 41).trim();
               final col2 = line.substring(41).trim();
-              if (col1.isNotEmpty) ingredients.add(col1);
-              if (col2.isNotEmpty) ingredients.add(col2);
+              if (col1.isNotEmpty) ingredients.add(mealMasterIngredient(col1));
+              if (col2.isNotEmpty) ingredients.add(mealMasterIngredient(col2));
             } else {
-              ingredients.add(trimmedLine);
+              ingredients.add(mealMasterIngredient(trimmedLine));
             }
           } else if (trimmedLine.startsWith('--') || trimmedLine.startsWith('-')) {
             // Continuation or note for previous ingredient

@@ -40,19 +40,16 @@ class PaprikaImporter {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException(_damaged);
+      throw const FileImportException.damaged(_app);
     }
+    final unzip = BoundedUnzip.forArchive(bytes.length);
 
-    // Collect image data by recipe name for matching
-    final imageMap = <String, String>{}; // name → base64
+    // The image files by recipe name, for matching. Each is unpacked when a
+    // recipe asks for it.
+    final images = <String, ArchiveFile>{};
     for (final file in archive.files) {
       if (file.isFile && _isImage(file.name)) {
-        final baseName = _baseName(file.name);
-        try {
-          imageMap[baseName.toLowerCase()] = base64Encode(file.content as List<int>);
-        } catch (_) {
-          // A photo that does not unpack costs no recipe.
-        }
+        images[_baseName(file.name).toLowerCase()] = file;
       }
     }
 
@@ -63,22 +60,24 @@ class PaprikaImporter {
 
       try {
         // Each .paprikarecipe file is gzip-compressed JSON
-        final json = _readJson(file.content as List<int>) as Map<String, dynamic>;
+        final json = _readJson(unzip.bytesOf(file)) as Map<String, dynamic>;
 
         final recipe = RecipeImportEngine.parsePaprikaRecipe(json);
         recipe.sourceFile = file.name;
 
-        // If recipe has no image data but we have a matching image file
+        // If recipe has no image data but we have a matching image file.
+        // A photo that does not unpack costs no recipe.
         if (recipe.imageData == null && recipe.imageUrl == null) {
-          final baseName = _baseName(file.name).toLowerCase();
-          if (imageMap.containsKey(baseName)) {
-            recipe.imageData = imageMap[baseName];
-          }
+          final image = images[_baseName(file.name).toLowerCase()];
+          final photo = image == null ? null : unzip.tryBytesOf(image);
+          if (photo != null) recipe.imageData = base64Encode(photo);
         }
 
         if (recipe.title.isNotEmpty) {
           recipes.add(recipe);
         }
+      } on ZipTooLargeException {
+        rethrow;
       } catch (_) {
         // Skip malformed recipe files
         unreadable++;
@@ -87,7 +86,7 @@ class PaprikaImporter {
 
     // An export may lose a recipe or two and still be worth importing. One
     // with no readable recipe at all is a damaged file.
-    if (recipes.isEmpty && unreadable > 0) throw const FormatException(_damaged);
+    if (recipes.isEmpty && unreadable > 0) throw const FileImportException.damaged(_app);
     return recipes;
   }
 
@@ -109,11 +108,11 @@ class PaprikaImporter {
       recipe.sourceFile = filename;
       return [recipe];
     } catch (_) {
-      throw const FormatException(_damaged);
+      throw const FileImportException.damaged(_app);
     }
   }
 
-  static const _damaged = 'This Paprika file is damaged or incomplete. Export it again and retry.';
+  static const _app = 'Paprika';
 
   /// Reads the JSON of one recipe. Paprika uses standard gzip compression.
   /// Data that is plain JSON, or raw deflate without the gzip wrapper, is
@@ -121,7 +120,7 @@ class PaprikaImporter {
   static Object? _readJson(List<int> data) {
     if (ImportSupport.isGzip(data)) {
       final unpacked = ImportSupport.gunzip(data);
-      if (unpacked == null) throw const FormatException(_damaged);
+      if (unpacked == null) throw const FileImportException.damaged(_app);
       return jsonDecode(ImportSupport.decodeText(unpacked));
     }
     try {

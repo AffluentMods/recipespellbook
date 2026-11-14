@@ -14,6 +14,7 @@ import '../../theme/tokens.dart';
 import '../../utils/platform_utils.dart';
 import '../../utils/responsive_utils.dart';
 import '../widgets/app_snackbar.dart';
+import '../widgets/auth_error_message.dart';
 import '../widgets/selection_action_bar.dart';
 import 'desktop_sidebar.dart';
 import 'shell_navigation.dart';
@@ -75,6 +76,10 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (_servicesInitialized) return;
     _servicesInitialized = true;
 
+    // main.dart has started both. Each runs once, so these wait for those
+    // same runs instead of starting them again (the session used to be
+    // checked with the server twice at every launch). Either one that fails
+    // still settles, and the listener below is set up all the same.
     await ref.read(authProvider.notifier).initialize();
     await ref.read(subscriptionProvider.notifier).initialize();
 
@@ -97,7 +102,7 @@ class _AppShellState extends ConsumerState<AppShell> {
 
       if (next.error != null && !next.isLoading && wasLoading) {
         if (mounted) {
-          AppSnackbar.error(context, next.error!);
+          AppSnackbar.error(context, authErrorMessage(AppLocalizations.of(context)!, next.error!));
           ref.read(authProvider.notifier).clearError();
         }
       }

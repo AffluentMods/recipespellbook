@@ -103,6 +103,12 @@ class CookbookUpdatePlan {
   bool get withImages => manifest?.withImages ?? true;
 }
 
+/// The publication a downloaded cookbook came from is no longer in the
+/// Community (unpublished, removed, or under review).
+class CommunitySourceUnavailable implements Exception {
+  const CommunitySourceUnavailable();
+}
+
 /// How an update went.
 class CookbookUpdateResult {
   final int added;
@@ -137,6 +143,9 @@ class CommunityCookbookUpdates {
   /// (one GET each); the rest wait for the next check. The API allows
   /// 1,000 requests per 15 minutes per address.
   static const maxDetailsPerCheck = 20;
+
+  /// At most this many photos that failed before are fetched again per check.
+  static const maxPhotoRetriesPerCheck = 20;
 
   static const lastCheckKey = 'communityCookbookUpdatesCheckedAt';
 
@@ -180,12 +189,19 @@ class CommunityCookbookUpdates {
       final me = AuthService.instance.currentUser?.id;
       var looked = 0;
       var deferred = false;
+      final available = <String>[];
       for (final cookbook in candidates) {
         final v = versions[cookbook.communitySourceId];
-        // Gone, unpublished or under review: the copy stays as it is.
-        if (v == null) continue;
+        // Gone, unpublished or under review: the copy stays as it is, and
+        // an "Update available" from before goes (there is nothing to
+        // update from now; it comes back if the publication does).
+        if (v == null) {
+          if (cookbook.communityUpdateVersion != null) await _setUpdateVersion(cookbook, null);
+          continue;
+        }
         // The user's own publication: they publish it, it is not updated.
         if (me != null && v.publisherId == me) continue;
+        available.add(cookbook.id);
 
         final base = cookbook.communitySourceVersion;
         if (base != null && v.version <= base) {
@@ -211,6 +227,15 @@ class CommunityCookbookUpdates {
           await _adopt(plan, cookbook);
         }
       }
+
+      // Photos an earlier download or update could not fetch, tried again
+      // (a few per check) while their publication is there to serve them.
+      var photoBudget = maxPhotoRetriesPerCheck;
+      for (final id in available) {
+        if (photoBudget <= 0) break;
+        photoBudget -= await retryMissingPhotos(id, limit: photoBudget);
+      }
+
       // A check cut short by the per-check limit carries on next time.
       if (!deferred) await prefs.setInt(lastCheckKey, now.millisecondsSinceEpoch);
 
@@ -235,6 +260,106 @@ class CommunityCookbookUpdates {
         .write(CookbooksCompanion(communityUpdateVersion: Value(version)));
   }
 
+  /// Fetches again, at most [limit], the photos of [cookbookId] that an
+  /// earlier download or update could not fetch, and puts each in its place.
+  /// A recipe the person has edited since is left as it is (its photo is
+  /// theirs to choose now); a photo that keeps failing is given up after a
+  /// few checks. Returns how many photos it tried.
+  Future<int> retryMissingPhotos(String cookbookId, {int limit = maxPhotoRetriesPerCheck}) async {
+    final cookbook = await (db.select(db.cookbooks)..where((c) => c.id.equals(cookbookId))).getSingleOrNull();
+    final publicationId = cookbook?.communitySourceId;
+    final manifest = CommunitySourceManifest.decode(cookbook?.communityManifest);
+    if (cookbook == null || publicationId == null || manifest == null || manifest.missing.isEmpty) return 0;
+    if (!manifest.withImages) {
+      await _writeManifest(cookbook, manifest, missing: const []);
+      return 0;
+    }
+
+    final tried = manifest.missing.take(limit).toList();
+    final photos = CommunityPhotoPlan.forPaths(publicationId, [for (final m in tried) m.serverPath]);
+    await _fetchPhotos(photos, null);
+
+    await db.transaction(() async {
+      // Read again: an update may have been applied while fetching.
+      final now = await (db.select(db.cookbooks)..where((c) => c.id.equals(cookbookId))).getSingleOrNull();
+      final current = CommunitySourceManifest.decode(now?.communityManifest);
+      if (now == null || current == null || now.communitySourceVersion != cookbook.communitySourceVersion) return;
+      final recipes = {...current.recipes};
+      final onDevice = {...current.photos};
+      final stillMissing = <CommunityMissingPhoto>[];
+      for (final m in current.missing) {
+        if (!tried.any((t) => t.key == m.key && t.step == m.step && t.serverPath == m.serverPath)) {
+          stillMissing.add(m); // not tried this time
+          continue;
+        }
+        final entry = recipes[m.key];
+        final recipeId = entry?.recipeId;
+        if (entry == null || recipeId == null) continue; // no longer here
+        final local = photos.localFor(m.serverPath);
+        if (local == null) {
+          if (m.tries + 1 < CommunityMissingPhoto.maxTries) {
+            stillMissing.add(CommunityMissingPhoto(key: m.key, step: m.step, serverPath: m.serverPath, tries: m.tries + 1));
+          }
+          continue;
+        }
+        // Only a copy the person has not changed takes the photo.
+        final before = await localRecipeFingerprint(db, recipeId);
+        final recipe = await (db.select(db.recipes)..where((r) => r.id.equals(recipeId))).getSingleOrNull();
+        if (recipe == null || recipe.deletedAt != null || recipe.cookbookId != cookbookId) continue;
+        if (entry.local == null || before != entry.local) continue;
+        if (m.step < 0) {
+          await (db.update(db.recipes)..where((r) => r.id.equals(recipeId))).write(RecipesCompanion(
+                imagePath: Value(local),
+                imageServerPath: const Value(null),
+                updatedAt: Value(DateTime.now()),
+              ));
+        } else {
+          // Steps in the order the download wrote them.
+          final steps = await (db.select(db.steps)
+                ..where((s) => s.recipeId.equals(recipeId))
+                ..orderBy([(s) => OrderingTerm.asc(s.rowId)]))
+              .get();
+          if (m.step >= steps.length) continue;
+          await (db.update(db.steps)..where((s) => s.id.equals(steps[m.step].id)))
+              .write(StepsCompanion(imagePath: Value(local), imageServerPath: const Value(null)));
+          await (db.update(db.recipes)..where((r) => r.id.equals(recipeId)))
+              .write(RecipesCompanion(updatedAt: Value(DateTime.now())));
+        }
+        onDevice[m.serverPath] = local;
+        recipes[m.key] = CommunityManifestRecipe(
+          recipeId: recipeId,
+          upstream: entry.upstream,
+          local: await localRecipeFingerprint(db, recipeId),
+        );
+      }
+      await _writeManifest(
+        now,
+        CommunitySourceManifest(
+          title: current.title,
+          description: current.description,
+          withImages: current.withImages,
+          recipes: recipes,
+          photos: onDevice,
+        ),
+        missing: stillMissing,
+      );
+    });
+    return tried.length;
+  }
+
+  Future<void> _writeManifest(Cookbook cookbook, CommunitySourceManifest manifest, {required List<CommunityMissingPhoto> missing}) {
+    final updated = CommunitySourceManifest(
+      title: manifest.title,
+      description: manifest.description,
+      withImages: manifest.withImages,
+      recipes: manifest.recipes,
+      photos: manifest.photos,
+      missing: missing,
+    );
+    return (db.update(db.cookbooks)..where((c) => c.id.equals(cookbook.id)))
+        .write(CookbooksCompanion(communityManifest: Value(updated.encode())));
+  }
+
   /// Downloaded cookbooks to check. A cookbook downloaded before sources
   /// were recorded is recognised by its photos, whose file names carry the
   /// publication id; one without photos can't be told and is left alone.
@@ -252,6 +377,8 @@ class CommunityCookbookUpdates {
         continue;
       }
       if (!c.id.startsWith('community_')) continue;
+      // Only some recipes were taken: it follows no publication.
+      if (c.id.startsWith(communityPartialCookbookPrefix)) continue;
       final publicationId = await legacyPublicationOf(c.id);
       if (publicationId == null) continue;
       await (db.update(db.cookbooks)..where((t) => t.id.equals(c.id)))
@@ -292,14 +419,24 @@ class CommunityCookbookUpdates {
 
   /// Fetches the publication behind [cookbookId] and works out the update.
   /// Null when the cookbook has no source, is one this device published
-  /// from, or the publication can't be fetched.
+  /// from, or the publication can't be fetched. Throws
+  /// [CommunitySourceUnavailable] (and clears "Update available") when the
+  /// publication is no longer in the Community.
   Future<CookbookUpdatePlan?> planFor(String cookbookId) async {
     final cookbook = await (db.select(db.cookbooks)..where((c) => c.id.equals(cookbookId))).getSingleOrNull();
     final publicationId = cookbook?.communitySourceId;
     if (cookbook == null || publicationId == null) return null;
     if ((await CommunityService.publishSourceCookbookIds()).contains(cookbookId)) return null;
-    final detail = await _service.getPublication(publicationId);
-    if (detail == null) return null;
+    final fetched = await _service.fetchPublication(publicationId);
+    final detail = fetched.detail;
+    if (detail == null) {
+      if (fetched.notFound) {
+        // Unpublished, removed or under review: nothing to update from.
+        await _setUpdateVersion(cookbook, null);
+        throw const CommunitySourceUnavailable();
+      }
+      return null;
+    }
     final me = AuthService.instance.currentUser?.id;
     if (me != null && detail.publisher.id == me) return null;
     return buildPlan(cookbook, detail, version: detail.version ?? cookbook.communityUpdateVersion);
@@ -420,6 +557,7 @@ class CommunityCookbookUpdates {
       withImages: plan.withImages,
       recipes: plan.baseline,
       photos: plan.manifest?.photos ?? const {},
+      missing: plan.manifest?.missing ?? const [],
     );
     final base = cookbook.communitySourceVersion;
     await (db.update(db.cookbooks)
@@ -554,6 +692,16 @@ class CommunityCookbookUpdates {
       };
       final photosOnDevice = {...?plan.manifest?.photos, ...photos.onDevice}
         ..removeWhere((serverPath, _) => !stillUsed.contains(serverPath));
+      // Photos still to fetch: earlier ones of recipes this update did not
+      // rewrite, and the ones of this update that did not come down.
+      final writtenKeys = {for (final i in written) plan.keys[i]};
+      final missing = [
+        for (final m in plan.manifest?.missing ?? const <CommunityMissingPhoto>[])
+          if (!writtenKeys.contains(m.key) && stillUsed.contains(m.serverPath)) m,
+        for (final m in photos.missing)
+          if (written.contains(m.index))
+            CommunityMissingPhoto(key: plan.keys[m.index], step: m.step, serverPath: m.serverPath),
+      ];
 
       String t(String? s) => (s ?? '').trim();
       final keptTitle = plan.manifest?.title ?? '';
@@ -572,6 +720,7 @@ class CommunityCookbookUpdates {
               withImages: plan.withImages,
               recipes: manifestRecipes,
               photos: photosOnDevice,
+              missing: missing,
             ).encode()),
           ));
 

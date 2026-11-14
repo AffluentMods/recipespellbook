@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
@@ -38,12 +40,23 @@ enum CommunityUploadFailure {
   /// photo again gets the same answer, so it is not retried.
   rejected,
 
-  /// Too many uploads for now (429). [CommunityUploadOutcome.retryAfter]
-  /// says when the limit resets.
+  /// Too many uploads for now (429), or the server's photo check is down
+  /// for a moment (503 `scan_unavailable`). [CommunityUploadOutcome.retryAfter]
+  /// says when to try again.
   rateLimited,
 
   /// Anything else: offline, timed out, server error, file too large.
   failed,
+
+  /// A format no decoder on this device can read (HEIC or AVIF where the
+  /// platform has no decoder for it). It is never sent as it is, so it is
+  /// not retried either: the publish goes ahead without it.
+  unsupported,
+
+  /// Today's upload allowance is used up (413 `daily_upload_limit`). It
+  /// resets at midnight, so neither this photo nor the ones after it are
+  /// tried again today.
+  dailyLimit,
 }
 
 /// What [ImageService.communityUploadFile] did with one photo.
@@ -54,7 +67,8 @@ class CommunityUploadOutcome {
   /// Set when it was not.
   final CommunityUploadFailure? failure;
 
-  /// For [CommunityUploadFailure.rateLimited]: time until the limit resets.
+  /// For [CommunityUploadFailure.rateLimited]: time until it can be tried
+  /// again.
   final Duration? retryAfter;
 
   /// Size of the photo as it was sent (after re-encoding), 0 if not stored.
@@ -110,6 +124,34 @@ class ImageService {
   bool get lastUploadRefused => _lastUploadRefused;
   bool _lastUploadRefused = false;
 
+  /// Set when the server said the account's photos for today are used up
+  /// (429 `daily_upload_limit`): until the next day [uploadFile] does not ask
+  /// again, so a sync does not send a photo only to have it turned away.
+  ({String userId, DateTime until})? _dailyLimit;
+
+  /// The time, for the daily limit. Tests replace it.
+  @visibleForTesting
+  static DateTime Function() now = DateTime.now;
+
+  /// When the server's upload day after [time] starts. It counts uploads per
+  /// calendar day in UTC.
+  @visibleForTesting
+  static DateTime nextUploadDay(DateTime time) {
+    final utc = time.toUtc();
+    return DateTime.utc(utc.year, utc.month, utc.day + 1);
+  }
+
+  /// The `code` of a JSON error answer, or null.
+  static String? _errorCode(String body) {
+    try {
+      final data = jsonDecode(body);
+      final code = data is Map ? data['code'] : null;
+      return code is String ? code : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   // ════════════════════════════════════════════
   //  PICK + UPLOAD (convenience)
   // ════════════════════════════════════════════
@@ -142,22 +184,44 @@ class ImageService {
       debugPrint('[ImageService] Not signed in — cannot upload');
       return null;
     }
+    final userId = _auth.currentUser?.id ?? '';
+    final limit = _dailyLimit;
+    if (limit != null) {
+      if (limit.userId == userId && now().isBefore(limit.until)) {
+        // It would be turned away the same way until the day is over.
+        _lastUploadRefused = true;
+        debugPrint('[ImageService] Daily upload limit reached; not uploading until ${limit.until.toIso8601String()}');
+        return null;
+      }
+      _dailyLimit = null;
+    }
 
     try {
       var bytes = await file.readAsBytes();
-      var contentType = _contentTypeFromPath(file.path);
+      const contentType = 'image/jpeg';
 
       // Always re-encode, so no photo goes up with its camera metadata
       // (GPS location included). Over 1MB it is also compressed. Both paths
-      // produce a real JPEG, so contentType follows.
-      final reencoded = bytes.length > 1024 * 1024
+      // produce a real JPEG. A format the image package cannot read (HEIC,
+      // AVIF) goes through the platform's own decoder; one nothing here can
+      // read is never sent as it is.
+      var reencoded = bytes.length > 1024 * 1024
           ? await compressImageBytes(bytes)
           : await _decodeResizeJpeg(bytes, maxDimension: maxDimension, quality: 90);
-      if (reencoded != null && reencoded.isNotEmpty) {
-        debugPrint('[ImageService] Re-encoded ${bytes.length} → ${reencoded.length} bytes');
-        bytes = reencoded;
-        contentType = 'image/jpeg';
+      if (reencoded == null || reencoded.isEmpty) {
+        final viaPlatform = await _platformReencodeJpeg(bytes, maxDimension: maxDimension, quality: 90);
+        reencoded = viaPlatform != null && viaPlatform.length > 1024 * 1024
+            ? await compressImageBytes(viaPlatform) ?? viaPlatform
+            : viaPlatform;
       }
+      if (reencoded == null || reencoded.isEmpty) {
+        // It would fail the same way every time: as good as refused.
+        _lastUploadRefused = true;
+        debugPrint('[ImageService] Photo format cannot be read here; not uploaded');
+        return null;
+      }
+      debugPrint('[ImageService] Re-encoded ${bytes.length} → ${reencoded.length} bytes');
+      bytes = reencoded;
 
       if (bytes.length > maxFileSize) {
         // It will be just as large next time: as good as refused.
@@ -183,6 +247,9 @@ class ImageService {
       }
 
       _lastUploadRefused = true;
+      if (response.statusCode == 429 && _errorCode(response.body) == 'daily_upload_limit') {
+        _dailyLimit = (userId: userId, until: nextUploadDay(now()));
+      }
       debugPrint('[ImageService] Upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
       return null;
     } catch (e) {
@@ -253,6 +320,109 @@ class ImageService {
     }
   }
 
+  /// How a run of many photo links waits: between requests, and for the
+  /// server's Retry-After. Tests replace it.
+  @visibleForTesting
+  static Future<void> Function(Duration) wait = Future<void>.delayed;
+
+  /// The most photos one presign-batch request asks for.
+  static const _batchSize = 200;
+
+  /// Fresh links for many stored photos at once, by path; a photo without
+  /// one (not found, not this account's, not reachable) is missing from the
+  /// result. A backup of a library in the cloud needs one for every photo,
+  /// and a request per photo ran into the server's limit of 1,000 requests
+  /// in 15 minutes: photos were left out and the app was locked out.
+  ///
+  /// Asks POST /v1/images/presign-batch, 200 photos a request. A server
+  /// without it (404) gets one request per photo, the first 100 at once and
+  /// then one every 1.2 seconds, which stays under that limit. A 429 waits for its
+  /// Retry-After and tries again, up to [maxWait] in all; after that the
+  /// rest is left without a link.
+  Future<Map<String, String>> getImageUrls(
+    List<String> imagePaths, {
+    Duration maxWait = const Duration(minutes: 3),
+  }) async {
+    final urls = <String, String>{};
+    if (!_auth.isSignedIn) return urls;
+    final paths = <String>[
+      for (final path in imagePaths.toSet())
+        if (_safeImagePathForUrl(path) != null) path,
+    ];
+    var waited = Duration.zero;
+
+    /// Sends [request] until it is not a 429; null when waiting would go
+    /// past [maxWait] or it could not be sent.
+    Future<http.Response?> send(Future<http.Response> Function() request) async {
+      while (true) {
+        final http.Response response;
+        try {
+          response = await request();
+        } catch (e) {
+          debugPrint('[ImageService] Links: $e');
+          return null;
+        }
+        if (response.statusCode != 429) return response;
+        final retryAfter = Duration(seconds: int.tryParse(response.headers['retry-after'] ?? '') ?? 30);
+        if (waited + retryAfter > maxWait) return null;
+        waited += retryAfter;
+        await wait(retryAfter);
+      }
+    }
+
+    var batched = true;
+    for (var i = 0; i < paths.length && batched; i += _batchSize) {
+      final chunk = paths.sublist(i, (i + _batchSize).clamp(0, paths.length));
+      final response = await send(() => _auth.post('/v1/images/presign-batch', {'paths': chunk}));
+      if (response == null) return urls;
+      if (response.statusCode == 404) {
+        batched = false; // an older server
+        break;
+      }
+      if (response.statusCode != 200) {
+        debugPrint('[ImageService] presign-batch failed: ${response.statusCode}');
+        return urls;
+      }
+      try {
+        final got = (jsonDecode(response.body) as Map)['urls'];
+        if (got is Map) {
+          got.forEach((path, url) {
+            if (path is String && url is String) urls[path] = url;
+          });
+        }
+      } catch (_) {}
+    }
+    if (batched) return urls;
+
+    for (final (i, path) in paths.indexed) {
+      if (i >= 100) await wait(const Duration(milliseconds: 1200));
+      final response = await send(() => _auth.get('/v1/images/${_safeImagePathForUrl(path)}'));
+      if (response == null) break;
+      if (response.statusCode != 200) continue;
+      try {
+        final url = (jsonDecode(response.body) as Map)['url'];
+        if (url is String) urls[path] = url;
+      } catch (_) {}
+    }
+    return urls;
+  }
+
+  /// The photo at [url] as bytes (https only, size-capped, must be an
+  /// image), or null. Works where there are no files, such as on the web.
+  Future<Uint8List?> downloadImageBytes(String url, {Duration timeout = const Duration(seconds: 20)}) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return null;
+    final client = http.Client();
+    try {
+      return await _fetchImageBytes(client, uri).timeout(timeout);
+    } catch (e) {
+      debugPrint('[ImageService] Download error: $e');
+      return null;
+    } finally {
+      client.close();
+    }
+  }
+
   /// Check if an imagePath is a server path (vs a local file path).
   /// Server paths look like "userId/hash.ext" (no slashes besides the one).
   static bool isServerPath(String? imagePath) {
@@ -308,7 +478,7 @@ class ImageService {
 
     try {
       var bytes = await file.readAsBytes();
-      var contentType = _contentTypeFromPath(file.path);
+      const contentType = 'image/jpeg';
       final origLen = bytes.length;
 
       // Always re-encode as JPEG: published photos must not carry camera
@@ -318,12 +488,15 @@ class ImageService {
       // resolution. The previous implementation forced every image up
       // to 1920px wide via `instantiateImageCodec(targetWidth:…)`,
       // which is what made uploaded photos look "zoomed and stretched".
-      final reencoded = await _decodeResizeJpeg(bytes,
-          maxDimension: maxDimension, quality: bytes.length > 500 * 1024 ? 82 : 90);
-      if (reencoded != null && reencoded.isNotEmpty) {
-        bytes = reencoded;
-        contentType = 'image/jpeg';
+      // A photo nothing here can decode (HEIC or AVIF where the platform
+      // has no decoder) is never sent as it is: its original bytes keep the
+      // camera metadata, and the server only takes JPEG, PNG, WebP and GIF.
+      final reencoded = await reencodeJpeg(bytes, quality: bytes.length > 500 * 1024 ? 82 : 90);
+      if (reencoded == null || reencoded.isEmpty) {
+        debugPrint('[ImageService] Community upload: photo format cannot be read here');
+        return const CommunityUploadOutcome.failed(CommunityUploadFailure.unsupported);
       }
+      bytes = reencoded;
 
       if (bytes.length > maxFileSize) {
         // One last pass at lower quality if we're still over the cap.
@@ -331,7 +504,6 @@ class ImageService {
             maxDimension: maxDimension, quality: 65);
         if (shrunk != null && shrunk.length < bytes.length) {
           bytes = shrunk;
-          contentType = 'image/jpeg';
         }
       }
 
@@ -366,6 +538,21 @@ class ImageService {
         final wait = rateLimitReset(response.headers);
         debugPrint('[ImageService] Community upload rate limited, resets in ${wait.inSeconds}s');
         return CommunityUploadOutcome.failed(CommunityUploadFailure.rateLimited, retryAfter: wait);
+      }
+
+      final code = _errorCode(response.body);
+      if (response.statusCode == 503 && code == 'scan_unavailable') {
+        // The photo check is down for a moment: waited out like a rate
+        // limit. Its Retry-After counts, not the RateLimit-Reset of the
+        // upload limiter that comes with every answer.
+        final wait = retryAfterOf(response.headers);
+        debugPrint('[ImageService] Community upload: photo check unavailable, trying again in ${wait.inSeconds}s');
+        return CommunityUploadOutcome.failed(CommunityUploadFailure.rateLimited, retryAfter: wait);
+      }
+
+      if (response.statusCode == 413 && code == 'daily_upload_limit') {
+        debugPrint('[ImageService] Community upload: daily upload limit reached');
+        return const CommunityUploadOutcome.failed(CommunityUploadFailure.dailyLimit);
       }
 
       debugPrint('[ImageService] Community upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
@@ -413,6 +600,18 @@ class ImageService {
       if (combined != null) seconds = int.tryParse(combined.group(1)!);
     }
     return Duration(seconds: (seconds ?? 60).clamp(1, 3600));
+  }
+
+  /// The `Retry-After` of an answer (seconds), or [fallback] when it has
+  /// none that can be read; between a second and an hour.
+  @visibleForTesting
+  static Duration retryAfterOf(Map<String, String> headers, {Duration fallback = const Duration(seconds: 30)}) {
+    for (final e in headers.entries) {
+      if (e.key.toLowerCase() != 'retry-after') continue;
+      final seconds = int.tryParse(e.value.trim());
+      if (seconds != null) return Duration(seconds: seconds.clamp(1, 3600));
+    }
+    return fallback;
   }
 
   // ════════════════════════════════════════════
@@ -482,6 +681,34 @@ class ImageService {
       return null;
     } finally {
       client.close();
+    }
+  }
+
+  /// Whether [path] is a photo this device does not hold but can fetch: a
+  /// cloud path ("userId/hash.jpg", synced from another device) or an https
+  /// address. (Photos are never fetched over plain http.)
+  static bool isRemotePhoto(String? path) => path != null && (isServerPath(path) || path.startsWith('https://'));
+
+  /// A file on this device with the photo at [path], a cloud path or an
+  /// https address ([isRemotePhoto]), for sending it on (a Community
+  /// publish, a share link) through the same upload as a local photo. It is
+  /// kept in the temporary folder under a name made from [path], so asking
+  /// again returns the same file instead of fetching it again. Null when it
+  /// cannot be fetched.
+  Future<String?> localCopyOfRemotePhoto(String path) async {
+    if (!supportsLocalFileSystem || !isRemotePhoto(path)) return null;
+    try {
+      final dir = Directory(p.join((await getTemporaryDirectory()).path, 'remote_photos'));
+      final name = 'remote_${sha1.convert(utf8.encode(path)).toString().substring(0, 32)}.jpg';
+      final file = File(p.join(dir.path, name));
+      if (await file.exists() && await file.length() > 0) return file.path;
+      final url = isServerPath(path) ? await getImageUrl(path) : path;
+      if (url == null) return null;
+      if (!await dir.exists()) await dir.create(recursive: true);
+      return await downloadAndSaveImage(url, name, directory: dir);
+    } catch (e) {
+      debugPrint('[ImageService] Remote photo fetch failed: $e');
+      return null;
     }
   }
 
@@ -598,6 +825,68 @@ class ImageService {
     }
   }
 
+  /// [bytes] as a JPEG with no metadata, at most [maxDimension] on its
+  /// longer side (never upscaled). Formats the image package cannot read
+  /// (HEIC, AVIF) go through the platform's own decoder. Null when nothing
+  /// on this device can read them: such a photo must not be sent as it is.
+  static Future<Uint8List?> reencodeJpeg(
+    Uint8List bytes, {
+    int maxDimension = ImageService.maxDimension,
+    required int quality,
+  }) async {
+    final out = await _decodeResizeJpeg(bytes, maxDimension: maxDimension, quality: quality);
+    if (out != null && out.isNotEmpty) return out;
+    return _platformReencodeJpeg(bytes, maxDimension: maxDimension, quality: quality);
+  }
+
+  /// [bytes] decoded by the platform's image decoder (which reads HEIC and
+  /// AVIF on the phones and Macs that support them), scaled down to at most
+  /// [maxDimension] on its longer side, then encoded as a JPEG. The decoded
+  /// pixels carry no metadata. Null when the platform cannot read it either.
+  static Future<Uint8List?> _platformReencodeJpeg(
+    Uint8List bytes, {
+    required int maxDimension,
+    required int quality,
+  }) async {
+    ui.ImmutableBuffer? buffer;
+    ui.ImageDescriptor? descriptor;
+    ui.Codec? codec;
+    ui.Image? image;
+    try {
+      buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      descriptor = await ui.ImageDescriptor.encoded(buffer);
+      final width = descriptor.width;
+      final height = descriptor.height;
+      if (width <= 0 || height <= 0) return null;
+      final longer = width > height ? width : height;
+      final scale = longer > maxDimension ? maxDimension / longer : 1.0;
+      codec = await descriptor.instantiateCodec(
+        targetWidth: (width * scale).round().clamp(1, width),
+        targetHeight: (height * scale).round().clamp(1, height),
+      );
+      image = (await codec.getNextFrame()).image;
+      final rgba = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+      if (rgba == null) return null;
+      return await compute(
+        _encodeRgbaJpegSync,
+        _RgbaWork(
+          rgba: rgba.buffer.asUint8List(rgba.offsetInBytes, rgba.lengthInBytes),
+          width: image.width,
+          height: image.height,
+          quality: quality,
+        ),
+      );
+    } catch (e) {
+      debugPrint('[ImageService] Platform decode failed: $e');
+      return null;
+    } finally {
+      image?.dispose();
+      codec?.dispose();
+      descriptor?.dispose();
+      buffer?.dispose();
+    }
+  }
+
   /// Compress image bytes to fit under ~2MB by re-encoding as JPEG with
   /// progressively lower quality. Used by the download path.
   static Future<Uint8List?> compressImageBytes(
@@ -637,17 +926,6 @@ class ImageService {
     }
   }
 
-  /// Determine MIME content type from file extension.
-  String _contentTypeFromPath(String filePath) {
-    final ext = p.extension(filePath).toLowerCase();
-    return switch (ext) {
-      '.png' => 'image/png',
-      '.webp' => 'image/webp',
-      '.gif' => 'image/gif',
-      '.heic' || '.heif' => 'image/heic',
-      _ => 'image/jpeg',
-    };
-  }
 }
 
 // ════════════════════════════════════════════
@@ -664,6 +942,27 @@ class _ImgWork {
     required this.maxDimension,
     required this.quality,
   });
+}
+
+/// Decoded pixels (straight RGBA) for [_encodeRgbaJpegSync].
+class _RgbaWork {
+  final Uint8List rgba;
+  final int width;
+  final int height;
+  final int quality;
+  const _RgbaWork({required this.rgba, required this.width, required this.height, required this.quality});
+}
+
+/// Pixels the platform decoded, encoded as a JPEG. Top-level for `compute()`.
+Uint8List _encodeRgbaJpegSync(_RgbaWork work) {
+  final image = img.Image.fromBytes(
+    width: work.width,
+    height: work.height,
+    bytes: work.rgba.buffer,
+    bytesOffset: work.rgba.offsetInBytes,
+    numChannels: 4,
+  );
+  return Uint8List.fromList(img.encodeJpg(image, quality: work.quality));
 }
 
 /// Synchronous decode → optional downscale → JPEG encode.

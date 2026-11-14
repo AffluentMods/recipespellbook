@@ -69,6 +69,8 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   final _descController = TextEditingController();
   List<String> _selectedTags = [];
   bool _includeImages = true;
+  // The person's own notes on each recipe stay private unless they say so.
+  bool _includeNotes = false;
 
   // Step 3 state
   bool _isPublishing = false;
@@ -77,12 +79,26 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   PublishRunToken? _run;
   // What the last run was publishing, kept for "Retry failed photos".
   PreparedPublish? _prepared;
+  // With an update: the title, description and tags to save with it (null
+  // when the person left them as they were).
+  PublicationDetails? _details;
+
+  // Republish mode: the publication as it is now. Its title, description
+  // and tags fill the form; edits to them are saved with the update.
+  MyPublication? _publication;
+  bool _publicationFailed = false;
 
   bool get _isSingleRecipeMode => widget.singleRecipeId != null;
+  bool get _isRepublish => widget.republishPublicationId != null;
+
+  /// In republish mode the title, description and tags can only be edited
+  /// once the publication's own are known.
+  bool get _detailsEditable => !_isRepublish || _publication != null;
 
   @override
   void initState() {
     super.initState();
+    if (_isRepublish) _loadPublication();
     if (_isSingleRecipeMode) {
       // Load the recipe and jump straight to step 2.
       WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -98,6 +114,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           _recipeCount = 1; // single-recipe mode — summary would show 0 otherwise
           _titleController.text = recipe.title;
           _descController.text = recipe.description ?? '';
+          _applyPublication();
           _step = 2;
         });
       });
@@ -119,6 +136,52 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     _titleController.dispose();
     _descController.dispose();
     super.dispose();
+  }
+
+  /// Republish mode: the publication's title, description and tags, and
+  /// the photos and notes choices it was last published with.
+  Future<void> _loadPublication() async {
+    final id = widget.republishPublicationId!;
+    final snapshot = await PublishSnapshot.lookup(id);
+    final pubs = await CommunityService.instance.fetchMyPublications();
+    if (!mounted) return;
+    final pub = pubs?.where((p) => p.id == id).firstOrNull;
+    setState(() {
+      _publication = pub;
+      _publicationFailed = pub == null;
+      // One from before snapshots has photos only if the server counts some.
+      _includeImages = snapshot?.includeImages ?? (pub == null ? _includeImages : pub.imageCount > 0);
+      _includeNotes = snapshot?.includeNotes ?? false;
+      _applyPublication();
+    });
+  }
+
+  /// Puts the publication's own title, description and tags in the form
+  /// (they are what the update keeps unless the person edits them).
+  void _applyPublication() {
+    final pub = _publication;
+    if (pub == null) return;
+    _titleController.text = pub.title;
+    _descController.text = pub.description ?? '';
+    _selectedTags = _tagList(pub.tags);
+  }
+
+  static List<String> _tagList(String? tags) =>
+      tags?.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList() ?? <String>[];
+
+  /// What the person changed about the publication's title, description
+  /// and tags, or null when nothing (or when they could not be loaded).
+  PublicationDetails? _editedDetails() {
+    final pub = _publication;
+    if (pub == null) return null;
+    final title = _titleController.text.trim();
+    final description = _descController.text.trim();
+    final tags = _selectedTags.join(',');
+    final unchanged = title == pub.title.trim() &&
+        description == (pub.description ?? '').trim() &&
+        tags == _tagList(pub.tags).join(',');
+    if (unchanged || title.isEmpty) return null;
+    return PublicationDetails(title: title, description: description, tags: tags);
   }
 
   @override
@@ -289,6 +352,8 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
     _titleController.text = cookbook.name;
     _descController.text = cookbook.description ?? '';
+    // An update keeps the publication's own title, description and tags.
+    _applyPublication();
 
     setState(() {
       _selectedCookbook = cookbook;
@@ -300,14 +365,26 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   // ── Step 2: Configure ──
 
   Widget _buildStep2Configure(ThemeData theme, AppLocalizations l10n) {
+    final editable = _detailsEditable;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // An update whose publication could not be loaded keeps its title,
+        // description and tags as they are.
+        if (_isRepublish && _publicationFailed) ...[
+          Text(
+            l10n.communityRepublishDetailsUnavailable,
+            style: TextStyle(fontSize: 13, color: theme.colorScheme.outline),
+          ),
+          const SizedBox(height: 12),
+        ],
+
         // Title
         Text(l10n.communityPublishTitle, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         TextField(
           controller: _titleController,
+          enabled: editable,
           decoration: InputDecoration(
             hintText: l10n.communityPublishTitleHint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -321,6 +398,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         const SizedBox(height: 8),
         TextField(
           controller: _descController,
+          enabled: editable,
           maxLines: 3,
           maxLength: 2000,
           decoration: InputDecoration(
@@ -334,9 +412,15 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         // Tags
         Text(l10n.communityPublishTags, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        CommunityTagPicker(
-          selectedTags: _selectedTags,
-          onChanged: (tags) => setState(() => _selectedTags = tags),
+        IgnorePointer(
+          ignoring: !editable,
+          child: Opacity(
+            opacity: editable ? 1 : 0.5,
+            child: CommunityTagPicker(
+              selectedTags: _selectedTags,
+              onChanged: (tags) => setState(() => _selectedTags = tags),
+            ),
+          ),
         ),
 
         const SizedBox(height: 16),
@@ -352,6 +436,20 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             value: _includeImages,
             onChanged: (v) => setState(() => _includeImages = v),
             secondary: const Icon(Icons.image_outlined),
+          ),
+        ),
+
+        // Include my notes (off unless the person turns it on)
+        Card(
+          child: SwitchListTile(
+            title: Text(l10n.communityPublishIncludeNotes, style: const TextStyle(fontWeight: FontWeight.w500)),
+            subtitle: Text(
+              l10n.communityPublishIncludeNotesSubtitle,
+              style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+            ),
+            value: _includeNotes,
+            onChanged: (v) => setState(() => _includeNotes = v),
+            secondary: const Icon(Icons.sticky_note_2_outlined),
           ),
         ),
 
@@ -408,6 +506,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           builder: (ctx, progress, _) {
             final status = progress?.status ?? 'preparing';
             final rejected = progress?.rejectedRecipes ?? const <String>[];
+            final unsupported = progress?.unsupportedRecipes ?? const <String>[];
             final failed = progress?.failedRecipes ?? const <String>[];
             final waitSeconds = progress?.waitSeconds ?? 0;
 
@@ -427,6 +526,28 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     ),
                     const SizedBox(height: 8),
                     _RecipeTitleList(titles: rejected),
+                  ],
+                  if (unsupported.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.communityPublishPhotosUnsupported,
+                      style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    _RecipeTitleList(titles: unsupported),
+                  ],
+                  if ((progress?.droppedPhotos ?? 0) > 0) ...[
+                    // Photos the server did not keep: sent again with the
+                    // next update.
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.communityPublishPhotosDropped(progress!.droppedPhotos),
+                      style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    _RecipeTitleList(titles: progress.droppedRecipes),
                   ],
                   if (offerNotifications) ...[
                     const SizedBox(height: 16),
@@ -535,17 +656,18 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   /// iOS) then registers this device for download notifications.
   Future<void> _turnOnDownloadNotifications() async {
     final l10n = AppLocalizations.of(context)!;
-    var ok = false;
+    var result = NotificationSwitch.unavailable;
     try {
-      ok = await ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(true);
+      result = await ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(true);
     } catch (e) {
       debugPrint('[Publish] Could not turn on notifications: $e');
     }
     if (!mounted) return;
-    if (ok) {
+    final message = notificationSwitchMessage(l10n, result);
+    if (message == null) {
       AppSnackbar.success(context, l10n.notifDownloadsOn);
     } else {
-      AppSnackbar.info(context, l10n.notifPermissionDenied);
+      AppSnackbar.info(context, message);
     }
   }
 
@@ -614,6 +736,10 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     if (!mounted) return;
     setState(() { _isPublishing = true; _step = 3; });
 
+    // An update saves what the person changed of the title, description and
+    // tags; the rest of the form only shapes a new publication.
+    _details = _isRepublish ? _editedDetails() : null;
+
     final PreparedPublish job;
     try {
       job = await pipeline.prepare(
@@ -622,17 +748,20 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         description: _descController.text.trim(),
         tags: _selectedTags,
         includeImages: _includeImages,
+        includeNotes: _includeNotes,
         kind: _isSingleRecipeMode ? 'recipe' : 'cookbook',
         sourceId: _isSingleRecipeMode ? _singleRecipe!.id : _selectedCookbook!.id,
         // For cookbook mode use the cookbook cover; for single-recipe mode
         // the recipe's own image.
         coverPath: _isSingleRecipeMode ? _singleRecipe!.imagePath : _selectedCookbook!.imagePath,
+        coverCloudPath: _isSingleRecipeMode ? null : _selectedCookbook!.imageServerPath,
         sourceName: _isSingleRecipeMode ? null : _selectedCookbook!.name,
         externalRecipeIds: externalSubRecipeIds.toList(),
         includedExternalIds: includedExternalIds,
       );
       // Auto-suggested (or trimmed to 5) tags show if the person goes back.
-      _selectedTags = job.tagList;
+      // An update keeps the publication's own tags in the form.
+      if (!_isRepublish) _selectedTags = job.tagList;
     } catch (e) {
       publishProgressNotifier.value = PublishProgress(status: 'error', errorMessage: e.toString());
       return;
@@ -657,13 +786,17 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       token: run,
       l10n: l10n,
       republishPublicationId: widget.republishPublicationId,
+      details: _details,
+      publishedTitle: _publication?.title,
       onProgress: (p) {
         if (identical(_run, run)) publishProgressNotifier.value = p;
       },
     );
     if (!result.success || !mounted) return;
 
-    if (widget.republishPublicationId != null) {
+    if (_isRepublish && !result.detailsSaved) {
+      AppSnackbar.warning(context, l10n.communityRepublishDetailsNotSaved);
+    } else if (_isRepublish) {
       AppSnackbar.success(context, l10n.communityRepublishSuccess);
     } else if (result.status == 'pending_review') {
       // Show under-review notice if flagged

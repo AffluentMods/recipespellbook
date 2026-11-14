@@ -109,11 +109,19 @@ void _updates() {
   late CommunityCookbookUpdates updates;
   final photoFetches = <String>[];
 
-  /// Stands in for the photo download: every job "arrives" as a small file.
+  /// Server paths whose download fails.
+  final unreachablePhotos = <String>{};
+
+  /// Stands in for the photo download: every job "arrives" as a small file
+  /// (except [unreachablePhotos]).
   Future<void> fetchPhotos(CommunityPhotoPlan photos, void Function(int done)? onProgress) async {
     final saved = <String?>[];
     for (final job in photos.jobs) {
       photoFetches.add(job.url);
+      if (unreachablePhotos.any(job.url.endsWith)) {
+        saved.add(null);
+        continue;
+      }
       final file = File('${dir.path}${Platform.pathSeparator}${job.filename}')..writeAsStringSync('photo');
       saved.add(file.path);
     }
@@ -124,6 +132,7 @@ void _updates() {
     dir = Directory.systemTemp.createTempSync('rsb_community_updates_test_');
     server = _Server();
     photoFetches.clear();
+    unreachablePhotos.clear();
     now = DateTime(2026, 11, 5, 9);
     SharedPreferences.setMockInitialValues({});
     CommunityCookbookUpdates.debugReset();
@@ -145,14 +154,14 @@ void _updates() {
   CommunityDetail detailOf(String id) => CommunityDetail.fromJson(server.pubs[id]!);
 
   /// Downloads publication [id] the way the detail screen does.
-  Future<String> download(String id, {List<int>? only, String? into, bool withImages = true}) async {
+  Future<String> download(String id, {List<int>? only, String? into, String? asNewCookbook, bool withImages = true}) async {
     final detail = detailOf(id);
     final indexes = only ?? List.generate(detail.recipes.length, (i) => i);
     final photos = withImages
         ? CommunityPhotoPlan.forRecipes(id, detail.recipes, indexes)
         : CommunityPhotoPlan.none();
     await fetchPhotos(photos, null);
-    final cookbookId = into ?? 'community_$id';
+    final cookbookId = into ?? asNewCookbook ?? 'community_$id';
     await saveCommunityDownload(
       db: db,
       publicationId: id,
@@ -553,6 +562,112 @@ void _updates() {
       expect(book.communitySourceVersion, 2);
       expect(book.description, 'Sunday lunch');
       expect((await withServer(() => updates.planFor(id)))!.hasChanges, isFalse);
+    });
+  });
+
+  group('publications that went away', () {
+    test('"Update available" clears once the publication is unpublished, removed or under review', () async {
+      server.publish('pub1', 'Italian Sundays', [_recipe('Lasagne')]);
+      final id = await download('pub1');
+      server.publish('pub1', 'Italian Sundays', [_recipe('Lasagne', steps: ['New.'])], version: 2);
+      expect(await withServer(() => updates.checkAll()), 1);
+
+      // The creator takes it down: versions leave it out.
+      server.pubs.remove('pub1');
+      now = now.add(const Duration(days: 1));
+      expect(await withServer(() => updates.checkAll()), 0);
+      final book = await cookbook(id);
+      expect(book.communityUpdateVersion, isNull);
+      expect(book.communitySourceId, 'pub1', reason: 'it may come back from review');
+      expect(await recipesIn(id), hasLength(1), reason: 'the copy stays as it is');
+    });
+
+    test('opening the update of one that is gone says so instead of an error', () async {
+      server.publish('pub1', 'Italian Sundays', [_recipe('Lasagne')]);
+      final id = await download('pub1');
+      server.publish('pub1', 'Italian Sundays', [_recipe('Lasagne', steps: ['New.'])], version: 2);
+      expect(await withServer(() => updates.checkAll()), 1);
+      server.pubs.remove('pub1');
+
+      await expectLater(withServer(() => updates.planFor(id)), throwsA(isA<CommunitySourceUnavailable>()));
+      expect((await cookbook(id)).communityUpdateVersion, isNull);
+    });
+  });
+
+  group('partial downloads', () {
+    test('a partial download into a new cookbook is never taken for an old whole download', () async {
+      server.publish('pubpart1', 'Italian Sundays', [
+        _recipe('Lasagne', photo: 'chef1/lasagne.jpg'),
+        _recipe('Ragu'),
+        _recipe('Tiramisu'),
+      ]);
+      final id = newCommunityCookbookId(partial: true);
+      await download('pubpart1', only: [0], into: null, asNewCookbook: id);
+      expect(await updates.legacyPublicationOf(id), 'pubpart1', reason: 'its photos still carry the publication');
+
+      // The publisher adds a recipe: nothing is offered to it.
+      server.publish('pubpart1', 'Italian Sundays', [
+        _recipe('Lasagne', photo: 'chef1/lasagne.jpg'),
+        _recipe('Ragu'),
+        _recipe('Tiramisu'),
+        _recipe('Focaccia'),
+      ], version: 2);
+      expect(await withServer(() => updates.checkAll()), 0);
+      expect(server.versionRequests, isEmpty);
+      expect((await cookbook(id)).communitySourceId, isNull);
+    });
+  });
+
+  group('photos that did not come down', () {
+    test('are fetched again at the next check and put in their place', () async {
+      server.publish('pub1', 'Italian Sundays', [
+        _recipe('Lasagne', photo: 'chef1/lasagne.jpg', steps: ['Layer.', 'Bake.']),
+        _recipe('Ragu', photo: 'chef1/ragu.jpg'),
+      ]);
+      (server.pubs['pub1']!['recipes'] as List)[0]['steps'][1]['imagePath'] = 'chef1/bake.jpg';
+      unreachablePhotos.addAll(['chef1/lasagne.jpg', 'chef1/bake.jpg']);
+      final id = await download('pub1');
+      var lasagne = await recipeTitled(id, 'Lasagne');
+      expect(lasagne.imagePath, isNull);
+      expect(CommunitySourceManifest.decode((await cookbook(id)).communityManifest)!.missing, hasLength(2));
+
+      unreachablePhotos.clear();
+      photoFetches.clear();
+      expect(await withServer(() => updates.checkAll()), 0);
+      expect(photoFetches.where((u) => u.endsWith('chef1/lasagne.jpg') || u.endsWith('chef1/bake.jpg')), hasLength(2));
+      lasagne = await recipeTitled(id, 'Lasagne');
+      expect(lasagne.imagePath, isNotNull);
+      final steps = await (db.select(db.steps)
+            ..where((s) => s.recipeId.equals(lasagne.id))
+            ..orderBy([(s) => drift.OrderingTerm.asc(s.rowId)]))
+          .get();
+      expect(steps[1].imagePath, isNotNull);
+      final manifest = CommunitySourceManifest.decode((await cookbook(id)).communityManifest)!;
+      expect(manifest.missing, isEmpty);
+      // Filling them in is not an edit of the person's own.
+      expect(manifest.recipes['lasagne']!.local, await localRecipeFingerprint(db, lasagne.id));
+    });
+
+    test('a recipe the person edited meanwhile keeps their version; one that keeps failing is given up', () async {
+      server.publish('pub1', 'Italian Sundays', [
+        _recipe('Lasagne', photo: 'chef1/lasagne.jpg'),
+        _recipe('Ragu', photo: 'chef1/ragu.jpg'),
+      ]);
+      unreachablePhotos.addAll(['chef1/lasagne.jpg', 'chef1/ragu.jpg']);
+      final id = await download('pub1');
+      final lasagne = await recipeTitled(id, 'Lasagne');
+      await (db.update(db.recipes)..where((r) => r.id.equals(lasagne.id)))
+          .write(const RecipesCompanion(description: drift.Value('My way.')));
+
+      unreachablePhotos.remove('chef1/lasagne.jpg');
+      for (var i = 0; i < CommunityMissingPhoto.maxTries; i++) {
+        await withServer(() => updates.retryMissingPhotos(id));
+      }
+      expect((await recipeTitled(id, 'Lasagne')).imagePath, isNull, reason: 'edited: left as the person has it');
+      expect(CommunitySourceManifest.decode((await cookbook(id)).communityManifest)!.missing, isEmpty);
+      final fetchesBefore = photoFetches.length;
+      await withServer(() => updates.retryMissingPhotos(id));
+      expect(photoFetches.length, fetchesBefore, reason: 'nothing left to try');
     });
   });
 }

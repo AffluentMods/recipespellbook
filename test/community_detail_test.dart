@@ -118,6 +118,54 @@ void main() {
     });
   });
 
+  group('picking recipes to save', () {
+    test('finds the picked recipes by title in a version the creator changed meanwhile', () {
+      final shown = [_recipe('Lasagne'), _recipe('Ragu'), _recipe('Tiramisu')].map(_parse).toList();
+      // A recipe was added at the top since the list was shown.
+      final now = [_recipe('Focaccia'), _recipe('Lasagne'), _recipe('Ragu'), _recipe('Tiramisu')].map(_parse).toList();
+      expect(pickedInNewVersion(shown, {1, 2}, now), {2, 3});
+      expect(pickedInNewVersion(shown, {0}, shown), {0});
+    });
+
+    test('gives nothing when a picked recipe is gone or renamed, so nothing wrong is saved', () {
+      final shown = [_recipe('Lasagne'), _recipe('Ragu')].map(_parse).toList();
+      final now = [_recipe('Lasagne'), _recipe('Beef Ragu')].map(_parse).toList();
+      expect(pickedInNewVersion(shown, {1}, now), isNull);
+      expect(pickedInNewVersion(shown, {0}, now), {0});
+    });
+  });
+
+  group('a publication that does not load', () {
+    Future<void> open(WidgetTester tester, http.Response Function() answer) async {
+      await http.runWithClient(() async {
+        final db = (await tester.runAsync(() async => AppDatabase.forTesting(NativeDatabase.memory())))!;
+        await tester.pumpWidget(ProviderScope(
+          overrides: [databaseProvider.overrideWithValue(db)],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: CommunityDetailScreen(publicationId: 'pub1'),
+          ),
+        ));
+        await settle(tester);
+        await tester.runAsync(db.close);
+      }, () => MockClient((_) async => answer()));
+    }
+
+    testWidgets('offers a retry instead of "not found"', (tester) async {
+      await open(tester, () => http.Response('{"error":"boom"}', 500));
+      expect(find.text('Publication not found'), findsNothing);
+      expect(find.text('Could not load this. Check your connection and try again.'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+    });
+
+    testWidgets('one that is gone says so', (tester) async {
+      await open(tester, () => http.Response('{"error":"Publication not found"}', 404));
+      expect(find.text('Publication not found'), findsOneWidget);
+      expect(find.text('Retry'), findsNothing);
+    });
+  });
+
   group('downloading several photos', () {
     final png = img.encodePng(img.Image(width: 2, height: 2));
     List<({String url, String filename})> jobs(int n) =>

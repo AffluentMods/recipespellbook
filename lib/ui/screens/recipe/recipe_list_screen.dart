@@ -507,7 +507,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         icon: Icons.delete_outline,
         label: l10n.actionDelete,
         isDestructive: true,
-        onTap: () => dao.moveToTrash(recipe.id),
+        onTap: () => _trashWithUndo(recipe.id),
       ),
     ];
   }
@@ -919,6 +919,21 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     return KeyEventResult.ignored;
   }
 
+  /// Move one recipe to the trash and offer it back: Del and the context
+  /// menu do it with no question asked, so a slip must be one tap to undo.
+  Future<void> _trashWithUndo(String id) async {
+    final dao = ref.read(recipeDaoProvider);
+    final l10n = AppLocalizations.of(context)!;
+    await dao.moveToTrash(id);
+    if (!mounted) return;
+    AppSnackbar.successWithAction(
+      context,
+      l10n.countRecipesMovedToTrash(1),
+      actionLabel: l10n.actionUndo,
+      onAction: () => dao.restoreRecipe(id),
+    );
+  }
+
   /// Del moves the highlighted recipe to trash (recoverable) and advances the
   /// selection to its neighbour, so the keyboard flow stays uninterrupted.
   Future<void> _trashSelected() async {
@@ -926,7 +941,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     if (id == null) return;
     final ids = _currentVisibleRecipes.map((r) => r.id).toList();
     final idx = ids.indexOf(id);
-    await ref.read(recipeDaoProvider).moveToTrash(id);
+    await _trashWithUndo(id);
     if (!mounted) return;
     final remaining = ids.where((rid) => rid != id).toList();
     setState(() {

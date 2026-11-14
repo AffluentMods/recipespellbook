@@ -232,6 +232,37 @@ class CommunityManifestRecipe {
   }
 }
 
+/// A photo that did not come down with a download or an update: where it
+/// belongs (the recipe by its key, and its [step], -1 for the recipe's own
+/// photo), its server path, and how often fetching it failed since.
+class CommunityMissingPhoto {
+  final String key;
+  final int step;
+  final String serverPath;
+  final int tries;
+
+  const CommunityMissingPhoto({required this.key, required this.step, required this.serverPath, this.tries = 0});
+
+  /// After this many more failed tries it is given up.
+  static const maxTries = 5;
+
+  List<Object> toJson() => [key, step, serverPath, tries];
+
+  static CommunityMissingPhoto? fromJson(Object? json) {
+    if (json is! List || json.length < 3) return null;
+    final key = json[0];
+    final step = json[1];
+    final path = json[2];
+    if (key is! String || step is! num || path is! String) return null;
+    return CommunityMissingPhoto(
+      key: key,
+      step: step.toInt(),
+      serverPath: path,
+      tries: json.length > 3 && json[3] is num ? (json[3] as num).toInt() : 0,
+    );
+  }
+}
+
 /// What a downloaded Community cookbook was made from: stored as JSON in
 /// `cookbooks.community_manifest`.
 class CommunitySourceManifest {
@@ -251,12 +282,16 @@ class CommunitySourceManifest {
   /// fetches photos that are new.
   final Map<String, String> photos;
 
+  /// Photos that did not come down; the next update check tries them again.
+  final List<CommunityMissingPhoto> missing;
+
   const CommunitySourceManifest({
     required this.title,
     required this.description,
     required this.withImages,
     required this.recipes,
     this.photos = const {},
+    this.missing = const [],
   });
 
   String encode() => jsonEncode({
@@ -266,6 +301,7 @@ class CommunitySourceManifest {
         'img': withImages,
         'r': {for (final e in recipes.entries) e.key: e.value.toJson()},
         if (photos.isNotEmpty) 'p': photos,
+        if (missing.isNotEmpty) 'm': [for (final m in missing) m.toJson()],
       });
 
   static CommunitySourceManifest? decode(String? raw) {
@@ -288,12 +324,18 @@ class CommunitySourceManifest {
           if (key is String && value is String) photos[key] = value;
         });
       }
+      final m = json['m'];
       return CommunitySourceManifest(
         title: json['t'] as String? ?? '',
         description: json['d'] as String?,
         withImages: json['img'] as bool? ?? true,
         recipes: recipes,
         photos: photos,
+        missing: [
+          if (m is List)
+            for (final entry in m)
+              if (CommunityMissingPhoto.fromJson(entry) case final photo?) photo,
+        ],
       );
     } catch (e) {
       debugPrint('[CommunityUpdates] bad manifest: $e');

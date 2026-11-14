@@ -28,6 +28,12 @@ class NutritionCalculator {
     final ingredientResults = <IngredientNutritionResult>[];
     var totalNutrition = NutritionData.empty;
     int matchedCount = 0;
+    // The recipe's own language where its names tell it (a Spanish recipe
+    // in an English app), otherwise the app's.
+    final language = ingredientLanguageOf(
+      ingredients.map((i) => i.name),
+      appLanguage: languageCode,
+    );
 
     for (final ingredient in ingredients) {
       // ── Priority 1: Check for linked recipe nutrition ──
@@ -89,7 +95,7 @@ class NutritionCalculator {
         totalNutrition = totalNutrition + manualNutrition;
         matchedCount++;
       } else {
-        final result = await _calculateForIngredient(ingredient, languageCode);
+        final result = await _calculateForIngredient(ingredient, language);
         ingredientResults.add(result);
 
         if (result.isMatched && result.nutrition != null) {
@@ -488,30 +494,33 @@ class NutritionCalculator {
           notes: ingredient.notes,
         );
 
-        if (grams != null && grams > 0) {
-          final scale = grams / 100.0;
-          final nutrition = NutritionData(
-            calories: per100g.calories * scale,
-            protein: per100g.protein * scale,
-            fat: per100g.fat * scale,
-            carbohydrates: per100g.carbs * scale,
-            fiber: per100g.fiber * scale,
-            sugar: per100g.sugar * scale,
-            sodium: per100g.sodium * scale,
-          );
-          // Flag as uncertain when there was no amount in the source recipe
-          final isMissingAmount = ingredient.amount == null || ingredient.amount!.trim().isEmpty;
-          debugPrint('Local match for "${ingredient.name}" -> "$matchedKey": ${grams.toStringAsFixed(0)}g -> ${(nutrition.calories ?? 0).toStringAsFixed(0)} cal${isMissingAmount ? ' (default amount)' : ''}');
-          return IngredientNutritionResult(
-            ingredient: ingredient,
-            isMatched: true,
-            nutrition: nutrition,
-            gramsUsed: grams,
-            matchStatus: isMissingAmount ? MatchStatus.uncertain : MatchStatus.matched,
-            matchDescription: matchedKey,
-            errorMessage: isMissingAmount ? 'No amount given, using a typical serving' : null,
-          );
+        if (grams == null || grams <= 0) {
+          // The food is known, its amount could not be weighed. The USDA
+          // search would weigh it the same way, so it is not asked.
+          return _notWeighed(ingredient, description: matchedKey);
         }
+        final scale = grams / 100.0;
+        final nutrition = NutritionData(
+          calories: per100g.calories * scale,
+          protein: per100g.protein * scale,
+          fat: per100g.fat * scale,
+          carbohydrates: per100g.carbs * scale,
+          fiber: per100g.fiber * scale,
+          sugar: per100g.sugar * scale,
+          sodium: per100g.sodium * scale,
+        );
+        // Flag as uncertain when there was no amount in the source recipe
+        final isMissingAmount = ingredient.amount == null || ingredient.amount!.trim().isEmpty;
+        debugPrint('Local match for "${ingredient.name}" -> "$matchedKey": ${grams.toStringAsFixed(0)}g -> ${(nutrition.calories ?? 0).toStringAsFixed(0)} cal${isMissingAmount ? ' (default amount)' : ''}');
+        return IngredientNutritionResult(
+          ingredient: ingredient,
+          isMatched: true,
+          nutrition: nutrition,
+          gramsUsed: grams,
+          matchStatus: isMissingAmount ? MatchStatus.uncertain : MatchStatus.matched,
+          matchDescription: matchedKey,
+          errorMessage: isMissingAmount ? 'No amount given, using a typical serving' : null,
+        );
       }
 
       // ── Step 2: Fall back to USDA search ──
@@ -574,15 +583,7 @@ class NutritionCalculator {
       notes: ingredient.notes,
     );
 
-    if (grams == null || grams <= 0) {
-      return IngredientNutritionResult(
-        ingredient: ingredient,
-        isMatched: true,
-        usdaFood: match,
-        matchStatus: match.isUncertainMatch ? MatchStatus.uncertain : MatchStatus.matched,
-        errorMessage: 'Could not parse amount to grams',
-      );
-    }
+    if (grams == null || grams <= 0) return _notWeighed(ingredient, usdaFood: match);
 
     // Calculate nutrition
     final nutrition = _usdaService.calculateNutrition(match.nutrients, grams);
@@ -596,6 +597,20 @@ class NutritionCalculator {
       matchStatus: match.isUncertainMatch ? MatchStatus.uncertain : MatchStatus.matched,
     );
   }
+
+  /// A food that was found, with an amount that could not be turned into
+  /// grams: it adds nothing, so it is not counted as matched, and its row
+  /// asks for a look instead of passing as done.
+  IngredientNutritionResult _notWeighed(Ingredient ingredient, {String? description, UsdaFoodResult? usdaFood}) =>
+      IngredientNutritionResult(
+        ingredient: ingredient,
+        isMatched: false,
+        usdaFood: usdaFood,
+        matchStatus: MatchStatus.uncertain,
+        matchDescription: description,
+        amountNotWeighed: true,
+        errorMessage: 'Could not parse amount to grams',
+      );
 
   /// Check if a USDA match is likely wrong based on simple heuristics
   bool _isLikelyBadMatch(String ingredientName, UsdaFoodResult match) {
@@ -672,8 +687,10 @@ class NutritionCalculator {
 
   // ───────────────────────── amounts to grams ─────────────────────────
 
-  /// Millilitres in one of each volume unit.
+  /// Millilitres in one of each volume unit. "metric cup" and "small cup"
+  /// are the cups of [_localSpoonsAndCups].
   static const _volumeMl = {
+    'metric cup': 250.0, 'small cup': 200.0,
     'cup': 236.588, 'c': 236.588, 'tbsp': 14.787, 'tablespoon': 14.787, 'tbs': 14.787,
     'tbl': 14.787, 'tbls': 14.787, 'tb': 14.787, 'tsp': 4.929, 'teaspoon': 4.929, 'ts': 4.929,
     'ml': 1.0, 'milliliter': 1.0, 'millilitre': 1.0, 'cc': 1.0, 'l': 1000.0, 'liter': 1000.0,
@@ -681,6 +698,50 @@ class NutritionCalculator {
     'pt': 473.176, 'quart': 946.353, 'qt': 946.353, 'gallon': 3785.41, 'gal': 3785.41,
     'pinch': 0.31, 'dash': 0.62, 'drop': 0.05, 'smidgen': 0.15, 'splash': 5.0,
     'shot': 44.36, 'jigger': 44.36,
+  };
+
+  /// Spoons and cups the way recipes in the app's other languages write
+  /// them, as [_readUnit] has them: in lower case, accents folded, dots
+  /// turned into spaces. A metric cup is 250 ml; Japanese, Korean and
+  /// Russian recipes use a cup of 200 ml.
+  static const _localSpoonsAndCups = {
+    // German
+    'el': 'tbsp', 'essloffel': 'tbsp', 'tl': 'tsp', 'teeloffel': 'tsp',
+    'tasse': 'metric cup', 'tassen': 'metric cup',
+    // Spanish
+    'cucharada': 'tbsp', 'cucharadas': 'tbsp', 'cda': 'tbsp', 'cdas': 'tbsp',
+    'cucharadita': 'tsp', 'cucharaditas': 'tsp', 'cdta': 'tsp', 'cdtas': 'tsp', 'cdita': 'tsp',
+    'cditas': 'tsp', 'taza': 'metric cup', 'tazas': 'metric cup',
+    // French
+    'c a soupe': 'tbsp', 'c a s': 'tbsp', 'cas': 'tbsp', 'cuillere a soupe': 'tbsp',
+    'cuilleres a soupe': 'tbsp', 'c a cafe': 'tsp', 'c a the': 'tsp', 'c a c': 'tsp', 'cac': 'tsp',
+    'cuillere a cafe': 'tsp', 'cuilleres a cafe': 'tsp', 'cuillere a the': 'tsp',
+    'cuilleres a the': 'tsp', 'tasses': 'metric cup',
+    // Italian
+    'cucchiaio': 'tbsp', 'cucchiai': 'tbsp', 'cucchiaino': 'tsp', 'cucchiaini': 'tsp',
+    'tazza': 'metric cup', 'tazze': 'metric cup',
+    // Portuguese
+    'colher de sopa': 'tbsp', 'colheres de sopa': 'tbsp', 'colher sopa': 'tbsp',
+    'colher de cha': 'tsp', 'colheres de cha': 'tsp', 'colher cha': 'tsp',
+    'xicara': 'metric cup', 'xicaras': 'metric cup', 'chavena': 'metric cup', 'chavenas': 'metric cup',
+    // Dutch ("el" and "tl" as in German)
+    'eetlepel': 'tbsp', 'eetlepels': 'tbsp', 'theelepel': 'tsp', 'theelepels': 'tsp',
+    'kop': 'metric cup', 'kopje': 'metric cup', 'kopjes': 'metric cup',
+    // Polish, with and without its letters
+    'łyżka': 'tbsp', 'łyżki': 'tbsp', 'łyżek': 'tbsp', 'lyzka': 'tbsp', 'lyzki': 'tbsp', 'lyzek': 'tbsp',
+    'łyżeczka': 'tsp', 'łyżeczki': 'tsp', 'łyżeczek': 'tsp', 'lyzeczka': 'tsp', 'lyzeczki': 'tsp',
+    'lyzeczek': 'tsp', 'szklanka': 'metric cup', 'szklanki': 'metric cup', 'szklanek': 'metric cup',
+    // Russian
+    'ст л': 'tbsp', 'столовая ложка': 'tbsp', 'столовые ложки': 'tbsp', 'столовых ложек': 'tbsp',
+    'ч л': 'tsp', 'чайная ложка': 'tsp', 'чайные ложки': 'tsp', 'чайных ложек': 'tsp',
+    'стакан': 'small cup', 'стакана': 'small cup', 'стаканов': 'small cup',
+    // Japanese
+    '大さじ': 'tbsp', '小さじ': 'tsp', 'カップ': 'small cup',
+    // Korean
+    '큰술': 'tbsp', '큰스푼': 'tbsp', '작은술': 'tsp', '작은스푼': 'tsp', '컵': 'small cup',
+    // Chinese
+    '汤匙': 'tbsp', '大匙': 'tbsp', '大勺': 'tbsp', '茶匙': 'tsp', '小匙': 'tsp', '小勺': 'tsp',
+    '杯': 'metric cup',
   };
 
   /// Grams in one of each weight unit.
@@ -727,6 +788,22 @@ class NutritionCalculator {
     if (u.contains('+')) u = u.split('+').first;
     u = u.replaceAll('.', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
     if (RegExp(r'^(fl|fluid) (oz|ounces?)$').hasMatch(u)) u = 'floz';
+    // A spoon or cup of another language. A size word in front of it counts
+    // as it does for any unit.
+    final local = _localSpoonsAndCups[u] ??
+        _localSpoonsAndCups[u.split(' ').where((w) => !_unitSizeWords.containsKey(w)).join(' ')];
+    if (local != null) {
+      var size = 1.0;
+      var sized = false;
+      for (final w in u.split(' ')) {
+        final factor = _unitSizeWords[w];
+        if (factor != null) {
+          size *= factor;
+          sized = true;
+        }
+      }
+      return (unit: local, size: size, sized: sized, paren: paren);
+    }
     var size = 1.0;
     var sized = false;
     final rest = <String>[];
@@ -1079,6 +1156,9 @@ class IngredientNutritionResult {
   final String? linkedRecipeTitle;
   /// Why the line counts as zero calories (water, bones...), or null
   final ZeroCalorieReason? zeroReason;
+  /// The food was found but its amount could not be turned into grams, so
+  /// it adds nothing ([matchStatus] is uncertain).
+  final bool amountNotWeighed;
 
   IngredientNutritionResult({
     required this.ingredient,
@@ -1094,6 +1174,7 @@ class IngredientNutritionResult {
     this.linkedRecipeId,
     this.linkedRecipeTitle,
     this.zeroReason,
+    this.amountNotWeighed = false,
   });
 
   /// Display string for the ingredient

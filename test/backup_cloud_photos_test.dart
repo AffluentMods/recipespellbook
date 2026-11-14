@@ -16,6 +16,7 @@ import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/services/auth_service.dart';
 import 'package:recipespellbook/services/backup_reminder_service.dart';
 import 'package:recipespellbook/services/export_import_service.dart';
+import 'package:recipespellbook/services/image_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'backup_restore_support.dart';
@@ -32,10 +33,30 @@ class _Cloud {
   bool offline = false;
   final asked = <String>[];
 
+  /// Answers POST /v1/images/presign-batch, as servers from 2.1.1 on do.
+  bool batches = false;
+
+  /// 429s to give before answering a presign-batch, each with Retry-After 2.
+  int tooMany = 0;
+
   http.Client get client => MockClient((request) async {
         if (offline) throw http.ClientException('Connection refused');
         if (request.url.host == 'files.invalid') return http.Response.bytes(_png, 200);
         final path = request.url.path;
+        if (batches && path == '/v1/images/presign-batch') {
+          asked.add(path);
+          if (tooMany > 0) {
+            tooMany--;
+            return http.Response('{"error":"Too many requests"}', 429, headers: {'retry-after': '2'});
+          }
+          final paths = ((jsonDecode(request.body) as Map)['paths'] as List).cast<String>();
+          return http.Response(
+              jsonEncode({
+                'urls': {for (final p in paths) p: 'https://files.invalid/${p.split('/').last}'},
+              }),
+              200,
+              headers: {'content-type': 'application/json'});
+        }
         if (path.startsWith('/v1/images/user1/')) {
           asked.add(path);
           return http.Response(jsonEncode({'url': 'https://files.invalid/${p.basename(path)}'}), 200,
@@ -258,6 +279,74 @@ void main() {
         File(first).renameSync('$first.old');
         await phone.service.shareFullZipExport();
         expect(File('$first.old').existsSync(), isFalse);
+      }, () => cloud.client);
+    });
+  });
+
+  group('photo links', () {
+    late Future<void> Function(Duration) wait;
+    final waited = <Duration>[];
+
+    setUp(() {
+      wait = ImageService.wait;
+      waited.clear();
+      ImageService.wait = (d) async => waited.add(d);
+    });
+    tearDown(() => ImageService.wait = wait);
+
+    test('come in one request for many photos, where the server can', () async {
+      await http.runWithClient(() async {
+        cloud.batches = true;
+        final leftOut = await phone.service.exportFullZipToPath(phone.file('backup.zip'));
+        expect(leftOut, 0);
+        expect(cloud.asked, ['/v1/images/presign-batch']);
+      }, () => cloud.client);
+    });
+
+    test('wait for the server when it asks, and then come', () async {
+      await http.runWithClient(() async {
+        cloud.batches = true;
+        cloud.tooMany = 2;
+        final leftOut = await phone.service.exportFullZipToPath(phone.file('backup.zip'));
+        expect(leftOut, 0);
+        expect(waited, [const Duration(seconds: 2), const Duration(seconds: 2)]);
+      }, () => cloud.client);
+    });
+
+    test('from an older server, one a photo, are paced after the first hundred', () async {
+      await http.runWithClient(() async {
+        final paths = [for (var i = 0; i < 103; i++) 'user1/p$i.png'];
+        final urls = await ImageService.instance.getImageUrls(paths);
+        expect(urls, hasLength(103));
+        expect(waited, hasLength(3));
+      }, () => cloud.client);
+    });
+  });
+
+  group('the backup made in memory, as on the web', () {
+    test('fetches the photos only in the cloud', () async {
+      await http.runWithClient(() async {
+        final zip = await phone.service.exportFullZipWithReport();
+        expect(zip.photosLeftOut, 0);
+        final files = unzip(zip.bytes);
+        for (final name in [
+          'images/cookbooks/baking_cover.jpg',
+          'images/recipes/pie_cover.jpg',
+          'images/recipes/pie_step_0.jpg',
+          'images/recipes/tart_cover.jpg',
+        ]) {
+          expect(files.findFile(name)?.content, _png, reason: name);
+        }
+      }, () => cloud.client);
+    });
+
+    test('says how many it could not fetch, instead of none', () async {
+      await http.runWithClient(() async {
+        cloud.offline = true;
+        final zip = await phone.service.exportFullZipWithReport();
+        expect(zip.photosLeftOut, 4);
+        final baking = (dataOf(unzip(zip.bytes))['cookbooks'] as List).cast<Map>().singleWhere((c) => c['id'] == 'baking');
+        expect(baking['imagePath'], isNull);
       }, () => cloud.client);
     });
   });

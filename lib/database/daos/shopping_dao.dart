@@ -36,6 +36,24 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
     return rows.isNotEmpty ? rows.first : null;
   }
 
+  /// The list things go on when no list is chosen: the one marked default,
+  /// else the built-in one, else the first. The built-in list can have moved
+  /// to an id of the account's own (sharing it, or a clash in sync), so its
+  /// id is looked up rather than assumed.
+  Future<String> defaultListId() async =>
+      (await getDefaultList())?.id ??
+      (await getListById('list_default'))?.id ??
+      (await getAllLists()).firstOrNull?.id ??
+      'list_default';
+
+  /// [defaultListId], as the lists change.
+  Stream<String> watchDefaultListId() => watchAllLists().map((lists) =>
+      (lists.where((l) => l.isDefault).firstOrNull ??
+              lists.where((l) => l.id == 'list_default').firstOrNull ??
+              lists.firstOrNull)
+          ?.id ??
+      'list_default').distinct();
+
   /// Mark [id] as the single default list, clearing the flag on every other.
   Future<void> setDefaultList(String id) async {
     await transaction(() async {
@@ -139,13 +157,28 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
   }
 
   /// Move an item to a different shopping list.
-  Future<void> moveItemToList(String id, String targetListId) {
-    return (update(shoppingListItems)..where((t) => t.id.equals(id)))
-        .write(ShoppingListItemsCompanion(
-      listId: Value(targetListId),
-      updatedAt: Value(DateTime.now()),
-    ));
+  ///
+  /// It goes over as a new item, and the old one is recorded as deleted
+  /// from the list it left. Moved under its own id, a shared list never
+  /// heard that it left: the other members kept it, and the next shared
+  /// pull put it back. The shared-list channel never moves an item from one
+  /// list to another.
+  Future<void> moveItemToList(String id, String targetListId) async {
+    await transaction(() async {
+      final item = await (select(shoppingListItems)..where((t) => t.id.equals(id))).getSingleOrNull();
+      if (item == null || item.listId == targetListId) return;
+      final now = DateTime.now();
+      await into(shoppingListItems).insert(item.toCompanion(false).copyWith(
+            id: Value('${id.replaceFirst(_movedSuffix, '')}_m${now.microsecondsSinceEpoch}'),
+            listId: Value(targetListId),
+            updatedAt: Value(now),
+          ));
+      await (delete(shoppingListItems)..where((t) => t.id.equals(id))).go();
+      await SyncJournal.recordDeletion(attachedDatabase, SyncJournal.shoppingListItems, id, parentId: item.listId);
+    });
   }
+
+  static final _movedSuffix = RegExp(r'_m\d+$');
 
   Future<void> toggleItemChecked(String id, bool checked) {
     return (update(shoppingListItems)..where((t) => t.id.equals(id)))

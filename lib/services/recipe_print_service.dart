@@ -5,44 +5,17 @@ import 'package:printing/printing.dart';
 import '../../data/course_category_data.dart';
 import '../../database/database.dart'; // Keep Step from here
 import '../utils/ingredient_utils.dart' show scaleQuantityString;
+import 'pdf_fonts.dart';
 
 /// Strip emoji characters that even Unicode fonts struggle with in PDFs.
-/// With Noto Sans embedded, most special characters (accents, CJK, Cyrillic)
-/// now render correctly — only emoji are stripped.
+/// With Noto Sans embedded (and a CJK fallback where needed, see PdfFonts),
+/// accents, Cyrillic, Greek and CJK render; only emoji are stripped.
 String _stripEmoji(String text) {
   return text.replaceAll(RegExp(
     r'[\u{1F000}-\u{1FFFF}]|[\u{FE00}-\u{FE0F}]|'
     r'[\u{200D}]|[\u{20E3}]|[\u{E0020}-\u{E007F}]',
     unicode: true,
   ), '').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
-}
-
-/// Cached Unicode fonts for PDF rendering.
-/// Loaded once from Google Fonts CDN, then cached on disk.
-pw.Font? _cachedRegular;
-pw.Font? _cachedBold;
-pw.Font? _cachedItalic;
-pw.Font? _cachedBoldItalic;
-
-/// Load Noto Sans fonts for full Unicode support in PDFs.
-/// Falls back to default PDF fonts if loading fails (e.g. offline).
-Future<pw.ThemeData> _loadPdfTheme() async {
-  try {
-    _cachedRegular ??= await PdfGoogleFonts.notoSansRegular();
-    _cachedBold ??= await PdfGoogleFonts.notoSansBold();
-    _cachedItalic ??= await PdfGoogleFonts.notoSansItalic();
-    _cachedBoldItalic ??= await PdfGoogleFonts.notoSansBoldItalic();
-
-    return pw.ThemeData.withFont(
-      base: _cachedRegular!,
-      bold: _cachedBold!,
-      italic: _cachedItalic!,
-      boldItalic: _cachedBoldItalic!,
-    );
-  } catch (_) {
-    // Offline or CDN error — fall back to default fonts
-    return pw.ThemeData.base();
-  }
 }
 
 /// Service for printing recipes
@@ -57,8 +30,15 @@ class RecipePrintService {
     bool columnarLayout = false,
     required Map<String, String> labels,
   }) async {
-    // Load Unicode fonts for full character support
-    final theme = await _loadPdfTheme();
+    // Noto Sans, plus a CJK font when the recipe has such text.
+    final theme = await PdfFonts.themeFor([
+      recipe.title,
+      recipe.description ?? '',
+      recipe.notes ?? '',
+      for (final i in ingredients) i.name,
+      for (final s in steps) s.instruction,
+      ...labels.values,
+    ].join('\n'));
     final pdf = pw.Document(theme: theme);
 
     // Load image if available

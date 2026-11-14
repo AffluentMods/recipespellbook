@@ -19,9 +19,27 @@ static void first_frame_cb(MyApplication* self, FlView* view) {
   gtk_widget_show(gtk_widget_get_toplevel(GTK_WIDGET(view)));
 }
 
+// recipespellbook:// links and other arguments on Linux:
+//  * Only one copy runs at a time (the application is unique on D-Bus), so
+//    two copies never work on the same database. A second launch activates
+//    the open copy, which brings its window to the front, and hands it its
+//    command line, then exits.
+//  * The command line (the first launch's and every later one's) reaches
+//    the "command-line" signal, which the gtk plugin passes to app_links,
+//    which passes the link to lib/main.dart (_initDeepLinks).
+//  * Without a D-Bus session bus GLib runs the app as before, non-unique.
+
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
+
+  // Already open (a second launch activated this copy): show that window.
+  GList* windows = gtk_application_get_windows(GTK_APPLICATION(application));
+  if (windows != nullptr) {
+    gtk_window_present(GTK_WINDOW(windows->data));
+    return;
+  }
+
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
@@ -93,10 +111,15 @@ static gboolean my_application_local_command_line(GApplication* application,
     return TRUE;
   }
 
+  // In the first copy this opens the window; in a second launch it asks the
+  // open copy to show its window.
   g_application_activate(application);
   *exit_status = 0;
 
-  return TRUE;
+  // Not handled here: GLib then hands the command line to the open copy's
+  // "command-line" signal (from a second launch, over D-Bus) and the second
+  // launch exits.
+  return FALSE;
 }
 
 // Implements GApplication::startup.
@@ -142,7 +165,10 @@ MyApplication* my_application_new() {
   // the application to be recognized beyond its binary name.
   g_set_prgname(APPLICATION_ID);
 
-  return MY_APPLICATION(g_object_new(my_application_get_type(),
-                                     "application-id", APPLICATION_ID, "flags",
-                                     G_APPLICATION_NON_UNIQUE, nullptr));
+  // Unique (no G_APPLICATION_NON_UNIQUE): a second launch is handed to the
+  // copy already running, with its command line and files to open.
+  return MY_APPLICATION(g_object_new(
+      my_application_get_type(), "application-id", APPLICATION_ID, "flags",
+      G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_HANDLES_OPEN,
+      nullptr));
 }

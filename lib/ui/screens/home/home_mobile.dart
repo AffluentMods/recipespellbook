@@ -23,6 +23,7 @@ import '../../../utils/planned_servings.dart' show plannedRecipeLocation;
 import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../../utils/week_start.dart';
 import '../../widgets/app_controls.dart';
 import '../../widgets/backup_reminder_banner.dart';
 import '../../widgets/new_cookbook_chooser.dart';
@@ -706,10 +707,7 @@ class _WeekPanelState extends ConsumerState<_WeekPanel> {
     _today = DateTime(now.year, now.month, now.day);
     _week = ref
         .read(mealPlanDaoProvider)
-        .watchMealPlansWithRecipesForRange(
-          _today,
-          _today.add(const Duration(days: 7)),
-        );
+        .watchMealPlansWithRecipesForRange(_today, addDays(_today, 7));
   }
 
   void _openPlanner(DateTime date) {
@@ -723,7 +721,9 @@ class _WeekPanelState extends ConsumerState<_WeekPanel> {
     final c = context.appColors;
     final today = _today;
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final selectedDate = today.add(Duration(days: _day));
+    // Calendar days: `add(Duration(days: n))` adds 24 hour periods, which
+    // put a meal in the wrong cell around a daylight saving change.
+    final selectedDate = addDays(today, _day);
 
     return _Panel(
       title: l10n.homeNextSevenDays,
@@ -737,12 +737,7 @@ class _WeekPanelState extends ConsumerState<_WeekPanel> {
         builder: (context, snapshot) {
           final byDay = <int, List<MealPlanWithRecipe>>{};
           for (final p in snapshot.data ?? const <MealPlanWithRecipe>[]) {
-            final d = p.mealPlan.date;
-            final idx = DateTime(
-              d.year,
-              d.month,
-              d.day,
-            ).difference(today).inDays;
+            final idx = calendarDaysBetween(today, p.mealPlan.date);
             if (idx >= 0 && idx < 7) byDay.putIfAbsent(idx, () => []).add(p);
           }
           final meals = byDay[_day] ?? const <MealPlanWithRecipe>[];
@@ -759,7 +754,7 @@ class _WeekPanelState extends ConsumerState<_WeekPanel> {
                   for (var i = 0; i < 7; i++)
                     Expanded(
                       child: _DayCell(
-                        date: today.add(Duration(days: i)),
+                        date: addDays(today, i),
                         locale: locale,
                         isToday: i == 0,
                         selected: i == _day,

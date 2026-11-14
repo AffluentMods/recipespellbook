@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Push notifications (APNs). Builds are signed with a development
+	     profile, which only allows "development" here; the App Store export
+	     (exportArchive with the distribution profile) writes "production"
+	     into the shipped app, so App Store and TestFlight builds use the
+	     production APNs environment. -->
+	<key>aps-environment</key>
+	<string>development</string>
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string>Default</string>

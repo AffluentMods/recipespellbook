@@ -12,7 +12,8 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/family_service.dart';
-import '../../services/image_service.dart';
+import '../../services/pdf_fonts.dart';
+import '../../services/share_snapshot.dart';
 import '../../services/share_file.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_colors.dart';
@@ -30,30 +31,10 @@ String _stripEmojiForPdf(String text) {
   ), '').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
 }
 
-/// Cached Unicode fonts for PDF rendering.
-pw.Font? _pdfRegular;
-pw.Font? _pdfBold;
-pw.Font? _pdfItalic;
-pw.Font? _pdfBoldItalic;
-
-/// Load Noto Sans fonts for full Unicode support in PDFs.
-Future<pw.ThemeData> _loadPdfTheme() async {
-  try {
-    _pdfRegular ??= await PdfGoogleFonts.notoSansRegular();
-    _pdfBold ??= await PdfGoogleFonts.notoSansBold();
-    _pdfItalic ??= await PdfGoogleFonts.notoSansItalic();
-    _pdfBoldItalic ??= await PdfGoogleFonts.notoSansBoldItalic();
-
-    return pw.ThemeData.withFont(
-      base: _pdfRegular!,
-      bold: _pdfBold!,
-      italic: _pdfItalic!,
-      boldItalic: _pdfBoldItalic!,
-    );
-  } catch (_) {
-    return pw.ThemeData.base();
-  }
-}
+/// Noto Sans for the recipe PDF, plus a CJK font when [text] or the app's
+/// language needs one (see PdfFonts, shared with printing).
+Future<pw.ThemeData> _loadPdfTheme(String text, AppLocalizations l10n) =>
+    PdfFonts.themeFor(text, languageCode: l10n.localeName);
 
 /// Shows a share sheet for a recipe with multiple options
 void showRecipeShareSheet(
@@ -171,48 +152,81 @@ class _RecipeShareSheet extends StatelessWidget {
 
     final origin = shareOrigin(context);
     Navigator.pop(context);
+    await _createAndShareLink(l10n, origin);
+  }
 
+  /// Makes the link and opens the share sheet with it. When it cannot be
+  /// made, says so and offers to try again or to share the recipe as text,
+  /// instead of quietly sharing only its title.
+  Future<void> _createAndShareLink(AppLocalizations l10n, Rect? origin) async {
     // Loading shows on the ROOT overlay and dismiss() is context-independent
-    // (static), so we must NOT guard dismiss on context.mounted — the share
-    // sheet's context unmounts once we pop it, which would otherwise leave the
-    // spinner stuck for its full 30s timeout.
-    AppSnackbar.loading(context, l10n.generatingLink);
+    // (static), so it is shown from the page and never guarded on mounted.
+    AppSnackbar.loading(pageContext, l10n.generatingLink);
 
     ShareLinkInfo? link;
+    var photosLeftOut = 0;
     try {
-      // Cap the whole thing so a slow/unresponsive server can never leave the
-      // spinner stuck — fall back to a plain share instead.
-      final snapshot = await _buildSnapshot().timeout(const Duration(seconds: 45));
+      // Photos go up a few at a time; ones not up in time are left out, so
+      // a slow connection costs photos, not the link.
+      final snapshot = await ShareSnapshotBuilder(ref.read(databaseProvider)).recipe(recipe);
+      photosLeftOut = snapshot.photosLeftOut;
       link = await FamilyService.instance
-          .createShareLink('recipe', recipe.id, snapshot: snapshot)
+          .createShareLink('recipe', recipe.id, snapshot: snapshot.data)
           .timeout(const Duration(seconds: 20));
     } catch (e) {
       debugPrint('[Share] link generation failed: $e');
     } finally {
-      AppSnackbar.dismiss(context);
+      // dismiss() does not use the context: the spinner must go even when
+      // the page has closed meanwhile.
+      // ignore: use_build_context_synchronously
+      AppSnackbar.dismiss(pageContext);
     }
 
     if (link != null) {
       // share_plus rejects uri + text together — send the link inside the text
       // so the title comes along with it.
-      SharePlus.instance.share(ShareParams(
+      await SharePlus.instance.share(ShareParams(
         text: '${recipe.title}\n${link.url}',
         subject: recipe.title,
         sharePositionOrigin: origin,
       ));
+      if (photosLeftOut > 0 && pageContext.mounted) {
+        AppSnackbar.info(pageContext, l10n.shareLinkPhotosLeftOut(photosLeftOut));
+      }
       return;
     }
 
-    // Signed in but link creation failed — degrade to the source URL if we have
-    // one, otherwise a plain title share.
-    final hasSourceUrl = recipe.sourceUrl != null && recipe.sourceUrl!.isNotEmpty;
-    SharePlus.instance.share(ShareParams(
-      text: hasSourceUrl
-          ? '${recipe.title}\n${recipe.sourceUrl!}'
-          : '${recipe.title}\n\n${l10n.shareFromApp}',
-      subject: recipe.title,
-      sharePositionOrigin: origin,
-    ));
+    if (!pageContext.mounted) return;
+    final choice = await showDialog<_LinkFailedChoice>(
+      context: pageContext,
+      builder: (ctx) {
+        final dl10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          icon: const Icon(Icons.link_off_rounded),
+          title: Text(dl10n.shareLinkFailedTitle),
+          content: Text(dl10n.shareLinkFailedBody),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(dl10n.actionCancel)),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, _LinkFailedChoice.text),
+              child: Text(dl10n.shareLinkShareAsText),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, _LinkFailedChoice.retry),
+              child: Text(dl10n.actionRetry),
+            ),
+          ],
+        );
+      },
+    );
+    switch (choice) {
+      case _LinkFailedChoice.retry:
+        await _createAndShareLink(l10n, origin);
+      case _LinkFailedChoice.text:
+        await _shareText(l10n, origin);
+      case null:
+        break;
+    }
   }
 
   /// Prompt sign-in (Google / Apple) so the user can create a share link.
@@ -273,104 +287,15 @@ class _RecipeShareSheet extends StatelessWidget {
     );
   }
 
-  /// Build a self-contained snapshot of this recipe for a share link, uploading
-  /// its local photos to the server (best-effort) so the shared copy shows
-  /// images. A failed image upload just leaves that image null (text still works).
-  Future<Map<String, dynamic>> _buildSnapshot() async {
-    final dao = ref.read(recipeDaoProvider);
-    final images = ImageService.instance;
-
-    Future<String?> upload(String? path) async {
-      if (path == null || path.isEmpty) return null;
-      try {
-        final r = await images
-            .communityUploadLocalPath(path)
-            .timeout(const Duration(seconds: 20));
-        return r.result?.path;
-      } catch (e) {
-        debugPrint('[Share] image upload skipped: $e');
-        return null; // best-effort: recipe still shares without this photo
-      }
-    }
-
-    // Snapshot one recipe (ingredients, steps, uploaded images).
-    Future<Map<String, dynamic>> snapOne(Recipe r) async {
-      final ings = await dao.getIngredientsForRecipe(r.id);
-      final steps = await dao.getStepsForRecipe(r.id);
-      final coverPath = await upload(r.imagePath);
-      final stepPaths = <String, String?>{};
-      for (final s in steps) {
-        stepPaths[s.id] = await upload(s.imagePath);
-      }
-      return {
-        'id': r.id,
-        'title': r.title,
-        'description': r.description,
-        'servings': r.servings,
-        'prepTimeMinutes': r.prepTimeMinutes,
-        'cookTimeMinutes': r.cookTimeMinutes,
-        'sourceUrl': r.sourceUrl,
-        'imagePath': coverPath,
-        'courseId': r.courseId,
-        'categoryId': r.categoryId,
-        'rating': r.rating,
-        'notes': r.notes,
-        'nutritionJson': r.nutritionJson,
-        'ingredients': ings
-            .map((i) => {
-                  'sortOrder': i.sortOrder,
-                  'amount': i.amount,
-                  'unit': i.unit,
-                  'name': i.name,
-                  'notes': i.notes,
-                })
-            .toList(),
-        'steps': steps
-            .map((s) => {
-                  'sortOrder': s.sortOrder,
-                  'instruction': s.instruction,
-                  'durationMinutes': s.durationMinutes,
-                  'notes': s.notes,
-                  'imagePath': stepPaths[s.id],
-                })
-            .toList(),
-      };
-    }
-
-    final snapshot = await snapOne(recipe);
-
-    // Include up to 6 linked sub-recipes so the shared copy is self-contained.
-    final ings = await dao.getIngredientsForRecipe(recipe.id);
-    final ingIdToName = {for (final i in ings) i.id: i.name};
-    final linkMap = await dao.getIngredientLinksMap(recipe.id);
-    final subs = <String, Recipe>{};
-    final links = <Map<String, dynamic>>[];
-    for (final entry in linkMap.entries) {
-      final ingName = ingIdToName[entry.key];
-      for (final info in entry.value) {
-        subs[info.recipe.id] = info.recipe;
-        links.add({'ingredientName': ingName, 'title': info.recipe.title, 'subId': info.recipe.id});
-      }
-    }
-    final capped = subs.values.take(6).toList();
-    if (capped.isNotEmpty) {
-      final linkedSnaps = <Map<String, dynamic>>[];
-      for (final sub in capped) {
-        linkedSnaps.add(await snapOne(sub));
-      }
-      final cappedIds = capped.map((r) => r.id).toSet();
-      snapshot['linkedRecipes'] = linkedSnaps;
-      snapshot['links'] = links.where((l) => cappedIds.contains(l['subId'])).toList();
-    }
-
-    return snapshot;
-  }
-
   Future<void> _shareAsText(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final origin = shareOrigin(context);
     Navigator.pop(context);
+    await _shareText(l10n, origin);
+  }
 
+  /// Shares the whole recipe as text (with its linked recipes).
+  Future<void> _shareText(AppLocalizations l10n, Rect? origin) async {
     final dao = ref.read(recipeDaoProvider);
     final ingredients = await dao.getIngredientsForRecipe(recipe.id);
     final steps = await dao.getStepsForRecipe(recipe.id);
@@ -688,7 +613,11 @@ class _RecipeShareSheet extends StatelessWidget {
       AppLocalizations l10n, {
         List<_LinkedRecipeData> linkedRecipes = const [],
       }) async {
-    final theme = await _loadPdfTheme();
+    final theme = await _loadPdfTheme([
+      for (final r in [recipe, for (final l in linkedRecipes) l.recipe]) ...[r.title, r.description ?? '', r.notes ?? ''],
+      for (final i in [...ingredients, for (final l in linkedRecipes) ...l.ingredients]) i.name,
+      for (final s in [...steps, for (final l in linkedRecipes) ...l.steps]) s.instruction,
+    ].join('\n'), l10n);
     final pdf = pw.Document(theme: theme);
 
     pdf.addPage(
@@ -915,6 +844,9 @@ class _LinkedRecipeData {
     required this.steps,
   });
 }
+
+/// What to do when a share link could not be made.
+enum _LinkFailedChoice { retry, text }
 
 class _ShareOption extends StatelessWidget {
   final IconData icon;

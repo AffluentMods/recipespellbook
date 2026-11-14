@@ -115,10 +115,16 @@ final shoppingListCountsProvider = StreamProvider<Map<String, int>>((ref) {
   return dao.watchUncheckedCountsByList();
 });
 
+/// The id of the default shopping list (see ShoppingDao.defaultListId).
+final defaultShoppingListIdProvider = StreamProvider<String>((ref) {
+  return ref.watch(shoppingDaoProvider).watchDefaultListId();
+});
+
 /// Default shopping list items
 final defaultShoppingItemsProvider = StreamProvider<List<ShoppingListItem>>((ref) {
   final dao = ref.watch(shoppingDaoProvider);
-  return dao.watchItemsInList('list_default');
+  final listId = ref.watch(defaultShoppingListIdProvider).valueOrNull ?? 'list_default';
+  return dao.watchItemsInList(listId);
 });
 
 /// Shopping categories stream

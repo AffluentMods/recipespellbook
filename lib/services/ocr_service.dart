@@ -1,4 +1,6 @@
+import 'dart:math' as math;
 import 'dart:ui' show Rect;
+import 'package:flutter/foundation.dart' show compute, visibleForTesting;
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../utils/platform_utils.dart';
 import 'ocr_stub.dart' if (dart.library.io) 'ocr_native.dart';
@@ -30,6 +32,11 @@ class OcrResult {
   /// when a recipe spans more than one page.
   final List<double> pageImageScores;
 
+  /// For PDFs: the temporary folder that holds [pageImagePaths]. Saving a
+  /// recipe copies the photo it keeps; the folder is the caller's to delete
+  /// once the recipes are saved or the import is given up.
+  final String? workFolder;
+
   const OcrResult({
     required this.text,
     required this.confidence,
@@ -38,6 +45,7 @@ class OcrResult {
     this.pageImagePaths = const [],
     this.pageStartLines = const [],
     this.pageImageScores = const [],
+    this.workFolder,
   });
 
   bool get isEmpty => text.trim().isEmpty;
@@ -143,13 +151,13 @@ class OcrService {
     }
     final document = await PdfDocument.openFile(pdfPath);
 
-    // Save page renders to a permanent app-docs location so they can be
-    // reused as recipe cover images later. Each PDF import gets its own
-    // subfolder keyed by the source filename + timestamp to avoid collisions.
-    final appDir = await getApplicationDocumentsDirectory();
+    // Page renders and the photos cut out of them go to a temporary folder
+    // of this import. Only the photos the saved recipes keep are copied
+    // into the app's storage; the caller deletes the folder after that.
+    final tempDir = await getTemporaryDirectory();
     final stamp = DateTime.now().millisecondsSinceEpoch;
     final baseName = p.basenameWithoutExtension(pdfPath).replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
-    final outputDir = Directory(p.join(appDir.path, 'images', 'imported_pdf', '${baseName}_$stamp'));
+    final outputDir = Directory(p.join(tempDir.path, 'imported_pdf', '${baseName}_$stamp'));
     await outputDir.create(recursive: true);
 
     final textRecognizer = TextRecognizer();
@@ -169,9 +177,10 @@ class OcrService {
         onProgress?.call(pageNum, document.pagesCount);
 
         final page = await document.getPage(pageNum);
+        final scale = pdfRenderScale(page.width, page.height);
         final pageImage = await page.render(
-          width: page.width * 2,
-          height: page.height * 2,
+          width: page.width * scale,
+          height: page.height * scale,
           format: PdfPageImageFormat.png,
         );
         await page.close();
@@ -205,14 +214,17 @@ class OcrService {
           }
 
           // Try to extract the food photo. We DON'T fall back to the full
-          // page render — better to have no cover than show a wall of text.
+          // page render: better to have no cover than show a wall of text.
           // The recipe assignment can look at neighboring pages if this one
-          // has no photo.
-          final extracted = await _extractPhotoFromPage(
-            sourcePath: fullPagePath,
-            outputDir: outputDir,
-            pageNum: pageNum,
-            textBoxes: textBoxes,
+          // has no photo. Decoding, cropping and encoding take long on a
+          // large page, so they run in the background.
+          final extracted = await compute(
+            extractPdfPagePhoto,
+            PdfPhotoJob(
+              sourcePath: fullPagePath,
+              outPath: p.join(outputDir.path, 'page_${pageNum.toString().padLeft(4, '0')}_photo.jpg'),
+              textBoxes: [for (final r in textBoxes) (r.left, r.top, r.right, r.bottom)],
+            ),
           );
 
           pageImagePaths.add(extracted?.path);
@@ -244,173 +256,197 @@ class OcrService {
         pageImagePaths: pageImagePaths,
         pageStartLines: pageStartLines,
         pageImageScores: pageImageScores,
+        workFolder: outputDir.path,
       );
+    } catch (_) {
+      // Nothing will use the photos of a PDF that could not be read.
+      try {
+        await outputDir.delete(recursive: true);
+      } catch (_) {}
+      rethrow;
     } finally {
       await textRecognizer.close();
       await document.close();
     }
   }
+}
 
-  /// Extracts the food photo from a rendered PDF page.
-  ///
-  /// Strategy: find the largest rectangular region NOT covered by any text
-  /// bounding box. If that region has photographic characteristics (high
-  /// color variance, not mostly white), crop it. Returns null if no good
-  /// photo region exists — the caller can look at neighboring pages.
-  Future<({String path, double score})?> _extractPhotoFromPage({
-    required String sourcePath,
-    required Directory outputDir,
-    required int pageNum,
-    required List<Rect> textBoxes,
-  }) async {
-    try {
-      final bytes = await File(sourcePath).readAsBytes();
-      final decoded = img.decodeImage(bytes);
-      if (decoded == null) return null;
+/// How much larger than its size in points a PDF page is rendered: twice,
+/// for sharp text, but never more than [maxSide] pixels on its longer side.
+/// A poster-sized page at twice its size would be a picture of hundreds of
+/// megabytes.
+@visibleForTesting
+double pdfRenderScale(double width, double height, {double maxSide = 2000}) {
+  final longest = math.max(width, height);
+  if (longest <= 0) return 2;
+  return math.min(2.0, maxSide / longest);
+}
 
-      final width = decoded.width;
-      final height = decoded.height;
-      const minPhotoArea = 0.08; // photo must be ≥8% of page area (lowered from 10%)
-      final pageArea = width * height;
+/// What [extractPdfPagePhoto] works on: the rendered page, where the photo
+/// goes, and the boxes of the text recognised on the page, as left, top,
+/// right and bottom in its pixels.
+class PdfPhotoJob {
+  final String sourcePath;
+  final String outPath;
+  final List<(double, double, double, double)> textBoxes;
 
-      // Build a coarse grid (32×32 cells) marking which cells are "text-free".
-      // This is much faster than pixel-perfect rectangle search.
-      const gridW = 32;
-      const gridH = 32;
-      final cellW = width / gridW;
-      final cellH = height / gridH;
-      final isTextCell = List.generate(gridH, (_) => List.filled(gridW, false));
+  const PdfPhotoJob({required this.sourcePath, required this.outPath, required this.textBoxes});
+}
 
-      for (final box in textBoxes) {
-        // Inflate text boxes slightly so we don't pick up regions adjacent to text
-        const padding = 12.0;
-        final left = (box.left - padding).clamp(0.0, width.toDouble());
-        final top = (box.top - padding).clamp(0.0, height.toDouble());
-        final right = (box.right + padding).clamp(0.0, width.toDouble());
-        final bottom = (box.bottom + padding).clamp(0.0, height.toDouble());
+/// Cuts the food photo out of a rendered PDF page and writes it to
+/// [PdfPhotoJob.outPath]. Top level, so it can run in a background isolate.
+///
+/// Strategy: find the largest rectangular region NOT covered by any text
+/// bounding box. If that region has photographic characteristics (high
+/// color variance, not mostly white), crop it. Returns null if no good
+/// photo region exists: the caller can look at neighboring pages.
+Future<({String path, double score})?> extractPdfPagePhoto(PdfPhotoJob job) async {
+  final textBoxes = [for (final (l, t, r, b) in job.textBoxes) Rect.fromLTRB(l, t, r, b)];
+  try {
+    final bytes = await File(job.sourcePath).readAsBytes();
+    final decoded = img.decodeImage(bytes);
+    if (decoded == null) return null;
 
-        final gx0 = (left / cellW).floor().clamp(0, gridW - 1);
-        final gy0 = (top / cellH).floor().clamp(0, gridH - 1);
-        final gx1 = (right / cellW).ceil().clamp(0, gridW);
-        final gy1 = (bottom / cellH).ceil().clamp(0, gridH);
+    final width = decoded.width;
+    final height = decoded.height;
+    const minPhotoArea = 0.08; // photo must be ≥8% of page area (lowered from 10%)
+    final pageArea = width * height;
 
-        for (var y = gy0; y < gy1; y++) {
-          for (var x = gx0; x < gx1; x++) {
-            isTextCell[y][x] = true;
+    // Build a coarse grid (32×32 cells) marking which cells are "text-free".
+    // This is much faster than pixel-perfect rectangle search.
+    const gridW = 32;
+    const gridH = 32;
+    final cellW = width / gridW;
+    final cellH = height / gridH;
+    final isTextCell = List.generate(gridH, (_) => List.filled(gridW, false));
+
+    for (final box in textBoxes) {
+      // Inflate text boxes slightly so we don't pick up regions adjacent to text
+      const padding = 12.0;
+      final left = (box.left - padding).clamp(0.0, width.toDouble());
+      final top = (box.top - padding).clamp(0.0, height.toDouble());
+      final right = (box.right + padding).clamp(0.0, width.toDouble());
+      final bottom = (box.bottom + padding).clamp(0.0, height.toDouble());
+
+      final gx0 = (left / cellW).floor().clamp(0, gridW - 1);
+      final gy0 = (top / cellH).floor().clamp(0, gridH - 1);
+      final gx1 = (right / cellW).ceil().clamp(0, gridW);
+      final gy1 = (bottom / cellH).ceil().clamp(0, gridH);
+
+      for (var y = gy0; y < gy1; y++) {
+        for (var x = gx0; x < gx1; x++) {
+          isTextCell[y][x] = true;
+        }
+      }
+    }
+
+    // Find the largest empty rectangle in the grid using a maximal-rectangle
+    // histogram approach. heights[x] = consecutive empty cells from this row up.
+    final heights = List<int>.filled(gridW, 0);
+    int bestArea = 0;
+    int bestX0 = 0, bestY0 = 0, bestX1 = 0, bestY1 = 0;
+
+    for (var y = 0; y < gridH; y++) {
+      // Update histogram
+      for (var x = 0; x < gridW; x++) {
+        heights[x] = isTextCell[y][x] ? 0 : heights[x] + 1;
+      }
+      // For this histogram row, find the largest rectangle (Bar-histogram method)
+      final stack = <int>[]; // indices
+      for (var x = 0; x <= gridW; x++) {
+        final h = (x == gridW) ? 0 : heights[x];
+        while (stack.isNotEmpty && heights[stack.last] > h) {
+          final top = stack.removeLast();
+          final w = stack.isEmpty ? x : x - stack.last - 1;
+          final area = heights[top] * w;
+          if (area > bestArea) {
+            bestArea = area;
+            bestX0 = stack.isEmpty ? 0 : stack.last + 1;
+            bestY0 = y - heights[top] + 1;
+            bestX1 = x; // exclusive
+            bestY1 = y + 1; // exclusive
           }
         }
-      }
-
-      // Find the largest empty rectangle in the grid using a maximal-rectangle
-      // histogram approach. heights[x] = consecutive empty cells from this row up.
-      final heights = List<int>.filled(gridW, 0);
-      int bestArea = 0;
-      int bestX0 = 0, bestY0 = 0, bestX1 = 0, bestY1 = 0;
-
-      for (var y = 0; y < gridH; y++) {
-        // Update histogram
-        for (var x = 0; x < gridW; x++) {
-          heights[x] = isTextCell[y][x] ? 0 : heights[x] + 1;
-        }
-        // For this histogram row, find the largest rectangle (Bar-histogram method)
-        final stack = <int>[]; // indices
-        for (var x = 0; x <= gridW; x++) {
-          final h = (x == gridW) ? 0 : heights[x];
-          while (stack.isNotEmpty && heights[stack.last] > h) {
-            final top = stack.removeLast();
-            final w = stack.isEmpty ? x : x - stack.last - 1;
-            final area = heights[top] * w;
-            if (area > bestArea) {
-              bestArea = area;
-              bestX0 = stack.isEmpty ? 0 : stack.last + 1;
-              bestY0 = y - heights[top] + 1;
-              bestX1 = x; // exclusive
-              bestY1 = y + 1; // exclusive
-            }
-          }
-          stack.add(x);
-        }
-      }
-
-      // Convert grid coords to pixel coords
-      final px0 = (bestX0 * cellW).round();
-      final py0 = (bestY0 * cellH).round();
-      final px1 = (bestX1 * cellW).round().clamp(0, width);
-      final py1 = (bestY1 * cellH).round().clamp(0, height);
-      final cropW = px1 - px0;
-      final cropH = py1 - py0;
-
-      if (cropW < 100 || cropH < 100) return null;
-      final areaRatio = (cropW * cropH) / pageArea;
-      if (areaRatio < minPhotoArea) return null;
-      // Tighter aspect ratio — food photos are 0.5–2.0, not super wide/tall
-      final aspect = cropW / cropH;
-      if (aspect < 0.5 || aspect > 2.5) return null;
-
-      // Verify the region is photographic (not blank white or solid color)
-      final cropped = img.copyCrop(decoded, x: px0, y: py0, width: cropW, height: cropH);
-      final variance = _photoVariance(cropped);
-      if (variance < 0) return null; // hard reject (mostly white)
-
-      // Score: combine area ratio (0-1) with normalized variance (0-1)
-      // — bigger + more colorful = better photo confidence
-      final score = areaRatio + (variance / 765.0); // 765 = max possible RGB range sum
-
-      // Encode and save
-      final outPath = p.join(outputDir.path, 'page_${pageNum.toString().padLeft(4, '0')}_photo.jpg');
-      final jpegBytes = img.encodeJpg(cropped, quality: 88);
-      await File(outPath).writeAsBytes(jpegBytes);
-      return (path: outPath, score: score);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Returns the total RGB channel range of an image as a "photographic-ness"
-  /// score, or -1 if the image is mostly blank/white space.
-  ///
-  /// Score interpretation:
-  ///   < 0    → reject (blank or near-white)
-  ///   < 120  → low confidence (solid color / simple graphic)
-  ///   ≥ 120  → likely photographic
-  ///   ≥ 300  → strong photographic signal
-  ///
-  /// Range is 0-765 (sum of R, G, B channel ranges, each 0-255).
-  int _photoVariance(img.Image image) {
-    int sampleCount = 0;
-    int brightSamples = 0;
-    final rs = <int>[], gs = <int>[], bs = <int>[];
-
-    final stepX = (image.width / 20).floor().clamp(1, image.width);
-    final stepY = (image.height / 20).floor().clamp(1, image.height);
-
-    for (var y = 0; y < image.height; y += stepY) {
-      for (var x = 0; x < image.width; x += stepX) {
-        final pixel = image.getPixel(x, y);
-        final r = pixel.r.toInt();
-        final g = pixel.g.toInt();
-        final b = pixel.b.toInt();
-        rs.add(r); gs.add(g); bs.add(b);
-        if (r > 240 && g > 240 && b > 240) brightSamples++;
-        sampleCount++;
+        stack.add(x);
       }
     }
 
-    if (sampleCount == 0) return -1;
-    // Reject if >80% of samples are near-white (was 85% — tightened)
-    if (brightSamples / sampleCount > 0.80) return -1;
+    // Convert grid coords to pixel coords
+    final px0 = (bestX0 * cellW).round();
+    final py0 = (bestY0 * cellH).round();
+    final px1 = (bestX1 * cellW).round().clamp(0, width);
+    final py1 = (bestY1 * cellH).round().clamp(0, height);
+    final cropW = px1 - px0;
+    final cropH = py1 - py0;
 
-    int channelRange(List<int> vals) {
-      if (vals.isEmpty) return 0;
-      var lo = 255, hi = 0;
-      for (final v in vals) {
-        if (v < lo) lo = v;
-        if (v > hi) hi = v;
-      }
-      return hi - lo;
-    }
+    if (cropW < 100 || cropH < 100) return null;
+    final areaRatio = (cropW * cropH) / pageArea;
+    if (areaRatio < minPhotoArea) return null;
+    // Tighter aspect ratio — food photos are 0.5–2.0, not super wide/tall
+    final aspect = cropW / cropH;
+    if (aspect < 0.5 || aspect > 2.5) return null;
 
-    return channelRange(rs) + channelRange(gs) + channelRange(bs);
+    // Verify the region is photographic (not blank white or solid color)
+    final cropped = img.copyCrop(decoded, x: px0, y: py0, width: cropW, height: cropH);
+    final variance = _photoVariance(cropped);
+    if (variance < 0) return null; // hard reject (mostly white)
+
+    // Score: combine area ratio (0-1) with normalized variance (0-1)
+    // — bigger + more colorful = better photo confidence
+    final score = areaRatio + (variance / 765.0); // 765 = max possible RGB range sum
+
+    // Encode and save
+    final jpegBytes = img.encodeJpg(cropped, quality: 88);
+    await File(job.outPath).writeAsBytes(jpegBytes);
+    return (path: job.outPath, score: score);
+  } catch (_) {
+    return null;
   }
 }
 
+/// Returns the total RGB channel range of an image as a "photographic-ness"
+/// score, or -1 if the image is mostly blank/white space.
+///
+/// Score interpretation:
+///   < 0    → reject (blank or near-white)
+///   < 120  → low confidence (solid color / simple graphic)
+///   ≥ 120  → likely photographic
+///   ≥ 300  → strong photographic signal
+///
+/// Range is 0-765 (sum of R, G, B channel ranges, each 0-255).
+int _photoVariance(img.Image image) {
+  int sampleCount = 0;
+  int brightSamples = 0;
+  final rs = <int>[], gs = <int>[], bs = <int>[];
+
+  final stepX = (image.width / 20).floor().clamp(1, image.width);
+  final stepY = (image.height / 20).floor().clamp(1, image.height);
+
+  for (var y = 0; y < image.height; y += stepY) {
+    for (var x = 0; x < image.width; x += stepX) {
+      final pixel = image.getPixel(x, y);
+      final r = pixel.r.toInt();
+      final g = pixel.g.toInt();
+      final b = pixel.b.toInt();
+      rs.add(r); gs.add(g); bs.add(b);
+      if (r > 240 && g > 240 && b > 240) brightSamples++;
+      sampleCount++;
+    }
+  }
+
+  if (sampleCount == 0) return -1;
+  // Reject if >80% of samples are near-white (was 85% — tightened)
+  if (brightSamples / sampleCount > 0.80) return -1;
+
+  int channelRange(List<int> vals) {
+    if (vals.isEmpty) return 0;
+    var lo = 255, hi = 0;
+    for (final v in vals) {
+      if (v < lo) lo = v;
+      if (v > hi) hi = v;
+    }
+    return hi - lo;
+  }
+
+  return channelRange(rs) + channelRange(gs) + channelRange(bs);
+}

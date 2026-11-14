@@ -12,7 +12,9 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
 
   Stream<List<MealPlanWithRecipe>> watchMealPlansWithRecipesForDate(DateTime date) {
     final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    // The next midnight by the calendar: a day is 23 or 25 hours long when
+    // the clocks change, and adding 24 hours missed or doubled a meal.
+    final endOfDay = DateTime(date.year, date.month, date.day + 1);
 
     final query = select(mealPlans).join([
       leftOuterJoin(recipes, recipes.id.equalsExp(mealPlans.recipeId)),
@@ -134,7 +136,9 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
 
   Stream<List<MealPlan>> watchMealPlansForDate(String cookbookId, DateTime date) {
     final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    // The next midnight by the calendar: a day is 23 or 25 hours long when
+    // the clocks change, and adding 24 hours missed or doubled a meal.
+    final endOfDay = DateTime(date.year, date.month, date.day + 1);
 
     return (select(mealPlans)
       ..where((t) => t.date.isBiggerOrEqualValue(startOfDay))

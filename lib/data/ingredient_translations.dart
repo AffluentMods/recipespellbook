@@ -4,41 +4,151 @@ library;
 
 /// Translates an ingredient name to English for USDA lookup
 /// Returns the original name if no translation found
+///
+/// The longest name the table knows that the ingredient holds wins, so
+/// "salsa de soja oscura" is soy sauce and not the salt of "sal". A name
+/// has to stand as whole words: the "ei" (egg) inside "Weißwein" is no egg.
+/// A word may carry a plural ending ("tomates", "Zwiebeln"), and German and
+/// Dutch name a food at the end of a compound ("Rinderhackfleisch" is
+/// Hackfleisch). Chinese and Japanese have no spaces between words, and
+/// Korean joins nouns, so there a name is found anywhere in the text.
 String translateIngredientToEnglish(String ingredient, String languageCode) {
   if (languageCode == 'en') return ingredient;
+  final match = _translationIn(ingredient, languageCode);
+  return match?.value ?? ingredient;
+}
 
-  final lowerIngredient = ingredient.toLowerCase().trim();
+/// The language the ingredient names of one recipe are written in, for
+/// [translateIngredientToEnglish]. A recipe is in the language of the site
+/// or the book it came from, not always in the app's: the script tells
+/// Russian, Korean, Japanese and Chinese, and among the languages written
+/// in Latin letters the one whose food names the recipe uses most. With
+/// nothing to tell, it is [appLanguage].
+String ingredientLanguageOf(Iterable<String> names, {required String appLanguage}) {
+  final list = [for (final n in names) if (n.trim().isNotEmpty) n];
+  if (list.isEmpty) return appLanguage;
+  final text = list.join(' ');
+  if (_hangul.hasMatch(text)) return 'ko';
+  if (_kana.hasMatch(text)) return 'ja';
+  if (_han.hasMatch(text)) return appLanguage == 'ja' ? 'ja' : 'zh';
+  if (_cyrillic.hasMatch(text)) return 'ru';
 
-  final translations = switch (languageCode) {
-    'de' => _germanToEnglish,
-    'es' => _spanishToEnglish,
-    'fr' => _frenchToEnglish,
-    'it' => _italianToEnglish,
-    'pt' => _portugueseToEnglish,
-    'nl' => _dutchToEnglish,
-    'pl' => _polishToEnglish,
-    'ru' => _russianToEnglish,
-    'ja' => _japaneseToEnglish,
-    'ko' => _koreanToEnglish,
-    'zh' => _chineseToEnglish,
-    _ => <String, String>{},
-  };
-
-  // Direct match
-  if (translations.containsKey(lowerIngredient)) {
-    return translations[lowerIngredient]!;
-  }
-
-  // Try partial match (ingredient might have additional words)
-  for (final entry in translations.entries) {
-    if (lowerIngredient.contains(entry.key) || entry.key.contains(lowerIngredient)) {
-      return entry.value;
+  // Names that one language's table turns into other English words.
+  int known(String language) => list.where((name) {
+        final match = _translationIn(name, language);
+        return match != null && match.key != match.value;
+      }).length;
+  final counts = {for (final language in _latinLanguages) language: known(language)};
+  final own = counts[appLanguage] ?? 0;
+  var best = appLanguage;
+  var bestCount = own;
+  for (final MapEntry(key: language, value: count) in counts.entries) {
+    if (count > bestCount) {
+      best = language;
+      bestCount = count;
     }
   }
-
-  // No translation found, return original
-  return ingredient;
+  if (best == appLanguage) return appLanguage;
+  // Another language has to say so clearly: an English recipe has the odd
+  // word that is also Spanish or Italian ("salsa", "pasta").
+  final clear = bestCount >= 2 && bestCount * 3 >= list.length && bestCount > own;
+  return clear ? best : appLanguage;
 }
+
+const _latinLanguages = ['de', 'es', 'fr', 'it', 'pt', 'nl', 'pl'];
+final _hangul = RegExp('[가-힯ᄀ-ᇿ㄰-㆏]');
+final _kana = RegExp('[぀-ヿ]');
+final _han = RegExp('[一-鿿㐀-䶿]');
+final _cyrillic = RegExp('[Ѐ-ӿ]');
+
+/// Words of a name: letters only, in lower case.
+final _notLetter = RegExp(r'[^\p{L}\p{M}]+', unicode: true);
+List<String> _wordsOf(String text) =>
+    [for (final w in text.toLowerCase().split(_notLetter)) if (w.isNotEmpty) w];
+
+/// Endings a plural or a declined word adds to the word in the table.
+const _wordEndings = ['s', 'es', 'n', 'en', 'e'];
+
+/// Languages that write a compound as one word with the food at its end.
+const _compounding = {'de', 'nl'};
+
+/// Languages whose names are found anywhere in the text.
+const _unspaced = {'ja', 'ko', 'zh'};
+
+/// One table's entries, longest name first, with each name's words.
+final _sortedTables = <String, List<(MapEntry<String, String>, List<String>)>>{};
+
+List<(MapEntry<String, String>, List<String>)> _sortedTable(String languageCode) =>
+    _sortedTables.putIfAbsent(languageCode, () {
+      final entries = _tableFor(languageCode).entries.toList()
+        ..sort((a, b) => b.key.length.compareTo(a.key.length));
+      return [for (final e in entries) (e, _wordsOf(e.key))];
+    });
+
+/// The entry of [languageCode]'s table that names [ingredient], or null.
+MapEntry<String, String>? _translationIn(String ingredient, String languageCode) {
+  final table = _sortedTable(languageCode);
+  if (table.isEmpty) return null;
+  final lower = ingredient.toLowerCase().trim();
+  if (_unspaced.contains(languageCode)) {
+    for (final (entry, _) in table) {
+      if (lower.contains(entry.key)) return entry;
+    }
+    return null;
+  }
+  final words = _wordsOf(lower);
+  if (words.isEmpty) return null;
+  final compounds = _compounding.contains(languageCode);
+  for (final (entry, keyWords) in table) {
+    if (keyWords.isEmpty) continue;
+    if (_containsWords(words, keyWords)) return entry;
+    if (compounds && keyWords.length == 1) {
+      final key = keyWords.single;
+      if (words.any((w) => w.length > key.length && _endsWithWord(w, key))) return entry;
+    }
+  }
+  return null;
+}
+
+/// Whether [key] is a word of its own, or with a plural ending.
+bool _sameWord(String word, String key) =>
+    word == key || (key.length >= 3 && _wordEndings.any((e) => word == key + e));
+
+/// Whether the compound [word] ends in [key] ("Rapsöl", "Rührei"), or in
+/// [key] with a plural ending. Not a name of two letters with an ending:
+/// "Wein" does not end in the "ei" of an egg.
+bool _endsWithWord(String word, String key) =>
+    word.endsWith(key) || (key.length >= 3 && _wordEndings.any((e) => word.endsWith(key + e)));
+
+/// Whether [words] hold [keyWords] one after the other.
+bool _containsWords(List<String> words, List<String> keyWords) {
+  for (var i = 0; i + keyWords.length <= words.length; i++) {
+    var all = true;
+    for (var j = 0; j < keyWords.length; j++) {
+      if (!_sameWord(words[i + j], keyWords[j])) {
+        all = false;
+        break;
+      }
+    }
+    if (all) return true;
+  }
+  return false;
+}
+
+Map<String, String> _tableFor(String languageCode) => switch (languageCode) {
+      'de' => _germanToEnglish,
+      'es' => _spanishToEnglish,
+      'fr' => _frenchToEnglish,
+      'it' => _italianToEnglish,
+      'pt' => _portugueseToEnglish,
+      'nl' => _dutchToEnglish,
+      'pl' => _polishToEnglish,
+      'ru' => _russianToEnglish,
+      'ja' => _japaneseToEnglish,
+      'ko' => _koreanToEnglish,
+      'zh' => _chineseToEnglish,
+      _ => const <String, String>{},
+    };
 
 /// Get all supported translation language codes
 List<String> getSupportedTranslationLanguages() {
@@ -112,7 +222,10 @@ const _germanToEnglish = <String, String>{
   'hackfleisch': 'ground beef',
   'rinderhack': 'ground beef',
   'schweinefleisch': 'pork',
+  'schwein': 'pork',
   'schweinehack': 'ground pork',
+  'schweinefilet': 'pork tenderloin',
+  'rinderfilet': 'beef tenderloin',
   'lammfleisch': 'lamb',
   'kalbfleisch': 'veal',
   'hühnchen': 'chicken',
@@ -854,6 +967,7 @@ const _dutchToEnglish = <String, String>{
   'olie': 'oil',
   'olijfolie': 'olive oil',
   'ui': 'onion',
+  'uien': 'onions',
   'knoflook': 'garlic',
   'aardappel': 'potato',
   'wortel': 'carrot',
