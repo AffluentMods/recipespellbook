@@ -43,7 +43,7 @@ import 'manage_shopping_categories_screen.dart';
 import 'manage_tags_screen.dart';
 import 'notification_settings_screen.dart';
 import 'nutrition_settings_screen.dart';
-import 'quick_access_settings_screen.dart';
+import 'home_screen_settings_screen.dart';
 import 'trash_screen.dart';
 import '../premium/family_screen.dart';
 import '../../widgets/planned_servings_stepper.dart';
@@ -166,28 +166,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           currentDay: s.weekStartDay,
           onDaySelected: (d) => ref.read(settingsProvider.notifier).setWeekStartDay(d),
         ) : null,
-        _m(l10n.settingsSurpriseMe, 'surprise recipe suggestion') ? SwitchListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-          secondary: _SettingIcon(Icons.auto_fix_high, color: theme.colorScheme.primary),
-          title: Text(l10n.settingsSurpriseMe, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-          subtitle: Text(l10n.settingsSurpriseMeSubtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
-          value: s.showSurpriseMe,
-          onChanged: (v) => ref.read(settingsProvider.notifier).setShowSurpriseMe(v),
+        // Every section of Home, the "What are you craving?" button and what
+        // goes into "Jump back in" (once Settings > Quick Access).
+        _m(l10n.settingsHomeScreen,
+            '${l10n.settingsHomeScreenSubtitle} ${l10n.settingsQuickAccess} ${l10n.settingsSurpriseMe} '
+            '${l10n.cravingCardTitle} ${l10n.homeJumpBackIn} quick access surprise dashboard') ? _Tile(
+          icon: Icons.dashboard_customize_outlined, title: l10n.settingsHomeScreen,
+          subtitle: l10n.settingsHomeScreenSubtitle,
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const HomeScreenSettingsScreen(), maxWidth: 700, maxHeight: 640);
+            } else {
+              context.push(homeScreenSettingsPath);
+            }
+          },
         ) : null,
       ]),
 
       // ─── RECIPES ───
       _section(title: l10n.settingsRecipes, icon: Icons.menu_book_outlined, children: [
-        _m(l10n.settingsQuickAccess) ? _Tile(
-          icon: Icons.bolt, title: l10n.settingsQuickAccess, subtitle: l10n.settingsQuickAccessSubtitle,
-          onTap: () {
-            if (Responsive.isDesktopLayout(context)) {
-              _openSettingsPanel(const QuickAccessSettingsScreen(), maxWidth: 700, maxHeight: 500);
-            } else {
-              context.push('/settings/quick-access');
-            }
-          },
-        ) : null,
         _m(l10n.settingsIngredientLayout) ? _Tile(
           icon: Icons.format_align_left, title: l10n.settingsIngredientLayout,
           subtitle: s.ingredientLayout == IngredientLayout.columnar ? l10n.ingredientLayoutColumnar : l10n.ingredientLayoutInline,

@@ -23184,6 +23184,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{No recipes in {cookbook} use them yet} =1{1 recipe in {cookbook} uses them} other{{count} recipes in {cookbook} use them}}'**
   String pantryCookRecipesInCookbookUsing(int count, String cookbook);
+
+  /// Settings entry and page title: turn the sections of the Home screen on and off.
+  ///
+  /// In en, this message translates to:
+  /// **'Home screen'**
+  String get settingsHomeScreen;
+
+  /// Subtitle of the Home screen entry in Settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what shows on Home'**
+  String get settingsHomeScreenSubtitle;
+
+  /// Top of Settings > Home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off what you do not use to keep Home tidy. The greeting, the search bar and the add button always stay.'**
+  String get homeSettingsIntro;
+
+  /// Group title in Settings > Home screen: the week's meals, the shopping list, what the pantry covers and dinner ideas.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning'**
+  String get homeSettingsGroupPlanning;
+
+  /// Group title in Settings > Home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips and reminders'**
+  String get homeSettingsGroupTips;
+
+  /// Home section switch: the All recipes, Favorites and Cookbooks chips under the search bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Library shortcuts'**
+  String get homeSectionLibraryChips;
+
+  /// No description provided for @homeSectionLibraryChipsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes, Favorites and Cookbooks under the search bar'**
+  String get homeSectionLibraryChipsDesc;
+
+  /// No description provided for @homeSectionNextSevenDaysDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The meals you planned for the week ahead'**
+  String get homeSectionNextSevenDaysDesc;
+
+  /// Home section switch: the shopping list at a glance.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list'**
+  String get homeSectionShoppingList;
+
+  /// No description provided for @homeSectionShoppingListDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'What is still to buy, ticked off with a tap'**
+  String get homeSectionShoppingListDesc;
+
+  /// No description provided for @homeSectionWhatCanIMakeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'How many recipes your pantry covers'**
+  String get homeSectionWhatCanIMakeDesc;
+
+  /// No description provided for @homeSectionDinnerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A few dinner ideas, each with a reason'**
+  String get homeSectionDinnerDesc;
+
+  /// No description provided for @homeSectionJumpBackInDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s meals, pinned and recently viewed recipes'**
+  String get homeSectionJumpBackInDesc;
+
+  /// No description provided for @homeSectionFavoritesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your favorite recipes in a row'**
+  String get homeSectionFavoritesDesc;
+
+  /// Home section switch: the course and category chips to browse the cookbook by.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses and categories'**
+  String get homeSectionBrowse;
+
+  /// No description provided for @homeSectionBrowseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse the cookbook by course and category'**
+  String get homeSectionBrowseDesc;
+
+  /// No description provided for @homeSectionCookbooksDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cookbook shelf, to switch with a tap'**
+  String get homeSectionCookbooksDesc;
+
+  /// No description provided for @homeSectionCravingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A button by the greeting that suggests a recipe for your mood'**
+  String get homeSectionCravingDesc;
+
+  /// Home section switch: the New here? card that points to the how-to guides.
+  ///
+  /// In en, this message translates to:
+  /// **'Guides tip'**
+  String get homeSectionGuides;
+
+  /// No description provided for @homeSectionGuidesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'New here? A card with the how-to guides, until you close it'**
+  String get homeSectionGuidesDesc;
+
+  /// Home section switch: the banner shown when cloud sync is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup reminder'**
+  String get homeSectionBackup;
+
+  /// No description provided for @homeSectionBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A reminder when cloud sync is off and recipes are not backed up'**
+  String get homeSectionBackupDesc;
+
+  /// Home section switch: the Update available notice for a cookbook saved from Community.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook updates'**
+  String get homeSectionCookbookUpdates;
+
+  /// No description provided for @homeSectionCookbookUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A notice when a cookbook from Community has an update'**
+  String get homeSectionCookbookUpdatesDesc;
+
+  /// Under Jump back in in Settings > Home screen: show today's planned recipes in it.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s planned meals'**
+  String get homeJumpBackInMeals;
+
+  /// No description provided for @homeJumpBackInPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned recipes'**
+  String get homeJumpBackInPinned;
+
+  /// No description provided for @homeJumpBackInRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently viewed recipes'**
+  String get homeJumpBackInRecent;
+
+  /// Label of the slider (3 to 20) under Recently viewed recipes in Settings > Home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'How many recently viewed to show'**
+  String get homeJumpBackInRecentCount;
+
+  /// Small text button at the bottom of Home that opens Settings > Home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Home screen'**
+  String get homeEditHomeScreen;
+
+  /// On Home, above Edit Home screen, when every optional section is turned off in Settings > Home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Every section of Home is turned off.'**
+  String get homeAllSectionsHidden;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -39,6 +39,7 @@ import '../pantry_cooking/pantry_cooking_widgets.dart';
 import '../planner/planner_screen.dart'
     show selectedPlannerDateProvider, mealTypeLabel;
 import '../../widgets/guides_tip_card.dart';
+import 'home_edit_button.dart';
 
 /// The phone / tablet home: a dashboard in one scrolling column. A greeting
 /// with the cookbook switcher and search, the library one tap away, then what
@@ -99,6 +100,13 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
     final recipes = recipesAsync.valueOrNull ?? const <Recipe>[];
     final wide = Responsive.useNavRail(context);
     final sideGutter = wide ? Space.xxl : Space.lg;
+    // Settings > Home screen: a section turned off is not built at all, so
+    // it leaves no gap behind.
+    final hidden = ref.watch(settingsProvider.select((s) => s.hiddenHomeSections));
+    bool shows(HomeSection section) => !hidden.contains(section);
+    final showWeek = shows(HomeSection.nextSevenDays);
+    final showShopping = shows(HomeSection.shoppingList);
+    final allHidden = HomeSection.values.every(hidden.contains);
 
     final body = LayoutBuilder(
       builder: (context, constraints) {
@@ -128,79 +136,106 @@ class _MobileHomeState extends ConsumerState<MobileHome> {
           else if (recipes.isEmpty)
             widget.emptyState
           else ...[
-            _LibraryChips(
-              cookbookId: cookbookId,
-              recipeCount: recipes.length,
-              padding: pad,
-            ),
-            CookbookUpdateBanner(
-              cookbook: widget.cookbook,
-              padding: EdgeInsets.fromLTRB(side, Space.sm, side, 0),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: side - Space.lg),
-              child: const BackupReminderBanner(),
-            ),
-            const SizedBox(height: Space.lg),
-            Padding(
-              padding: pad,
-              child: wide
-                  ? IntrinsicHeight(
-                      child: Row(
+            if (shows(HomeSection.libraryChips))
+              _LibraryChips(
+                cookbookId: cookbookId,
+                recipeCount: recipes.length,
+                padding: pad,
+              ),
+            if (shows(HomeSection.cookbookUpdates))
+              CookbookUpdateBanner(
+                cookbook: widget.cookbook,
+                padding: EdgeInsets.fromLTRB(side, Space.sm, side, 0),
+              ),
+            if (shows(HomeSection.backupReminder))
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: side - Space.lg),
+                child: const BackupReminderBanner(),
+              ),
+            if (showWeek || showShopping) ...[
+              const SizedBox(height: Space.lg),
+              Padding(
+                padding: pad,
+                child: !(showWeek && showShopping)
+                    ? (showWeek
+                        ? _WeekPanel(cookbookId: cookbookId)
+                        : const _ShoppingPanel())
+                    : wide
+                    ? IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: _WeekPanel(cookbookId: cookbookId),
+                            ),
+                            const SizedBox(width: Space.lg),
+                            const Expanded(flex: 2, child: _ShoppingPanel()),
+                          ],
+                        ),
+                      )
+                    : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(
-                            flex: 3,
-                            child: _WeekPanel(cookbookId: cookbookId),
-                          ),
-                          const SizedBox(width: Space.lg),
-                          const Expanded(flex: 2, child: _ShoppingPanel()),
+                          _WeekPanel(cookbookId: cookbookId),
+                          const SizedBox(height: Space.md),
+                          const _ShoppingPanel(),
                         ],
                       ),
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _WeekPanel(cookbookId: cookbookId),
-                        const SizedBox(height: Space.md),
-                        const _ShoppingPanel(),
-                      ],
-                    ),
-            ),
+              ),
+            ],
             // New here? The how-to guides, until closed.
-            GuidesTipCard(padding: pad.copyWith(top: Space.md)),
+            if (shows(HomeSection.guidesTip))
+              GuidesTipCard(padding: pad.copyWith(top: Space.md)),
             // Deciding dinner: what the pantry covers, then a few
             // suggestions with the reason for each.
-            Padding(
-              padding: pad.copyWith(top: Space.md),
-              child: const PantryCookingHomeCard(),
-            ),
-            DinnerSuggestionsSection(
-              day: dinnerDay(),
-              padding: EdgeInsets.symmetric(horizontal: side),
-              tileWidth: wide ? 196 : 156,
-              headerBuilder: (context, onShuffle) => _SectionTitle(
-                title: l10n.dinnerTitle,
+            if (shows(HomeSection.whatCanIMake))
+              Padding(
+                padding: pad.copyWith(top: Space.md),
+                child: const PantryCookingHomeCard(),
+              ),
+            if (shows(HomeSection.dinnerIdeas))
+              DinnerSuggestionsSection(
+                day: dinnerDay(),
+                padding: EdgeInsets.symmetric(horizontal: side),
+                tileWidth: wide ? 196 : 156,
+                headerBuilder: (context, onShuffle) => _SectionTitle(
+                  title: l10n.dinnerTitle,
+                  side: side,
+                  onSeeAll: onShuffle,
+                  actionLabel: l10n.dinnerShowOthers,
+                ),
+              ),
+            if (shows(HomeSection.jumpBackIn))
+              _JumpBackInRow(cookbookId: cookbookId, side: side, wide: wide),
+            if (shows(HomeSection.favorites))
+              _RecipeCarousel(
+                title: l10n.favoritesTitle,
+                recipes:
+                    ref.watch(favoriteRecipesProvider).valueOrNull ?? const [],
                 side: side,
-                onSeeAll: onShuffle,
-                actionLabel: l10n.dinnerShowOthers,
+                wide: wide,
+                onSeeAll: () => context.push('/recipes/favorites'),
+              ),
+            if (shows(HomeSection.browse))
+              _BrowseSection(
+                cookbookId: cookbookId,
+                recipes: recipes,
+                side: side,
+              ),
+            if (shows(HomeSection.cookbookShelf))
+              _CookbookShelf(side: side, wide: wide, contentWidth: contentWidth),
+            // "Edit Home screen", and with everything off a word that Home
+            // is clear on purpose.
+            HomeEditButton(
+              allHidden: allHidden,
+              padding: EdgeInsets.fromLTRB(
+                side,
+                allHidden ? Space.huge : Space.xxl,
+                side,
+                0,
               ),
             ),
-            _JumpBackInRow(cookbookId: cookbookId, side: side, wide: wide),
-            _RecipeCarousel(
-              title: l10n.favoritesTitle,
-              recipes:
-                  ref.watch(favoriteRecipesProvider).valueOrNull ?? const [],
-              side: side,
-              wide: wide,
-              onSeeAll: () => context.push('/recipes/favorites'),
-            ),
-            _BrowseSection(
-              cookbookId: cookbookId,
-              recipes: recipes,
-              side: side,
-            ),
-            _CookbookShelf(side: side, wide: wide, contentWidth: contentWidth),
             const SizedBox(height: 112),
           ],
         ];

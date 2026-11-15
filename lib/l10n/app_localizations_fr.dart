@@ -13450,4 +13450,94 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get settingsHomeScreen => 'Écran d\'accueil';
+
+  @override
+  String get settingsHomeScreenSubtitle => 'Choisissez ce qui s\'affiche sur l\'accueil';
+
+  @override
+  String get homeSettingsIntro => 'Désactivez ce que vous n\'utilisez pas pour garder l\'accueil épuré. Le message d\'accueil, la barre de recherche et le bouton d\'ajout restent toujours.';
+
+  @override
+  String get homeSettingsGroupPlanning => 'Planification';
+
+  @override
+  String get homeSettingsGroupTips => 'Conseils et rappels';
+
+  @override
+  String get homeSectionLibraryChips => 'Raccourcis de la bibliothèque';
+
+  @override
+  String get homeSectionLibraryChipsDesc => 'Toutes les recettes, Favoris et Livres de recettes sous la barre de recherche';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => 'Les repas prévus pour la semaine à venir';
+
+  @override
+  String get homeSectionShoppingList => 'Liste de courses';
+
+  @override
+  String get homeSectionShoppingListDesc => 'Ce qu\'il reste à acheter, coché d\'un geste';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => 'Combien de recettes votre garde-manger couvre';
+
+  @override
+  String get homeSectionDinnerDesc => 'Quelques idées de dîner, chacune avec sa raison';
+
+  @override
+  String get homeSectionJumpBackInDesc => 'Repas du jour, recettes épinglées et consultées récemment';
+
+  @override
+  String get homeSectionFavoritesDesc => 'Vos recettes favorites sur une ligne';
+
+  @override
+  String get homeSectionBrowse => 'Types de plats et catégories';
+
+  @override
+  String get homeSectionBrowseDesc => 'Parcourir le livre par type de plat et catégorie';
+
+  @override
+  String get homeSectionCookbooksDesc => 'Votre étagère de livres de recettes, pour changer d\'un geste';
+
+  @override
+  String get homeSectionCravingDesc => 'Un bouton près du message d\'accueil qui propose une recette selon vos envies';
+
+  @override
+  String get homeSectionGuides => 'Astuce des guides';
+
+  @override
+  String get homeSectionGuidesDesc => 'Nouveau ici ? Une carte avec les guides, jusqu\'à ce que vous la fermiez';
+
+  @override
+  String get homeSectionBackup => 'Rappel de sauvegarde';
+
+  @override
+  String get homeSectionBackupDesc => 'Un rappel quand la synchronisation cloud est désactivée et que les recettes ne sont pas sauvegardées';
+
+  @override
+  String get homeSectionCookbookUpdates => 'Mises à jour des livres';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => 'Un avis quand un livre de recettes de la Communauté a une mise à jour';
+
+  @override
+  String get homeJumpBackInMeals => 'Repas prévus aujourd\'hui';
+
+  @override
+  String get homeJumpBackInPinned => 'Recettes épinglées';
+
+  @override
+  String get homeJumpBackInRecent => 'Recettes consultées récemment';
+
+  @override
+  String get homeJumpBackInRecentCount => 'Nombre de recettes récentes à afficher';
+
+  @override
+  String get homeEditHomeScreen => 'Modifier l\'écran d\'accueil';
+
+  @override
+  String get homeAllSectionsHidden => 'Toutes les sections de l\'accueil sont désactivées.';
 }

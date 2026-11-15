@@ -13437,4 +13437,94 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get settingsHomeScreen => 'Tela inicial';
+
+  @override
+  String get settingsHomeScreenSubtitle => 'Escolha o que aparece no Início';
+
+  @override
+  String get homeSettingsIntro => 'Desative o que você não usa para manter o Início organizado. A saudação, a barra de pesquisa e o botão de adicionar sempre ficam.';
+
+  @override
+  String get homeSettingsGroupPlanning => 'Planejamento';
+
+  @override
+  String get homeSettingsGroupTips => 'Dicas e lembretes';
+
+  @override
+  String get homeSectionLibraryChips => 'Atalhos da biblioteca';
+
+  @override
+  String get homeSectionLibraryChipsDesc => 'Todas as receitas, Favoritos e Livros de receitas abaixo da barra de pesquisa';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => 'As refeições planejadas para a próxima semana';
+
+  @override
+  String get homeSectionShoppingList => 'Lista de compras';
+
+  @override
+  String get homeSectionShoppingListDesc => 'O que falta comprar, marcado com um toque';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => 'Quantas receitas sua despensa cobre';
+
+  @override
+  String get homeSectionDinnerDesc => 'Algumas ideias para o jantar, cada uma com um motivo';
+
+  @override
+  String get homeSectionJumpBackInDesc => 'Refeições de hoje, receitas fixadas e vistas recentemente';
+
+  @override
+  String get homeSectionFavoritesDesc => 'Suas receitas favoritas em uma fileira';
+
+  @override
+  String get homeSectionBrowse => 'Tipos de prato e categorias';
+
+  @override
+  String get homeSectionBrowseDesc => 'Navegue pelo livro por tipo de prato e categoria';
+
+  @override
+  String get homeSectionCookbooksDesc => 'Sua estante de livros de receitas, para trocar com um toque';
+
+  @override
+  String get homeSectionCravingDesc => 'Um botão ao lado da saudação que sugere uma receita para a sua vontade';
+
+  @override
+  String get homeSectionGuides => 'Dica dos guias';
+
+  @override
+  String get homeSectionGuidesDesc => 'É novo por aqui? Um cartão com os guias, até você fechá-lo';
+
+  @override
+  String get homeSectionBackup => 'Lembrete de backup';
+
+  @override
+  String get homeSectionBackupDesc => 'Um lembrete quando a sincronização na nuvem está desativada e as receitas não têm backup';
+
+  @override
+  String get homeSectionCookbookUpdates => 'Atualizações de livros';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => 'Um aviso quando um livro de receitas da Comunidade tem uma atualização';
+
+  @override
+  String get homeJumpBackInMeals => 'Refeições planejadas para hoje';
+
+  @override
+  String get homeJumpBackInPinned => 'Receitas fixadas';
+
+  @override
+  String get homeJumpBackInRecent => 'Receitas vistas recentemente';
+
+  @override
+  String get homeJumpBackInRecentCount => 'Quantas receitas recentes mostrar';
+
+  @override
+  String get homeEditHomeScreen => 'Editar tela inicial';
+
+  @override
+  String get homeAllSectionsHidden => 'Todas as seções do Início estão desativadas.';
 }

@@ -35,6 +35,7 @@ import '../cookbooks/cookbook_update_sheet.dart';
 import '../craving/craving_screen.dart';
 import '../pantry_cooking/pantry_cooking_widgets.dart';
 import '../../widgets/guides_tip_card.dart';
+import 'home_edit_button.dart';
 
 /// The desktop home: a dashboard that uses the width instead of stretching the
 /// phone stack. A glance row (the next seven days of meals beside the shopping
@@ -74,6 +75,14 @@ class DesktopHome extends ConsumerWidget {
     // shared with the user as view-only.
     ref.watch(collabRevisionProvider);
     final canScan = supportsBookScan && cookbook != null && canAddRecipesTo(cookbook!.id);
+    // Settings > Home screen: a section turned off is not built at all, so
+    // it leaves no gap behind. The library chips are a phone row; here the
+    // sidebar has them.
+    final hidden = ref.watch(settingsProvider.select((s) => s.hiddenHomeSections));
+    bool shows(HomeSection section) => !hidden.contains(section);
+    final showWeek = shows(HomeSection.nextSevenDays);
+    final showShopping = shows(HomeSection.shoppingList);
+    final allHidden = HomeSection.values.every((s) => s == HomeSection.libraryChips || hidden.contains(s));
 
     final subtitle = [
       cookbook?.name ?? l10n.appTitle,
@@ -130,61 +139,79 @@ class DesktopHome extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        CookbookUpdateBanner(
-                          cookbook: cookbook,
-                          padding: const EdgeInsets.only(bottom: Space.lg),
-                        ),
-                        const BackupReminderBanner(),
-                        if (stackGlance) ...[
-                          SizedBox(height: 232, child: _WeekGlanceCard()),
-                          const SizedBox(height: Space.lg),
-                          const SizedBox(height: 232, child: _ShoppingGlanceCard()),
-                        ] else
-                          SizedBox(
-                            height: 244,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(flex: 3, child: _WeekGlanceCard()),
-                                const SizedBox(width: Space.lg),
-                                const Expanded(flex: 2, child: _ShoppingGlanceCard()),
-                              ],
-                            ),
+                        if (shows(HomeSection.cookbookUpdates))
+                          CookbookUpdateBanner(
+                            cookbook: cookbook,
+                            padding: const EdgeInsets.only(bottom: Space.lg),
                           ),
+                        if (shows(HomeSection.backupReminder)) const BackupReminderBanner(),
+                        if (showWeek && showShopping) ...[
+                          if (stackGlance) ...[
+                            SizedBox(height: 232, child: _WeekGlanceCard()),
+                            const SizedBox(height: Space.lg),
+                            const SizedBox(height: 232, child: _ShoppingGlanceCard()),
+                          ] else
+                            SizedBox(
+                              height: 244,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(flex: 3, child: _WeekGlanceCard()),
+                                  const SizedBox(width: Space.lg),
+                                  const Expanded(flex: 2, child: _ShoppingGlanceCard()),
+                                ],
+                              ),
+                            ),
+                        ] else if (showWeek)
+                          SizedBox(height: stackGlance ? 232 : 244, child: _WeekGlanceCard())
+                        else if (showShopping)
+                          SizedBox(height: stackGlance ? 232 : 244, child: const _ShoppingGlanceCard()),
                         // New here? The how-to guides, until closed.
-                        const GuidesTipCard(padding: EdgeInsets.only(top: Space.lg)),
+                        if (shows(HomeSection.guidesTip))
+                          const GuidesTipCard(padding: EdgeInsets.only(top: Space.lg)),
                         // Deciding dinner: what the pantry covers, then a few
                         // suggestions with the reason for each.
-                        const SizedBox(height: Space.lg),
-                        const PantryCookingHomeCard(),
-                        DinnerSuggestionsSection(
-                          day: dinnerDay(),
-                          fitWidth: width,
-                          headerBuilder: (context, onShuffle) => _SectionTitle(
-                            title: l10n.dinnerTitle,
-                            onSeeAll: onShuffle,
-                            actionLabel: l10n.dinnerShowOthers,
+                        if (shows(HomeSection.whatCanIMake)) ...[
+                          const SizedBox(height: Space.lg),
+                          const PantryCookingHomeCard(),
+                        ],
+                        if (shows(HomeSection.dinnerIdeas))
+                          DinnerSuggestionsSection(
+                            day: dinnerDay(),
+                            fitWidth: width,
+                            headerBuilder: (context, onShuffle) => _SectionTitle(
+                              title: l10n.dinnerTitle,
+                              onSeeAll: onShuffle,
+                              actionLabel: l10n.dinnerShowOthers,
+                            ),
                           ),
-                        ),
                         // Same Quick Access sources and settings as the phone.
-                        _RecipeRowSection(
-                          title: l10n.homeJumpBackIn,
-                          recipes: [
-                            for (final i in ref.watch(jumpBackInProvider(cookbookId)).valueOrNull ??
-                                const <QuickAccessItem>[])
-                              i.recipe,
-                          ],
-                          width: width,
-                          onSeeAll: () => context.push('/recipes/quick-access'),
+                        if (shows(HomeSection.jumpBackIn))
+                          _RecipeRowSection(
+                            title: l10n.homeJumpBackIn,
+                            recipes: [
+                              for (final i in ref.watch(jumpBackInProvider(cookbookId)).valueOrNull ??
+                                  const <QuickAccessItem>[])
+                                i.recipe,
+                            ],
+                            width: width,
+                            onSeeAll: () => context.push('/recipes/quick-access'),
+                          ),
+                        if (shows(HomeSection.favorites))
+                          _RecipeRowSection(
+                            title: l10n.favoritesTitle,
+                            recipes: ref.watch(favoriteRecipesProvider).valueOrNull ?? const [],
+                            width: width,
+                            onSeeAll: () => goToDestination(ref, ShellDestination.favorites),
+                          ),
+                        if (shows(HomeSection.browse)) _BrowseSection(recipes: recipes, cookbookId: cookbookId),
+                        if (shows(HomeSection.cookbookShelf)) _CookbookShelf(width: width),
+                        // "Edit Home screen", and with everything off a word
+                        // that Home is clear on purpose.
+                        HomeEditButton(
+                          allHidden: allHidden,
+                          padding: EdgeInsets.only(top: allHidden ? Space.huge : Space.xxl),
                         ),
-                        _RecipeRowSection(
-                          title: l10n.favoritesTitle,
-                          recipes: ref.watch(favoriteRecipesProvider).valueOrNull ?? const [],
-                          width: width,
-                          onSeeAll: () => goToDestination(ref, ShellDestination.favorites),
-                        ),
-                        _BrowseSection(recipes: recipes, cookbookId: cookbookId),
-                        _CookbookShelf(width: width),
                       ],
                     ),
                   );

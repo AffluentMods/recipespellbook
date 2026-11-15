@@ -1,6 +1,6 @@
 // "Jump back in" on the home screen (phone and desktop) shows today's planned
-// recipes, pinned ones and recently viewed ones, each part switched by
-// Settings > Quick Access.
+// recipes, pinned ones and recently viewed ones, each part switched under
+// "Jump back in" in Settings > Home screen.
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
