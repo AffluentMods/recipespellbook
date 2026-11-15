@@ -5055,5 +5055,6 @@
   "webImportPageTooLarge": "Рецепт не найден: эта страница слишком велика для чтения.",
   "webImportUnreadableEncoding": "Эта страница использует кодировку текста ({charset}), которую приложение не может прочитать.",
   "webImportNoRecipeInVideo": "В описании этого видео рецепт не найден.",
-  "webImportTimedOut": "Сайт слишком долго не отвечал. Попробуйте позже."
+  "webImportTimedOut": "Сайт слишком долго не отвечал. Попробуйте позже.",
+  "pantryCookOptionalMissing": "По желанию: {items}"
 }

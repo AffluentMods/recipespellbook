@@ -613,7 +613,10 @@ class _MatchTile extends ConsumerWidget {
             ),
           );
 
+    // One chip per food still needed: of "pineapple leaf and maraschino
+    // cherry" with pineapple on hand, the cherry. A tap adds that food.
     final missing = match.missing;
+    final foods = match.missingFoods;
     final missingRow = missing.isEmpty
         ? null
         : Wrap(
@@ -625,13 +628,13 @@ class _MatchTile extends ConsumerWidget {
                 l10n.pantryCookMissingLabel,
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: c.textTertiary),
               ),
-              for (final i in missing.take(_missingShown))
+              for (final food in foods.take(_missingShown))
                 Tooltip(
-                  message: l10n.pantryCookHaveIt(i.key.label),
+                  message: l10n.pantryCookHaveIt(food),
                   waitDuration: const Duration(milliseconds: 500),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(999),
-                    onTap: () => addToPantryWithUndo(context, ref, i.key.label),
+                    onTap: () => addToPantryWithUndo(context, ref, food),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: 2),
                       decoration: BoxDecoration(
@@ -639,18 +642,28 @@ class _MatchTile extends ConsumerWidget {
                         border: Border.all(color: c.hairline),
                       ),
                       child: Text(
-                        i.key.label,
+                        food,
                         style: TextStyle(fontSize: 12, color: c.textPrimary),
                       ),
                     ),
                   ),
                 ),
-              if (missing.length > _missingShown)
+              if (foods.length > _missingShown)
                 Text(
-                  l10n.pantryCookMoreMissing(missing.length - _missingShown),
+                  l10n.pantryCookMoreMissing(foods.length - _missingShown),
                   style: TextStyle(fontSize: 12, color: c.textTertiary),
                 ),
             ],
+          );
+
+    // A garnish or "to serve" line that is not on hand: named, never counted.
+    final optionalRow = match.optionalMissing.isEmpty
+        ? null
+        : Text(
+            l10n.pantryCookOptionalMissing(match.optionalMissing.join(', ')),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: c.textTertiary),
           );
 
     final Widget action = missing.isEmpty
@@ -735,6 +748,10 @@ class _MatchTile extends ConsumerWidget {
                     if (missingRow != null) ...[
                       const SizedBox(height: Space.sm),
                       missingRow,
+                    ],
+                    if (optionalRow != null) ...[
+                      SizedBox(height: missingRow != null ? Space.xs : Space.xs + 2),
+                      optionalRow,
                     ],
                   ],
                 ),

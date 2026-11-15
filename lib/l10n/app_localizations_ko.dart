@@ -13297,4 +13297,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get webImportTimedOut => '웹사이트 응답이 너무 오래 걸렸습니다. 나중에 다시 시도하세요.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return '선택: $items';
+  }
 }

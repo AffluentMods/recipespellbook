@@ -13445,4 +13445,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get webImportTimedOut => 'De website reageerde te traag. Probeer het later opnieuw.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return 'Optioneel: $items';
+  }
 }

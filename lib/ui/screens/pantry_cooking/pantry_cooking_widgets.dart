@@ -20,8 +20,9 @@ const pantryCookingPath = '/pantry-cooking';
 
 // ── Shared actions ──
 
-/// Put the missing lines of [match] on the active shopping list and say so,
-/// with a way to open the list.
+/// Put what [match] still needs on the active shopping list and say so,
+/// with a way to open the list. Of a line partly on hand, only the foods
+/// still needed go on it.
 Future<void> addMissingToShoppingList(
   BuildContext context,
   WidgetRef ref,
@@ -33,7 +34,7 @@ Future<void> addMissingToShoppingList(
     final result = await addIngredientsToShoppingList(
       dao: ref.read(shoppingDaoProvider),
       recipe: match.recipe,
-      ingredients: match.missing,
+      ingredients: match.toBuy,
       newListName: l10n.defaultShoppingListName,
     );
     if (!context.mounted) return;

@@ -13433,4 +13433,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get webImportTimedOut => 'Le site a mis trop de temps à répondre. Réessayez plus tard.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return 'Facultatif : $items';
+  }
 }

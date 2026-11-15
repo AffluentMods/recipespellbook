@@ -215,4 +215,85 @@ void main() {
     expect(matcher.hasItem('kosher salt'), isTrue);
     expect(matcher.hasItem('flour'), isFalse);
   });
+
+  group('garnish and optional sections', () {
+    test('section titles for a garnish, a decoration, extras or serving, in every language', () {
+      for (final title in [
+        // English.
+        'Garnish', 'For the garnish', 'Garnishes', 'To garnish', 'Decoration', 'To decorate', 'Optional',
+        'Optional extras', 'To serve', 'For serving', 'Serving suggestions', 'Serve with', 'For dusting',
+        // German, Spanish, French, Italian, Portuguese, Dutch.
+        'Zum Garnieren', 'Für die Garnitur', 'Dekoration', 'Zum Servieren', 'Nach Belieben', 'Zum Anrichten',
+        'Para decorar', 'Decoración', 'Para servir', 'Opcional',
+        'Pour la décoration', 'Décoration', 'Facultatif', 'Pour servir',
+        'Per guarnire', 'Guarnizione', 'Facoltativo', 'Per servire',
+        'Para enfeitar', 'Decoração', 'Opcionais',
+        'Ter garnering', 'Garnering', 'Optioneel', 'Om te serveren',
+        // Polish, Russian.
+        'Do dekoracji', 'Przybranie', 'Do podania', 'Opcjonalnie',
+        'Для украшения', 'Украшение', 'Для подачи', 'По желанию',
+        // Japanese, Korean, Chinese.
+        '飾り', '飾り用', 'お好みで', '장식', '고명', '선택 재료', '装饰', '點綴', '可选',
+      ]) {
+        expect(isOptionalSectionTitle(title), isTrue, reason: title);
+      }
+    });
+
+    test('titles for a part of the dish are not, nor look-alikes that mean a filling or a side', () {
+      for (final title in [
+        'Red layer', 'White layer', 'For the sauce', 'Topping', 'For the topping', 'Filling', 'Dressing',
+        'Serves 4', 'Für die Füllung', 'Teig', 'Beilage', 'Contorno', 'Начинка', 'Тесто',
+        // French "garniture" is a filling.
+        'Garniture', 'Pour la garniture',
+        // Spanish "guarnición" and Portuguese "guarnição" are side dishes.
+        'Guarnición', 'Para la guarnición', 'Guarnição', 'Acompanhamento',
+        // A side, a topping, a decorative cut of a food the dish needs.
+        '付け合わせ', 'トッピング', '飾り切り', '곁들임', '配菜', '',
+      ]) {
+        expect(isOptionalSectionTitle(title), isFalse, reason: title);
+      }
+    });
+
+    test('a line can say it is a garnish itself', () {
+      for (final line in [
+        'Garnish: lime wheel', 'Garnishes: mint sprigs', 'lime wheels, for garnish', 'mint to garnish',
+        'Petersilie zum Garnieren', 'hojas de menta para decorar', 'feuilles de menthe pour décorer',
+        'basilico per guarnire', 'мята для украшения', '飾り用ミント', '香菜（装饰）',
+      ]) {
+        expect(ingredientKeyFor(line).optional, isTrue, reason: line);
+      }
+      for (final line in [
+        'garniture de champignons', 'arroz de guarnición', '人参（飾り切り）', 'pineapple leaf and maraschino cherry',
+      ]) {
+        expect(ingredientKeyFor(line).optional, isFalse, reason: line);
+      }
+    });
+
+    test('a line partly on hand needs only the rest', () {
+      final matcher = PantryMatcher(pantry: ['pineapple', 'pineapple juice']);
+      final key = ingredientKeyFor('pineapple leaf and maraschino cherry');
+      expect(matcher.coverOf(key), IngredientCover.missing);
+      expect(key.label, 'pineapple', reason: 'the first food, which is on hand');
+      expect([for (final p in matcher.missingFoodsFor(key)) key.labelOf(p)], ['maraschino cherry']);
+
+      final plural = ingredientKeyFor('2 pineapple leaves and 3 maraschino cherries');
+      expect([for (final p in matcher.missingFoodsFor(plural)) plural.labelOf(p)], ['maraschino cherries'],
+          reason: 'as the line writes it');
+
+      // Adding what it names covers the line.
+      expect(PantryMatcher(pantry: ['pineapple', 'maraschino cherry']).coverOf(key), IngredientCover.covered);
+      expect(PantryMatcher(pantry: ['pineapple', 'maraschino cherries']).coverOf(key), IngredientCover.covered);
+      expect(PantryMatcher(pantry: ['pineapple', 'maraschino cherry']).missingFoodsFor(key), isEmpty);
+    });
+
+    test('of several alternatives, the one closest to on hand', () {
+      final either = ingredientKeyFor('butter and sugar or margarine');
+      expect(PantryMatcher(pantry: const []).missingFoodsFor(either).map((p) => p.text), ['margarine'],
+          reason: 'one thing to get beats two');
+      expect(PantryMatcher(pantry: ['butter']).missingFoodsFor(either).map((p) => p.text), ['sugar'],
+          reason: 'a tie goes to the first');
+      expect(PantryMatcher(pantry: ['margarine']).missingFoodsFor(either), isEmpty);
+      expect(PantryMatcher(pantry: const []).missingFoodsFor(ingredientKeyFor('to taste')), isEmpty);
+    });
+  });
 }

@@ -5055,5 +5055,6 @@
   "webImportPageTooLarge": "Nie znaleziono przepisu: ta strona jest za duża, by ją odczytać.",
   "webImportUnreadableEncoding": "Ta strona używa kodowania tekstu ({charset}), którego aplikacja nie potrafi odczytać.",
   "webImportNoRecipeInVideo": "W opisie tego filmu nie znaleziono przepisu.",
-  "webImportTimedOut": "Strona odpowiadała zbyt długo. Spróbuj ponownie później."
+  "webImportTimedOut": "Strona odpowiadała zbyt długo. Spróbuj ponownie później.",
+  "pantryCookOptionalMissing": "Opcjonalnie: {items}"
 }

@@ -6871,5 +6871,7 @@
   "webImportNoRecipeInVideo": "No recipe found in that video's description.",
   "@webImportNoRecipeInVideo": {"description": "Import from a link: a YouTube page whose description holds no recipe."},
   "webImportTimedOut": "The website took too long to respond. Try again later.",
-  "@webImportTimedOut": {"description": "Import from a link: the site did not answer in time."}
+  "@webImportTimedOut": {"description": "Import from a link: the site did not answer in time."},
+  "pantryCookOptionalMissing": "Optional: {items}",
+  "@pantryCookOptionalMissing": {"description": "On a recipe in What can I make?: garnish or serving ingredients (under a Garnish or To serve section, or marked optional) that are not in the pantry. They do not count as missing.", "placeholders": {"items": {"type": "String", "example": "maraschino cherry, mint"}}}
 }

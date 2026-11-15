@@ -5055,5 +5055,6 @@
   "webImportPageTooLarge": "Nenhuma receita encontrada: essa página é grande demais para ser lida.",
   "webImportUnreadableEncoding": "Essa página usa uma codificação de texto ({charset}) que este app não consegue ler.",
   "webImportNoRecipeInVideo": "Nenhuma receita encontrada na descrição desse vídeo.",
-  "webImportTimedOut": "O site demorou demais para responder. Tente novamente mais tarde."
+  "webImportTimedOut": "O site demorou demais para responder. Tente novamente mais tarde.",
+  "pantryCookOptionalMissing": "Opcional: {items}"
 }

@@ -5055,5 +5055,6 @@
   "webImportPageTooLarge": "未找到食谱：该页面太大，无法读取。",
   "webImportUnreadableEncoding": "该页面使用了本应用无法读取的文本编码（{charset}）。",
   "webImportNoRecipeInVideo": "该视频的描述中未找到食谱。",
-  "webImportTimedOut": "网站响应时间过长。请稍后再试。"
+  "webImportTimedOut": "网站响应时间过长。请稍后再试。",
+  "pantryCookOptionalMissing": "可选：{items}"
 }

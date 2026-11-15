@@ -5055,5 +5055,6 @@
   "webImportPageTooLarge": "Geen recept gevonden: die pagina is te groot om te lezen.",
   "webImportUnreadableEncoding": "Die pagina gebruikt een tekstcodering ({charset}) die deze app niet kan lezen.",
   "webImportNoRecipeInVideo": "Geen recept gevonden in de beschrijving van die video.",
-  "webImportTimedOut": "De website reageerde te traag. Probeer het later opnieuw."
+  "webImportTimedOut": "De website reageerde te traag. Probeer het later opnieuw.",
+  "pantryCookOptionalMissing": "Optioneel: {items}"
 }

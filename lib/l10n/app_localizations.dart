@@ -23172,6 +23172,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The website took too long to respond. Try again later.'**
   String get webImportTimedOut;
+
+  /// On a recipe in What can I make?: garnish or serving ingredients (under a Garnish or To serve section, or marked optional) that are not in the pantry. They do not count as missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: {items}'**
+  String pantryCookOptionalMissing(String items);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

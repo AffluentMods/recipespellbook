@@ -13265,4 +13265,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get webImportTimedOut => '网站响应时间过长。请稍后再试。';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return '可选：$items';
+  }
 }

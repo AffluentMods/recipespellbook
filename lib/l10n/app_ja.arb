@@ -5055,5 +5055,6 @@
   "webImportPageTooLarge": "レシピが見つかりません。そのページは大きすぎて読み込めません。",
   "webImportUnreadableEncoding": "そのページはこのアプリで読み込めない文字コード（{charset}）を使用しています。",
   "webImportNoRecipeInVideo": "その動画の説明にレシピが見つかりませんでした。",
-  "webImportTimedOut": "Webサイトの応答に時間がかかりすぎました。しばらくしてからもう一度お試しください。"
+  "webImportTimedOut": "Webサイトの応答に時間がかかりすぎました。しばらくしてからもう一度お試しください。",
+  "pantryCookOptionalMissing": "お好みで：{items}"
 }
