@@ -23,8 +23,10 @@ import 'pantry_cooking_widgets.dart';
 /// "What can I make?": every recipe in every cookbook (copies shown once),
 /// ranked by how much of it the pantry covers, with what is missing and a
 /// one-tap "Add missing" to the shopping list. Quick filters for ready now,
-/// one or two missing, a course or a cookbook. The pantry itself sits beside
-/// the results on desktop and one tap away on phones.
+/// one or two missing, a course or a cookbook. It opens on the cookbook
+/// chosen on Home, with "All cookbooks" first on the cookbook chip. The
+/// pantry itself sits beside the results on desktop and one tap away on
+/// phones.
 class PantryCookingScreen extends ConsumerStatefulWidget {
   const PantryCookingScreen({super.key});
 
@@ -37,6 +39,32 @@ class _PantryCookingScreenState extends ConsumerState<PantryCookingScreen> {
   String? _course;
   String? _cookbook;
 
+  /// The cookbook chosen on Home was looked at, once the cookbooks were known.
+  bool _cookbookDefaulted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // In a cookbook, say Cocktails, "What can I make?" is about its recipes
+    // first. Only with more than one cookbook, and only one that is there:
+    // otherwise all of them, as before.
+    final selected = ref.read(selectedCookbookIdProvider);
+    if (selected == null) return;
+    var initializing = true;
+    ref.listenManual<AsyncValue<List<Cookbook>>>(cookbooksProvider, (_, next) {
+      final cookbooks = next.valueOrNull;
+      if (_cookbookDefaulted || cookbooks == null) return;
+      _cookbookDefaulted = true;
+      if (cookbooks.length < 2 || !cookbooks.any((cb) => cb.id == selected)) return;
+      if (initializing) {
+        _cookbook = selected;
+      } else if (mounted) {
+        setState(() => _cookbook = selected);
+      }
+    }, fireImmediately: true);
+    initializing = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -47,10 +75,20 @@ class _PantryCookingScreenState extends ConsumerState<PantryCookingScreen> {
     final ranked = matchesAsync.valueOrNull;
     final desktop = Responsive.isDesktopLayout(context);
 
-    final usable = ranked == null ? const <PantryRecipeMatch>[] : filterPantryMatches(ranked);
+    // The count follows the cookbook chosen: "109 recipes in Cocktails use
+    // them".
+    final cookbookName = _cookbook == null
+        ? null
+        : ref.watch(cookbooksProvider).valueOrNull?.where((cb) => cb.id == _cookbook).firstOrNull?.name;
+    final usable = ranked == null
+        ? const <PantryRecipeMatch>[]
+        : filterPantryMatches(ranked, cookbookId: cookbookName == null ? null : _cookbook);
+    final recipesLine = cookbookName == null
+        ? l10n.pantryCookRecipesUsing(usable.length)
+        : l10n.pantryCookRecipesInCookbookUsing(usable.length, cookbookName);
     final summary = pantry == null || pantry.isEmpty
         ? null
-        : '${l10n.pantryCookItemsInPantry(pantry.items.length)}  ·  ${l10n.pantryCookRecipesUsing(usable.length)}';
+        : '${l10n.pantryCookItemsInPantry(pantry.items.length)}  ·  $recipesLine';
 
     final Widget results;
     if (pantry == null || (ranked == null && !matchesAsync.hasError)) {

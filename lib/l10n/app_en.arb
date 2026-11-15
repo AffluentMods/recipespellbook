@@ -6873,5 +6873,7 @@
   "webImportTimedOut": "The website took too long to respond. Try again later.",
   "@webImportTimedOut": {"description": "Import from a link: the site did not answer in time."},
   "pantryCookOptionalMissing": "Optional: {items}",
-  "@pantryCookOptionalMissing": {"description": "On a recipe in What can I make?: garnish or serving ingredients (under a Garnish or To serve section, or marked optional) that are not in the pantry. They do not count as missing.", "placeholders": {"items": {"type": "String", "example": "maraschino cherry, mint"}}}
+  "@pantryCookOptionalMissing": {"description": "On a recipe in What can I make?: garnish or serving ingredients (under a Garnish or To serve section, or marked optional) that are not in the pantry. They do not count as missing.", "placeholders": {"items": {"type": "String", "example": "maraschino cherry, mint"}}},
+  "pantryCookRecipesInCookbookUsing": "{count, plural, =0{No recipes in {cookbook} use them yet} =1{1 recipe in {cookbook} uses them} other{{count} recipes in {cookbook} use them}}",
+  "@pantryCookRecipesInCookbookUsing": {"description": "Header line in What can I make? while a cookbook is chosen: how many recipes in that cookbook use what is in the pantry. Follows the items count, as in: 61 items in your pantry · 109 recipes in Cocktails use them.", "placeholders": {"count": {"type": "int"}, "cookbook": {"type": "String", "example": "Cocktails"}}}
 }

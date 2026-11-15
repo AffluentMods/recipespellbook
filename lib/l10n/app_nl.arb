@@ -5056,5 +5056,6 @@
   "webImportUnreadableEncoding": "Die pagina gebruikt een tekstcodering ({charset}) die deze app niet kan lezen.",
   "webImportNoRecipeInVideo": "Geen recept gevonden in de beschrijving van die video.",
   "webImportTimedOut": "De website reageerde te traag. Probeer het later opnieuw.",
-  "pantryCookOptionalMissing": "Optioneel: {items}"
+  "pantryCookOptionalMissing": "Optioneel: {items}",
+  "pantryCookRecipesInCookbookUsing": "{count, plural, =0{Nog geen recepten in {cookbook} gebruiken ze} =1{1 recept in {cookbook} gebruikt ze} other{{count} recepten in {cookbook} gebruiken ze}}"
 }

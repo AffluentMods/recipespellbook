@@ -5056,5 +5056,6 @@
   "webImportUnreadableEncoding": "そのページはこのアプリで読み込めない文字コード（{charset}）を使用しています。",
   "webImportNoRecipeInVideo": "その動画の説明にレシピが見つかりませんでした。",
   "webImportTimedOut": "Webサイトの応答に時間がかかりすぎました。しばらくしてからもう一度お試しください。",
-  "pantryCookOptionalMissing": "お好みで：{items}"
+  "pantryCookOptionalMissing": "お好みで：{items}",
+  "pantryCookRecipesInCookbookUsing": "{count, plural, =0{{cookbook}で使えるレシピはまだありません} other{{cookbook}の{count}件のレシピで使えます}}"
 }

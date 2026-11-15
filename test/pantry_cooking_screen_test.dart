@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:recipespellbook/providers/cookbook_provider.dart';
 import 'package:recipespellbook/providers/database_provider.dart';
 import 'package:recipespellbook/services/pantry_service.dart';
 import 'package:recipespellbook/ui/screens/pantry_cooking/pantry_cooking_screen.dart';
@@ -70,7 +71,8 @@ void main() {
       GoRoute(path: '/recipe/:id', builder: (_, s) => Scaffold(body: Text('Recipe ${s.pathParameters['id']}'))),
     ]);
     await tester.pumpWidget(ProviderScope(
-      overrides: [databaseProvider.overrideWithValue(db)],
+      // Opened with no cookbook chosen on Home: every cookbook's recipes.
+      overrides: [databaseProvider.overrideWithValue(db), selectedCookbookIdProvider.overrideWith((ref) => null)],
       child: MaterialApp.router(
         routerConfig: router,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

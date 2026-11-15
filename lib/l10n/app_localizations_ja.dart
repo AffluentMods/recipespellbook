@@ -13274,4 +13274,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String pantryCookOptionalMissing(String items) {
     return 'お好みで：$items';
   }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$cookbookの$count件のレシピで使えます',
+      zero: '$cookbookで使えるレシピはまだありません',
+    );
+    return '$_temp0';
+  }
 }

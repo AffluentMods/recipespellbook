@@ -23178,6 +23178,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Optional: {items}'**
   String pantryCookOptionalMissing(String items);
+
+  /// Header line in What can I make? while a cookbook is chosen: how many recipes in that cookbook use what is in the pantry. Follows the items count, as in: 61 items in your pantry · 109 recipes in Cocktails use them.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No recipes in {cookbook} use them yet} =1{1 recipe in {cookbook} uses them} other{{count} recipes in {cookbook} use them}}'**
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

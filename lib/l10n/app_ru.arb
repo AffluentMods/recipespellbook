@@ -5056,5 +5056,6 @@
   "webImportUnreadableEncoding": "Эта страница использует кодировку текста ({charset}), которую приложение не может прочитать.",
   "webImportNoRecipeInVideo": "В описании этого видео рецепт не найден.",
   "webImportTimedOut": "Сайт слишком долго не отвечал. Попробуйте позже.",
-  "pantryCookOptionalMissing": "По желанию: {items}"
+  "pantryCookOptionalMissing": "По желанию: {items}",
+  "pantryCookRecipesInCookbookUsing": "{count, plural, =0{Пока ни один рецепт из книги {cookbook} их не использует} one{Используются в {count} рецепте из книги {cookbook}} few{Используются в {count} рецептах из книги {cookbook}} many{Используются в {count} рецептах из книги {cookbook}} other{Используются в {count} рецепта из книги {cookbook}}}"
 }

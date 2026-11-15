@@ -13270,4 +13270,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String pantryCookOptionalMissing(String items) {
     return '可选：$items';
   }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$cookbook中有 $count 个食谱用到它们',
+      zero: '$cookbook中还没有食谱用到它们',
+    );
+    return '$_temp0';
+  }
 }

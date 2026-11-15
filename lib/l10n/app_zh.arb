@@ -5056,5 +5056,6 @@
   "webImportUnreadableEncoding": "该页面使用了本应用无法读取的文本编码（{charset}）。",
   "webImportNoRecipeInVideo": "该视频的描述中未找到食谱。",
   "webImportTimedOut": "网站响应时间过长。请稍后再试。",
-  "pantryCookOptionalMissing": "可选：{items}"
+  "pantryCookOptionalMissing": "可选：{items}",
+  "pantryCookRecipesInCookbookUsing": "{count, plural, =0{{cookbook}中还没有食谱用到它们} other{{cookbook}中有 {count} 个食谱用到它们}}"
 }

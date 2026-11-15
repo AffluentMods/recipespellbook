@@ -4618,5 +4618,6 @@
   "webImportUnreadableEncoding": "Diese Seite verwendet eine Textkodierung ({charset}), die die App nicht lesen kann.",
   "webImportNoRecipeInVideo": "In der Beschreibung dieses Videos wurde kein Rezept gefunden.",
   "webImportTimedOut": "Die Website hat zu lange nicht geantwortet. Versuche es später erneut.",
-  "pantryCookOptionalMissing": "Optional: {items}"
+  "pantryCookOptionalMissing": "Optional: {items}",
+  "pantryCookRecipesInCookbookUsing": "{count, plural, =0{Noch keine Rezepte in {cookbook} damit} =1{1 Rezept in {cookbook} damit} other{{count} Rezepte in {cookbook} damit}}"
 }
