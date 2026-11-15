@@ -23,12 +23,21 @@ class LibraryIngredient {
   final String? unit;
   final IngredientKey key;
 
+  /// Listed under a section the dish can do without ("Garnish", "To
+  /// serve", "Optional"; see [isOptionalSectionTitle]).
+  final bool inOptionalSection;
+
   const LibraryIngredient({
     required this.name,
     this.amount,
     this.unit,
     required this.key,
+    this.inOptionalSection = false,
   });
+
+  /// Not needed to make the dish: marked optional or a garnish itself, or
+  /// under an optional section.
+  bool get optional => inOptionalSection || key.optional;
 }
 
 /// A recipe as "What can I make?" sees it: copies of the same recipe in
@@ -164,14 +173,33 @@ RecipeLibrary buildRecipeLibrary(List<Recipe> recipes, List<IngredientRow> rows,
       cookbookIds: {for (final c in copies) c.cookbookId},
       isFavorite: copies.any((c) => c.isFavorite),
       lastViewedAt: viewed,
-      ingredients: [
-        for (final row in rowsByRecipe[shown.id] ?? const <IngredientRow>[])
-          if (row.notes != ingredientHeaderMarker && row.name.trim().isNotEmpty)
-            LibraryIngredient(name: row.name, amount: row.amount, unit: row.unit, key: keyFor(row)),
-      ],
+      ingredients: _libraryIngredients(rowsByRecipe[shown.id] ?? const <IngredientRow>[], keyFor),
     ));
   }
   return RecipeLibrary(entries);
+}
+
+/// A recipe's ingredient [rows] as lines for matching. Section titles are
+/// not food, but they say whether the lines under them are needed: those
+/// under "Garnish" or "To serve" are not.
+List<LibraryIngredient> _libraryIngredients(List<IngredientRow> rows, IngredientKey Function(IngredientRow) keyFor) {
+  final out = <LibraryIngredient>[];
+  var optionalSection = false;
+  for (final row in rows) {
+    if (row.notes == ingredientHeaderMarker) {
+      optionalSection = isOptionalSectionTitle(row.name);
+      continue;
+    }
+    if (row.name.trim().isEmpty) continue;
+    out.add(LibraryIngredient(
+      name: row.name,
+      amount: row.amount,
+      unit: row.unit,
+      key: keyFor(row),
+      inOptionalSection: optionalSection,
+    ));
+  }
+  return out;
 }
 
 int _preferredCopyFirst(Recipe a, Recipe b) {
@@ -246,6 +274,21 @@ Future<RecipeLibrary> loadRecipeLibrary(AppDatabase db) async {
 
 // ── Ranking ────────────────────────────────────────────────────────────────
 
+/// A counted line the pantry lacks, and what of it is still needed.
+class MissingLine {
+  final LibraryIngredient ingredient;
+
+  /// The foods of the line not on hand, as the recipe writes them: only
+  /// "maraschino cherry" of "pineapple leaf and maraschino cherry" when
+  /// pineapple is in the pantry.
+  final List<String> foods;
+
+  /// Some of the line is on hand, so only [foods] are needed.
+  final bool partly;
+
+  const MissingLine({required this.ingredient, required this.foods, this.partly = false});
+}
+
 /// How much of one recipe the pantry covers.
 class PantryRecipeMatch {
   final LibraryRecipe recipe;
@@ -262,9 +305,17 @@ class PantryRecipeMatch {
   /// Counted lines the pantry lacks, in recipe order.
   final List<LibraryIngredient> missing;
 
-  /// Counted lines the pantry has, in recipe order, each with the pantry
-  /// items that cover it as the user wrote them.
+  /// What [missing] still needs, line by line in the same order.
+  final List<MissingLine> missingLines;
+
+  /// Lines the pantry has, in recipe order, each with the pantry items that
+  /// cover it as the user wrote them. Optional lines on hand are here too;
+  /// only counted ones are in [covered].
   final List<(LibraryIngredient, List<String>)> coveredBy;
+
+  /// Foods of optional lines (a garnish, "to serve") that are not on hand,
+  /// as the recipe writes them, each once. Shown, never counted.
+  final List<String> optionalMissing;
 
   const PantryRecipeMatch({
     required this.recipe,
@@ -272,13 +323,37 @@ class PantryRecipeMatch {
     required this.covered,
     required this.basics,
     required this.missing,
+    this.missingLines = const [],
     this.coveredBy = const [],
+    this.optionalMissing = const [],
   });
 
   /// The pantry items this recipe uses, each once, in recipe order.
   List<String> get pantryItemsUsed => {
         for (final (_, items) in coveredBy) ...items,
       }.toList();
+
+  /// The foods to get, each once, in recipe order: what the missing chips
+  /// name, and what a tap on one adds to the pantry.
+  List<String> get missingFoods {
+    final seen = <String>{};
+    return [
+      for (final line in missingLines)
+        for (final food in line.foods)
+          if (seen.add(food.toLowerCase())) food,
+    ];
+  }
+
+  /// What "Add missing" puts on the shopping list: a line that is wholly
+  /// lacking as written (amount and all), and of a line partly on hand only
+  /// the foods still needed.
+  List<LibraryIngredient> get toBuy => [
+        for (final line in missingLines)
+          if (line.partly)
+            for (final food in line.foods) LibraryIngredient(name: food, key: ingredientKeyFor(food))
+          else
+            line.ingredient,
+      ];
 
   /// Share of the counted lines in the pantry, 0 to 1.
   double get share => counted == 0 ? (basics > 0 ? 1 : 0) : covered / counted;
@@ -293,15 +368,39 @@ class PantryRecipeMatch {
 }
 
 /// Check one recipe against the pantry. A food listed twice (butter for the
-/// sauce and butter for the pan) counts once.
+/// sauce and butter for the pan) counts once. Optional lines (a garnish, "to
+/// serve", anything under such a section) never count, and never stand in
+/// for a needed line of the same food.
 PantryRecipeMatch matchRecipe(LibraryRecipe recipe, PantryMatcher matcher) {
   var counted = 0, covered = 0, basics = 0;
   final missing = <LibraryIngredient>[];
+  final missingLines = <MissingLine>[];
   final coveredBy = <(LibraryIngredient, List<String>)>[];
+  final optionalMissing = <String>[];
   final seen = <String>{};
+  final seenOptional = <String>{};
+  final seenOptionalFood = <String>{};
   for (final ingredient in recipe.ingredients) {
-    if (ingredient.key.isEmpty || !seen.add(ingredient.key.signature)) continue;
-    switch (matcher.coverOf(ingredient.key)) {
+    final key = ingredient.key;
+    if (key.isEmpty) continue;
+    var cover = matcher.coverOf(key);
+    if (ingredient.inOptionalSection && cover != IngredientCover.basic) cover = IngredientCover.ignored;
+    if (cover == IngredientCover.ignored) {
+      if (!seenOptional.add(key.signature)) continue;
+      final lacking = matcher.missingFoodsFor(key);
+      if (lacking.isEmpty) {
+        final items = matcher.pantryItemsFor(key);
+        if (items.isNotEmpty) coveredBy.add((ingredient, items));
+      } else {
+        for (final food in lacking) {
+          final label = key.labelOf(food);
+          if (seenOptionalFood.add(label.toLowerCase())) optionalMissing.add(label);
+        }
+      }
+      continue;
+    }
+    if (!seen.add(key.signature)) continue;
+    switch (cover) {
       case IngredientCover.basic:
         basics++;
       case IngredientCover.ignored:
@@ -309,11 +408,23 @@ PantryRecipeMatch matchRecipe(LibraryRecipe recipe, PantryMatcher matcher) {
       case IngredientCover.covered:
         counted++;
         covered++;
-        coveredBy.add((ingredient, matcher.pantryItemsFor(ingredient.key)));
+        coveredBy.add((ingredient, matcher.pantryItemsFor(key)));
       case IngredientCover.missing:
         counted++;
         missing.add(ingredient);
+        final alternative = matcher.closestAlternative(key)!;
+        final lacking = [for (final p in alternative) if (!matcher.hasFood(p)) p];
+        missingLines.add(MissingLine(
+          ingredient: ingredient,
+          foods: [for (final p in lacking) key.labelOf(p)],
+          partly: lacking.length < alternative.length,
+        ));
     }
+  }
+  // Mint to garnish and mint in the glass: named once, as missing.
+  if (optionalMissing.isNotEmpty && missingLines.isNotEmpty) {
+    final needed = {for (final l in missingLines) for (final f in l.foods) f.toLowerCase()};
+    optionalMissing.removeWhere((f) => needed.contains(f.toLowerCase()));
   }
   return PantryRecipeMatch(
     recipe: recipe,
@@ -321,7 +432,9 @@ PantryRecipeMatch matchRecipe(LibraryRecipe recipe, PantryMatcher matcher) {
     covered: covered,
     basics: basics,
     missing: missing,
+    missingLines: missingLines,
     coveredBy: coveredBy,
+    optionalMissing: optionalMissing,
   );
 }
 

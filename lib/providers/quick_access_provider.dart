@@ -10,8 +10,8 @@ typedef QuickAccessItem = ({Recipe recipe, QuickAccessSource source});
 
 /// "Jump back in" on the home screen, phone and desktop alike: today's
 /// planned recipes, then pinned ones, then recently viewed ones. Each part
-/// follows its switch in Settings > Quick Access, and the recent part its
-/// history count.
+/// follows its switch under "Jump back in" in Settings > Home screen, and
+/// the recent part its history count.
 final jumpBackInProvider = FutureProvider.autoDispose
     .family<List<QuickAccessItem>, String>((ref, cookbookId) async {
   ref.watch(recipesInCookbookProvider(cookbookId));

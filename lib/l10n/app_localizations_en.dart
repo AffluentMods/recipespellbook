@@ -13445,4 +13445,111 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get webImportTimedOut => 'The website took too long to respond. Try again later.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return 'Optional: $items';
+  }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes in $cookbook use them',
+      one: '1 recipe in $cookbook uses them',
+      zero: 'No recipes in $cookbook use them yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsHomeScreen => 'Home screen';
+
+  @override
+  String get settingsHomeScreenSubtitle => 'Choose what shows on Home';
+
+  @override
+  String get homeSettingsIntro => 'Turn off what you do not use to keep Home tidy. The greeting, the search bar and the add button always stay.';
+
+  @override
+  String get homeSettingsGroupPlanning => 'Planning';
+
+  @override
+  String get homeSettingsGroupTips => 'Tips and reminders';
+
+  @override
+  String get homeSectionLibraryChips => 'Library shortcuts';
+
+  @override
+  String get homeSectionLibraryChipsDesc => 'All recipes, Favorites and Cookbooks under the search bar';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => 'The meals you planned for the week ahead';
+
+  @override
+  String get homeSectionShoppingList => 'Shopping list';
+
+  @override
+  String get homeSectionShoppingListDesc => 'What is still to buy, ticked off with a tap';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => 'How many recipes your pantry covers';
+
+  @override
+  String get homeSectionDinnerDesc => 'A few dinner ideas, each with a reason';
+
+  @override
+  String get homeSectionJumpBackInDesc => 'Today\'s meals, pinned and recently viewed recipes';
+
+  @override
+  String get homeSectionFavoritesDesc => 'Your favorite recipes in a row';
+
+  @override
+  String get homeSectionBrowse => 'Courses and categories';
+
+  @override
+  String get homeSectionBrowseDesc => 'Browse the cookbook by course and category';
+
+  @override
+  String get homeSectionCookbooksDesc => 'Your cookbook shelf, to switch with a tap';
+
+  @override
+  String get homeSectionCravingDesc => 'A button by the greeting that suggests a recipe for your mood';
+
+  @override
+  String get homeSectionGuides => 'Guides tip';
+
+  @override
+  String get homeSectionGuidesDesc => 'New here? A card with the how-to guides, until you close it';
+
+  @override
+  String get homeSectionBackup => 'Backup reminder';
+
+  @override
+  String get homeSectionBackupDesc => 'A reminder when cloud sync is off and recipes are not backed up';
+
+  @override
+  String get homeSectionCookbookUpdates => 'Cookbook updates';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => 'A notice when a cookbook from Community has an update';
+
+  @override
+  String get homeJumpBackInMeals => 'Today\'s planned meals';
+
+  @override
+  String get homeJumpBackInPinned => 'Pinned recipes';
+
+  @override
+  String get homeJumpBackInRecent => 'Recently viewed recipes';
+
+  @override
+  String get homeJumpBackInRecentCount => 'How many recently viewed to show';
+
+  @override
+  String get homeEditHomeScreen => 'Edit Home screen';
+
+  @override
+  String get homeAllSectionsHidden => 'Every section of Home is turned off.';
 }

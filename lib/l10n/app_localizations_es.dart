@@ -13426,4 +13426,111 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webImportTimedOut => 'El sitio web tardó demasiado en responder. Inténtalo más tarde.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return 'Opcional: $items';
+  }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recetas de $cookbook los usan',
+      one: '1 receta de $cookbook los usa',
+      zero: 'Ninguna receta de $cookbook los usa todavía',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsHomeScreen => 'Pantalla de inicio';
+
+  @override
+  String get settingsHomeScreenSubtitle => 'Elige qué aparece en Inicio';
+
+  @override
+  String get homeSettingsIntro => 'Desactiva lo que no uses para mantener Inicio ordenado. El saludo, la barra de búsqueda y el botón de añadir siempre se quedan.';
+
+  @override
+  String get homeSettingsGroupPlanning => 'Planificación';
+
+  @override
+  String get homeSettingsGroupTips => 'Consejos y recordatorios';
+
+  @override
+  String get homeSectionLibraryChips => 'Accesos directos';
+
+  @override
+  String get homeSectionLibraryChipsDesc => 'Todas las recetas, Favoritos y Recetarios bajo la barra de búsqueda';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => 'Las comidas que planeaste para la próxima semana';
+
+  @override
+  String get homeSectionShoppingList => 'Lista de la compra';
+
+  @override
+  String get homeSectionShoppingListDesc => 'Lo que falta por comprar, tachado con un toque';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => 'Cuántas recetas cubre tu despensa';
+
+  @override
+  String get homeSectionDinnerDesc => 'Algunas ideas para cenar, cada una con su motivo';
+
+  @override
+  String get homeSectionJumpBackInDesc => 'Comidas de hoy, recetas fijadas y vistas recientemente';
+
+  @override
+  String get homeSectionFavoritesDesc => 'Tus recetas favoritas en una fila';
+
+  @override
+  String get homeSectionBrowse => 'Platos y categorías';
+
+  @override
+  String get homeSectionBrowseDesc => 'Explora el recetario por plato y categoría';
+
+  @override
+  String get homeSectionCookbooksDesc => 'Tu estantería de recetarios, para cambiar con un toque';
+
+  @override
+  String get homeSectionCravingDesc => 'Un botón junto al saludo que sugiere una receta según tu antojo';
+
+  @override
+  String get homeSectionGuides => 'Aviso de guías';
+
+  @override
+  String get homeSectionGuidesDesc => '¿Eres nuevo? Una tarjeta con las guías, hasta que la cierres';
+
+  @override
+  String get homeSectionBackup => 'Recordatorio de copia de seguridad';
+
+  @override
+  String get homeSectionBackupDesc => 'Un aviso cuando la sincronización en la nube está desactivada y las recetas no tienen copia';
+
+  @override
+  String get homeSectionCookbookUpdates => 'Actualizaciones de recetarios';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => 'Un aviso cuando un recetario de la Comunidad tiene una actualización';
+
+  @override
+  String get homeJumpBackInMeals => 'Comidas planificadas para hoy';
+
+  @override
+  String get homeJumpBackInPinned => 'Recetas fijadas';
+
+  @override
+  String get homeJumpBackInRecent => 'Recetas vistas recientemente';
+
+  @override
+  String get homeJumpBackInRecentCount => 'Cuántas recetas recientes mostrar';
+
+  @override
+  String get homeEditHomeScreen => 'Editar pantalla de inicio';
+
+  @override
+  String get homeAllSectionsHidden => 'Todas las secciones de Inicio están desactivadas.';
 }

@@ -13673,4 +13673,113 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get webImportTimedOut => 'Сайт слишком долго не отвечал. Попробуйте позже.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return 'По желанию: $items';
+  }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Используются в $count рецепта из книги $cookbook',
+      many: 'Используются в $count рецептах из книги $cookbook',
+      few: 'Используются в $count рецептах из книги $cookbook',
+      one: 'Используются в $count рецепте из книги $cookbook',
+      zero: 'Пока ни один рецепт из книги $cookbook их не использует',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsHomeScreen => 'Главный экран';
+
+  @override
+  String get settingsHomeScreenSubtitle => 'Выберите, что показывать на главной';
+
+  @override
+  String get homeSettingsIntro => 'Выключите то, чем не пользуетесь, чтобы главная оставалась аккуратной. Приветствие, строка поиска и кнопка добавления остаются всегда.';
+
+  @override
+  String get homeSettingsGroupPlanning => 'Планирование';
+
+  @override
+  String get homeSettingsGroupTips => 'Подсказки и напоминания';
+
+  @override
+  String get homeSectionLibraryChips => 'Быстрые ссылки на рецепты';
+
+  @override
+  String get homeSectionLibraryChipsDesc => 'Все рецепты, Избранное и Кулинарные книги под строкой поиска';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => 'Блюда, запланированные на неделю вперёд';
+
+  @override
+  String get homeSectionShoppingList => 'Список покупок';
+
+  @override
+  String get homeSectionShoppingListDesc => 'Что ещё купить, отмечается одним касанием';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => 'Сколько рецептов покрывают продукты из кладовой';
+
+  @override
+  String get homeSectionDinnerDesc => 'Несколько идей для ужина, у каждой своя причина';
+
+  @override
+  String get homeSectionJumpBackInDesc => 'Блюда на сегодня, закреплённые и недавно просмотренные рецепты';
+
+  @override
+  String get homeSectionFavoritesDesc => 'Ваши избранные рецепты в один ряд';
+
+  @override
+  String get homeSectionBrowse => 'Блюда и категории';
+
+  @override
+  String get homeSectionBrowseDesc => 'Просматривайте книгу по блюдам и категориям';
+
+  @override
+  String get homeSectionCookbooksDesc => 'Полка с вашими кулинарными книгами, переключение одним касанием';
+
+  @override
+  String get homeSectionCravingDesc => 'Кнопка рядом с приветствием, которая предложит рецепт под настроение';
+
+  @override
+  String get homeSectionGuides => 'Подсказка о руководствах';
+
+  @override
+  String get homeSectionGuidesDesc => 'Вы здесь впервые? Карточка с руководствами, пока вы её не закроете';
+
+  @override
+  String get homeSectionBackup => 'Напоминание о резервной копии';
+
+  @override
+  String get homeSectionBackupDesc => 'Напоминание, когда облачная синхронизация выключена и у рецептов нет резервной копии';
+
+  @override
+  String get homeSectionCookbookUpdates => 'Обновления книг';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => 'Уведомление, когда у книги из Сообщества есть обновление';
+
+  @override
+  String get homeJumpBackInMeals => 'Блюда, запланированные на сегодня';
+
+  @override
+  String get homeJumpBackInPinned => 'Закреплённые рецепты';
+
+  @override
+  String get homeJumpBackInRecent => 'Недавно просмотренные рецепты';
+
+  @override
+  String get homeJumpBackInRecentCount => 'Сколько недавних рецептов показывать';
+
+  @override
+  String get homeEditHomeScreen => 'Настроить главный экран';
+
+  @override
+  String get homeAllSectionsHidden => 'Все разделы главной выключены.';
 }

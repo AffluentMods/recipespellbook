@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:recipespellbook/providers/cookbook_provider.dart';
 import 'package:recipespellbook/providers/database_provider.dart';
 import 'package:recipespellbook/services/pantry_service.dart';
 import 'package:recipespellbook/ui/screens/pantry_cooking/pantry_cooking_screen.dart';
@@ -60,7 +61,7 @@ void main() {
     return db!;
   }
 
-  Future<void> open(WidgetTester tester, AppDatabase db, Size size) async {
+  Future<void> open(WidgetTester tester, AppDatabase db, Size size, {String waitFor = 'Omelette'}) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -70,14 +71,15 @@ void main() {
       GoRoute(path: '/recipe/:id', builder: (_, s) => Scaffold(body: Text('Recipe ${s.pathParameters['id']}'))),
     ]);
     await tester.pumpWidget(ProviderScope(
-      overrides: [databaseProvider.overrideWithValue(db)],
+      // Opened with no cookbook chosen on Home: every cookbook's recipes.
+      overrides: [databaseProvider.overrideWithValue(db), selectedCookbookIdProvider.overrideWith((ref) => null)],
       child: MaterialApp.router(
         routerConfig: router,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       ),
     ));
-    await settleUntil(tester, () => showing('Omelette'));
+    await settleUntil(tester, () => showing(waitFor));
   }
 
   Future<void> close(WidgetTester tester, AppDatabase db) async {
@@ -181,4 +183,63 @@ void main() {
 
     await close(tester, db);
   }, timeout: const Timeout(Duration(seconds: 90)));
+
+  testWidgets('a garnish never counts, and a line partly on hand names only what it lacks', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'pantry_items': jsonEncode([
+        'pineapple', 'pineapple juice', 'strawberries', 'simple syrup', 'light rum', 'coconut cream', 'banana', 'ice',
+      ]),
+    });
+    PantryService.resetForTesting();
+    final db = (await tester.runAsync(() async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      await db.into(db.cookbooks).insert(CookbooksCompanion.insert(id: 'bar', name: 'Cocktails'));
+      Future<void> recipe(String id, String title, List<(String, String?)> rows) async {
+        await db.into(db.recipes).insert(RecipesCompanion.insert(id: id, cookbookId: 'bar', title: title));
+        for (var i = 0; i < rows.length; i++) {
+          await db.into(db.ingredients).insert(IngredientsCompanion.insert(
+                id: '${id}_$i',
+                recipeId: id,
+                sortOrder: i,
+                name: rows[i].$1,
+                notes: drift.Value(rows[i].$2),
+              ));
+        }
+      }
+
+      const title = '__header__';
+      await recipe('lava', 'Lava Flow', [
+        ('Red layer', title), ('strawberries', 'fresh or frozen'), ('simple syrup', null),
+        ('White layer', title), ('light rum', null), ('coconut cream', null), ('pineapple juice', null),
+        ('banana', null), ('ice', null),
+        ('Garnish', title), ('pineapple leaf and maraschino cherry', null),
+      ]);
+      await recipe('punch', 'Tiki Punch', [
+        ('light rum', null), ('pineapple juice', null), ('pineapple leaf and maraschino cherry', null),
+      ]);
+      return db;
+    }))!;
+    await open(tester, db, const Size(420, 900), waitFor: 'Tiki Punch');
+
+    // Lava Flow is ready: its garnish is named, not missing.
+    expect(find.text('Ready now  1'), findsOneWidget);
+    expect(find.text('Optional: maraschino cherry'), findsOneWidget);
+    // Tiki Punch lacks only the cherry of its last line, and its chip says so.
+    expect(find.text('maraschino cherry'), findsOneWidget);
+    expect(find.text('pineapple'), findsNothing);
+
+    // Add missing puts the cherry on the list, not the pineapple.
+    await tester.tap(find.byTooltip('Add missing to shopping list'));
+    await settleUntil(tester, () => showing('View List'));
+    expect(await shoppingNames(tester, db), ['maraschino cherry']);
+
+    // A tap on the chip adds the cherry, and Tiki Punch is ready at once.
+    await tester.tap(find.text('maraschino cherry'));
+    await settleUntil(tester, () => showing('Ready now  2'));
+    expect(find.text('Ready now  2'), findsOneWidget);
+    expect(await tester.runAsync(() => PantryService.instance.getAll()), contains('maraschino cherry'));
+    expect(find.text('Optional: maraschino cherry'), findsNothing, reason: 'the cherry is in the pantry now');
+
+    await close(tester, db);
+  });
 }

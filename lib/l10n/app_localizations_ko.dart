@@ -13297,4 +13297,110 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get webImportTimedOut => '웹사이트 응답이 너무 오래 걸렸습니다. 나중에 다시 시도하세요.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return '선택: $items';
+  }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$cookbook의 $count개 레시피에서 사용',
+      zero: '$cookbook에서 아직 사용하는 레시피가 없어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsHomeScreen => '홈 화면';
+
+  @override
+  String get settingsHomeScreenSubtitle => '홈에 표시할 항목 선택';
+
+  @override
+  String get homeSettingsIntro => '사용하지 않는 항목을 끄면 홈이 깔끔해져요. 인사말, 검색창, 추가 버튼은 항상 표시돼요.';
+
+  @override
+  String get homeSettingsGroupPlanning => '계획';
+
+  @override
+  String get homeSettingsGroupTips => '팁과 알림';
+
+  @override
+  String get homeSectionLibraryChips => '라이브러리 바로가기';
+
+  @override
+  String get homeSectionLibraryChipsDesc => '검색창 아래의 모든 레시피, 즐겨찾기, 요리책';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => '앞으로 일주일 동안 계획한 식사';
+
+  @override
+  String get homeSectionShoppingList => '쇼핑 목록';
+
+  @override
+  String get homeSectionShoppingListDesc => '아직 살 것, 탭 한 번으로 체크';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => '식료품 저장소로 만들 수 있는 레시피 수';
+
+  @override
+  String get homeSectionDinnerDesc => '이유와 함께 보여 주는 저녁 아이디어 몇 가지';
+
+  @override
+  String get homeSectionJumpBackInDesc => '오늘의 식사, 고정한 레시피와 최근 본 레시피';
+
+  @override
+  String get homeSectionFavoritesDesc => '즐겨찾는 레시피를 한 줄로';
+
+  @override
+  String get homeSectionBrowse => '코스와 카테고리';
+
+  @override
+  String get homeSectionBrowseDesc => '코스와 카테고리별로 요리책 둘러보기';
+
+  @override
+  String get homeSectionCookbooksDesc => '요리책 선반, 탭 한 번으로 전환';
+
+  @override
+  String get homeSectionCravingDesc => '인사말 옆에서 기분에 맞는 레시피를 추천하는 버튼';
+
+  @override
+  String get homeSectionGuides => '가이드 팁';
+
+  @override
+  String get homeSectionGuidesDesc => '처음이신가요? 닫을 때까지 보이는 사용법 가이드 카드';
+
+  @override
+  String get homeSectionBackup => '백업 알림';
+
+  @override
+  String get homeSectionBackupDesc => '클라우드 동기화가 꺼져 있고 레시피가 백업되지 않았을 때 알림';
+
+  @override
+  String get homeSectionCookbookUpdates => '요리책 업데이트';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => '커뮤니티에서 받은 요리책에 업데이트가 있을 때 알림';
+
+  @override
+  String get homeJumpBackInMeals => '오늘 계획한 식사';
+
+  @override
+  String get homeJumpBackInPinned => '고정한 레시피';
+
+  @override
+  String get homeJumpBackInRecent => '최근 본 레시피';
+
+  @override
+  String get homeJumpBackInRecentCount => '표시할 최근 본 레시피 수';
+
+  @override
+  String get homeEditHomeScreen => '홈 화면 편집';
+
+  @override
+  String get homeAllSectionsHidden => '홈의 모든 섹션이 꺼져 있어요.';
 }

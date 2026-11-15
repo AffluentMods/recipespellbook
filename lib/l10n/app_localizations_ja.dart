@@ -13269,4 +13269,110 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get webImportTimedOut => 'Webサイトの応答に時間がかかりすぎました。しばらくしてからもう一度お試しください。';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return 'お好みで：$items';
+  }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$cookbookの$count件のレシピで使えます',
+      zero: '$cookbookで使えるレシピはまだありません',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsHomeScreen => 'ホーム画面';
+
+  @override
+  String get settingsHomeScreenSubtitle => 'ホームに表示する内容を選択';
+
+  @override
+  String get homeSettingsIntro => '使わないものをオフにして、ホームをすっきりさせましょう。あいさつ、検索バー、追加ボタンは常に表示されます。';
+
+  @override
+  String get homeSettingsGroupPlanning => '計画';
+
+  @override
+  String get homeSettingsGroupTips => 'ヒントとリマインダー';
+
+  @override
+  String get homeSectionLibraryChips => 'ライブラリのショートカット';
+
+  @override
+  String get homeSectionLibraryChipsDesc => '検索バーの下の「すべてのレシピ」「お気に入り」「レシピ本」';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => '今後1週間に予定した食事';
+
+  @override
+  String get homeSectionShoppingList => '買い物リスト';
+
+  @override
+  String get homeSectionShoppingListDesc => 'まだ買うもの。タップでチェックできます';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => 'パントリーで作れるレシピの数';
+
+  @override
+  String get homeSectionDinnerDesc => '理由つきの夕食のアイデアをいくつか';
+
+  @override
+  String get homeSectionJumpBackInDesc => '今日の食事、ピン留めしたレシピ、最近見たレシピ';
+
+  @override
+  String get homeSectionFavoritesDesc => 'お気に入りのレシピを一列に';
+
+  @override
+  String get homeSectionBrowse => 'コースとカテゴリ';
+
+  @override
+  String get homeSectionBrowseDesc => 'コースとカテゴリでレシピ本を見る';
+
+  @override
+  String get homeSectionCookbooksDesc => 'レシピ本の棚。タップで切り替え';
+
+  @override
+  String get homeSectionCravingDesc => 'あいさつの横にある、気分に合うレシピを提案するボタン';
+
+  @override
+  String get homeSectionGuides => 'ガイドのヒント';
+
+  @override
+  String get homeSectionGuidesDesc => 'はじめての方へ。閉じるまで表示される、使い方ガイドのカード';
+
+  @override
+  String get homeSectionBackup => 'バックアップのリマインダー';
+
+  @override
+  String get homeSectionBackupDesc => 'クラウド同期がオフで、レシピがバックアップされていないときのお知らせ';
+
+  @override
+  String get homeSectionCookbookUpdates => 'レシピ本の更新';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => 'コミュニティのレシピ本に更新があるときのお知らせ';
+
+  @override
+  String get homeJumpBackInMeals => '今日予定している食事';
+
+  @override
+  String get homeJumpBackInPinned => 'ピン留めしたレシピ';
+
+  @override
+  String get homeJumpBackInRecent => '最近見たレシピ';
+
+  @override
+  String get homeJumpBackInRecentCount => '最近見たレシピの表示数';
+
+  @override
+  String get homeEditHomeScreen => 'ホーム画面を編集';
+
+  @override
+  String get homeAllSectionsHidden => 'ホームのセクションはすべてオフになっています。';
 }

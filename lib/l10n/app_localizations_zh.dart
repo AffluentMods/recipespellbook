@@ -13265,4 +13265,110 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get webImportTimedOut => '网站响应时间过长。请稍后再试。';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return '可选：$items';
+  }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$cookbook中有 $count 个食谱用到它们',
+      zero: '$cookbook中还没有食谱用到它们',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsHomeScreen => '首页';
+
+  @override
+  String get settingsHomeScreenSubtitle => '选择首页显示的内容';
+
+  @override
+  String get homeSettingsIntro => '关闭不用的部分，让首页更整洁。问候语、搜索栏和添加按钮始终保留。';
+
+  @override
+  String get homeSettingsGroupPlanning => '计划';
+
+  @override
+  String get homeSettingsGroupTips => '提示和提醒';
+
+  @override
+  String get homeSectionLibraryChips => '资料库快捷方式';
+
+  @override
+  String get homeSectionLibraryChipsDesc => '搜索栏下方的所有食谱、收藏和食谱书';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => '未来一周计划的餐食';
+
+  @override
+  String get homeSectionShoppingList => '购物清单';
+
+  @override
+  String get homeSectionShoppingListDesc => '还要买的东西，点一下即可勾掉';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => '储藏室能做多少道食谱';
+
+  @override
+  String get homeSectionDinnerDesc => '几个晚餐建议，各附理由';
+
+  @override
+  String get homeSectionJumpBackInDesc => '今日餐食、置顶和最近浏览的食谱';
+
+  @override
+  String get homeSectionFavoritesDesc => '一排显示你收藏的食谱';
+
+  @override
+  String get homeSectionBrowse => '菜品类型和类别';
+
+  @override
+  String get homeSectionBrowseDesc => '按菜品类型和类别浏览食谱书';
+
+  @override
+  String get homeSectionCookbooksDesc => '你的食谱书架，点一下即可切换';
+
+  @override
+  String get homeSectionCravingDesc => '问候语旁的按钮，按你的心情推荐食谱';
+
+  @override
+  String get homeSectionGuides => '指南提示';
+
+  @override
+  String get homeSectionGuidesDesc => '第一次使用？显示使用指南的卡片，直到你关闭它';
+
+  @override
+  String get homeSectionBackup => '备份提醒';
+
+  @override
+  String get homeSectionBackupDesc => '云同步关闭且食谱没有备份时的提醒';
+
+  @override
+  String get homeSectionCookbookUpdates => '食谱书更新';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => '来自社区的食谱书有更新时的通知';
+
+  @override
+  String get homeJumpBackInMeals => '今天计划的餐食';
+
+  @override
+  String get homeJumpBackInPinned => '置顶的食谱';
+
+  @override
+  String get homeJumpBackInRecent => '最近浏览的食谱';
+
+  @override
+  String get homeJumpBackInRecentCount => '显示多少个最近浏览的食谱';
+
+  @override
+  String get homeEditHomeScreen => '编辑首页';
+
+  @override
+  String get homeAllSectionsHidden => '首页的所有部分都已关闭。';
 }

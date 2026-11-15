@@ -87,6 +87,50 @@ enum IngredientLayout {
   columnar, // Amount+unit in a fixed column, name in another (aligned)
 }
 
+/// The parts of the Home screen that Settings > Home screen turns on and
+/// off, phone and desktop alike. The greeting with the cookbook switcher,
+/// the search bar and the add button are not here: they are how the user
+/// gets around, and always shown. The "What are you craving?" button has its
+/// own setting, [AppSettings.showSurpriseMe].
+enum HomeSection {
+  /// All recipes, Favorites and Cookbooks under the search bar (phones and
+  /// tablets; desktop has the sidebar).
+  libraryChips,
+
+  /// The meals planned for the next seven days.
+  nextSevenDays,
+
+  /// The shopping list at a glance.
+  shoppingList,
+
+  /// "What can I make?": how many recipes the pantry covers.
+  whatCanIMake,
+
+  /// "What's for dinner?": a few suggestions, each with its reason.
+  dinnerIdeas,
+
+  /// Today's meals, pinned and recently viewed recipes.
+  jumpBackIn,
+
+  /// The favourite recipes in a row.
+  favorites,
+
+  /// Courses and categories to browse the cookbook by.
+  browse,
+
+  /// The cookbook shelf.
+  cookbookShelf,
+
+  /// "New here?": the card that points to the how-to guides.
+  guidesTip,
+
+  /// The reminder that cloud sync is off and nothing is backed up.
+  backupReminder,
+
+  /// "Update available" for a cookbook saved from Community.
+  cookbookUpdates,
+}
+
 // ============ SETTINGS STATE ============
 
 class AppSettings {
@@ -130,6 +174,10 @@ class AppSettings {
   // Surprise Me card visibility (home screen)
   final bool showSurpriseMe;
 
+  /// Home screen sections turned off in Settings > Home screen; all are on
+  /// by default.
+  final Set<HomeSection> hiddenHomeSections;
+
   // Custom theme colors (for AppColorTheme.custom, premium-only)
   final Color? customBgColor;
   final Color? customPrimaryColor;
@@ -167,6 +215,7 @@ class AppSettings {
     this.householdServings = 0,
     this.ingredientLayout = IngredientLayout.inline,
     this.showSurpriseMe = true,
+    this.hiddenHomeSections = const {},
     this.customBgColor,
     this.customPrimaryColor,
     this.customAccentColor,
@@ -177,6 +226,9 @@ class AppSettings {
     Set<String>? enabledNutrients,
   }) : seedColor = appTheme.seedColor,
         enabledNutrients = enabledNutrients ?? defaultEnabledNutrients;
+
+  /// Whether Home shows [section].
+  bool showsHomeSection(HomeSection section) => !hiddenHomeSections.contains(section);
 
   AppSettings copyWith({
     AppColorTheme? appTheme,
@@ -200,6 +252,7 @@ class AppSettings {
     int? householdServings,
     IngredientLayout? ingredientLayout,
     bool? showSurpriseMe,
+    Set<HomeSection>? hiddenHomeSections,
     Color? customBgColor,
     Color? customPrimaryColor,
     Color? customAccentColor,
@@ -230,6 +283,7 @@ class AppSettings {
       householdServings: householdServings ?? this.householdServings,
       ingredientLayout: ingredientLayout ?? this.ingredientLayout,
       showSurpriseMe: showSurpriseMe ?? this.showSurpriseMe,
+      hiddenHomeSections: hiddenHomeSections ?? this.hiddenHomeSections,
       customBgColor: customBgColor ?? this.customBgColor,
       customPrimaryColor: customPrimaryColor ?? this.customPrimaryColor,
       customAccentColor: customAccentColor ?? this.customAccentColor,
@@ -319,6 +373,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _householdServingsKey = 'household_servings';
   static const _ingredientLayoutKey = 'ingredient_layout';
   static const _showSurpriseMeKey = 'show_surprise_me';
+
+  /// The Home sections turned off, by [HomeSection] name.
+  static const homeHiddenSectionsKey = 'home_hidden_sections';
   static const _customBgKey = 'custom_theme_bg';
   static const _customPrimaryKey = 'custom_theme_primary';
   static const _customAccentKey = 'custom_theme_accent';
@@ -451,6 +508,21 @@ class SettingsNotifier extends Notifier<AppSettings> {
     // Load Surprise Me visibility
     final showSurpriseMe = prefs.getBool(_showSurpriseMeKey) ?? true;
 
+    // Home sections turned off. Before Settings > Home screen, the only way
+    // to clear "Jump back in" off Home was turning off all three of its
+    // Quick Access sources: it starts off for those users, the sources as
+    // they left them.
+    final hiddenNames = prefs.getStringList(homeHiddenSectionsKey);
+    final hiddenHomeSections = hiddenNames != null
+        ? {
+            for (final name in hiddenNames)
+              ...HomeSection.values.where((s) => s.name == name),
+          }
+        : {
+            if (!quickAccessShowMealPlan && !quickAccessShowPinned && !quickAccessShowHistory)
+              HomeSection.jumpBackIn,
+          };
+
     // Load custom theme colors
     final customBgInt = prefs.getInt(_customBgKey);
     final customPrimaryInt = prefs.getInt(_customPrimaryKey);
@@ -488,6 +560,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       householdServings: householdServings,
       ingredientLayout: ingredientLayout,
       showSurpriseMe: showSurpriseMe,
+      hiddenHomeSections: hiddenHomeSections,
       customBgColor: customBgColor,
       customPrimaryColor: customPrimaryColor,
       customAccentColor: customAccentColor,
@@ -502,6 +575,35 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showSurpriseMeKey, show);
     state = state.copyWith(showSurpriseMe: show);
+  }
+
+  /// Show or hide one section of the Home screen. Turning "Jump back in" on
+  /// with none of its sources on turns them all on, so it has something to
+  /// show.
+  Future<void> setHomeSectionShown(HomeSection section, bool show) async {
+    final hidden = {...state.hiddenHomeSections};
+    if (show) {
+      hidden.remove(section);
+    } else {
+      hidden.add(section);
+    }
+    // In the state at once and saved from the state, so two switches flipped
+    // quickly both stick.
+    state = state.copyWith(hiddenHomeSections: hidden);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(homeHiddenSectionsKey, [
+      for (final s in HomeSection.values)
+        if (state.hiddenHomeSections.contains(s)) s.name,
+    ]);
+    if (show &&
+        section == HomeSection.jumpBackIn &&
+        !state.quickAccessShowMealPlan &&
+        !state.quickAccessShowPinned &&
+        !state.quickAccessShowHistory) {
+      await setQuickAccessShowMealPlan(true);
+      await setQuickAccessShowPinned(true);
+      await setQuickAccessShowHistory(true);
+    }
   }
 
   Future<void> setNutritionChartStyle(NutritionChartStyle style) async {
@@ -720,7 +822,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
     _languageKey, _quickAccessHistoryKey, _quickAccessHistoryCountKey, _quickAccessMealPlanKey,
     _quickAccessPinnedKey, _recipePlaceholderKey, _cookbookPlaceholderKey, _allergensKey,
     _recipeEditLayoutKey, _textScaleKey, _weekStartDayKey, _householdServingsKey, _ingredientLayoutKey,
-    _showSurpriseMeKey, _customBgKey, _customPrimaryKey, _customAccentKey, _customDarkLinkedKey,
+    _showSurpriseMeKey, homeHiddenSectionsKey, _customBgKey, _customPrimaryKey, _customAccentKey,
+    _customDarkLinkedKey,
     _customDarkBgKey, _customDarkPrimaryKey, _customDarkAccentKey,
     'defaultNutritionView', 'nutritionChartStyle', 'nutritionPalette', 'showExpandedNutrition',
     'enabledNutrients',

@@ -60,13 +60,22 @@ class IngredientKey {
   /// used when the user adds a missing ingredient to the pantry.
   final String label;
 
+  /// Each food's words as the line writes them, by [FoodPhrase.text]
+  /// ("maraschino cherries" for the phrase "maraschino cherry").
+  final Map<String, String> phraseLabels;
+
   const IngredientKey({
     required this.alternatives,
     required this.optional,
     required this.label,
+    this.phraseLabels = const {},
   });
 
   bool get isEmpty => alternatives.isEmpty;
+
+  /// One food of the line as the line writes it, to show it or add it to
+  /// the pantry on its own.
+  String labelOf(FoodPhrase phrase) => phraseLabels[phrase.text] ?? phrase.text;
 
   /// Stable text for telling two lines of one recipe apart.
   String get signature =>
@@ -227,10 +236,70 @@ const _cjkBasics = <String, List<String>>{
 final _cjkSaltAndPepper = RegExp(r'塩こしょう|塩コショウ|塩胡椒|盐和胡椒|鹽和胡椒|소금과\s*후추');
 
 /// A word inside "for garnish", "to serve", "optional": the line is not
-/// needed to make the dish.
+/// needed to make the dish. Matched against text with accents folded.
 final _optionalPattern = RegExp(
-  r'\boptional\b|\bif desired\b|\b(?:for|to) (?:garnish|serve|serving|decorate|decoration|dust|dusting|sprinkle|sprinkling)\b|\bgarnish\b',
+  r'\boptional\b|\bif desired\b|\b(?:for|to) (?:garnish|serve|serving|decorate|decoration|dust|dusting|sprinkle|sprinkling)\b|\bgarnish(?:es|ing)?\b'
+  '|$_otherOptionalWords',
 );
+
+/// "For garnish", "to decorate", "optional" and "to serve" in the app's
+/// other languages, accents folded. Kept to words that only ever mean that:
+/// French "garniture" is a filling, Spanish "guarnicion" and Portuguese
+/// "guarnicao" are side dishes, and none of them is here.
+const _otherOptionalWords =
+    // German.
+    r'\bzum (?:garnieren|dekorieren|verzieren|servieren)\b|\bzur (?:dekoration|deko)\b|\bgarnitur\b'
+    // Spanish and Portuguese.
+    r'|\bpara (?:decorar|adornar|enfeitar|servir)\b|\bopciona(?:l|les|is)\b'
+    // French.
+    r'|\bpour (?:decorer|la decoration|servir)\b|\bfacultati(?:f|fs|ve|ves)\b|\boptionnel(?:le)?s?\b'
+    // Italian.
+    r'|\bper (?:guarnire|decorare|servire)\b|\bfacoltativ[oaie]\b|\bopzional[ei]\b'
+    // Dutch.
+    r'|\bom te (?:garneren|versieren|serveren)\b|\bter (?:garnering|decoratie)\b|\boptioneel\b'
+    // Polish.
+    r'|\bdo (?:dekoracji|dekorowania|przybrania|podania)\b|\bopcjonaln(?:ie|e|y|a)\b'
+    // Russian.
+    r'|для (?:украшения|декора|подачи)|по желанию|опционально'
+    // Japanese (not 飾り切り, a decorative cut of a food the dish needs),
+    // Korean and Chinese.
+    r'|飾り(?!切)|あしらい|장식용|고명|\(선택\)|선택\s*사항|선택\s*재료|装饰|裝飾|点缀|點綴|盘饰|盤飾|可选|可選';
+
+/// A section title in a recipe's ingredients ("Garnish", "To serve",
+/// "Optional", "Pour la décoration", "Do podania") whose lines are not
+/// needed to make the dish. Matched against the title with accents folded.
+/// Besides [_optionalPattern], the words that only a title uses that way.
+final _optionalSectionPattern = RegExp(
+  // English: "Decoration", "Serving suggestions", "Serve with".
+  r'\bdecorat(?:ion|ions|ing)\b|\bserving suggestions?\b|\bserve with\b'
+  // German: "Dekoration", "Deko", "Verzierung", "Nach Belieben", "Zum Anrichten".
+  r'|\b(?:dekoration|deko|verzierung|garnieren)\b|\bnach belieben\b|\bzum anrichten\b'
+  // Spanish and Portuguese: "Decoración", "Adorno", "Decoração", "Enfeite".
+  r'|\b(?:decoracion|adornos?|decoracao|enfeites?)\b'
+  // French: "Décoration", "Décor", "Au moment de servir".
+  r'|\b(?:decoration|decor)\b|\bau moment de servir\b'
+  // Italian: "Guarnizione", "Decorazione".
+  r'|\b(?:guarnizion[ei]|decorazion[ei])\b'
+  // Dutch: "Garnering", "Decoratie", "Versiering", "Serveren".
+  r'|\b(?:garnering|decoratie|versiering|serveren)\b'
+  // Polish: "Dekoracja", "Przybranie".
+  r'|\b(?:dekoracja|przybranie)\b'
+  // Russian: "Украшение", "Декор", "При подаче".
+  r'|(?<!\p{L})(?:украшени|декор)|при подаче'
+  // Japanese "お好みで" (as you like), Korean "장식" (decoration), "선택"
+  // (optional), "기호에 따라" (to your liking) and "서빙용" (for serving).
+  r'|お好みで|オプション|장식|선택|기호에\s*따라|서빙용',
+  unicode: true,
+);
+
+/// Whether an ingredient section titled [title] holds lines the dish can do
+/// without: a garnish, a decoration, optional extras or what to serve it
+/// with, in any of the app's languages.
+bool isOptionalSectionTitle(String title) {
+  final s = foldAccents(title.trim());
+  if (s.isEmpty) return false;
+  return _optionalPattern.hasMatch(s) || _optionalSectionPattern.hasMatch(s);
+}
 
 /// "Plus more for dusting": the line is needed, with a little extra on top.
 final _alsoNeededPattern = RegExp(r'\b(?:plus|more|additional)\b');
@@ -374,17 +443,29 @@ IngredientKey ingredientKeyFor(String name, {String? notes}) {
   s = canonicalizeFoodText(_foreignPrepass(s));
 
   final alternatives = <List<FoodPhrase>>[];
-  final labelWords = <String>[];
+  final phraseLabels = <String, String>{};
+  String? label;
   for (final alternative in s.split(_alternativeSplit)) {
     final phrases = <FoodPhrase>[];
     for (final part in alternative.split(_partSplit)) {
-      final phrase = _phraseOf(part, alternatives.isEmpty && phrases.isEmpty ? labelWords : null);
-      if (phrase != null && !phrases.contains(phrase)) phrases.add(phrase);
+      final words = <String>[];
+      final phrase = _phraseOf(part, words);
+      if (phrase == null) continue;
+      // The line's label is its first food as written; each food keeps its
+      // own words too ("maraschino cherry" of "pineapple leaf and
+      // maraschino cherry"), without the amount in a CJK line.
+      label ??= words.join(' ');
+      phraseLabels.putIfAbsent(phrase.text, () => phrase.cjk ? phrase.text : words.join(' '));
+      if (!phrases.contains(phrase)) phrases.add(phrase);
     }
     if (phrases.isNotEmpty) alternatives.add(phrases);
   }
-  final label = labelWords.isNotEmpty ? labelWords.join(' ') : name.trim().toLowerCase();
-  return IngredientKey(alternatives: alternatives, optional: optional, label: label);
+  return IngredientKey(
+    alternatives: alternatives,
+    optional: optional,
+    label: label != null && label.isNotEmpty ? label : name.trim().toLowerCase(),
+    phraseLabels: phraseLabels,
+  );
 }
 
 /// The phrase a pantry item names, or null for an empty or filler-only item.
@@ -663,6 +744,33 @@ class PantryMatcher {
     }
     return const [];
   }
+
+  /// The alternative of an ingredient line closest to on hand: the one with
+  /// the fewest foods lacking, the first of equals. Null for a line with
+  /// nothing food-like.
+  List<FoodPhrase>? closestAlternative(IngredientKey key) {
+    List<FoodPhrase>? best;
+    var bestLacking = 0;
+    for (final alternative in key.alternatives) {
+      final lacking = alternative.where((p) => !hasFood(p)).length;
+      if (best == null || lacking < bestLacking) {
+        best = alternative;
+        bestLacking = lacking;
+      }
+      if (lacking == 0) break;
+    }
+    return best;
+  }
+
+  /// The foods an ingredient line still needs: those of its
+  /// [closestAlternative] that are not on hand. "Pineapple leaf and
+  /// maraschino cherry" with pineapple in the pantry needs the maraschino
+  /// cherry only, so that is what to name, to buy and to add to the pantry.
+  /// Empty when the line is on hand or names no food.
+  List<FoodPhrase> missingFoodsFor(IngredientKey key) => [
+        for (final phrase in closestAlternative(key) ?? const <FoodPhrase>[])
+          if (!hasFood(phrase)) phrase,
+      ];
 
   /// Whether every food of some alternative of an ingredient line is on hand
   /// (in the pantry or a basic), optional or not. For the shopping list.

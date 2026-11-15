@@ -13445,4 +13445,111 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get webImportTimedOut => 'De website reageerde te traag. Probeer het later opnieuw.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return 'Optioneel: $items';
+  }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten in $cookbook gebruiken ze',
+      one: '1 recept in $cookbook gebruikt ze',
+      zero: 'Nog geen recepten in $cookbook gebruiken ze',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsHomeScreen => 'Startscherm';
+
+  @override
+  String get settingsHomeScreenSubtitle => 'Kies wat er op de startpagina staat';
+
+  @override
+  String get homeSettingsIntro => 'Zet uit wat je niet gebruikt, zodat de startpagina overzichtelijk blijft. De begroeting, de zoekbalk en de knop om toe te voegen blijven altijd staan.';
+
+  @override
+  String get homeSettingsGroupPlanning => 'Planning';
+
+  @override
+  String get homeSettingsGroupTips => 'Tips en herinneringen';
+
+  @override
+  String get homeSectionLibraryChips => 'Snelkoppelingen naar je verzameling';
+
+  @override
+  String get homeSectionLibraryChipsDesc => 'Alle recepten, Favorieten en Kookboeken onder de zoekbalk';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => 'De maaltijden die je voor de komende week hebt gepland';
+
+  @override
+  String get homeSectionShoppingList => 'Boodschappenlijst';
+
+  @override
+  String get homeSectionShoppingListDesc => 'Wat je nog moet kopen, met één tik afgevinkt';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => 'Hoeveel recepten je voorraadkast dekt';
+
+  @override
+  String get homeSectionDinnerDesc => 'Een paar ideeën voor het avondeten, elk met een reden';
+
+  @override
+  String get homeSectionJumpBackInDesc => 'Maaltijden van vandaag, vastgepinde en recent bekeken recepten';
+
+  @override
+  String get homeSectionFavoritesDesc => 'Je favoriete recepten op een rij';
+
+  @override
+  String get homeSectionBrowse => 'Gangen en categorieën';
+
+  @override
+  String get homeSectionBrowseDesc => 'Blader door het kookboek per gang en categorie';
+
+  @override
+  String get homeSectionCookbooksDesc => 'Je kookboekenplank, om met één tik te wisselen';
+
+  @override
+  String get homeSectionCravingDesc => 'Een knop bij de begroeting die een recept voorstelt waar je zin in hebt';
+
+  @override
+  String get homeSectionGuides => 'Tip over de handleidingen';
+
+  @override
+  String get homeSectionGuidesDesc => 'Nieuw hier? Een kaart met de handleidingen, tot je hem sluit';
+
+  @override
+  String get homeSectionBackup => 'Back-upherinnering';
+
+  @override
+  String get homeSectionBackupDesc => 'Een herinnering als cloudsynchronisatie uit staat en recepten geen back-up hebben';
+
+  @override
+  String get homeSectionCookbookUpdates => 'Kookboekupdates';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => 'Een melding als een kookboek uit de Community een update heeft';
+
+  @override
+  String get homeJumpBackInMeals => 'Vandaag geplande maaltijden';
+
+  @override
+  String get homeJumpBackInPinned => 'Vastgepinde recepten';
+
+  @override
+  String get homeJumpBackInRecent => 'Recent bekeken recepten';
+
+  @override
+  String get homeJumpBackInRecentCount => 'Hoeveel recent bekeken recepten tonen';
+
+  @override
+  String get homeEditHomeScreen => 'Startscherm aanpassen';
+
+  @override
+  String get homeAllSectionsHidden => 'Alle onderdelen van de startpagina staan uit.';
 }

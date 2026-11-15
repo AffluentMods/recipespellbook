@@ -13683,4 +13683,113 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get webImportTimedOut => 'Strona odpowiadała zbyt długo. Spróbuj ponownie później.';
+
+  @override
+  String pantryCookOptionalMissing(String items) {
+    return 'Opcjonalnie: $items';
+  }
+
+  @override
+  String pantryCookRecipesInCookbookUsing(int count, String cookbook) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Używa ich $count przepisu z książki $cookbook',
+      many: 'Używa ich $count przepisów z książki $cookbook',
+      few: 'Używają ich $count przepisy z książki $cookbook',
+      one: 'Używa ich $count przepis z książki $cookbook',
+      zero: 'Żaden przepis z książki $cookbook ich jeszcze nie używa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsHomeScreen => 'Ekran główny';
+
+  @override
+  String get settingsHomeScreenSubtitle => 'Wybierz, co widać na stronie głównej';
+
+  @override
+  String get homeSettingsIntro => 'Wyłącz to, czego nie używasz, aby strona główna była uporządkowana. Powitanie, pasek wyszukiwania i przycisk dodawania zostają zawsze.';
+
+  @override
+  String get homeSettingsGroupPlanning => 'Planowanie';
+
+  @override
+  String get homeSettingsGroupTips => 'Wskazówki i przypomnienia';
+
+  @override
+  String get homeSectionLibraryChips => 'Skróty do przepisów';
+
+  @override
+  String get homeSectionLibraryChipsDesc => 'Wszystkie przepisy, Ulubione i Książki kucharskie pod paskiem wyszukiwania';
+
+  @override
+  String get homeSectionNextSevenDaysDesc => 'Posiłki zaplanowane na najbliższy tydzień';
+
+  @override
+  String get homeSectionShoppingList => 'Lista zakupów';
+
+  @override
+  String get homeSectionShoppingListDesc => 'Co jeszcze kupić, odhaczane jednym dotknięciem';
+
+  @override
+  String get homeSectionWhatCanIMakeDesc => 'Ile przepisów pokrywa twoja spiżarnia';
+
+  @override
+  String get homeSectionDinnerDesc => 'Kilka pomysłów na kolację, każdy z powodem';
+
+  @override
+  String get homeSectionJumpBackInDesc => 'Dzisiejsze posiłki, przypięte i ostatnio oglądane przepisy';
+
+  @override
+  String get homeSectionFavoritesDesc => 'Twoje ulubione przepisy w jednym rzędzie';
+
+  @override
+  String get homeSectionBrowse => 'Dania i kategorie';
+
+  @override
+  String get homeSectionBrowseDesc => 'Przeglądaj książkę według dań i kategorii';
+
+  @override
+  String get homeSectionCookbooksDesc => 'Półka z książkami kucharskimi, przełączanie jednym dotknięciem';
+
+  @override
+  String get homeSectionCravingDesc => 'Przycisk obok powitania, który podsunie przepis na to, na co masz ochotę';
+
+  @override
+  String get homeSectionGuides => 'Wskazówka o przewodnikach';
+
+  @override
+  String get homeSectionGuidesDesc => 'Pierwszy raz tutaj? Karta z przewodnikami, dopóki jej nie zamkniesz';
+
+  @override
+  String get homeSectionBackup => 'Przypomnienie o kopii zapasowej';
+
+  @override
+  String get homeSectionBackupDesc => 'Przypomnienie, gdy synchronizacja w chmurze jest wyłączona, a przepisy nie mają kopii zapasowej';
+
+  @override
+  String get homeSectionCookbookUpdates => 'Aktualizacje książek';
+
+  @override
+  String get homeSectionCookbookUpdatesDesc => 'Powiadomienie, gdy książka ze Społeczności ma aktualizację';
+
+  @override
+  String get homeJumpBackInMeals => 'Posiłki zaplanowane na dziś';
+
+  @override
+  String get homeJumpBackInPinned => 'Przypięte przepisy';
+
+  @override
+  String get homeJumpBackInRecent => 'Ostatnio oglądane przepisy';
+
+  @override
+  String get homeJumpBackInRecentCount => 'Ile ostatnio oglądanych pokazać';
+
+  @override
+  String get homeEditHomeScreen => 'Edytuj ekran główny';
+
+  @override
+  String get homeAllSectionsHidden => 'Wszystkie sekcje strony głównej są wyłączone.';
 }

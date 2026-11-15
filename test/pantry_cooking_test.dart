@@ -412,4 +412,135 @@ void main() {
       expect(names(await loadRecipeLibrary(db)), ['leeks', 'potatoes']);
     });
   });
+
+  group('garnish sections and lines partly on hand', () {
+    // The owner's Lava Flow, as saved: two layers and a garnish, each under
+    // a section title.
+    List<IngredientRow> lavaFlow(String id, {String garnishTitle = 'Garnish'}) => [
+          IngredientRow(recipeId: id, name: 'Red layer', notes: ingredientHeaderMarker),
+          IngredientRow(recipeId: id, name: 'strawberries', amount: '1', unit: 'cup', notes: 'fresh or frozen'),
+          IngredientRow(recipeId: id, name: 'simple syrup', amount: '1', unit: 'oz'),
+          IngredientRow(recipeId: id, name: 'White layer', notes: ingredientHeaderMarker),
+          IngredientRow(recipeId: id, name: 'light rum', amount: '2', unit: 'oz'),
+          IngredientRow(recipeId: id, name: 'coconut cream', amount: '2', unit: 'oz'),
+          IngredientRow(recipeId: id, name: 'pineapple juice', amount: '2', unit: 'oz'),
+          IngredientRow(recipeId: id, name: 'banana', amount: '1'),
+          IngredientRow(recipeId: id, name: 'ice', amount: '1', unit: 'cup'),
+          IngredientRow(recipeId: id, name: garnishTitle, notes: ingredientHeaderMarker),
+          IngredientRow(recipeId: id, name: 'pineapple leaf and maraschino cherry'),
+        ];
+    const bar = [
+      'pineapple', 'pineapple juice', 'strawberries', 'simple syrup', 'light rum', 'coconut cream', 'banana', 'ice',
+    ];
+    PantryRecipeMatch match(List<IngredientRow> rows, List<String> pantry) => matchRecipe(
+          buildRecipeLibrary([_recipe(rows.first.recipeId, title: 'Lava Flow')], rows).recipes.single,
+          PantryMatcher(pantry: pantry, basics: ['water', 'salt']),
+        );
+
+    test('the garnish does not keep Lava Flow from Ready now', () {
+      final lava = match(lavaFlow('lava'), bar);
+      expect(lava.readyNow, isTrue);
+      expect(lava.counted, 7, reason: 'the seven lines of the two layers');
+      expect(lava.missing, isEmpty);
+      expect(lava.missingFoods, isEmpty);
+      expect(lava.optionalMissing, ['maraschino cherry'], reason: 'named, not counted');
+      final garnish = lava.recipe.ingredients.last;
+      expect(garnish.inOptionalSection, isTrue);
+      expect(garnish.optional, isTrue);
+      expect(lava.recipe.ingredients.where((i) => i.inOptionalSection).length, 1,
+          reason: 'only the lines under the garnish title');
+
+      // Short of strawberries: those are missing, the garnish still is not.
+      final short = match(lavaFlow('lava'), [...bar]..remove('strawberries'));
+      expect(short.readyNow, isFalse);
+      expect(short.missing.map((i) => i.name), ['strawberries']);
+      expect(short.missingFoods, ['strawberries']);
+
+      // With the cherries in too, the garnish is from the pantry like the rest.
+      final full = match(lavaFlow('lava'), [...bar, 'maraschino cherries']);
+      expect(full.optionalMissing, isEmpty);
+      expect(full.pantryItemsUsed, contains('maraschino cherries'));
+      expect(full.counted, 7);
+    });
+
+    test('garnish titles in other languages, and a French garniture that counts', () {
+      for (final title in ['Pour la décoration', 'Zum Garnieren', 'Para decorar', 'Do dekoracji', 'Для украшения', '飾り']) {
+        expect(match(lavaFlow('lava', garnishTitle: title), bar).readyNow, isTrue, reason: title);
+      }
+      final filling = match(lavaFlow('lava', garnishTitle: 'Garniture'), bar);
+      expect(filling.readyNow, isFalse, reason: 'a garniture is a filling, needed');
+      expect(filling.missingFoods, ['maraschino cherry']);
+    });
+
+    test('a line partly on hand is missing only the rest, and adding that makes it ready', () {
+      // The same line where a title does not make it a garnish.
+      final lava = match(lavaFlow('lava', garnishTitle: 'Topping'), bar);
+      expect(lava.missing.map((i) => i.name), ['pineapple leaf and maraschino cherry']);
+      expect(lava.missingFoods, ['maraschino cherry'], reason: 'pineapple is on hand; the chip names the cherry');
+      expect(lava.missingLines.single.partly, isTrue);
+      expect(lava.toBuy.map((i) => i.name), ['maraschino cherry']);
+
+      final after = match(lavaFlow('lava', garnishTitle: 'Topping'), [...bar, 'maraschino cherry']);
+      expect(after.readyNow, isTrue);
+    });
+
+    test('a line wholly lacking goes on the list as written; one need is named once', () {
+      final rows = [
+        const IngredientRow(recipeId: 'mojito', name: 'mint leaves', amount: '10'),
+        const IngredientRow(recipeId: 'mojito', name: 'white rum', amount: '2', unit: 'oz'),
+        const IngredientRow(recipeId: 'mojito', name: 'lime and soda water'),
+        const IngredientRow(recipeId: 'mojito', name: 'To serve', notes: ingredientHeaderMarker),
+        const IngredientRow(recipeId: 'mojito', name: 'mint sprig'),
+        const IngredientRow(recipeId: 'mojito', name: 'lime wedge'),
+      ];
+      final mojito = match(rows, ['white rum', 'soda water']);
+      expect(mojito.missing.map((i) => i.name), ['mint leaves', 'lime and soda water']);
+      expect(mojito.missingFoods, ['mint', 'lime']);
+      expect(mojito.toBuy.map((i) => '${i.amount ?? ''} ${i.name}'.trim()), ['10 mint leaves', 'lime']);
+      expect(mojito.optionalMissing, ['lime wedge'], reason: 'the mint to serve is already named as missing');
+    });
+
+    test('an optional line does not stand in for a needed line of the same food', () {
+      final rows = [
+        const IngredientRow(recipeId: 'soup', name: 'parsley, to garnish'),
+        const IngredientRow(recipeId: 'soup', name: 'leeks'),
+        const IngredientRow(recipeId: 'soup', name: 'parsley'),
+      ];
+      final soup = match(rows, ['leeks']);
+      expect(soup.missing.map((i) => i.name), ['parsley']);
+      expect(soup.counted, 2);
+    });
+
+    test('Add missing puts only the part still needed on the list', () async {
+      SharedPreferences.setMockInitialValues({});
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      resetRecipeLibraryCacheForTesting();
+      await db.into(db.cookbooks).insert(CookbooksCompanion.insert(id: 'cb1', name: 'Cocktails'));
+      await db.into(db.recipes).insert(RecipesCompanion.insert(id: 'punch', cookbookId: 'cb1', title: 'Tiki Punch'));
+      final lines = [('light rum', '2', 'oz'), ('pineapple leaf and maraschino cherry', '1', null), ('orgeat', '1', 'oz')];
+      for (var i = 0; i < lines.length; i++) {
+        await db.into(db.ingredients).insert(IngredientsCompanion.insert(
+              id: 'punch_$i',
+              recipeId: 'punch',
+              sortOrder: i,
+              name: lines[i].$1,
+              amount: Value(lines[i].$2),
+              unit: Value(lines[i].$3),
+            ));
+      }
+      final punch = rankRecipesByPantry(await loadRecipeLibrary(db), PantryMatcher(pantry: ['light rum', 'pineapple']))
+          .single;
+      final shopping = ShoppingDao(db);
+      final result = await addIngredientsToShoppingList(
+        dao: shopping,
+        recipe: punch.recipe,
+        ingredients: punch.toBuy,
+        newListName: 'Shopping List',
+      );
+      expect(result.added, 2);
+      final items = await shopping.getItemsForList(result.list.id);
+      expect(items.map((i) => i.name).toSet(), {'maraschino cherry', '1 oz orgeat'});
+    });
+  });
 }
