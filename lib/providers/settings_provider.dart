@@ -587,12 +587,14 @@ class SettingsNotifier extends Notifier<AppSettings> {
     } else {
       hidden.add(section);
     }
+    // In the state at once and saved from the state, so two switches flipped
+    // quickly both stick.
+    state = state.copyWith(hiddenHomeSections: hidden);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(homeHiddenSectionsKey, [
       for (final s in HomeSection.values)
-        if (hidden.contains(s)) s.name,
+        if (state.hiddenHomeSections.contains(s)) s.name,
     ]);
-    state = state.copyWith(hiddenHomeSections: hidden);
     if (show &&
         section == HomeSection.jumpBackIn &&
         !state.quickAccessShowMealPlan &&
