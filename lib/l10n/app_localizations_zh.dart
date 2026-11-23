@@ -10523,6 +10523,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityICookedThisActive => '已做过';
 
   @override
+  String get communitySignInToMarkCooked => '登录后即可标记你做过的菜谱，并计入次数。';
+
+  @override
   String get communityRepublishRecipes => '更新已发布的版本';
 
   @override

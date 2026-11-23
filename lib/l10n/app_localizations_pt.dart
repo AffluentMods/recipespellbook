@@ -10624,6 +10624,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get communityICookedThisActive => 'Feita';
 
   @override
+  String get communitySignInToMarkCooked => 'Faça login para marcar as receitas que você preparou e somar à contagem.';
+
+  @override
   String get communityRepublishRecipes => 'Atualizar versão publicada';
 
   @override

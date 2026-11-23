@@ -1055,8 +1055,12 @@ class CommunityService {
 
   /// Toggle the current user's "cooked" reaction on a community recipe.
   /// Pass [cooked]: true to set, false to clear. Returns the updated
-  /// state from the server, or null on failure.
-  Future<CookedState?> setRecipeCooked(String recipeId, bool cooked) async {
+  /// state from the server, or a null state on failure. `sessionExpired`
+  /// is true when the server answered 401: this device's sign-in is no
+  /// longer accepted, so the caller should ask the user to sign in again
+  /// instead of showing a generic error.
+  Future<({CookedState? state, bool sessionExpired})> setRecipeCooked(
+      String recipeId, bool cooked) async {
     try {
       final r = await _auth.post(
         '/v1/community/recipes/$recipeId/cooked',
@@ -1064,15 +1068,20 @@ class CommunityService {
       );
       if (r.statusCode == 200) {
         final data = jsonDecode(r.body) as Map<String, dynamic>;
-        return CookedState(
-          cooked: data['cooked'] as bool? ?? cooked,
-          cookCount: (data['cookCount'] as num?)?.toInt() ?? 0,
+        return (
+          state: CookedState(
+            cooked: data['cooked'] as bool? ?? cooked,
+            cookCount: (data['cookCount'] as num?)?.toInt() ?? 0,
+          ),
+          sessionExpired: false,
         );
       }
+      if (r.statusCode == 401) return (state: null, sessionExpired: true);
+      debugPrint('[Community] setRecipeCooked: HTTP ${r.statusCode}');
     } catch (e) {
       debugPrint('[Community] setRecipeCooked: $e');
     }
-    return null;
+    return (state: null, sessionExpired: false);
   }
 
   /// Get current "cooked" state for a recipe (and total count). Works

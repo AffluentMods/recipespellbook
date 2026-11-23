@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/ingredient_images.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/cookbook_provider.dart';
+import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
 import '../../../services/community_recipe_saver.dart';
 import '../../../utils/responsive_utils.dart';
@@ -14,6 +16,7 @@ import '../../widgets/community_image.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sheet_chrome.dart';
+import '../../widgets/sign_in_prompt.dart';
 
 // ════════════════════════════════════════════
 //  FULL READ-ONLY RECIPE PREVIEW
@@ -714,7 +717,9 @@ class _StepCard extends StatelessWidget {
 /// Compact pill-style button that lets the signed-in user mark a
 /// community recipe as "cooked", with an optimistic count update so
 /// the tap feels instant. Refetches state on mount so the count is
-/// fresh even when navigating from a stale list payload.
+/// fresh even when navigating from a stale list payload. Marking needs
+/// an account: signed out, or with a sign-in the server no longer
+/// accepts, a tap opens the sign-in sheet and finishes afterwards.
 class _CookedToggle extends ConsumerStatefulWidget {
   final String recipeId;
   final int initialCount;
@@ -750,6 +755,23 @@ class _CookedToggleState extends ConsumerState<_CookedToggle> {
     if (_busy) return;
     final desired = !_cooked;
 
+    // The server only counts taps from an account. Signed out, ask to
+    // sign in first, then finish the tap.
+    await waitForAuthReady(ref);
+    if (!mounted) return;
+    if (!AuthService.instance.isSignedIn && !await _signIn()) return;
+
+    await _send(desired, retryAfterSignIn: true);
+  }
+
+  /// Sends [desired] to the server with an optimistic update. A 401 means
+  /// this device's sign-in is no longer accepted: ask to sign in again
+  /// and, when [retryAfterSignIn], send the tap once more.
+  Future<void> _send(bool desired, {required bool retryAfterSignIn}) async {
+    // After a sign-in the reload may show the tap is already done (marked
+    // from another device): nothing left to send.
+    if (!mounted || _cooked == desired) return;
+
     // Optimistic update — feels instant, server is just confirming.
     setState(() {
       _busy = true;
@@ -757,22 +779,51 @@ class _CookedToggleState extends ConsumerState<_CookedToggle> {
       _count = (desired ? _count + 1 : _count - 1).clamp(0, 1 << 30);
     });
 
-    final state = await CommunityService.instance.setRecipeCooked(widget.recipeId, desired);
+    final result = await CommunityService.instance.setRecipeCooked(widget.recipeId, desired);
     if (!mounted) return;
+    final state = result.state;
     if (state != null) {
       setState(() {
         _cooked = state.cooked;
         _count = state.cookCount;
         _busy = false;
       });
-    } else {
-      // Failed — revert.
-      setState(() {
-        _cooked = !desired;
-        _count = (desired ? _count - 1 : _count + 1).clamp(0, 1 << 30);
-        _busy = false;
-      });
-      AppSnackbar.error(context, AppLocalizations.of(context)!.errorGeneric);
+      return;
+    }
+
+    // Failed — revert.
+    setState(() {
+      _cooked = !desired;
+      _count = (desired ? _count - 1 : _count + 1).clamp(0, 1 << 30);
+      _busy = false;
+    });
+    if (result.sessionExpired && retryAfterSignIn) {
+      if (await _signIn(sessionExpired: true)) {
+        await _send(desired, retryAfterSignIn: false);
+      }
+      return;
+    }
+    AppSnackbar.error(context, AppLocalizations.of(context)!.errorGeneric);
+  }
+
+  /// Opens the sign-in sheet. After a sign-in, reloads this account's
+  /// state so the button and count are right before the tap goes on.
+  /// Resolves to whether the user is signed in and still on this page.
+  Future<bool> _signIn({bool sessionExpired = false}) async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _busy = true);
+    try {
+      // The server already rejected this sign-in; clear it so the sheet
+      // starts clean instead of reporting the user as signed in.
+      if (sessionExpired) await ref.read(authProvider.notifier).signOut();
+      if (!mounted) return false;
+      final ok = await promptSignIn(context, ref,
+          message: l10n.communitySignInToMarkCooked, icon: Icons.local_fire_department);
+      if (!ok || !mounted) return false;
+      await _loadState();
+      return mounted;
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 

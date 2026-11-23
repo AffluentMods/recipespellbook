@@ -3655,6 +3655,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{1 Rezept zum Essensplan hinzugefügt} other{{count} Rezepte zum Essensplan hinzugefügt}}",
   "communityICookedThis": "Ich habe das gekocht",
   "communityICookedThisActive": "Gekocht",
+  "communitySignInToMarkCooked": "Melde dich an, um Rezepte als gekocht zu markieren und ihren Zähler zu erhöhen.",
   "communityRepublishRecipes": "Veröffentlichte Version aktualisieren",
   "communityRepublishRecipesBody": "Ersetzt den veröffentlichten Rezeptinhalt durch deine aktuelle Version. Bewertungen und Downloads bleiben erhalten.",
   "communityRepublishRecipesAction": "Aktualisieren",

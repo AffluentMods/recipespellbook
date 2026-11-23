@@ -5630,6 +5630,7 @@
   "shareLinkViewDesc": "Anyone with the link can view this list",
   "communityICookedThis": "I cooked this",
   "communityICookedThisActive": "Cooked",
+  "communitySignInToMarkCooked": "Sign in to mark recipes you cooked and add to their count.",
   "communityRepublishRecipes": "Update published version",
   "communityRepublishRecipesBody": "Replaces the published recipe content with your current version. Ratings and downloads are kept.",
   "communityRepublishRecipesAction": "Update",

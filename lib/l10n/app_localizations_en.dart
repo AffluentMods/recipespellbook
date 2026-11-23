@@ -10649,6 +10649,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityICookedThisActive => 'Cooked';
 
   @override
+  String get communitySignInToMarkCooked => 'Sign in to mark recipes you cooked and add to their count.';
+
+  @override
   String get communityRepublishRecipes => 'Update published version';
 
   @override

@@ -10780,6 +10780,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get communityICookedThisActive => 'Ugotowane';
 
   @override
+  String get communitySignInToMarkCooked => 'Zaloguj się, aby oznaczać ugotowane przepisy i dodawać je do licznika.';
+
+  @override
   String get communityRepublishRecipes => 'Zaktualizuj opublikowaną wersję';
 
   @override

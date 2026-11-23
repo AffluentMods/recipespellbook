@@ -4093,6 +4093,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{Добавлен 1 рецепт в план питания} few{Добавлено {count} рецепта в план питания} many{Добавлено {count} рецептов в план питания} other{Добавлено {count} рецепта в план питания}}",
   "communityICookedThis": "Я это готовил(а)",
   "communityICookedThisActive": "Приготовлено",
+  "communitySignInToMarkCooked": "Войдите, чтобы отмечать приготовленные рецепты и добавлять их в счётчик.",
   "communityRepublishRecipes": "Обновить опубликованную версию",
   "communityRepublishRecipesBody": "Заменяет содержимое опубликованного рецепта вашей текущей версией. Оценки и скачивания сохраняются.",
   "communityRepublishRecipesAction": "Обновить",

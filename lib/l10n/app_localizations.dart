@@ -18883,6 +18883,12 @@ abstract class AppLocalizations {
   /// **'Cooked'**
   String get communityICookedThisActive;
 
+  /// No description provided for @communitySignInToMarkCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to mark recipes you cooked and add to their count.'**
+  String get communitySignInToMarkCooked;
+
   /// No description provided for @communityRepublishRecipes.
   ///
   /// In en, this message translates to:
