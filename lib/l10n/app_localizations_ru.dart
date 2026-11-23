@@ -10770,6 +10770,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get communityICookedThisActive => 'Приготовлено';
 
   @override
+  String get communitySignInToMarkCooked => 'Войдите, чтобы отмечать приготовленные рецепты и добавлять их в счётчик.';
+
+  @override
   String get communityRepublishRecipes => 'Обновить опубликованную версию';
 
   @override

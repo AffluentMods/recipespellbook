@@ -10527,6 +10527,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get communityICookedThisActive => '作りました';
 
   @override
+  String get communitySignInToMarkCooked => '作ったレシピに印を付けて回数に加えるには、サインインしてください。';
+
+  @override
   String get communityRepublishRecipes => '公開バージョンを更新';
 
   @override

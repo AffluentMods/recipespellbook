@@ -4093,6 +4093,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{1件のレシピを献立に追加しました} other{{count}件のレシピを献立に追加しました}}",
   "communityICookedThis": "作ってみた",
   "communityICookedThisActive": "作りました",
+  "communitySignInToMarkCooked": "作ったレシピに印を付けて回数に加えるには、サインインしてください。",
   "communityRepublishRecipes": "公開バージョンを更新",
   "communityRepublishRecipesBody": "公開済みのレシピ内容を現在のバージョンに置き換えます。評価とダウンロード数は保持されます。",
   "communityRepublishRecipesAction": "更新",

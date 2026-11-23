@@ -4093,6 +4093,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{1 receita adicionada ao plano de refeições} other{{count} receitas adicionadas ao plano de refeições}}",
   "communityICookedThis": "Eu fiz esta receita",
   "communityICookedThisActive": "Feita",
+  "communitySignInToMarkCooked": "Faça login para marcar as receitas que você preparou e somar à contagem.",
   "communityRepublishRecipes": "Atualizar versão publicada",
   "communityRepublishRecipesBody": "Substitui o conteúdo da receita publicada pela sua versão atual. As avaliações e os downloads são mantidos.",
   "communityRepublishRecipesAction": "Atualizar",

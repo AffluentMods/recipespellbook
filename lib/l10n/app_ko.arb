@@ -4093,6 +4093,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{레시피 1개를 식단 계획에 추가했습니다} other{레시피 {count}개를 식단 계획에 추가했습니다}}",
   "communityICookedThis": "이거 만들어봤어요",
   "communityICookedThisActive": "만들어봄",
+  "communitySignInToMarkCooked": "만든 레시피를 표시하고 횟수에 더하려면 로그인하세요.",
   "communityRepublishRecipes": "게시된 버전 업데이트",
   "communityRepublishRecipesBody": "게시된 레시피 내용을 현재 버전으로 교체합니다. 평점과 다운로드 수는 유지됩니다.",
   "communityRepublishRecipesAction": "업데이트",

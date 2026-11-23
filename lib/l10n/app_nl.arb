@@ -4093,6 +4093,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{1 recept aan maaltijdplan toegevoegd} other{{count} recepten aan maaltijdplan toegevoegd}}",
   "communityICookedThis": "Ik heb dit gekookt",
   "communityICookedThisActive": "Gekookt",
+  "communitySignInToMarkCooked": "Log in om recepten te markeren die je hebt gekookt en ze mee te tellen.",
   "communityRepublishRecipes": "Gepubliceerde versie bijwerken",
   "communityRepublishRecipesBody": "Vervangt de gepubliceerde receptinhoud door je huidige versie. Beoordelingen en downloads blijven behouden.",
   "communityRepublishRecipesAction": "Bijwerken",

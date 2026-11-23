@@ -4093,6 +4093,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{Dodano 1 przepis do planu posiłków} few{Dodano {count} przepisy do planu posiłków} many{Dodano {count} przepisów do planu posiłków} other{Dodano {count} przepisu do planu posiłków}}",
   "communityICookedThis": "Ugotowałem to",
   "communityICookedThisActive": "Ugotowane",
+  "communitySignInToMarkCooked": "Zaloguj się, aby oznaczać ugotowane przepisy i dodawać je do licznika.",
   "communityRepublishRecipes": "Zaktualizuj opublikowaną wersję",
   "communityRepublishRecipesBody": "Zastępuje opublikowaną treść przepisu Twoją bieżącą wersją. Oceny i pobrania zostają zachowane.",
   "communityRepublishRecipesAction": "Zaktualizuj",

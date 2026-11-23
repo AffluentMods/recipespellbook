@@ -4093,6 +4093,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{已将 1 个食谱加入膳食计划} other{已将 {count} 个食谱加入膳食计划}}",
   "communityICookedThis": "我做过这道菜",
   "communityICookedThisActive": "已做过",
+  "communitySignInToMarkCooked": "登录后即可标记你做过的菜谱，并计入次数。",
   "communityRepublishRecipes": "更新已发布的版本",
   "communityRepublishRecipesBody": "用你当前的版本替换已发布的食谱内容。评分和下载次数将保留。",
   "communityRepublishRecipesAction": "更新",

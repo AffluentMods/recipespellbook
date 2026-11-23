@@ -3620,6 +3620,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{Se añadió 1 receta al plan de comidas} other{Se añadieron {count} recetas al plan de comidas}}",
   "communityICookedThis": "La cociné",
   "communityICookedThisActive": "Cocinada",
+  "communitySignInToMarkCooked": "Inicia sesión para marcar las recetas que has cocinado y sumarte a su contador.",
   "communityRepublishRecipes": "Actualizar la versión publicada",
   "communityRepublishRecipesBody": "Reemplaza el contenido de la receta publicada con tu versión actual. Se conservan las valoraciones y las descargas.",
   "communityRepublishRecipesAction": "Actualizar",

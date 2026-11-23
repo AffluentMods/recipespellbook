@@ -10547,6 +10547,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get communityICookedThisActive => '만들어봄';
 
   @override
+  String get communitySignInToMarkCooked => '만든 레시피를 표시하고 횟수에 더하려면 로그인하세요.';
+
+  @override
   String get communityRepublishRecipes => '게시된 버전 업데이트';
 
   @override

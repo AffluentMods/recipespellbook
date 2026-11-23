@@ -3118,6 +3118,7 @@
   "shoppingMealPlanAddedCount": "{count, plural, =1{1 recette ajoutée au menu} other{{count} recettes ajoutées au menu}}",
   "communityICookedThis": "Je l'ai cuisinée",
   "communityICookedThisActive": "Cuisinée",
+  "communitySignInToMarkCooked": "Connectez-vous pour marquer les recettes que vous avez cuisinées et les ajouter à leur compteur.",
   "communityRepublishRecipes": "Mettre à jour la version publiée",
   "communityRepublishRecipesBody": "Remplace le contenu de la recette publiée par votre version actuelle. Les notes et les téléchargements sont conservés.",
   "communityRepublishRecipesAction": "Mettre à jour",
