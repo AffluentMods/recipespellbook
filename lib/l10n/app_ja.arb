@@ -4726,6 +4726,7 @@
   "pantryCookFilterFew": "あと1〜2品",
   "pantryCookAllCourses": "すべてのコース",
   "pantryCookAllCookbooks": "すべてのレシピ本",
+  "pantryCookCookbookCount": "{total}件中{count}件",
   "pantryCookNoResults": "パントリーの食材を使うレシピはまだありません",
   "pantryCookNoResultsHint": "手元にあるものをもう少し追加すると、ここにレシピが表示されます。",
   "pantryCookNoFilterResults": "この条件に合うレシピはありません",

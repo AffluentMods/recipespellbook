@@ -3751,6 +3751,7 @@
   "pantryCookFilterFew": "Il manque 1 ou 2",
   "pantryCookAllCourses": "Tous les types de plats",
   "pantryCookAllCookbooks": "Tous les livres de recettes",
+  "pantryCookCookbookCount": "{count} sur {total}",
   "pantryCookNoResults": "Aucune recette n'utilise encore votre garde-manger",
   "pantryCookNoResultsHint": "Ajoutez encore quelques articles que vous avez pour voir des recettes ici.",
   "pantryCookNoFilterResults": "Aucune recette ne correspond à ces filtres",

@@ -21181,6 +21181,12 @@ abstract class AppLocalizations {
   /// **'All cookbooks'**
   String get pantryCookAllCookbooks;
 
+  /// A cookbook in the What can I make menu: how many of its recipes use something in the pantry, of all its recipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total}'**
+  String pantryCookCookbookCount(int count, int total);
+
   /// No description provided for @pantryCookNoResults.
   ///
   /// In en, this message translates to:

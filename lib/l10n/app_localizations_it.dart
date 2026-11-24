@@ -12081,6 +12081,11 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pantryCookAllCookbooks => 'Tutti i ricettari';
 
   @override
+  String pantryCookCookbookCount(int count, int total) {
+    return '$count su $total';
+  }
+
+  @override
   String get pantryCookNoResults => 'Nessuna ricetta usa ancora la tua dispensa';
 
   @override

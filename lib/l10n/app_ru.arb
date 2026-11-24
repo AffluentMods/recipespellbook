@@ -4726,6 +4726,7 @@
   "pantryCookFilterFew": "Не хватает 1 или 2",
   "pantryCookAllCourses": "Все блюда",
   "pantryCookAllCookbooks": "Все кулинарные книги",
+  "pantryCookCookbookCount": "{count} из {total}",
   "pantryCookNoResults": "Пока ни один рецепт не использует твою кладовую",
   "pantryCookNoResultsHint": "Добавь ещё несколько продуктов, которые у тебя есть, чтобы увидеть здесь рецепты.",
   "pantryCookNoFilterResults": "Нет рецептов по этим фильтрам",

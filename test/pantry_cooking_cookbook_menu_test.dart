@@ -65,6 +65,9 @@ void main() {
 
       await recipe('omelette', 'week', 'Omelette', ['eggs', 'butter']);
       await recipe('pancakes', 'baking', 'Pancakes', ['flour', 'eggs', 'milk']);
+      // Nothing from the pantry: not in the results, but counted in the
+      // cookbook's total ("1 of 2", as Home says 2 recipes).
+      await recipe('steak', 'week', 'Ribeye', ['ribeye steak']);
       return (db, dir);
     }))!;
 
@@ -85,6 +88,7 @@ void main() {
       await _settle(tester, rounds: 1);
     }
     expect(find.text('Omelette'), findsOneWidget);
+    expect(find.text('Ribeye'), findsNothing);
 
     // Nothing chosen: the chip is text only.
     final chip = find.text('All cookbooks');
@@ -98,16 +102,16 @@ void main() {
     Finder inEntry(String label, Finder what) => find.descendant(of: entry(label), matching: what);
 
     // Each cookbook's cover at the start of its entry, about 28px.
-    expect(inEntry('Weeknights  1', find.byType(CookbookCoverThumb)), findsOneWidget);
-    expect(inEntry('Weeknights  1', find.byType(CookbookPlaceholderImage)), findsOneWidget,
+    expect(inEntry('Weeknights  1 of 2', find.byType(CookbookCoverThumb)), findsOneWidget);
+    expect(inEntry('Weeknights  1 of 2', find.byType(CookbookPlaceholderImage)), findsOneWidget,
         reason: 'no cover: the placeholder');
-    expect(inEntry('Baking  1', find.byType(CookbookCoverThumb)), findsOneWidget);
-    expect(inEntry('Baking  1', find.byType(Image)), findsOneWidget, reason: 'its cover file');
-    expect(inEntry('Baking  1', find.byType(CookbookPlaceholderImage)), findsNothing);
-    expect(tester.getSize(inEntry('Weeknights  1', find.byType(CookbookCoverThumb))), const Size(28, 28));
+    expect(inEntry('Baking  1 of 1', find.byType(CookbookCoverThumb)), findsOneWidget);
+    expect(inEntry('Baking  1 of 1', find.byType(Image)), findsOneWidget, reason: 'its cover file');
+    expect(inEntry('Baking  1 of 1', find.byType(CookbookPlaceholderImage)), findsNothing);
+    expect(tester.getSize(inEntry('Weeknights  1 of 2', find.byType(CookbookCoverThumb))), const Size(28, 28));
     expect(
-      tester.getTopLeft(inEntry('Baking  1', find.byType(CookbookCoverThumb))).dx,
-      lessThan(tester.getTopLeft(find.text('Baking  1')).dx),
+      tester.getTopLeft(inEntry('Baking  1 of 1', find.byType(CookbookCoverThumb))).dx,
+      lessThan(tester.getTopLeft(find.text('Baking  1 of 1')).dx),
       reason: 'at the start of the entry',
     );
     // "All cookbooks": a plain library mark, and the check on the chosen entry.
@@ -116,7 +120,7 @@ void main() {
     expect(find.descendant(of: all, matching: find.byIcon(Icons.check_rounded)), findsOneWidget);
 
     // Choosing a cookbook puts its cover in the chip.
-    await tester.tap(find.text('Weeknights  1'));
+    await tester.tap(find.text('Weeknights  1 of 2'));
     await tester.pumpAndSettle();
     expect(find.text('Pancakes'), findsNothing);
     final chipThumb = find.ancestor(of: find.text('Weeknights'), matching: find.byType(InkWell));

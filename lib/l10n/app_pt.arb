@@ -4726,6 +4726,7 @@
   "pantryCookFilterFew": "Faltam 1 ou 2",
   "pantryCookAllCourses": "Todos os tipos de prato",
   "pantryCookAllCookbooks": "Todos os livros de receitas",
+  "pantryCookCookbookCount": "{count} de {total}",
   "pantryCookNoResults": "Nenhuma receita usa sua despensa ainda",
   "pantryCookNoResultsHint": "Adicione mais algumas coisas que você tem para ver receitas aqui.",
   "pantryCookNoFilterResults": "Nenhuma receita corresponde a esses filtros",

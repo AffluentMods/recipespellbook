@@ -4726,6 +4726,7 @@
   "pantryCookFilterFew": "1~2개 부족",
   "pantryCookAllCourses": "모든 코스",
   "pantryCookAllCookbooks": "모든 요리책",
+  "pantryCookCookbookCount": "{total}개 중 {count}개",
   "pantryCookNoResults": "아직 식료품 저장소 재료를 쓰는 레시피가 없어요",
   "pantryCookNoResultsHint": "가지고 있는 재료를 몇 가지 더 추가하면 여기에 레시피가 나타나요.",
   "pantryCookNoFilterResults": "이 필터에 맞는 레시피가 없어요",

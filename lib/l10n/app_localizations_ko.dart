@@ -11971,6 +11971,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pantryCookAllCookbooks => '모든 요리책';
 
   @override
+  String pantryCookCookbookCount(int count, int total) {
+    return '$total개 중 $count개';
+  }
+
+  @override
   String get pantryCookNoResults => '아직 식료품 저장소 재료를 쓰는 레시피가 없어요';
 
   @override

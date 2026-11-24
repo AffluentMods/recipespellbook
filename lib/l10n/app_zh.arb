@@ -4726,6 +4726,7 @@
   "pantryCookFilterFew": "缺 1 到 2 样",
   "pantryCookAllCourses": "所有菜品类型",
   "pantryCookAllCookbooks": "所有食谱书",
+  "pantryCookCookbookCount": "{count}/{total}",
   "pantryCookNoResults": "还没有食谱用到储藏室里的食材",
   "pantryCookNoResultsHint": "再添加几样已有的食材，这里就会显示食谱。",
   "pantryCookNoFilterResults": "没有符合这些筛选条件的食谱",

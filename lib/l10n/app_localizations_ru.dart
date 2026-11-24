@@ -12247,6 +12247,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get pantryCookAllCookbooks => 'Все кулинарные книги';
 
   @override
+  String pantryCookCookbookCount(int count, int total) {
+    return '$count из $total';
+  }
+
+  @override
   String get pantryCookNoResults => 'Пока ни один рецепт не использует твою кладовую';
 
   @override
