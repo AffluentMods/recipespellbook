@@ -4288,6 +4288,7 @@
   "pantryCookFilterFew": "1 bis 2 fehlen",
   "pantryCookAllCourses": "Alle Gänge",
   "pantryCookAllCookbooks": "Alle Kochbücher",
+  "pantryCookCookbookCount": "{count} von {total}",
   "pantryCookNoResults": "Noch nutzt kein Rezept deinen Vorrat",
   "pantryCookNoResultsHint": "Trag noch ein paar Dinge ein, die du hast, um hier Rezepte zu sehen.",
   "pantryCookNoFilterResults": "Keine Rezepte passen zu diesen Filtern",

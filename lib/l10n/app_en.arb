@@ -6262,6 +6262,8 @@
   "pantryCookFilterFew": "Missing 1 to 2",
   "pantryCookAllCourses": "All courses",
   "pantryCookAllCookbooks": "All cookbooks",
+  "pantryCookCookbookCount": "{count} of {total}",
+  "@pantryCookCookbookCount": {"description": "A cookbook in the What can I make menu: how many of its recipes use something in the pantry, of all its recipes.", "placeholders": {"count": {"type": "int"}, "total": {"type": "int"}}},
   "pantryCookNoResults": "Nothing uses your pantry yet",
   "pantryCookNoResultsHint": "Add a few more things you have to see recipes here.",
   "pantryCookNoFilterResults": "No recipes match these filters",

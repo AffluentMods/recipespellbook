@@ -4726,6 +4726,7 @@
   "pantryCookFilterFew": "Brakuje 1 do 2",
   "pantryCookAllCourses": "Wszystkie dania",
   "pantryCookAllCookbooks": "Wszystkie książki kucharskie",
+  "pantryCookCookbookCount": "{count} z {total}",
   "pantryCookNoResults": "Żaden przepis nie korzysta jeszcze ze spiżarni",
   "pantryCookNoResultsHint": "Dodaj jeszcze kilka rzeczy, które masz, aby zobaczyć tu przepisy.",
   "pantryCookNoFilterResults": "Brak przepisów pasujących do tych filtrów",

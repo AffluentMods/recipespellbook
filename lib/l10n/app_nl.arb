@@ -4726,6 +4726,7 @@
   "pantryCookFilterFew": "1 tot 2 missen",
   "pantryCookAllCourses": "Alle gangen",
   "pantryCookAllCookbooks": "Alle kookboeken",
+  "pantryCookCookbookCount": "{count} van {total}",
   "pantryCookNoResults": "Nog geen recepten gebruiken je voorraadkast",
   "pantryCookNoResultsHint": "Voeg nog een paar dingen toe die je hebt om hier recepten te zien.",
   "pantryCookNoFilterResults": "Geen recepten voor deze filters",

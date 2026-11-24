@@ -335,15 +335,20 @@ class _Results extends ConsumerWidget {
     int count(PantryFilter f) => scoped.where((m) => pantryFilterAccepts(f, m)).length;
     final shown = [for (final m in scoped) if (pantryFilterAccepts(filter, m)) m];
 
-    // Courses and cookbooks that have something to show.
+    // Courses and cookbooks that have something to show. A cookbook entry
+    // says how many of all its recipes use the pantry ("Cocktails  109 of
+    // 121"), so the 121 on Home does not look like it went missing.
     final usable = filterPantryMatches(ranked);
     final courseCounts = <String, int>{};
     final cookbookCounts = <String, int>{};
-    for (final m in usable) {
+    final cookbookTotals = <String, int>{};
+    for (final m in ranked) {
+      final uses = pantryFilterAccepts(PantryFilter.all, m);
       final key = m.recipe.courseKey;
-      if (key != null) courseCounts[key] = (courseCounts[key] ?? 0) + 1;
+      if (uses && key != null) courseCounts[key] = (courseCounts[key] ?? 0) + 1;
       for (final id in m.recipe.cookbookIds) {
-        cookbookCounts[id] = (cookbookCounts[id] ?? 0) + 1;
+        cookbookTotals[id] = (cookbookTotals[id] ?? 0) + 1;
+        if (uses) cookbookCounts[id] = (cookbookCounts[id] ?? 0) + 1;
       }
     }
     String courseName(String key) {
@@ -406,7 +411,12 @@ class _Results extends ConsumerWidget {
               value: cookbook,
               options: [
                 (null, l10n.pantryCookAllCookbooks),
-                for (final cb in cookbooks) (cb.id, '${cb.name}  ${cookbookCounts[cb.id] ?? 0}'),
+                for (final cb in cookbooks)
+                  (
+                    cb.id,
+                    '${cb.name}  '
+                        '${l10n.pantryCookCookbookCount(cookbookCounts[cb.id] ?? 0, cookbookTotals[cb.id] ?? 0)}',
+                  ),
               ],
               // Each cookbook's cover; "All cookbooks" a plain library mark.
               leading: (id, size) {

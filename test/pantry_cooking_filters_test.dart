@@ -80,7 +80,7 @@ void main() {
     await tester.ensureVisible(find.text('All cookbooks'));
     await tester.tap(find.text('All cookbooks'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Baking  1'));
+    await tester.tap(find.text('Baking  1 of 1'));
     await tester.pumpAndSettle();
     expect(find.text('Pancakes'), findsOneWidget);
     expect(find.text('Omelette'), findsNothing);
@@ -99,7 +99,7 @@ void main() {
     // And it clears from there.
     await tester.tap(find.text('Baking'));
     await tester.pumpAndSettle();
-    expect(find.text('Baking  0'), findsOneWidget);
+    expect(find.text('Baking  0 of 1'), findsOneWidget, reason: 'none of its 1 recipe uses the pantry now');
     await tester.tap(find.text('All cookbooks').last);
     await tester.pumpAndSettle();
     expect(find.text('Omelette'), findsOneWidget);

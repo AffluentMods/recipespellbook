@@ -3750,6 +3750,7 @@
   "pantryCookFilterFew": "Ne mancano 1 o 2",
   "pantryCookAllCourses": "Tutte le portate",
   "pantryCookAllCookbooks": "Tutti i ricettari",
+  "pantryCookCookbookCount": "{count} su {total}",
   "pantryCookNoResults": "Nessuna ricetta usa ancora la tua dispensa",
   "pantryCookNoResultsHint": "Aggiungi qualche altra cosa che hai per vedere le ricette qui.",
   "pantryCookNoFilterResults": "Nessuna ricetta corrisponde a questi filtri",

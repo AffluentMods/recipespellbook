@@ -11939,6 +11939,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pantryCookAllCookbooks => '所有食谱书';
 
   @override
+  String pantryCookCookbookCount(int count, int total) {
+    return '$count/$total';
+  }
+
+  @override
   String get pantryCookNoResults => '还没有食谱用到储藏室里的食材';
 
   @override
