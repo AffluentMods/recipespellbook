@@ -191,8 +191,10 @@ final router = GoRouter(
         GoRoute(
           path: '/planner',
           name: 'planner',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: PlannerScreen(),
+          // "?day=2026-11-25" (a prep reminder for several meals) opens
+          // that day.
+          pageBuilder: (context, state) => NoTransitionPage(
+            child: PlannerScreen(initialDay: parsePlannerDay(state.uri.queryParameters['day'])),
           ),
         ),
         // Phone / tablet "More" tab (account, library, import, sharing,

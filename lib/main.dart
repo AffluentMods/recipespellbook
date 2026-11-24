@@ -15,6 +15,7 @@ import 'utils/widget_links.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cookbook_provider.dart';
 import 'providers/database_provider.dart';
+import 'providers/pantry_cooking_provider.dart' show pantryProvider;
 import 'providers/settings_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'providers/sync_provider.dart';
@@ -36,6 +37,7 @@ import 'services/transfer_service.dart';
 import 'services/collab_service.dart';
 import 'services/community_cookbook_updates.dart';
 import 'services/photo_path_repair.dart';
+import 'services/prep_reminder_service.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/screens/import/video_import_ui.dart';
@@ -288,6 +290,8 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
         if (supportsFirebaseMessaging) {
           NotificationService.instance.localizeChannels(languageCode);
         }
+        // Prep reminders are written in the app's language too.
+        PrepReminderService.instance.scheduleRefresh();
       },
     );
   }
@@ -443,11 +447,28 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
         ref.read(subscriptionProvider.notifier).initialize(),
       ];
       if (supportsFirebaseMessaging) {
-        futures.add(NotificationService.instance.initialize());
+        // Prep reminders schedule through the local notifications set up
+        // here, so they start once it is done (also when push failed).
+        futures.add(NotificationService.instance.initialize().whenComplete(_startPrepReminders));
       }
       await Future.wait(futures);
     } catch (e) {
       debugPrint('[Init] Background init error: $e');
+    }
+  }
+
+  /// The evening-before reminders to thaw, soak or marinate for planned
+  /// meals (phones only). Rescheduled on every change to the pantry; the
+  /// service watches meal plans and recipes itself.
+  void _startPrepReminders() {
+    if (!PrepReminderService.isSupported) return;
+    try {
+      ref.listenManual(pantryProvider, (_, _) => PrepReminderService.instance.scheduleRefresh());
+      PrepReminderService.instance
+          .start(ref.read(databaseProvider), languageCode: () => ref.read(settingsProvider).languageCode)
+          .catchError((Object e) => debugPrint('[PrepReminders] start failed: $e'));
+    } catch (e) {
+      debugPrint('[PrepReminders] start failed: $e');
     }
   }
 
@@ -782,6 +803,8 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     if (state == AppLifecycleState.resumed || state == AppLifecycleState.paused) {
       HomeWidgetService.instance.refresh();
     }
+    // A new day moves the two weeks of prep reminders along.
+    if (state == AppLifecycleState.resumed) PrepReminderService.instance.scheduleRefresh();
   }
 
   @override
@@ -789,6 +812,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkSub?.cancel();
     HomeWidgetService.instance.stop();
+    PrepReminderService.instance.stop();
     super.dispose();
   }
 

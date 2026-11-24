@@ -13560,4 +13560,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeAllSectionsHidden => 'Every section of Home is turned off.';
+
+  @override
+  String get prepRemindersName => 'Prep reminders';
+
+  @override
+  String get prepRemindersDesc => 'The evening before a planned meal: what to take out of the freezer, soak or marinate';
+
+  @override
+  String get prepReminderTitle => 'Prep for tomorrow';
+
+  @override
+  String prepReminderThaw(String items, String recipe) {
+    return 'Take the $items out of the freezer for $recipe.';
+  }
+
+  @override
+  String prepReminderSoak(String items, String recipe) {
+    return 'Soak the $items for $recipe.';
+  }
+
+  @override
+  String prepReminderMarinate(String items, String recipe) {
+    return 'Marinate the $items for $recipe.';
+  }
+
+  @override
+  String prepReminderAhead(String recipe) {
+    return '$recipe needs time ahead. Check the recipe tonight.';
+  }
+
+  @override
+  String prepReminderItems(String items, String last) {
+    return '$items and $last';
+  }
+
+  @override
+  String prepReminderMore(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get prepReminderTime => 'Reminder time';
+
+  @override
+  String get plannerPrepAhead => 'Prep the day before';
 }

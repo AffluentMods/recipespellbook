@@ -4616,5 +4616,16 @@
   "homeJumpBackInRecent": "Recetas vistas recientemente",
   "homeJumpBackInRecentCount": "Cuántas recetas recientes mostrar",
   "homeEditHomeScreen": "Editar pantalla de inicio",
-  "homeAllSectionsHidden": "Todas las secciones de Inicio están desactivadas."
+  "homeAllSectionsHidden": "Todas las secciones de Inicio están desactivadas.",
+  "prepRemindersName": "Recordatorios de preparación",
+  "prepRemindersDesc": "La tarde antes de una comida planificada: qué sacar del congelador, poner en remojo o marinar",
+  "prepReminderTitle": "Prepara lo de mañana",
+  "prepReminderThaw": "Para {recipe}: saca del congelador {items}.",
+  "prepReminderSoak": "Para {recipe}: pon en remojo {items}.",
+  "prepReminderMarinate": "Para {recipe}: deja marinar {items}.",
+  "prepReminderAhead": "{recipe} necesita preparación previa. Revisa la receta esta noche.",
+  "prepReminderItems": "{items} y {last}",
+  "prepReminderMore": "+{count} más",
+  "prepReminderTime": "Hora del recordatorio",
+  "plannerPrepAhead": "Preparar el día antes"
 }

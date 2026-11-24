@@ -4651,5 +4651,16 @@
   "homeJumpBackInRecent": "Zuletzt angesehene Rezepte",
   "homeJumpBackInRecentCount": "Wie viele zuletzt angesehene anzeigen",
   "homeEditHomeScreen": "Startseite anpassen",
-  "homeAllSectionsHidden": "Alle Bereiche der Startseite sind ausgeschaltet."
+  "homeAllSectionsHidden": "Alle Bereiche der Startseite sind ausgeschaltet.",
+  "prepRemindersName": "Vorbereitungs-Erinnerungen",
+  "prepRemindersDesc": "Am Abend vor einer geplanten Mahlzeit: was aus dem Gefrierfach muss, eingeweicht oder mariniert wird",
+  "prepReminderTitle": "Für morgen vorbereiten",
+  "prepReminderThaw": "{items} für {recipe} aus dem Gefrierfach nehmen.",
+  "prepReminderSoak": "{items} für {recipe} einweichen.",
+  "prepReminderMarinate": "{items} für {recipe} marinieren.",
+  "prepReminderAhead": "{recipe} braucht Vorlauf. Schau heute Abend ins Rezept.",
+  "prepReminderItems": "{items} und {last}",
+  "prepReminderMore": "+{count} weitere",
+  "prepReminderTime": "Uhrzeit der Erinnerung",
+  "plannerPrepAhead": "Am Vortag vorbereiten"
 }

@@ -8,7 +8,8 @@ import '../../widgets/app_snackbar.dart';
 
 /// Notification settings for this device. Only shown where push works
 /// (Android and iOS). The one notification the server sends is a download of
-/// something the user published to Community.
+/// something the user published to Community; the app itself reminds the
+/// evening before a planned meal that needs prep.
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
 
@@ -52,12 +53,25 @@ class _NotificationSettingsScreenState
     }
   }
 
+  Future<void> _pickPrepTime(int minutes) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60),
+    );
+    if (picked == null || !mounted) return;
+    await ref.read(notificationPrefsProvider.notifier).setPrepReminderMinutes(picked.hour * 60 + picked.minute);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final prefs = ref.watch(notificationPrefsProvider);
     final blockedBySystem = prefs.communityUpdates && _systemAllowed == false;
+    final prepTime = MaterialLocalizations.of(context).formatTimeOfDay(
+      TimeOfDay(hour: prefs.prepReminderMinutes ~/ 60, minute: prefs.prepReminderMinutes % 60),
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -75,6 +89,33 @@ class _NotificationSettingsScreenState
             onChanged: _busy ? null : _setDownloads,
           ),
           if (blockedBySystem)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+              child: Text(
+                l10n.notifPermissionDenied,
+                style: TextStyle(color: theme.colorScheme.outline, fontSize: 13),
+              ),
+            ),
+
+          // ── Meal planner ──
+          _SectionHeader(title: l10n.plannerTitle, icon: Icons.calendar_month_outlined),
+          SwitchListTile(
+            key: const Key('prepRemindersSwitch'),
+            secondary: const Icon(Icons.kitchen_outlined),
+            title: Text(l10n.prepRemindersName),
+            subtitle: Text(l10n.prepRemindersDesc),
+            value: prefs.prepReminders,
+            onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setPrepReminders(v),
+          ),
+          ListTile(
+            key: const Key('prepReminderTime'),
+            leading: const Icon(Icons.schedule),
+            title: Text(l10n.prepReminderTime),
+            trailing: Text(prepTime, style: theme.textTheme.bodyLarge),
+            enabled: prefs.prepReminders,
+            onTap: () => _pickPrepTime(prefs.prepReminderMinutes),
+          ),
+          if (prefs.prepReminders && _systemAllowed == false)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: Text(
