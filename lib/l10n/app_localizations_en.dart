@@ -13560,4 +13560,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeAllSectionsHidden => 'Every section of Home is turned off.';
+
+  @override
+  String get cookbookPdfAction => 'Print or save as PDF';
+
+  @override
+  String get cookbookPdfSubtitle => 'A cover, contents and every recipe, ready to print or share';
+
+  @override
+  String get cookbookPdfIncludePhotos => 'Include photos';
+
+  @override
+  String get cookbookPdfPhotosHint => 'Without photos the file is smaller and uses less ink.';
+
+  @override
+  String get cookbookPdfPageSize => 'Page size';
+
+  @override
+  String get cookbookPdfLetter => 'Letter';
+
+  @override
+  String get cookbookPdfA4 => 'A4';
+
+  @override
+  String get cookbookPdfMake => 'Make PDF';
+
+  @override
+  String get cookbookPdfPreparing => 'Getting the recipes ready';
+
+  @override
+  String cookbookPdfProgress(int current, int total) {
+    return 'Adding recipe $current of $total';
+  }
+
+  @override
+  String get cookbookPdfFinishing => 'Putting the pages together';
+
+  @override
+  String get cookbookPdfReady => 'Your PDF is ready';
+
+  @override
+  String cookbookPdfPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookPdfLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recipes could not be added.',
+      one: '1 recipe could not be added.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookPdfFailed => 'The PDF could not be made. Please try again.';
+
+  @override
+  String get cookbookPdfNoRecipes => 'This cookbook has no recipes yet.';
+
+  @override
+  String get cookbookPdfContents => 'Contents';
+
+  @override
+  String get cookbookPdfOtherRecipes => 'Other recipes';
+
+  @override
+  String printLabelServes(String servings) {
+    return 'Serves $servings';
+  }
 }

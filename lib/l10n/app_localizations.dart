@@ -23376,6 +23376,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Every section of Home is turned off.'**
   String get homeAllSectionsHidden;
+
+  /// Cookbook menu and cookbook edit screen: make the whole cookbook into one PDF (cover, contents, every recipe) to print or share.
+  ///
+  /// In en, this message translates to:
+  /// **'Print or save as PDF'**
+  String get cookbookPdfAction;
+
+  /// No description provided for @cookbookPdfSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A cover, contents and every recipe, ready to print or share'**
+  String get cookbookPdfSubtitle;
+
+  /// No description provided for @cookbookPdfIncludePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Include photos'**
+  String get cookbookPdfIncludePhotos;
+
+  /// No description provided for @cookbookPdfPhotosHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Without photos the file is smaller and uses less ink.'**
+  String get cookbookPdfPhotosHint;
+
+  /// No description provided for @cookbookPdfPageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Page size'**
+  String get cookbookPdfPageSize;
+
+  /// The US Letter paper size (8.5 by 11 inches), in the PDF options.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter'**
+  String get cookbookPdfLetter;
+
+  /// The A4 paper size, in the PDF options.
+  ///
+  /// In en, this message translates to:
+  /// **'A4'**
+  String get cookbookPdfA4;
+
+  /// No description provided for @cookbookPdfMake.
+  ///
+  /// In en, this message translates to:
+  /// **'Make PDF'**
+  String get cookbookPdfMake;
+
+  /// No description provided for @cookbookPdfPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting the recipes ready'**
+  String get cookbookPdfPreparing;
+
+  /// No description provided for @cookbookPdfProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding recipe {current} of {total}'**
+  String cookbookPdfProgress(int current, int total);
+
+  /// No description provided for @cookbookPdfFinishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Putting the pages together'**
+  String get cookbookPdfFinishing;
+
+  /// No description provided for @cookbookPdfReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Your PDF is ready'**
+  String get cookbookPdfReady;
+
+  /// No description provided for @cookbookPdfPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page} other{{count} pages}}'**
+  String cookbookPdfPages(int count);
+
+  /// After making a cookbook PDF: recipes that could not be laid out and are missing from it (rare).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe could not be added.} other{{count} recipes could not be added.}}'**
+  String cookbookPdfLeftOut(int count);
+
+  /// No description provided for @cookbookPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF could not be made. Please try again.'**
+  String get cookbookPdfFailed;
+
+  /// No description provided for @cookbookPdfNoRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook has no recipes yet.'**
+  String get cookbookPdfNoRecipes;
+
+  /// Heading of the table of contents page in a cookbook PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Contents'**
+  String get cookbookPdfContents;
+
+  /// In a cookbook PDF's contents: the group of recipes that have no course.
+  ///
+  /// In en, this message translates to:
+  /// **'Other recipes'**
+  String get cookbookPdfOtherRecipes;
+
+  /// Printed recipe: how many it serves, as the recipe gives it (such as 4 or 4-6).
+  ///
+  /// In en, this message translates to:
+  /// **'Serves {servings}'**
+  String printLabelServes(String servings);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

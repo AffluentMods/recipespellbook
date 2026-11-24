@@ -13548,4 +13548,81 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeAllSectionsHidden => 'Toutes les sections de l\'accueil sont désactivées.';
+
+  @override
+  String get cookbookPdfAction => 'Imprimer ou enregistrer en PDF';
+
+  @override
+  String get cookbookPdfSubtitle => 'Couverture, sommaire et toutes les recettes, prêt à imprimer ou à partager';
+
+  @override
+  String get cookbookPdfIncludePhotos => 'Inclure les photos';
+
+  @override
+  String get cookbookPdfPhotosHint => 'Sans photos, le fichier est plus léger et utilise moins d\'encre.';
+
+  @override
+  String get cookbookPdfPageSize => 'Format de page';
+
+  @override
+  String get cookbookPdfLetter => 'Lettre US';
+
+  @override
+  String get cookbookPdfA4 => 'A4';
+
+  @override
+  String get cookbookPdfMake => 'Créer le PDF';
+
+  @override
+  String get cookbookPdfPreparing => 'Préparation des recettes';
+
+  @override
+  String cookbookPdfProgress(int current, int total) {
+    return 'Ajout de la recette $current sur $total';
+  }
+
+  @override
+  String get cookbookPdfFinishing => 'Assemblage des pages';
+
+  @override
+  String get cookbookPdfReady => 'Votre PDF est prêt';
+
+  @override
+  String cookbookPdfPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookPdfLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes n\'ont pas pu être ajoutées.',
+      one: '1 recette n\'a pas pu être ajoutée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookPdfFailed => 'Impossible de créer le PDF. Veuillez réessayer.';
+
+  @override
+  String get cookbookPdfNoRecipes => 'Ce livre ne contient encore aucune recette.';
+
+  @override
+  String get cookbookPdfContents => 'Sommaire';
+
+  @override
+  String get cookbookPdfOtherRecipes => 'Autres recettes';
+
+  @override
+  String printLabelServes(String servings) {
+    return 'Portions : $servings';
+  }
 }

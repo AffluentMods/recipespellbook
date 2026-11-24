@@ -13790,4 +13790,85 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get homeAllSectionsHidden => 'Все разделы главной выключены.';
+
+  @override
+  String get cookbookPdfAction => 'Печать или сохранение в PDF';
+
+  @override
+  String get cookbookPdfSubtitle => 'Обложка, оглавление и все рецепты, готово к печати или отправке';
+
+  @override
+  String get cookbookPdfIncludePhotos => 'Добавить фото';
+
+  @override
+  String get cookbookPdfPhotosHint => 'Без фото файл меньше и расходует меньше чернил.';
+
+  @override
+  String get cookbookPdfPageSize => 'Размер страницы';
+
+  @override
+  String get cookbookPdfLetter => 'US Letter';
+
+  @override
+  String get cookbookPdfA4 => 'A4';
+
+  @override
+  String get cookbookPdfMake => 'Создать PDF';
+
+  @override
+  String get cookbookPdfPreparing => 'Подготовка рецептов';
+
+  @override
+  String cookbookPdfProgress(int current, int total) {
+    return 'Добавление рецепта $current из $total';
+  }
+
+  @override
+  String get cookbookPdfFinishing => 'Сборка страниц';
+
+  @override
+  String get cookbookPdfReady => 'PDF готов';
+
+  @override
+  String cookbookPdfPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count страницы',
+      many: '$count страниц',
+      few: '$count страницы',
+      one: '$count страница',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookPdfLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не удалось добавить $count рецепта.',
+      many: 'Не удалось добавить $count рецептов.',
+      few: 'Не удалось добавить $count рецепта.',
+      one: 'Не удалось добавить $count рецепт.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookPdfFailed => 'Не удалось создать PDF. Попробуйте ещё раз.';
+
+  @override
+  String get cookbookPdfNoRecipes => 'В этой книге пока нет рецептов.';
+
+  @override
+  String get cookbookPdfContents => 'Содержание';
+
+  @override
+  String get cookbookPdfOtherRecipes => 'Другие рецепты';
+
+  @override
+  String printLabelServes(String servings) {
+    return 'Порций: $servings';
+  }
 }

@@ -13560,4 +13560,81 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get homeAllSectionsHidden => 'Alle onderdelen van de startpagina staan uit.';
+
+  @override
+  String get cookbookPdfAction => 'Afdrukken of opslaan als pdf';
+
+  @override
+  String get cookbookPdfSubtitle => 'Een omslag, inhoudsopgave en alle recepten, klaar om af te drukken of te delen';
+
+  @override
+  String get cookbookPdfIncludePhotos => 'Foto\'s toevoegen';
+
+  @override
+  String get cookbookPdfPhotosHint => 'Zonder foto\'s is het bestand kleiner en gebruikt het minder inkt.';
+
+  @override
+  String get cookbookPdfPageSize => 'Papierformaat';
+
+  @override
+  String get cookbookPdfLetter => 'US Letter';
+
+  @override
+  String get cookbookPdfA4 => 'A4';
+
+  @override
+  String get cookbookPdfMake => 'Pdf maken';
+
+  @override
+  String get cookbookPdfPreparing => 'Recepten worden klaargezet';
+
+  @override
+  String cookbookPdfProgress(int current, int total) {
+    return 'Recept $current van $total toevoegen';
+  }
+
+  @override
+  String get cookbookPdfFinishing => 'Pagina\'s worden samengevoegd';
+
+  @override
+  String get cookbookPdfReady => 'Je pdf is klaar';
+
+  @override
+  String cookbookPdfPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pagina\'s',
+      one: '1 pagina',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookPdfLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recepten konden niet worden toegevoegd.',
+      one: '1 recept kon niet worden toegevoegd.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookPdfFailed => 'De pdf kon niet worden gemaakt. Probeer het opnieuw.';
+
+  @override
+  String get cookbookPdfNoRecipes => 'Dit kookboek heeft nog geen recepten.';
+
+  @override
+  String get cookbookPdfContents => 'Inhoud';
+
+  @override
+  String get cookbookPdfOtherRecipes => 'Overige recepten';
+
+  @override
+  String printLabelServes(String servings) {
+    return 'Porties: $servings';
+  }
 }
