@@ -13413,6 +13413,81 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeAllSectionsHidden => '홈의 모든 섹션이 꺼져 있어요.';
 
   @override
+  String get cookbookPdfAction => '인쇄 또는 PDF로 저장';
+
+  @override
+  String get cookbookPdfSubtitle => '표지, 목차, 모든 레시피를 담아 인쇄하거나 공유할 수 있어요';
+
+  @override
+  String get cookbookPdfIncludePhotos => '사진 포함';
+
+  @override
+  String get cookbookPdfPhotosHint => '사진을 빼면 파일이 작아지고 잉크도 덜 들어요.';
+
+  @override
+  String get cookbookPdfPageSize => '용지 크기';
+
+  @override
+  String get cookbookPdfLetter => '레터';
+
+  @override
+  String get cookbookPdfA4 => 'A4';
+
+  @override
+  String get cookbookPdfMake => 'PDF 만들기';
+
+  @override
+  String get cookbookPdfPreparing => '레시피를 준비하는 중';
+
+  @override
+  String cookbookPdfProgress(int current, int total) {
+    return '$total개 중 $current번째 레시피 추가 중';
+  }
+
+  @override
+  String get cookbookPdfFinishing => '페이지를 묶는 중';
+
+  @override
+  String get cookbookPdfReady => 'PDF가 준비됐어요';
+
+  @override
+  String cookbookPdfPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count페이지',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookPdfLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '레시피 $count개를 추가하지 못했어요.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookPdfFailed => 'PDF를 만들지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get cookbookPdfNoRecipes => '이 요리책에는 아직 레시피가 없어요.';
+
+  @override
+  String get cookbookPdfContents => '목차';
+
+  @override
+  String get cookbookPdfOtherRecipes => '기타 레시피';
+
+  @override
+  String printLabelServes(String servings) {
+    return '분량: $servings';
+  }
+
+  @override
   String get prepRemindersName => '재료 준비 알림';
 
   @override

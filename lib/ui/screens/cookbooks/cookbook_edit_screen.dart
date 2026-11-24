@@ -17,6 +17,7 @@ import '../../../utils/responsive_utils.dart';
 import '../../shell/shell_navigation.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/bulk_nutrition_sheet.dart';
+import '../../widgets/cookbook_pdf_sheet.dart';
 import '../../widgets/leave_cookbook_dialog.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
@@ -386,6 +387,18 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
                   subtitle: Text(l10n.bulkNutritionCookbookSubtitle),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => showBulkNutritionSheet(context, ref, cookbook: _cookbook),
+                ),
+              ],
+              if (_cookbook != null) ...[
+                const SizedBox(height: 12),
+                ListTile(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  tileColor: theme.colorScheme.surfaceContainerHighest,
+                  leading: Icon(Icons.picture_as_pdf_outlined, color: theme.colorScheme.primary),
+                  title: Text(l10n.cookbookPdfAction),
+                  subtitle: Text(l10n.cookbookPdfSubtitle),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => showCookbookPdfSheet(context, ref, cookbook: _cookbook!),
                 ),
               ],
             ],

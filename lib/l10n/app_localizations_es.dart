@@ -13543,6 +13543,83 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeAllSectionsHidden => 'Todas las secciones de Inicio están desactivadas.';
 
   @override
+  String get cookbookPdfAction => 'Imprimir o guardar como PDF';
+
+  @override
+  String get cookbookPdfSubtitle => 'Portada, índice y todas las recetas, listo para imprimir o compartir';
+
+  @override
+  String get cookbookPdfIncludePhotos => 'Incluir fotos';
+
+  @override
+  String get cookbookPdfPhotosHint => 'Sin fotos, el archivo es más pequeño y gasta menos tinta.';
+
+  @override
+  String get cookbookPdfPageSize => 'Tamaño de página';
+
+  @override
+  String get cookbookPdfLetter => 'Carta';
+
+  @override
+  String get cookbookPdfA4 => 'A4';
+
+  @override
+  String get cookbookPdfMake => 'Crear PDF';
+
+  @override
+  String get cookbookPdfPreparing => 'Preparando las recetas';
+
+  @override
+  String cookbookPdfProgress(int current, int total) {
+    return 'Añadiendo la receta $current de $total';
+  }
+
+  @override
+  String get cookbookPdfFinishing => 'Uniendo las páginas';
+
+  @override
+  String get cookbookPdfReady => 'Tu PDF está listo';
+
+  @override
+  String cookbookPdfPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count páginas',
+      one: '1 página',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookPdfLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'No se pudieron añadir $count recetas.',
+      one: 'No se pudo añadir 1 receta.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookPdfFailed => 'No se pudo crear el PDF. Inténtalo de nuevo.';
+
+  @override
+  String get cookbookPdfNoRecipes => 'Este libro de cocina aún no tiene recetas.';
+
+  @override
+  String get cookbookPdfContents => 'Índice';
+
+  @override
+  String get cookbookPdfOtherRecipes => 'Otras recetas';
+
+  @override
+  String printLabelServes(String servings) {
+    return 'Porciones: $servings';
+  }
+
+  @override
   String get prepRemindersName => 'Recordatorios de preparación';
 
   @override

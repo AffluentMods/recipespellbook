@@ -13537,6 +13537,83 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeAllSectionsHidden => 'Todas as seções do Início estão desativadas.';
 
   @override
+  String get cookbookPdfAction => 'Imprimir ou salvar como PDF';
+
+  @override
+  String get cookbookPdfSubtitle => 'Capa, sumário e todas as receitas, pronto para imprimir ou compartilhar';
+
+  @override
+  String get cookbookPdfIncludePhotos => 'Incluir fotos';
+
+  @override
+  String get cookbookPdfPhotosHint => 'Sem fotos, o arquivo fica menor e gasta menos tinta.';
+
+  @override
+  String get cookbookPdfPageSize => 'Tamanho da página';
+
+  @override
+  String get cookbookPdfLetter => 'Carta';
+
+  @override
+  String get cookbookPdfA4 => 'A4';
+
+  @override
+  String get cookbookPdfMake => 'Criar PDF';
+
+  @override
+  String get cookbookPdfPreparing => 'Preparando as receitas';
+
+  @override
+  String cookbookPdfProgress(int current, int total) {
+    return 'Adicionando a receita $current de $total';
+  }
+
+  @override
+  String get cookbookPdfFinishing => 'Montando as páginas';
+
+  @override
+  String get cookbookPdfReady => 'Seu PDF está pronto';
+
+  @override
+  String cookbookPdfPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count páginas',
+      one: '1 página',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookPdfLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Não foi possível adicionar $count receitas.',
+      one: 'Não foi possível adicionar 1 receita.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookPdfFailed => 'Não foi possível criar o PDF. Tente novamente.';
+
+  @override
+  String get cookbookPdfNoRecipes => 'Este livro ainda não tem receitas.';
+
+  @override
+  String get cookbookPdfContents => 'Sumário';
+
+  @override
+  String get cookbookPdfOtherRecipes => 'Outras receitas';
+
+  @override
+  String printLabelServes(String servings) {
+    return 'Porções: $servings';
+  }
+
+  @override
   String get prepRemindersName => 'Lembretes de preparo';
 
   @override

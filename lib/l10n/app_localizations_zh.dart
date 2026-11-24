@@ -13381,6 +13381,81 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeAllSectionsHidden => '首页的所有部分都已关闭。';
 
   @override
+  String get cookbookPdfAction => '打印或保存为 PDF';
+
+  @override
+  String get cookbookPdfSubtitle => '包含封面、目录和所有食谱，可直接打印或分享';
+
+  @override
+  String get cookbookPdfIncludePhotos => '包含照片';
+
+  @override
+  String get cookbookPdfPhotosHint => '不含照片时文件更小，也更省墨。';
+
+  @override
+  String get cookbookPdfPageSize => '纸张大小';
+
+  @override
+  String get cookbookPdfLetter => '信纸';
+
+  @override
+  String get cookbookPdfA4 => 'A4';
+
+  @override
+  String get cookbookPdfMake => '生成 PDF';
+
+  @override
+  String get cookbookPdfPreparing => '正在准备食谱';
+
+  @override
+  String cookbookPdfProgress(int current, int total) {
+    return '正在添加第 $current 个食谱，共 $total 个';
+  }
+
+  @override
+  String get cookbookPdfFinishing => '正在整理页面';
+
+  @override
+  String get cookbookPdfReady => 'PDF 已生成';
+
+  @override
+  String cookbookPdfPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 页',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookbookPdfLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 个食谱无法添加。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookPdfFailed => '无法生成 PDF，请重试。';
+
+  @override
+  String get cookbookPdfNoRecipes => '这本食谱书还没有食谱。';
+
+  @override
+  String get cookbookPdfContents => '目录';
+
+  @override
+  String get cookbookPdfOtherRecipes => '其他食谱';
+
+  @override
+  String printLabelServes(String servings) {
+    return '份量：$servings';
+  }
+
+  @override
   String get prepRemindersName => '备菜提醒';
 
   @override

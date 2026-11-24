@@ -21,6 +21,7 @@ import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/bulk_nutrition_sheet.dart';
+import '../../widgets/cookbook_pdf_sheet.dart';
 import '../community/community_publish_screen.dart';
 import 'cookbook_update_sheet.dart';
 import '../../widgets/family_share_sheet.dart';
@@ -393,6 +394,11 @@ class _CookbookGrid extends ConsumerWidget {
                       label: l10n.bulkNutritionAction,
                       onTap: () => showBulkNutritionSheet(context, ref, cookbook: cookbook),
                     ),
+                  ContextMenuItem(
+                    icon: Icons.picture_as_pdf_outlined,
+                    label: l10n.cookbookPdfAction,
+                    onTap: () => showCookbookPdfSheet(context, ref, cookbook: cookbook),
+                  ),
                   // Someone else's cookbook is left, never deleted.
                   if (isSharedInCookbook(cookbook))
                     ContextMenuItem(
@@ -488,6 +494,15 @@ class _CookbookGrid extends ConsumerWidget {
               title: Text(l10n.bulkNutritionAction),
             ),
           ),
+        PopupMenuItem(
+          value: 'pdf',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.picture_as_pdf_outlined, size: 20),
+            title: Text(l10n.cookbookPdfAction),
+          ),
+        ),
         if (isSharedInCookbook(cookbook))
           PopupMenuItem(
             value: 'leave',
@@ -520,6 +535,8 @@ class _CookbookGrid extends ConsumerWidget {
           _showMergeCookbooksSheet(context, ref, initialCookbookId: cookbook.id);
         case 'nutrition':
           showBulkNutritionSheet(context, ref, cookbook: cookbook);
+        case 'pdf':
+          showCookbookPdfSheet(context, ref, cookbook: cookbook);
         case 'delete':
           _showDeleteConfirmation(context, ref, cookbook);
         case 'leave':
