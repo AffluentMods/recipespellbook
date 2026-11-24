@@ -261,7 +261,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: l10n.settingsNotifManagePreferences,
             onTap: () {
               if (Responsive.isDesktopLayout(context)) {
-                _openSettingsPanel(const NotificationSettingsScreen(), maxWidth: 600, maxHeight: 500);
+                _openSettingsPanel(const NotificationSettingsScreen(), maxWidth: 600, maxHeight: 640);
               } else {
                 context.push('/settings/notifications');
               }

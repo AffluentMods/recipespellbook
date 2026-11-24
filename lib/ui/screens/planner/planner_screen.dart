@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/prep_reminder_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../utils/planned_servings.dart';
 import '../../../utils/responsive_utils.dart';
@@ -124,8 +125,21 @@ String plannerWeekRange(AppLocalizations l10n, String locale, DateTime weekStart
 
 // ============ MAIN SCREEN ============
 
+/// The day of a planner link's "day" parameter ("2026-11-25"), at midnight,
+/// or null when there is none or it is not a date.
+DateTime? parsePlannerDay(String? param) {
+  final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(param?.trim() ?? '');
+  if (match == null) return null;
+  final day = DateTime(int.parse(match[1]!), int.parse(match[2]!), int.parse(match[3]!));
+  return day.month == int.parse(match[2]!) ? day : null;
+}
+
 class PlannerScreen extends ConsumerStatefulWidget {
-  const PlannerScreen({super.key});
+  /// The day to show on opening (a prep reminder's day), else the one
+  /// selected before.
+  final DateTime? initialDay;
+
+  const PlannerScreen({super.key, this.initialDay});
 
   @override
   ConsumerState<PlannerScreen> createState() => _PlannerScreenState();
@@ -156,6 +170,23 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   void initState() {
     super.initState();
     _restoreViewMode();
+    _showInitialDay();
+  }
+
+  @override
+  void didUpdateWidget(PlannerScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDay != oldWidget.initialDay) _showInitialDay();
+  }
+
+  /// Select [PlannerScreen.initialDay], after this build: providers cannot
+  /// change while the tree builds.
+  void _showInitialDay() {
+    final day = widget.initialDay;
+    if (day == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _select(DateTime(day.year, day.month, day.day));
+    });
   }
 
   Future<void> _restoreViewMode() async {
@@ -1128,6 +1159,8 @@ class _CompactMealCard extends ConsumerWidget {
       _mealBlockColor(plan.mealPlan.mealType),
     );
     final people = plannedServingsToShow(plan.mealPlan, recipe);
+    final mealDay = plan.mealPlan.date;
+    final prep = _needsPrep(ref, recipe, DateTime(mealDay.year, mealDay.month, mealDay.day));
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -1209,6 +1242,15 @@ class _CompactMealCard extends ConsumerWidget {
                 if (people != null) ...[
                   const SizedBox(width: 4),
                   PlannedServingsBadge(people: people, color: context.appColors.accent),
+                ],
+                if (prep) ...[
+                  const SizedBox(width: 4),
+                  // No Tooltip (it would take the long-press); the label is
+                  // for screen readers.
+                  Semantics(
+                    label: l10n.plannerPrepAhead,
+                    child: Icon(Icons.schedule, size: 14, color: context.appColors.accent),
+                  ),
                 ],
               ],
             ),
@@ -2346,6 +2388,16 @@ String _mealBlockEmoji(String type) {
 String _clock(DateTime base, int minutes) =>
     DateFormat.jm().format(DateTime(base.year, base.month, base.day, 0, minutes));
 
+/// Whether a meal on [day] of [recipe] needs prep the day before (something
+/// to thaw, soak or marinate, or hours ahead). Days that have passed say
+/// nothing.
+bool _needsPrep(WidgetRef ref, Recipe? recipe, DateTime day) {
+  if (recipe == null) return false;
+  final now = DateTime.now();
+  if (day.isBefore(DateTime(now.year, now.month, now.day))) return false;
+  return ref.watch(recipePrepProvider(recipe.id)).valueOrNull?.isNotEmpty ?? false;
+}
+
 /// A planned meal, rendered under the hour it starts. Tap to edit, long-press
 /// to multi-select, swipe to delete.
 class _MealBlock extends ConsumerWidget {
@@ -2387,6 +2439,7 @@ class _MealBlock extends ConsumerWidget {
       if (t != null) _clock(base, t.hour * 60 + t.minute),
       if (people != null) l10n.plannedServingsBadge(people) else ?servingsLabel(l10n, r?.servings),
     ].join('  ·  ');
+    final prep = _needsPrep(ref, r, base);
 
     return Padding(
       // Left inset aligns the card with the hour divider (8 ListView + 72 label).
@@ -2474,6 +2527,26 @@ class _MealBlock extends ConsumerWidget {
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: onColor.withValues(alpha: 0.85),
                                 ),
+                              ),
+                            ],
+                            if (prep) ...[
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.schedule, size: 13, color: onColor.withValues(alpha: 0.9)),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      l10n.plannerPrepAhead,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: onColor.withValues(alpha: 0.9),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ],

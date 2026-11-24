@@ -13548,4 +13548,49 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeAllSectionsHidden => 'Toutes les sections de l\'accueil sont désactivées.';
+
+  @override
+  String get prepRemindersName => 'Rappels de préparation';
+
+  @override
+  String get prepRemindersDesc => 'La veille d\'un repas prévu : ce qu\'il faut sortir du congélateur, faire tremper ou mariner';
+
+  @override
+  String get prepReminderTitle => 'À préparer pour demain';
+
+  @override
+  String prepReminderThaw(String items, String recipe) {
+    return 'Pour $recipe : sortez du congélateur $items.';
+  }
+
+  @override
+  String prepReminderSoak(String items, String recipe) {
+    return 'Pour $recipe : faites tremper $items.';
+  }
+
+  @override
+  String prepReminderMarinate(String items, String recipe) {
+    return 'Pour $recipe : faites mariner $items.';
+  }
+
+  @override
+  String prepReminderAhead(String recipe) {
+    return '$recipe se prépare à l\'avance. Jetez un œil à la recette ce soir.';
+  }
+
+  @override
+  String prepReminderItems(String items, String last) {
+    return '$items et $last';
+  }
+
+  @override
+  String prepReminderMore(int count) {
+    return '+$count de plus';
+  }
+
+  @override
+  String get prepReminderTime => 'Heure du rappel';
+
+  @override
+  String get plannerPrepAhead => 'À préparer la veille';
 }

@@ -5089,5 +5089,16 @@
   "homeJumpBackInRecent": "Recent bekeken recepten",
   "homeJumpBackInRecentCount": "Hoeveel recent bekeken recepten tonen",
   "homeEditHomeScreen": "Startscherm aanpassen",
-  "homeAllSectionsHidden": "Alle onderdelen van de startpagina staan uit."
+  "homeAllSectionsHidden": "Alle onderdelen van de startpagina staan uit.",
+  "prepRemindersName": "Herinneringen om voor te bereiden",
+  "prepRemindersDesc": "De avond voor een geplande maaltijd: wat uit de vriezer moet, moet weken of marineren",
+  "prepReminderTitle": "Voorbereiden voor morgen",
+  "prepReminderThaw": "Voor {recipe}: haal {items} uit de vriezer.",
+  "prepReminderSoak": "Voor {recipe}: zet {items} in de week.",
+  "prepReminderMarinate": "Voor {recipe}: marineer {items}.",
+  "prepReminderAhead": "{recipe} vraagt voorbereiding. Bekijk vanavond het recept.",
+  "prepReminderItems": "{items} en {last}",
+  "prepReminderMore": "+{count} meer",
+  "prepReminderTime": "Tijdstip van de herinnering",
+  "plannerPrepAhead": "De dag ervoor voorbereiden"
 }

@@ -77,8 +77,9 @@ abstract final class WidgetLinks {
     }
   }
 
-  /// Whether [route] is a main tab (see [tabRoutes]).
-  static bool isTabRoute(String route) => tabRoutes.contains(route);
+  /// Whether [route] is a main tab (see [tabRoutes]), also with a query
+  /// ("/planner?day=2026-11-25" from a prep reminder).
+  static bool isTabRoute(String route) => tabRoutes.contains(route.split('?').first);
 
   /// [servings] when it is a number of people a meal can be planned for.
   static int? _validServings(int? servings) =>

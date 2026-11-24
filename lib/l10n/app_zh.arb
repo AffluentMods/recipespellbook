@@ -5089,5 +5089,16 @@
   "homeJumpBackInRecent": "最近浏览的食谱",
   "homeJumpBackInRecentCount": "显示多少个最近浏览的食谱",
   "homeEditHomeScreen": "编辑首页",
-  "homeAllSectionsHidden": "首页的所有部分都已关闭。"
+  "homeAllSectionsHidden": "首页的所有部分都已关闭。",
+  "prepRemindersName": "备菜提醒",
+  "prepRemindersDesc": "在计划用餐的前一天晚上提醒你：要从冷冻室取出、浸泡或腌制的食材",
+  "prepReminderTitle": "明天的备菜",
+  "prepReminderThaw": "为{recipe}把{items}从冷冻室取出解冻。",
+  "prepReminderSoak": "为{recipe}浸泡{items}。",
+  "prepReminderMarinate": "为{recipe}腌制{items}。",
+  "prepReminderAhead": "{recipe}需要提前准备。今晚看一下食谱吧。",
+  "prepReminderItems": "{items}和{last}",
+  "prepReminderMore": "还有 {count} 项",
+  "prepReminderTime": "提醒时间",
+  "plannerPrepAhead": "需提前一天准备"
 }

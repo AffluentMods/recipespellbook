@@ -13560,4 +13560,49 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get homeAllSectionsHidden => 'Alle onderdelen van de startpagina staan uit.';
+
+  @override
+  String get prepRemindersName => 'Herinneringen om voor te bereiden';
+
+  @override
+  String get prepRemindersDesc => 'De avond voor een geplande maaltijd: wat uit de vriezer moet, moet weken of marineren';
+
+  @override
+  String get prepReminderTitle => 'Voorbereiden voor morgen';
+
+  @override
+  String prepReminderThaw(String items, String recipe) {
+    return 'Voor $recipe: haal $items uit de vriezer.';
+  }
+
+  @override
+  String prepReminderSoak(String items, String recipe) {
+    return 'Voor $recipe: zet $items in de week.';
+  }
+
+  @override
+  String prepReminderMarinate(String items, String recipe) {
+    return 'Voor $recipe: marineer $items.';
+  }
+
+  @override
+  String prepReminderAhead(String recipe) {
+    return '$recipe vraagt voorbereiding. Bekijk vanavond het recept.';
+  }
+
+  @override
+  String prepReminderItems(String items, String last) {
+    return '$items en $last';
+  }
+
+  @override
+  String prepReminderMore(int count) {
+    return '+$count meer';
+  }
+
+  @override
+  String get prepReminderTime => 'Tijdstip van de herinnering';
+
+  @override
+  String get plannerPrepAhead => 'De dag ervoor voorbereiden';
 }

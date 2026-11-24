@@ -5089,5 +5089,16 @@
   "homeJumpBackInRecent": "Недавно просмотренные рецепты",
   "homeJumpBackInRecentCount": "Сколько недавних рецептов показывать",
   "homeEditHomeScreen": "Настроить главный экран",
-  "homeAllSectionsHidden": "Все разделы главной выключены."
+  "homeAllSectionsHidden": "Все разделы главной выключены.",
+  "prepRemindersName": "Напоминания о подготовке",
+  "prepRemindersDesc": "Вечером накануне запланированного блюда: что достать из морозилки, замочить или замариновать",
+  "prepReminderTitle": "Подготовка на завтра",
+  "prepReminderThaw": "Достаньте из морозилки: {items} ({recipe}).",
+  "prepReminderSoak": "Замочите: {items} ({recipe}).",
+  "prepReminderMarinate": "Замаринуйте: {items} ({recipe}).",
+  "prepReminderAhead": "Для блюда «{recipe}» нужна подготовка заранее. Загляните в рецепт сегодня вечером.",
+  "prepReminderItems": "{items} и {last}",
+  "prepReminderMore": "ещё {count}",
+  "prepReminderTime": "Время напоминания",
+  "plannerPrepAhead": "Подготовить накануне"
 }

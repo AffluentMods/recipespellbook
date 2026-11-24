@@ -5089,5 +5089,16 @@
   "homeJumpBackInRecent": "Ostatnio oglądane przepisy",
   "homeJumpBackInRecentCount": "Ile ostatnio oglądanych pokazać",
   "homeEditHomeScreen": "Edytuj ekran główny",
-  "homeAllSectionsHidden": "Wszystkie sekcje strony głównej są wyłączone."
+  "homeAllSectionsHidden": "Wszystkie sekcje strony głównej są wyłączone.",
+  "prepRemindersName": "Przypomnienia o przygotowaniu",
+  "prepRemindersDesc": "Wieczorem przed zaplanowanym posiłkiem: co wyjąć z zamrażarki, namoczyć lub zamarynować",
+  "prepReminderTitle": "Przygotuj na jutro",
+  "prepReminderThaw": "Wyjmij z zamrażarki: {items} ({recipe}).",
+  "prepReminderSoak": "Namocz: {items} ({recipe}).",
+  "prepReminderMarinate": "Zamarynuj: {items} ({recipe}).",
+  "prepReminderAhead": "{recipe} wymaga wcześniejszego przygotowania. Zajrzyj dziś wieczorem do przepisu.",
+  "prepReminderItems": "{items} i {last}",
+  "prepReminderMore": "+{count} więcej",
+  "prepReminderTime": "Godzina przypomnienia",
+  "plannerPrepAhead": "Przygotuj dzień wcześniej"
 }

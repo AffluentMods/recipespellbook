@@ -65,6 +65,14 @@ class NotificationService {
   /// the user's settings for it.
   static const cookingChannelId = 'cooking_reminders';
 
+  /// The evening-before reminders to thaw, soak or marinate for a planned
+  /// meal (PrepReminderAlerts schedules on it): a channel of their own, so
+  /// they can be muted apart from cooking timers.
+  static const prepChannelId = 'prep_reminders';
+
+  /// The category in a prep reminder's payload (see [routeFor]).
+  static const prepCategory = 'prep';
+
   /// A channel earlier versions made for notifications nothing sends
   /// (achievements). Removed from the phone's settings.
   static const _retiredChannelIds = ['achievements'];
@@ -96,6 +104,12 @@ class NotificationService {
         description: l10n.notifChannelCookingTimersDesc,
         importance: Importance.high,
       ));
+      await android.createNotificationChannel(AndroidNotificationChannel(
+        prepChannelId,
+        l10n.prepRemindersName,
+        description: l10n.prepRemindersDesc,
+        importance: Importance.defaultImportance,
+      ));
       for (final id in _retiredChannelIds) {
         await android.deleteNotificationChannel(id);
       }
@@ -123,6 +137,18 @@ class NotificationService {
     // Create the Android notification channel in the app's language.
     final prefs = await SharedPreferences.getInstance();
     await localizeChannels(prefs.getString(SettingsNotifier.languagePrefKey) ?? 'system');
+
+    // A local notification (a prep reminder) tapped while the app was not
+    // running started it: open what it points at.
+    try {
+      final launch = await _localNotifications.getNotificationAppLaunchDetails();
+      final response = launch?.notificationResponse;
+      if (launch != null && launch.didNotificationLaunchApp && response != null) {
+        _onNotificationTap(response);
+      }
+    } catch (e) {
+      debugPrint('[FCM] Could not read the launch notification: $e');
+    }
 
     // Listen for foreground messages
     FirebaseMessaging.onMessage.listen(_showForegroundNotification);
@@ -361,9 +387,15 @@ class NotificationService {
   /// The screen a notification with [data] opens, or null. The server sends
   /// one kind: a download of something the user published to Community
   /// (category "community", shown the same when it has no category), with
-  /// the publication as publicationId or resourceId.
+  /// the publication as publicationId or resourceId. The app's own prep
+  /// reminders (category "prep") carry the recipe or planner day to open.
   static String? routeFor(Map<String, dynamic> data) {
     final category = data['category'] as String? ?? 'community';
+    if (category == prepCategory) {
+      final route = data['route'];
+      if (route is String && (route.startsWith('/recipe/') || route.startsWith('/planner'))) return route;
+      return '/planner';
+    }
     if (category != 'community') return null;
     final id = (data['resourceId'] ?? data['publicationId'])?.toString().trim();
     if (id == null || id.isEmpty) return '/community';
