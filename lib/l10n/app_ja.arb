@@ -5108,5 +5108,16 @@
   "cookbookPdfNoRecipes": "このレシピ本にはまだレシピがありません。",
   "cookbookPdfContents": "目次",
   "cookbookPdfOtherRecipes": "その他のレシピ",
-  "printLabelServes": "分量: {servings}"
+  "printLabelServes": "分量: {servings}",
+  "prepRemindersName": "下ごしらえリマインダー",
+  "prepRemindersDesc": "献立の前日の夜に、冷凍庫から出すもの、水に浸けるもの、漬け込むものをお知らせします",
+  "prepReminderTitle": "明日の下ごしらえ",
+  "prepReminderThaw": "{recipe}用の{items}を冷凍庫から出しておきましょう。",
+  "prepReminderSoak": "{recipe}用の{items}を水に浸けておきましょう。",
+  "prepReminderMarinate": "{recipe}用の{items}を漬け込んでおきましょう。",
+  "prepReminderAhead": "{recipe}は前もって準備が必要です。今夜レシピを確認しましょう。",
+  "prepReminderItems": "{items}と{last}",
+  "prepReminderMore": "ほか{count}件",
+  "prepReminderTime": "通知の時刻",
+  "plannerPrepAhead": "前日に下ごしらえ"
 }

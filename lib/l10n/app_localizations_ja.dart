@@ -13458,4 +13458,49 @@ class AppLocalizationsJa extends AppLocalizations {
   String printLabelServes(String servings) {
     return '分量: $servings';
   }
+
+  @override
+  String get prepRemindersName => '下ごしらえリマインダー';
+
+  @override
+  String get prepRemindersDesc => '献立の前日の夜に、冷凍庫から出すもの、水に浸けるもの、漬け込むものをお知らせします';
+
+  @override
+  String get prepReminderTitle => '明日の下ごしらえ';
+
+  @override
+  String prepReminderThaw(String items, String recipe) {
+    return '$recipe用の$itemsを冷凍庫から出しておきましょう。';
+  }
+
+  @override
+  String prepReminderSoak(String items, String recipe) {
+    return '$recipe用の$itemsを水に浸けておきましょう。';
+  }
+
+  @override
+  String prepReminderMarinate(String items, String recipe) {
+    return '$recipe用の$itemsを漬け込んでおきましょう。';
+  }
+
+  @override
+  String prepReminderAhead(String recipe) {
+    return '$recipeは前もって準備が必要です。今夜レシピを確認しましょう。';
+  }
+
+  @override
+  String prepReminderItems(String items, String last) {
+    return '$itemsと$last';
+  }
+
+  @override
+  String prepReminderMore(int count) {
+    return 'ほか$count件';
+  }
+
+  @override
+  String get prepReminderTime => '通知の時刻';
+
+  @override
+  String get plannerPrepAhead => '前日に下ごしらえ';
 }

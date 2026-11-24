@@ -4133,5 +4133,16 @@
   "cookbookPdfNoRecipes": "Ce livre ne contient encore aucune recette.",
   "cookbookPdfContents": "Sommaire",
   "cookbookPdfOtherRecipes": "Autres recettes",
-  "printLabelServes": "Portions : {servings}"
+  "printLabelServes": "Portions : {servings}",
+  "prepRemindersName": "Rappels de préparation",
+  "prepRemindersDesc": "La veille d'un repas prévu : ce qu'il faut sortir du congélateur, faire tremper ou mariner",
+  "prepReminderTitle": "À préparer pour demain",
+  "prepReminderThaw": "Pour {recipe} : sortez du congélateur {items}.",
+  "prepReminderSoak": "Pour {recipe} : faites tremper {items}.",
+  "prepReminderMarinate": "Pour {recipe} : faites mariner {items}.",
+  "prepReminderAhead": "{recipe} se prépare à l'avance. Jetez un œil à la recette ce soir.",
+  "prepReminderItems": "{items} et {last}",
+  "prepReminderMore": "+{count} de plus",
+  "prepReminderTime": "Heure du rappel",
+  "plannerPrepAhead": "À préparer la veille"
 }

@@ -13486,4 +13486,49 @@ class AppLocalizationsKo extends AppLocalizations {
   String printLabelServes(String servings) {
     return '분량: $servings';
   }
+
+  @override
+  String get prepRemindersName => '재료 준비 알림';
+
+  @override
+  String get prepRemindersDesc => '계획한 식사 전날 저녁에 냉동실에서 꺼낼 것, 불릴 것, 재워 둘 것을 알려 드려요';
+
+  @override
+  String get prepReminderTitle => '내일 요리 준비';
+
+  @override
+  String prepReminderThaw(String items, String recipe) {
+    return '$recipe: $items 냉동실에서 꺼내 두세요.';
+  }
+
+  @override
+  String prepReminderSoak(String items, String recipe) {
+    return '$recipe: $items 물에 불려 두세요.';
+  }
+
+  @override
+  String prepReminderMarinate(String items, String recipe) {
+    return '$recipe: $items 양념에 재워 두세요.';
+  }
+
+  @override
+  String prepReminderAhead(String recipe) {
+    return '$recipe: 미리 준비가 필요해요. 오늘 밤 레시피를 확인하세요.';
+  }
+
+  @override
+  String prepReminderItems(String items, String last) {
+    return '$items, $last';
+  }
+
+  @override
+  String prepReminderMore(int count) {
+    return '+$count개 더';
+  }
+
+  @override
+  String get prepReminderTime => '알림 시간';
+
+  @override
+  String get plannerPrepAhead => '전날 미리 준비';
 }

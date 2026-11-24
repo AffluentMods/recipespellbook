@@ -60,6 +60,8 @@ class FlutterLocalNotificationsPlugin {
 
   T? resolvePlatformSpecificImplementation<T>() => null;
 
+  Future<NotificationAppLaunchDetails?> getNotificationAppLaunchDetails() async => null;
+
   Future<void> show(int id, String? title, String? body, NotificationDetails? details, {String? payload}) async {}
 }
 
@@ -104,6 +106,12 @@ class AndroidNotificationDetails {
 
 class DarwinNotificationDetails {
   const DarwinNotificationDetails({bool presentAlert = true, bool presentBadge = true, bool presentSound = true});
+}
+
+class NotificationAppLaunchDetails {
+  final bool didNotificationLaunchApp;
+  final NotificationResponse? notificationResponse;
+  const NotificationAppLaunchDetails(this.didNotificationLaunchApp, {this.notificationResponse});
 }
 
 class NotificationResponse {

@@ -5108,5 +5108,16 @@
   "cookbookPdfNoRecipes": "Ta książka nie ma jeszcze przepisów.",
   "cookbookPdfContents": "Spis treści",
   "cookbookPdfOtherRecipes": "Pozostałe przepisy",
-  "printLabelServes": "Porcje: {servings}"
+  "printLabelServes": "Porcje: {servings}",
+  "prepRemindersName": "Przypomnienia o przygotowaniu",
+  "prepRemindersDesc": "Wieczorem przed zaplanowanym posiłkiem: co wyjąć z zamrażarki, namoczyć lub zamarynować",
+  "prepReminderTitle": "Przygotuj na jutro",
+  "prepReminderThaw": "Wyjmij z zamrażarki: {items} ({recipe}).",
+  "prepReminderSoak": "Namocz: {items} ({recipe}).",
+  "prepReminderMarinate": "Zamarynuj: {items} ({recipe}).",
+  "prepReminderAhead": "{recipe} wymaga wcześniejszego przygotowania. Zajrzyj dziś wieczorem do przepisu.",
+  "prepReminderItems": "{items} i {last}",
+  "prepReminderMore": "+{count} więcej",
+  "prepReminderTime": "Godzina przypomnienia",
+  "plannerPrepAhead": "Przygotuj dzień wcześniej"
 }

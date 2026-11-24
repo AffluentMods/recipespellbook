@@ -23490,6 +23490,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Serves {servings}'**
   String printLabelServes(String servings);
+
+  /// Settings > Notifications switch, and the name of the Android notification channel, for the reminders the evening before a planned meal.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep reminders'**
+  String get prepRemindersName;
+
+  /// Under the Prep reminders switch, and the Android notification channel description.
+  ///
+  /// In en, this message translates to:
+  /// **'The evening before a planned meal: what to take out of the freezer, soak or marinate'**
+  String get prepRemindersDesc;
+
+  /// Title of the notification the evening before planned meals that need prep.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep for tomorrow'**
+  String get prepReminderTitle;
+
+  /// One line of the prep notification. items: pantry items in the freezer (one, or a list made with prepReminderItems); recipe: the recipe title.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the {items} out of the freezer for {recipe}.'**
+  String prepReminderThaw(String items, String recipe);
+
+  /// One line of the prep notification: dried beans or grains to soak. items: ingredient names; recipe: the recipe title.
+  ///
+  /// In en, this message translates to:
+  /// **'Soak the {items} for {recipe}.'**
+  String prepReminderSoak(String items, String recipe);
+
+  /// One line of the prep notification: meat or fish to marinate. items: ingredient names; recipe: the recipe title.
+  ///
+  /// In en, this message translates to:
+  /// **'Marinate the {items} for {recipe}.'**
+  String prepReminderMarinate(String items, String recipe);
+
+  /// One line of the prep notification when the recipe needs hours or a night ahead (chilling, rising, resting) and nothing more precise was found.
+  ///
+  /// In en, this message translates to:
+  /// **'{recipe} needs time ahead. Check the recipe tonight.'**
+  String prepReminderAhead(String recipe);
+
+  /// Joins the last of several items to the others (already joined with commas) in a prep notification line.
+  ///
+  /// In en, this message translates to:
+  /// **'{items} and {last}'**
+  String prepReminderItems(String items, String last);
+
+  /// End of a prep notification that names only its first line.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String prepReminderMore(int count);
+
+  /// Settings > Notifications: the time of day prep reminders come, the evening before.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder time'**
+  String get prepReminderTime;
+
+  /// Small line on a planned meal in the planner when the recipe needs prep the day before (thawing, soaking, marinating, chilling).
+  ///
+  /// In en, this message translates to:
+  /// **'Prep the day before'**
+  String get plannerPrepAhead;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

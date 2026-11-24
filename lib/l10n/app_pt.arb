@@ -5108,5 +5108,16 @@
   "cookbookPdfNoRecipes": "Este livro ainda não tem receitas.",
   "cookbookPdfContents": "Sumário",
   "cookbookPdfOtherRecipes": "Outras receitas",
-  "printLabelServes": "Porções: {servings}"
+  "printLabelServes": "Porções: {servings}",
+  "prepRemindersName": "Lembretes de preparo",
+  "prepRemindersDesc": "Na noite anterior a uma refeição planejada: o que tirar do congelador, deixar de molho ou marinar",
+  "prepReminderTitle": "Preparo para amanhã",
+  "prepReminderThaw": "Para {recipe}: tire do congelador {items}.",
+  "prepReminderSoak": "Para {recipe}: deixe de molho {items}.",
+  "prepReminderMarinate": "Para {recipe}: deixe marinando {items}.",
+  "prepReminderAhead": "{recipe} precisa de preparo antecipado. Confira a receita hoje à noite.",
+  "prepReminderItems": "{items} e {last}",
+  "prepReminderMore": "+{count} a mais",
+  "prepReminderTime": "Horário do lembrete",
+  "plannerPrepAhead": "Preparar no dia anterior"
 }

@@ -13454,4 +13454,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String printLabelServes(String servings) {
     return '份量：$servings';
   }
+
+  @override
+  String get prepRemindersName => '备菜提醒';
+
+  @override
+  String get prepRemindersDesc => '在计划用餐的前一天晚上提醒你：要从冷冻室取出、浸泡或腌制的食材';
+
+  @override
+  String get prepReminderTitle => '明天的备菜';
+
+  @override
+  String prepReminderThaw(String items, String recipe) {
+    return '为$recipe把$items从冷冻室取出解冻。';
+  }
+
+  @override
+  String prepReminderSoak(String items, String recipe) {
+    return '为$recipe浸泡$items。';
+  }
+
+  @override
+  String prepReminderMarinate(String items, String recipe) {
+    return '为$recipe腌制$items。';
+  }
+
+  @override
+  String prepReminderAhead(String recipe) {
+    return '$recipe需要提前准备。今晚看一下食谱吧。';
+  }
+
+  @override
+  String prepReminderItems(String items, String last) {
+    return '$items和$last';
+  }
+
+  @override
+  String prepReminderMore(int count) {
+    return '还有 $count 项';
+  }
+
+  @override
+  String get prepReminderTime => '提醒时间';
+
+  @override
+  String get plannerPrepAhead => '需提前一天准备';
 }

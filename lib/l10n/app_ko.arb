@@ -5108,5 +5108,16 @@
   "cookbookPdfNoRecipes": "이 요리책에는 아직 레시피가 없어요.",
   "cookbookPdfContents": "목차",
   "cookbookPdfOtherRecipes": "기타 레시피",
-  "printLabelServes": "분량: {servings}"
+  "printLabelServes": "분량: {servings}",
+  "prepRemindersName": "재료 준비 알림",
+  "prepRemindersDesc": "계획한 식사 전날 저녁에 냉동실에서 꺼낼 것, 불릴 것, 재워 둘 것을 알려 드려요",
+  "prepReminderTitle": "내일 요리 준비",
+  "prepReminderThaw": "{recipe}: {items} 냉동실에서 꺼내 두세요.",
+  "prepReminderSoak": "{recipe}: {items} 물에 불려 두세요.",
+  "prepReminderMarinate": "{recipe}: {items} 양념에 재워 두세요.",
+  "prepReminderAhead": "{recipe}: 미리 준비가 필요해요. 오늘 밤 레시피를 확인하세요.",
+  "prepReminderItems": "{items}, {last}",
+  "prepReminderMore": "+{count}개 더",
+  "prepReminderTime": "알림 시간",
+  "plannerPrepAhead": "전날 미리 준비"
 }

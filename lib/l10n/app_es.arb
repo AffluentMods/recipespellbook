@@ -4635,5 +4635,16 @@
   "cookbookPdfNoRecipes": "Este libro de cocina aún no tiene recetas.",
   "cookbookPdfContents": "Índice",
   "cookbookPdfOtherRecipes": "Otras recetas",
-  "printLabelServes": "Porciones: {servings}"
+  "printLabelServes": "Porciones: {servings}",
+  "prepRemindersName": "Recordatorios de preparación",
+  "prepRemindersDesc": "La tarde antes de una comida planificada: qué sacar del congelador, poner en remojo o marinar",
+  "prepReminderTitle": "Prepara lo de mañana",
+  "prepReminderThaw": "Para {recipe}: saca del congelador {items}.",
+  "prepReminderSoak": "Para {recipe}: pon en remojo {items}.",
+  "prepReminderMarinate": "Para {recipe}: deja marinar {items}.",
+  "prepReminderAhead": "{recipe} necesita preparación previa. Revisa la receta esta noche.",
+  "prepReminderItems": "{items} y {last}",
+  "prepReminderMore": "+{count} más",
+  "prepReminderTime": "Hora del recordatorio",
+  "plannerPrepAhead": "Preparar el día antes"
 }

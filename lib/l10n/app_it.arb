@@ -4132,5 +4132,16 @@
   "cookbookPdfNoRecipes": "Questo ricettario non ha ancora ricette.",
   "cookbookPdfContents": "Indice",
   "cookbookPdfOtherRecipes": "Altre ricette",
-  "printLabelServes": "Porzioni: {servings}"
+  "printLabelServes": "Porzioni: {servings}",
+  "prepRemindersName": "Promemoria di preparazione",
+  "prepRemindersDesc": "La sera prima di un pasto in programma: cosa togliere dal congelatore, mettere in ammollo o marinare",
+  "prepReminderTitle": "Da preparare per domani",
+  "prepReminderThaw": "Per {recipe}: togli dal congelatore {items}.",
+  "prepReminderSoak": "Per {recipe}: metti in ammollo {items}.",
+  "prepReminderMarinate": "Per {recipe}: metti a marinare {items}.",
+  "prepReminderAhead": "Per {recipe} serve una preparazione in anticipo. Dai un'occhiata alla ricetta stasera.",
+  "prepReminderItems": "{items} e {last}",
+  "prepReminderMore": "+{count} altri",
+  "prepReminderTime": "Ora del promemoria",
+  "plannerPrepAhead": "Da preparare il giorno prima"
 }

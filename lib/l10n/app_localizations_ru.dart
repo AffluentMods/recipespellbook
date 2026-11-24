@@ -13871,4 +13871,49 @@ class AppLocalizationsRu extends AppLocalizations {
   String printLabelServes(String servings) {
     return 'Порций: $servings';
   }
+
+  @override
+  String get prepRemindersName => 'Напоминания о подготовке';
+
+  @override
+  String get prepRemindersDesc => 'Вечером накануне запланированного блюда: что достать из морозилки, замочить или замариновать';
+
+  @override
+  String get prepReminderTitle => 'Подготовка на завтра';
+
+  @override
+  String prepReminderThaw(String items, String recipe) {
+    return 'Достаньте из морозилки: $items ($recipe).';
+  }
+
+  @override
+  String prepReminderSoak(String items, String recipe) {
+    return 'Замочите: $items ($recipe).';
+  }
+
+  @override
+  String prepReminderMarinate(String items, String recipe) {
+    return 'Замаринуйте: $items ($recipe).';
+  }
+
+  @override
+  String prepReminderAhead(String recipe) {
+    return 'Для блюда «$recipe» нужна подготовка заранее. Загляните в рецепт сегодня вечером.';
+  }
+
+  @override
+  String prepReminderItems(String items, String last) {
+    return '$items и $last';
+  }
+
+  @override
+  String prepReminderMore(int count) {
+    return 'ещё $count';
+  }
+
+  @override
+  String get prepReminderTime => 'Время напоминания';
+
+  @override
+  String get plannerPrepAhead => 'Подготовить накануне';
 }

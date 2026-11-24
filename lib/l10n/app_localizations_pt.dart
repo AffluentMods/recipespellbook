@@ -13612,4 +13612,49 @@ class AppLocalizationsPt extends AppLocalizations {
   String printLabelServes(String servings) {
     return 'Porções: $servings';
   }
+
+  @override
+  String get prepRemindersName => 'Lembretes de preparo';
+
+  @override
+  String get prepRemindersDesc => 'Na noite anterior a uma refeição planejada: o que tirar do congelador, deixar de molho ou marinar';
+
+  @override
+  String get prepReminderTitle => 'Preparo para amanhã';
+
+  @override
+  String prepReminderThaw(String items, String recipe) {
+    return 'Para $recipe: tire do congelador $items.';
+  }
+
+  @override
+  String prepReminderSoak(String items, String recipe) {
+    return 'Para $recipe: deixe de molho $items.';
+  }
+
+  @override
+  String prepReminderMarinate(String items, String recipe) {
+    return 'Para $recipe: deixe marinando $items.';
+  }
+
+  @override
+  String prepReminderAhead(String recipe) {
+    return '$recipe precisa de preparo antecipado. Confira a receita hoje à noite.';
+  }
+
+  @override
+  String prepReminderItems(String items, String last) {
+    return '$items e $last';
+  }
+
+  @override
+  String prepReminderMore(int count) {
+    return '+$count a mais';
+  }
+
+  @override
+  String get prepReminderTime => 'Horário do lembrete';
+
+  @override
+  String get plannerPrepAhead => 'Preparar no dia anterior';
 }
