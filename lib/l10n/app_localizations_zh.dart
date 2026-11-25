@@ -4161,6 +4161,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tryAgain => '重试';
 
   @override
+  String get scannerCameraError => '无法启动相机或条码识别器。';
+
+  @override
+  String get scannerCameraDenied => '要扫描，请在手机设置中允许 Recipe Spellbook 使用相机。';
+
+  @override
   String get skipForNow => '暂时跳过';
 
   @override

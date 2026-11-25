@@ -1611,6 +1611,8 @@
   "krogerConnectionFailed": "Falha na conexão",
   "goToShoppingList": "Ir para lista de compras",
   "tryAgain": "Tentar novamente",
+  "scannerCameraError": "Não foi possível iniciar a câmera ou o leitor de códigos.",
+  "scannerCameraDenied": "Permita o acesso à câmera para o Recipe Spellbook nas configurações do celular para escanear.",
   "skipForNow": "Pular por enquanto",
   "skipDuplicates": "Pular duplicatas",
   "deselectAll": "Desmarcar tudo",

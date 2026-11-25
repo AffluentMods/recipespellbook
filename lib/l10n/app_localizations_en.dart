@@ -4206,6 +4206,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tryAgain => 'Try Again';
 
   @override
+  String get scannerCameraError => 'The camera or the barcode reader could not start.';
+
+  @override
+  String get scannerCameraDenied => 'Allow camera access for Recipe Spellbook in your phone\'s settings to scan.';
+
+  @override
   String get skipForNow => 'Skip for now';
 
   @override

@@ -1611,6 +1611,8 @@
   "krogerConnectionFailed": "连接失败",
   "goToShoppingList": "前往购物清单",
   "tryAgain": "重试",
+  "scannerCameraError": "无法启动相机或条码识别器。",
+  "scannerCameraDenied": "要扫描，请在手机设置中允许 Recipe Spellbook 使用相机。",
   "skipForNow": "暂时跳过",
   "skipDuplicates": "跳过重复",
   "deselectAll": "取消选择",

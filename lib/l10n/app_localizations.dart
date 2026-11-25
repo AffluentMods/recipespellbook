@@ -7615,6 +7615,18 @@ abstract class AppLocalizations {
   /// **'Try Again'**
   String get tryAgain;
 
+  /// Barcode and QR scanners: the camera or the barcode reader failed to start. A Try Again button follows.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera or the barcode reader could not start.'**
+  String get scannerCameraError;
+
+  /// Barcode and QR scanners: camera permission was refused.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera access for Recipe Spellbook in your phone\'s settings to scan.'**
+  String get scannerCameraDenied;
+
   /// No description provided for @skipForNow.
   ///
   /// In en, this message translates to:

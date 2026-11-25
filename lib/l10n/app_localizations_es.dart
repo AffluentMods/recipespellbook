@@ -4200,6 +4200,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tryAgain => 'Reintentar';
 
   @override
+  String get scannerCameraError => 'No se pudo iniciar la cámara o el lector de códigos.';
+
+  @override
+  String get scannerCameraDenied => 'Permite el acceso a la cámara para Recipe Spellbook en los ajustes del teléfono para escanear.';
+
+  @override
   String get skipForNow => 'Omitir por ahora';
 
   @override

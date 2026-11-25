@@ -4206,6 +4206,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get tryAgain => 'Opnieuw proberen';
 
   @override
+  String get scannerCameraError => 'De camera of de barcodelezer kon niet starten.';
+
+  @override
+  String get scannerCameraDenied => 'Geef Recipe Spellbook in de instellingen van je telefoon toegang tot de camera om te scannen.';
+
+  @override
   String get skipForNow => 'Voorlopig overslaan';
 
   @override

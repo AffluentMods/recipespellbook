@@ -15,6 +15,7 @@ import '../ui/screens/cookbooks/cookbook_isbn_screen.dart';
 import '../ui/widgets/app_snackbar.dart';
 import '../ui/widgets/nutrition_facts.dart';
 import '../ui/widgets/scan_viewfinder.dart';
+import '../ui/widgets/scanner_error_view.dart';
 import '../ui/widgets/sheet_chrome.dart';
 import 'isbn_lookup_service.dart';
 import '../utils/responsive_utils.dart';
@@ -632,6 +633,10 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
+            errorBuilder: (context, error) => ScannerErrorView(
+              error: error,
+              onRetry: () => restartScanner(_controller!),
+            ),
           ),
 
           // A shade under the app bar so its title reads on any picture.
@@ -655,11 +660,14 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           ),
 
           // The scan window, with the hint or the lookup under it.
-          ScanViewfinder(
-            hint: l10n.pointCameraBarcode,
-            busy: _isProcessing,
-            busyText: l10n.lookingUpProduct,
-            windowAspect: 1.8,
+          HideOnScannerError(
+            controller: _controller!,
+            child: ScanViewfinder(
+              hint: l10n.pointCameraBarcode,
+              busy: _isProcessing,
+              busyText: l10n.lookingUpProduct,
+              windowAspect: 1.8,
+            ),
           ),
         ],
       ),

@@ -4161,6 +4161,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tryAgain => '再試行';
 
   @override
+  String get scannerCameraError => 'カメラまたはバーコードリーダーを起動できませんでした。';
+
+  @override
+  String get scannerCameraDenied => 'スキャンするには、端末の設定で Recipe Spellbook のカメラへのアクセスを許可してください。';
+
+  @override
   String get skipForNow => '今はスキップ';
 
   @override

@@ -1611,6 +1611,8 @@
   "krogerConnectionFailed": "Подключение не удалось",
   "goToShoppingList": "Перейти к списку покупок",
   "tryAgain": "Попробовать снова",
+  "scannerCameraError": "Не удалось запустить камеру или сканер штрихкодов.",
+  "scannerCameraDenied": "Чтобы сканировать, разрешите Recipe Spellbook доступ к камере в настройках телефона.",
   "skipForNow": "Пропустить",
   "skipDuplicates": "Пропустить дубликаты",
   "deselectAll": "Снять выбор",

@@ -1611,6 +1611,8 @@
   "krogerConnectionFailed": "Verbinding mislukt",
   "goToShoppingList": "Naar boodschappenlijst gaan",
   "tryAgain": "Opnieuw proberen",
+  "scannerCameraError": "De camera of de barcodelezer kon niet starten.",
+  "scannerCameraDenied": "Geef Recipe Spellbook in de instellingen van je telefoon toegang tot de camera om te scannen.",
   "skipForNow": "Voorlopig overslaan",
   "skipDuplicates": "Duplicaten overslaan",
   "deselectAll": "Selectie opheffen",

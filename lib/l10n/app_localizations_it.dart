@@ -4200,6 +4200,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get tryAgain => 'Riprova';
 
   @override
+  String get scannerCameraError => 'Impossibile avviare la fotocamera o il lettore di codici a barre.';
+
+  @override
+  String get scannerCameraDenied => 'Consenti l\'accesso alla fotocamera a Recipe Spellbook nelle impostazioni del telefono per scansionare.';
+
+  @override
   String get skipForNow => 'Salta per ora';
 
   @override
