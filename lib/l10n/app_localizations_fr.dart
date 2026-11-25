@@ -4194,6 +4194,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tryAgain => 'Réessayer';
 
   @override
+  String get scannerCameraError => 'Impossible de démarrer l\'appareil photo ou le lecteur de codes-barres.';
+
+  @override
+  String get scannerCameraDenied => 'Autorisez l\'accès à l\'appareil photo pour Recipe Spellbook dans les réglages du téléphone pour scanner.';
+
+  @override
   String get skipForNow => 'Passer pour l\'instant';
 
   @override

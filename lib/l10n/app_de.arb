@@ -1533,6 +1533,8 @@
   "krogerConnectionFailed": "Verbindung fehlgeschlagen",
   "goToShoppingList": "Zur Einkaufsliste",
   "tryAgain": "Erneut versuchen",
+  "scannerCameraError": "Die Kamera oder der Barcode-Leser konnte nicht starten.",
+  "scannerCameraDenied": "Erlaube Recipe Spellbook in den Einstellungen deines Telefons den Kamerazugriff, um zu scannen.",
   "skipForNow": "Jetzt überspringen",
   "skipDuplicates": "Duplikate überspringen",
   "deselectAll": "Alle abwählen",

@@ -4272,6 +4272,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get tryAgain => 'Spróbuj ponownie';
 
   @override
+  String get scannerCameraError => 'Nie udało się uruchomić aparatu ani czytnika kodów kreskowych.';
+
+  @override
+  String get scannerCameraDenied => 'Aby skanować, zezwól aplikacji Recipe Spellbook na dostęp do aparatu w ustawieniach telefonu.';
+
+  @override
   String get skipForNow => 'Pomiń na razie';
 
   @override

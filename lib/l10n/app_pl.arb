@@ -1611,6 +1611,8 @@
   "krogerConnectionFailed": "Połączenie nie powiodło się",
   "goToShoppingList": "Przejdź do listy zakupów",
   "tryAgain": "Spróbuj ponownie",
+  "scannerCameraError": "Nie udało się uruchomić aparatu ani czytnika kodów kreskowych.",
+  "scannerCameraDenied": "Aby skanować, zezwól aplikacji Recipe Spellbook na dostęp do aparatu w ustawieniach telefonu.",
   "skipForNow": "Pomiń na razie",
   "skipDuplicates": "Pomiń duplikaty",
   "deselectAll": "Odznacz wszystko",

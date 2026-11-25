@@ -4171,6 +4171,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tryAgain => '다시 시도';
 
   @override
+  String get scannerCameraError => '카메라 또는 바코드 리더를 시작할 수 없습니다.';
+
+  @override
+  String get scannerCameraDenied => '스캔하려면 휴대폰 설정에서 Recipe Spellbook의 카메라 접근을 허용하세요.';
+
+  @override
   String get skipForNow => '지금은 건너뛰기';
 
   @override

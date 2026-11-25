@@ -1198,6 +1198,8 @@
   "skipDuplicates": "Salta duplicati",
   "goToShoppingList": "Vai alla lista della spesa",
   "tryAgain": "Riprova",
+  "scannerCameraError": "Impossibile avviare la fotocamera o il lettore di codici a barre.",
+  "scannerCameraDenied": "Consenti l'accesso alla fotocamera a Recipe Spellbook nelle impostazioni del telefono per scansionare.",
   "skipForNow": "Salta per ora",
   "sendSuggestion": "Invia suggerimento",
   "sendSuggestionSubtitle": "Aiutaci a migliorare Recipe Spellbook",

@@ -1611,6 +1611,8 @@
   "krogerConnectionFailed": "연결 실패",
   "goToShoppingList": "쇼핑 목록으로 이동",
   "tryAgain": "다시 시도",
+  "scannerCameraError": "카메라 또는 바코드 리더를 시작할 수 없습니다.",
+  "scannerCameraDenied": "스캔하려면 휴대폰 설정에서 Recipe Spellbook의 카메라 접근을 허용하세요.",
   "skipForNow": "지금은 건너뛰기",
   "skipDuplicates": "중복 건너뛰기",
   "deselectAll": "선택 해제",

@@ -1197,6 +1197,8 @@
   "skipDuplicates": "Ignorer les doublons",
   "goToShoppingList": "Aller à la liste de courses",
   "tryAgain": "Réessayer",
+  "scannerCameraError": "Impossible de démarrer l'appareil photo ou le lecteur de codes-barres.",
+  "scannerCameraDenied": "Autorisez l'accès à l'appareil photo pour Recipe Spellbook dans les réglages du téléphone pour scanner.",
   "skipForNow": "Passer pour l'instant",
   "sendSuggestion": "Envoyer une suggestion",
   "sendSuggestionSubtitle": "Aidez-nous à améliorer Recipe Spellbook",

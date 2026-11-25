@@ -10,6 +10,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/transfer_service.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/scanner_error_view.dart';
 import '../../widgets/sign_in_prompt.dart';
 
 /// One-time device transfer screen for free users.
@@ -748,8 +749,15 @@ class _QRScannerPageState extends State<_QRScannerPage> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          MobileScanner(controller: _controller, onDetect: _onDetect),
-          _ScannerOverlay(theme: theme),
+          MobileScanner(
+            controller: _controller,
+            onDetect: _onDetect,
+            errorBuilder: (context, error) => ScannerErrorView(
+              error: error,
+              onRetry: () => restartScanner(_controller),
+            ),
+          ),
+          HideOnScannerError(controller: _controller, child: _ScannerOverlay(theme: theme)),
           // Top bar
           SafeArea(
             child: Padding(

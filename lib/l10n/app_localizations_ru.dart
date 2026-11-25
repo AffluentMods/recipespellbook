@@ -4270,6 +4270,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tryAgain => 'Попробовать снова';
 
   @override
+  String get scannerCameraError => 'Не удалось запустить камеру или сканер штрихкодов.';
+
+  @override
+  String get scannerCameraDenied => 'Чтобы сканировать, разрешите Recipe Spellbook доступ к камере в настройках телефона.';
+
+  @override
   String get skipForNow => 'Пропустить';
 
   @override
