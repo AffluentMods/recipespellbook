@@ -11094,6 +11094,32 @@ class AppLocalizationsRu extends AppLocalizations {
   String get familyYou => 'Вы';
 
   @override
+  String get familyPantrySwitch => 'Делиться кладовой с семьёй';
+
+  @override
+  String get familyPantryHint => 'Все, кто включит это, пользуются одной кладовой: что один добавит или израсходует, видят остальные.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'Кладовой делятся: $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'Пока никто не делится своей кладовой.';
+
+  @override
+  String get familyPantryOn => 'Теперь ваша кладовая стала семейной.';
+
+  @override
+  String get familyPantryOff => 'Кладовая снова ваша, с копией того, что было в семейной кладовой.';
+
+  @override
+  String get familyPantryFailed => 'Не удалось изменить общий доступ к кладовой. Попробуйте ещё раз.';
+
+  @override
+  String get pantryFamilyShared => 'Это семейная кладовая: изменения здесь видят все, кто ею делится.';
+
+  @override
   String get familyErrorSubscription => 'Чтобы создать семью, нужен тариф Premium.';
 
   @override

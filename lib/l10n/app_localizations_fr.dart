@@ -10957,6 +10957,32 @@ class AppLocalizationsFr extends AppLocalizations {
   String get familyYou => 'Vous';
 
   @override
+  String get familyPantrySwitch => 'Partager mon garde-manger avec la famille';
+
+  @override
+  String get familyPantryHint => 'Tous ceux qui activent cette option utilisent un seul garde-manger : ce que l\'un ajoute ou termine, les autres le voient.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'Partagent le garde-manger : $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'Personne ne partage encore son garde-manger.';
+
+  @override
+  String get familyPantryOn => 'Votre garde-manger est désormais celui de la famille.';
+
+  @override
+  String get familyPantryOff => 'Votre garde-manger redevient le vôtre, avec une copie de ce qu\'il y avait dans celui de la famille.';
+
+  @override
+  String get familyPantryFailed => 'Impossible de modifier le partage du garde-manger. Veuillez réessayer.';
+
+  @override
+  String get pantryFamilyShared => 'C\'est le garde-manger de votre famille : les changements ici sont visibles par tous ceux qui le partagent.';
+
+  @override
   String get familyErrorSubscription => 'Un abonnement Premium est nécessaire pour créer une famille.';
 
   @override

@@ -10957,6 +10957,32 @@ class AppLocalizationsDe extends AppLocalizations {
   String get familyYou => 'Du';
 
   @override
+  String get familyPantrySwitch => 'Meinen Vorrat mit der Familie teilen';
+
+  @override
+  String get familyPantryHint => 'Alle, die das einschalten, nutzen einen gemeinsamen Vorrat: Was eine Person hinzufügt oder aufbraucht, sehen die anderen.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'Teilen den Vorrat: $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'Noch niemand teilt seinen Vorrat.';
+
+  @override
+  String get familyPantryOn => 'Dein Vorrat ist jetzt der Familienvorrat.';
+
+  @override
+  String get familyPantryOff => 'Dein Vorrat gehört wieder dir, mit einer Kopie dessen, was im Familienvorrat war.';
+
+  @override
+  String get familyPantryFailed => 'Das Teilen des Vorrats konnte nicht geändert werden. Bitte versuche es erneut.';
+
+  @override
+  String get pantryFamilyShared => 'Das ist der Vorrat deiner Familie: Änderungen hier sehen alle, die ihn teilen.';
+
+  @override
   String get familyErrorSubscription => 'Zum Erstellen einer Familie brauchst du einen Premium-Tarif.';
 
   @override

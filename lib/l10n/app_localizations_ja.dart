@@ -10846,6 +10846,32 @@ class AppLocalizationsJa extends AppLocalizations {
   String get familyYou => 'あなた';
 
   @override
+  String get familyPantrySwitch => 'パントリーを家族と共有';
+
+  @override
+  String get familyPantryHint => 'オンにした人は全員ひとつのパントリーを使います。誰かが追加したり使い切ったりすると、ほかの人にも表示されます。';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'パントリーを共有中: $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'まだ誰もパントリーを共有していません。';
+
+  @override
+  String get familyPantryOn => 'あなたのパントリーは家族のパントリーになりました。';
+
+  @override
+  String get familyPantryOff => 'パントリーは自分専用に戻りました。家族のパントリーにあった食材のコピーも残っています。';
+
+  @override
+  String get familyPantryFailed => 'パントリーの共有を変更できませんでした。もう一度お試しください。';
+
+  @override
+  String get pantryFamilyShared => 'これは家族のパントリーです。ここでの変更は共有している全員に表示されます。';
+
+  @override
   String get familyErrorSubscription => 'ファミリーを作成するにはプレミアムプランが必要です。';
 
   @override

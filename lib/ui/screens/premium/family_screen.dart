@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/pantry_cooking_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
+import '../../../services/pantry_sync.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_invite_sheet.dart';
@@ -26,6 +28,7 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
   final _family = FamilyService.instance;
   FamilyInfo? _info;
   bool _loading = true;
+  bool _pantryBusy = false;
 
   @override
   void initState() {
@@ -51,6 +54,72 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
           ? _buildNoFamily(theme)
           : _buildFamilyView(theme),
     );
+  }
+
+  // ════════════════════════════════════════════
+  //  SHARED PANTRY
+  // ════════════════════════════════════════════
+
+  /// "Share my pantry with the family": everyone who turns it on uses one
+  /// pantry. Lists who does.
+  Widget _buildPantryCard(ThemeData theme, FamilyInfo info, String? myUserId) {
+    final l10n = AppLocalizations.of(context)!;
+    final me = info.members.where((m) => m.userId == myUserId).firstOrNull;
+    final sharing = [
+      for (final m in info.members)
+        if (m.sharePantry) m.userId == myUserId ? l10n.familyYou : m.displayName,
+    ];
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SwitchListTile(
+              secondary: const Icon(Icons.kitchen_outlined),
+              title: Text(l10n.familyPantrySwitch),
+              subtitle: Text(l10n.familyPantryHint),
+              value: me?.sharePantry ?? false,
+              onChanged: _pantryBusy || me == null ? null : _setPantrySharing,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                sharing.isEmpty ? l10n.familyPantryNobody : l10n.familyPantrySharedBy(sharing.join(', ')),
+                style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _setPantrySharing(bool shared) async {
+    final l10n = AppLocalizations.of(context)!;
+    final userId = AuthService.instance.currentUser?.id;
+    if (userId == null) return;
+    setState(() => _pantryBusy = true);
+    try {
+      final scope = await _family.setPantrySharing(shared);
+      if (!mounted) return;
+      if (scope == null) {
+        AppSnackbar.error(context, l10n.familyPantryFailed);
+        return;
+      }
+      // Merge this pantry with the one it uses now, keeping both.
+      await PantrySync.switchedTo(userId, scope);
+      try {
+        await PantrySync.forAuth(AuthService.instance).run(userId);
+      } catch (_) {
+        // The next sync merges instead.
+      }
+      ref.invalidate(familyPantryInUseProvider);
+      await _load();
+      if (mounted) AppSnackbar.success(context, scope == 'family' ? l10n.familyPantryOn : l10n.familyPantryOff);
+    } finally {
+      if (mounted) setState(() => _pantryBusy = false);
+    }
   }
 
   // ════════════════════════════════════════════
@@ -345,6 +414,10 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+
+          // ── Shared pantry ──
+          _buildPantryCard(theme, info, myUserId),
           const SizedBox(height: 16),
 
           // ── Actions ──

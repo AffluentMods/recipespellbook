@@ -10969,6 +10969,32 @@ class AppLocalizationsNl extends AppLocalizations {
   String get familyYou => 'Jij';
 
   @override
+  String get familyPantrySwitch => 'Mijn voorraadkast delen met het gezin';
+
+  @override
+  String get familyPantryHint => 'Iedereen die dit aanzet, gebruikt één voorraadkast: wat de een toevoegt of opmaakt, zien de anderen.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'Delen de voorraadkast: $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'Nog niemand deelt zijn voorraadkast.';
+
+  @override
+  String get familyPantryOn => 'Je voorraadkast is nu de gezinsvoorraadkast.';
+
+  @override
+  String get familyPantryOff => 'Je voorraadkast is weer van jou, met een kopie van wat er in de gezinsvoorraadkast stond.';
+
+  @override
+  String get familyPantryFailed => 'Het delen van de voorraadkast kon niet worden gewijzigd. Probeer het opnieuw.';
+
+  @override
+  String get pantryFamilyShared => 'Dit is de voorraadkast van je gezin: wijzigingen hier ziet iedereen die hem deelt.';
+
+  @override
   String get familyErrorSubscription => 'Je hebt een Premium-abonnement nodig om een gezin aan te maken.';
 
   @override

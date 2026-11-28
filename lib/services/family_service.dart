@@ -22,9 +22,12 @@ class FamilyMemberInfo {
   final String role;
   final DateTime? joinedAt;
 
+  /// Uses the family pantry ("Share my pantry").
+  final bool sharePantry;
+
   const FamilyMemberInfo({
     required this.userId, this.name, this.email, this.avatarUrl,
-    this.tier, required this.role, this.joinedAt,
+    this.tier, required this.role, this.joinedAt, this.sharePantry = false,
   });
 
   factory FamilyMemberInfo.fromJson(Map<String, dynamic> json) => FamilyMemberInfo(
@@ -35,6 +38,7 @@ class FamilyMemberInfo {
     tier: json['tier'] as String?,
     role: json['role'] as String? ?? 'member',
     joinedAt: json['joinedAt'] != null ? DateTime.tryParse(json['joinedAt'] as String) : null,
+    sharePantry: json['sharePantry'] == true,
   );
 
   String get displayName => name ?? email?.split('@').first ?? 'Unknown';
@@ -342,6 +346,23 @@ class FamilyService {
       return r.statusCode;
     } catch (e) {
       debugPrint('[Share] probe: $e');
+      return null;
+    }
+  }
+
+  /// Turns "Share my pantry with the family" on or off. Returns the pantry
+  /// the account uses now ('family' or 'personal'), or null when it failed.
+  Future<String?> setPantrySharing(bool shared) async {
+    try {
+      final r = await _auth.put('/v1/sync/pantry/sharing', {'shared': shared});
+      if (r.statusCode != 200) {
+        debugPrint('[Family] setPantrySharing: HTTP ${r.statusCode}');
+        return null;
+      }
+      final data = jsonDecode(r.body) as Map<String, dynamic>;
+      return data['scope'] == 'family' ? 'family' : 'personal';
+    } catch (e) {
+      debugPrint('[Family] setPantrySharing: $e');
       return null;
     }
   }

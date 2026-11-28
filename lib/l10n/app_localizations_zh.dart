@@ -10842,6 +10842,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get familyYou => '你';
 
   @override
+  String get familyPantrySwitch => '与家人共享我的储藏室';
+
+  @override
+  String get familyPantryHint => '开启此项的人都使用同一个储藏室：一个人添加或用完的东西，其他人都能看到。';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return '共享储藏室的成员：$names';
+  }
+
+  @override
+  String get familyPantryNobody => '还没有人共享储藏室。';
+
+  @override
+  String get familyPantryOn => '你的储藏室现在是家庭储藏室。';
+
+  @override
+  String get familyPantryOff => '你的储藏室又归你自己了，家庭储藏室里的东西也留了一份副本。';
+
+  @override
+  String get familyPantryFailed => '无法更改储藏室共享，请重试。';
+
+  @override
+  String get pantryFamilyShared => '这是家庭储藏室：在这里的更改，所有共享的人都能看到。';
+
+  @override
   String get familyErrorSubscription => '创建家庭需要高级版方案。';
 
   @override

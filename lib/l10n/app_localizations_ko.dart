@@ -10867,6 +10867,32 @@ class AppLocalizationsKo extends AppLocalizations {
   String get familyYou => '나';
 
   @override
+  String get familyPantrySwitch => '가족과 팬트리 공유';
+
+  @override
+  String get familyPantryHint => '이 기능을 켠 사람은 모두 하나의 팬트리를 사용합니다. 누군가 추가하거나 다 쓰면 다른 사람에게도 보입니다.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return '팬트리 공유 중: $names';
+  }
+
+  @override
+  String get familyPantryNobody => '아직 팬트리를 공유하는 사람이 없습니다.';
+
+  @override
+  String get familyPantryOn => '이제 내 팬트리가 가족 팬트리입니다.';
+
+  @override
+  String get familyPantryOff => '팬트리가 다시 내 것이 되었습니다. 가족 팬트리에 있던 항목의 사본도 남아 있습니다.';
+
+  @override
+  String get familyPantryFailed => '팬트리 공유를 변경할 수 없습니다. 다시 시도해 주세요.';
+
+  @override
+  String get pantryFamilyShared => '가족 팬트리입니다. 여기서 바꾼 내용은 공유하는 모든 사람에게 보입니다.';
+
+  @override
   String get familyErrorSubscription => '가족을 만들려면 프리미엄 플랜이 필요합니다.';
 
   @override
