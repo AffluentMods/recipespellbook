@@ -10969,6 +10969,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyYou => 'You';
 
   @override
+  String get familyPantrySwitch => 'Share my pantry with the family';
+
+  @override
+  String get familyPantryHint => 'Everyone who turns this on uses one pantry: what one of you adds or uses up, the others see.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'Sharing the pantry: $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'Nobody shares their pantry yet.';
+
+  @override
+  String get familyPantryOn => 'Your pantry is now the family pantry.';
+
+  @override
+  String get familyPantryOff => 'Your pantry is your own again, with a copy of what was in the family pantry.';
+
+  @override
+  String get familyPantryFailed => 'Pantry sharing could not be changed. Please try again.';
+
+  @override
+  String get pantryFamilyShared => 'This is your family\'s pantry: changes here show for everyone sharing it.';
+
+  @override
   String get familyErrorSubscription => 'A Premium plan is required to create a family.';
 
   @override

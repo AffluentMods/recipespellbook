@@ -72,6 +72,21 @@ class PantryScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  if (ref.watch(familyPantryInUseProvider).valueOrNull ?? false) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.family_restroom, size: 18, color: theme.colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.pantryFamilyShared,
+                            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 8),
 
                   // What can I make with all this?

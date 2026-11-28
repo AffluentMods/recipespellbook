@@ -10944,6 +10944,32 @@ class AppLocalizationsPt extends AppLocalizations {
   String get familyYou => 'Você';
 
   @override
+  String get familyPantrySwitch => 'Compartilhar minha despensa com a família';
+
+  @override
+  String get familyPantryHint => 'Todos que ativarem isso usam uma única despensa: o que um adiciona ou termina, os outros veem.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'Compartilhando a despensa: $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'Ninguém compartilha a despensa ainda.';
+
+  @override
+  String get familyPantryOn => 'Sua despensa agora é a despensa da família.';
+
+  @override
+  String get familyPantryOff => 'Sua despensa voltou a ser só sua, com uma cópia do que havia na despensa da família.';
+
+  @override
+  String get familyPantryFailed => 'Não foi possível alterar o compartilhamento da despensa. Tente novamente.';
+
+  @override
+  String get pantryFamilyShared => 'Esta é a despensa da sua família: as mudanças aqui aparecem para todos que a compartilham.';
+
+  @override
   String get familyErrorSubscription => 'É preciso um plano Premium para criar uma família.';
 
   @override

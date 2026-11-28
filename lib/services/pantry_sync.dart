@@ -20,6 +20,12 @@ import 'pantry_service.dart';
 /// merges, so two devices that each had a pantry keep both.
 ///
 /// A server without the pantry routes (404) is simply skipped.
+///
+/// An account can share its pantry with its family ("Share my pantry" in
+/// Family): the server then answers with the family's pantry (scope
+/// 'family'). When the scope changes, here or on another device, the next
+/// sync merges afresh with the other pantry, as a first sync does, so no
+/// item is lost on the way in or out.
 class PantrySync {
   PantrySync(this._get, this._put, {PantryService? pantry}) : _pantry = pantry ?? PantryService.instance;
 
@@ -36,11 +42,31 @@ class PantrySync {
   /// The pantry as it stood after the last sync, on the server and here.
   static String _baseKey(String userId) => 'pantry_sync_base_$userId';
 
+  /// Which pantry the account synced with last: 'personal' or 'family'.
+  /// Missing means personal (every sync before family pantries).
+  static String _scopeKey(String userId) => 'pantry_sync_scope_$userId';
+
   /// Forget the last sync with [userId] (an account switch or a local
   /// reset): the next one merges as a first one does.
   static Future<void> forget(SharedPreferences prefs, String userId) async {
     await prefs.remove(_mergedKey(userId));
     await prefs.remove(_baseKey(userId));
+    await prefs.remove(_scopeKey(userId));
+  }
+
+  /// Whether [userId]'s pantry is the family pantry, as of the last sync or
+  /// switch on this device.
+  static Future<bool> usesFamilyPantry(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_scopeKey(userId)) == 'family';
+  }
+
+  /// "Share my pantry" was turned on or off and the account now uses
+  /// [scope]: the next sync merges this pantry with that one, keeping both.
+  static Future<void> switchedTo(String userId, String scope) async {
+    final prefs = await SharedPreferences.getInstance();
+    await forget(prefs, userId);
+    await prefs.setString(_scopeKey(userId), scope);
   }
 
   /// Whether the pantry is in sync now (or the server has no pantry
@@ -55,6 +81,13 @@ class PantrySync {
     var serverDoc = server['pantry'];
     var serverAt = (server['updatedAt'] as num?)?.toInt();
     final prefs = await SharedPreferences.getInstance();
+    final scope = server['scope'] == 'family' ? 'family' : 'personal';
+    if ((prefs.getString(_scopeKey(userId)) ?? 'personal') != scope) {
+      // Moved to or from the family pantry (maybe on another device): the
+      // copy kept from the last sync belongs to the other pantry.
+      await forget(prefs, userId);
+    }
+    await prefs.setString(_scopeKey(userId), scope);
     final synced = prefs.getBool(_mergedKey(userId)) ?? false;
     final baseRaw = prefs.getString(_baseKey(userId));
 

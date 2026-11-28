@@ -10963,6 +10963,32 @@ class AppLocalizationsIt extends AppLocalizations {
   String get familyYou => 'Tu';
 
   @override
+  String get familyPantrySwitch => 'Condividi la mia dispensa con la famiglia';
+
+  @override
+  String get familyPantryHint => 'Chi attiva questa opzione usa un\'unica dispensa: ciò che uno aggiunge o finisce, gli altri lo vedono.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'Condividono la dispensa: $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'Nessuno condivide ancora la propria dispensa.';
+
+  @override
+  String get familyPantryOn => 'La tua dispensa ora è la dispensa di famiglia.';
+
+  @override
+  String get familyPantryOff => 'La tua dispensa torna tua, con una copia di ciò che c\'era nella dispensa di famiglia.';
+
+  @override
+  String get familyPantryFailed => 'Impossibile modificare la condivisione della dispensa. Riprova.';
+
+  @override
+  String get pantryFamilyShared => 'Questa è la dispensa della tua famiglia: le modifiche qui le vede chi la condivide.';
+
+  @override
   String get familyErrorSubscription => 'Serve un piano Premium per creare una famiglia.';
 
   @override

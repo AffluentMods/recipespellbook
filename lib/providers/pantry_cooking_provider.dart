@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/auth_service.dart';
 import '../services/cook_history_service.dart';
 import '../services/pantry_cooking_service.dart';
 import '../services/pantry_matcher.dart';
 import '../services/pantry_service.dart';
+import '../services/pantry_sync.dart';
 import '../services/recipe_suggestion_service.dart';
 import '../utils/week_start.dart';
 import 'database_provider.dart';
@@ -108,6 +110,13 @@ class PantryNotifier extends AsyncNotifier<PantryState> {
 }
 
 final pantryProvider = AsyncNotifierProvider<PantryNotifier, PantryState>(PantryNotifier.new);
+
+/// Whether the signed-in account's pantry is the family pantry ("Share my
+/// pantry" in Family). The family screen refreshes it when that changes.
+final familyPantryInUseProvider = FutureProvider<bool>((ref) async {
+  final userId = AuthService.instance.currentUser?.id;
+  return userId != null && await PantrySync.usesFamilyPantry(userId);
+});
 
 /// Every recipe checked against the pantry, best first. Re-ranked when the
 /// pantry or the library changes; the matching itself is cached per food.

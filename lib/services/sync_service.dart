@@ -381,8 +381,9 @@ class SyncService {
 
     var health = this.health.value;
 
-    // The pantry is one small document of its own, not table rows.
-    if (own.success && _auth.currentUser?.id == userId) {
+    // The pantry is one small document of its own, not table rows. A family
+    // pantry syncs on the family plan, without Premium of one's own.
+    if ((own.success || await PantrySync.usesFamilyPantry(userId)) && _auth.currentUser?.id == userId) {
       var pantryOk = false;
       try {
         pantryOk = await PantrySync.forAuth(_auth).run(userId);

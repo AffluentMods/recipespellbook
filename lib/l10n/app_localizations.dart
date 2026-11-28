@@ -19471,6 +19471,54 @@ abstract class AppLocalizations {
   /// **'You'**
   String get familyYou;
 
+  /// Family screen: switch that makes this account use the one pantry shared by the family members who turn it on.
+  ///
+  /// In en, this message translates to:
+  /// **'Share my pantry with the family'**
+  String get familyPantrySwitch;
+
+  /// No description provided for @familyPantryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone who turns this on uses one pantry: what one of you adds or uses up, the others see.'**
+  String get familyPantryHint;
+
+  /// Family screen, under the pantry switch: who shares the pantry. names: member names joined with commas (the user is "You").
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing the pantry: {names}'**
+  String familyPantrySharedBy(String names);
+
+  /// No description provided for @familyPantryNobody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody shares their pantry yet.'**
+  String get familyPantryNobody;
+
+  /// No description provided for @familyPantryOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pantry is now the family pantry.'**
+  String get familyPantryOn;
+
+  /// No description provided for @familyPantryOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pantry is your own again, with a copy of what was in the family pantry.'**
+  String get familyPantryOff;
+
+  /// No description provided for @familyPantryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry sharing could not be changed. Please try again.'**
+  String get familyPantryFailed;
+
+  /// Pantry screen, near the top, while the pantry is the family pantry.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your family\'s pantry: changes here show for everyone sharing it.'**
+  String get pantryFamilyShared;
+
   /// No description provided for @familyErrorSubscription.
   ///
   /// In en, this message translates to:

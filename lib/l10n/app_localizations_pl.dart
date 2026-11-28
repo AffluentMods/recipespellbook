@@ -11104,6 +11104,32 @@ class AppLocalizationsPl extends AppLocalizations {
   String get familyYou => 'Ty';
 
   @override
+  String get familyPantrySwitch => 'Udostępnij moją spiżarnię rodzinie';
+
+  @override
+  String get familyPantryHint => 'Wszyscy, którzy to włączą, korzystają z jednej spiżarni: co ktoś doda lub zużyje, widzą pozostali.';
+
+  @override
+  String familyPantrySharedBy(String names) {
+    return 'Spiżarnię udostępniają: $names';
+  }
+
+  @override
+  String get familyPantryNobody => 'Nikt jeszcze nie udostępnia swojej spiżarni.';
+
+  @override
+  String get familyPantryOn => 'Twoja spiżarnia jest teraz spiżarnią rodzinną.';
+
+  @override
+  String get familyPantryOff => 'Spiżarnia znów jest tylko twoja, z kopią tego, co było w spiżarni rodzinnej.';
+
+  @override
+  String get familyPantryFailed => 'Nie udało się zmienić udostępniania spiżarni. Spróbuj ponownie.';
+
+  @override
+  String get pantryFamilyShared => 'To spiżarnia twojej rodziny: zmiany tutaj widzą wszyscy, którzy ją udostępniają.';
+
+  @override
   String get familyErrorSubscription => 'Do utworzenia rodziny potrzebny jest plan Premium.';
 
   @override
